@@ -36,10 +36,16 @@ TERM_YEARS = 30
 MONTHS_ELAPSED = 60           # 5 years into the mortgage at simulation start
 
 EXPECTED_STAY_MONTHS = 60     # horizon over which payment penalties are felt
-TRANSACTION_COST_RATE = 0.07  # 7% of home value (commissions, fees, moving)
+TRANSACTION_COST_MEAN = 0.07  # 7% mean (realtor commissions, origination, moving)
+TRANSACTION_COST_STD = 0.015  # ~1.5% std dev → 68% of agents pay 5.5%-8.5%
+TRANSACTION_COST_FLOOR = 0.02 # minimum 2% (discount broker / FSBO)
+TRANSACTION_COST_CAP = 0.12   # maximum 12% (high-cost markets + relocation)
 MOBILITY_DESIRE_SCALE = 12_500  # default scale; recalibrated at runtime
 
 RATE_GRID = np.arange(0.02, 0.0801, 0.005)  # 2.0% -> 8.0% step 0.5%
+# Friction grid for the 2D CPR surface — covers the macro Dynamic_Friction
+# range (7.0%-10.5%) with a small margin for clean interpolation.
+FRICTION_GRID = np.arange(0.07, 0.1101, 0.005)
 
 # FRED settings (same key as fed_mbs_extension_risk.py)
 FRED_API_KEY = "YOUR_FRED_API_KEY"
@@ -138,22 +144,30 @@ class Household:
     """A rational household weighing financial penalty against desire to move."""
 
     def __init__(self, income: float, current_home_value: float,
-                 mortgage: Mortgage, mobility_desire: float):
+                 mortgage: Mortgage, mobility_desire: float,
+                 transaction_cost_rate: float):
         self.income = income
         self.current_home_value = current_home_value
         self.mortgage = mortgage
         self.mobility_desire = mobility_desire  # $-equivalent benefit of moving
+        self.transaction_cost_rate = transaction_cost_rate
 
     def evaluate_move(self, current_market_rate: float,
-                      system_type: str) -> bool:
+                      system_type: str,
+                      friction: float = TRANSACTION_COST_MEAN) -> bool:
         """
         Decide whether to move under the given mortgage system.
 
         The household pays off its current mortgage (cost depends on the
         system), finances that payoff amount with a NEW mortgage at the
         current market rate, and compares the resulting change in monthly
-        payment (over an expected-stay horizon, plus fixed transaction
-        costs) against its non-financial mobility desire.
+        payment (over an expected-stay horizon, plus transaction costs)
+        against its non-financial mobility desire.
+
+        `friction` is the macro base transaction-cost rate for the month
+        (defaults to the static 7% mean). The household's idiosyncratic
+        deviation from the base mean is preserved as an offset, so when
+        friction == TRANSACTION_COST_MEAN behavior is unchanged.
         """
         if system_type == "US":
             payoff = self.mortgage.get_payoff_cost_us(current_market_rate)
@@ -168,10 +182,12 @@ class Household:
         new_payment = new_loan.calculate_monthly_payment()
         current_payment = self.mortgage.calculate_monthly_payment()
 
-        # Financial penalty of moving, in total dollars over the horizon.
-        # Transaction costs scale with home value (realtor commissions,
-        # origination fees, moving expenses ~= 7% of the property price).
-        transaction_cost = self.current_home_value * TRANSACTION_COST_RATE
+        # Effective transaction cost = macro friction shifted by the agent's
+        # idiosyncratic offset around the base mean, clipped to sane bounds.
+        offset = self.transaction_cost_rate - TRANSACTION_COST_MEAN
+        eff_rate = float(np.clip(friction + offset,
+                                 TRANSACTION_COST_FLOOR, TRANSACTION_COST_CAP))
+        transaction_cost = self.current_home_value * eff_rate
         monthly_penalty = new_payment - current_payment
         total_penalty = monthly_penalty * EXPECTED_STAY_MONTHS + transaction_cost
 
@@ -214,19 +230,45 @@ class HousingMarketEngine:
         desires = self.rng.exponential(scale=self.mobility_scale,
                                        size=self.n_households)
 
+        # Per-agent transaction cost rate: N(7%, 1.5%), clipped to [2%, 12%]
+        txn_rates = self.rng.normal(
+            loc=TRANSACTION_COST_MEAN,
+            scale=TRANSACTION_COST_STD,
+            size=self.n_households,
+        ).clip(TRANSACTION_COST_FLOOR, TRANSACTION_COST_CAP)
+
         households = []
-        for inc, hv, des in zip(incomes, home_values, desires):
+        for inc, hv, des, txn in zip(incomes, home_values, desires, txn_rates):
             principal = 0.80 * hv  # 80% LTV at origination
             mortgage = Mortgage(principal, ORIGINAL_RATE)
-            households.append(Household(inc, hv, mortgage, des))
+            households.append(Household(inc, hv, mortgage, des, txn))
         return households
 
-    def cpr_at(self, rate: float, system_type: str) -> float:
-        """CPR for a single market rate under one system."""
+    def cpr_at(self, rate: float, system_type: str,
+               friction: float = TRANSACTION_COST_MEAN) -> float:
+        """CPR for a single market rate and friction level under one system."""
         movers = sum(
-            h.evaluate_move(rate, system_type) for h in self.households
+            h.evaluate_move(rate, system_type, friction)
+            for h in self.households
         )
         return movers / self.n_households
+
+    def build_cpr_surface(self) -> pd.DataFrame:
+        """
+        Sweep the full rate x friction grid to produce a 2D CPR surface.
+        Used by the macro model to interpolate month-specific CPRs from each
+        month's mortgage rate AND its Dynamic_Friction level.
+        """
+        records = []
+        for friction in FRICTION_GRID:
+            for rate in RATE_GRID:
+                records.append({
+                    "Market_Rate": rate,
+                    "Friction": friction,
+                    "CPR_US": self.cpr_at(rate, "US", friction),
+                    "CPR_Danish": self.cpr_at(rate, "Danish", friction),
+                })
+        return pd.DataFrame(records)
 
     def run_simulation(self) -> pd.DataFrame:
         """Sweep market rates and record CPR under both systems."""
@@ -353,6 +395,13 @@ def main():
 
     results.to_csv("abm_lockin_results.csv", index=False)
     print("\nResults table saved to abm_lockin_results.csv")
+
+    # Build the 2D CPR surface (rate x friction) for the macro model
+    print(f"\nBuilding 2D CPR surface "
+          f"({len(RATE_GRID)} rates x {len(FRICTION_GRID)} friction levels) …")
+    surface = engine.build_cpr_surface()
+    surface.to_csv("abm_cpr_surface.csv", index=False)
+    print("CPR surface saved to abm_cpr_surface.csv")
 
     plot_s_curve(results)
 
