@@ -44,11 +44,31 @@ TRANSACTION_COST_FLOOR = 0.02 # minimum 2% (discount broker / FSBO)
 TRANSACTION_COST_CAP = 0.12   # maximum 12% (high-cost markets + relocation)
 MOBILITY_DESIRE_SCALE = 12_500  # default scale; recalibrated at runtime
 
+# --- Behavioral extensions (literature-grounded, not tuned to any target) ---
+# DTI hard wall: CFPB QM/ATR threshold, 12 CFR 1026.43(e)(2)(vi).
+# Front-end only (mortgage payment / gross income); no other-debt data.
+DTI_MAX = 0.43
+
+# Loss aversion: Kahneman & Tversky (1979, 1992) prospect-theory coefficient.
+# Payment *increases* (losses) are perceived at lambda x their dollar value;
+# payment *decreases* (gains) are unscaled.
+LOSS_AVERSION_LAMBDA = 2.25
+
+# Wait-and-see: when the 6-month rate change exceeds the threshold, a fixed
+# fraction of the population freezes regardless of their cost-benefit result.
+# These are stated assumptions, not empirically sourced — sensitivity-test later.
+WAIT_AND_SEE_RATE_THRESHOLD = 0.015   # 150 bps over 6 months
+WAIT_AND_SEE_PROB = 0.20              # 20% of cleared movers freeze
+
 RATE_GRID = np.arange(0.02, 0.0801, 0.005)  # 2.0% -> 8.0% step 0.5%
 # Friction grid for the 2D CPR surface — widened to 5%-17.5% so the sensitivity
 # analysis (which sweeps base friction and penalty caps) can interpolate at
 # extreme friction levels without clamping at a grid boundary.
 FRICTION_GRID = np.arange(0.05, 0.18, 0.005)
+
+# Rate-velocity grid for the 3D surface: 6-month change in the 30-year rate.
+# Covers the observed 2021-2025 range (roughly -1pp to +3pp) plus buffer.
+RATE_VELOCITY_GRID = np.arange(-0.01, 0.0351, 0.005)  # -1.0% to +3.5%, step 0.5%
 
 # FRED settings (same key as fed_mbs_extension_risk.py)
 FRED_API_KEY = "0da55cec06bcff18594e15cc9da17d2d"
@@ -148,29 +168,35 @@ class Household:
 
     def __init__(self, income: float, current_home_value: float,
                  mortgage: Mortgage, mobility_desire: float,
-                 transaction_cost_rate: float):
+                 transaction_cost_rate: float,
+                 patience_draw: float = 1.0):
         self.income = income
         self.current_home_value = current_home_value
         self.mortgage = mortgage
         self.mobility_desire = mobility_desire  # $-equivalent benefit of moving
         self.transaction_cost_rate = transaction_cost_rate
+        self.patience_draw = patience_draw  # U[0,1]; used for wait-and-see gate
 
     def evaluate_move(self, current_market_rate: float,
                       system_type: str,
-                      friction: float = TRANSACTION_COST_MEAN) -> bool:
+                      friction: float = TRANSACTION_COST_MEAN,
+                      rate_velocity: float = 0.0) -> bool:
         """
         Decide whether to move under the given mortgage system.
 
-        The household pays off its current mortgage (cost depends on the
-        system), finances that payoff amount with a NEW mortgage at the
-        current market rate, and compares the resulting change in monthly
-        payment (over an expected-stay horizon, plus transaction costs)
-        against its non-financial mobility desire.
+        Three behavioral gates are applied in sequence:
+
+        1. DTI hard wall — if the new mortgage payment exceeds 43% of gross
+           monthly income, the bank rejects the loan (QM/ATR rule).
+        2. Asymmetric loss aversion — payment *increases* are perceived at
+           LOSS_AVERSION_LAMBDA times their dollar value (Kahneman & Tversky);
+           payment decreases are unscaled.
+        3. Wait-and-see — when recent rate velocity exceeds the threshold,
+           a fixed share of otherwise-cleared movers freezes.
 
         `friction` is the macro base transaction-cost rate for the month
-        (defaults to the static 7% mean). The household's idiosyncratic
-        deviation from the base mean is preserved as an offset, so when
-        friction == TRANSACTION_COST_MEAN behavior is unchanged.
+        (defaults to the static 7% mean). `rate_velocity` is the 6-month
+        change in the 30-year rate (decimal, e.g. 0.02 = 200 bps).
         """
         if system_type == "US":
             payoff = self.mortgage.get_payoff_cost_us(current_market_rate)
@@ -179,11 +205,20 @@ class Household:
         else:
             raise ValueError(f"Unknown system_type: {system_type}")
 
-        # New mortgage finances the payoff amount at today's market rate
         new_loan = Mortgage(payoff, current_market_rate,
                             term_years=TERM_YEARS, months_elapsed=0)
         new_payment = new_loan.calculate_monthly_payment()
         current_payment = self.mortgage.calculate_monthly_payment()
+
+        # Gate 1: DTI hard wall (front-end ratio, mortgage payment only)
+        monthly_income = self.income / 12
+        if monthly_income > 0 and new_payment / monthly_income > DTI_MAX:
+            return False
+
+        # Gate 2: asymmetric loss aversion on the payment change
+        monthly_penalty = new_payment - current_payment
+        if monthly_penalty > 0:
+            monthly_penalty *= LOSS_AVERSION_LAMBDA
 
         # Effective transaction cost = macro friction shifted by the agent's
         # idiosyncratic offset around the base mean, clipped to sane bounds.
@@ -191,11 +226,17 @@ class Household:
         eff_rate = float(np.clip(friction + offset,
                                  TRANSACTION_COST_FLOOR, TRANSACTION_COST_CAP))
         transaction_cost = self.current_home_value * eff_rate
-        monthly_penalty = new_payment - current_payment
         total_penalty = monthly_penalty * EXPECTED_STAY_MONTHS + transaction_cost
 
-        # Move only if the non-financial desire outweighs the penalty
-        return self.mobility_desire > total_penalty
+        if self.mobility_desire <= total_penalty:
+            return False
+
+        # Gate 3: wait-and-see freeze under high rate velocity
+        if (rate_velocity > WAIT_AND_SEE_RATE_THRESHOLD
+                and self.patience_draw < WAIT_AND_SEE_PROB):
+            return False
+
+        return True
 
 
 # ---------------------------------------------------------------------------
@@ -220,61 +261,134 @@ class HousingMarketEngine:
         self.mobility_scale = mobility_scale
         self.rng = np.random.default_rng(seed)
         self.households = self._generate_population()
+        self._precompute_arrays()
 
     def _generate_population(self) -> list:
         """10,000 heterogeneous households, all locked into 3.0% mortgages."""
-        # Lognormal income centered on the FRED empirical median
         incomes = self.rng.lognormal(mean=np.log(self.median_income),
                                      sigma=0.45, size=self.n_households)
-        # Lognormal home values centered on the FRED empirical median
         home_values = self.rng.lognormal(mean=np.log(self.median_home_value),
                                          sigma=0.35, size=self.n_households)
-        # Non-financial desire to move (job change, family, schools...)
         desires = self.rng.exponential(scale=self.mobility_scale,
                                        size=self.n_households)
-
-        # Per-agent transaction cost rate: N(7%, 1.5%), clipped to [2%, 12%]
         txn_rates = self.rng.normal(
             loc=TRANSACTION_COST_MEAN,
             scale=TRANSACTION_COST_STD,
             size=self.n_households,
         ).clip(TRANSACTION_COST_FLOOR, TRANSACTION_COST_CAP)
+        patience_draws = self.rng.random(size=self.n_households)
 
         households = []
-        for inc, hv, des, txn in zip(incomes, home_values, desires, txn_rates):
-            principal = 0.80 * hv  # 80% LTV at origination
+        for inc, hv, des, txn, pat in zip(incomes, home_values, desires,
+                                           txn_rates, patience_draws):
+            principal = 0.80 * hv
             mortgage = Mortgage(principal, ORIGINAL_RATE)
-            households.append(Household(inc, hv, mortgage, des, txn))
+            households.append(Household(inc, hv, mortgage, des, txn, pat))
         return households
 
+    def _precompute_arrays(self):
+        """Cache population attributes as NumPy arrays for vectorized CPR."""
+        n = self.n_households
+        self._monthly_income = np.array([h.income / 12 for h in self.households])
+        self._home_values = np.array([h.current_home_value
+                                      for h in self.households])
+        self._desires = np.array([h.mobility_desire for h in self.households])
+        self._txn_offsets = np.array([h.transaction_cost_rate - TRANSACTION_COST_MEAN
+                                      for h in self.households])
+        self._patience = np.array([h.patience_draw for h in self.households])
+        self._current_payment = np.array(
+            [h.mortgage.calculate_monthly_payment() for h in self.households])
+        self._outstanding_us = np.array(
+            [h.mortgage.outstanding_principal() for h in self.households])
+
+        # Danish payoff depends on market rate, so precompute partial values:
+        # monthly coupon payment and remaining term (shared across all agents
+        # since they all started with ORIGINAL_RATE mortgages).
+        self._pmt = self._current_payment  # same as coupon payment
+        self._n_rem = TERM_YEARS * 12 - MONTHS_ELAPSED
+
+    def _payoff_us(self, rate: float) -> np.ndarray:
+        return self._outstanding_us
+
+    def _payoff_danish(self, rate: float) -> np.ndarray:
+        r_mkt = rate / 12
+        if r_mkt == 0:
+            market_value = self._pmt * self._n_rem
+        else:
+            market_value = self._pmt * (1 - (1 + r_mkt) ** -self._n_rem) / r_mkt
+        return np.minimum(market_value, self._outstanding_us)
+
+    def _new_payment_vec(self, payoff: np.ndarray, rate: float) -> np.ndarray:
+        """Monthly payment on a new mortgage at `rate` for each household."""
+        r = rate / 12
+        n = TERM_YEARS * 12
+        if r == 0:
+            return payoff / n
+        return payoff * r / (1 - (1 + r) ** -n)
+
+    def _cpr_vec(self, rate: float, system_type: str,
+                 friction: float, rate_velocity: float) -> float:
+        """Fully vectorized CPR for one grid point."""
+        payoff = (self._payoff_us(rate) if system_type == "US"
+                  else self._payoff_danish(rate))
+        new_pmt = self._new_payment_vec(payoff, rate)
+
+        # Gate 1: DTI
+        dti = np.where(self._monthly_income > 0,
+                       new_pmt / self._monthly_income, 0.0)
+        passes_dti = dti <= DTI_MAX
+
+        # Gate 2: loss aversion on payment delta
+        delta = new_pmt - self._current_payment
+        penalty = np.where(delta > 0, delta * LOSS_AVERSION_LAMBDA, delta)
+
+        eff_rate = np.clip(friction + self._txn_offsets,
+                           TRANSACTION_COST_FLOOR, TRANSACTION_COST_CAP)
+        txn_cost = self._home_values * eff_rate
+        total_penalty = penalty * EXPECTED_STAY_MONTHS + txn_cost
+        passes_cost = self._desires > total_penalty
+
+        # Gate 3: wait-and-see
+        if rate_velocity > WAIT_AND_SEE_RATE_THRESHOLD:
+            passes_wait = self._patience >= WAIT_AND_SEE_PROB
+        else:
+            passes_wait = np.ones(self.n_households, dtype=bool)
+
+        movers = passes_dti & passes_cost & passes_wait
+        return float(movers.sum()) / self.n_households
+
     def cpr_at(self, rate: float, system_type: str,
-               friction: float = TRANSACTION_COST_MEAN) -> float:
-        """CPR for a single market rate and friction level under one system."""
-        movers = sum(
-            h.evaluate_move(rate, system_type, friction)
-            for h in self.households
-        )
-        return movers / self.n_households
+               friction: float = TRANSACTION_COST_MEAN,
+               rate_velocity: float = 0.0) -> float:
+        """CPR for a single (rate, friction, rate_velocity) point."""
+        return self._cpr_vec(rate, system_type, friction, rate_velocity)
 
     def build_cpr_surface(self) -> pd.DataFrame:
         """
-        Sweep the full rate x friction grid to produce a 2D CPR surface.
-        Used by the macro model to interpolate month-specific CPRs from each
-        month's mortgage rate AND its Dynamic_Friction level.
+        Sweep the full rate x friction x rate_velocity grid to produce a 3D
+        CPR surface.  Uses vectorized evaluation for speed.
         """
         records = []
+        total = len(FRICTION_GRID) * len(RATE_VELOCITY_GRID) * len(RATE_GRID)
+        done = 0
         for friction in FRICTION_GRID:
-            for rate in RATE_GRID:
-                records.append({
-                    "Market_Rate": rate,
-                    "Friction": friction,
-                    "CPR_US": self.cpr_at(rate, "US", friction),
-                    "CPR_Danish": self.cpr_at(rate, "Danish", friction),
-                })
+            for velocity in RATE_VELOCITY_GRID:
+                for rate in RATE_GRID:
+                    records.append({
+                        "Market_Rate": rate,
+                        "Friction": friction,
+                        "Rate_Velocity": velocity,
+                        "CPR_US": self._cpr_vec(rate, "US", friction, velocity),
+                        "CPR_Danish": self._cpr_vec(rate, "Danish", friction,
+                                                    velocity),
+                    })
+                    done += 1
+                if done % 260 == 0 or done == total:
+                    print(f"  Surface: {done}/{total} grid points …")
         return pd.DataFrame(records)
 
     def run_simulation(self) -> pd.DataFrame:
-        """Sweep market rates and record CPR under both systems."""
+        """Sweep market rates and record CPR under both systems (velocity=0)."""
         records = []
         for rate in RATE_GRID:
             records.append({
@@ -399,9 +513,10 @@ def main():
     results.to_csv("abm_lockin_results.csv", index=False)
     print("\nResults table saved to abm_lockin_results.csv")
 
-    # Build the 2D CPR surface (rate x friction) for the macro model
-    print(f"\nBuilding 2D CPR surface "
-          f"({len(RATE_GRID)} rates x {len(FRICTION_GRID)} friction levels) …")
+    # Build the 3D CPR surface (rate x friction x velocity) for the macro model
+    print(f"\nBuilding 3D CPR surface "
+          f"({len(RATE_GRID)} rates x {len(FRICTION_GRID)} frictions "
+          f"x {len(RATE_VELOCITY_GRID)} velocities) …")
     surface = engine.build_cpr_surface()
     surface.to_csv("abm_cpr_surface.csv", index=False)
     print("CPR surface saved to abm_cpr_surface.csv")

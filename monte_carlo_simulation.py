@@ -43,22 +43,42 @@ HISTOGRAM_PNG = "monte_carlo_trapped_liquidity.png"
 def surface_df_to_tuple(surf: pd.DataFrame):
     """
     Convert the ABM's surface DataFrame (decimals) into the tuple format that
-    fed.compute_metrics expects from load_cpr_surface: rates in percent,
-    frictions in decimal, CPR grids in percent.
+    fed.compute_metrics expects from load_cpr_surface.
+
+    Supports both 2D (rate x friction) and 3D (rate x friction x velocity).
     """
     rates = np.sort(surf["Market_Rate"].unique())
     frictions = np.sort(surf["Friction"].unique())
-    piv_us = surf.pivot(index="Market_Rate", columns="Friction",
-                        values="CPR_US").reindex(index=rates, columns=frictions)
-    piv_dk = surf.pivot(index="Market_Rate", columns="Friction",
-                        values="CPR_Danish").reindex(index=rates,
-                                                     columns=frictions)
-    return (
-        rates * 100.0,
-        frictions,
-        piv_us.to_numpy() * 100.0,
-        piv_dk.to_numpy() * 100.0,
-    )
+
+    if "Rate_Velocity" in surf.columns:
+        velocities = np.sort(surf["Rate_Velocity"].unique())
+        nr, nf, nv = len(rates), len(frictions), len(velocities)
+        z_us = np.empty((nr, nf, nv))
+        z_dk = np.empty((nr, nf, nv))
+        for iv, vel in enumerate(velocities):
+            slab = surf[np.isclose(surf["Rate_Velocity"], vel)]
+            piv_us = slab.pivot(index="Market_Rate", columns="Friction",
+                                values="CPR_US").reindex(index=rates,
+                                                          columns=frictions)
+            piv_dk = slab.pivot(index="Market_Rate", columns="Friction",
+                                values="CPR_Danish").reindex(index=rates,
+                                                              columns=frictions)
+            z_us[:, :, iv] = piv_us.to_numpy() * 100.0
+            z_dk[:, :, iv] = piv_dk.to_numpy() * 100.0
+        return rates * 100.0, frictions, velocities, z_us, z_dk
+    else:
+        piv_us = surf.pivot(index="Market_Rate", columns="Friction",
+                            values="CPR_US").reindex(index=rates,
+                                                      columns=frictions)
+        piv_dk = surf.pivot(index="Market_Rate", columns="Friction",
+                            values="CPR_Danish").reindex(index=rates,
+                                                         columns=frictions)
+        return (
+            rates * 100.0,
+            frictions,
+            piv_us.to_numpy() * 100.0,
+            piv_dk.to_numpy() * 100.0,
+        )
 
 
 def us_trapped(metrics: pd.DataFrame) -> float:

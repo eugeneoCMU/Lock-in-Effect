@@ -55,6 +55,14 @@ PORTFOLIO_COUPON = 0.03         # 3.0% weighted-average coupon (pandemic cohort)
 PORTFOLIO_TERM = 360            # 30-year fixed = 360 months
 PORTFOLIO_ORIGIN = pd.Timestamp("2020-06-01")  # approximate origination midpoint
 
+# Voluntary partial prepayments (curtailments), scaled by real disposable income.
+# Magnitude: ~1.2% CPR annualized from GSE daily-prepayment-report curtailment
+# estimates (machinesp.com, Sept-2024 cohort). Driver: disposable income
+# availability (SSRN 4949187, "Understanding Excess Repayment").
+CURTAILMENT_CPR_HEALTHY = 0.012       # full curtailment at healthy income growth
+CURTAILMENT_INCOME_HEALTHY_PCT = 4.0  # real disposable income YoY (%) -> 100%
+CURTAILMENT_INCOME_STRESSED_PCT = -2.0  # real disposable income YoY (%) -> 0%
+
 
 def scheduled_amortization_smm(annual_rate: float, term_months: int,
                                months_elapsed: int) -> float:
@@ -100,6 +108,23 @@ def scheduled_amortization_series(index: pd.DatetimeIndex,
         index=index,
     )
     return smm
+
+
+def curtailment_series(real_income_yoy_pct: pd.Series,
+                       healthy_pct: float = CURTAILMENT_INCOME_HEALTHY_PCT,
+                       stressed_pct: float = CURTAILMENT_INCOME_STRESSED_PCT,
+                       healthy_cpr: float = CURTAILMENT_CPR_HEALTHY) -> pd.Series:
+    """
+    Monthly curtailment SMM, continuously scaled by real disposable income
+    growth.  Source: SSRN 4949187 — curtailment tracks disposable income
+    availability, not inflation or mortgage rate directly.  Uses simple /12
+    monthly convention to match this module's CPR->monthly-rate treatment.
+    """
+    span = healthy_pct - stressed_pct
+    if span <= 0:
+        raise ValueError("healthy_pct must exceed stressed_pct for curtailment scaling")
+    frac = ((real_income_yoy_pct - stressed_pct) / span).clip(0.0, 1.0)
+    return frac * healthy_cpr / 12
 
 
 def cpr_goodness_of_fit(empirical: pd.Series, predicted: pd.Series,
@@ -275,12 +300,16 @@ def calculate_dynamic_friction(
 
 def load_cpr_surface(csv_path: str = "abm_cpr_surface.csv"):
     """
-    Load the ABM 2D CPR surface and reshape into grids for interpolation.
-    Returns (rates_pct, frictions, Z_US, Z_DK) or None if the file is absent.
+    Load the ABM CPR surface and reshape into grids for interpolation.
 
-    rates_pct  : 1D array of market rates in percent (ascending)
-    frictions  : 1D array of friction levels in decimal (ascending)
-    Z_US/Z_DK  : 2D arrays of CPR in percent, shape (len(rates), len(frictions))
+    Supports both 2D (rate x friction) and 3D (rate x friction x velocity)
+    layouts.  Returns a tuple whose length signals the dimensionality:
+
+      2D -> (rates_pct, frictions, Z_US, Z_DK)
+      3D -> (rates_pct, frictions, velocities, Z_US_3d, Z_DK_3d)
+
+    All CPR values are returned in percent.
+    Returns None if the file is absent.
     """
     try:
         surf = pd.read_csv(csv_path)
@@ -290,45 +319,100 @@ def load_cpr_surface(csv_path: str = "abm_cpr_surface.csv"):
 
     rates = np.sort(surf["Market_Rate"].unique())
     frictions = np.sort(surf["Friction"].unique())
-    piv_us = surf.pivot(index="Market_Rate", columns="Friction",
-                        values="CPR_US").reindex(index=rates, columns=frictions)
-    piv_dk = surf.pivot(index="Market_Rate", columns="Friction",
-                        values="CPR_Danish").reindex(index=rates,
-                                                     columns=frictions)
-    rates_pct = rates * 100.0          # surface rates are decimals
-    z_us = piv_us.to_numpy() * 100.0   # CPR decimal -> percent
-    z_dk = piv_dk.to_numpy() * 100.0
-    print(f"CPR surface loaded from {csv_path}: "
-          f"{len(rates)} rates x {len(frictions)} friction levels")
-    return rates_pct, frictions, z_us, z_dk
+
+    has_velocity = "Rate_Velocity" in surf.columns
+    if has_velocity:
+        velocities = np.sort(surf["Rate_Velocity"].unique())
+        nr, nf, nv = len(rates), len(frictions), len(velocities)
+        z_us = np.empty((nr, nf, nv))
+        z_dk = np.empty((nr, nf, nv))
+        for iv, vel in enumerate(velocities):
+            slab = surf[np.isclose(surf["Rate_Velocity"], vel)]
+            piv_us = slab.pivot(index="Market_Rate", columns="Friction",
+                                values="CPR_US").reindex(index=rates,
+                                                          columns=frictions)
+            piv_dk = slab.pivot(index="Market_Rate", columns="Friction",
+                                values="CPR_Danish").reindex(index=rates,
+                                                              columns=frictions)
+            z_us[:, :, iv] = piv_us.to_numpy() * 100.0
+            z_dk[:, :, iv] = piv_dk.to_numpy() * 100.0
+
+        print(f"CPR surface loaded from {csv_path}: "
+              f"{nr} rates x {nf} frictions x {nv} velocities")
+        return rates * 100.0, frictions, velocities, z_us, z_dk
+    else:
+        piv_us = surf.pivot(index="Market_Rate", columns="Friction",
+                            values="CPR_US").reindex(index=rates,
+                                                      columns=frictions)
+        piv_dk = surf.pivot(index="Market_Rate", columns="Friction",
+                            values="CPR_Danish").reindex(index=rates,
+                                                         columns=frictions)
+        print(f"CPR surface loaded from {csv_path}: "
+              f"{len(rates)} rates x {len(frictions)} friction levels")
+        return rates * 100.0, frictions, piv_us.to_numpy() * 100.0, \
+            piv_dk.to_numpy() * 100.0
 
 
 def interp_cpr_surface(rate_pct: pd.Series, friction: pd.Series,
-                       surface) -> pd.DataFrame:
+                       surface,
+                       velocity: Optional[pd.Series] = None) -> pd.DataFrame:
     """
-    Bilinear interpolation on the (rate, friction) CPR surface, evaluated
-    per month. Uses nested np.interp (rate axis, then friction axis) so no
-    SciPy dependency is required. np.interp clamps out-of-range inputs.
+    Interpolation on the CPR surface, evaluated per month.  Uses nested
+    np.interp so no SciPy dependency is required; np.interp clamps
+    out-of-range inputs.
+
+    Supports both 2D (bilinear on rate x friction) and 3D (trilinear on
+    rate x friction x velocity) surfaces, auto-detected from the tuple
+    length returned by load_cpr_surface().
     """
-    rates_pct, frictions, z_us, z_dk = surface
     rate_arr = rate_pct.to_numpy(dtype=float)
     fric_arr = friction.to_numpy(dtype=float)
 
-    us_out = np.empty(len(rate_arr))
-    dk_out = np.empty(len(rate_arr))
-    for i in range(len(rate_arr)):
-        # Step 1: interpolate over rate for each friction column
-        us_by_friction = np.array(
-            [np.interp(rate_arr[i], rates_pct, z_us[:, j])
-             for j in range(len(frictions))]
-        )
-        dk_by_friction = np.array(
-            [np.interp(rate_arr[i], rates_pct, z_dk[:, j])
-             for j in range(len(frictions))]
-        )
-        # Step 2: interpolate that result over friction
-        us_out[i] = np.interp(fric_arr[i], frictions, us_by_friction)
-        dk_out[i] = np.interp(fric_arr[i], frictions, dk_by_friction)
+    if len(surface) == 5:
+        # 3D surface: (rates_pct, frictions, velocities, z_us, z_dk)
+        rates_grid, frictions_grid, vel_grid, z_us, z_dk = surface
+        vel_arr = (velocity.to_numpy(dtype=float)
+                   if velocity is not None
+                   else np.zeros(len(rate_arr)))
+
+        us_out = np.empty(len(rate_arr))
+        dk_out = np.empty(len(rate_arr))
+        for i in range(len(rate_arr)):
+            # Step 1: for each (friction_col, velocity_slab), interp over rate
+            # Then interp that 2D slice over friction, then over velocity.
+            us_by_vel = np.empty(len(vel_grid))
+            dk_by_vel = np.empty(len(vel_grid))
+            for iv in range(len(vel_grid)):
+                us_by_fric = np.array(
+                    [np.interp(rate_arr[i], rates_grid, z_us[:, jf, iv])
+                     for jf in range(len(frictions_grid))]
+                )
+                dk_by_fric = np.array(
+                    [np.interp(rate_arr[i], rates_grid, z_dk[:, jf, iv])
+                     for jf in range(len(frictions_grid))]
+                )
+                us_by_vel[iv] = np.interp(fric_arr[i], frictions_grid,
+                                          us_by_fric)
+                dk_by_vel[iv] = np.interp(fric_arr[i], frictions_grid,
+                                          dk_by_fric)
+            us_out[i] = np.interp(vel_arr[i], vel_grid, us_by_vel)
+            dk_out[i] = np.interp(vel_arr[i], vel_grid, dk_by_vel)
+    else:
+        # 2D surface: (rates_pct, frictions, z_us, z_dk) — legacy
+        rates_grid, frictions_grid, z_us, z_dk = surface
+        us_out = np.empty(len(rate_arr))
+        dk_out = np.empty(len(rate_arr))
+        for i in range(len(rate_arr)):
+            us_by_friction = np.array(
+                [np.interp(rate_arr[i], rates_grid, z_us[:, j])
+                 for j in range(len(frictions_grid))]
+            )
+            dk_by_friction = np.array(
+                [np.interp(rate_arr[i], rates_grid, z_dk[:, j])
+                 for j in range(len(frictions_grid))]
+            )
+            us_out[i] = np.interp(fric_arr[i], frictions_grid, us_by_friction)
+            dk_out[i] = np.interp(fric_arr[i], frictions_grid, dk_by_friction)
 
     return pd.DataFrame(
         {"US_CPR_Pct": us_out, "Danish_CPR_Pct": dk_out},
@@ -418,8 +502,11 @@ def fetch_data(api_key: str = FRED_API_KEY,
                                 observation_start=BASELINE_START)  # search friction
     sentiment = fred.get_series("UMCSENT",
                                 observation_start=BASELINE_START)  # psych friction
+    dspi = fred.get_series("DSPIC96",
+                           observation_start=BASELINE_START)  # curtailment driver
     inventory_m = inventory.resample("ME").last()
     sentiment_m = sentiment.resample("ME").mean()
+    dspi_m = dspi.resample("ME").last()
 
     # 2017-2019 inventory baseline (healthy, pre-pandemic supply)
     base_slice = inventory_m.loc["2017-01-01":"2019-12-31"]
@@ -428,6 +515,7 @@ def fetch_data(api_key: str = FRED_API_KEY,
     # Align friction drivers to the monthly Fed timeline; no NaNs allowed
     monthly["ACTLISCOUUS"] = inventory_m.reindex(monthly.index).ffill().bfill()
     monthly["UMCSENT"] = sentiment_m.reindex(monthly.index).ffill().bfill()
+    monthly["DSPIC96"] = dspi_m.reindex(monthly.index).ffill().bfill()
 
     monthly.attrs["inventory_baseline"] = inventory_baseline
     print(f"FRED friction drivers loaded: 2017-2019 inventory baseline = "
@@ -504,14 +592,18 @@ def compute_metrics(
         sentiment_penalty_cap=sentiment_penalty_cap,
     )
 
+    # --- Rate velocity for the 3D CPR surface (6-month rate change) --------
+    df["Rate_6M_Change"] = df["MORTGAGE30US"].diff(6).fillna(0.0) / 100.0
+
     # --- ABM counterfactual: month-varying CPR paths ----------------------
-    # Preferred path: 2D CPR surface interpolated on (rate, friction).
+    # Preferred path: CPR surface interpolated on (rate, friction[, velocity]).
     # Fallback: 1D anchor interpolation at base friction if surface is absent.
     if surface is None:
         surface = load_cpr_surface()
     if surface is not None:
+        velocity_series = df["Rate_6M_Change"] if len(surface) == 5 else None
         cpr = interp_cpr_surface(df["MORTGAGE30US"], df["Dynamic_Friction"],
-                                 surface)
+                                 surface, velocity=velocity_series)
     else:
         anchor_rates, anchor_us, anchor_dk = load_abm_anchors()
         cpr = compute_abm_cpr_vectors(df["MORTGAGE30US"],
@@ -525,6 +617,9 @@ def compute_metrics(
     sched_smm = scheduled_amortization_series(df.index)
     df["Scheduled_Amort_SMM"] = sched_smm
 
+    df["RealDispInc_YoY_Pct"] = df["DSPIC96"].pct_change(12).fillna(0.0) * 100
+    df["Curtailment_SMM"] = curtailment_series(df["RealDispInc_YoY_Pct"])
+
     # --- Empirical CPR: back out from actual roll-off and sched. amort. ---
     actual_abs = df["Actual_Monthly_Rolloff_Billions"].abs()
     empirical_smm = (actual_abs / holdings_b) - sched_smm
@@ -533,7 +628,7 @@ def compute_metrics(
     # --- U.S. counterfactual: use actual holdings (ABM CPR ≈ reality) ---
     monthly_cpr = df["US_CPR_Pct"] / 100 / 12
     df["US_Simulated_Monthly_Rolloff_Billions"] = (
-        -holdings_b * (monthly_cpr + sched_smm)
+        -holdings_b * (monthly_cpr + sched_smm + df["Curtailment_SMM"])
     )
 
     # --- Danish counterfactual: dynamic declining-balance simulation ---
@@ -551,7 +646,9 @@ def compute_metrics(
             dk_balance[i] = float(holdings_b.iloc[i])
             continue
         dk_balance[i] = bal
-        monthly_drain = float(monthly_cpr_dk.iloc[i]) + float(sched_smm.iloc[i])
+        monthly_drain = (float(monthly_cpr_dk.iloc[i])
+                         + float(sched_smm.iloc[i])
+                         + float(df["Curtailment_SMM"].iloc[i]))
         rolloff = bal * monthly_drain
         dk_rolloff[i] = -rolloff
         bal = max(bal - rolloff, 0.0)
@@ -854,7 +951,7 @@ def print_summary(df: pd.DataFrame):
     share_explained = (total_trapped_us / total_trapped * 100
                        if total_trapped else float("nan"))
     print("-" * 65)
-    print(" ABM-CALIBRATED COUNTERFACTUALS (CPR + scheduled amortization)")
+    print(" ABM-CALIBRATED COUNTERFACTUALS (CPR + sched. amort. + curtailment)")
     print(f"  U.S. System Trapped Liquidity:    ${total_trapped_us:,.1f}B"
           f"  ({share_explained:.1f}% of empirical)")
     print(f"  Danish System Trapped Liquidity:  ${total_trapped_dk:,.1f}B"
@@ -872,6 +969,13 @@ def print_summary(df: pd.DataFrame):
         print(f"  Sched. amortization during QT:    ${amort_total:,.1f}B "
               f"(SMM {smm.mean()*100:.3f}% avg ≈ "
               f"{smm.mean()*12*100:.2f}% ann.)")
+    if "Curtailment_SMM" in df.columns:
+        curt_smm = qt_df["Curtailment_SMM"]
+        holdings_b_qt = qt_df["WSHOMCB"] / 1_000
+        curt_total = (holdings_b_qt * curt_smm).sum()
+        print(f"  Curtailment during QT:            ${curt_total:,.1f}B "
+              f"(SMM {curt_smm.mean()*100:.3f}% avg ≈ "
+              f"{curt_smm.mean()*12*100:.2f}% ann.)")
     if "Empirical_CPR_Pct" in df.columns:
         ecpr = qt_df["Empirical_CPR_Pct"]
         acpr = qt_df["US_CPR_Pct"]

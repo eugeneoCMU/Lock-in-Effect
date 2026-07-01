@@ -1,6 +1,6 @@
 # Technical Narrative — Corrections, Validation, and Final Numbers
 
-This document is a chronological record of the investigation that took the project's headline "trapped liquidity" figure from an unsupported **$972.3B** to a validated **$672.9B**, fixed a structural omission in the Agent-Based Model (ABM), fixed a Danish-counterfactual bug that inflated the "institutional gap" claim, and added a four-part validation suite (goodness-of-fit statistics, sensitivity analysis, robustness analysis, Monte Carlo, and an out-of-sample holdout split) to check that the result isn't an artifact of parameter tuning, data-source choice, or curve-fitting.
+This document is a chronological record of the investigation that took the project's headline "trapped liquidity" figure from an unsupported **$972.3B** to a validated **$672.9B**, fixed a structural omission in the Agent-Based Model (ABM), fixed a Danish-counterfactual bug that inflated the "institutional gap" claim, added a four-part validation suite (goodness-of-fit statistics, sensitivity analysis, robustness analysis, Monte Carlo, and an out-of-sample holdout split), tested three behavioral extensions (DTI constraint, loss aversion, wait-and-see) whose honest, pre-committed result was a *wider* gap between ABM and empirical (Section 15), and tested a macro-level curtailment channel whose pre-registered expectation — worse aggregate match — was confirmed (Section 16).
 
 For the high-level project description and how to run the code, see [README.md](README.md). This document assumes familiarity with that overview and focuses on *why* each number is what it is.
 
@@ -22,8 +22,10 @@ For the high-level project description and how to run the code, see [README.md](
 12. [The Danish Counterfactual Bug History](#12-the-danish-counterfactual-bug-history)
 13. [Cross-Correlation Diagnostic](#13-cross-correlation-diagnostic)
 14. [Out-of-Sample Holdout Split](#14-out-of-sample-holdout-split)
-15. [Final Numbers Table](#15-final-numbers-table)
-16. [Known Limitations and Open Items](#16-known-limitations-and-open-items)
+15. [Behavioral Extensions — DTI, Loss Aversion, Wait-and-See](#15-behavioral-extensions--dti-loss-aversion-wait-and-see)
+16. [Curtailment Prepayment Channel](#16-curtailment-prepayment-channel)
+17. [Final Numbers Table](#17-final-numbers-table)
+18. [Known Limitations and Open Items](#18-known-limitations-and-open-items)
 
 ---
 
@@ -307,36 +309,124 @@ The model performs *better* on the unseen data — R² is much closer to zero, R
 
 ---
 
-## 15. Final Numbers Table
+## 15. Behavioral Extensions — DTI, Loss Aversion, Wait-and-See
 
-Single source of truth for every headline figure discussed in this document, current as of the fixes described above.
+Three behavioral mechanisms were added to `Household.evaluate_move()` to test whether the 19.2% residual ($128.9B gap between the ABM's $544.0B and the empirical $672.9B) could be explained by credit constraints, prospect-theory loss aversion, and rate-shock paralysis. All parameters were set from external sources — no parameter was tuned to match $672.9B.
+
+### 15.1 Mechanisms
+
+1. **DTI hard wall** — if the new mortgage payment exceeds 43% of gross monthly income, the move is vetoed (the bank rejects the loan). Source: CFPB Qualified Mortgage / Ability-to-Repay rule, 12 CFR 1026.43(e)(2)(vi). This is a front-end-only ratio (mortgage payment / income) since the model has no data on other household debts; the true regulatory threshold is a back-end ratio.
+
+2. **Asymmetric loss aversion** — payment *increases* are perceived at 2.25x their dollar value; payment *decreases* are unscaled. Source: Kahneman & Tversky (1979, 1992) prospect-theory loss-aversion coefficient. This preserves the asymmetry that is the core of prospect theory: losses hurt more than equivalent gains feel good.
+
+3. **Wait-and-see freeze** — when the trailing 6-month rate change exceeds 150 bps, 20% of otherwise-cleared movers freeze. The freeze is implemented as a fixed per-agent trait (`patience_draw ~ U[0,1]`), not a per-evaluation random roll, so the CPR surface remains deterministic for a given population. The threshold and probability are stated assumptions, not empirically sourced, and should be sensitivity-tested in future work.
+
+### 15.2 3D CPR surface
+
+The wait-and-see gate depends on rate velocity, which varies by month. To preserve the surface-interpolation architecture (rather than moving to online per-month ABM calls), the CPR surface was extended from 2D `(rate × friction)` to 3D `(rate × friction × velocity)`. The velocity grid spans -1.0% to +3.5% in 0.5% steps (10 grid points), covering the observed range of 6-month MORTGAGE30US changes during 2021-2025.
+
+`load_cpr_surface()` and `interp_cpr_surface()` in `fed_mbs_extension_risk.py` were updated to handle both 2D (legacy) and 3D surfaces automatically, using trilinear nested `np.interp` (no SciPy dependency added). `compute_metrics()` computes `Rate_6M_Change = MORTGAGE30US.diff(6) / 100` and passes it as the velocity axis.
+
+### 15.3 Vectorization
+
+The 3D grid expanded the surface from 338 to 3,380 grid points. A per-household Python loop across 10,000 agents per grid point made the Monte Carlo suite infeasible (~5.5 hours). `HousingMarketEngine` was refactored to precompute population attributes as NumPy arrays (`_precompute_arrays`) and evaluate all three behavioral gates vectorially (`_cpr_vec`). This reduced the full ABM surface build from ~6.7 minutes to ~3 seconds (~120x speedup) and the 50-seed Monte Carlo from projected ~5.5 hours to ~46 seconds.
+
+### 15.4 Results — the honest outcome
+
+The behavioral extensions did **not** close the gap; they **widened** it.
+
+| Metric | Before (rational only) | After (behavioral) |
+|---|---|---|
+| ABM U.S. trapped liquidity | $544.0B (80.8%) | **$419.6B (62.3%)** |
+| ABM Danish trapped liquidity | -$359.7B | **-$764.2B** |
+| Institutional gap | $903.8B | **$1,183.8B** |
+| ABM U.S. CPR (mean) | 6.62% | **7.92%** |
+| CPR R² (raw) | -0.590 | **-1.586** |
+| Monte Carlo mean | $570.4B | **$438.9B** |
+| Monte Carlo 95% CI | [$564.4B, $576.4B] | **[$432.2B, $445.6B]** |
+
+**Why the model moved in the wrong direction**: Loss aversion steepens the penalty function, making the cost of moving at any given rate higher. But the ABM is calibrated to maintain the 4-5% involuntary-turnover floor at 8% rates (death, divorce, default). To hit that floor under a steeper penalty function, `calibrate_mobility_scale()` had to increase `MOBILITY_DESIRE_SCALE` from ~12,500 to ~36,086. That higher desire scale increased CPR at *all* rate levels — including the intermediate rates (5-7%) where most of the QT-period data falls — producing more mobility, faster roll-off, and therefore *less* trapped liquidity.
+
+This is not a bug; it is an honest, pre-committed finding. The calibration target (4-5% floor) is independently grounded in real-world involuntary turnover data — it would be illegitimate to drop or adjust it just because the outcome was surprising. The result demonstrates that adding behavioral frictions to a model that is already calibrated to a turnover anchor can **increase** predicted mobility if the recalibration effect dominates the direct friction effect.
+
+### 15.5 Implications
+
+- The 19.2% residual is **not explained** by DTI constraints, loss aversion, or wait-and-see paralysis, at least not at literature-grounded parameter values without retuning other model parameters.
+- The residual likely reflects mechanisms *outside* the household decision function entirely: vintage/seasoning effects, geographic heterogeneity, servicer behavior, or structural features of the MBS pool composition that a representative-coupon model cannot capture.
+- The behavioral extensions do strengthen the **institutional gap** claim ($1,183.8B vs $903.8B), since the Danish system's high CPR benefits more from the increased desire scale than the U.S. system's suppressed CPR does.
+
+---
+
+## 16. Curtailment Prepayment Channel
+
+### 16.1 Motivation and pre-registered diagnostic
+
+Partial voluntary prepayments ("curtailments") — extra principal payments beyond the scheduled amount — are a separate channel from move/refinance-driven CPR. Literature suggests curtailment tracks **disposable income availability** (SSRN 4949187, "Understanding Excess Repayment"), not inflation or mortgage rate directly. GSE daily-prepayment-report analysis estimates curtailment at roughly **1.1–1.3% CPR** annualized for recent cohorts (machinesp.com, Sept-2024).
+
+Before building the mechanism, a diagnostic was run: correlation between the ABM's CPR over-prediction (`US_CPR_Pct - Empirical_CPR_Pct`) and Real Disposable Personal Income YoY growth (FRED `DSPIC96`) over the QT window was **r = -0.487**. The worst over-prediction months (Jun–Sep 2022, bias +9.6 to +14.8pp) coincide with the most negative income growth (-3% to -4.6%). **Pre-registered expectation**: because curtailment is additive-only (extra roll-off, never less than zero) and near-zero during stress months where the model is worst, adding curtailment would likely **worsen** the aggregate trapped-liquidity match (estimated $60–90B of extra simulated roll-off → ABM trapped liquidity toward ~$330–360B, down from $419.6B).
+
+### 16.2 Implementation
+
+Curtailment lives entirely in the macro layer ([fed_mbs_extension_risk.py](fed_mbs_extension_risk.py)) — no ABM or calibration changes:
+
+- **Data**: FRED `DSPIC96` (real disposable personal income), merged in `fetch_data()`.
+- **Scaling**: `curtailment_series()` maps real-income YoY growth continuously from 0% curtailment at -2% income growth to full curtailment at +4% income growth.
+- **Magnitude**: `CURTAILMENT_CPR_HEALTHY = 0.012` (~1.2% CPR annualized at full scale).
+- **Roll-off**: added to U.S. and Danish simulated monthly drain alongside CPR and scheduled amortization. Empirical CPR back-out is unchanged (historical roll-off already embeds whatever curtailment occurred).
+
+### 16.3 Results — expectation confirmed
+
+| Metric | Before curtailment | After curtailment |
+|---|---|---|
+| ABM U.S. trapped liquidity | $419.6B (62.3%) | **$344.6B (51.2%)** |
+| Curtailment contribution (QT window) | — | **$74.9B** |
+| ABM Danish trapped liquidity | -$764.2B | **-$779.0B** |
+| Institutional gap | $1,183.8B | **$1,123.6B** |
+| CPR R² / Pearson r (unchanged) | -1.586 / -0.309 | -1.586 / -0.309 |
+| Monte Carlo mean | $438.9B | **$364.0B** |
+| Monte Carlo 95% CI | [$432.2B, $445.6B] | **[$357.3B, $370.7B]** |
+
+The aggregate trapped-liquidity figure fell by **$75.0B**, squarely within the pre-registered $60–90B band. Share explained dropped from 62.3% to **51.2%** — a worse match to the $672.9B empirical benchmark, exactly as predicted. CPR-path diagnostics did not change, because curtailment affects simulated roll-off only, not the ABM CPR surface or the empirical CPR extraction.
+
+**Interpretation**: curtailment is a real prepayment channel, but modeling it as an *additive* boost to ABM-simulated roll-off pushes the counterfactual further from reality when the ABM already over-predicts mobility. The residual is not explained by "missing curtailment in the simulation"; if anything, the ABM path already implies too much roll-off, and adding more voluntary prepayment during healthy-income months deepens that bias. Closing the gap likely requires mechanisms that *reduce* simulated roll-off (vintage burnout, pool selection) or improve the CPR path itself, not channels that only add principal repayment.
+
+---
+
+## 17. Final Numbers Table
+
+Single source of truth for every headline figure, current as of the curtailment channel described in Section 16.
 
 | Metric | Value | Source |
 |---|---|---|
 | Empirical trapped liquidity (SOMA, phased cap) | **$672.9B** | `print_summary()`, "Net Trapped Liquidity" |
-| ABM U.S. trapped liquidity | **$544.0B** (80.8% of empirical) | `print_summary()`, "U.S. System Trapped Liquidity" |
-| ABM Danish trapped liquidity (dynamic balance) | **-$359.7B** | `print_summary()`, "Danish System Trapped Liquidity" |
-| Danish portfolio path | $2,654B → $898B | `print_summary()`, "Danish Portfolio" |
-| Institutional gap (U.S. - Danish) | **$903.8B** | `print_summary()`, "Institutional Gap" |
+| ABM U.S. trapped liquidity | **$344.6B** (51.2% of empirical) | `print_summary()`, "U.S. System Trapped Liquidity" |
+| ABM Danish trapped liquidity (dynamic balance) | **-$779.0B** | `print_summary()`, "Danish System Trapped Liquidity" |
+| Danish portfolio path | $2,634B → $455B | `print_summary()`, "Danish Portfolio" |
+| Institutional gap (U.S. - Danish) | **$1,123.6B** | `print_summary()`, "Institutional Gap" |
 | Scheduled amortization during QT | $242.1B (≈2.55% ann.) | `print_summary()`, "Sched. amortization" |
+| Curtailment during QT | $74.9B (≈0.78% ann. avg SMM) | `print_summary()`, "Curtailment during QT" |
 | Empirical CPR range | 0.00% - 14.20% (mean 5.62%) | `print_summary()`, "CPR DIAGNOSTIC" |
-| ABM U.S. CPR range | 4.15% - 10.56% (mean 6.62%) | `print_summary()`, "CPR DIAGNOSTIC" |
-| CPR goodness-of-fit (raw) | R²=-0.590, RMSE=3.52pp, MAE=2.38pp, r=-0.338 | `cpr_goodness_of_fit()` |
-| CPR goodness-of-fit (smoothed) | R²=-1.345, RMSE=2.54pp, MAE=1.68pp, r=-0.481 | `cpr_goodness_of_fit()` |
-| Cross-correlation (best lag) | +0.152 at lag -3 (not meaningful) | `cpr_cross_correlation()` |
-| Holdout split — in-sample | R²=-1.624, RMSE=4.20pp, share=74.2% | `print_summary()`, "Holdout split" |
-| Holdout split — out-of-sample | R²=-0.126, RMSE=3.00pp, share=87.5% | `print_summary()`, "Holdout split" |
-| Sensitivity sweep range (125 scenarios) | Trapped $0.1B-$738.1B; Share 0.0%-109.7% | `sensitivity_analysis.py` |
+| ABM U.S. CPR range | 4.29% - 16.02% (mean 7.92%) | `print_summary()`, "CPR DIAGNOSTIC" |
+| CPR goodness-of-fit (raw) | R²=-1.586, RMSE=4.48pp, MAE=3.16pp, r=-0.309 | `cpr_goodness_of_fit()` |
+| CPR goodness-of-fit (smoothed) | R²=-3.705, RMSE=3.59pp, MAE=2.54pp, r=-0.454 | `cpr_goodness_of_fit()` |
+| Cross-correlation (best lag) | +0.182 at lag -3 (not meaningful) | `cpr_cross_correlation()` |
+| Holdout split — in-sample | R²=-3.562, RMSE=5.54pp, share=48.0% | `print_summary()`, "Holdout split" |
+| Holdout split — out-of-sample | R²=-0.675, RMSE=3.66pp, share=54.5% | `print_summary()`, "Holdout split" |
+| Sensitivity sweep range (125 scenarios) | Trapped $31.4B-$479.5B; Share 4.7%-71.2% | `sensitivity_analysis.py` |
 | Robustness — data source | SOMA $672.9B vs WSHOMCB $671.6B (<1% diff) | `robustness_analysis.py`, Panel B |
-| Robustness — cap schedule (18 scenarios) | Empirical $285.4B-$690.4B; Share 97.8%-132.1% | `robustness_analysis.py`, Panel C |
-| Monte Carlo (50 population draws) | Mean $570.4B, Std $21.7B, 95% CI [$564.4B, $576.4B] | `monte_carlo_simulation.py` |
+| Robustness — cap schedule (18 scenarios) | Empirical $285.4B-$690.4B; Share 61.0%-87.9% | `robustness_analysis.py`, Panel C |
+| Monte Carlo (50 population draws) | Mean $364.0B, Std $24.2B, 95% CI [$357.3B, $370.7B] | `monte_carlo_simulation.py` |
 | Dynamic friction range | 8.23% - 10.26% (mean 9.05%) | `print_summary()`, "DYNAMIC MACROECONOMIC FRICTION" |
+| CPR bias vs. real income YoY (pre-build diagnostic) | r = -0.487 | Section 16.1 |
 
 ---
 
-## 16. Known Limitations and Open Items
+## 18. Known Limitations and Open Items
 
-- **Monthly CPR path fit remains weak.** The aggregate/level comparison (80.8% share explained) is solid, but the month-to-month R² is negative under every friction specification tested (Section 9) and no lag alignment fixes it (Section 13). Future work could add a lagged-rate or seasonal term to the CPR surface, or explicitly model vintage/seasoning effects.
-- **The Danish counterfactual still uses U.S.-calibrated friction.** The dynamic friction series (inventory + sentiment penalties) is calibrated on U.S. housing-market data and applied identically to the Danish counterfactual. Since Danish institutional frictions may differ, the -$359.7B / $903.8B figures should be read as an **upper bound** on the institutional gap under U.S.-style frictions, not a claim about what Danish-market frictions specifically would produce.
+- **Monthly CPR path fit remains weak.** The aggregate/level comparison (51.2% share explained) is meaningful but the month-to-month R² is negative under every friction specification tested (Section 9) and no lag alignment fixes it (Section 13). Future work could add a lagged-rate or seasonal term to the CPR surface, or explicitly model vintage/seasoning effects.
+- **The Danish counterfactual still uses U.S.-calibrated friction.** The dynamic friction series (inventory + sentiment penalties) is calibrated on U.S. housing-market data and applied identically to the Danish counterfactual. Since Danish institutional frictions may differ, the -$779.0B / $1,123.6B figures should be read as an **upper bound** on the institutional gap under U.S.-style frictions, not a claim about what Danish-market frictions specifically would produce.
 - **No confidence interval on the empirical trapped-liquidity figure itself.** The Monte Carlo suite (Section 11) puts a confidence interval on the *ABM's* prediction, and the robustness suite (Section 10) shows how the *empirical* figure moves under different assumptions, but there is no single combined interval (e.g., a bootstrap over both data and assumption choices simultaneously) for the $672.9B figure.
 - **The holdout split is a single split, not a rolling/expanding-window validation.** A more rigorous test would repeat the holdout at multiple cut dates (e.g., every 6 months) and check whether out-of-sample performance is consistently competitive with in-sample, rather than relying on one Jan-2024 cut point.
+- **Behavioral extensions (DTI, loss aversion, wait-and-see) widened the gap rather than closing it** (Section 15). This is an honest finding under literature-grounded parameters; the residual likely reflects pool-composition, vintage, and servicer effects outside the household decision function. The wait-and-see threshold (150 bps) and probability (20%) are unsourced assumptions that should be sensitivity-tested in future work.
+- **Curtailment channel worsened the aggregate match** (Section 16). Literature-grounded partial prepayments added $74.9B of simulated roll-off during QT, reducing share explained from 62.3% to 51.2% — confirming the pre-registered expectation. The ABM already over-predicts mobility; additive prepayment channels cannot close a gap caused by too much simulated roll-off.
+- **DTI constraint is front-end only.** The 43% DTI check uses only the mortgage payment, not total household debt. This underestimates the binding power of the constraint, since real QM underwriting uses a back-end ratio including student loans, auto loans, and credit card minimums.
