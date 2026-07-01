@@ -70,7 +70,11 @@ def fetch_soma_mbs_monthly(start: str = START_DATE,
     ...
 ```
 
-Added a direct pull from the NY Fed Markets API (`markets.newyorkfed.org/api/soma/summary.json`), which reports the System Open Market Account's weekly MBS par values. Resampling to month-end and differencing gives a cleaner roll-off series than `WSHOMCB.diff()`, because it reflects actual portfolio par value rather than FRED's settlement-date-sensitive balance-sheet snapshot. `compute_metrics()` prefers this source when available and falls back to `WSHOMCB` diffs automatically if the API is unreachable — the resulting `Rolloff_Source` column records which was used.
+Added a direct pull from the NY Fed Markets API (`markets.newyorkfed.org/api/soma/summary.json`), which reports the System Open Market Account's weekly MBS **current face value** — the remaining unpaid principal balance of the underlying mortgage pools. `compute_metrics()` prefers this source when available and falls back to `WSHOMCB` diffs automatically if the API is unreachable — the resulting `Rolloff_Source` column records which was used.
+
+This is a real accounting distinction, not just a data-cleanliness preference. Per the Fed's own Financial Accounting Manual, SOMA holdings (including `WSHOMCB`) are booked at **amortized cost, on a settlement-date basis** — not fair value, and not raw face value. Because the Fed's MBS purchases were largely executed at a premium (bought when mortgage rates, and therefore coupons, were near record lows relative to prevailing prices), `WSHOMCB`'s amortized cost declines every period from **premium amortization** on top of, and independent of, actual mortgage principal being repaid. Differencing `WSHOMCB` month-over-month therefore conflates two distinct things: real principal paydown (what matters for CPR/roll-off) and pure accounting amortization drift. The NY Fed's SOMA current-face-value series does not have this confound, since current face value only moves when principal is actually paid down (or securities are purchased/sold) — it is not adjusted for premium/discount accretion.
+
+Both series remain **settlement-date** accounting, and both flow through the same To-Be-Announced (TBA) forward market, where a trade can be agreed weeks before it settles (allocation day is only 2 business days before settlement, per the SIFMA schedule). So switching to SOMA removes the amortized-cost confound but does **not** remove TBA-settlement lag — that limitation is shared by both sources.
 
 ---
 
@@ -174,7 +178,7 @@ The same stale-benchmark bug existed in `monte_carlo_simulation.py` as a hardcod
 | SOMA | $672.9B | 80.8% (R²=-0.590) |
 | WSHOMCB | $671.6B | 81.0% (R²=-0.505) |
 
-The two data sources agree to within 0.2%, confirming the earlier SOMA-vs-WSHOMCB discrepancy (Section 1, error #2) was about ramp-cap methodology, not which balance-sheet series was used.
+The two data sources agree to within 0.2%, confirming the earlier SOMA-vs-WSHOMCB discrepancy (Section 1, error #2) was about ramp-cap methodology, not which balance-sheet series was used. This close agreement is a reassuring empirical check, but it isn't the reason SOMA was chosen: SOMA remains the conceptually correct source regardless of how closely it happens to track `WSHOMCB` in this particular sample, since it reports current face value rather than `WSHOMCB`'s amortized cost (see Section 4).
 
 **Panel C — cap-schedule sensitivity**: 18 scenarios sweeping ramp duration (2/3/4 months), full-pace cap ($30B/$35B), and QT-end date (Jun/Sep/Dec 2025). The empirical benchmark ranges from **$285.4B to $690.4B** and the ABM's share-explained ranges from **97.8% to 132.1%** across these scenarios — the baseline (3-month ramp, $35B cap, Dec 2025 end) sits at the high end of the empirical range ($672.9B) and near the low end of share-explained (98.5%), which is a reasonable, defensible choice rather than an outlier pick.
 

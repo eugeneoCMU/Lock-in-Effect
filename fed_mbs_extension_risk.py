@@ -345,7 +345,8 @@ SOMA_SUMMARY_URL = "https://markets.newyorkfed.org/api/soma/summary.json"
 def fetch_soma_mbs_monthly(start: str = START_DATE,
                            url: str = SOMA_SUMMARY_URL) -> Optional[pd.Series]:
     """
-    Pull weekly SOMA MBS par values from the NY Fed Markets API, resample
+    Pull weekly SOMA MBS current face value (remaining unpaid principal
+    balance, not amortized cost) from the NY Fed Markets API, resample
     to month-end, and return month-over-month changes in $B (negative =
     portfolio decline).  Returns None if the API is unreachable so the
     caller can fall back to WSHOMCB diffs.
@@ -453,8 +454,12 @@ def compute_metrics(
     callers are unaffected) but can be overridden by the sensitivity sweep.
     An optional pre-loaded `surface` avoids re-reading the CSV on every call.
     When `soma_rolloff` is provided (monthly Series from the NY Fed SOMA
-    API), it is used instead of WSHOMCB diffs for the actual roll-off —
-    this avoids TBA settlement noise in the FRED balance-sheet series.
+    API), it is used instead of WSHOMCB diffs for the actual roll-off.
+    SOMA reports current face value (remaining unpaid principal), so its
+    diff avoids the premium/discount amortization drift baked into
+    WSHOMCB's amortized-cost accounting. Both series remain settlement-date
+    based, so TBA-settlement lag is a limitation shared by either source,
+    not something switching to SOMA fixes on its own.
     """
     df = df.copy()
 

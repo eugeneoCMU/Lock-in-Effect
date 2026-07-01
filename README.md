@@ -84,7 +84,7 @@ flowchart TD
   viz --> vizPNGs["results_viz.png + surface_viz.png"]
 
   fredMacro["FRED: WSHOMCB, MORTGAGE30US, ACTLISCOUUS, UMCSENT"] --> macro["fed_mbs_extension_risk.py"]
-  soma["NY Fed SOMA API: weekly MBS par values"] -->|"preferred roll-off source"| macro
+  soma["NY Fed SOMA API: weekly MBS current face value"] -->|"preferred roll-off source"| macro
   surfaceCSV --> macro
   resultsCSV -->|"1D fallback"| macro
   macro --> dashboard["mbs_extension_risk_dashboard.png"]
@@ -201,7 +201,7 @@ Quantifies the Fed's MBS extension risk from live data and overlays the ABM beha
 
 The friction drivers are pulled from `BASELINE_START = 2017-01-01` (vs. `START_DATE = 2021-01-01` for the balance sheet) so a healthy pre-pandemic **2017-2019 inventory baseline** can be computed. That baseline is stashed in `df.attrs["inventory_baseline"]`. All friction columns are aligned to the monthly index and `ffill().bfill()`-ed so there are never NaNs.
 
-**`fetch_soma_mbs_monthly()`** pulls weekly SOMA MBS par values directly from the NY Fed Markets API (`markets.newyorkfed.org/api/soma/summary.json`), resamples to month-end, and differences to get the preferred actual roll-off series. This avoids the TBA-settlement noise present in FRED's `WSHOMCB` series (see [TECHNICAL.md](TECHNICAL.md) for why this matters). If the API is unreachable, `compute_metrics()` falls back to `WSHOMCB.diff()` automatically.
+**`fetch_soma_mbs_monthly()`** pulls weekly SOMA MBS current-face-value holdings directly from the NY Fed Markets API (`markets.newyorkfed.org/api/soma/summary.json`), resamples to month-end, and differences to get the preferred actual roll-off series. Because SOMA reports current face value (remaining unpaid principal) rather than `WSHOMCB`'s amortized cost, this also avoids the premium/discount amortization drift baked into FRED's balance-sheet series — SOMA MBS were largely bought at a premium during QE, so amortized cost declines independent of actual principal paydown, while current face value does not have this issue (see [TECHNICAL.md](TECHNICAL.md) for the full accounting explanation). Both series remain settlement-date based, so TBA-settlement lag is a limitation neither source fixes on its own. If the API is unreachable, `compute_metrics()` falls back to `WSHOMCB.diff()` automatically.
 
 ### 5.2 QT policy modeling
 
@@ -279,7 +279,7 @@ Sweeps all 5×5×5 = 125 combinations of `BASE_FRICTION` (5%-9%), `SEARCH_PENALT
 
 Two panels:
 
-- **Panel B (data source)**: re-computes the empirical benchmark using SOMA vs. WSHOMCB roll-off, confirming the two data sources agree closely (they differ by well under 1%).
+- **Panel B (data source)**: re-computes the empirical benchmark using SOMA vs. WSHOMCB roll-off, confirming the two data sources agree closely (they differ by well under 1%). SOMA is conceptually preferred regardless of this agreement — it reports current face value, not `WSHOMCB`'s amortized cost — so the close agreement is a reassuring empirical check, not the reason for the choice.
 - **Panel C (cap schedule)**: sweeps 18 combinations of ramp-up duration (2/3/4 months), full-pace cap ($30B/$35B), and QT-end date (Jun/Sep/Dec 2025), showing how the empirical benchmark and the ABM's share-explained move under different reasonable assumptions about the QT cap schedule.
 
 ### 7.3 `monte_carlo_simulation.py` — population-draw robustness
