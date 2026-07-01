@@ -18,6 +18,8 @@ market rates from 2.0% to 8.0%.
 
 import numpy as np
 import pandas as pd
+import matplotlib
+matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 import matplotlib.ticker as mticker
 from fredapi import Fred
@@ -43,12 +45,13 @@ TRANSACTION_COST_CAP = 0.12   # maximum 12% (high-cost markets + relocation)
 MOBILITY_DESIRE_SCALE = 12_500  # default scale; recalibrated at runtime
 
 RATE_GRID = np.arange(0.02, 0.0801, 0.005)  # 2.0% -> 8.0% step 0.5%
-# Friction grid for the 2D CPR surface — covers the macro Dynamic_Friction
-# range (7.0%-10.5%) with a small margin for clean interpolation.
-FRICTION_GRID = np.arange(0.07, 0.1101, 0.005)
+# Friction grid for the 2D CPR surface — widened to 5%-17.5% so the sensitivity
+# analysis (which sweeps base friction and penalty caps) can interpolate at
+# extreme friction levels without clamping at a grid boundary.
+FRICTION_GRID = np.arange(0.05, 0.18, 0.005)
 
 # FRED settings (same key as fed_mbs_extension_risk.py)
-FRED_API_KEY = "YOUR_FRED_API_KEY"
+FRED_API_KEY = "0da55cec06bcff18594e15cc9da17d2d"
 FALLBACK_MEDIAN_INCOME = 80_000       # used if FRED is unreachable
 FALLBACK_MEDIAN_HOME_VALUE = 420_000  # used if FRED is unreachable
 
@@ -358,7 +361,7 @@ def plot_s_curve(results: pd.DataFrame,
 
     plt.tight_layout()
     plt.savefig(save_path, dpi=200, bbox_inches="tight")
-    plt.show()
+    plt.close(fig)
     print(f"\nS-curve chart saved to {save_path}")
 
 

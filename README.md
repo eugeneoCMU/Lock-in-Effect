@@ -1,11 +1,14 @@
 # Lock-In Effect — Mortgage Mobility, Extension Risk, and Trapped Liquidity
 
-A quantitative research project that measures and simulates the mortgage **"lock-in effect"** — the phenomenon where households holding cheap, below-market fixed-rate mortgages refuse to move (and therefore refuse to prepay) once market rates rise. The project attacks the problem from two complementary angles and stitches them together into a single, self-consistent pipeline:
+A quantitative research project that measures and simulates the mortgage **"lock-in effect"** — the phenomenon where households holding cheap, below-market fixed-rate mortgages refuse to move (and therefore refuse to prepay) once market rates rise. The project attacks the problem from two complementary angles and stitches them together into a single, self-consistent pipeline, then stress-tests the result with a four-part validation suite:
 
-1. **Empirical macro analysis** (`fed_mbs_extension_risk.py`) — measures, from live FRED data, how the post-2022 rate shock slowed prepayments on the Federal Reserve's Mortgage-Backed Securities (MBS) portfolio, "extending" its duration and trapping liquidity far beyond the pace targeted by Quantitative Tightening (QT).
-2. **Agent-based simulation** (`abm_lockin_simulation.py`) — simulates 10,000 rational households deciding whether to move under an interest-rate shock, contrasting the **U.S. par-payoff** mortgage rule against the **Danish market-price buyback** rule.
+1. **Empirical macro analysis** ([fed_mbs_extension_risk.py](fed_mbs_extension_risk.py)) — measures, from live FRED and NY Fed SOMA data, how the post-2022 rate shock slowed prepayments on the Federal Reserve's Mortgage-Backed Securities (MBS) portfolio, "extending" its duration and trapping liquidity far beyond the pace targeted by Quantitative Tightening (QT).
+2. **Agent-based simulation** ([abm_lockin_simulation.py](abm_lockin_simulation.py)) — simulates 10,000 rational households deciding whether to move under an interest-rate shock, contrasting the **U.S. par-payoff** mortgage rule against the **Danish market-price buyback** rule.
+3. **Validation suite** ([sensitivity_analysis.py](sensitivity_analysis.py), [robustness_analysis.py](robustness_analysis.py), [monte_carlo_simulation.py](monte_carlo_simulation.py)) — sweeps friction parameters, data sources, cap-schedule assumptions, and ABM population draws, plus an in-sample/out-of-sample holdout split, to check that the headline result isn't an artifact of any single modeling choice.
 
-The two are linked: the ABM precomputes a behavioral **CPR (Conditional Prepayment Rate) surface**, and the macro model interpolates that surface month-by-month to build counterfactual "what the Fed's roll-off would have looked like under each institutional regime" scenarios.
+The two core models are linked: the ABM precomputes a behavioral **CPR (Conditional Prepayment Rate) surface**, and the macro model interpolates that surface month-by-month to build counterfactual "what the Fed's roll-off would have looked like under each institutional regime" scenarios — now including **scheduled amortization**, so the comparison is apples-to-apples with reality.
+
+> **For the full technical narrative of every bug found and fixed in this project (the corrected $972B→$673B benchmark, the Danish counterfactual bug history, goodness-of-fit methodology, and the holdout-split results), see [TECHNICAL.md](TECHNICAL.md).**
 
 ---
 
@@ -15,11 +18,12 @@ The two are linked: the ABM precomputes a behavioral **CPR (Conditional Prepayme
 2. [Repository Map](#2-repository-map)
 3. [Data Flow](#3-data-flow)
 4. [Script 1 — Agent-Based Model](#4-script-1--agent-based-model-abm_lockin_simulationpy)
-5. [Script 2 — Macro FRED Analysis](#5-script-2--macro-fred-analysis-fed_mbs_extension_riskpy)
+5. [Script 2 — Macro FRED/SOMA Analysis](#5-script-2--macro-fredsoma-analysis-fed_mbs_extension_riskpy)
 6. [Script 3 — Visualization Utility](#6-script-3--visualization-utility-visualize_abm_outputspy)
-7. [How to Reproduce](#7-how-to-reproduce)
-8. [Key Results and Interpretation](#8-key-results-and-interpretation)
-9. [Dependencies](#9-dependencies)
+7. [Scripts 4-6 — Validation Suite](#7-scripts-4-6--validation-suite)
+8. [How to Reproduce](#8-how-to-reproduce)
+9. [Key Results and Interpretation](#9-key-results-and-interpretation)
+10. [Dependencies](#10-dependencies)
 
 ---
 
@@ -31,11 +35,11 @@ A U.S. 30-year fixed mortgage originated in 2020-21 carries a coupon of roughly 
 
 ### Why it matters for the Fed
 
-The lock-in effect has a direct balance-sheet consequence. The Fed accumulated a large MBS portfolio during pandemic-era Quantitative Easing. Its plan to shrink that portfolio (QT) relied on **passive roll-off**: as homeowners move or refinance, they prepay their mortgages, and the principal flows back to the Fed, shrinking holdings by a targeted ~$35B/month. But if nobody prepays, the bonds **extend** — their effective maturity lengthens and the portfolio stops shrinking. The gap between the targeted roll-off and the (much smaller) actual roll-off is **trapped liquidity** — money the Fed intended to drain from the system but couldn't.
+The lock-in effect has a direct balance-sheet consequence. The Fed accumulated a large MBS portfolio during pandemic-era Quantitative Easing. Its plan to shrink that portfolio (QT) relied on **passive roll-off**: as homeowners move, refinance, or simply pay down scheduled principal, cash flows back to the Fed, shrinking holdings by a targeted pace (phased from $17.5B/month up to $35B/month — see [Section 5.2](#52-qt-policy-modeling)). But if prepayments stall, the bonds **extend** — their effective maturity lengthens and the portfolio shrinks far slower than intended. The gap between the targeted roll-off and the actual roll-off is **trapped liquidity** — money the Fed intended to drain from the system but couldn't.
 
 ### The Danish counterfactual
 
-Denmark's mortgage system allows borrowers to **buy back** their mortgage at market price rather than at par. When rates rise, the market value of a low-coupon mortgage falls below par, so a Danish borrower can extinguish the debt at a discount — neutralizing the lock-in. Contrasting the two systems isolates how much of the trapped liquidity is a product of U.S. *institutional design* rather than rate dynamics alone.
+Denmark's mortgage system allows borrowers to **buy back** their mortgage at market price rather than at par. When rates rise, the market value of a low-coupon mortgage falls below par, so a Danish borrower can extinguish the debt at a discount — neutralizing the lock-in. Contrasting the two systems isolates how much of the trapped liquidity is a product of U.S. *institutional design* rather than rate dynamics alone. This counterfactual is now simulated with a **dynamic declining balance** (see [Section 5.5](#55-metric-computation--compute_metrics)) rather than applied to a static portfolio, so the comparison reflects what actually would have happened to the Danish balance path.
 
 ---
 
@@ -44,16 +48,25 @@ Denmark's mortgage system allows borrowers to **buy back** their mortgage at mar
 | File | Type | Purpose |
 | --- | --- | --- |
 | `abm_lockin_simulation.py` | Script | Agent-based model of household mobility; produces the CPR S-curve and 2D CPR surface. |
-| `fed_mbs_extension_risk.py` | Script | Empirical FRED analysis of Fed MBS extension risk; produces the 3-panel dashboard. |
+| `fed_mbs_extension_risk.py` | Script | Empirical FRED/SOMA analysis of Fed MBS extension risk; produces the 3-panel dashboard and CPR diagnostic. |
 | `visualize_abm_outputs.py` | Script | Standalone plotting utility for the two ABM CSV outputs. |
+| `sensitivity_analysis.py` | Script | Sweeps the 3 dynamic-friction parameters (125 scenarios); reports trapped liquidity, share-explained, and CPR goodness-of-fit for each. |
+| `robustness_analysis.py` | Script | Sweeps data source (SOMA vs. WSHOMCB) and QT cap-schedule assumptions (18 scenarios); checks the empirical benchmark isn't an artifact of one data/assumption choice. |
+| `monte_carlo_simulation.py` | Script | Reruns the full ABM→macro pipeline 50 times with different household population seeds; reports the mean, std, and 95% CI of U.S. trapped liquidity. |
 | `abm_lockin_results.csv` | Data (output) | CPR vs. market rate for both systems (1D S-curve data). |
 | `abm_cpr_surface.csv` | Data (output) | CPR vs. (market rate × friction) for both systems (2D surface data). |
+| `sensitivity_results.csv` | Data (output) | Full 125-row friction-parameter sweep. |
+| `robustness_results.csv` | Data (output) | Full data-source and cap-schedule sweep. |
+| `monte_carlo_results.csv` | Data (output) | 50 trapped-liquidity draws, one per random seed. |
 | `abm_lockin_scurve.png` | Image (output) | S-curve chart generated by the ABM script itself. |
 | `abm_lockin_results_viz.png` | Image (output) | S-curve chart generated by the visualization utility. |
 | `abm_cpr_surface_viz.png` | Image (output) | Heatmaps of the 2D CPR surface (U.S. vs. Danish). |
 | `mbs_extension_risk_dashboard.png` | Image (output) | The 3-panel macro dashboard. |
+| `cpr_diagnostic.png` | Image (output) | Two-panel chart comparing ABM-predicted CPR against empirical (SOMA-implied) CPR. |
+| `monte_carlo_trapped_liquidity.png` | Image (output) | Histogram of the 50 Monte Carlo trapped-liquidity draws vs. the empirical benchmark. |
 | `requirements.txt` | Config | Python dependencies. |
-| `README.md` | Docs | This document. |
+| `README.md` | Docs | This document — project overview and how-to-reproduce. |
+| `TECHNICAL.md` | Docs | Detailed technical narrative of the corrections and validation methodology. |
 
 ---
 
@@ -71,13 +84,24 @@ flowchart TD
   viz --> vizPNGs["results_viz.png + surface_viz.png"]
 
   fredMacro["FRED: WSHOMCB, MORTGAGE30US, ACTLISCOUUS, UMCSENT"] --> macro["fed_mbs_extension_risk.py"]
+  soma["NY Fed SOMA API: weekly MBS par values"] -->|"preferred roll-off source"| macro
   surfaceCSV --> macro
   resultsCSV -->|"1D fallback"| macro
   macro --> dashboard["mbs_extension_risk_dashboard.png"]
-  macro --> summary["console summary stats"]
+  macro --> cprDiag["cpr_diagnostic.png"]
+  macro --> summary["console summary + GOF + cross-correlation + holdout split"]
+
+  macro -->|"compute_metrics()"| sens["sensitivity_analysis.py"]
+  macro -->|"compute_metrics()"| robust["robustness_analysis.py"]
+  abm -->|"rebuilt per seed"| mc["monte_carlo_simulation.py"]
+  macro -->|"compute_metrics()"| mc
+  sens --> sensCSV["sensitivity_results.csv"]
+  robust --> robustCSV["robustness_results.csv"]
+  mc --> mcCSV["monte_carlo_results.csv"]
+  mc --> mcPNG["monte_carlo_trapped_liquidity.png"]
 ```
 
-The critical link is `abm_cpr_surface.csv`: the ABM writes it, and the macro model reads it to translate each month's mortgage rate and macro-friction level into a behavioral prepayment rate.
+The critical link is `abm_cpr_surface.csv`: the ABM writes it, and the macro model reads it to translate each month's mortgage rate and macro-friction level into a behavioral prepayment rate. The three validation scripts all sit downstream of `fed_mbs_extension_risk.compute_metrics()`, re-invoking it with different inputs (friction parameters, data source, cap schedule, or ABM population) to stress-test the headline numbers.
 
 ---
 
@@ -98,7 +122,7 @@ A modular, object-oriented Monte Carlo simulation built on `numpy`, `pandas`, an
 | `TRANSACTION_COST_MEAN / STD / FLOOR / CAP` | 0.07 / 0.015 / 0.02 / 0.12 | Per-agent transaction cost rate as a fraction of home value, drawn from a clipped normal. |
 | `MOBILITY_DESIRE_SCALE` | 12,500 (default) | Seed for the exponential mobility-desire distribution; recalibrated at runtime. |
 | `RATE_GRID` | 2.0% → 8.0%, step 0.5% | Market-rate sweep. |
-| `FRICTION_GRID` | 7.0% → 11.0%, step 0.5% | Friction axis for the 2D surface (covers the macro friction range with margin). |
+| `FRICTION_GRID` | 5.0% → 17.5%, step 0.5% | Friction axis for the 2D surface — widened beyond the macro model's default 7-10.5% floating range so `sensitivity_analysis.py` can sweep extreme friction parameters without clamping at a grid boundary. |
 
 ### 4.2 FRED data pull — `fetch_macro_from_fred()`
 
@@ -146,7 +170,7 @@ Generates the population and runs experiments.
   - Each mortgage is originated at 80% LTV on the home value, at `ORIGINAL_RATE`.
 - **`cpr_at(rate, system_type, friction)`** — fraction of the population that moves at a given rate/friction = the Conditional Prepayment Rate.
 - **`run_simulation()`** — sweeps `RATE_GRID` at base friction → the 1D S-curve.
-- **`build_cpr_surface()`** — sweeps the full `FRICTION_GRID × RATE_GRID` → the 2D surface (13 rates × 9 friction levels).
+- **`build_cpr_surface()`** — sweeps the full `FRICTION_GRID × RATE_GRID` → the 2D surface (13 rates × 26 friction levels).
 
 ### 4.6 Calibration — `calibrate_mobility_scale()`
 
@@ -160,37 +184,37 @@ The non-financial mobility desire is unobservable, so it is **anchored to a know
 
 ---
 
-## 5. Script 2 — Macro FRED Analysis (`fed_mbs_extension_risk.py`)
+## 5. Script 2 — Macro FRED/SOMA Analysis (`fed_mbs_extension_risk.py`)
 
 Quantifies the Fed's MBS extension risk from live data and overlays the ABM behavioral counterfactuals.
 
-### 5.1 Data pipeline — `fetch_data()`
+### 5.1 Data pipeline — `fetch_data()` and `fetch_soma_mbs_monthly()`
 
-Pulls four FRED series and aligns them onto a clean monthly timeline:
+`fetch_data()` pulls four FRED series and aligns them onto a clean monthly timeline:
 
 | Ticker | Series | Role | Resampling |
 | --- | --- | --- | --- |
-| `WSHOMCB` | Fed MBS holdings (weekly) | Balance-sheet stock | `.resample("ME").last()` (end-of-month level) |
+| `WSHOMCB` | Fed MBS holdings (weekly) | Balance-sheet stock (fallback roll-off source) | `.resample("ME").last()` (end-of-month level) |
 | `MORTGAGE30US` | 30-yr fixed rate (weekly) | Market rate | `.resample("ME").mean()` (monthly average) |
 | `ACTLISCOUUS` | Realtor.com active listings | Search friction driver | `.resample("ME").last()` |
 | `UMCSENT` | U. Michigan consumer sentiment | Psychological friction driver | `.resample("ME").mean()` |
 
 The friction drivers are pulled from `BASELINE_START = 2017-01-01` (vs. `START_DATE = 2021-01-01` for the balance sheet) so a healthy pre-pandemic **2017-2019 inventory baseline** can be computed. That baseline is stashed in `df.attrs["inventory_baseline"]`. All friction columns are aligned to the monthly index and `ffill().bfill()`-ed so there are never NaNs.
 
-> **Why monthly resampling matters:** an earlier version summed overlapping 4-week roll-off windows on weekly data, inflating trapped liquidity into the trillions. Resampling to true calendar-month frequency and differencing once per month (`diff(periods=1)`) fixed the double-counting.
+**`fetch_soma_mbs_monthly()`** pulls weekly SOMA MBS par values directly from the NY Fed Markets API (`markets.newyorkfed.org/api/soma/summary.json`), resamples to month-end, and differences to get the preferred actual roll-off series. This avoids the TBA-settlement noise present in FRED's `WSHOMCB` series (see [TECHNICAL.md](TECHNICAL.md) for why this matters). If the API is unreachable, `compute_metrics()` falls back to `WSHOMCB.diff()` automatically.
 
 ### 5.2 QT policy modeling
 
-- `QT_START = 2022-06-01`, `QT_END = 2025-12-01` (the Fed officially ended QT in December 2025).
-- **`compute_qt_target_series(index)`** builds a time-dependent target: `NaN` before QT, **−35B/month** while active, **0B/month** after QT ends. This stepped target drives the bar coloring, extension-delta math, and the flatlining of cumulative trapped liquidity.
+- `QT_START = 2022-06-01`, `QT_RAMP_END = 2022-09-01`, `QT_END = 2025-12-01` (the Fed officially ended QT in December 2025).
+- **`compute_qt_target_series(index)`** builds a **phased** time-dependent target: `NaN` before QT, **−$17.5B/month** during the June-August 2022 ramp-up, **−$35B/month** at full pace from September 2022, and **$0B/month** after QT ends. This phased cap (rather than a flat −$35B from day one) is one of the corrections that brought the headline empirical figure down from the original, inflated $972.3B — see [TECHNICAL.md §2](TECHNICAL.md).
 
 ### 5.3 Dynamic Macroeconomic Friction — `calculate_dynamic_friction()`
 
-Instead of a static 7% transaction cost, friction floats month-by-month between **7.0% and 10.5%** based on two real-world drivers:
+Instead of a static 7% transaction cost, friction floats month-by-month based on two real-world drivers, using the module's `BASE_FRICTION`, `SEARCH_PENALTY_CAP`, and `SENTIMENT_PENALTY_CAP` defaults (all exposed as keyword arguments so `sensitivity_analysis.py` can sweep them):
 
-- **Search penalty** (low inventory ⇒ harder to find a home): `shortfall = max(0, baseline − inventory)`, scaled so the lowest-inventory month hits the cap of **+200 bps** (`SEARCH_PENALTY_CAP = 0.02`).
-- **Sentiment penalty** (fear ⇒ reluctance to transact): **+5 bps per point** that `UMCSENT` falls below the healthy baseline of 85.0, capped at **+150 bps** (`SENTIMENT_PENALTY_CAP = 0.015`).
-- `Dynamic_Friction = 0.07 + search_penalty + sentiment_penalty`.
+- **Search penalty** (low inventory ⇒ harder to find a home): `shortfall = max(0, baseline − inventory)`, scaled so the lowest-inventory month hits the cap of **+200 bps**.
+- **Sentiment penalty** (fear ⇒ reluctance to transact): **+5 bps per point** that `UMCSENT` falls below the healthy baseline of 85.0, capped at **+150 bps**.
+- `Dynamic_Friction = base_friction + search_penalty + sentiment_penalty` — with default parameters this floats between roughly 8.2% and 10.3% over the QT window.
 
 ### 5.4 CPR surface interpolation
 
@@ -200,23 +224,36 @@ Instead of a static 7% transaction cost, friction floats month-by-month between 
 
 ### 5.5 Metric computation — `compute_metrics()`
 
-1. **Actual roll-off**: `WSHOMCB.diff(1) / 1000` (month-over-month change, M→B).
-2. **Extension delta**: `actual − QT_target` (only meaningful once QT begins).
-3. **Cumulative trapped liquidity (empirical)**: cumulative sum of positive deltas, accumulating only while QT is active and **flatlining at its peak after Dec 2025** (a permanent trap).
-4. **Dynamic friction**: computed first so the surface can be sampled at each month's `(rate, friction)` coordinate.
-5. **ABM counterfactual CPR paths**: `US_CPR_Pct`, `Danish_CPR_Pct` interpolated from the surface.
-6. **Simulated roll-off**: `−holdings · (CPR / 12)` — the monthly prepayment intensity applied to the portfolio, comparable to the −35B target.
-7. **Per-system extension deltas, missed roll-off, and cumulative trapped liquidity** for both the U.S. and Danish counterfactuals (same QT-active / flatline logic).
+1. **Actual roll-off**: SOMA-derived monthly diff (preferred) or `WSHOMCB.diff(1) / 1000` (fallback).
+2. **Extension delta**: `actual − QT_target` (only meaningful once QT begins), using the phased target from §5.2.
+3. **Cumulative trapped liquidity (empirical)**: **net** cumulative sum of the delta (overshoot months offset shortfall months), accumulating only while QT is active and **flatlining at its terminal value after Dec 2025** (a permanent trap).
+4. **Scheduled amortization**: `scheduled_amortization_series()` computes the month-by-month scheduled-principal fraction (SMM) for a representative 3.0%-coupon, 30-year, mid-2020-origination mortgage — the principal that flows through *regardless of prepayment*. This is added to CPR-driven prepayment in every simulated roll-off calculation so the ABM isn't missing a structural cash-flow component.
+5. **Empirical CPR extraction**: `Empirical_CPR_Pct` backs the implied prepayment rate out of actual roll-off minus the scheduled-amortization component, enabling a direct, apples-to-apples comparison against the ABM's predicted CPR.
+6. **Dynamic friction**: computed first so the CPR surface can be sampled at each month's `(rate, friction)` coordinate.
+7. **ABM counterfactual CPR paths**: `US_CPR_Pct`, `Danish_CPR_Pct` interpolated from the surface.
+8. **U.S. simulated roll-off**: `−holdings · (CPR/12 + scheduled_SMM)` applied to the actual (observed) balance path, since the ABM's U.S. CPR is meant to approximate reality.
+9. **Danish simulated roll-off — dynamic balance**: rather than applying the (much higher, ~21-27%) Danish CPR to the static U.S. balance, the code simulates the Danish portfolio balance **forward month-by-month from the QT-start level**, so each month's roll-off is applied to the *already-shrunk* balance. This matters: Danish CPR is high enough that a static-balance application produces an economically implausible result (see [TECHNICAL.md §12](TECHNICAL.md) for the full bug history).
+10. **Per-system extension deltas, missed roll-off, and cumulative trapped liquidity** for both the U.S. and Danish counterfactuals (same QT-active / flatline logic, net accumulation as in step 3).
 
-### 5.6 Three-panel dashboard — `plot_dashboard()`
+### 5.6 Goodness-of-fit and diagnostics — `cpr_goodness_of_fit()`, `cpr_cross_correlation()`
+
+- **`cpr_goodness_of_fit(empirical, predicted)`** computes R², RMSE, MAE, and Pearson r comparing the ABM's monthly CPR predictions to the empirical (SOMA-implied) CPR, both raw and on a 3-month centered rolling average ("smoothed").
+- **`cpr_cross_correlation(empirical, predicted, max_lag=3)`** computes the same Pearson r at lags −3 to +3 months, to check whether any apparent mismatch is a settlement-timing lag (which lag-alignment could fix) versus a genuine structural sign mismatch (which it can't).
+- `print_summary()` also reports an **in-sample / out-of-sample holdout split** at January 2024, comparing R², RMSE, and share-explained on data the friction parameters implicitly "saw" (Jun 2022 - Dec 2023) versus data they didn't (Jan 2024 onward) — a check against pure curve-fitting.
+
+### 5.7 Three-panel dashboard — `plot_dashboard()`
 
 - **Panel 1** — Fed MBS holdings ($B) and the 30-yr mortgage rate on a dual axis, with the QT era shaded.
-- **Panel 2** — Actual monthly roll-off bars (green = target met, orange = missed), overlaid with the ABM U.S. and Danish simulated roll-off lines and the stepped QT target. A dotted **Dynamic Friction (%)** line on a twin axis shows the friction regime. A vertical marker flags QT end.
+- **Panel 2** — Actual monthly roll-off bars (green = target met, orange = missed), overlaid with the ABM U.S. and Danish simulated roll-off lines and the stepped, phased QT target. A dotted **Dynamic Friction (%)** line on a twin axis shows the friction regime. A vertical marker flags QT end.
 - **Panel 3** — Cumulative trapped liquidity for the U.S. (dark red) and Danish (orange) counterfactuals as filled areas, with terminal-value annotations and a QT-end marker labeling the permanent trap.
 
-### 5.7 Summary statistics — `print_summary()`
+### 5.8 CPR diagnostic chart — `plot_cpr_diagnostic()`
 
-Prints the active QT period, targets, average actual roll-off, total empirical trapped liquidity, the ABM-calibrated U.S. and Danish trapped-liquidity totals, the **institutional gap** (U.S. − Danish), and the dynamic-friction min/mean/max.
+A separate two-panel chart (`cpr_diagnostic.png`): a time-series overlay of empirical vs. ABM CPR with the gap shaded, and a scatter of both series against the month's mortgage rate (colored by date) to visualize where the ABM over- or under-predicts along the rate curve.
+
+### 5.9 Summary statistics — `print_summary()`
+
+Prints the active QT period, phased targets, average actual roll-off, total empirical trapped liquidity, the ABM-calibrated U.S. and Danish trapped-liquidity totals (with the U.S. share-of-empirical percentage and the Danish portfolio's dynamic balance path), the **institutional gap** (U.S. − Danish), scheduled-amortization contribution, CPR goodness-of-fit (raw + smoothed), cross-correlation at lags −3..+3, the holdout-split comparison, and the dynamic-friction min/mean/max.
 
 ---
 
@@ -230,12 +267,33 @@ A standalone, dependency-light plotting tool (no FRED key required) that renders
 
 ---
 
-## 7. How to Reproduce
+## 7. Scripts 4-6 — Validation Suite
+
+These three scripts don't change the model; they interrogate it, answering "is the headline result robust, or an artifact of one modeling choice?"
+
+### 7.1 `sensitivity_analysis.py` — friction-parameter sweep
+
+Sweeps all 5×5×5 = 125 combinations of `BASE_FRICTION` (5%-9%), `SEARCH_PENALTY_CAP` (0-400bps), and `SENTIMENT_PENALTY_CAP` (0-300bps), re-running `compute_metrics()` for each. For every scenario it reports: U.S./Danish trapped liquidity, the gap, the **share of the (correctly-anchored) empirical trapped liquidity explained**, and the CPR goodness-of-fit (R², RMSE, raw and smoothed). A "Panel A" summary block reports the full range across all 125 scenarios so a single-point baseline claim can be checked against how sensitive it is to the friction specification.
+
+### 7.2 `robustness_analysis.py` — data-source and cap-schedule sweep
+
+Two panels:
+
+- **Panel B (data source)**: re-computes the empirical benchmark using SOMA vs. WSHOMCB roll-off, confirming the two data sources agree closely (they differ by well under 1%).
+- **Panel C (cap schedule)**: sweeps 18 combinations of ramp-up duration (2/3/4 months), full-pace cap ($30B/$35B), and QT-end date (Jun/Sep/Dec 2025), showing how the empirical benchmark and the ABM's share-explained move under different reasonable assumptions about the QT cap schedule.
+
+### 7.3 `monte_carlo_simulation.py` — population-draw robustness
+
+Reruns the **entire** ABM→macro pipeline 50 times, each time re-seeding the random number generator and rebuilding both the 10,000-household population and the CPR surface from scratch, then recomputing U.S. trapped liquidity. Reports the mean, standard deviation, and 95% confidence interval across the 50 draws, and plots a histogram against the empirical benchmark (computed once, at runtime, from the same `Extension_Delta_Billions` logic used everywhere else — not a hardcoded constant).
+
+---
+
+## 8. How to Reproduce
 
 ### Prerequisites
 
 - Python 3.9+
-- A free FRED API key from <https://fred.stlouisfed.org/docs/api/api_key.html> (already set in both scripts; replace if you fork).
+- A free FRED API key from <https://fred.stlouisfed.org/docs/api/api_key.html> (already set in both core scripts; replace if you fork). No key is needed for the NY Fed SOMA API.
 
 ### Install
 
@@ -251,33 +309,45 @@ The ABM must run first so the macro model can read the CPR surface:
 # 1. Agent-based model → writes abm_lockin_results.csv, abm_cpr_surface.csv, abm_lockin_scurve.png
 python abm_lockin_simulation.py
 
-# 2. Macro analysis → reads the surface, writes mbs_extension_risk_dashboard.png + console summary
+# 2. Macro analysis → reads the surface + SOMA API, writes the dashboard, CPR diagnostic, and console summary
 python fed_mbs_extension_risk.py
 
 # 3. (Optional) Re-render the ABM CSVs as standalone charts
 python visualize_abm_outputs.py
+
+# 4. (Optional) Validation suite — each re-runs compute_metrics() many times, so expect a few seconds each
+python sensitivity_analysis.py    # 125-scenario friction sweep
+python robustness_analysis.py     # data-source + cap-schedule sweep
+python monte_carlo_simulation.py  # 50-seed population-draw robustness (slowest — rebuilds the ABM each time)
 ```
 
-> **Headless environments:** if you run on a machine without a display, set `MPLBACKEND=Agg` (and a writable `MPLCONFIGDIR`) so matplotlib saves PNGs without trying to open a window.
+> **Headless environments:** all scripts call `matplotlib.use("Agg")` before importing `pyplot`, so they save PNGs directly without requiring a display.
 
 ### Expected generated files
 
-`abm_lockin_results.csv`, `abm_cpr_surface.csv`, `abm_lockin_scurve.png`, `abm_lockin_results_viz.png`, `abm_cpr_surface_viz.png`, `mbs_extension_risk_dashboard.png`.
+`abm_lockin_results.csv`, `abm_cpr_surface.csv`, `abm_lockin_scurve.png`, `abm_lockin_results_viz.png`, `abm_cpr_surface_viz.png`, `mbs_extension_risk_dashboard.png`, `cpr_diagnostic.png`, `sensitivity_results.csv`, `robustness_results.csv`, `monte_carlo_results.csv`, `monte_carlo_trapped_liquidity.png`.
 
 ---
 
-## 8. Key Results and Interpretation
+## 9. Key Results and Interpretation
 
-- **The S-curve** — As market rates climb from the 3% coupon toward 8%, the U.S. mobility curve **collapses toward its ~4.6% involuntary floor**, while the Danish curve stays high (~32%). The shaded gap between them is pure institutional lock-in: identical households, identical rates, different mortgage rules.
-- **The macro dashboard** — Actual Fed roll-off chronically undershoots the −35B QT target during the high-rate window; the cumulative shortfall is the trapped-liquidity "mountain." The ABM counterfactual shows that under the U.S. regime roll-off all but stalls, while under the Danish regime it would have continued — the difference is the **institutional gap** reported in the summary.
-- **Dynamic friction** — During 2021-2025, depressed housing inventory and weak consumer sentiment pushed effective friction to roughly **8-10%** (well above the 7% static baseline). Higher friction suppresses simulated CPR at any given rate, **amplifying** the lock-in and deepening the trap beyond what rates alone would predict.
+- **The S-curve** — As market rates climb from the 3% coupon toward 8%, the U.S. mobility curve **collapses toward its ~4.6% involuntary floor**, while the Danish curve stays high (~20-30%). The shaded gap between them is pure institutional lock-in: identical households, identical rates, different mortgage rules.
+- **Empirical trapped liquidity**: using the phased QT cap and SOMA roll-off data, the Fed's MBS portfolio has trapped **$672.9B** relative to the QT schedule (June 2022 - November 2025) — a corrected figure, down from an earlier, methodologically inflated $972.3B estimate (see [TECHNICAL.md](TECHNICAL.md) for the full derivation).
+- **ABM explains most, not all, of the gap**: the rational ABM (dynamic friction + scheduled amortization) predicts **$544.0B** of U.S. trapped liquidity — **80.8%** of the empirical figure. The remaining ~19% is unmodeled behavioral/frictional residual.
+- **The institutional gap**: under the dynamic-balance Danish counterfactual, the portfolio would have **overshot** the QT cap by **-$359.7B** (shrinking from $2,654B to $898B), versus the U.S. system's $544.0B shortfall. The resulting **institutional gap is $903.8B** — the liquidity difference attributable purely to mortgage-market design.
+- **Monthly CPR fit is weak, but not for the reason you'd expect**: the ABM's CPR tracks the empirical *level* reasonably well but has a **negative correlation with the month-to-month path** (raw r = -0.34, smoothed r = -0.48 — smoothing makes it *worse*). A lag-correlation check (±3 months) found no lag that flips this meaningfully positive, so the mismatch is a genuine structural gap (vintage effects, seasoning, path dependence) rather than settlement-timing noise.
+- **Out-of-sample validation**: splitting the sample at January 2024, the ABM performs **better** out-of-sample (R² = -0.126, share explained 87.5%) than in-sample (R² = -1.624, share explained 74.2%) — evidence against pure curve-fitting, since a curve-fit model would be expected to degrade, not improve, out of sample.
+- **Robustness**: the empirical benchmark is stable across data sources (SOMA vs. WSHOMCB differ by <1%) and moves in a reasonable, expected range ($285B-$690B) across 18 different QT cap-schedule assumptions. The ABM's own trapped-liquidity estimate is stable across 50 independent population draws (95% CI: $564.4B-$576.4B).
+- **Dynamic friction** — During 2022-2025, depressed housing inventory and weak consumer sentiment pushed effective friction to roughly **8-10%** (well above the 7% static baseline). Higher friction suppresses simulated CPR at any given rate, **amplifying** the lock-in and deepening the trap beyond what rates alone would predict.
+
+For the complete numbers, methodology, and the history of every bug found and corrected along the way, see [TECHNICAL.md](TECHNICAL.md).
 
 ---
 
-## 9. Dependencies
+## 10. Dependencies
 
 - Python 3.9+
 - `pandas`, `numpy`, `matplotlib`, `fredapi` (see `requirements.txt`)
-- A free FRED API key (see above)
+- A free FRED API key (see above); the NY Fed SOMA API requires no key
 
 All interpolation is pure NumPy — **no SciPy required**.
