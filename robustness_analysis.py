@@ -76,13 +76,15 @@ def custom_qt_target(index: pd.DatetimeIndex,
 
 def run_cap_scenario(df: pd.DataFrame, surface, soma_rolloff,
                      ramp_months: int, full_cap: float,
-                     qt_end: pd.Timestamp) -> dict:
+                     qt_end: pd.Timestamp,
+                     cohorts=None) -> dict:
     """
     Re-run compute_metrics with a custom cap schedule by monkey-patching the
     QT target after computation.  Only the target series and the downstream
     deltas change; the CPR surface is unaffected.
     """
-    metrics = fed.compute_metrics(df, soma_rolloff=soma_rolloff, surface=surface)
+    metrics = fed.compute_metrics(df, soma_rolloff=soma_rolloff, surface=surface,
+                                  cohorts=cohorts)
 
     custom = custom_qt_target(metrics.index,
                               ramp_months=ramp_months,
@@ -146,6 +148,11 @@ def main():
             "abm_cpr_surface.csv not found — run abm_lockin_simulation.py first."
         )
 
+    cohorts = None
+    if isinstance(surface, dict):
+        print("Fetching SOMA MBS coupon cohorts once …")
+        cohorts = fed.fetch_soma_mbs_cohorts()
+
     # ==================================================================
     # PANEL B — Data-source sensitivity
     # ==================================================================
@@ -156,7 +163,8 @@ def main():
 
     panel_b = []
     for source_label, rolloff in [("SOMA", soma_rolloff), ("WSHOMCB", None)]:
-        metrics = fed.compute_metrics(df, soma_rolloff=rolloff, surface=surface)
+        metrics = fed.compute_metrics(df, soma_rolloff=rolloff, surface=surface,
+                                      cohorts=cohorts)
         emp = empirical_trapped_from_metrics(metrics)
         abm = abm_trapped_and_gof(metrics)
         share = abm["ABM_Trapped_US_B"] / emp * 100 if emp else np.nan
@@ -187,7 +195,8 @@ def main():
 
     panel_c = []
     for ramp, cap, end in combos:
-        row = run_cap_scenario(df, surface, soma_rolloff, ramp, cap, end)
+        row = run_cap_scenario(df, surface, soma_rolloff, ramp, cap, end,
+                               cohorts=cohorts)
         panel_c.append(row)
 
     panel_c_df = pd.DataFrame(panel_c)

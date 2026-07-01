@@ -60,7 +60,8 @@ def run_single_scenario(df: pd.DataFrame, surface,
                         base: float, search_cap: float,
                         sentiment_cap: float,
                         soma_rolloff=None,
-                        empirical_trapped: float = 0.0) -> dict:
+                        empirical_trapped: float = 0.0,
+                        cohorts=None) -> dict:
     """Run the metric pipeline for one parameter triple; return a result row."""
     metrics = fed.compute_metrics(
         df,
@@ -69,6 +70,7 @@ def run_single_scenario(df: pd.DataFrame, surface,
         sentiment_penalty_cap=sentiment_cap,
         surface=surface,
         soma_rolloff=soma_rolloff,
+        cohorts=cohorts,
     )
     trapped_us, trapped_dk, gap = aggregate_trapped(metrics)
     fric = metrics["Dynamic_Friction"] * 100
@@ -151,10 +153,15 @@ def main():
             "abm_cpr_surface.csv not found — run abm_lockin_simulation.py first."
         )
 
+    cohorts = None
+    if isinstance(surface, dict):
+        print("Fetching SOMA MBS coupon cohorts once …")
+        cohorts = fed.fetch_soma_mbs_cohorts()
+
     # Compute empirical trapped liquidity once (actual SOMA vs QT cap —
     # independent of ABM friction, so it's the same for all scenarios).
     baseline_metrics = fed.compute_metrics(df, soma_rolloff=soma_rolloff,
-                                           surface=surface)
+                                           surface=surface, cohorts=cohorts)
     emp_trapped = empirical_trapped(baseline_metrics)
     print(f"Empirical trapped liquidity (SOMA): ${emp_trapped:,.1f}B")
 
@@ -166,7 +173,8 @@ def main():
     rows = [
         run_single_scenario(df, surface, base, search_cap, sentiment_cap,
                             soma_rolloff=soma_rolloff,
-                            empirical_trapped=emp_trapped)
+                            empirical_trapped=emp_trapped,
+                            cohorts=cohorts)
         for base, search_cap, sentiment_cap in combos
     ]
 

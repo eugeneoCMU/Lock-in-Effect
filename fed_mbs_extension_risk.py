@@ -12,8 +12,9 @@ Data sources:
 
 import datetime
 import json
+import re
 import urllib.request
-from typing import Optional
+from typing import Dict, List, Optional, Union
 
 import matplotlib
 matplotlib.use("Agg")
@@ -298,28 +299,10 @@ def calculate_dynamic_friction(
     return df
 
 
-def load_cpr_surface(csv_path: str = "abm_cpr_surface.csv"):
-    """
-    Load the ABM CPR surface and reshape into grids for interpolation.
-
-    Supports both 2D (rate x friction) and 3D (rate x friction x velocity)
-    layouts.  Returns a tuple whose length signals the dimensionality:
-
-      2D -> (rates_pct, frictions, Z_US, Z_DK)
-      3D -> (rates_pct, frictions, velocities, Z_US_3d, Z_DK_3d)
-
-    All CPR values are returned in percent.
-    Returns None if the file is absent.
-    """
-    try:
-        surf = pd.read_csv(csv_path)
-    except FileNotFoundError:
-        print(f"{csv_path} not found — falling back to 1D anchor CPRs.")
-        return None
-
+def _surface_tuple_from_dataframe(surf: pd.DataFrame):
+    """Convert one cohort's surface DataFrame into interpolation grids."""
     rates = np.sort(surf["Market_Rate"].unique())
     frictions = np.sort(surf["Friction"].unique())
-
     has_velocity = "Rate_Velocity" in surf.columns
     if has_velocity:
         velocities = np.sort(surf["Rate_Velocity"].unique())
@@ -336,21 +319,57 @@ def load_cpr_surface(csv_path: str = "abm_cpr_surface.csv"):
                                                               columns=frictions)
             z_us[:, :, iv] = piv_us.to_numpy() * 100.0
             z_dk[:, :, iv] = piv_dk.to_numpy() * 100.0
-
-        print(f"CPR surface loaded from {csv_path}: "
-              f"{nr} rates x {nf} frictions x {nv} velocities")
         return rates * 100.0, frictions, velocities, z_us, z_dk
+
+    piv_us = surf.pivot(index="Market_Rate", columns="Friction",
+                        values="CPR_US").reindex(index=rates,
+                                                  columns=frictions)
+    piv_dk = surf.pivot(index="Market_Rate", columns="Friction",
+                        values="CPR_Danish").reindex(index=rates,
+                                                     columns=frictions)
+    return rates * 100.0, frictions, piv_us.to_numpy() * 100.0, \
+        piv_dk.to_numpy() * 100.0
+
+
+def load_cpr_surface(csv_path: str = "abm_cpr_surface.csv"):
+    """
+    Load the ABM CPR surface and reshape into grids for interpolation.
+
+    Returns:
+      None if file absent.
+      2D tuple -> (rates_pct, frictions, Z_US, Z_DK)
+      3D tuple -> (rates_pct, frictions, velocities, Z_US_3d, Z_DK_3d)
+      dict[float, tuple] when Cohort_Coupon column is present — one tuple
+        per coupon bucket keyed by decimal coupon (e.g. 0.02 for 2.0%).
+    """
+    try:
+        surf = pd.read_csv(csv_path)
+    except FileNotFoundError:
+        print(f"{csv_path} not found — falling back to 1D anchor CPRs.")
+        return None
+
+    if "Cohort_Coupon" in surf.columns:
+        surfaces = {}
+        for coupon, grp in surf.groupby("Cohort_Coupon"):
+            slab = grp.drop(columns=["Cohort_Coupon"])
+            surfaces[float(coupon)] = _surface_tuple_from_dataframe(slab)
+        n_c = len(surfaces)
+        sample = next(iter(surfaces.values()))
+        dim = "3D" if len(sample) == 5 else "2D"
+        print(f"CPR surface loaded from {csv_path}: {n_c} cohorts ({dim})")
+        return surfaces
+
+    tup = _surface_tuple_from_dataframe(surf)
+    if len(tup) == 5:
+        rates, frictions, velocities, _, _ = tup
+        print(f"CPR surface loaded from {csv_path}: "
+              f"{len(rates)} rates x {len(frictions)} frictions "
+              f"x {len(velocities)} velocities")
     else:
-        piv_us = surf.pivot(index="Market_Rate", columns="Friction",
-                            values="CPR_US").reindex(index=rates,
-                                                      columns=frictions)
-        piv_dk = surf.pivot(index="Market_Rate", columns="Friction",
-                            values="CPR_Danish").reindex(index=rates,
-                                                         columns=frictions)
+        rates, frictions, _, _ = tup
         print(f"CPR surface loaded from {csv_path}: "
               f"{len(rates)} rates x {len(frictions)} friction levels")
-        return rates * 100.0, frictions, piv_us.to_numpy() * 100.0, \
-            piv_dk.to_numpy() * 100.0
+    return tup
 
 
 def interp_cpr_surface(rate_pct: pd.Series, friction: pd.Series,
@@ -424,6 +443,124 @@ def interp_cpr_surface(rate_pct: pd.Series, friction: pd.Series,
 # Section 1 – Data Ingestion & Cleaning
 # ---------------------------------------------------------------------------
 SOMA_SUMMARY_URL = "https://markets.newyorkfed.org/api/soma/summary.json"
+SOMA_LATEST_DATE_URL = "https://markets.newyorkfed.org/api/soma/asofdates/latest.json"
+SOMA_CUSIP_URL = ("https://markets.newyorkfed.org/api/soma/agency/get/all/"
+                  "asof/{date}.json")
+
+
+def _default_cohort() -> List[dict]:
+    """Single-cohort fallback matching legacy PORTFOLIO_* constants."""
+    return [{
+        "coupon": PORTFOLIO_COUPON,
+        "weight": 1.0,
+        "origin_date": PORTFOLIO_ORIGIN,
+        "months_elapsed": PORTFOLIO_TERM - int(
+            (pd.Timestamp.now().normalize() - PORTFOLIO_ORIGIN).days / 30.44
+        ),
+    }]
+
+
+def fetch_soma_mbs_cohorts(min_share: float = 0.02,
+                           coupon_step_pct: float = 0.5
+                           ) -> List[dict]:
+    """
+    Fetch CUSIP-level SOMA MBS holdings (30yr term only) and bucket into
+    coupon cohorts: [{coupon, weight, origin_date, months_elapsed}, ...].
+
+    Coupon and maturity (MM/YY) are parsed from securityDescription
+    (e.g. "UMBS MORTPASS 2% 10/51"). origin_date is back-derived per CUSIP
+    as maturity_date - 360 months, weighted-averaged within each rounded
+    coupon bucket. Buckets below min_share fold into the nearest surviving
+    bucket by coupon distance. Falls back to a single legacy cohort if the
+    API is unreachable.
+    """
+    try:
+        req = urllib.request.Request(SOMA_LATEST_DATE_URL,
+                                     headers={"Accept": "application/json"})
+        with urllib.request.urlopen(req, timeout=15) as resp:
+            as_of_str = json.loads(resp.read())["soma"]["asOfDates"][0]
+        as_of = pd.Timestamp(as_of_str)
+
+        url = SOMA_CUSIP_URL.format(date=as_of_str)
+        req = urllib.request.Request(url, headers={"Accept": "application/json"})
+        with urllib.request.urlopen(req, timeout=30) as resp:
+            holdings = json.loads(resp.read())["soma"]["holdings"]
+    except Exception as exc:
+        print(f"SOMA CUSIP API unavailable ({exc}); using single-cohort fallback.")
+        return _default_cohort()
+
+    step = coupon_step_pct / 100.0
+    bucket_value = {}       # rounded coupon -> total face value
+    bucket_elapsed_w = {}   # rounded coupon -> sum(value * months_elapsed)
+    bucket_origin_w = {}    # rounded coupon -> sum(value * origin ordinal)
+
+    def months_between(d1: pd.Timestamp, d2: pd.Timestamp) -> int:
+        return (d1.year - d2.year) * 12 + (d1.month - d2.month)
+
+    for row in holdings:
+        if row.get("securityType") != "MBS" or row.get("term") != "30yr":
+            continue
+        desc = row.get("securityDescription", "")
+        mc = re.search(r"(\d+(?:\.\d+)?)%", desc)
+        mm = re.search(r"(\d{1,2})/(\d{2})\b", desc)
+        if not mc or not mm:
+            continue
+        coupon = float(mc.group(1)) / 100.0
+        mo, yy = int(mm.group(1)), int(mm.group(2))
+        mat_year = 2000 + yy
+        mat_date = pd.Timestamp(year=mat_year, month=mo, day=1)
+        months_remaining = months_between(mat_date, as_of)
+        elapsed = max(0, PORTFOLIO_TERM - months_remaining)
+        origin = mat_date - pd.DateOffset(months=PORTFOLIO_TERM)
+        value = float(row["currentFaceValue"])
+        rounded = round(coupon / step) * step
+        bucket_value[rounded] = bucket_value.get(rounded, 0.0) + value
+        bucket_elapsed_w[rounded] = (bucket_elapsed_w.get(rounded, 0.0)
+                                     + value * elapsed)
+        bucket_origin_w[rounded] = (bucket_origin_w.get(rounded, 0.0)
+                                    + value * origin.toordinal())
+
+    if not bucket_value:
+        print("SOMA CUSIP parse yielded no 30yr MBS; using single-cohort fallback.")
+        return _default_cohort()
+
+    total = sum(bucket_value.values())
+    raw = []
+    for c in sorted(bucket_value):
+        val = bucket_value[c]
+        raw.append({
+            "coupon": c,
+            "weight": val / total,
+            "origin_date": pd.Timestamp.fromordinal(
+                int(round(bucket_origin_w[c] / val))
+            ),
+            "months_elapsed": int(round(bucket_elapsed_w[c] / val)),
+        })
+
+    # Fold buckets below min_share into nearest survivor by coupon distance.
+    survivors = [r for r in raw if r["weight"] >= min_share]
+    if not survivors:
+        survivors = [max(raw, key=lambda r: r["weight"])]
+    folded_weight = sum(r["weight"] for r in raw if r["weight"] < min_share)
+    if folded_weight > 0:
+        for r in raw:
+            if r["weight"] < min_share:
+                nearest = min(survivors, key=lambda s: abs(s["coupon"] - r["coupon"]))
+                nearest["weight"] += r["weight"]
+
+    cohorts = [r for r in survivors if r["weight"] >= min_share * 0.5]
+    wsum = sum(r["weight"] for r in cohorts)
+    for r in cohorts:
+        r["weight"] /= wsum
+
+    wac = sum(r["coupon"] * r["weight"] for r in cohorts)
+    print(f"SOMA MBS cohorts loaded ({len(cohorts)} buckets, "
+          f"as-of {as_of_str}, WAC {wac*100:.2f}%):")
+    for r in cohorts:
+        print(f"  coupon {r['coupon']*100:.2f}%  weight {r['weight']*100:5.1f}%  "
+              f"seasoning {r['months_elapsed']}mo  "
+              f"origin {r['origin_date'].strftime('%Y-%m')}")
+    return cohorts
 
 
 def fetch_soma_mbs_monthly(start: str = START_DATE,
@@ -534,6 +671,7 @@ def compute_metrics(
     sentiment_penalty_cap: float = SENTIMENT_PENALTY_CAP,
     surface=None,
     soma_rolloff: Optional[pd.Series] = None,
+    cohorts: Optional[List[dict]] = None,
 ) -> pd.DataFrame:
     """
     Derive roll-off, extension delta, and cumulative trapped liquidity.
@@ -595,67 +733,157 @@ def compute_metrics(
     # --- Rate velocity for the 3D CPR surface (6-month rate change) --------
     df["Rate_6M_Change"] = df["MORTGAGE30US"].diff(6).fillna(0.0) / 100.0
 
-    # --- ABM counterfactual: month-varying CPR paths ----------------------
-    # Preferred path: CPR surface interpolated on (rate, friction[, velocity]).
-    # Fallback: 1D anchor interpolation at base friction if surface is absent.
     if surface is None:
         surface = load_cpr_surface()
-    if surface is not None:
-        velocity_series = df["Rate_6M_Change"] if len(surface) == 5 else None
-        cpr = interp_cpr_surface(df["MORTGAGE30US"], df["Dynamic_Friction"],
-                                 surface, velocity=velocity_series)
+
+    multi_cohort = isinstance(surface, dict)
+    if multi_cohort and cohorts is None:
+        cohorts = fetch_soma_mbs_cohorts()
+
+    holdings_b = df["WSHOMCB"] / 1_000
+    df["RealDispInc_YoY_Pct"] = df["DSPIC96"].pct_change(12).fillna(0.0) * 100
+    df["Curtailment_SMM"] = curtailment_series(df["RealDispInc_YoY_Pct"])
+    curtailment_smm = df["Curtailment_SMM"]
+    velocity_series = df["Rate_6M_Change"]
+    us_cpr = pd.Series(0.0, index=df.index)
+    dk_cpr = pd.Series(0.0, index=df.index)
+    us_rolloff = pd.Series(0.0, index=df.index)
+    sched_smm_ref = scheduled_amortization_series(df.index)
+
+    if surface is not None and multi_cohort:
+        cohort_paths = []
+        for cohort in cohorts:
+            coupon = cohort["coupon"]
+            surf_c = surface.get(coupon)
+            if surf_c is None:
+                nearest = min(surface.keys(),
+                              key=lambda k: abs(k - coupon))
+                surf_c = surface[nearest]
+            cpr_c = interp_cpr_surface(
+                df["MORTGAGE30US"], df["Dynamic_Friction"], surf_c,
+                velocity=velocity_series if len(surf_c) == 5 else None,
+            )
+            sched_c = scheduled_amortization_series(
+                df.index, coupon=cohort["coupon"],
+                origin=cohort["origin_date"],
+            )
+            w = cohort["weight"]
+            us_cpr += w * cpr_c["US_CPR_Pct"]
+            dk_cpr += w * cpr_c["Danish_CPR_Pct"]
+            us_rolloff += (
+                -holdings_b * w
+                * (cpr_c["US_CPR_Pct"] / 100 / 12 + sched_c + curtailment_smm)
+            )
+            cohort_paths.append({
+                "coupon": coupon,
+                "weight": w,
+                "dk_monthly_cpr": cpr_c["Danish_CPR_Pct"] / 100 / 12,
+                "sched": sched_c,
+            })
+        df["US_CPR_Pct"] = us_cpr
+        df["Danish_CPR_Pct"] = dk_cpr
+        df["Scheduled_Amort_SMM"] = sched_smm_ref
+        df["US_Simulated_Monthly_Rolloff_Billions"] = us_rolloff
+
+        dk_rolloff = np.zeros(len(df))
+        dk_balance = np.zeros(len(df))
+        qt_start_idx = df.index.get_indexer([QT_START], method="nearest")[0]
+        init_balance = float(holdings_b.iloc[qt_start_idx])
+        cohort_balances = {
+            cp["coupon"]: init_balance * cp["weight"]
+            for cp in cohort_paths
+        }
+        for i in range(len(df)):
+            if i < qt_start_idx:
+                dk_balance[i] = float(holdings_b.iloc[i])
+                continue
+            total_bal = 0.0
+            total_rolloff = 0.0
+            for cp in cohort_paths:
+                coupon = cp["coupon"]
+                bal = cohort_balances[coupon]
+                drain = (float(cp["dk_monthly_cpr"].iloc[i])
+                         + float(cp["sched"].iloc[i])
+                         + float(curtailment_smm.iloc[i]))
+                rolloff = bal * drain
+                total_rolloff += rolloff
+                cohort_balances[coupon] = max(bal - rolloff, 0.0)
+                total_bal += cohort_balances[coupon]
+            dk_balance[i] = total_bal
+            dk_rolloff[i] = -total_rolloff
+        df["Danish_Simulated_Monthly_Rolloff_Billions"] = dk_rolloff
+        df["Danish_Balance_Billions"] = dk_balance
+
+    elif surface is not None:
+        cpr = interp_cpr_surface(
+            df["MORTGAGE30US"], df["Dynamic_Friction"], surface,
+            velocity=velocity_series if len(surface) == 5 else None,
+        )
+        df["US_CPR_Pct"] = cpr["US_CPR_Pct"]
+        df["Danish_CPR_Pct"] = cpr["Danish_CPR_Pct"]
+        sched_smm = scheduled_amortization_series(df.index)
+        df["Scheduled_Amort_SMM"] = sched_smm
+        monthly_cpr = df["US_CPR_Pct"] / 100 / 12
+        df["US_Simulated_Monthly_Rolloff_Billions"] = (
+            -holdings_b * (monthly_cpr + sched_smm + curtailment_smm)
+        )
+        monthly_cpr_dk = df["Danish_CPR_Pct"] / 100 / 12
+        dk_rolloff = np.zeros(len(df))
+        dk_balance = np.zeros(len(df))
+        qt_start_idx = df.index.get_indexer([QT_START], method="nearest")[0]
+        init_balance = float(holdings_b.iloc[qt_start_idx])
+        bal = init_balance
+        for i in range(len(df)):
+            if i < qt_start_idx:
+                dk_balance[i] = float(holdings_b.iloc[i])
+                continue
+            dk_balance[i] = bal
+            monthly_drain = (float(monthly_cpr_dk.iloc[i])
+                             + float(sched_smm.iloc[i])
+                             + float(curtailment_smm.iloc[i]))
+            rolloff = bal * monthly_drain
+            dk_rolloff[i] = -rolloff
+            bal = max(bal - rolloff, 0.0)
+        df["Danish_Simulated_Monthly_Rolloff_Billions"] = dk_rolloff
+        df["Danish_Balance_Billions"] = dk_balance
     else:
         anchor_rates, anchor_us, anchor_dk = load_abm_anchors()
         cpr = compute_abm_cpr_vectors(df["MORTGAGE30US"],
                                       anchor_rates, anchor_us, anchor_dk)
-    df["US_CPR_Pct"] = cpr["US_CPR_Pct"]
-    df["Danish_CPR_Pct"] = cpr["Danish_CPR_Pct"]
-
-    # Simulated monthly roll-off = prepayments (CPR) + scheduled amortization.
-    # Both components erode the portfolio; negative sign = decline.
-    holdings_b = df["WSHOMCB"] / 1_000
-    sched_smm = scheduled_amortization_series(df.index)
-    df["Scheduled_Amort_SMM"] = sched_smm
-
-    df["RealDispInc_YoY_Pct"] = df["DSPIC96"].pct_change(12).fillna(0.0) * 100
-    df["Curtailment_SMM"] = curtailment_series(df["RealDispInc_YoY_Pct"])
+        df["US_CPR_Pct"] = cpr["US_CPR_Pct"]
+        df["Danish_CPR_Pct"] = cpr["Danish_CPR_Pct"]
+        sched_smm = scheduled_amortization_series(df.index)
+        df["Scheduled_Amort_SMM"] = sched_smm
+        monthly_cpr = df["US_CPR_Pct"] / 100 / 12
+        df["US_Simulated_Monthly_Rolloff_Billions"] = (
+            -holdings_b * (monthly_cpr + sched_smm + curtailment_smm)
+        )
+        monthly_cpr_dk = df["Danish_CPR_Pct"] / 100 / 12
+        dk_rolloff = np.zeros(len(df))
+        dk_balance = np.zeros(len(df))
+        qt_start_idx = df.index.get_indexer([QT_START], method="nearest")[0]
+        init_balance = float(holdings_b.iloc[qt_start_idx])
+        bal = init_balance
+        for i in range(len(df)):
+            if i < qt_start_idx:
+                dk_balance[i] = float(holdings_b.iloc[i])
+                continue
+            dk_balance[i] = bal
+            monthly_drain = (float(monthly_cpr_dk.iloc[i])
+                             + float(sched_smm.iloc[i])
+                             + float(curtailment_smm.iloc[i]))
+            rolloff = bal * monthly_drain
+            dk_rolloff[i] = -rolloff
+            bal = max(bal - rolloff, 0.0)
+        df["Danish_Simulated_Monthly_Rolloff_Billions"] = dk_rolloff
+        df["Danish_Balance_Billions"] = dk_balance
 
     # --- Empirical CPR: back out from actual roll-off and sched. amort. ---
     actual_abs = df["Actual_Monthly_Rolloff_Billions"].abs()
-    empirical_smm = (actual_abs / holdings_b) - sched_smm
+    empirical_smm = (actual_abs / holdings_b) - df["Scheduled_Amort_SMM"]
     df["Empirical_CPR_Pct"] = (empirical_smm.clip(lower=0) * 12 * 100)
 
-    # --- U.S. counterfactual: use actual holdings (ABM CPR ≈ reality) ---
-    monthly_cpr = df["US_CPR_Pct"] / 100 / 12
-    df["US_Simulated_Monthly_Rolloff_Billions"] = (
-        -holdings_b * (monthly_cpr + sched_smm + df["Curtailment_SMM"])
-    )
-
-    # --- Danish counterfactual: dynamic declining-balance simulation ---
-    # Under Danish rules the ~24% CPR would shrink the portfolio much
-    # faster than the actual U.S. path. We simulate the balance forward
-    # from the QT-start level so the roll-off shrinks as the portfolio does.
-    monthly_cpr_dk = df["Danish_CPR_Pct"] / 100 / 12
-    dk_rolloff = np.zeros(len(df))
-    dk_balance = np.zeros(len(df))
-    qt_start_idx = df.index.get_indexer([QT_START], method="nearest")[0]
-    init_balance = float(holdings_b.iloc[qt_start_idx])
-    bal = init_balance
-    for i in range(len(df)):
-        if i < qt_start_idx:
-            dk_balance[i] = float(holdings_b.iloc[i])
-            continue
-        dk_balance[i] = bal
-        monthly_drain = (float(monthly_cpr_dk.iloc[i])
-                         + float(sched_smm.iloc[i])
-                         + float(df["Curtailment_SMM"].iloc[i]))
-        rolloff = bal * monthly_drain
-        dk_rolloff[i] = -rolloff
-        bal = max(bal - rolloff, 0.0)
-    df["Danish_Simulated_Monthly_Rolloff_Billions"] = dk_rolloff
-    df["Danish_Balance_Billions"] = dk_balance
-
-    # Extension deltas vs. the row-wise QT target for both institutional regimes
+    # --- Extension deltas vs. QT target -----------------------------------
     qt_mask = df.index >= QT_START
     df["US_Extension_Delta_Billions"] = np.where(
         qt_mask,

@@ -18,6 +18,7 @@ Run:
 """
 
 import random
+import time
 
 import numpy as np
 import pandas as pd
@@ -40,45 +41,19 @@ HISTOGRAM_PNG = "monte_carlo_trapped_liquidity.png"
 # ---------------------------------------------------------------------------
 # Helpers
 # ---------------------------------------------------------------------------
-def surface_df_to_tuple(surf: pd.DataFrame):
+def surface_df_to_surfaces(surf: pd.DataFrame):
     """
-    Convert the ABM's surface DataFrame (decimals) into the tuple format that
-    fed.compute_metrics expects from load_cpr_surface.
-
-    Supports both 2D (rate x friction) and 3D (rate x friction x velocity).
+    Convert the ABM surface DataFrame into the format fed.compute_metrics
+    expects: a dict keyed by coupon when Cohort_Coupon is present, else a
+    single 2D/3D tuple.
     """
-    rates = np.sort(surf["Market_Rate"].unique())
-    frictions = np.sort(surf["Friction"].unique())
-
-    if "Rate_Velocity" in surf.columns:
-        velocities = np.sort(surf["Rate_Velocity"].unique())
-        nr, nf, nv = len(rates), len(frictions), len(velocities)
-        z_us = np.empty((nr, nf, nv))
-        z_dk = np.empty((nr, nf, nv))
-        for iv, vel in enumerate(velocities):
-            slab = surf[np.isclose(surf["Rate_Velocity"], vel)]
-            piv_us = slab.pivot(index="Market_Rate", columns="Friction",
-                                values="CPR_US").reindex(index=rates,
-                                                          columns=frictions)
-            piv_dk = slab.pivot(index="Market_Rate", columns="Friction",
-                                values="CPR_Danish").reindex(index=rates,
-                                                              columns=frictions)
-            z_us[:, :, iv] = piv_us.to_numpy() * 100.0
-            z_dk[:, :, iv] = piv_dk.to_numpy() * 100.0
-        return rates * 100.0, frictions, velocities, z_us, z_dk
-    else:
-        piv_us = surf.pivot(index="Market_Rate", columns="Friction",
-                            values="CPR_US").reindex(index=rates,
-                                                      columns=frictions)
-        piv_dk = surf.pivot(index="Market_Rate", columns="Friction",
-                            values="CPR_Danish").reindex(index=rates,
-                                                         columns=frictions)
-        return (
-            rates * 100.0,
-            frictions,
-            piv_us.to_numpy() * 100.0,
-            piv_dk.to_numpy() * 100.0,
-        )
+    if "Cohort_Coupon" in surf.columns:
+        surfaces = {}
+        for coupon, grp in surf.groupby("Cohort_Coupon"):
+            slab = grp.drop(columns=["Cohort_Coupon"])
+            surfaces[float(coupon)] = fed._surface_tuple_from_dataframe(slab)
+        return surfaces
+    return fed._surface_tuple_from_dataframe(surf)
 
 
 def us_trapped(metrics: pd.DataFrame) -> float:
@@ -92,8 +67,9 @@ def us_trapped(metrics: pd.DataFrame) -> float:
 def run_single_iteration(seed: int, fred_df: pd.DataFrame,
                          mobility_scale: float,
                          income: float, home_value: float,
+                         cohorts: list,
                          soma_rolloff=None) -> float:
-    """One Monte Carlo draw: re-seed, rebuild population + surface, score it."""
+    """One Monte Carlo draw: re-seed, rebuild population + surfaces, score it."""
     np.random.seed(seed)
     random.seed(seed)
 
@@ -103,9 +79,11 @@ def run_single_iteration(seed: int, fred_df: pd.DataFrame,
         median_home_value=home_value,
         mobility_scale=mobility_scale,
     )
-    surface = surface_df_to_tuple(engine.build_cpr_surface())
+    surface_df = abm.build_multi_cohort_surfaces(engine, cohorts)
+    surface = surface_df_to_surfaces(surface_df)
     metrics = fed.compute_metrics(fred_df, surface=surface,
-                                  soma_rolloff=soma_rolloff)
+                                  soma_rolloff=soma_rolloff,
+                                  cohorts=cohorts)
     return us_trapped(metrics)
 
 
@@ -161,8 +139,13 @@ def main():
     print("Fetching SOMA MBS roll-off from NY Fed …")
     soma_rolloff = fed.fetch_soma_mbs_monthly()
 
+    print("Fetching SOMA MBS coupon cohorts once …")
+    cohorts = fed.fetch_soma_mbs_cohorts()
+
     # Compute the empirical benchmark at runtime (actual roll-off vs QT cap)
-    baseline_metrics = fed.compute_metrics(fred_df, soma_rolloff=soma_rolloff)
+    baseline_metrics = fed.compute_metrics(
+        fred_df, soma_rolloff=soma_rolloff, cohorts=cohorts,
+    )
     soma_target = empirical_trapped(baseline_metrics)
     print(f"Empirical trapped liquidity (SOMA): ${soma_target:,.1f}B")
 
@@ -170,15 +153,24 @@ def main():
     mobility_scale = abm.calibrate_mobility_scale(income, home_value)
 
     print(f"\nRunning {N_RUNS} Monte Carlo iterations "
-          f"(full CPR-surface rebuild each) …")
+          f"({len(cohorts)} cohort surfaces per seed) …")
     rows = []
+    t0 = time.perf_counter()
     for i in range(N_RUNS):
+        iter_t0 = time.perf_counter()
         trapped = run_single_iteration(i, fred_df, mobility_scale,
                                        income, home_value,
+                                       cohorts=cohorts,
                                        soma_rolloff=soma_rolloff)
-        rows.append({"seed": i, "trapped_us_b": trapped})
+        iter_elapsed = time.perf_counter() - iter_t0
+        rows.append({"seed": i, "trapped_us_b": trapped,
+                       "elapsed_sec": iter_elapsed})
         print(f"  [{i + 1:>2}/{N_RUNS}] seed={i:>2}  "
-              f"U.S. trapped = ${trapped:,.1f}B")
+              f"U.S. trapped = ${trapped:,.1f}B  "
+              f"({iter_elapsed:.1f}s)")
+    total_elapsed = time.perf_counter() - t0
+    print(f"\nTotal Monte Carlo runtime: {total_elapsed/60:.1f} min "
+          f"({total_elapsed/N_RUNS:.1f}s per seed avg)")
 
     results = pd.DataFrame(rows)
     results.to_csv(RESULTS_CSV, index=False)

@@ -1,6 +1,6 @@
 # Technical Narrative — Corrections, Validation, and Final Numbers
 
-This document is a chronological record of the investigation that took the project's headline "trapped liquidity" figure from an unsupported **$972.3B** to a validated **$672.9B**, fixed a structural omission in the Agent-Based Model (ABM), fixed a Danish-counterfactual bug that inflated the "institutional gap" claim, added a four-part validation suite (goodness-of-fit statistics, sensitivity analysis, robustness analysis, Monte Carlo, and an out-of-sample holdout split), tested three behavioral extensions (DTI constraint, loss aversion, wait-and-see) whose honest, pre-committed result was a *wider* gap between ABM and empirical (Section 15), and tested a macro-level curtailment channel whose pre-registered expectation — worse aggregate match — was confirmed (Section 16).
+This document is a chronological record of the investigation that took the project's headline "trapped liquidity" figure from an unsupported **$972.3B** to a validated **$672.9B**, fixed a structural omission in the Agent-Based Model (ABM), fixed a Danish-counterfactual bug that inflated the "institutional gap" claim, added a four-part validation suite (goodness-of-fit statistics, sensitivity analysis, robustness analysis, Monte Carlo, and an out-of-sample holdout split), tested three behavioral extensions (DTI constraint, loss aversion, wait-and-see) whose honest, pre-committed result was a *wider* gap between ABM and empirical (Section 15), tested a macro-level curtailment channel whose pre-registered expectation — worse aggregate match — was confirmed (Section 16), and replaced the flat 3.0% coupon assumption with live NY Fed CUSIP-level multi-cohort composition — a falsifiable test that **also widened** the gap (Section 19).
 
 For the high-level project description and how to run the code, see [README.md](README.md). This document assumes familiarity with that overview and focuses on *why* each number is what it is.
 
@@ -26,6 +26,7 @@ For the high-level project description and how to run the code, see [README.md](
 16. [Curtailment Prepayment Channel](#16-curtailment-prepayment-channel)
 17. [Final Numbers Table](#17-final-numbers-table)
 18. [Known Limitations and Open Items](#18-known-limitations-and-open-items)
+19. [Multi-Vintage Coupon Cohorts](#19-multi-vintage-coupon-cohorts)
 
 ---
 
@@ -392,30 +393,103 @@ The aggregate trapped-liquidity figure fell by **$75.0B**, squarely within the p
 
 ---
 
+## 19. Multi-Vintage Coupon Cohorts
+
+The prior model assumed every household held a **flat 3.0% coupon** with a single origination date (`PORTFOLIO_COUPON = 0.03`, `PORTFOLIO_ORIGIN = 2020-06-01`). The Fed's actual SOMA MBS book is dominated by **2.0–2.5% pandemic-era coupons** (weighted-average coupon ≈ **2.55%** on the 30-year slice). Since a lower coupon implies a larger rate gap at today's ~6.5–7% market rate, the natural hypothesis was that replacing the flat assumption with the real composition would push the ABM's trapped-liquidity prediction **up** toward the $672.9B empirical benchmark.
+
+### 19.1 Data source and parsing
+
+CUSIP-level holdings are fetched live from the NY Fed (distinct from the `summary.json` endpoint used for monthly roll-off):
+
+```
+GET https://markets.newyorkfed.org/api/soma/asofdates/latest.json
+GET https://markets.newyorkfed.org/api/soma/agency/get/all/asof/{date}.json
+```
+
+Each MBS record embeds coupon and maturity in `securityDescription` (e.g. `"UMBS MORTPASS 2% 10/51"`), not as separate fields. `fetch_soma_mbs_cohorts()` in `fed_mbs_extension_risk.py` parses 30-year MBS only, buckets by 0.5%-step coupon, back-derives `origin_date` as `maturity_date − 360 months`, and folds buckets below 2% share into the nearest survivor. **15-year term MBS (~9% of total face value) are excluded** in this pass.
+
+Verified cohort table (as-of 2026-06-24, $1,769.6B of 30yr face value):
+
+| Coupon | Value | Share of 30yr book | Avg months elapsed | Implied origination |
+|---|---|---|---|---|
+| 1.50% | $53.6B | 3.0% | 62 | 2021.3 |
+| 2.00% | $703.1B | 39.7% | 59 | 2021.1 |
+| 2.50% | $518.4B | 29.3% | 60 | 2021.0 |
+| 3.00% | $209.4B | 11.8% | 100 | 2017.7 |
+| 3.50% | $143.0B | 8.1% | 104 | 2017.3 |
+| 4.00% | $90.6B | 5.1% | 91 | 2018.4 |
+| 4.50%+ | $51.5B | 2.9% | 80 | 2019.8 |
+
+Falls back to a single legacy 3.0% cohort if the API is unreachable.
+
+### 19.2 Architecture changes
+
+1. **`HousingMarketEngine.attach_cohort()`** — decouples household economics (income, home value, desire, txn cost, patience) from mortgage terms. One RNG draw serves all cohorts; `attach_cohort(coupon, months_elapsed)` rebuilds every `Mortgage` in place and re-runs `_precompute_arrays()`.
+2. **Per-cohort CPR surfaces** — `build_multi_cohort_surfaces()` loops cohorts, builds a full 3D surface per bucket, and writes one long-format `abm_cpr_surface.csv` with a `Cohort_Coupon` column (23,660 rows = 7 × 3,380).
+3. **`load_cpr_surface()`** — returns `{coupon: (rates, frictions, velocities, z_us, z_dk), ...}` when `Cohort_Coupon` is present.
+4. **`compute_metrics()`** — weighted sum over cohorts for U.S. simulated rolloff; independent declining-balance Danish loops per cohort summed together. Curtailment remains cohort-agnostic (income-driven). Empirical CPR back-out still uses single `PORTFOLIO_COUPON` scheduled amort (unchanged).
+
+### 19.3 Results — hypothesis falsified
+
+| Metric | Flat 3.0% cohort (Section 16) | Multi-cohort (Section 19) | Direction vs. hypothesis |
+|---|---|---|---|
+| ABM U.S. trapped liquidity | **$344.6B** (51.2%) | **$257.6B** (38.3%) | ↓ $87.0B — **opposite** of predicted |
+| Danish trapped (dynamic balance) | -$779.0B | **-$805.5B** | slightly more overshoot |
+| Institutional gap (U.S. − Danish) | $1,123.6B | **$1,063.1B** | ↓ $60.5B |
+| ABM U.S. CPR mean (QT window) | 7.92% | **8.67%** | ↑ — model predicts *more* prepayment |
+| CPR R² (raw) | -1.586 | **-2.166** | worse path fit |
+| Monte Carlo mean (50 seeds) | $364.0B | **$275.7B** (95% CI: $269.3–$282.2B) | ↓ $88.3B |
+| Monte Carlo runtime | ~46 s total | **16.1 min** (~19.3 s/seed) | 7 cohorts × surface rebuild |
+| Sensitivity range (125 scenarios) | $31.4B–$479.5B | **-$95.7B–$414.2B** | baseline now $257.6B |
+
+The lower-weighted-average coupon did **not** increase trapped liquidity. The weighted multi-cohort model predicts **more** simulated roll-off ($87B less trapped liquidity), not less. CPR path fit also **worsened** (R² from -1.59 to -2.17).
+
+### 19.4 Interpretation
+
+Three compounding effects explain the counter-intuitive direction:
+
+1. **Per-cohort scheduled amortization** — lower-coupon loans amortize principal more slowly (more interest, less SMM). The flat 3.0% model used one amort schedule; the multi-cohort blend uses slower schedules for the dominant 2.0–2.5% buckets, but this is dominated by the CPR effect below.
+2. **Younger seasoning on dominant buckets** — the 2.0% cohort (40% weight) has ~59 months elapsed vs. the legacy flat model's ~68 months. Younger loans have higher remaining principal and higher baseline turnover in the ABM's turnover anchor.
+3. **CPR surface re-build per coupon** — each cohort gets its own 3D surface at its own coupon gap. The weighted CPR series averages **8.67%** vs empirical **5.62%**, meaning the multi-cohort ABM still **over-predicts** monthly prepayment — and does so more than the single-cohort model did.
+
+**Conclusion**: pool composition is real and measurable, but simply swapping in the Fed's actual coupon/vintage weights **does not** close the $328B residual. The ABM's household-level lock-in mechanism, even when applied cohort-by-cohort with correct coupons and seasoning, produces too much aggregate mobility. The remaining gap is not explained by "wrong average coupon"; it likely reflects loan-level heterogeneity (FICO/LTV/geography), servicer forbearance/modification, and burnout dynamics that a 10,000-agent representative model cannot capture from coupon buckets alone.
+
+### 19.5 Known limitations (cohort pass)
+
+- **15-year MBS excluded** (~9% of SOMA face value); different amortization schedule.
+- **Maturity-string parsing** approximates true origination date (assumes 360-month term from parsed MM/YY maturity).
+- **`min_share = 0.02` bucket-folding** merges tiny tails into nearest coupon bucket.
+- **Mobility calibration unchanged** — still anchored at 8% rate on default cohort; not re-calibrated per coupon bucket.
+- **Monte Carlo cost** — 7× surface rebuild per seed (~16 min for 50 seeds vs ~46 s single-cohort).
+
+---
+
 ## 17. Final Numbers Table
 
-Single source of truth for every headline figure, current as of the curtailment channel described in Section 16.
+Single source of truth for every headline figure, current as of the multi-cohort extension described in Section 19.
 
 | Metric | Value | Source |
 |---|---|---|
 | Empirical trapped liquidity (SOMA, phased cap) | **$672.9B** | `print_summary()`, "Net Trapped Liquidity" |
-| ABM U.S. trapped liquidity | **$344.6B** (51.2% of empirical) | `print_summary()`, "U.S. System Trapped Liquidity" |
-| ABM Danish trapped liquidity (dynamic balance) | **-$779.0B** | `print_summary()`, "Danish System Trapped Liquidity" |
-| Danish portfolio path | $2,634B → $455B | `print_summary()`, "Danish Portfolio" |
-| Institutional gap (U.S. - Danish) | **$1,123.6B** | `print_summary()`, "Institutional Gap" |
+| ABM U.S. trapped liquidity | **$257.6B** (38.3% of empirical) | `print_summary()`, "U.S. System Trapped Liquidity" |
+| ABM Danish trapped liquidity (dynamic balance) | **-$805.5B** | `print_summary()`, "Danish System Trapped Liquidity" |
+| Danish portfolio path | $2,557B → $408B | `print_summary()`, "Danish Portfolio" |
+| Institutional gap (U.S. - Danish) | **$1,063.1B** | `print_summary()`, "Institutional Gap" |
 | Scheduled amortization during QT | $242.1B (≈2.55% ann.) | `print_summary()`, "Sched. amortization" |
 | Curtailment during QT | $74.9B (≈0.78% ann. avg SMM) | `print_summary()`, "Curtailment during QT" |
+| SOMA 30yr WAC (live cohort fetch) | **2.55%** (7 buckets) | `fetch_soma_mbs_cohorts()` |
 | Empirical CPR range | 0.00% - 14.20% (mean 5.62%) | `print_summary()`, "CPR DIAGNOSTIC" |
-| ABM U.S. CPR range | 4.29% - 16.02% (mean 7.92%) | `print_summary()`, "CPR DIAGNOSTIC" |
-| CPR goodness-of-fit (raw) | R²=-1.586, RMSE=4.48pp, MAE=3.16pp, r=-0.309 | `cpr_goodness_of_fit()` |
-| CPR goodness-of-fit (smoothed) | R²=-3.705, RMSE=3.59pp, MAE=2.54pp, r=-0.454 | `cpr_goodness_of_fit()` |
-| Cross-correlation (best lag) | +0.182 at lag -3 (not meaningful) | `cpr_cross_correlation()` |
-| Holdout split — in-sample | R²=-3.562, RMSE=5.54pp, share=48.0% | `print_summary()`, "Holdout split" |
-| Holdout split — out-of-sample | R²=-0.675, RMSE=3.66pp, share=54.5% | `print_summary()`, "Holdout split" |
-| Sensitivity sweep range (125 scenarios) | Trapped $31.4B-$479.5B; Share 4.7%-71.2% | `sensitivity_analysis.py` |
+| ABM U.S. CPR range | 4.79% - 16.76% (mean 8.67%) | `print_summary()`, "CPR DIAGNOSTIC" |
+| CPR goodness-of-fit (raw) | R²=-2.166, RMSE=4.96pp, MAE=3.63pp, r=-0.303 | `cpr_goodness_of_fit()` |
+| CPR goodness-of-fit (smoothed) | R²=-5.269, RMSE=4.15pp, MAE=3.16pp, r=-0.433 | `cpr_goodness_of_fit()` |
+| Cross-correlation (best lag) | +0.190 at lag -3 (not meaningful) | `cpr_cross_correlation()` |
+| Holdout split — in-sample | R²=-4.328, RMSE=5.98pp, share=37.6% | `print_summary()`, "Holdout split" |
+| Holdout split — out-of-sample | R²=-1.188, RMSE=4.19pp, share=38.9% | `print_summary()`, "Holdout split" |
+| Sensitivity sweep range (125 scenarios) | Trapped -$95.7B-$414.2B; Share -14.2%-61.6% | `sensitivity_analysis.py` |
 | Robustness — data source | SOMA $672.9B vs WSHOMCB $671.6B (<1% diff) | `robustness_analysis.py`, Panel B |
-| Robustness — cap schedule (18 scenarios) | Empirical $285.4B-$690.4B; Share 61.0%-87.9% | `robustness_analysis.py`, Panel C |
-| Monte Carlo (50 population draws) | Mean $364.0B, Std $24.2B, 95% CI [$357.3B, $370.7B] | `monte_carlo_simulation.py` |
+| Robustness — cap schedule (18 scenarios) | Empirical $285.4B-$690.4B; Share 45.0%-74.6% | `robustness_analysis.py`, Panel C |
+| Monte Carlo (50 population draws) | Mean $275.7B, Std $23.4B, 95% CI [$269.3B, $282.2B] | `monte_carlo_simulation.py` |
+| Monte Carlo runtime (multi-cohort) | 16.1 min total (~19.3 s/seed) | `monte_carlo_simulation.py` |
 | Dynamic friction range | 8.23% - 10.26% (mean 9.05%) | `print_summary()`, "DYNAMIC MACROECONOMIC FRICTION" |
 | CPR bias vs. real income YoY (pre-build diagnostic) | r = -0.487 | Section 16.1 |
 
@@ -423,10 +497,12 @@ Single source of truth for every headline figure, current as of the curtailment 
 
 ## 18. Known Limitations and Open Items
 
-- **Monthly CPR path fit remains weak.** The aggregate/level comparison (51.2% share explained) is meaningful but the month-to-month R² is negative under every friction specification tested (Section 9) and no lag alignment fixes it (Section 13). Future work could add a lagged-rate or seasonal term to the CPR surface, or explicitly model vintage/seasoning effects.
-- **The Danish counterfactual still uses U.S.-calibrated friction.** The dynamic friction series (inventory + sentiment penalties) is calibrated on U.S. housing-market data and applied identically to the Danish counterfactual. Since Danish institutional frictions may differ, the -$779.0B / $1,123.6B figures should be read as an **upper bound** on the institutional gap under U.S.-style frictions, not a claim about what Danish-market frictions specifically would produce.
+- **Monthly CPR path fit remains weak.** The aggregate/level comparison (38.3% share explained) is meaningful but the month-to-month R² is negative under every friction specification tested (Section 9) and no lag alignment fixes it (Section 13). Future work could add a lagged-rate or seasonal term to the CPR surface, or explicitly model vintage/seasoning effects.
+- **The Danish counterfactual still uses U.S.-calibrated friction.** The dynamic friction series (inventory + sentiment penalties) is calibrated on U.S. housing-market data and applied identically to the Danish counterfactual. Since Danish institutional frictions may differ, the -$805.5B / $1,063.1B figures should be read as an **upper bound** on the institutional gap under U.S.-style frictions, not a claim about what Danish-market frictions specifically would produce.
 - **No confidence interval on the empirical trapped-liquidity figure itself.** The Monte Carlo suite (Section 11) puts a confidence interval on the *ABM's* prediction, and the robustness suite (Section 10) shows how the *empirical* figure moves under different assumptions, but there is no single combined interval (e.g., a bootstrap over both data and assumption choices simultaneously) for the $672.9B figure.
 - **The holdout split is a single split, not a rolling/expanding-window validation.** A more rigorous test would repeat the holdout at multiple cut dates (e.g., every 6 months) and check whether out-of-sample performance is consistently competitive with in-sample, rather than relying on one Jan-2024 cut point.
 - **Behavioral extensions (DTI, loss aversion, wait-and-see) widened the gap rather than closing it** (Section 15). This is an honest finding under literature-grounded parameters; the residual likely reflects pool-composition, vintage, and servicer effects outside the household decision function. The wait-and-see threshold (150 bps) and probability (20%) are unsourced assumptions that should be sensitivity-tested in future work.
 - **Curtailment channel worsened the aggregate match** (Section 16). Literature-grounded partial prepayments added $74.9B of simulated roll-off during QT, reducing share explained from 62.3% to 51.2% — confirming the pre-registered expectation. The ABM already over-predicts mobility; additive prepayment channels cannot close a gap caused by too much simulated roll-off.
+- **Multi-cohort coupon composition also worsened the match** (Section 19). Replacing the flat 3.0% assumption with live NY Fed CUSIP-level weights (WAC 2.55%, 7 buckets) reduced trapped liquidity from $344.6B to **$257.6B** (38.3%) — falsifying the hypothesis that lower coupons would push the model toward $672.9B. The weighted multi-cohort ABM predicts *more* aggregate prepayment (CPR mean 8.67% vs empirical 5.62%), not less. Residual likely requires loan-level heterogeneity, servicer effects, or burnout dynamics beyond coupon buckets.
+- **15-year MBS excluded from cohort modeling** (~9% of SOMA face value); maturity-string parsing approximates origination dates.
 - **DTI constraint is front-end only.** The 43% DTI check uses only the mortgage payment, not total household debt. This underestimates the binding power of the constraint, since real QM underwriting uses a back-end ratio including student loans, auto loans, and credit card minimums.

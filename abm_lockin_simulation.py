@@ -260,11 +260,22 @@ class HousingMarketEngine:
         self.median_home_value = median_home_value
         self.mobility_scale = mobility_scale
         self.rng = np.random.default_rng(seed)
+        self._cohort_rate = ORIGINAL_RATE
+        self._cohort_months_elapsed = MONTHS_ELAPSED
         self.households = self._generate_population()
+        self._attach_mortgages()
+        self._precompute_arrays()
+
+    def attach_cohort(self, original_rate: float,
+                      months_elapsed: int = MONTHS_ELAPSED):
+        """Rebind every household mortgage to a new coupon/seasoning cohort."""
+        self._cohort_rate = original_rate
+        self._cohort_months_elapsed = months_elapsed
+        self._attach_mortgages()
         self._precompute_arrays()
 
     def _generate_population(self) -> list:
-        """10,000 heterogeneous households, all locked into 3.0% mortgages."""
+        """Draw heterogeneous households (economics only; mortgages attached later)."""
         incomes = self.rng.lognormal(mean=np.log(self.median_income),
                                      sigma=0.45, size=self.n_households)
         home_values = self.rng.lognormal(mean=np.log(self.median_home_value),
@@ -281,10 +292,17 @@ class HousingMarketEngine:
         households = []
         for inc, hv, des, txn, pat in zip(incomes, home_values, desires,
                                            txn_rates, patience_draws):
-            principal = 0.80 * hv
-            mortgage = Mortgage(principal, ORIGINAL_RATE)
-            households.append(Household(inc, hv, mortgage, des, txn, pat))
+            placeholder = Mortgage(0.80 * hv, self._cohort_rate,
+                                   months_elapsed=self._cohort_months_elapsed)
+            households.append(Household(inc, hv, placeholder, des, txn, pat))
         return households
+
+    def _attach_mortgages(self):
+        """Rebuild mortgages for the current cohort without redrawing economics."""
+        for h in self.households:
+            principal = 0.80 * h.current_home_value
+            h.mortgage = Mortgage(principal, self._cohort_rate,
+                                  months_elapsed=self._cohort_months_elapsed)
 
     def _precompute_arrays(self):
         """Cache population attributes as NumPy arrays for vectorized CPR."""
@@ -305,7 +323,7 @@ class HousingMarketEngine:
         # monthly coupon payment and remaining term (shared across all agents
         # since they all started with ORIGINAL_RATE mortgages).
         self._pmt = self._current_payment  # same as coupon payment
-        self._n_rem = TERM_YEARS * 12 - MONTHS_ELAPSED
+        self._n_rem = TERM_YEARS * 12 - self._cohort_months_elapsed
 
     def _payoff_us(self, rate: float) -> np.ndarray:
         return self._outstanding_us
@@ -399,6 +417,22 @@ class HousingMarketEngine:
         return pd.DataFrame(records)
 
 
+def build_multi_cohort_surfaces(engine: HousingMarketEngine,
+                                cohorts: list) -> pd.DataFrame:
+    """Build one 3D CPR surface per cohort and concatenate with Cohort_Coupon."""
+    frames = []
+    for i, cohort in enumerate(cohorts):
+        print(f"  Cohort {i + 1}/{len(cohorts)}: "
+              f"coupon={cohort['coupon']*100:.2f}%  "
+              f"weight={cohort['weight']*100:.1f}%  "
+              f"seasoning={cohort['months_elapsed']}mo")
+        engine.attach_cohort(cohort["coupon"], cohort["months_elapsed"])
+        surf = engine.build_cpr_surface()
+        surf["Cohort_Coupon"] = cohort["coupon"]
+        frames.append(surf)
+    return pd.concat(frames, ignore_index=True)
+
+
 # ---------------------------------------------------------------------------
 # Calibration: anchor the mobility-desire scale to the "Baseline Floor"
 # ---------------------------------------------------------------------------
@@ -483,6 +517,11 @@ def plot_s_curve(results: pd.DataFrame,
 # Main
 # ---------------------------------------------------------------------------
 def main():
+    import fed_mbs_extension_risk as fed
+
+    print("Fetching SOMA MBS coupon cohorts from NY Fed …")
+    cohorts = fed.fetch_soma_mbs_cohorts()
+
     print("Fetching empirical medians from FRED …")
     median_income, median_home_value = fetch_macro_from_fred()
 
@@ -491,14 +530,16 @@ def main():
     mobility_scale = calibrate_mobility_scale(median_income,
                                               median_home_value)
 
-    print(f"\nInitializing {N_HOUSEHOLDS:,} households at "
-          f"{ORIGINAL_RATE:.1%} mortgages "
-          f"(2020-21 pandemic origination cohort) …")
+    ref = cohorts[0]
+    print(f"\nInitializing {N_HOUSEHOLDS:,} households "
+          f"(reference cohort {ref['coupon']*100:.2f}%, "
+          f"{ref['months_elapsed']}mo seasoning) …")
     engine = HousingMarketEngine(
         median_income=median_income,
         median_home_value=median_home_value,
         mobility_scale=mobility_scale,
     )
+    engine.attach_cohort(ref["coupon"], ref["months_elapsed"])
 
     print("Sweeping market rates 2.0% → 8.0% under US and Danish rules …")
     results = engine.run_simulation()
@@ -513,11 +554,10 @@ def main():
     results.to_csv("abm_lockin_results.csv", index=False)
     print("\nResults table saved to abm_lockin_results.csv")
 
-    # Build the 3D CPR surface (rate x friction x velocity) for the macro model
-    print(f"\nBuilding 3D CPR surface "
-          f"({len(RATE_GRID)} rates x {len(FRICTION_GRID)} frictions "
-          f"x {len(RATE_VELOCITY_GRID)} velocities) …")
-    surface = engine.build_cpr_surface()
+    print(f"\nBuilding multi-cohort 3D CPR surfaces "
+          f"({len(cohorts)} cohorts x {len(RATE_GRID)} rates x "
+          f"{len(FRICTION_GRID)} frictions x {len(RATE_VELOCITY_GRID)} velocities) …")
+    surface = build_multi_cohort_surfaces(engine, cohorts)
     surface.to_csv("abm_cpr_surface.csv", index=False)
     print("CPR surface saved to abm_cpr_surface.csv")
 
