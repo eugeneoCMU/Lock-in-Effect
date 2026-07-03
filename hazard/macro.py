@@ -57,8 +57,18 @@ def compute_qt_target_series(index: pd.DatetimeIndex) -> pd.Series:
     return target
 
 
+def coupon_to_decimal(rate: float | np.ndarray) -> float | np.ndarray:
+    """Freddie stores coupon as percent (e.g. 4.5); macro rates use decimal (0.045)."""
+    arr = np.asarray(rate, dtype=np.float64)
+    out = np.where(arr > 1.0, arr / 100.0, arr)
+    if np.ndim(rate) == 0:
+        return float(out)
+    return out
+
+
 def scheduled_amortization_smm(annual_rate: float, term_months: int,
                                months_elapsed: int) -> float:
+    annual_rate = float(coupon_to_decimal(annual_rate))
     r = annual_rate / 12
     n, k = term_months, months_elapsed
     if r == 0:

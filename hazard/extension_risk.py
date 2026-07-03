@@ -26,7 +26,9 @@ from config import (
     EMPIRICAL_TRAPPED_B,
     EXTENSION_RISK_PNG,
     HAZARD_COEF_PATH,
+    LOAN_SAMPLE_PATH,
     MICROSIM_RESULTS_PATH,
+    PANEL_PATH,
     QT_START,
     SIM_RESULTS_PATH,
 )
@@ -64,6 +66,12 @@ def score_extension_risk(
         qt_sim["hazard_cpr_pct"],
     )
     best_lag = max(xcorr, key=lambda k: abs(xcorr[k])) if xcorr else 0
+    peak_lag_r = xcorr.get(best_lag, 0.0) if xcorr else 0.0
+    lag_interp = (
+        "Negative lag = hazard CPR leads SOMA empirical CPR. "
+        "Consistent with 45-90d TBA settlement delay between "
+        "Freddie loan-level prepay and NY Fed SOMA cash receipt."
+    )
 
     results = {
         "empirical_trapped_b": emp_trapped,
@@ -74,7 +82,9 @@ def score_extension_risk(
         "cpr_gof_smoothed": gof["smoothed"],
         "cross_correlation": xcorr,
         "best_lag": best_lag,
-        "mode": "literature_microsim",
+        "peak_lag_r": peak_lag_r,
+        "lag_interpretation": lag_interp,
+        "mode": "cohort_empirical",
     }
     return results
 
@@ -153,10 +163,18 @@ def print_summary(results: dict):
     print(f"  ABM benchmark share (for comparison):   13.2%")
     print("-" * 60)
     g = results["cpr_gof_raw"]
-    print(f"  CPR R²:   {g['r2']:.3f}   RMSE: {g['rmse']:.2f}pp   r: {g['corr']:.3f}")
+    lag0_r = g["corr"]
     if results.get("cross_correlation"):
-        print(f"  Cross-corr peak: lag {results['best_lag']} "
-              f"(r={results['cross_correlation'].get(results['best_lag'], 0):.3f})")
+        bl = results["best_lag"]
+        peak_r = results.get("peak_lag_r", results["cross_correlation"].get(bl, 0))
+        print(
+            f"  CPR r (lag 0): {lag0_r:+.3f}   |  "
+            f"Peak lag {bl}: r={peak_r:+.3f}"
+        )
+        print(f"  CPR R²: {g['r2']:.3f}   RMSE: {g['rmse']:.2f}pp")
+        print(f"  Settlement note:  {results.get('lag_interpretation', '')}")
+    else:
+        print(f"  CPR R²:   {g['r2']:.3f}   RMSE: {g['rmse']:.2f}pp   r (lag 0): {lag0_r:.3f}")
     print("=" * 60)
 
     if results.get("mode") != "literature_microsim" and HAZARD_COEF_PATH.exists():
@@ -164,20 +182,21 @@ def print_summary(results: dict):
             coef_data = json.load(f)
         c = coef_data.get("coefficients", {})
         print("\nPre-registered coefficient signs:")
-        for name, expected in [("rate_gap", ">0"), ("burnout", "<0"), ("friction", "<0")]:
+        rate_key = "rate_gap_bps" if "rate_gap_bps" in c else "rate_gap"
+        for name, expected in [(rate_key, ">0"), ("burnout_orth", "<0"), ("friction", "<0")]:
             val = c.get(name, np.nan)
             ok = (val > 0) if expected == ">0" else (val < 0)
             print(f"  β({name}) = {val:+.4f}  expected {expected}  {'OK' if ok else 'FAIL'}")
 
 
-def run_empirical_pipeline():
+def run_empirical_pipeline(force_rebuild: bool = False, years: list[int] | None = None):
     from ingest import load_or_build_panel
     from hazard_fit import fit_hazard_glm
     from markov import estimate_transitions_from_panel
     from simulate import simulate_qt_window
 
     print("Step 1: Ingest …")
-    panel = load_or_build_panel()
+    panel = load_or_build_panel(force_rebuild=force_rebuild, years=years)
 
     print("\nStep 2: Fit hazard GLM …")
     fit_hazard_glm(panel)
@@ -190,20 +209,25 @@ def run_empirical_pipeline():
     return sim
 
 
-def run_literature_microsim():
+def run_literature_microsim(force_rebuild: bool = False):
     from loan_sample import load_or_build_loan_sample
     from microsim_engine import run_qt_microsim
 
     print("Step 1: Build loan sample …")
-    loans = load_or_build_loan_sample()
+    loans = load_or_build_loan_sample(force_rebuild=force_rebuild)
+
+    if not force_rebuild and MICROSIM_RESULTS_PATH.exists():
+        print("\nStep 2: Using cached microsim results …")
+        return pd.read_parquet(MICROSIM_RESULTS_PATH)
 
     print("\nStep 2: Run literature microsim (US + Danish) …")
     paths = run_qt_microsim(loan_sample=loans)
-    sim = paths["US"]
-    return sim
+    return paths["US"]
 
 
 def main():
+    import argparse
+
     parser = argparse.ArgumentParser(description="Hazard extension-risk scoring")
     parser.add_argument(
         "--mode",
@@ -211,12 +235,34 @@ def main():
         default="empirical",
         help="empirical: cohort GLM fit; literature: agent microsim",
     )
+    parser.add_argument(
+        "--rebuild",
+        action="store_true",
+        help="Force rebuild panel/loan sample from Freddie raw (ignore cache)",
+    )
+    parser.add_argument(
+        "--years",
+        nargs="*",
+        type=int,
+        default=None,
+        help="Limit ingest to vintage years (e.g. --years 2020 2021)",
+    )
     args = parser.parse_args()
 
+    if args.rebuild:
+        if args.mode == "literature":
+            cache_paths = (LOAN_SAMPLE_PATH, MICROSIM_RESULTS_PATH)
+        else:
+            cache_paths = (PANEL_PATH, LOAN_SAMPLE_PATH, SIM_RESULTS_PATH, MICROSIM_RESULTS_PATH)
+        for p in cache_paths:
+            if p.exists():
+                p.unlink()
+                print(f"Removed cache: {p}")
+
     if args.mode == "literature":
-        sim = run_literature_microsim()
+        sim = run_literature_microsim(force_rebuild=args.rebuild)
     else:
-        sim = run_empirical_pipeline()
+        sim = run_empirical_pipeline(force_rebuild=args.rebuild, years=args.years)
         if SIM_RESULTS_PATH.exists():
             sim = pd.read_parquet(SIM_RESULTS_PATH)
 
@@ -229,18 +275,21 @@ def main():
         sim = pd.read_parquet(MICROSIM_RESULTS_PATH)
 
     results = score_extension_risk(sim, empirical)
-    if args.mode == "literature":
-        results["mode"] = "literature_microsim"
+    results["mode"] = "literature_microsim" if args.mode == "literature" else "cohort_empirical"
     print_summary(results)
     plot_dashboard(sim, empirical, results)
     plot_cpr_diagnostic(sim, empirical)
 
-    out = Path(__file__).parent / "data" / "extension_risk_results.json"
-    with open(out, "w") as f:
-        json.dump({k: v for k, v in results.items()
-                   if k not in ("cpr_gof_raw", "cpr_gof_smoothed")}, f, indent=2,
-                  default=lambda x: float(x) if isinstance(x, (np.floating, np.integer)) else x)
-    print(f"\nResults saved to {out}")
+    out_dir = Path(__file__).parent / "data"
+    payload = {k: v for k, v in results.items()
+               if k not in ("cpr_gof_raw", "cpr_gof_smoothed")}
+    mode_slug = results.get("mode", "cohort")
+    for name in (f"extension_risk_results_{mode_slug}.json", "extension_risk_results.json"):
+        out = out_dir / name
+        with open(out, "w") as f:
+            json.dump(payload, f, indent=2,
+                      default=lambda x: float(x) if isinstance(x, (np.floating, np.integer)) else x)
+        print(f"Results saved to {out}")
 
 
 if __name__ == "__main__":

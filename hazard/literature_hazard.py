@@ -12,6 +12,7 @@ import numpy as np
 
 from config import (
     BASELINE_MODE,
+    INVOLUNTARY_CPR_ANNUAL,
     LITERATURE_COEFS,
     P_Q_BASELINE,
     PSA_SPEED,
@@ -47,20 +48,20 @@ BETA1_PREPAY_MID = rothstein_beta1(ROTHSTEIN_Q_DECLINE_MID)
 BETA1_PREPAY_HIGH = rothstein_beta1(ROTHSTEIN_Q_DECLINE_HIGH)
 
 
+def cpr_annual_to_monthly_hazard(cpr_annual: np.ndarray) -> np.ndarray:
+    """CPR (annual decimal) → monthly hazard via constant-hazard compounding."""
+    cpr = np.clip(np.asarray(cpr_annual, dtype=np.float64), 0.0, 0.99)
+    return np.clip(1.0 - (1.0 - cpr) ** (1.0 / 12.0), 1e-8, 0.5)
+
+
 def h0_psa(age_months: np.ndarray, psa_speed: float = PSA_SPEED) -> np.ndarray:
     """
-    PSA baseline monthly prepayment hazard.
-
-    0.2% CPR/month for age <= 30, ramping to psa_speed% annual CPR at month 30+.
+    Standard PSA baseline: CPR ramps from 0 to 6%*(PSA/100) annual over months 1–30,
+    flat thereafter. Converted to monthly hazard (not raw CPR as hazard).
     """
-    age = np.asarray(age_months, dtype=np.float64)
-    cpr_monthly = np.where(
-        age <= 30,
-        0.002,
-        0.002 + (psa_speed / 100.0) / 12.0 * np.minimum(age - 30, 30) / 30.0,
-    )
-    # Convert CPR to monthly hazard: h ≈ CPR/12 for small rates
-    return np.clip(cpr_monthly, 1e-8, 0.5)
+    age = np.maximum(np.asarray(age_months, dtype=np.float64), 0.0)
+    cpr_ann = 0.06 * (psa_speed / 100.0) * np.minimum(age, 30.0) / 30.0
+    return cpr_annual_to_monthly_hazard(cpr_ann)
 
 
 def h0_weibull(age_months: np.ndarray, shape: float = 1.5, scale: float = 60.0) -> np.ndarray:
@@ -94,7 +95,11 @@ def prepay_hazard(
         + c["beta_ltv"] * ltv_z
         + c["beta_burnout"] * burnout
     )
-    return np.clip(h0 * np.exp(log_h), 0.0, 1.0)
+    h_vol = h0 * np.exp(log_h)
+    h_floor = cpr_annual_to_monthly_hazard(
+        np.full_like(h0, INVOLUNTARY_CPR_ANNUAL, dtype=np.float64)
+    )
+    return np.clip(np.maximum(h_floor, h_vol), 0.0, 1.0)
 
 
 def default_hazard(

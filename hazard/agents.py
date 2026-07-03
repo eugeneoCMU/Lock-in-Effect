@@ -13,6 +13,7 @@ import numpy as np
 import polars as pl
 
 from config import MARKOV_STATES, TERM_MONTHS
+from macro import coupon_to_decimal
 
 
 STATE_TO_CODE = {s: i for i, s in enumerate(MARKOV_STATES)}
@@ -115,7 +116,7 @@ class MicrosimPool:
         self.fico = pdf["fico"].fillna(700).values.astype(np.float64)
         self.property_states = pdf["property_state"].fillna("CA").astype(str).values
         self.orig_ltv = pdf["orig_ltv"].fillna(80).values.astype(np.float64)
-        self.coupon = pdf["coupon"].values.astype(np.float64)
+        self.coupon = coupon_to_decimal(pdf["coupon"].values.astype(np.float64))
         self.orig_upb = pdf["orig_upb"].values.astype(np.float64)
         self.balance = pdf["balance"].values.astype(np.float64)
         self.loan_age = pdf["loan_age"].fillna(36).values.astype(np.int32)

@@ -24,13 +24,20 @@ from config import (
     SIM_RESULTS_PATH,
     TERM_MONTHS,
 )
-from hazard_fit import load_coefficients, predict_hazard
+from hazard_fit import (
+    load_burnout_age_adjust,
+    load_coefficients,
+    load_predict_scales,
+    predict_hazard,
+)
+from stratum import build_stratum_id
 from macro import (
+    coupon_to_decimal,
     fetch_data,
     calculate_dynamic_friction,
     scheduled_amortization_smm,
 )
-from markov import load_transition_matrix, route_through_pipeline
+from markov import load_transition_matrix
 
 
 def _cohort_key(row) -> tuple:
@@ -69,6 +76,8 @@ def simulate_qt_window(
         panel = pl.read_parquet(PANEL_PATH)
     if coefs is None:
         coefs = load_coefficients(HAZARD_COEF_PATH)
+    burnout_adj = load_burnout_age_adjust(HAZARD_COEF_PATH)
+    scales = load_predict_scales(HAZARD_COEF_PATH)
     if trans is None:
         trans = load_transition_matrix(MARKOV_MATRIX_PATH)
 
@@ -85,14 +94,22 @@ def simulate_qt_window(
             "burnout": row["burnout"],
             "loan_age": row["loan_age"],
             "coupon": row["coupon"],
-            "weight": row["balance"] / total_balance if total_balance > 0 else 0,
+            "stratum_id": build_stratum_id(
+                row["vintage"], row["coupon"], row["fico_bucket"], row["ltv_bucket"]
+            ),
         }
 
     balances = {k: v["balance"] for k, v in cohort_meta.items()}
     burnout_state = {k: v["burnout"] for k, v in cohort_meta.items()}
     ages = {k: v["loan_age"] for k, v in cohort_meta.items()}
     coupons = {k: v["coupon"] for k, v in cohort_meta.items()}
-    weights = {k: v["weight"] for k, v in cohort_meta.items()}
+    stratum_ids = {k: v["stratum_id"] for k, v in cohort_meta.items()}
+
+    holdings_at_qt = float(
+        macro.loc[qt_index[0], "WSHOMCB"]
+    ) / 1_000 if len(qt_index) else 0.0
+    soma_scale = holdings_at_qt / max(total_balance / 1e9, 1e-6)
+    print(f"Cohort UPB: ${total_balance/1e9:.1f}B  |  SOMA scale: {soma_scale:.3f}x")
 
     records = []
     for ts in qt_index:
@@ -101,41 +118,50 @@ def simulate_qt_window(
         month_prepay = 0.0
         month_sched = 0.0
         month_settled = 0.0
+        total_bal_start = sum(balances.values())
 
         for key in list(balances.keys()):
             bal = balances[key]
             if bal <= 0:
                 continue
-            coupon = coupons[key]
+            coupon = float(coupon_to_decimal(coupons[key]))
             age = ages[key]
             burnout = burnout_state[key]
             gap = coupon - mkt
 
-            hazard = predict_hazard(age, gap, burnout, fric, coefs)
+            hazard = predict_hazard(
+                age, gap, burnout, fric, coefs,
+                burnout_age_adjust=burnout_adj,
+                stratum_id=stratum_ids[key],
+                reference_stratum=scales["reference_stratum"],
+                fe_columns=scales["fe_columns"],
+                friction_mean=scales["friction_mean"],
+                friction_std=scales["friction_std"],
+                rate_gap_bps_mean=scales["rate_gap_bps_mean"],
+                rate_gap_bps_std=scales["rate_gap_bps_std"],
+                burnout_demean_std=scales["burnout_demean_std"],
+                stratum_burnout_mean=scales["stratum_burnout_mean"],
+                fe_index=scales["fe_index"],
+            )
             sched = scheduled_amortization_smm(coupon, TERM_MONTHS, int(age))
 
             prepay_amt = bal * hazard
             sched_amt = bal * sched
             drain = prepay_amt + sched_amt
 
-            # Route prepayment through Markov servicer pipeline
-            settled = route_through_pipeline(prepay_amt, trans, max_steps=3)
-            settled_total = sum(settled.values())
+            settled_total = prepay_amt
 
             balances[key] = max(bal - drain, 0)
             burnout_state[key] = min(1.0, burnout + prepay_amt / max(bal, 1))
             ages[key] = age + 1
 
-            w = weights[key]
-
-            month_prepay += w * prepay_amt
-            month_sched += w * sched_amt
-            month_settled += w * settled_total
+            month_prepay += prepay_amt
+            month_sched += sched_amt
+            month_settled += settled_total
 
         total_bal = sum(balances.values())
-        # Scale to Fed portfolio ($B): normalize cohort UPB to WSHOMCB at QT start
         holdings_b = float(macro.loc[ts, "WSHOMCB"]) / 1_000
-        scale = holdings_b / max(total_bal / 1e9, 1e-6)
+        scale = holdings_b / max(total_bal_start / 1e9, 1e-6)
 
         records.append({
             "period": ts,
@@ -146,7 +172,9 @@ def simulate_qt_window(
             "weighted_sched_b": month_sched * scale / 1e9,
             "weighted_settled_b": month_settled * scale / 1e9,
             "simulated_rolloff_b": -(month_settled + month_sched) * scale / 1e9,
-            "hazard_cpr_pct": (month_prepay / max(total_bal, 1)) * 12 * 100,
+            "hazard_cpr_pct": (
+                (month_prepay / max(total_bal_start, 1)) * 12 * 100
+            ),
         })
 
     sim = pd.DataFrame(records).set_index("period")

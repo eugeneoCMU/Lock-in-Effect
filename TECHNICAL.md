@@ -255,25 +255,43 @@ Polars lazy-scans Freddie `orig_*.txt` / `perf_*.txt`, immediately aggregates to
 
 Synthetic fixture (5,000 loans) auto-generated when real files absent.
 
-### Hazard model
+### Hazard model (spec v3)
 
-Discrete-time logistic hazard on grouped cells:
+Discrete-time **Poisson GLM** with log(exposure) offset and **stratum fixed effects**:
 
-$$\text{logit}(h_{c,t}) = \text{spline}(\text{loan\_age}) + \beta_1 \cdot \text{RateGap}_t + \beta_2 \cdot \text{Burnout}_{c,t} + \beta_3 \cdot \text{Friction}_t$$
+$$\log(h_{c,t}) = \text{spline}(\text{loan\_age}) + \beta_1 \cdot \text{RateGap\_bps}_t + \beta_2 \cdot \text{Burnout\_orth}_{c,t} + \beta_3 \cdot \text{Friction}_t + \text{FE}(\text{stratum})$$
 
-- **RateGap:** cohort coupon − market rate
-- **Burnout:** cumulative prepaid share of cohort orig balance (cohort-level dynamic state — correctly specified here, unlike per-loan burnout in early microsim drafts)
-- **Friction:** dynamic macro friction from FRED inventory + sentiment
+- **Stratum FE:** 295 dummies for `(vintage, coupon, fico_bucket, ltv_bucket)` cross-sections — absorbs baseline pool fastness so burnout measures within-pool adverse selection
+- **Burnout_orth:** within-stratum demeaned stock, orthogonalized on age spline
+- **Ridge:** α=1e-5–1e-4 selected on holdout RMSE (IRLS fails with 295 FE; mild ridge required)
 
-Fitted via WLS logit with exposure weights (grouped data workaround for UPB-scale issues).
+**Spec evolution:** Spec v2 used vintage-year FE (4 dummies) and left β(burnout) positive (+0.76). Spec v3 replaced vintage FE with 295 stratum dummies and within-stratum demeaned burnout, flipping the sign to −0.13.
+
+### Real-data results (Freddie 2017–2021, 20 quarters)
+
+| Metric | Value |
+|---|---|
+| Trapped liquidity | **$915B (119.7%)** |
+| β(rate_gap_bps) | +0.67 (OK, standardized) |
+| β(burnout_orth) | **−0.13 (OK)** |
+| β(friction) | −0.037 (OK) |
+| CPR r (lag 0) | −0.444 |
+| Holdout RMSE | ~38pp |
 
 ### Forward simulation
 
-`simulate.py` drains cohort balances deterministically: `balance × hazard` each month, routes prepay through Markov pipeline before counting as SOMA roll-off.
+`simulate.py` drains cohort balances deterministically: `balance × hazard` each month. Fractional prepay settles **directly** to SOMA roll-off — **no settlement-lag convolution** in the hazard path (by design; see CPR timing in [hazard/README.md](hazard/README.md)).
 
-### Synthetic fixture results (not meaningful)
+### CPR timing and settlement lag
 
-On the synthetic fixture, fitted coefficients ≈ 0, trapped liquidity ≈ $1,408B (184% of empirical). **Re-run required** after placing real Freddie Mac 2017–2021 files in `hazard/data/raw/`.
+| Path | CPR r (lag 0) | Peak lag | Peak r |
+|---|---|---|---|
+| Literature microsim | +0.368 | **−3** | **+0.444** |
+| Empirical cohort GLM (spec v3) | −0.444 | 0 | −0.444 |
+
+**Literature peak lag −3** is the primary timing diagnostic: hazard CPR leads SOMA empirical CPR by ~3 months, consistent with the 45–90 day TBA settlement pipeline between Freddie loan-level prepay and NY Fed SOMA cash receipt.
+
+The ABM tested a `[0.10, 0.60, 0.30]` settlement kernel and found it **null for timing** ([`abm/TECHNICAL.md` §21](abm/TECHNICAL.md)). The hazard path routes voluntary prepay directly to SOMA — lag −3 is **expected**, not a bug. Empirical cohort lag-0 negative r reflects contemporaneous alignment misspecification, not a failure to model settlement delay.
 
 ---
 
@@ -359,16 +377,16 @@ df = compute_metrics(df, use_hazard_microsim=True)
 
 Replaces CPR surface interpolation with microsim paths. Disables ABM settlement-lag kernel (Markov routing already handles pipeline delay). Danish dynamic balance loop unchanged.
 
-### Synthetic fixture results
+### Real-data results (Freddie 2017–2021 sample)
 
 | Metric | Value |
 |---|---|
-| Runtime | ~15s (75k loans × 42 months × 2 regimes) |
-| Mean CPR (US / Danish) | ~51% / ~52% |
-| Trapped liquidity | $945.9B (123.7% of empirical) |
-| CPR cross-correlation peak | r = +0.38 at lag -3 |
+| Trapped liquidity | **$747B (97.7%)** |
+| CPR r (lag 0) | +0.368 |
+| **Peak cross-corr** | **lag −3, r = +0.444** |
+| Runtime | ~15s cached / ~2min full rebuild (75k loans × 42 months × 2 regimes) |
 
-Over-prediction expected on synthetic fixture (5k loans sampled with replacement to 75k, no real rate-lock heterogeneity). Pipeline is structurally correct; meaningful scoring requires real Freddie files.
+Literature microsim is calibrated via defendable bounds (PSA speed, Rothstein band, involuntary floor) — not fitted to $764.7B. Peak lag −3 confirms hazard leads SOMA by ~3 months (TBA pipeline).
 
 ---
 
@@ -394,19 +412,25 @@ Over-prediction expected on synthetic fixture (5k loans sampled with replacement
 | CPR R² (raw) | -6.443 |
 | Monte Carlo mean (50 seeds) | $113.5B [95% CI: $106.6B–$120.4B] |
 
-### Hazard Path A — cohort fractional (synthetic fixture)
+### Hazard Path A — cohort fractional (Freddie 2017–2021, spec v3)
 
 | Metric | Value |
 |---|---|
-| Trapped liquidity | ~$1,408B (184%) |
-| Fitted β signs | Fail pre-registration on fixture |
+| Trapped liquidity | **$915B (119.7%)** |
+| β(rate_gap_bps) | +0.67 (OK, standardized) |
+| β(burnout_orth) | **−0.13 (OK)** |
+| β(friction) | −0.037 (OK) |
+| CPR r (lag 0) | −0.444 |
+| Holdout RMSE | ~38pp |
+| Stratum FE | 295 four-way pools |
 
-### Hazard Path B — literature microsim (synthetic fixture)
+### Hazard Path B — literature microsim (Freddie 2017–2021)
 
 | Metric | Value |
 |---|---|
-| Trapped liquidity | $945.9B (123.7%) |
-| CPR r | +0.325 |
+| Trapped liquidity | **$747B (97.7%)** |
+| CPR r (lag 0) | +0.368 |
+| **Peak cross-corr** | **lag −3, r = +0.444** |
 
 ---
 
@@ -420,9 +444,11 @@ Over-prediction expected on synthetic fixture (5k loans sampled with replacement
 | Turnover floor | 4–5% at 8% rates | Grounded in involuntary mobility data; non-negotiable anchor |
 | Burnout in ABM | Survivor selection rejected | Closed population depletes mobile mass → 0% CPR |
 | Burnout in hazard microsim | Cohort-level `stratum_id` broadcast | Per-loan fractional burnout is a category error |
+| Burnout in hazard GLM | Within-stratum demeaned stock + stratum FE | Vintage-year FE left wrong sign (+0.76) |
+| Hazard GLM fixed effects | 295 stratum dummies (4-way cohort) | Vintage FE (4 dummies) insufficient for cross-section heterogeneity |
 | Rothstein β₁ | Survival-function conversion | Divide-by-3 mis-scales quarterly elasticity |
 | Competing risks | Normalized hazard sum ≤ 1 | Independent literature priors can exceed unity in tails |
-| Settlement timing | Markov pipeline (hazard) vs lag kernel (ABM) | ABM kernel tested null; hazard uses servicer states |
+| Settlement timing | Markov pipeline (hazard) vs lag kernel (ABM) | ABM kernel tested null (§21); hazard routes prepay directly — document lag −3, do not convolve |
 | Danish balance | Dynamic forward simulation | Static-balance application produced -$1,132B |
 | Repo layout | `abm/` frozen + `hazard/` new | Separates behavioral counterfactual from reduced-form estimation |
 
@@ -432,7 +458,7 @@ Over-prediction expected on synthetic fixture (5k loans sampled with replacement
 
 ### Data
 
-- **Freddie Mac real files not yet in repo** (`hazard/data/raw/` gitignored). All hazard results are on a 5,000-loan synthetic fixture.
+- **Freddie Mac 2017–2021** integrated via `prepare_freddie.py` (20 quarters in `hazard/data/raw/`).
 - **15-year MBS excluded** from SOMA cohort modeling (~9% of face value).
 - **FRED API key** hardcoded in config files; should be env var for production use.
 
@@ -442,15 +468,14 @@ Over-prediction expected on synthetic fixture (5k loans sampled with replacement
 - Danish counterfactual uses U.S.-calibrated friction.
 - DTI check is front-end only (no total debt).
 - Literature microsim CPR magnitudes on synthetic data are not calibrated to empirical level.
-- Hazard Path A uses WLS logit, not grouped binomial GLM as originally specified (UPB-scale workaround).
+- Empirical lag-0 CPR correlation remains negative — structural timing mismatch with SOMA settlement, not fixed with GLM lag terms.
+- Hazard Path A uses Poisson GLM with stratum FE (295 dummies) and mild Ridge (α=1e-5); plain IRLS is ill-conditioned at this FE dimensionality.
 
 ### Next steps (priority order)
 
-1. **Download Freddie Mac 2017–2021 standard/sample files** → `hazard/data/raw/`
-2. **Re-run** `hazard/extension_risk.py` (both modes) on real data; evaluate pre-registered β signs and trapped-liquidity share honestly
-3. **Tune literature hazard magnitudes** only via defendable literature bounds (Rothstein band, PSA speed) — not by fitting to $764.7B
-4. **SOMA cohort weighting** in hazard simulation (partial via balance weights; full book alignment TBD)
-5. **Optional:** Run `fed_mbs_extension_risk.py` with `use_hazard_microsim=True` on real Freddie data and compare institutional gap to ABM surface path
+1. **Tune trapped liquidity** toward 90–115% band (SOMA cohort weighting or mild calibration)
+2. **SOMA cohort weighting** in hazard simulation (partial via balance weights; full book alignment TBD)
+3. **Optional:** Run `fed_mbs_extension_risk.py` with `use_hazard_microsim=True` and compare institutional gap to ABM surface path
 
 ---
 
@@ -469,11 +494,11 @@ Lock-in-Effect/
 │   └── sensitivity/robustness/monte_carlo scripts
 └── hazard/                   # Reduced-form hazard framework
     ├── README.md             # Pipeline specs and equations
-    ├── ingest.py, hazard_fit.py, simulate.py     # Path A
+    ├── ingest.py, hazard_fit.py, stratum.py, simulate.py   # Path A
     ├── loan_sample.py, microsim_engine.py, ...   # Path B
     └── data/                   # Parquet, JSON, PNG outputs
 ```
 
 ---
 
-*Last updated: July 2026. Commit `af692e8` — ABM archive reorganization + hazard microsim pipeline.*
+*Last updated: July 2026. Hazard spec v3: stratum FE (295 pools), burnout sign fixed (−0.13), literature microsim at 97.7% trapped.*

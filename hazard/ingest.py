@@ -98,7 +98,7 @@ def _scan_orig(path: Path) -> pl.LazyFrame:
         .filter(pl.col("original_ltv").is_between(1, 200))
         .filter(pl.col("credit_score").is_between(300, 850))
         .with_columns([
-            _coupon_bucket(pl.col("original_interest_rate")).alias("coupon"),
+            _coupon_bucket(pl.col("original_interest_rate") / 100.0).alias("coupon"),
             _fico_bucket(pl.col("credit_score")).alias("fico_bucket"),
             _ltv_bucket(pl.col("original_ltv")).alias("ltv_bucket"),
             _vintage_from_seq(pl.col("loan_sequence_number")).alias("vintage"),
@@ -159,17 +159,39 @@ def discover_raw_files(raw_dir: Path = RAW_DIR) -> list[tuple[Path, Path]]:
     return pairs
 
 
+def filter_pairs(
+    pairs: list[tuple[Path, Path]],
+    years: list[int] | None = None,
+) -> list[tuple[Path, Path]]:
+    """Keep pairs whose suffix starts with one of `years` (e.g. 2020, 2020Q1)."""
+    if not years:
+        return pairs
+    yr = {str(y) for y in years}
+    out = []
+    for o, p in pairs:
+        suffix = o.stem.replace("orig_", "")
+        if any(suffix.startswith(y) for y in yr):
+            out.append((o, p))
+    return out
+
+
 def build_panel_from_files(
     pairs: Iterable[tuple[Path, Path]],
     output: Path = PANEL_PATH,
 ) -> pl.DataFrame:
     """Lazy-scan Freddie files and aggregate to cohort-month panel."""
-    chunks = []
+    agg_dfs: list[pl.DataFrame] = []
     for orig_path, perf_path in pairs:
         print(f"  Scanning {orig_path.name} + {perf_path.name} …")
         orig = _scan_orig(orig_path)
         perf = _scan_perf(perf_path)
         joined = perf.join(orig, on="loan_sequence_number", how="inner")
+        joined = joined.with_columns([
+            pl.col("current_upb")
+            .shift(1)
+            .over("loan_sequence_number")
+            .alias("prev_upb"),
+        ])
         agg = (
             joined
             .group_by([
@@ -180,7 +202,9 @@ def build_panel_from_files(
                 pl.col("current_upb").sum().alias("exposure_upb"),
                 pl.col("original_upb").sum().alias("orig_upb_sum"),
                 pl.when(pl.col("is_prepay"))
-                  .then(pl.col("current_upb"))
+                  .then(
+                      pl.col("prev_upb").fill_null(pl.col("original_upb"))
+                  )
                   .otherwise(0.0)
                   .sum()
                   .alias("prepaid_upb"),
@@ -189,12 +213,24 @@ def build_panel_from_files(
                 pl.len().alias("loan_count"),
             ])
         )
-        chunks.append(agg)
+        agg_dfs.append(agg.collect())
+        print(f"    → {len(agg_dfs[-1]):,} cohort-month cells")
 
-    if not chunks:
+    if not agg_dfs:
         raise FileNotFoundError("No Freddie orig/perf file pairs found.")
 
-    panel = pl.concat(chunks).collect()
+    panel = pl.concat(agg_dfs)
+    # Same vintage year spans multiple origination quarters — sum cohort-month cells
+    panel = panel.group_by([
+        "vintage", "coupon", "fico_bucket", "ltv_bucket", "reporting_period",
+    ]).agg([
+        pl.col("exposure_upb").sum(),
+        pl.col("orig_upb_sum").sum(),
+        pl.col("prepaid_upb").sum(),
+        pl.col("mean_loan_age").mean(),
+        pl.col("mode_state").first(),
+        pl.col("loan_count").sum(),
+    ])
     panel = (
         panel
         .sort(["vintage", "coupon", "fico_bucket", "ltv_bucket", "reporting_period"])
@@ -310,15 +346,28 @@ def generate_synthetic_fixture(
 def load_or_build_panel(
     raw_dir: Path = RAW_DIR,
     force_synthetic: bool = False,
+    force_rebuild: bool = False,
+    years: list[int] | None = None,
 ) -> pl.DataFrame:
     """Load cached panel or build from raw Freddie files / synthetic fixture."""
-    if PANEL_PATH.exists() and not force_synthetic:
+    from prepare_freddie import ensure_raw_files
+
+    if PANEL_PATH.exists() and not force_synthetic and not force_rebuild:
         print(f"Loading cached panel from {PANEL_PATH}")
         return pl.read_parquet(PANEL_PATH)
 
+    if ensure_raw_files(dest_dir=raw_dir):
+        force_synthetic = False
+        if PANEL_PATH.exists() and force_rebuild:
+            PANEL_PATH.unlink()
+
     pairs = discover_raw_files(raw_dir)
+    pairs = filter_pairs(pairs, years)
     if not pairs or force_synthetic:
-        print("Building panel from synthetic fixture …")
+        if pairs:
+            print("No usable pairs after prepare; falling back to synthetic fixture …")
+        else:
+            print("Building panel from synthetic fixture …")
         if PANEL_PATH.exists():
             PANEL_PATH.unlink()
         generate_synthetic_fixture()

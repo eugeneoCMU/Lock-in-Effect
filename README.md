@@ -43,16 +43,19 @@ Lock-in-Effect/
 └── hazard/                # reduced-form hazard framework
     ├── README.md
     ├── extension_risk.py  # end-to-end pipeline entry point
-    ├── ingest.py, hazard_fit.py, markov.py, simulate.py, macro.py
+    ├── ingest.py, hazard_fit.py, stratum.py, simulate.py, macro.py
     └── data/              # panel, coefficients, results (raw/ gitignored)
 ```
 
 ## Headline results (current)
 
-See [TECHNICAL.md §12](TECHNICAL.md#12-current-headline-numbers) for the full table across all frameworks. ABM summary:
+See [TECHNICAL.md §12](TECHNICAL.md#12-current-headline-numbers) for the full table across all frameworks.
 
-- **Empirical trapped liquidity** (SOMA, active QT window): **$764.7B**
-- **ABM U.S. trapped** (surface + settlement lag): **$101.2B** (13.2%)
-- **Institutional gap** (U.S. vs Danish counterfactual): **$930.3B**
+| Framework | Trapped | Share of $764.7B |
+|---|---|---|
+| **Empirical benchmark** (SOMA) | $764.7B | 100% |
+| **ABM** (surface + settlement lag) | $101.2B | 13.2% |
+| **Hazard Path B** (literature microsim) | $747B | **97.7%** |
+| **Hazard Path A** (empirical cohort GLM, spec v3) | $915B | 119.7% |
 
-The reduced-form hazard framework in `hazard/` addresses path-dependence, competing risks, and loan-level heterogeneity that the static CPR surface cannot capture. See [TECHNICAL.md §9–§11](TECHNICAL.md#9-pivot-to-the-hazard-framework).
+The reduced-form hazard framework in `hazard/` addresses path-dependence, competing risks, and loan-level heterogeneity that the static CPR surface cannot capture. Literature microsim lands near the empirical benchmark without fitting to it; the empirical GLM passes all pre-registered coefficient sign checks after stratum-level fixed effects. See [TECHNICAL.md §9–§11](TECHNICAL.md#9-pivot-to-the-hazard-framework).

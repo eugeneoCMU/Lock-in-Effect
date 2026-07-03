@@ -40,47 +40,71 @@ def _stratum_id_expr() -> pl.Expr:
     return (
         pl.col("vintage").cast(pl.Utf8)
         + pl.lit("_")
-        + (pl.col("coupon") * 100).round(0).cast(pl.Int64).cast(pl.Utf8)
+        + (pl.col("coupon") * 10000).round(0).cast(pl.Int64).cast(pl.Utf8)
         + pl.lit("_")
         + pl.col("fico_bucket")
     )
 
 
+def _loan_snapshot_one_pair(orig_path: Path, perf_path: Path) -> pl.DataFrame:
+    """Join orig + latest pre-QT perf row per loan for one quarterly file pair."""
+    qt_ym = QT_START.strftime("%Y%m")
+    orig = _scan_orig(orig_path)
+    perf = _scan_perf(perf_path)
+    return (
+        perf.join(orig, on="loan_sequence_number", how="inner")
+        .filter(pl.col("reporting_period") < qt_ym)
+        .sort("reporting_period")
+        .group_by("loan_sequence_number")
+        .last()
+        .collect()
+        .with_columns([
+            pl.col("loan_sequence_number").alias("loan_id"),
+            pl.col("current_upb").alias("balance"),
+            pl.col("original_interest_rate").alias("coupon_pct"),
+            (pl.col("original_interest_rate") / 100.0).alias("coupon"),
+            pl.col("credit_score").cast(pl.Int64).alias("fico"),
+            pl.col("original_ltv").alias("orig_ltv"),
+            pl.col("original_upb").alias("orig_upb"),
+            _stratum_id_expr().alias("stratum_id"),
+            pl.col("servicer_state").alias("state"),
+        ])
+        .select([
+            "loan_id", "stratum_id", "fico", "property_state", "orig_ltv",
+            "coupon", "orig_upb", "balance", "loan_age", "state", "vintage",
+            "fico_bucket", "ltv_bucket",
+        ])
+    )
+
+
 def _build_loan_universe(pairs: list[tuple[Path, Path]]) -> pl.DataFrame:
     """Join orig + latest pre-QT perf row per loan."""
-    qt_ym = QT_START.strftime("%Y%m")
-    chunks = []
-    for orig_path, perf_path in pairs:
-        orig = _scan_orig(orig_path)
-        perf = _scan_perf(perf_path)
-        joined = (
-            perf.join(orig, on="loan_sequence_number", how="inner")
-            .filter(pl.col("reporting_period") < qt_ym)
-            .sort("reporting_period")
-            .group_by("loan_sequence_number")
-            .last()
-        )
-        chunks.append(joined)
-
+    chunks = [_loan_snapshot_one_pair(o, p) for o, p in pairs]
     if not chunks:
         raise FileNotFoundError("No Freddie orig/perf file pairs found.")
+    return pl.concat(chunks)
 
-    df = pl.concat(chunks).collect()
-    df = df.with_columns([
-        pl.col("loan_sequence_number").alias("loan_id"),
-        pl.col("current_upb").alias("balance"),
-        pl.col("original_interest_rate").alias("coupon"),
-        pl.col("credit_score").cast(pl.Int64).alias("fico"),
-        pl.col("original_ltv").alias("orig_ltv"),
-        pl.col("original_upb").alias("orig_upb"),
-        _stratum_id_expr().alias("stratum_id"),
-        pl.col("servicer_state").alias("state"),
-    ])
-    return df.select([
-        "loan_id", "stratum_id", "fico", "property_state", "orig_ltv",
-        "coupon", "orig_upb", "balance", "loan_age", "state", "vintage",
-        "fico_bucket", "ltv_bucket",
-    ])
+
+def _build_loan_sample_pool(
+    pairs: list[tuple[Path, Path]],
+    pool_target: int,
+    seed: int,
+) -> pl.DataFrame:
+    """
+    Memory-safe pool: oversample per quarterly file instead of materializing
+    the full loan universe (~12M rows).
+    """
+    per_file = max(1000, pool_target // max(len(pairs), 1))
+    chunks = []
+    for i, (orig_path, perf_path) in enumerate(pairs):
+        df = _loan_snapshot_one_pair(orig_path, perf_path)
+        if len(df) == 0:
+            continue
+        k = min(per_file, len(df))
+        chunks.append(df.sample(n=k, seed=seed + i))
+    if not chunks:
+        raise FileNotFoundError("No Freddie orig/perf file pairs found.")
+    return pl.concat(chunks)
 
 
 def _stratified_sample(df: pl.DataFrame, n_loans: int, seed: int) -> pl.DataFrame:
@@ -136,11 +160,11 @@ def build_loan_sample(
         generate_synthetic_fixture()
         pairs = discover_raw_files(raw_dir)
 
-    print(f"Building loan universe from {len(pairs)} file pair(s) …")
-    universe = _build_loan_universe(pairs)
-    print(f"  Universe: {len(universe):,} loans, {universe['stratum_id'].n_unique()} strata")
+    print(f"Building stratified loan pool from {len(pairs)} file pair(s) …")
+    pool = _build_loan_sample_pool(pairs, pool_target=n_loans * 4, seed=seed)
+    print(f"  Pool: {len(pool):,} loans, {pool['stratum_id'].n_unique()} strata")
 
-    sample = _stratified_sample(universe, n_loans, seed)
+    sample = _stratified_sample(pool, n_loans, seed)
     sample = sample.with_columns([
         pl.lit(1.0).alias("weight"),  # normalized below after scaling
     ])
@@ -155,6 +179,10 @@ def load_or_build_loan_sample(
     n_loans: int = N_LOANS,
     force_rebuild: bool = False,
 ) -> pl.DataFrame:
+    from prepare_freddie import ensure_raw_files
+    ensure_raw_files()
+    if force_rebuild and LOAN_SAMPLE_PATH.exists():
+        LOAN_SAMPLE_PATH.unlink()
     return build_loan_sample(n_loans=n_loans, force_rebuild=force_rebuild)
 
 

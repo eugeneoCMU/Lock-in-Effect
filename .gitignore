@@ -1,5 +1,6 @@
 # Freddie Mac raw loan-level files (large; user-downloaded)
 hazard/data/raw/
+Historic Freddie/
 
 # Python
 __pycache__/

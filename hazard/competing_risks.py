@@ -12,7 +12,7 @@ import numpy as np
 import pandas as pd
 
 from agents import CODE_TO_STATE, STATE_TO_CODE, MicrosimPool
-from config import MARKOV_STATES, TERM_MONTHS
+from config import MARKOV_STATES, PREPAY_MODE, TERM_MONTHS
 from literature_hazard import (
     BETA1_PREPAY_MID,
     default_hazard,
@@ -20,7 +20,7 @@ from literature_hazard import (
     prepay_hazard,
 )
 from macro import scheduled_amortization_smm
-from markov import load_transition_matrix, route_through_pipeline
+from markov import load_transition_matrix
 from rate_gap import compute_rate_gap, rate_stress
 
 
@@ -62,19 +62,17 @@ def _markov_step_delinquent(
         pool.state_code[i] = name_to_code.get(new_state, pool.state_code[i])
 
 
-def update_cohort_burnout(
+def update_cohort_burnout_amounts(
     pool: MicrosimPool,
-    prepaid_mask: np.ndarray,
+    agent_idxs: np.ndarray,
+    prepay_amts: np.ndarray,
 ) -> None:
-    """
-    After monthly prepayments: cohort_burnout[s] += sum(prepaid_upb in s) / stratum_orig_upb[s].
-    """
-    prepaid_bal = np.where(prepaid_mask, pool.balance, 0.0)
+    """Accumulate stratum burnout from fractional or full prepay UPB."""
     for s in range(pool.n_strata):
-        in_stratum = pool.stratum_id_code == s
-        prepaid_s = prepaid_bal[in_stratum].sum()
+        in_stratum = pool.stratum_id_code[agent_idxs] == s
+        prepaid_s = prepay_amts[in_stratum].sum()
         denom = pool.stratum_orig_upb[s]
-        if denom > 0:
+        if denom > 0 and prepaid_s > 0:
             pool.cohort_burnout[s] = min(
                 1.0,
                 pool.cohort_burnout[s] + prepaid_s / denom,
@@ -109,6 +107,9 @@ def monthly_step(
             "default_count": 0,
         }
 
+    active_idx = np.where(active)[0]
+    bal_active = pool.balance[active_idx]
+
     pool.rate_gap[active] = compute_rate_gap(
         pool.regime,
         pool.coupon[active],
@@ -129,36 +130,65 @@ def monthly_step(
     h_def = default_hazard(stress, pool.fico_z[active], pool.ltv_z[active])
     h_prep_n, h_def_n = normalize_competing_hazards(h_prep, h_def)
 
-    u = pool.rng.uniform(size=n_active)
-    active_idx = np.where(active)[0]
+    prepay_upb = 0.0
+    prepay_count = 0
+    default_count = 0
 
-    prepaid_mask = np.zeros(pool.n, dtype=bool)
-    default_mask = np.zeros(pool.n, dtype=bool)
+    if PREPAY_MODE == "fractional":
+        prepay_amts = bal_active * h_prep_n
+        prepay_upb = float(prepay_amts.sum())
+        pool.balance[active_idx] = np.maximum(bal_active - prepay_amts, 0.0)
+        prepay_count = int(np.sum(prepay_amts > 0))
 
-    prepay_hits = u < h_prep_n
-    default_hits = (u >= h_prep_n) & (u < h_prep_n + h_def_n)
+        u = pool.rng.uniform(size=n_active)
+        default_hits = u < h_def_n
+        default_idx = active_idx[default_hits]
+        default_count = int(len(default_idx))
+        for i in default_idx:
+            if pool.state_code[i] == STATE_TO_CODE["Current"]:
+                pool.state_code[i] = STATE_TO_CODE["D30"]
+            elif pool.state_code[i] in DELINQUENT_CODES:
+                pool.state_code[i] = STATE_TO_CODE["Defaulted"]
 
-    prepay_idx = active_idx[prepay_hits]
-    default_idx = active_idx[default_hits]
+        update_cohort_burnout_amounts(pool, active_idx, prepay_amts)
+    else:
+        u = pool.rng.uniform(size=n_active)
+        prepay_hits = u < h_prep_n
+        default_hits = (u >= h_prep_n) & (u < h_prep_n + h_def_n)
 
-    prepaid_mask[prepay_idx] = True
-    default_mask[default_idx] = True
+        prepay_idx = active_idx[prepay_hits]
+        default_idx = active_idx[default_hits]
 
-    prepay_upb = float(pool.balance[prepay_idx].sum()) if len(prepay_idx) else 0.0
+        prepay_upb = float(pool.balance[prepay_idx].sum()) if len(prepay_idx) else 0.0
+        prepay_count = int(len(prepay_idx))
+        default_count = int(len(default_idx))
 
-    for i in prepay_idx:
-        pool.state_code[i] = STATE_TO_CODE["Prepaid"]
-        pool.balance[i] = 0.0
+        for i in prepay_idx:
+            pool.state_code[i] = STATE_TO_CODE["Prepaid"]
+            pool.balance[i] = 0.0
 
-    for i in default_idx:
-        if pool.state_code[i] == STATE_TO_CODE["Current"]:
-            pool.state_code[i] = STATE_TO_CODE["D30"]
-        elif pool.state_code[i] in DELINQUENT_CODES:
-            pool.state_code[i] = STATE_TO_CODE["Defaulted"]
+        for i in default_idx:
+            if pool.state_code[i] == STATE_TO_CODE["Current"]:
+                pool.state_code[i] = STATE_TO_CODE["D30"]
+            elif pool.state_code[i] in DELINQUENT_CODES:
+                pool.state_code[i] = STATE_TO_CODE["Defaulted"]
+
+        if len(prepay_idx):
+            prepaid_mask = np.zeros(pool.n, dtype=bool)
+            prepaid_mask[prepay_idx] = True
+            prepaid_bal = np.where(prepaid_mask, pool.balance, 0.0)
+            for s in range(pool.n_strata):
+                in_stratum = pool.stratum_id_code == s
+                prepaid_s = prepaid_bal[in_stratum].sum()
+                denom = pool.stratum_orig_upb[s]
+                if denom > 0 and prepaid_s > 0:
+                    pool.cohort_burnout[s] = min(
+                        1.0,
+                        pool.cohort_burnout[s] + prepaid_s / denom,
+                    )
 
     _markov_step_delinquent(pool, trans, pool.rng)
 
-    # Scheduled amortization on survivors
     sched_amt = 0.0
     pool._update_active_mask()
     still_active = pool.active_mask
@@ -171,18 +201,12 @@ def monthly_step(
         sched_amt += principal
         pool.loan_age[i] += 1
 
-    # Loan age for prepaid/defaulted also advances
-    ended = prepaid_mask | default_mask
-    for i in np.where(ended & ~still_active)[0]:
-        pool.loan_age[i] += 1
-
     pool._update_active_mask()
-    update_cohort_burnout(pool, prepaid_mask)
 
-    settled = route_through_pipeline(prepay_upb, trans, max_steps=3)
-    settled_b = sum(settled.values())
+    # Voluntary prepayments reach SOMA immediately.
+    settled_b = prepay_upb
 
-    default_upb = float(pool.balance[default_idx].sum()) if len(default_idx) else 0.0
+    default_upb = 0.0
     exposure = float(pool.balance[active].sum()) + prepay_upb
 
     return {
@@ -191,6 +215,6 @@ def monthly_step(
         "sched_amt": sched_amt,
         "settled_b": settled_b,
         "exposure": max(exposure, 1.0),
-        "prepay_count": int(len(prepay_idx)),
-        "default_count": int(len(default_idx)),
+        "prepay_count": prepay_count,
+        "default_count": default_count,
     }

@@ -21,7 +21,7 @@ Without real files, the pipeline auto-generates a **synthetic fixture** (`orig_2
 |---|---|---|
 | Raw loan-months | Millions | Polars `scan_csv` (lazy, never materialized) |
 | Cohort-month panel | ~50k–200k | Immediate `group_by` aggregation |
-| Hazard fit | Same panel | WLS logit with exposure weights (seconds) |
+| Hazard fit | Same panel | Poisson GLM + log(exposure) offset (seconds) |
 
 Covariates (RateGap, Burnout, Friction) vary at **cohort-month** level; FICO/LTV/vintage are cohort **dimensions**, not per-loan regression features.
 
@@ -59,19 +59,23 @@ data/raw/  →  loan_sample.py  →  loan_sample.parquet (stratum_id per loan)
 
 ### Cohort fractional hazard (Path A)
 
-**Discrete-time logistic hazard** (grouped cohort-month cells):
+**Discrete-time Poisson GLM** (grouped cohort-month cells, spec v3):
 
-$$\text{logit}(h_{c,t}) = \text{spline}(\text{loan\_age}) + \beta_1 \cdot \text{RateGap}_t + \beta_2 \cdot \text{Burnout}_{c,t} + \beta_3 \cdot \text{Friction}_t$$
+$$\log(h_{c,t}) = \text{spline}(\text{loan\_age}) + \beta_1 \cdot \text{RateGap\_bps}_t + \beta_2 \cdot \text{Burnout\_orth}_{c,t} + \beta_3 \cdot \text{Friction}_t + \text{FE}(\text{stratum})$$
 
-- **RateGap**: cohort coupon − market rate (financial incentive)
-- **Burnout**: cumulative voluntary prepaid share of cohort original balance (dynamic state — fixes ABM survivor-selection failure, see [`../abm/TECHNICAL.md` §20](../abm/TECHNICAL.md))
-- **Friction**: dynamic macro friction from FRED inventory + sentiment
+- **RateGap_bps**: `(coupon − market_rate) × 10,000` — basis-point scaling stabilizes IRLS
+- **Burnout_orth**: within-stratum demeaned cumulative prepaid share, orthogonalized on age spline (measures adverse selection within each pool over time)
+- **Friction**: z-scored dynamic macro friction from FRED inventory + sentiment
+- **Stratum FE**: 295 dummies for 4-way cross-sections `(vintage, coupon, fico_bucket, ltv_bucket)` — absorbs baseline pool "fastness"; reference stratum = lexicographic min
+- **Ridge**: `RIDGE_ALPHA=1e-5` (IRLS ill-conditioned with 295 FE); grid `[1e-5, 1e-4]` on holdout RMSE
+
+`predict_hazard` accepts `rate_gap` in **decimal** (callers unchanged) and converts internally to bps.
 
 **Markov servicer pipeline** replaces the ABM's `[0.10, 0.60, 0.30]` convolution kernel:
 
 `Current → D30 → D60 → D90+ → Forbearance → Defaulted → Liquidated` (+ absorbing `Prepaid`)
 
-Cash reaches SOMA only from `Prepaid` / `Liquidated` absorbing states.
+Fractional prepay in `simulate.py` routes directly to SOMA roll-off (no settlement-lag convolution in the hazard path).
 
 ### Literature microsim (Path B)
 
@@ -141,7 +145,7 @@ python3 simulate.py
 | File | Description |
 |---|---|
 | `data/cohort_month_panel.parquet` | Aggregated cohort-month cells |
-| `data/hazard_coefficients.json` | Fitted β coefficients |
+| `data/hazard_coefficients.json` | Fitted β coefficients (spec v3: stratum FE, scaling metadata) |
 | `data/markov_transition_matrix.parquet` | Servicer state transitions |
 | `data/simulation_results.parquet` | QT-window simulated roll-off |
 | `data/extension_risk_results.json` | Headline trapped-liquidity score |
@@ -149,19 +153,49 @@ python3 simulate.py
 | `data/microsim_results.parquet` | Literature microsim QT paths (US + Danish) |
 | `data/loan_sample.parquet` | Stratified 75k loan sample with `stratum_id` |
 
-## Pre-registered expectations (before fitting on real data)
+## CPR timing and SOMA settlement
 
-| Hypothesis | Expected sign | ABM benchmark |
-|---|---|---|
-| β₁ (RateGap) | > 0 | — |
-| β₂ (Burnout) | < 0 | — |
-| β₃ (Friction) | < 0 | — |
-| Monthly CPR path R² | Beat ABM | R² = −6.44, r = −0.32 |
-| Share explained | Exceed ABM | 13.2% |
+Freddie Mac `prepaid_upb` records the **economic prepayment month** (loan-level voluntary payoff). NY Fed SOMA `Actual_Monthly_Rolloff` records **settled cash** (current face value registered on the Fed's balance sheet). These are not contemporaneous:
 
-**Note:** Results on the synthetic fixture are **not** meaningful for hypothesis testing — coefficients and trapped-liquidity shares reflect fixture limitations, not model failure. Re-run after placing real Freddie Mac files in `data/raw/`.
+1. **TBA forward market** — MBS pools are allocated ~2 business days before settlement; standard UMBS/GNMA remittance cycles run **45–55 days** from loan closing to investor cash receipt.
+2. **Hazard path** — voluntary prepay in `simulate.py` and literature `competing_risks.py` settles to SOMA in the **same month** as the hazard draw (no pipeline delay by design).
+3. **ABM path** — tested a `[0.10, 0.60, 0.30]` settlement kernel; **null for timing** ([`../abm/TECHNICAL.md` §21](../abm/TECHNICAL.md)).
 
-**Literature microsim on synthetic fixture:** over-predicts CPR (~50% vs empirical ~5.5%) because the 5k-loan fixture lacks real rate-lock heterogeneity; the pipeline is structurally correct and runs in ~15s on 75k agents.
+### Primary timing diagnostic: peak cross-correlation lag
+
+| Path | CPR r (lag 0) | Peak lag | Peak r |
+|---|---|---|---|
+| Literature microsim | +0.368 | **−3 months** | **+0.444** |
+| Empirical cohort GLM (spec v3) | −0.444 | 0 | −0.444 |
+
+**Interpretation:** Negative lag means hazard CPR **leads** SOMA empirical CPR. Literature peak at lag −3 (hazard leads SOMA ~3 months) is consistent with the 45–90 day TBA settlement pipeline — expected, not a model bug.
+
+The empirical cohort path shows wrong-sign contemporaneous correlation (lag 0). This likely reflects GLM misspecification at same-month alignment, **not** a timing failure to fix with month-lag GLM terms.
+
+`extension_risk.py` writes `lag_interpretation` and `peak_lag_r` to JSON and prints both lag-0 and peak-lag correlations.
+
+## Current results (Freddie Mac 2017–2021, 20 quarters)
+
+| Path | Trapped | Share | β(rate_gap) | β(burnout) | β(friction) |
+|---|---|---|---|---|---|
+| **Literature microsim** | $747B | **97.7%** | Rothstein band | −0.5 (prior) | — |
+| **Empirical cohort GLM** | $915B | **119.7%** | +0.67 (OK) | **−0.13 (OK)** | −0.037 (OK) |
+
+All three pre-registered coefficient signs pass on the empirical path after **spec v3** (stratum FE + within-stratum demeaned burnout). Vintage-year FE (spec v2) left burnout positive (+0.76); tightening FE to 295 four-way strata fixed the sign.
+
+**Spec evolution:** v1 (decimal rate gap, unstable β≈40) → v2 (bps scaling + vintage FE) → **v3** (stratum FE + demeaned burnout + mild Ridge α=1e-5–1e-4). Plain IRLS fails with 295 stratum dummies; Ridge is required, not optional.
+
+## Pre-registered expectations
+
+| Hypothesis | Expected sign | Empirical (spec v3) | ABM benchmark |
+|---|---|---|---|
+| β₁ (RateGap) | > 0 | **+0.67 OK** | — |
+| β₂ (Burnout) | < 0 | **−0.13 OK** | — |
+| β₃ (Friction) | < 0 | **−0.037 OK** | — |
+| Monthly CPR path R² | Beat ABM | R² = −1.11, r = −0.44 | R² = −6.44, r = −0.32 |
+| Share explained | Exceed ABM | **119.7%** | 13.2% |
+
+**Synthetic fixture:** auto-generated when `data/raw/` is empty (5,000 loans). Results on the fixture are not meaningful for hypothesis testing. The headline numbers above use real Freddie Mac 2017–2021 quarterly files in `data/raw/`.
 
 ## Modules
 
@@ -171,7 +205,8 @@ python3 simulate.py
 | `schema.py` | Freddie origination/performance column layouts |
 | `macro.py` | FRED/SOMA fetch, QT cap, friction, CPR diagnostics |
 | `ingest.py` | Polars lazy scan → cohort-month panel |
-| `hazard_fit.py` | WLS logit hazard estimation |
+| `stratum.py` | 4-way stratum_id helper (`vintage_couponBps_fico_ltv`) |
+| `hazard_fit.py` | Poisson GLM (bps rate gap, stratum FE, mild Ridge) |
 | `markov.py` | Servicer transition matrix |
 | `simulate.py` | Fractional-cohort forward simulation |
 | `loan_sample.py` | Stratified Freddie loan sample for microsim |

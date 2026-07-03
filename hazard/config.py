@@ -20,6 +20,8 @@ N_LOANS = 75_000
 RNG_SEED = 42
 BASELINE_MODE = "psa"  # "psa" | "weibull"
 PSA_SPEED = 100.0
+# Fractional SMM prepay (matches cohort simulate.py); "absorbing" = Bernoulli full payoff
+PREPAY_MODE = "fractional"
 
 # Rothstein quarterly mobility decline per 100bp rate gap (probability scale)
 ROTHSTEIN_Q_DECLINE_LOW = 0.055
@@ -27,6 +29,9 @@ ROTHSTEIN_Q_DECLINE_MID = 0.065
 ROTHSTEIN_Q_DECLINE_HIGH = 0.077
 # Reference baseline quarterly mobility probability (turnover proxy)
 P_Q_BASELINE = 0.06
+
+# Involuntary turnover floor (death, divorce, relocation) — annual CPR %
+INVOLUNTARY_CPR_ANNUAL = 0.04
 
 LITERATURE_COEFS = {
     "beta_burnout": -0.5,
@@ -66,6 +71,9 @@ TERM_MONTHS = 360
 # Hazard model
 HOLDOUT_DATE = pd.Timestamp("2024-01-01")
 AGE_SPLINE_KNOTS = [12, 24, 36, 60, 84, 120]
+RATE_GAP_UNITS = "bps"
+RIDGE_ALPHA = 1e-5  # stratum FE makes IRLS ill-conditioned; mild ridge required
+RIDGE_ALPHA_GRID = [1e-5, 1e-4]
 
 # Markov servicer pipeline states
 MARKOV_STATES = [
