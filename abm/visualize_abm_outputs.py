@@ -16,14 +16,17 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import matplotlib.ticker as mticker
 
+from paths import (
+    ABM_CPR_SURFACE_CSV,
+    ABM_CPR_SURFACE_VIZ_PNG,
+    ABM_LOCKIN_RESULTS_CSV,
+    ABM_LOCKIN_RESULTS_VIZ_PNG,
+)
 
-# ---------------------------------------------------------------------------
-# Constants
-# ---------------------------------------------------------------------------
-RESULTS_CSV = "abm_lockin_results.csv"
-SURFACE_CSV = "abm_cpr_surface.csv"
-RESULTS_PNG = "abm_lockin_results_viz.png"
-SURFACE_PNG = "abm_cpr_surface_viz.png"
+RESULTS_CSV = ABM_LOCKIN_RESULTS_CSV
+SURFACE_CSV = ABM_CPR_SURFACE_CSV
+RESULTS_PNG = ABM_LOCKIN_RESULTS_VIZ_PNG
+SURFACE_PNG = ABM_CPR_SURFACE_VIZ_PNG
 
 ORIGINAL_RATE = 0.03  # 2020-21 pandemic origination coupon, for reference line
 
@@ -117,10 +120,27 @@ def _pivot_surface(df: pd.DataFrame, value_col: str):
     return rates, frictions, grid.to_numpy()
 
 
+def _slice_surface_for_plot(df: pd.DataFrame) -> pd.DataFrame:
+    """Pick one cohort and zero velocity for a 2D heatmap slice."""
+    out = df.copy()
+    if "Rate_Velocity" in out.columns:
+        vels = np.sort(out["Rate_Velocity"].unique())
+        out = out[np.isclose(out["Rate_Velocity"], vels[0])]
+    if "Cohort_Coupon" in out.columns:
+        coupons = out.groupby("Cohort_Coupon").size().idxmax()
+        out = out[np.isclose(out["Cohort_Coupon"], coupons)]
+    return out
+
+
 def plot_cpr_surface(df: pd.DataFrame, save_path: str = SURFACE_PNG):
-    """Side-by-side heatmaps of the 2D CPR surface (rate x friction)."""
-    rates, frictions, z_us = _pivot_surface(df, "CPR_US")
-    _, _, z_dk = _pivot_surface(df, "CPR_Danish")
+    """Side-by-side heatmaps of a 2D CPR surface slice (rate x friction)."""
+    slab = _slice_surface_for_plot(df)
+    title_suffix = ""
+    if "Cohort_Coupon" in df.columns:
+        c = slab["Cohort_Coupon"].iloc[0]
+        title_suffix = f" (cohort {c*100:.1f}%, velocity=0)"
+    rates, frictions, z_us = _pivot_surface(slab, "CPR_US")
+    _, _, z_dk = _pivot_surface(slab, "CPR_Danish")
 
     rate_pct = rates * 100
     fric_pct = frictions * 100
@@ -158,7 +178,8 @@ def plot_cpr_surface(df: pd.DataFrame, save_path: str = SURFACE_PNG):
     cbar.set_label("Conditional Prepayment Rate (CPR, %)", fontsize=11)
 
     fig.suptitle(
-        "ABM CPR Surface: Mobility Across Rate and Friction Regimes",
+        "ABM CPR Surface: Mobility Across Rate and Friction Regimes"
+        + title_suffix,
         fontsize=15, fontweight="bold",
     )
     plt.savefig(save_path, dpi=200, bbox_inches="tight")

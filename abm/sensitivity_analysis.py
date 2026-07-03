@@ -21,7 +21,9 @@ import itertools
 import numpy as np
 import pandas as pd
 
+import abm_lockin_simulation as abm
 import fed_mbs_extension_risk as fed
+from paths import SENSITIVITY_RESULTS_CSV
 
 # ---------------------------------------------------------------------------
 # Sweep grid (baseline values are the current module constants)
@@ -32,17 +34,15 @@ SENTIMENT_CAP_GRID = [0.000, 0.0075, 0.015, 0.0225, 0.030]
 
 BASELINE = (fed.BASE_FRICTION, fed.SEARCH_PENALTY_CAP, fed.SENTIMENT_PENALTY_CAP)
 
-RESULTS_CSV = "sensitivity_results.csv"
+RESULTS_CSV = SENSITIVITY_RESULTS_CSV
 
 
 def aggregate_trapped(df: pd.DataFrame) -> tuple:
     """
-    Total ABM-calibrated trapped liquidity for each system over the QT
+    Total ABM-calibrated trapped liquidity for each system over the active QT
     window, and the institutional gap.
     """
-    qt_df = df.loc[df.index >= fed.QT_START].dropna(
-        subset=["Extension_Delta_Billions"]
-    )
+    qt_df = fed.qt_active_frame(df)
     trapped_us = qt_df["US_Missed_Rolloff_Billions"].sum()
     trapped_dk = qt_df["Danish_Missed_Rolloff_Billions"].sum()
     return trapped_us, trapped_dk, trapped_us - trapped_dk
@@ -50,9 +50,7 @@ def aggregate_trapped(df: pd.DataFrame) -> tuple:
 
 def empirical_trapped(df: pd.DataFrame) -> float:
     """Actual SOMA/WSHOMCB roll-off vs QT cap — independent of the ABM."""
-    qt_df = df.loc[df.index >= fed.QT_START].dropna(
-        subset=["Extension_Delta_Billions"]
-    )
+    qt_df = fed.qt_active_frame(df)
     return float(qt_df["Extension_Delta_Billions"].sum())
 
 
@@ -61,7 +59,8 @@ def run_single_scenario(df: pd.DataFrame, surface,
                         sentiment_cap: float,
                         soma_rolloff=None,
                         empirical_trapped: float = 0.0,
-                        cohorts=None) -> dict:
+                        cohorts=None,
+                        abm_params=None) -> dict:
     """Run the metric pipeline for one parameter triple; return a result row."""
     metrics = fed.compute_metrics(
         df,
@@ -71,6 +70,9 @@ def run_single_scenario(df: pd.DataFrame, surface,
         surface=surface,
         soma_rolloff=soma_rolloff,
         cohorts=cohorts,
+        use_burnout=False,
+        apply_settlement_lag_kernel=True,
+        abm_params=abm_params,
     )
     trapped_us, trapped_dk, gap = aggregate_trapped(metrics)
     fric = metrics["Dynamic_Friction"] * 100
@@ -78,6 +80,7 @@ def run_single_scenario(df: pd.DataFrame, surface,
     qt_df = metrics.loc[metrics.index >= fed.QT_START].dropna(
         subset=["Extension_Delta_Billions"]
     )
+    qt_df = qt_df.loc[fed.qt_active_mask(qt_df.index)]
     gof = fed.cpr_goodness_of_fit(
         qt_df["Empirical_CPR_Pct"], qt_df["US_CPR_Pct"]
     )
@@ -146,22 +149,27 @@ def main():
     print("Fetching SOMA MBS roll-off from NY Fed …")
     soma_rolloff = fed.fetch_soma_mbs_monthly()
 
-    print("Loading CPR surface once …")
-    surface = fed.load_cpr_surface()
-    if surface is None:
-        raise SystemExit(
-            "abm_cpr_surface.csv not found — run abm_lockin_simulation.py first."
-        )
+    print("Fetching SOMA MBS coupon cohorts …")
+    cohorts = fed.fetch_soma_mbs_cohorts()
+    ref = abm.reference_cohort(cohorts)
+    income, home_value = abm.fetch_macro_from_fred()
+    mobility_scale = abm.calibrate_mobility_scale(
+        income, home_value,
+        cohort_rate=ref["coupon"],
+        cohort_months=ref["months_elapsed"],
+    )
+    abm_params = {
+        "mobility_scale": mobility_scale,
+        "median_income": income,
+        "median_home_value": home_value,
+    }
 
-    cohorts = None
-    if isinstance(surface, dict):
-        print("Fetching SOMA MBS coupon cohorts once …")
-        cohorts = fed.fetch_soma_mbs_cohorts()
-
-    # Compute empirical trapped liquidity once (actual SOMA vs QT cap —
-    # independent of ABM friction, so it's the same for all scenarios).
-    baseline_metrics = fed.compute_metrics(df, soma_rolloff=soma_rolloff,
-                                           surface=surface, cohorts=cohorts)
+    baseline_metrics = fed.compute_metrics(
+        df, soma_rolloff=soma_rolloff, cohorts=cohorts,
+        use_burnout=False,
+        apply_settlement_lag_kernel=True,
+        abm_params=abm_params,
+    )
     emp_trapped = empirical_trapped(baseline_metrics)
     print(f"Empirical trapped liquidity (SOMA): ${emp_trapped:,.1f}B")
 
@@ -171,10 +179,11 @@ def main():
     print(f"Sweeping {len(combos)} scenarios …")
 
     rows = [
-        run_single_scenario(df, surface, base, search_cap, sentiment_cap,
+        run_single_scenario(df, None, base, search_cap, sentiment_cap,
                             soma_rolloff=soma_rolloff,
                             empirical_trapped=emp_trapped,
-                            cohorts=cohorts)
+                            cohorts=cohorts,
+                            abm_params=abm_params)
         for base, search_cap, sentiment_cap in combos
     ]
 

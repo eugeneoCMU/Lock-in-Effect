@@ -1,0 +1,12 @@
+# Freddie Mac raw loan-level files (large; user-downloaded)
+hazard/data/raw/
+
+# Python
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.venv/
+venv/
+
+# OS
+.DS_Store

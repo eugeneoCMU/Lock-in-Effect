@@ -2,3 +2,6 @@ pandas
 numpy
 matplotlib
 fredapi
+polars
+statsmodels
+pyarrow

@@ -1,0 +1,247 @@
+"""
+Extension-risk scoring: hazard simulation vs $764.7B empirical benchmark.
+
+Run order (empirical fit):
+  ingest → hazard_fit → markov → simulate → extension_risk
+
+Run order (literature microsim):
+  loan_sample → microsim_engine → extension_risk --mode literature
+"""
+
+from __future__ import annotations
+
+import argparse
+import json
+import sys
+from pathlib import Path
+
+import matplotlib
+matplotlib.use("Agg")
+import matplotlib.pyplot as plt
+import numpy as np
+import pandas as pd
+
+from config import (
+    CPR_DIAGNOSTIC_PNG,
+    EMPIRICAL_TRAPPED_B,
+    EXTENSION_RISK_PNG,
+    HAZARD_COEF_PATH,
+    MICROSIM_RESULTS_PATH,
+    QT_START,
+    SIM_RESULTS_PATH,
+)
+from macro import (
+    build_empirical_metrics,
+    cpr_cross_correlation,
+    cpr_goodness_of_fit,
+    fetch_data,
+    fetch_soma_mbs_monthly,
+    qt_active_frame,
+)
+
+
+def score_extension_risk(
+    sim: pd.DataFrame,
+    empirical_df: pd.DataFrame,
+) -> dict:
+    """Compare hazard-simulated roll-off to empirical QT extension deltas."""
+    qt_emp = qt_active_frame(empirical_df)
+    qt_sim = sim.reindex(qt_emp.index).dropna(subset=["simulated_rolloff_b"])
+    qt_target = qt_emp["QT_Target_Billions"]
+
+    emp_trapped = float(qt_emp["Extension_Delta_Billions"].sum())
+    sim_trapped = float(
+        (qt_sim["simulated_rolloff_b"] - qt_target).sum()
+    )
+    share = sim_trapped / emp_trapped * 100 if emp_trapped else np.nan
+
+    gof = cpr_goodness_of_fit(
+        qt_emp["Empirical_CPR_Pct"],
+        qt_sim["hazard_cpr_pct"],
+    )
+    xcorr = cpr_cross_correlation(
+        qt_emp["Empirical_CPR_Pct"],
+        qt_sim["hazard_cpr_pct"],
+    )
+    best_lag = max(xcorr, key=lambda k: abs(xcorr[k])) if xcorr else 0
+
+    results = {
+        "empirical_trapped_b": emp_trapped,
+        "hazard_trapped_b": sim_trapped,
+        "share_explained_pct": share,
+        "benchmark_b": EMPIRICAL_TRAPPED_B,
+        "cpr_gof_raw": gof["raw"],
+        "cpr_gof_smoothed": gof["smoothed"],
+        "cross_correlation": xcorr,
+        "best_lag": best_lag,
+        "mode": "literature_microsim",
+    }
+    return results
+
+
+def plot_dashboard(
+    sim: pd.DataFrame,
+    empirical_df: pd.DataFrame,
+    results: dict,
+    save_path: Path = EXTENSION_RISK_PNG,
+):
+    fig, axes = plt.subplots(2, 1, figsize=(12, 9))
+
+    qt_emp = qt_active_frame(empirical_df)
+    qt_sim = sim.reindex(qt_emp.index)
+
+    ax = axes[0]
+    ax.bar(qt_emp.index, qt_emp["Extension_Delta_Billions"], alpha=0.5,
+           label="Empirical extension delta", color="#888")
+    miss = qt_emp["Extension_Delta_Billions"] - (
+        qt_sim["simulated_rolloff_b"] - qt_emp["QT_Target_Billions"]
+    )
+    ax.bar(qt_emp.index, miss, alpha=0.7, label="Hazard trapped (missed)", color="#1f77b4")
+    ax.axhline(0, color="k", lw=0.5)
+    ax.set_ylabel("$B")
+    mode = results.get("mode", "cohort")
+    ax.set_title(
+        f"Hazard Extension Risk ({mode}) — trapped {results['hazard_trapped_b']:.1f}B "
+        f"({results['share_explained_pct']:.1f}% of {results['empirical_trapped_b']:.1f}B)"
+    )
+    ax.legend()
+
+    ax2 = axes[1]
+    ax2.plot(qt_emp.index, qt_emp["Empirical_CPR_Pct"], "o-", label="Empirical CPR", ms=4)
+    ax2.plot(qt_sim.index, qt_sim["hazard_cpr_pct"], "s-", label="Hazard CPR", ms=4)
+    ax2.set_ylabel("CPR %")
+    ax2.set_title(
+        f"CPR fit: R²={results['cpr_gof_raw']['r2']:.3f}, "
+        f"r={results['cpr_gof_raw']['corr']:.3f}"
+    )
+    ax2.legend()
+    plt.tight_layout()
+    save_path.parent.mkdir(parents=True, exist_ok=True)
+    plt.savefig(save_path, dpi=150, bbox_inches="tight")
+    plt.close()
+    print(f"Dashboard saved to {save_path}")
+
+
+def plot_cpr_diagnostic(
+    sim: pd.DataFrame,
+    empirical_df: pd.DataFrame,
+    save_path: Path = CPR_DIAGNOSTIC_PNG,
+):
+    qt_emp = qt_active_frame(empirical_df)
+    qt_sim = sim.reindex(qt_emp.index)
+    fig, ax = plt.subplots(figsize=(8, 6))
+    ax.scatter(qt_emp["Empirical_CPR_Pct"], qt_sim["hazard_cpr_pct"], alpha=0.7)
+    lim = max(qt_emp["Empirical_CPR_Pct"].max(), qt_sim["hazard_cpr_pct"].max()) * 1.1
+    ax.plot([0, lim], [0, lim], "k--", alpha=0.4)
+    ax.set_xlabel("Empirical CPR %")
+    ax.set_ylabel("Hazard CPR %")
+    ax.set_title("Hazard vs Empirical CPR (QT window)")
+    plt.tight_layout()
+    plt.savefig(save_path, dpi=150)
+    plt.close()
+    print(f"CPR diagnostic saved to {save_path}")
+
+
+def print_summary(results: dict):
+    print("\n" + "=" * 60)
+    print(" HAZARD EXTENSION RISK — SUMMARY")
+    print("=" * 60)
+    print(f"  Mode:                                 {results.get('mode', 'cohort')}")
+    print(f"  Empirical trapped (SOMA, active QT):  ${results['empirical_trapped_b']:.1f}B")
+    print(f"  Hazard model trapped:                 ${results['hazard_trapped_b']:.1f}B")
+    print(f"  Share explained:                      {results['share_explained_pct']:.1f}%")
+    print(f"  ABM benchmark share (for comparison):   13.2%")
+    print("-" * 60)
+    g = results["cpr_gof_raw"]
+    print(f"  CPR R²:   {g['r2']:.3f}   RMSE: {g['rmse']:.2f}pp   r: {g['corr']:.3f}")
+    if results.get("cross_correlation"):
+        print(f"  Cross-corr peak: lag {results['best_lag']} "
+              f"(r={results['cross_correlation'].get(results['best_lag'], 0):.3f})")
+    print("=" * 60)
+
+    if results.get("mode") != "literature_microsim" and HAZARD_COEF_PATH.exists():
+        with open(HAZARD_COEF_PATH) as f:
+            coef_data = json.load(f)
+        c = coef_data.get("coefficients", {})
+        print("\nPre-registered coefficient signs:")
+        for name, expected in [("rate_gap", ">0"), ("burnout", "<0"), ("friction", "<0")]:
+            val = c.get(name, np.nan)
+            ok = (val > 0) if expected == ">0" else (val < 0)
+            print(f"  β({name}) = {val:+.4f}  expected {expected}  {'OK' if ok else 'FAIL'}")
+
+
+def run_empirical_pipeline():
+    from ingest import load_or_build_panel
+    from hazard_fit import fit_hazard_glm
+    from markov import estimate_transitions_from_panel
+    from simulate import simulate_qt_window
+
+    print("Step 1: Ingest …")
+    panel = load_or_build_panel()
+
+    print("\nStep 2: Fit hazard GLM …")
+    fit_hazard_glm(panel)
+
+    print("\nStep 3: Estimate Markov transitions …")
+    estimate_transitions_from_panel(panel)
+
+    print("\nStep 4: Simulate QT window …")
+    sim = simulate_qt_window(panel)
+    return sim
+
+
+def run_literature_microsim():
+    from loan_sample import load_or_build_loan_sample
+    from microsim_engine import run_qt_microsim
+
+    print("Step 1: Build loan sample …")
+    loans = load_or_build_loan_sample()
+
+    print("\nStep 2: Run literature microsim (US + Danish) …")
+    paths = run_qt_microsim(loan_sample=loans)
+    sim = paths["US"]
+    return sim
+
+
+def main():
+    parser = argparse.ArgumentParser(description="Hazard extension-risk scoring")
+    parser.add_argument(
+        "--mode",
+        choices=["empirical", "literature"],
+        default="empirical",
+        help="empirical: cohort GLM fit; literature: agent microsim",
+    )
+    args = parser.parse_args()
+
+    if args.mode == "literature":
+        sim = run_literature_microsim()
+    else:
+        sim = run_empirical_pipeline()
+        if SIM_RESULTS_PATH.exists():
+            sim = pd.read_parquet(SIM_RESULTS_PATH)
+
+    print("\nScoring vs empirical …")
+    macro = fetch_data()
+    soma = fetch_soma_mbs_monthly()
+    empirical = build_empirical_metrics(macro, soma_rolloff=soma)
+
+    if args.mode == "literature" and MICROSIM_RESULTS_PATH.exists():
+        sim = pd.read_parquet(MICROSIM_RESULTS_PATH)
+
+    results = score_extension_risk(sim, empirical)
+    if args.mode == "literature":
+        results["mode"] = "literature_microsim"
+    print_summary(results)
+    plot_dashboard(sim, empirical, results)
+    plot_cpr_diagnostic(sim, empirical)
+
+    out = Path(__file__).parent / "data" / "extension_risk_results.json"
+    with open(out, "w") as f:
+        json.dump({k: v for k, v in results.items()
+                   if k not in ("cpr_gof_raw", "cpr_gof_smoothed")}, f, indent=2,
+                  default=lambda x: float(x) if isinstance(x, (np.floating, np.integer)) else x)
+    print(f"\nResults saved to {out}")
+
+
+if __name__ == "__main__":
+    main()

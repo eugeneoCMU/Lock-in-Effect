@@ -13,7 +13,9 @@ Data sources:
 import datetime
 import json
 import re
+import sys
 import urllib.request
+from pathlib import Path
 from typing import Dict, List, Optional, Union
 
 import matplotlib
@@ -24,6 +26,13 @@ import matplotlib.ticker as mticker
 import numpy as np
 import pandas as pd
 from fredapi import Fred
+
+from paths import (
+    ABM_CPR_SURFACE_CSV,
+    ABM_LOCKIN_RESULTS_CSV,
+    CPR_DIAGNOSTIC_PNG,
+    MBS_DASHBOARD_PNG,
+)
 
 # ---------------------------------------------------------------------------
 # Constants
@@ -37,6 +46,7 @@ QT_END = pd.Timestamp("2025-12-01")       # Fed officially ended QT Dec 2025
 QT_TARGET_RAMP_B = -17.5  # $17.5B/month during Jun–Aug 2022 ramp-up
 QT_TARGET_FULL_B = -35.0  # $35B/month from Sep 2022 onward
 POST_QT_TARGET_B = 0.0    # no balance-sheet shrink target after QT ends
+DEFAULT_COHORT_ASOF = pd.Timestamp("2026-06-24")  # pinned SOMA as-of for fallbacks
 
 # ---------------------------------------------------------------------------
 # Dynamic Macroeconomic Friction parameters
@@ -63,6 +73,11 @@ PORTFOLIO_ORIGIN = pd.Timestamp("2020-06-01")  # approximate origination midpoin
 CURTAILMENT_CPR_HEALTHY = 0.012       # full curtailment at healthy income growth
 CURTAILMENT_INCOME_HEALTHY_PCT = 4.0  # real disposable income YoY (%) -> 100%
 CURTAILMENT_INCOME_STRESSED_PCT = -2.0  # real disposable income YoY (%) -> 0%
+
+# UMBS/GNMA remittance settlement lag kernel (lags 0/1/2 months; mass-conserving).
+# Sourced from standard 55-day / ~50-day agency remittance cycles, not tuned.
+SETTLEMENT_LAG_KERNEL = [0.10, 0.60, 0.30]
+BURNOUT_LOOKBACK_MONTHS = 36  # max months of pre-QT burn-in per cohort
 
 
 def scheduled_amortization_smm(annual_rate: float, term_months: int,
@@ -178,6 +193,38 @@ def cpr_cross_correlation(empirical: pd.Series, predicted: pd.Series,
     return out
 
 
+def qt_active_mask(index: pd.DatetimeIndex) -> pd.Series:
+    """Boolean mask for months when QT balance-sheet shrink was active."""
+    return (index >= QT_START) & (index < QT_END)
+
+
+def qt_active_frame(df: pd.DataFrame) -> pd.DataFrame:
+    """Rows during active QT with valid extension deltas (headline aggregations)."""
+    mask = qt_active_mask(df.index)
+    return df.loc[mask].dropna(subset=["Extension_Delta_Billions"])
+
+
+def _round_coupon(c: float) -> float:
+    return round(float(c), 4)
+
+
+MONTHS_ELAPSED_DEFAULT = PORTFOLIO_TERM - int(
+    (DEFAULT_COHORT_ASOF.normalize() - PORTFOLIO_ORIGIN).days / 30.44
+)
+
+
+def cohorts_from_surface(surface: dict, equal_weight: bool = True) -> List[dict]:
+    """Derive cohort metadata from loaded surface keys when API fetch fails."""
+    keys = sorted(surface.keys())
+    w = 1.0 / len(keys) if equal_weight else 1.0
+    return [{
+        "coupon": k,
+        "weight": w,
+        "origin_date": PORTFOLIO_ORIGIN,
+        "months_elapsed": MONTHS_ELAPSED_DEFAULT,
+    } for k in keys]
+
+
 def compute_qt_target_series(index: pd.DatetimeIndex) -> pd.Series:
     """
     Build a time-dependent QT roll-off target aligned to the index:
@@ -204,11 +251,13 @@ _FALLBACK_US    = np.array([39.2, 16.4, 4.56])
 _FALLBACK_DK    = np.array([39.2, 35.1, 30.9])
 
 
-def load_abm_anchors(csv_path: str = "abm_lockin_results.csv"):
+def load_abm_anchors(csv_path=None):
     """
     Read the ABM results CSV and extract anchor CPRs at 3%, 5%, and 8%
     market rates. Returns (rates_pct, us_cpr_pct, danish_cpr_pct).
     """
+    if csv_path is None:
+        csv_path = ABM_LOCKIN_RESULTS_CSV
     try:
         abm = pd.read_csv(csv_path)
         anchor_decimals = [0.03, 0.05, 0.08]
@@ -331,7 +380,7 @@ def _surface_tuple_from_dataframe(surf: pd.DataFrame):
         piv_dk.to_numpy() * 100.0
 
 
-def load_cpr_surface(csv_path: str = "abm_cpr_surface.csv"):
+def load_cpr_surface(csv_path=None):
     """
     Load the ABM CPR surface and reshape into grids for interpolation.
 
@@ -343,6 +392,8 @@ def load_cpr_surface(csv_path: str = "abm_cpr_surface.csv"):
         per coupon bucket keyed by decimal coupon (e.g. 0.02 for 2.0%).
     """
     try:
+        if csv_path is None:
+            csv_path = ABM_CPR_SURFACE_CSV
         surf = pd.read_csv(csv_path)
     except FileNotFoundError:
         print(f"{csv_path} not found — falling back to 1D anchor CPRs.")
@@ -352,7 +403,7 @@ def load_cpr_surface(csv_path: str = "abm_cpr_surface.csv"):
         surfaces = {}
         for coupon, grp in surf.groupby("Cohort_Coupon"):
             slab = grp.drop(columns=["Cohort_Coupon"])
-            surfaces[float(coupon)] = _surface_tuple_from_dataframe(slab)
+            surfaces[_round_coupon(coupon)] = _surface_tuple_from_dataframe(slab)
         n_c = len(surfaces)
         sample = next(iter(surfaces.values()))
         dim = "3D" if len(sample) == 5 else "2D"
@@ -454,9 +505,7 @@ def _default_cohort() -> List[dict]:
         "coupon": PORTFOLIO_COUPON,
         "weight": 1.0,
         "origin_date": PORTFOLIO_ORIGIN,
-        "months_elapsed": PORTFOLIO_TERM - int(
-            (pd.Timestamp.now().normalize() - PORTFOLIO_ORIGIN).days / 30.44
-        ),
+        "months_elapsed": MONTHS_ELAPSED_DEFAULT,
     }]
 
 
@@ -529,7 +578,7 @@ def fetch_soma_mbs_cohorts(min_share: float = 0.02,
     for c in sorted(bucket_value):
         val = bucket_value[c]
         raw.append({
-            "coupon": c,
+            "coupon": _round_coupon(c),
             "weight": val / total,
             "origin_date": pd.Timestamp.fromordinal(
                 int(round(bucket_origin_w[c] / val))
@@ -541,17 +590,27 @@ def fetch_soma_mbs_cohorts(min_share: float = 0.02,
     survivors = [r for r in raw if r["weight"] >= min_share]
     if not survivors:
         survivors = [max(raw, key=lambda r: r["weight"])]
-    folded_weight = sum(r["weight"] for r in raw if r["weight"] < min_share)
-    if folded_weight > 0:
-        for r in raw:
-            if r["weight"] < min_share:
-                nearest = min(survivors, key=lambda s: abs(s["coupon"] - r["coupon"]))
-                nearest["weight"] += r["weight"]
+    for r in raw:
+        if r["weight"] < min_share:
+            nearest = min(survivors, key=lambda s: abs(s["coupon"] - r["coupon"]))
+            old_w = nearest["weight"]
+            add_w = r["weight"]
+            new_w = old_w + add_w
+            nearest["origin_date"] = pd.Timestamp.fromordinal(int(round(
+                (nearest["origin_date"].toordinal() * old_w
+                 + r["origin_date"].toordinal() * add_w) / new_w
+            )))
+            nearest["months_elapsed"] = int(round(
+                (nearest["months_elapsed"] * old_w
+                 + r["months_elapsed"] * add_w) / new_w
+            ))
+            nearest["weight"] = new_w
 
     cohorts = [r for r in survivors if r["weight"] >= min_share * 0.5]
     wsum = sum(r["weight"] for r in cohorts)
     for r in cohorts:
         r["weight"] /= wsum
+        r["coupon"] = _round_coupon(r["coupon"])
 
     wac = sum(r["coupon"] * r["weight"] for r in cohorts)
     print(f"SOMA MBS cohorts loaded ({len(cohorts)} buckets, "
@@ -617,7 +676,7 @@ def fetch_data(api_key: str = FRED_API_KEY,
     fred = Fred(api_key=api_key)
 
     mbs = fred.get_series("WSHOMCB", observation_start=start)
-    rate = fred.get_series("MORTGAGE30US", observation_start=start)
+    rate = fred.get_series("MORTGAGE30US", observation_start=BASELINE_START)
 
     mbs.name = "WSHOMCB"
     rate.name = "MORTGAGE30US"
@@ -655,6 +714,9 @@ def fetch_data(api_key: str = FRED_API_KEY,
     monthly["DSPIC96"] = dspi_m.reindex(monthly.index).ffill().bfill()
 
     monthly.attrs["inventory_baseline"] = inventory_baseline
+    monthly.attrs["MORTGAGE30US_EXTENDED"] = (
+        rate.resample("ME").mean().ffill()
+    )
     print(f"FRED friction drivers loaded: 2017-2019 inventory baseline = "
           f"{inventory_baseline:,.0f} listings")
 
@@ -664,6 +726,33 @@ def fetch_data(api_key: str = FRED_API_KEY,
 # ---------------------------------------------------------------------------
 # Section 2 – Quantitative Calculations
 # ---------------------------------------------------------------------------
+def apply_settlement_lag(series: pd.Series,
+                         kernel: List[float] = None) -> pd.Series:
+    """Convolve simulated roll-off with agency remittance settlement lags."""
+    if kernel is None:
+        kernel = SETTLEMENT_LAG_KERNEL
+    out = pd.Series(0.0, index=series.index)
+    for lag, weight in enumerate(kernel):
+        out = out + weight * series.shift(lag, fill_value=0.0)
+    return out
+
+
+def _load_hazard_microsim_paths(df: pd.DataFrame) -> dict[str, pd.DataFrame]:
+    """Run literature hazard microsim; return US and Danish monthly paths."""
+    hazard_dir = Path(__file__).resolve().parent.parent / "hazard"
+    if str(hazard_dir) not in sys.path:
+        sys.path.insert(0, str(hazard_dir))
+
+    from loan_sample import load_or_build_loan_sample
+    from microsim_engine import run_qt_microsim
+
+    loans = load_or_build_loan_sample()
+    macro = df.copy()
+    if "Dynamic_Friction" not in macro.columns:
+        macro = calculate_dynamic_friction(macro)
+    return run_qt_microsim(loan_sample=loans, macro=macro)
+
+
 def compute_metrics(
     df: pd.DataFrame,
     base_friction: float = BASE_FRICTION,
@@ -672,6 +761,10 @@ def compute_metrics(
     surface=None,
     soma_rolloff: Optional[pd.Series] = None,
     cohorts: Optional[List[dict]] = None,
+    use_burnout: bool = False,
+    apply_settlement_lag_kernel: bool = False,
+    use_hazard_microsim: bool = False,
+    abm_params: Optional[dict] = None,
 ) -> pd.DataFrame:
     """
     Derive roll-off, extension delta, and cumulative trapped liquidity.
@@ -733,12 +826,16 @@ def compute_metrics(
     # --- Rate velocity for the 3D CPR surface (6-month rate change) --------
     df["Rate_6M_Change"] = df["MORTGAGE30US"].diff(6).fillna(0.0) / 100.0
 
-    if surface is None:
+    if surface is None and not use_burnout and not use_hazard_microsim:
         surface = load_cpr_surface()
 
     multi_cohort = isinstance(surface, dict)
-    if multi_cohort and cohorts is None:
-        cohorts = fetch_soma_mbs_cohorts()
+    if (multi_cohort or use_burnout) and cohorts is None and not use_hazard_microsim:
+        try:
+            cohorts = fetch_soma_mbs_cohorts()
+        except Exception:
+            cohorts = cohorts_from_surface(surface)
+            print("Using cohort weights derived from loaded surface keys.")
 
     holdings_b = df["WSHOMCB"] / 1_000
     df["RealDispInc_YoY_Pct"] = df["DSPIC96"].pct_change(12).fillna(0.0) * 100
@@ -748,16 +845,132 @@ def compute_metrics(
     us_cpr = pd.Series(0.0, index=df.index)
     dk_cpr = pd.Series(0.0, index=df.index)
     us_rolloff = pd.Series(0.0, index=df.index)
-    sched_smm_ref = scheduled_amortization_series(df.index)
+    sched_smm_weighted = pd.Series(0.0, index=df.index)
 
-    if surface is not None and multi_cohort:
+    burnout_mode = use_burnout and cohorts
+    if use_hazard_microsim:
+        print("Using literature hazard microsim CPR paths …")
+        micro_paths = _load_hazard_microsim_paths(df)
+        us_sim = micro_paths["US"].reindex(df.index)
+        dk_sim = micro_paths["Danish"].reindex(df.index)
+
+        df["US_CPR_Pct"] = us_sim["hazard_cpr_pct"].fillna(0.0)
+        df["Danish_CPR_Pct"] = dk_sim["hazard_cpr_pct"].fillna(0.0)
+        sched_smm = scheduled_amortization_series(df.index)
+        df["Scheduled_Amort_SMM"] = sched_smm
+
+        # US rolloff: microsim already routes prepay through Markov pipeline
+        us_rolloff = us_sim["simulated_rolloff_b"].reindex(df.index).fillna(0.0)
+        us_rolloff = us_rolloff - holdings_b * curtailment_smm
+        df["US_Simulated_Monthly_Rolloff_Billions"] = us_rolloff
+
+        # Danish dynamic balance forward loop
+        monthly_cpr_dk = df["Danish_CPR_Pct"] / 100 / 12
+        dk_rolloff = np.zeros(len(df))
+        dk_balance = np.zeros(len(df))
+        qt_start_idx = df.index.get_indexer([QT_START], method="nearest")[0]
+        bal = float(holdings_b.iloc[qt_start_idx])
+        for i in range(len(df)):
+            if i < qt_start_idx:
+                dk_balance[i] = float(holdings_b.iloc[i])
+                continue
+            dk_balance[i] = bal
+            monthly_drain = (float(monthly_cpr_dk.iloc[i])
+                             + float(sched_smm.iloc[i])
+                             + float(curtailment_smm.iloc[i]))
+            rolloff = bal * monthly_drain
+            dk_rolloff[i] = -rolloff
+            bal = max(bal - rolloff, 0.0)
+        df["Danish_Simulated_Monthly_Rolloff_Billions"] = dk_rolloff
+        df["Danish_Balance_Billions"] = dk_balance
+
+    elif burnout_mode:
+        import abm_lockin_simulation as abm
+        params = abm_params or {}
+        engine = abm.HousingMarketEngine(
+            seed=params.get("seed", abm.RNG_SEED),
+            median_income=params.get("median_income", 80_000.0),
+            median_home_value=params.get("median_home_value", 400_000.0),
+            mobility_scale=params.get("mobility_scale", abm.MOBILITY_DESIRE_SCALE),
+        )
+        rates_ext = df.attrs.get("MORTGAGE30US_EXTENDED", df["MORTGAGE30US"])
         cohort_paths = []
         for cohort in cohorts:
-            coupon = cohort["coupon"]
+            engine.attach_cohort(cohort["coupon"], cohort["months_elapsed"])
+            origin = pd.Timestamp(cohort["origin_date"])
+            end = df.index[-1]
+            if origin > end:
+                continue
+            burn_start = origin
+            path_index = pd.date_range(burn_start, end, freq="ME")
+            rates_path = rates_ext.reindex(path_index).ffill().bfill()
+            fric_path = df["Dynamic_Friction"].reindex(path_index).fillna(base_friction)
+            vel_path = df["Rate_6M_Change"].reindex(path_index).fillna(0.0)
+            path = engine.simulate_cohort_path(path_index, rates_path,
+                                               fric_path, vel_path)
+            path = path.reindex(df.index)
+            sched_c = scheduled_amortization_series(
+                df.index, coupon=cohort["coupon"],
+                origin=cohort["origin_date"],
+            )
+            w = cohort["weight"]
+            us_cpr += w * path["US_CPR_Pct"].fillna(0.0)
+            dk_cpr += w * path["Danish_CPR_Pct"].fillna(0.0)
+            sched_smm_weighted += w * sched_c
+            us_rolloff += (
+                -holdings_b * w
+                * (path["US_CPR_Pct"] / 100 / 12 + sched_c + curtailment_smm)
+            )
+            cohort_paths.append({
+                "coupon": _round_coupon(cohort["coupon"]),
+                "weight": w,
+                "dk_monthly_cpr": path["Danish_CPR_Pct"] / 100 / 12,
+                "sched": sched_c,
+            })
+        df["US_CPR_Pct"] = us_cpr
+        df["Danish_CPR_Pct"] = dk_cpr
+        df["Scheduled_Amort_SMM"] = sched_smm_weighted
+        df["US_Simulated_Monthly_Rolloff_Billions"] = us_rolloff
+
+        dk_rolloff = np.zeros(len(df))
+        dk_balance = np.zeros(len(df))
+        qt_start_idx = df.index.get_indexer([QT_START], method="nearest")[0]
+        init_balance = float(holdings_b.iloc[qt_start_idx])
+        cohort_balances = {
+            cp["coupon"]: init_balance * cp["weight"]
+            for cp in cohort_paths
+        }
+        for i in range(len(df)):
+            if i < qt_start_idx:
+                dk_balance[i] = float(holdings_b.iloc[i])
+                continue
+            total_bal = 0.0
+            total_rolloff = 0.0
+            for cp in cohort_paths:
+                coupon = cp["coupon"]
+                bal = cohort_balances[coupon]
+                drain = (float(cp["dk_monthly_cpr"].iloc[i])
+                         + float(cp["sched"].iloc[i])
+                         + float(curtailment_smm.iloc[i]))
+                rolloff = bal * drain
+                total_rolloff += rolloff
+                cohort_balances[coupon] = max(bal - rolloff, 0.0)
+                total_bal += cohort_balances[coupon]
+            dk_balance[i] = total_bal
+            dk_rolloff[i] = -total_rolloff
+        df["Danish_Simulated_Monthly_Rolloff_Billions"] = dk_rolloff
+        df["Danish_Balance_Billions"] = dk_balance
+
+    elif surface is not None and multi_cohort:
+        cohort_paths = []
+        for cohort in cohorts:
+            coupon = _round_coupon(cohort["coupon"])
             surf_c = surface.get(coupon)
             if surf_c is None:
                 nearest = min(surface.keys(),
                               key=lambda k: abs(k - coupon))
+                print(f"WARNING: no surface for coupon {coupon*100:.2f}%; "
+                      f"using nearest {nearest*100:.2f}%.")
                 surf_c = surface[nearest]
             cpr_c = interp_cpr_surface(
                 df["MORTGAGE30US"], df["Dynamic_Friction"], surf_c,
@@ -770,6 +983,7 @@ def compute_metrics(
             w = cohort["weight"]
             us_cpr += w * cpr_c["US_CPR_Pct"]
             dk_cpr += w * cpr_c["Danish_CPR_Pct"]
+            sched_smm_weighted += w * sched_c
             us_rolloff += (
                 -holdings_b * w
                 * (cpr_c["US_CPR_Pct"] / 100 / 12 + sched_c + curtailment_smm)
@@ -782,7 +996,7 @@ def compute_metrics(
             })
         df["US_CPR_Pct"] = us_cpr
         df["Danish_CPR_Pct"] = dk_cpr
-        df["Scheduled_Amort_SMM"] = sched_smm_ref
+        df["Scheduled_Amort_SMM"] = sched_smm_weighted
         df["US_Simulated_Monthly_Rolloff_Billions"] = us_rolloff
 
         dk_rolloff = np.zeros(len(df))
@@ -878,6 +1092,14 @@ def compute_metrics(
         df["Danish_Simulated_Monthly_Rolloff_Billions"] = dk_rolloff
         df["Danish_Balance_Billions"] = dk_balance
 
+    if apply_settlement_lag_kernel and not use_hazard_microsim:
+        df["US_Simulated_Monthly_Rolloff_Billions"] = apply_settlement_lag(
+            df["US_Simulated_Monthly_Rolloff_Billions"]
+        )
+        df["Danish_Simulated_Monthly_Rolloff_Billions"] = apply_settlement_lag(
+            df["Danish_Simulated_Monthly_Rolloff_Billions"]
+        )
+
     # --- Empirical CPR: back out from actual roll-off and sched. amort. ---
     actual_abs = df["Actual_Monthly_Rolloff_Billions"].abs()
     empirical_smm = (actual_abs / holdings_b) - df["Scheduled_Amort_SMM"]
@@ -919,8 +1141,10 @@ def compute_metrics(
 # ---------------------------------------------------------------------------
 # Section 3 – Visualization
 # ---------------------------------------------------------------------------
-def plot_dashboard(df: pd.DataFrame, save_path: str = "mbs_extension_risk_dashboard.png"):
+def plot_dashboard(df: pd.DataFrame, save_path=None):
     """Three-panel publication-quality dashboard."""
+    if save_path is None:
+        save_path = MBS_DASHBOARD_PNG
     qt_mask = df.index >= QT_START
     qt_df = df.loc[qt_mask].dropna(subset=["Actual_Monthly_Rolloff_Billions"])
 
@@ -1075,7 +1299,9 @@ def plot_dashboard(df: pd.DataFrame, save_path: str = "mbs_extension_risk_dashbo
 
 
 def plot_cpr_diagnostic(df: pd.DataFrame,
-                        save_path: str = "cpr_diagnostic.png"):
+                        save_path=None):
+    if save_path is None:
+        save_path = CPR_DIAGNOSTIC_PNG
     """
     Diagnostic chart comparing the ABM-predicted CPR against the empirical
     CPR backed out from actual SOMA roll-off.  Two panels:
@@ -1149,9 +1375,7 @@ def plot_cpr_diagnostic(df: pd.DataFrame,
 # ---------------------------------------------------------------------------
 def print_summary(df: pd.DataFrame):
     """Print key aggregate metrics to stdout."""
-    qt_df = df.loc[df.index >= QT_START].dropna(
-        subset=["Extension_Delta_Billions"]
-    )
+    qt_df = qt_active_frame(df)
 
     total_trapped = qt_df["Extension_Delta_Billions"].sum()
     avg_rolloff = qt_df["Actual_Monthly_Rolloff_Billions"].mean()
@@ -1275,14 +1499,39 @@ def print_summary(df: pd.DataFrame):
 # Main
 # ---------------------------------------------------------------------------
 def main():
+    import abm_lockin_simulation as abm
+
     print("Fetching data from FRED …")
     df = fetch_data()
 
     print("Fetching SOMA MBS roll-off from NY Fed …")
     soma_rolloff = fetch_soma_mbs_monthly()
 
-    print("Computing extension-risk metrics …")
-    df = compute_metrics(df, soma_rolloff=soma_rolloff)
+    print("Fetching SOMA MBS coupon cohorts …")
+    cohorts = fetch_soma_mbs_cohorts()
+    ref = abm.reference_cohort(cohorts)
+
+    print("Fetching ABM calibration inputs …")
+    income, home_value = abm.fetch_macro_from_fred()
+    mobility_scale = abm.calibrate_mobility_scale(
+        income, home_value,
+        cohort_rate=ref["coupon"],
+        cohort_months=ref["months_elapsed"],
+    )
+
+    print("Computing extension-risk metrics (settlement lag) …")
+    df = compute_metrics(
+        df,
+        soma_rolloff=soma_rolloff,
+        cohorts=cohorts,
+        use_burnout=False,
+        apply_settlement_lag_kernel=True,
+        abm_params={
+            "mobility_scale": mobility_scale,
+            "median_income": income,
+            "median_home_value": home_value,
+        },
+    )
 
     print("Generating dashboard …")
     plot_dashboard(df)

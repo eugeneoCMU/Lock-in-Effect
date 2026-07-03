@@ -28,14 +28,12 @@ import matplotlib.pyplot as plt
 
 import abm_lockin_simulation as abm
 import fed_mbs_extension_risk as fed
+from paths import MONTE_CARLO_HISTOGRAM_PNG, MONTE_CARLO_RESULTS_CSV
 
-# ---------------------------------------------------------------------------
-# Constants
-# ---------------------------------------------------------------------------
+RESULTS_CSV = MONTE_CARLO_RESULTS_CSV
+HISTOGRAM_PNG = MONTE_CARLO_HISTOGRAM_PNG
+
 N_RUNS = 50
-
-RESULTS_CSV = "monte_carlo_results.csv"
-HISTOGRAM_PNG = "monte_carlo_trapped_liquidity.png"
 
 
 # ---------------------------------------------------------------------------
@@ -57,10 +55,8 @@ def surface_df_to_surfaces(surf: pd.DataFrame):
 
 
 def us_trapped(metrics: pd.DataFrame) -> float:
-    """Aggregate U.S. trapped liquidity over the QT window (mirrors print_summary)."""
-    qt = metrics.loc[metrics.index >= fed.QT_START].dropna(
-        subset=["Extension_Delta_Billions"]
-    )
+    """Aggregate U.S. trapped liquidity over the active QT window."""
+    qt = fed.qt_active_frame(metrics)
     return float(qt["US_Missed_Rolloff_Billions"].sum())
 
 
@@ -69,7 +65,7 @@ def run_single_iteration(seed: int, fred_df: pd.DataFrame,
                          income: float, home_value: float,
                          cohorts: list,
                          soma_rolloff=None) -> float:
-    """One Monte Carlo draw: re-seed, rebuild population + surfaces, score it."""
+    """One Monte Carlo draw: re-seed ABM, rebuild CPR surface, score trapped."""
     np.random.seed(seed)
     random.seed(seed)
 
@@ -79,11 +75,15 @@ def run_single_iteration(seed: int, fred_df: pd.DataFrame,
         median_home_value=home_value,
         mobility_scale=mobility_scale,
     )
-    surface_df = abm.build_multi_cohort_surfaces(engine, cohorts)
-    surface = surface_df_to_surfaces(surface_df)
-    metrics = fed.compute_metrics(fred_df, surface=surface,
-                                  soma_rolloff=soma_rolloff,
-                                  cohorts=cohorts)
+    surf_df = abm.build_multi_cohort_surfaces(engine, cohorts)
+    surface = surface_df_to_surfaces(surf_df)
+
+    metrics = fed.compute_metrics(
+        fred_df, surface=surface, soma_rolloff=soma_rolloff,
+        cohorts=cohorts,
+        use_burnout=False,
+        apply_settlement_lag_kernel=True,
+    )
     return us_trapped(metrics)
 
 
@@ -92,9 +92,7 @@ def run_single_iteration(seed: int, fred_df: pd.DataFrame,
 # ---------------------------------------------------------------------------
 def empirical_trapped(metrics: pd.DataFrame) -> float:
     """Actual roll-off vs QT cap — independent of ABM parameters."""
-    qt = metrics.loc[metrics.index >= fed.QT_START].dropna(
-        subset=["Extension_Delta_Billions"]
-    )
+    qt = fed.qt_active_frame(metrics)
     return float(qt["Extension_Delta_Billions"].sum())
 
 
@@ -142,18 +140,30 @@ def main():
     print("Fetching SOMA MBS coupon cohorts once …")
     cohorts = fed.fetch_soma_mbs_cohorts()
 
-    # Compute the empirical benchmark at runtime (actual roll-off vs QT cap)
+    ref = abm.reference_cohort(cohorts)
+    print("Calibrating mobility desire once (reused across all seeds) …")
+    mobility_scale = abm.calibrate_mobility_scale(
+        income, home_value,
+        cohort_rate=ref["coupon"],
+        cohort_months=ref["months_elapsed"],
+    )
+    abm_params_base = {
+        "mobility_scale": mobility_scale,
+        "median_income": income,
+        "median_home_value": home_value,
+    }
+
     baseline_metrics = fed.compute_metrics(
         fred_df, soma_rolloff=soma_rolloff, cohorts=cohorts,
+        use_burnout=False,
+        apply_settlement_lag_kernel=True,
+        abm_params=abm_params_base,
     )
     soma_target = empirical_trapped(baseline_metrics)
     print(f"Empirical trapped liquidity (SOMA): ${soma_target:,.1f}B")
 
-    print("Calibrating mobility desire once (reused across all seeds) …")
-    mobility_scale = abm.calibrate_mobility_scale(income, home_value)
-
     print(f"\nRunning {N_RUNS} Monte Carlo iterations "
-          f"({len(cohorts)} cohort surfaces per seed) …")
+          f"(CPR surface rebuild per seed) …")
     rows = []
     t0 = time.perf_counter()
     for i in range(N_RUNS):

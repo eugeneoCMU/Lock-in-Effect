@@ -16,6 +16,8 @@ Output: a CPR (Conditional Prepayment Rate) S-curve for both systems across
 market rates from 2.0% to 8.0%.
 """
 
+from typing import Optional
+
 import numpy as np
 import pandas as pd
 import matplotlib
@@ -23,6 +25,12 @@ matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 import matplotlib.ticker as mticker
 from fredapi import Fred
+
+from paths import (
+    ABM_CPR_SURFACE_CSV,
+    ABM_LOCKIN_RESULTS_CSV,
+    ABM_LOCKIN_SCURVE_PNG,
+)
 
 # ---------------------------------------------------------------------------
 # Global calibration constants
@@ -375,6 +383,78 @@ class HousingMarketEngine:
         movers = passes_dti & passes_cost & passes_wait
         return float(movers.sum()) / self.n_households
 
+    def _movers_mask(self, rate: float, system_type: str,
+                     friction: float, rate_velocity: float) -> np.ndarray:
+        """Boolean mask of households that move at one grid point."""
+        payoff = (self._payoff_us(rate) if system_type == "US"
+                  else self._payoff_danish(rate))
+        new_pmt = self._new_payment_vec(payoff, rate)
+        dti = np.where(self._monthly_income > 0,
+                       new_pmt / self._monthly_income, 0.0)
+        passes_dti = dti <= DTI_MAX
+        delta = new_pmt - self._current_payment
+        penalty = np.where(delta > 0, delta * LOSS_AVERSION_LAMBDA, delta)
+        eff_rate = np.clip(friction + self._txn_offsets,
+                           TRANSACTION_COST_FLOOR, TRANSACTION_COST_CAP)
+        txn_cost = self._home_values * eff_rate
+        total_penalty = penalty * EXPECTED_STAY_MONTHS + txn_cost
+        passes_cost = self._desires > total_penalty
+        if rate_velocity > WAIT_AND_SEE_RATE_THRESHOLD:
+            passes_wait = self._patience >= WAIT_AND_SEE_PROB
+        else:
+            passes_wait = np.ones(self.n_households, dtype=bool)
+        return passes_dti & passes_cost & passes_wait
+
+    def simulate_cohort_path(self,
+                             month_index: pd.DatetimeIndex,
+                             market_rates_pct: pd.Series,
+                             frictions: pd.Series,
+                             velocities: pd.Series) -> pd.DataFrame:
+        """
+        Vintage burnout via survivor selection (parameter-free).
+
+        Walk the historical path from the cohort's seasoning anchor; each
+        month evaluate move decisions on the *surviving* population, record
+        CPR = movers / survivors, then permanently remove movers.  The
+        involuntary tail (agents who never pass the mobility gates) remains
+        and sets a natural CPR floor on the depleted pool.
+        """
+        alive_us = np.ones(self.n_households, dtype=bool)
+        alive_dk = np.ones(self.n_households, dtype=bool)
+        us_out, dk_out = [], []
+        for ts in month_index:
+            n_us = int(alive_us.sum())
+            n_dk = int(alive_dk.sum())
+            if n_us == 0 and n_dk == 0:
+                us_out.append(0.0)
+                dk_out.append(0.0)
+                continue
+            rate = float(market_rates_pct.loc[ts]) / 100.0
+            fric = float(frictions.loc[ts])
+            vel = float(velocities.loc[ts])
+            if n_us > 0:
+                movers_us = (
+                    alive_us
+                    & self._movers_mask(rate, "US", fric, vel)
+                )
+                us_out.append(float(movers_us.sum()) / n_us * 100.0)
+                alive_us &= ~movers_us
+            else:
+                us_out.append(0.0)
+            if n_dk > 0:
+                movers_dk = (
+                    alive_dk
+                    & self._movers_mask(rate, "Danish", fric, vel)
+                )
+                dk_out.append(float(movers_dk.sum()) / n_dk * 100.0)
+                alive_dk &= ~movers_dk
+            else:
+                dk_out.append(0.0)
+        return pd.DataFrame(
+            {"US_CPR_Pct": us_out, "Danish_CPR_Pct": dk_out},
+            index=month_index,
+        )
+
     def cpr_at(self, rate: float, system_type: str,
                friction: float = TRANSACTION_COST_MEAN,
                rate_velocity: float = 0.0) -> float:
@@ -433,11 +513,70 @@ def build_multi_cohort_surfaces(engine: HousingMarketEngine,
     return pd.concat(frames, ignore_index=True)
 
 
+def weighted_burnout_cpr_paths(
+    df: pd.DataFrame,
+    cohorts: list,
+    mobility_scale: float,
+    median_income: float,
+    median_home_value: float,
+    seed: int = RNG_SEED,
+    rates_extended: Optional[pd.Series] = None,
+    base_friction: float = None,
+) -> tuple:
+    """
+    Build cohort-weighted US/Danish CPR paths via survivor-based burnout
+    along each cohort's historical rate path from origination.
+    """
+    import fed_mbs_extension_risk as fed
+
+    if base_friction is None:
+        base_friction = fed.BASE_FRICTION
+    if rates_extended is None:
+        rates_extended = df.attrs.get("MORTGAGE30US_EXTENDED", df["MORTGAGE30US"])
+
+    engine = HousingMarketEngine(
+        seed=seed,
+        median_income=median_income,
+        median_home_value=median_home_value,
+        mobility_scale=mobility_scale,
+    )
+
+    us_cpr = pd.Series(0.0, index=df.index)
+    dk_cpr = pd.Series(0.0, index=df.index)
+    fric_series = df["Dynamic_Friction"]
+    vel_series = df["Rate_6M_Change"]
+
+    for cohort in cohorts:
+        engine.attach_cohort(cohort["coupon"], cohort["months_elapsed"])
+        origin = pd.Timestamp(cohort["origin_date"])
+        end = df.index[-1]
+        if origin > end:
+            continue
+        path_index = pd.date_range(origin, end, freq="ME")
+        rates_path = rates_extended.reindex(path_index).ffill().bfill()
+        fric_path = fric_series.reindex(path_index).fillna(base_friction)
+        vel_path = vel_series.reindex(path_index).fillna(0.0)
+        path = engine.simulate_cohort_path(path_index, rates_path,
+                                           fric_path, vel_path)
+        w = cohort["weight"]
+        us_cpr += w * path["US_CPR_Pct"].reindex(df.index).fillna(0.0)
+        dk_cpr += w * path["Danish_CPR_Pct"].reindex(df.index).fillna(0.0)
+
+    return us_cpr, dk_cpr
+
+
 # ---------------------------------------------------------------------------
 # Calibration: anchor the mobility-desire scale to the "Baseline Floor"
 # ---------------------------------------------------------------------------
+def reference_cohort(cohorts: list) -> dict:
+    """Dominant coupon bucket (max SOMA weight)."""
+    return max(cohorts, key=lambda c: c["weight"])
+
+
 def calibrate_mobility_scale(median_income: float,
                              median_home_value: float,
+                             cohort_rate: float = ORIGINAL_RATE,
+                             cohort_months: int = MONTHS_ELAPSED,
                              target_low: float = 0.04,
                              target_high: float = 0.05,
                              max_iter: int = 30) -> float:
@@ -458,6 +597,7 @@ def calibrate_mobility_scale(median_income: float,
             median_home_value=median_home_value,
             mobility_scale=scale,
         )
+        engine.attach_cohort(cohort_rate, cohort_months)
         cpr = engine.cpr_at(0.08, "US")
 
         if target_low <= cpr <= target_high:
@@ -476,8 +616,11 @@ def calibrate_mobility_scale(median_income: float,
 # Visualization
 # ---------------------------------------------------------------------------
 def plot_s_curve(results: pd.DataFrame,
-                 save_path: str = "abm_lockin_scurve.png"):
+                 reference_coupon: float = ORIGINAL_RATE,
+                 save_path=None):
     """Publication-quality S-curve comparing the two mortgage systems."""
+    if save_path is None:
+        save_path = ABM_LOCKIN_SCURVE_PNG
     fig, ax = plt.subplots(figsize=(12, 7))
 
     ax.plot(results["Market_Rate"] * 100, results["CPR_US"] * 100,
@@ -488,9 +631,10 @@ def plot_s_curve(results: pd.DataFrame,
             label="Danish System (market-price buyback)")
 
     # Reference line at the original mortgage coupon
-    ax.axvline(x=ORIGINAL_RATE * 100, color="grey", linestyle=":",
+    ax.axvline(x=reference_coupon * 100, color="grey", linestyle=":",
                linewidth=1.5, alpha=0.8)
-    ax.text(ORIGINAL_RATE * 100 + 0.05, 2, "Original coupon (3.0%)",
+    ax.text(reference_coupon * 100 + 0.05, 2,
+            f"Reference coupon ({reference_coupon*100:.1f}%)",
             color="grey", fontsize=10)
 
     ax.set_xlabel("Current Market Interest Rate (%)", fontsize=12)
@@ -525,12 +669,16 @@ def main():
     print("Fetching empirical medians from FRED …")
     median_income, median_home_value = fetch_macro_from_fred()
 
+    ref = reference_cohort(cohorts)
+
     print("Calibrating mobility desire to the 4-5% involuntary-turnover "
           "floor …")
-    mobility_scale = calibrate_mobility_scale(median_income,
-                                              median_home_value)
+    mobility_scale = calibrate_mobility_scale(
+        median_income, median_home_value,
+        cohort_rate=ref["coupon"],
+        cohort_months=ref["months_elapsed"],
+    )
 
-    ref = cohorts[0]
     print(f"\nInitializing {N_HOUSEHOLDS:,} households "
           f"(reference cohort {ref['coupon']*100:.2f}%, "
           f"{ref['months_elapsed']}mo seasoning) …")
@@ -551,17 +699,17 @@ def main():
     display["CPR_Danish"] = (display["CPR_Danish"] * 100).map("{:.2f}%".format)
     print("\n" + display.to_string(index=False))
 
-    results.to_csv("abm_lockin_results.csv", index=False)
-    print("\nResults table saved to abm_lockin_results.csv")
+    results.to_csv(ABM_LOCKIN_RESULTS_CSV, index=False)
+    print(f"\nResults table saved to {ABM_LOCKIN_RESULTS_CSV}")
 
     print(f"\nBuilding multi-cohort 3D CPR surfaces "
           f"({len(cohorts)} cohorts x {len(RATE_GRID)} rates x "
           f"{len(FRICTION_GRID)} frictions x {len(RATE_VELOCITY_GRID)} velocities) …")
     surface = build_multi_cohort_surfaces(engine, cohorts)
-    surface.to_csv("abm_cpr_surface.csv", index=False)
-    print("CPR surface saved to abm_cpr_surface.csv")
+    surface.to_csv(ABM_CPR_SURFACE_CSV, index=False)
+    print(f"CPR surface saved to {ABM_CPR_SURFACE_CSV}")
 
-    plot_s_curve(results)
+    plot_s_curve(results, reference_coupon=ref["coupon"])
 
 
 if __name__ == "__main__":

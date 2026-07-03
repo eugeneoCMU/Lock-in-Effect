@@ -1,6 +1,6 @@
 # Technical Narrative — Corrections, Validation, and Final Numbers
 
-This document is a chronological record of the investigation that took the project's headline "trapped liquidity" figure from an unsupported **$972.3B** to a validated **$672.9B**, fixed a structural omission in the Agent-Based Model (ABM), fixed a Danish-counterfactual bug that inflated the "institutional gap" claim, added a four-part validation suite (goodness-of-fit statistics, sensitivity analysis, robustness analysis, Monte Carlo, and an out-of-sample holdout split), tested three behavioral extensions (DTI constraint, loss aversion, wait-and-see) whose honest, pre-committed result was a *wider* gap between ABM and empirical (Section 15), tested a macro-level curtailment channel whose pre-registered expectation — worse aggregate match — was confirmed (Section 16), and replaced the flat 3.0% coupon assumption with live NY Fed CUSIP-level multi-cohort composition — a falsifiable test that **also widened** the gap (Section 19).
+This document is a chronological record of the investigation that took the project's headline "trapped liquidity" figure from an unsupported **$972.3B** to a validated **$764.7B** (active QT window), fixed aggregation and multi-cohort correctness bugs, tested vintage burnout (failed, §20) and a settlement-lag kernel (null, §21), and documents the full validation suite. Historical milestones along the way include the **$672.9B** figure (pre QT-window fix) and **$257.6B / 38.3%** ABM share (pre reference-cohort calibration).
 
 For the high-level project description and how to run the code, see [README.md](README.md). This document assumes familiarity with that overview and focuses on *why* each number is what it is.
 
@@ -81,15 +81,17 @@ Both series remain **settlement-date** accounting, and both flow through the sam
 
 ---
 
-## 5. Corrected Empirical Benchmark: $672.9B
+## 5. Corrected Empirical Benchmark: $764.7B (active QT window)
 
-With the phased cap and SOMA data source in place, the empirical trapped-liquidity figure (June 2022 - November 2025) is:
+The headline empirical trapped-liquidity figure is the **net sum of monthly extension deltas** during the **active QT window only** (`QT_START` ≤ month < `QT_END`, i.e. June 2022 through November 2025). Post-QT months are excluded because the QT target is $0 and continuing to accumulate deltas would dilute the headline with spurious negatives as the ABM keeps simulating roll-off.
 
 ```
-Net Trapped Liquidity (sum of monthly deltas): $672.9B
+Net Trapped Liquidity (sum of monthly deltas): $764.7B
 ```
 
-This is down from the original $972.3B and lands close to the independently-reasoned $800-870B range mentioned in Section 1 — closer still once one accounts for the fact that the reasoning in Section 1 used a slightly different cap-schedule assumption (see the [robustness analysis](#10-robustness-analysis), which shows the empirical figure ranges from $285B to $690B across 18 different reasonable cap-schedule assumptions).
+**QT-window bug (fixed July 2026):** prior versions summed every month `>= QT_START` without an upper bound. QT ended December 2025, but the data series now extends ~7 months past it; each post-QT month added a large negative delta while the cumulative series correctly flatlined via `qt_active`. This understated both the empirical total (previously **$672.9B**) and the ABM share-explained ratio. All headline aggregations in `print_summary()`, `monte_carlo_simulation.py`, `sensitivity_analysis.py`, and `robustness_analysis.py` now use `qt_active_mask()` / `qt_active_frame()`.
+
+Earlier methodological fixes (phased ramp cap, SOMA current-face roll-off) remain documented in Sections 1–4; the $672.9B figure in historical comparison tables (Sections 15–19) predates this QT-window correction. With phased cap and SOMA in place, the corrected active-window total is **$764.7B** — up from $672.9B because the prior headline was diluted by post-QT months rather than because the underlying roll-off series changed materially.
 
 ---
 
@@ -127,7 +129,7 @@ actual_rolloff = -holdings * (empirical_CPR/12 + scheduled_SMM)
     df["Empirical_CPR_Pct"] = (empirical_smm.clip(lower=0) * 12 * 100)
 ```
 
-This produces an `Empirical_CPR_Pct` series ranging from 0.00% to 14.20% (mean 5.62%) over the QT window, directly comparable to the ABM's `US_CPR_Pct` (4.15%-10.56%, mean 6.62%). The `cpr_diagnostic.png` chart (via `plot_cpr_diagnostic()`) visualizes this month-by-month, both as a time series and as a scatter against the prevailing mortgage rate.
+This produces an `Empirical_CPR_Pct` series ranging from 0.00% to 14.02% (mean 5.53%) over the active QT window, directly comparable to the ABM's `US_CPR_Pct` (7.55%-21.72%, mean 11.98%). Multi-cohort runs now use **cohort-weighted** `Scheduled_Amort_SMM` (not the legacy single 3.0% coupon series) so the empirical CPR back-out is apples-to-apples with the simulation. The `cpr_diagnostic.png` chart (via `plot_cpr_diagnostic()`) visualizes this month-by-month, both as a time series and as a scatter against the prevailing mortgage rate.
 
 ---
 
@@ -139,14 +141,14 @@ def cpr_goodness_of_fit(empirical: pd.Series, predicted: pd.Series,
     ...
 ```
 
-Reports R² (`1 - SS_res/SS_tot`), RMSE (`sqrt(mean((actual-pred)^2))`), MAE, and Pearson r, both on the raw monthly series and on a 3-month centered rolling average ("smoothed", intended to filter out settlement-timing noise). Current results (N=49 months):
+Reports R² (`1 - SS_res/SS_tot`), RMSE (`sqrt(mean((actual-pred)^2))`), MAE, and Pearson r, both on the raw monthly series and on a 3-month centered rolling average ("smoothed", intended to filter out settlement-timing noise). **Current results** (N=42 active QT months, surface interpolation + settlement-lag kernel):
 
 | | R² | RMSE | MAE | r |
 |---|---|---|---|---|
-| Raw | -0.590 | 3.52pp | 2.38pp | -0.338 |
-| Smoothed | -1.345 | 2.54pp | 1.68pp | -0.481 |
+| Raw | -6.443 | 7.73pp | 6.58pp | -0.316 |
+| Smoothed | -14.464 | 7.14pp | 6.41pp | -0.397 |
 
-A negative R² means the ABM's month-to-month CPR path is a *worse* predictor than simply using the empirical mean every month — i.e., the ABM's aggregate **level** is reasonably close (see Section 15) but its **monthly path** is not well matched. Section 13 investigates why smoothing makes R²/r *worse* rather than better.
+A negative R² means the ABM's month-to-month CPR path is a *worse* predictor than simply using the empirical mean every month — i.e., the ABM's aggregate **level** understates trapped liquidity (13.2% share explained) while its **monthly path** over-predicts CPR volatility. Section 13 investigates why smoothing makes R²/r *worse* rather than better; Section 21 tests whether settlement-lag convolution fixes the weak cross-correlation peak.
 
 ---
 
@@ -164,9 +166,7 @@ def empirical_trapped(df: pd.DataFrame) -> float:
     ...
 ```
 
-**Corrected results**: baseline (default parameters) U.S. trapped = $544.0B against the correctly-anchored empirical $672.9B = **80.8%** share explained (not 100%). Across all 125 scenarios: trapped liquidity ranges $0.1B-$738.1B, share explained ranges 0.0%-109.7%, CPR R² ranges -7.371 to -0.335, RMSE ranges 3.22-8.07pp. The baseline sits comfortably in the middle of this range rather than at an extreme, which is evidence the 80.8% figure isn't cherry-picked.
-
-The same stale-benchmark bug existed in `monte_carlo_simulation.py` as a hardcoded `SOMA_TARGET_B = 785.2` constant (left over from an earlier, pre-SOMA-fix estimate). It was replaced with a runtime computation using the same `empirical_trapped()` logic, so the Monte Carlo histogram now compares against the same $672.9B anchor used everywhere else.
+**Current results** (post correctness fixes, surface + settlement lag): baseline U.S. trapped = **$101.2B** against empirical **$764.7B** = **13.2%** share explained. Across all 125 scenarios: trapped liquidity ranges **-$265.1B–$265.5B**, share explained ranges **-34.7%–34.7%**, CPR R² ranges -16.575 to -3.498, RMSE ranges 6.01–11.88pp. The ABM now **over-predicts** aggregate prepayment (CPR mean 11.98% vs empirical 5.53%), so the baseline sits below the historical 38–80% share-explained range documented in Sections 15–19.
 
 ---
 
@@ -174,16 +174,16 @@ The same stale-benchmark bug existed in `monte_carlo_simulation.py` as a hardcod
 
 `robustness_analysis.py` holds the ABM fixed and varies the *empirical* side of the comparison across two panels:
 
-**Panel B — data source**: SOMA vs. WSHOMCB, both with the same phased cap schedule.
+**Panel B — data source** (current):
 
 | Source | Empirical | ABM Share |
 |---|---|---|
-| SOMA | $672.9B | 80.8% (R²=-0.590) |
-| WSHOMCB | $671.6B | 81.0% (R²=-0.505) |
+| SOMA | $764.7B | 13.2% (R²=-6.443) |
+| WSHOMCB | $763.7B | 13.2% (R²=-5.250) |
 
-The two data sources agree to within 0.2%, confirming the earlier SOMA-vs-WSHOMCB discrepancy (Section 1, error #2) was about ramp-cap methodology, not which balance-sheet series was used. This close agreement is a reassuring empirical check, but it isn't the reason SOMA was chosen: SOMA remains the conceptually correct source regardless of how closely it happens to track `WSHOMCB` in this particular sample, since it reports current face value rather than `WSHOMCB`'s amortized cost (see Section 4).
+The two data sources agree to within 0.1%. SOMA remains the preferred source (current face value; see Section 4).
 
-**Panel C — cap-schedule sensitivity**: 18 scenarios sweeping ramp duration (2/3/4 months), full-pace cap ($30B/$35B), and QT-end date (Jun/Sep/Dec 2025). The empirical benchmark ranges from **$285.4B to $690.4B** and the ABM's share-explained ranges from **97.8% to 132.1%** across these scenarios — the baseline (3-month ramp, $35B cap, Dec 2025 end) sits at the high end of the empirical range ($672.9B) and near the low end of share-explained (98.5%), which is a reasonable, defensible choice rather than an outlier pick.
+**Panel C — cap-schedule sensitivity** (current): 18 scenarios sweeping ramp duration (2/3/4 months), full-pace cap ($30B/$35B), and QT-end date (Jun/Sep/Dec 2025). The empirical benchmark ranges from **$479.6B to $782.2B** and the ABM's share-explained ranges from **-24.6% to 15.2%** — the baseline (3-month ramp, $35B cap, Dec 2025 end) sits at **$764.7B empirical / 13.2% share**.
 
 ---
 
@@ -191,7 +191,7 @@ The two data sources agree to within 0.2%, confirming the earlier SOMA-vs-WSHOMC
 
 `monte_carlo_simulation.py` reruns the entire ABM→macro pipeline 50 times, each time re-seeding NumPy/`random` and rebuilding both the 10,000-household population and the CPR surface from scratch (`abm.HousingMarketEngine(seed=i, ...)`), then recomputing U.S. trapped liquidity against the shared, runtime-computed empirical benchmark.
 
-**Result**: mean $570.4B, std $21.7B, 95% CI **[$564.4B, $576.4B]** across the 50 draws — a tight distribution, confirming the headline ABM figure isn't sensitive to the particular random population drawn. (Note: this run used a slightly different friction/date snapshot than the $544.0B baseline reported elsewhere in this document, since it rebuilds the CPR surface fresh each time rather than reusing `abm_cpr_surface.csv`; the two are consistent within the Monte Carlo distribution's range.)
+**Current result** (50 seeds, CPR surface rebuilt per draw, settlement-lag kernel): mean **$113.5B**, std **$24.8B**, 95% CI **[ $106.6B, $120.4B ]** against empirical **$764.7B**. Runtime **4.6 min** (~5.5 s/seed). Population-draw variance is material; the fixed-CSV-surface run (std ≈ $0) was a bug — surfaces must be rebuilt per seed.
 
 ---
 
@@ -223,29 +223,9 @@ The gap figure being cited in early drafts (e.g., "$924.5B") was therefore just 
 
 Fixing the one-sided clip (Section 3) let overshoot register as a negative contribution, which is correct in principle. But the Danish roll-off was still being computed as `-holdings_b * (danish_CPR/12 + scheduled_SMM)`, where `holdings_b` is the **actual U.S. balance path** (`WSHOMCB / 1000`) — i.e., applying a ~24% annual prepayment rate to a balance that hadn't actually shrunk by that much. Compounding this error over 42 months of QT produced an economically implausible **-$1,132B** Danish trapped liquidity, and an inflated **$1,676.1B** institutional gap.
 
-### Stage 2 — dynamic-balance simulation (current): -$359.7B
+### Stage 2 — dynamic-balance simulation (superseded; see Section 17 for current)
 
-The fix simulates the Danish balance **forward month-by-month** starting from the actual balance at QT start, so each month's roll-off is applied to the *already-reduced* balance rather than the static U.S. path:
-
-```534:554:fed_mbs_extension_risk.py
-    monthly_cpr_dk = df["Danish_CPR_Pct"] / 100 / 12
-    dk_rolloff = np.zeros(len(df))
-    dk_balance = np.zeros(len(df))
-    qt_start_idx = df.index.get_indexer([QT_START], method="nearest")[0]
-    init_balance = float(holdings_b.iloc[qt_start_idx])
-    bal = init_balance
-    for i in range(len(df)):
-        if i < qt_start_idx:
-            dk_balance[i] = float(holdings_b.iloc[i])
-            continue
-        dk_balance[i] = bal
-        monthly_drain = float(monthly_cpr_dk.iloc[i]) + float(sched_smm.iloc[i])
-        rolloff = bal * monthly_drain
-        dk_rolloff[i] = -rolloff
-        bal = max(bal - rolloff, 0.0)
-```
-
-**Result**: the Danish portfolio declines from **$2,654B to $898B** over the QT window, giving Danish trapped liquidity of **-$359.7B** (the Danish system would have overshot the QT cap by that much) and an **institutional gap of $903.8B** (`544.0 - (-359.7) = 903.7`).
+The fix simulates the Danish balance **forward month-by-month** starting from the actual balance at QT start. **Historical result** at the time of writing: Danish trapped **-$359.7B**, institutional gap **$903.8B**. **Current result** (multi-cohort + correctness fixes + settlement lag): Danish trapped **-$829.1B** ($2,535B → $428B), institutional gap **$930.3B**.
 
 ### Summary of the evolution
 
@@ -267,21 +247,19 @@ def cpr_cross_correlation(empirical: pd.Series, predicted: pd.Series,
     ...
 ```
 
-If the mismatch were pure noise, smoothing should pull the correlation *toward* zero or positive. Instead:
+**Current cross-correlation** (settlement-lag kernel applied; N=42):
 
-| Lag (months) | Raw r | Smoothed r |
-|---|---|---|
-| -3 | +0.152 | +0.141 |
-| -2 | -0.117 | -0.123 |
-| -1 | -0.178 | -0.361 |
-| **0** | **-0.338** | **-0.481** |
-| +1 | -0.228 | -0.408 |
-| +2 | -0.094 | -0.257 |
-| +3 | +0.007 | -0.084 |
+| Lag (months) | Raw r |
+|---|---|
+| -3 | +0.192 |
+| -2 | -0.209 |
+| -1 | -0.140 |
+| **0** | **-0.316** |
+| +1 | -0.206 |
+| +2 | -0.033 |
+| +3 | +0.103 |
 
-Smoothing makes the correlation at lag 0 **more negative** (-0.338 → -0.481), not less — the signature of a genuine sign mismatch that smoothing preserves (or amplifies) rather than noise that smoothing would average away. No lag in the ±3-month window flips the correlation meaningfully positive (the best is a weak +0.152 at lag -3, too small to treat as a real lag-alignment fix).
-
-**Conclusion**: the ABM's month-to-month CPR path has a structural weakness — it responds to the current month's rate and friction level only, and cannot capture vintage/seasoning effects or path-dependent behavior in the actual mortgage pool. This is reported honestly in `print_summary()` rather than attributed to settlement noise.
+Peak remains at lag **-3** (r = +0.192) — weak and unchanged in direction from pre-kernel diagnostics. Section 21 reports the settlement-lag kernel as a **null** timing fix.
 
 ---
 
@@ -299,14 +277,14 @@ Because the three dynamic-friction parameters could in principle be tuned to fit
         ...
 ```
 
-**Result**:
+**Current result** (surface + settlement lag):
 
 | | N | R² | RMSE | Share Explained |
 |---|---|---|---|---|
-| In-sample | 19 | -1.624 | 4.20pp | 74.2% |
-| Out-of-sample | 30 | **-0.126** | **3.00pp** | **87.5%** |
+| In-sample | 19 | -10.990 | 8.86pp | -11.1% |
+| Out-of-sample | 23 | -4.222 | 6.66pp | 32.5% |
 
-The model performs *better* on the unseen data — R² is much closer to zero, RMSE is lower, and share-explained is higher. A model that was merely curve-fit to the full sample would be expected to show the opposite pattern (good in-sample fit, degraded out-of-sample fit). This is evidence, though not proof, that the ABM's rational lock-in mechanism captures a genuine structural relationship rather than overfitting to the specific friction path realized during 2022-2023's volatile early-QT period.
+Out-of-sample share explained is higher than in-sample, but both R² values are deeply negative and in-sample share is negative — the model **over-predicts** simulated roll-off in the early QT period (net negative trapped contribution) and under-predicts in the later period. This is no longer the "better out-of-sample" pattern seen in earlier single-cohort calibrations (historical table above); the max-weight 2.0% reference cohort and cohort-weighted amortization shifted the CPR surface upward.
 
 ---
 
@@ -461,48 +439,94 @@ Three compounding effects explain the counter-intuitive direction:
 - **`min_share = 0.02` bucket-folding** merges tiny tails into nearest coupon bucket.
 - **Mobility calibration unchanged** — still anchored at 8% rate on default cohort; not re-calibrated per coupon bucket.
 - **Monte Carlo cost** — 7× surface rebuild per seed (~16 min for 50 seeds vs ~46 s single-cohort).
+- **Figures in Section 19.4 comparison table predate the QT-active aggregation fix** (Section 5) and the max-weight reference-cohort calibration; see Section 17 for current headline numbers.
 
 ---
 
 ## 17. Final Numbers Table
 
-Single source of truth for every headline figure, current as of the multi-cohort extension described in Section 19.
+Single source of truth for every headline figure, **current as of the correctness-fix + settlement-lag pipeline re-run (July 2026)**. Historical figures in Sections 15–19 predate the QT-window aggregation fix (Section 5).
 
 | Metric | Value | Source |
 |---|---|---|
-| Empirical trapped liquidity (SOMA, phased cap) | **$672.9B** | `print_summary()`, "Net Trapped Liquidity" |
-| ABM U.S. trapped liquidity | **$257.6B** (38.3% of empirical) | `print_summary()`, "U.S. System Trapped Liquidity" |
-| ABM Danish trapped liquidity (dynamic balance) | **-$805.5B** | `print_summary()`, "Danish System Trapped Liquidity" |
-| Danish portfolio path | $2,557B → $408B | `print_summary()`, "Danish Portfolio" |
-| Institutional gap (U.S. - Danish) | **$1,063.1B** | `print_summary()`, "Institutional Gap" |
-| Scheduled amortization during QT | $242.1B (≈2.55% ann.) | `print_summary()`, "Sched. amortization" |
-| Curtailment during QT | $74.9B (≈0.78% ann. avg SMM) | `print_summary()`, "Curtailment during QT" |
+| Empirical trapped liquidity (SOMA, phased cap, active QT window) | **$764.7B** | `print_summary()`, "Net Trapped Liquidity" |
+| ABM U.S. trapped liquidity (surface + settlement lag) | **$101.2B** (13.2% of empirical) | `print_summary()`, "U.S. System Trapped Liquidity" |
+| ABM U.S. trapped (surface only, no lag) | **$117.7B** (15.4%) | `compute_metrics(apply_settlement_lag_kernel=False)` |
+| ABM Danish trapped liquidity (dynamic balance) | **-$829.1B** | `print_summary()`, "Danish System Trapped Liquidity" |
+| Danish portfolio path | $2,535B → $428B | `print_summary()`, "Danish Portfolio" |
+| Institutional gap (U.S. − Danish) | **$930.3B** | `print_summary()`, "Institutional Gap" |
+| Scheduled amortization during QT | $224.1B (≈2.68% ann.) | `print_summary()`, "Sched. amortization" |
+| Curtailment during QT | $69.6B (≈0.84% ann. avg SMM) | `print_summary()`, "Curtailment during QT" |
 | SOMA 30yr WAC (live cohort fetch) | **2.55%** (7 buckets) | `fetch_soma_mbs_cohorts()` |
-| Empirical CPR range | 0.00% - 14.20% (mean 5.62%) | `print_summary()`, "CPR DIAGNOSTIC" |
-| ABM U.S. CPR range | 4.79% - 16.76% (mean 8.67%) | `print_summary()`, "CPR DIAGNOSTIC" |
-| CPR goodness-of-fit (raw) | R²=-2.166, RMSE=4.96pp, MAE=3.63pp, r=-0.303 | `cpr_goodness_of_fit()` |
-| CPR goodness-of-fit (smoothed) | R²=-5.269, RMSE=4.15pp, MAE=3.16pp, r=-0.433 | `cpr_goodness_of_fit()` |
-| Cross-correlation (best lag) | +0.190 at lag -3 (not meaningful) | `cpr_cross_correlation()` |
-| Holdout split — in-sample | R²=-4.328, RMSE=5.98pp, share=37.6% | `print_summary()`, "Holdout split" |
-| Holdout split — out-of-sample | R²=-1.188, RMSE=4.19pp, share=38.9% | `print_summary()`, "Holdout split" |
-| Sensitivity sweep range (125 scenarios) | Trapped -$95.7B-$414.2B; Share -14.2%-61.6% | `sensitivity_analysis.py` |
-| Robustness — data source | SOMA $672.9B vs WSHOMCB $671.6B (<1% diff) | `robustness_analysis.py`, Panel B |
-| Robustness — cap schedule (18 scenarios) | Empirical $285.4B-$690.4B; Share 45.0%-74.6% | `robustness_analysis.py`, Panel C |
-| Monte Carlo (50 population draws) | Mean $275.7B, Std $23.4B, 95% CI [$269.3B, $282.2B] | `monte_carlo_simulation.py` |
-| Monte Carlo runtime (multi-cohort) | 16.1 min total (~19.3 s/seed) | `monte_carlo_simulation.py` |
+| Reference calibration cohort | **2.00%** coupon, 39.7% weight | `reference_cohort()` |
+| Empirical CPR range | 0.00% - 14.02% (mean 5.53%) | `print_summary()`, "CPR DIAGNOSTIC" |
+| ABM U.S. CPR range | 7.55% - 21.72% (mean 11.98%) | `print_summary()`, "CPR DIAGNOSTIC" |
+| CPR goodness-of-fit (raw) | R²=-6.443, RMSE=7.73pp, MAE=6.58pp, r=-0.316 | `cpr_goodness_of_fit()` |
+| CPR goodness-of-fit (smoothed) | R²=-14.464, RMSE=7.14pp, MAE=6.41pp, r=-0.397 | `cpr_goodness_of_fit()` |
+| Cross-correlation (best lag) | +0.192 at lag -3 (not meaningful) | `cpr_cross_correlation()` |
+| Holdout split — in-sample | R²=-10.990, RMSE=8.86pp, share=-11.1% | `print_summary()`, "Holdout split" |
+| Holdout split — out-of-sample | R²=-4.222, RMSE=6.66pp, share=32.5% | `print_summary()`, "Holdout split" |
+| Sensitivity sweep range (125 scenarios) | Trapped -$265.1B–$265.5B; Share -34.7%–34.7% | `sensitivity_analysis.py` |
+| Robustness — data source | SOMA $764.7B vs WSHOMCB $763.7B (<0.2% diff) | `robustness_analysis.py`, Panel B |
+| Robustness — cap schedule (18 scenarios) | Empirical $479.6B–$782.2B; Share -24.6%–15.2% | `robustness_analysis.py`, Panel C |
+| Monte Carlo (50 population draws) | Mean $113.5B, Std $24.8B, 95% CI [$106.6B, $120.4B] | `monte_carlo_simulation.py` |
+| Monte Carlo runtime (multi-cohort) | 4.6 min total (~5.5 s/seed) | `monte_carlo_simulation.py` |
+| Vintage burnout (survivor selection) | **$1,123.9B** (147%) — failed pre-registration | Section 20 |
 | Dynamic friction range | 8.23% - 10.26% (mean 9.05%) | `print_summary()`, "DYNAMIC MACROECONOMIC FRICTION" |
-| CPR bias vs. real income YoY (pre-build diagnostic) | r = -0.487 | Section 16.1 |
 
 ---
 
 ## 18. Known Limitations and Open Items
 
-- **Monthly CPR path fit remains weak.** The aggregate/level comparison (38.3% share explained) is meaningful but the month-to-month R² is negative under every friction specification tested (Section 9) and no lag alignment fixes it (Section 13). Future work could add a lagged-rate or seasonal term to the CPR surface, or explicitly model vintage/seasoning effects.
-- **The Danish counterfactual still uses U.S.-calibrated friction.** The dynamic friction series (inventory + sentiment penalties) is calibrated on U.S. housing-market data and applied identically to the Danish counterfactual. Since Danish institutional frictions may differ, the -$805.5B / $1,063.1B figures should be read as an **upper bound** on the institutional gap under U.S.-style frictions, not a claim about what Danish-market frictions specifically would produce.
-- **No confidence interval on the empirical trapped-liquidity figure itself.** The Monte Carlo suite (Section 11) puts a confidence interval on the *ABM's* prediction, and the robustness suite (Section 10) shows how the *empirical* figure moves under different assumptions, but there is no single combined interval (e.g., a bootstrap over both data and assumption choices simultaneously) for the $672.9B figure.
-- **The holdout split is a single split, not a rolling/expanding-window validation.** A more rigorous test would repeat the holdout at multiple cut dates (e.g., every 6 months) and check whether out-of-sample performance is consistently competitive with in-sample, rather than relying on one Jan-2024 cut point.
-- **Behavioral extensions (DTI, loss aversion, wait-and-see) widened the gap rather than closing it** (Section 15). This is an honest finding under literature-grounded parameters; the residual likely reflects pool-composition, vintage, and servicer effects outside the household decision function. The wait-and-see threshold (150 bps) and probability (20%) are unsourced assumptions that should be sensitivity-tested in future work.
-- **Curtailment channel worsened the aggregate match** (Section 16). Literature-grounded partial prepayments added $74.9B of simulated roll-off during QT, reducing share explained from 62.3% to 51.2% — confirming the pre-registered expectation. The ABM already over-predicts mobility; additive prepayment channels cannot close a gap caused by too much simulated roll-off.
-- **Multi-cohort coupon composition also worsened the match** (Section 19). Replacing the flat 3.0% assumption with live NY Fed CUSIP-level weights (WAC 2.55%, 7 buckets) reduced trapped liquidity from $344.6B to **$257.6B** (38.3%) — falsifying the hypothesis that lower coupons would push the model toward $672.9B. The weighted multi-cohort ABM predicts *more* aggregate prepayment (CPR mean 8.67% vs empirical 5.62%), not less. Residual likely requires loan-level heterogeneity, servicer effects, or burnout dynamics beyond coupon buckets.
+- **Monthly CPR path fit remains weak.** The aggregate share explained is **13.2%** (Section 17) and month-to-month R² is negative under every friction specification tested (Section 9). Settlement-lag convolution (Section 21) did not fix the cross-correlation peak.
+- **The Danish counterfactual still uses U.S.-calibrated friction.** The -$829.1B / $930.3B figures (Section 17) should be read as an **upper bound** on the institutional gap under U.S.-style frictions.
+- **No confidence interval on the empirical trapped-liquidity figure itself.** The Monte Carlo suite (Section 11) puts a CI on the *ABM's* prediction; the robustness suite (Section 10) shows how the *empirical* $764.7B moves under cap-schedule assumptions.
+- **Vintage burnout via survivor selection failed** (Section 20) — parameter-free implementation drove QT-window CPR to ~0% and trapped liquidity to 147% of empirical (wrong direction). Production defaults use surface interpolation.
+- **Behavioral extensions, curtailment, and multi-cohort composition** (Sections 15–19) are historical falsification tests; current headline numbers are in Section 17.
 - **15-year MBS excluded from cohort modeling** (~9% of SOMA face value); maturity-string parsing approximates origination dates.
-- **DTI constraint is front-end only.** The 43% DTI check uses only the mortgage payment, not total household debt. This underestimates the binding power of the constraint, since real QM underwriting uses a back-end ratio including student loans, auto loans, and credit card minimums.
+- **DTI constraint is front-end only.** The 43% DTI check uses only the mortgage payment, not total household debt.
+
+---
+
+## 20. Vintage Burnout (Survivor Selection) — Pre-Registered Test, Failed
+
+### Mechanism
+
+Rather than a tuned hazard-decay parameter, burnout was implemented as **survivor selection**: `HousingMarketEngine.simulate_cohort_path()` walks each cohort's historical rate path from origination; each month evaluates `_movers_mask()` on the surviving population, records CPR = movers/survivors, and permanently removes movers. US and Danish survivor sets are tracked separately. In `compute_metrics(use_burnout=True)`, per-cohort paths replace static surface interpolation for the historical window.
+
+### Pre-registered expectations
+
+1. Burnout lowers late-sample ABM CPR → trapped liquidity **rises** toward $764.7B.
+2. Path fit (R², correlation) **improves** via monotone time-decay.
+
+### Actual results (July 2026 re-run)
+
+| Configuration | U.S. Trapped | Share | QT-window CPR mean |
+|---|---|---|---|
+| Surface baseline (no burnout) | $117.7B | 15.4% | 8.41% |
+| Survivor burnout | **$1,123.9B** | **147.0%** | **~0.00%** |
+
+**Diagnosis:** pandemic-era cohorts (2.0–2.5% coupons, 70% of weight) experience massive first-month prepayment when the path enters the 2020–21 low-rate window. Survivors after selection are exclusively **low-desire, never-movers** — an absorbing state with ~0% CPR at lock-in rates, not the calibrated 4–5% involuntary floor. The closed 10,000-agent population depletes its mobile mass before the QT window; this is a structural mismatch with a real MBS pool that retains involuntary turnover and ongoing origination.
+
+**Production decision:** `use_burnout=False` in `fed_mbs_extension_risk.py` `main()` and all downstream scripts. Code retained for reproducibility.
+
+---
+
+## 21. Settlement-Lag Kernel — Pre-Registered Test, Null
+
+### Mechanism
+
+Household prepayment decisions and SOMA cash receipt are separated by TBA settlement + servicer remittance (UMBS ~55-day, GNMA II ~50-day standard delays). `apply_settlement_lag()` convolves `US_Simulated_Monthly_Rolloff_Billions` (and Danish, symmetrically) with a fixed mass-conserving kernel **`[0.10, 0.60, 0.30]`** over lags 0/1/2 months (documented remittance-cycle weights, not tuned).
+
+### Pre-registered expectation
+
+Cross-correlation peak (weak r = +0.19 at lag -3) should shift toward lag 0; monthly R² should improve.
+
+### Actual results
+
+| Configuration | U.S. Trapped | Share | Peak cross-corr |
+|---|---|---|---|
+| Surface only | $117.7B | 15.4% | +0.192 at lag -3 |
+| Surface + lag kernel | **$101.2B** | **13.2%** | **+0.192 at lag -3** |
+
+Aggregate trapped liquidity changes modestly (-$16.5B) because the kernel is mass-conserving over the full QT window; timing alignment **did not improve** (peak unchanged, R² worse: -6.443 vs -2.166 pre-lag on the earlier surface). **Conclusion:** timing lag is not the binding residual; the kernel is kept in production as a documented null result with negligible directional effect on the headline figure.

@@ -27,25 +27,23 @@ import itertools
 import numpy as np
 import pandas as pd
 
+import abm_lockin_simulation as abm
 import fed_mbs_extension_risk as fed
+from paths import ROBUSTNESS_RESULTS_CSV
 
-RESULTS_CSV = "robustness_results.csv"
+RESULTS_CSV = ROBUSTNESS_RESULTS_CSV
 
 
 # ---------------------------------------------------------------------------
 # Panel B helpers
 # ---------------------------------------------------------------------------
 def empirical_trapped_from_metrics(metrics: pd.DataFrame) -> float:
-    qt = metrics.loc[metrics.index >= fed.QT_START].dropna(
-        subset=["Extension_Delta_Billions"]
-    )
+    qt = fed.qt_active_frame(metrics)
     return float(qt["Extension_Delta_Billions"].sum())
 
 
 def abm_trapped_and_gof(metrics: pd.DataFrame) -> dict:
-    qt = metrics.loc[metrics.index >= fed.QT_START].dropna(
-        subset=["Extension_Delta_Billions"]
-    )
+    qt = fed.qt_active_frame(metrics)
     trapped_us = float(qt["US_Missed_Rolloff_Billions"].sum())
     gof = fed.cpr_goodness_of_fit(qt["Empirical_CPR_Pct"], qt["US_CPR_Pct"])
     return {
@@ -77,14 +75,18 @@ def custom_qt_target(index: pd.DatetimeIndex,
 def run_cap_scenario(df: pd.DataFrame, surface, soma_rolloff,
                      ramp_months: int, full_cap: float,
                      qt_end: pd.Timestamp,
-                     cohorts=None) -> dict:
+                     cohorts=None,
+                     abm_params=None) -> dict:
     """
     Re-run compute_metrics with a custom cap schedule by monkey-patching the
     QT target after computation.  Only the target series and the downstream
     deltas change; the CPR surface is unaffected.
     """
     metrics = fed.compute_metrics(df, soma_rolloff=soma_rolloff, surface=surface,
-                                  cohorts=cohorts)
+                                  cohorts=cohorts,
+                                  use_burnout=False,
+                                  apply_settlement_lag_kernel=True,
+                                  abm_params=abm_params)
 
     custom = custom_qt_target(metrics.index,
                               ramp_months=ramp_months,
@@ -101,7 +103,9 @@ def run_cap_scenario(df: pd.DataFrame, surface, soma_rolloff,
         metrics["Actual_Monthly_Rolloff_Billions"] - custom,
         np.nan,
     )
-    trapped_emp = metrics.loc[qt_mask, "Extension_Delta_Billions"].dropna().sum()
+    trapped_emp = float(
+        metrics.loc[qt_active, "Extension_Delta_Billions"].dropna().sum()
+    )
 
     # Recompute ABM extension deltas
     metrics["US_Extension_Delta_Billions"] = np.where(
@@ -141,17 +145,20 @@ def main():
     print("Fetching FRED data …")
     df = fed.fetch_data()
 
-    print("Loading CPR surface …")
-    surface = fed.load_cpr_surface()
-    if surface is None:
-        raise SystemExit(
-            "abm_cpr_surface.csv not found — run abm_lockin_simulation.py first."
-        )
-
-    cohorts = None
-    if isinstance(surface, dict):
-        print("Fetching SOMA MBS coupon cohorts once …")
-        cohorts = fed.fetch_soma_mbs_cohorts()
+    print("Fetching SOMA MBS coupon cohorts …")
+    cohorts = fed.fetch_soma_mbs_cohorts()
+    ref = abm.reference_cohort(cohorts)
+    income, home_value = abm.fetch_macro_from_fred()
+    mobility_scale = abm.calibrate_mobility_scale(
+        income, home_value,
+        cohort_rate=ref["coupon"],
+        cohort_months=ref["months_elapsed"],
+    )
+    abm_params = {
+        "mobility_scale": mobility_scale,
+        "median_income": income,
+        "median_home_value": home_value,
+    }
 
     # ==================================================================
     # PANEL B — Data-source sensitivity
@@ -163,21 +170,24 @@ def main():
 
     panel_b = []
     for source_label, rolloff in [("SOMA", soma_rolloff), ("WSHOMCB", None)]:
-        metrics = fed.compute_metrics(df, soma_rolloff=rolloff, surface=surface,
-                                      cohorts=cohorts)
+        metrics = fed.compute_metrics(df, soma_rolloff=rolloff, surface=None,
+                                      cohorts=cohorts,
+                                      use_burnout=False,
+                                      apply_settlement_lag_kernel=True,
+                                      abm_params=abm_params)
         emp = empirical_trapped_from_metrics(metrics)
-        abm = abm_trapped_and_gof(metrics)
-        share = abm["ABM_Trapped_US_B"] / emp * 100 if emp else np.nan
+        abm_stats = abm_trapped_and_gof(metrics)
+        share = abm_stats["ABM_Trapped_US_B"] / emp * 100 if emp else np.nan
         row = {
             "Source": source_label,
             "Empirical_Trapped_B": emp,
-            **abm,
+            **abm_stats,
             "Share_Explained_Pct": share,
         }
         panel_b.append(row)
         print(f"  {source_label:>8}:  empirical=${emp:,.1f}B  "
-              f"ABM=${abm['ABM_Trapped_US_B']:,.1f}B  "
-              f"share={share:.1f}%  R²={abm['CPR_R2']:.3f}")
+              f"ABM=${abm_stats['ABM_Trapped_US_B']:,.1f}B  "
+              f"share={share:.1f}%  R²={abm_stats['CPR_R2']:.3f}")
 
     # ==================================================================
     # PANEL C — Cap-schedule sensitivity
@@ -195,8 +205,8 @@ def main():
 
     panel_c = []
     for ramp, cap, end in combos:
-        row = run_cap_scenario(df, surface, soma_rolloff, ramp, cap, end,
-                               cohorts=cohorts)
+        row = run_cap_scenario(df, None, soma_rolloff, ramp, cap, end,
+                               cohorts=cohorts, abm_params=abm_params)
         panel_c.append(row)
 
     panel_c_df = pd.DataFrame(panel_c)
