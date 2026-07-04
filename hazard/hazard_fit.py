@@ -97,8 +97,9 @@ def _stratum_dummy_matrix(
     fe_columns: list[str],
 ) -> np.ndarray:
     """Vectorized stratum dummies for holdout panels."""
+    fe_index = build_fe_index(fe_columns)
     rows = [
-        _stratum_fe_row(sid, reference_stratum, fe_columns)
+        _stratum_fe_row(sid, reference_stratum, fe_columns, fe_index)
         for sid in stratum_ids.astype(str)
     ]
     return np.asarray(rows, dtype=np.float64)
