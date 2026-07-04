@@ -1,19 +1,19 @@
 {
   "empirical_trapped_b": 764.7482532227002,
-  "hazard_trapped_b": 915.067027857209,
-  "share_explained_pct": 119.65598142932075,
+  "hazard_trapped_b": 818.5300844066606,
+  "share_explained_pct": 107.0326190295068,
   "benchmark_b": 764.7,
   "cross_correlation": {
-    "-3": -0.3813467593891287,
-    "-2": -0.38156719674442086,
-    "-1": -0.4044537137221179,
-    "0": -0.4443709072594436,
-    "1": -0.3324307824184794,
-    "2": -0.1975919897651803,
-    "3": -0.07926437590303773
+    "-3": 0.40436496933191357,
+    "-2": 0.21233407814928984,
+    "-1": 0.26727820845070605,
+    "0": 0.19000395255236566,
+    "1": 0.2024740482319247,
+    "2": 0.20579650285045425,
+    "3": 0.21098813910611228
   },
-  "best_lag": 0,
-  "peak_lag_r": -0.4443709072594436,
+  "best_lag": -3,
+  "peak_lag_r": 0.40436496933191357,
   "lag_interpretation": "Negative lag = hazard CPR leads SOMA empirical CPR. Consistent with 45-90d TBA settlement delay between Freddie loan-level prepay and NY Fed SOMA cash receipt.",
-  "mode": "cohort_empirical"
+  "mode": "literature_microsim"
 }

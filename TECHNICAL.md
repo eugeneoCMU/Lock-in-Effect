@@ -377,16 +377,16 @@ df = compute_metrics(df, use_hazard_microsim=True)
 
 Replaces CPR surface interpolation with microsim paths. Disables ABM settlement-lag kernel (Markov routing already handles pipeline delay). Danish dynamic balance loop unchanged.
 
-### Real-data results (Freddie 2017–2021 sample)
+### Real-data results (Freddie 2017–2021 sample; post-β₁-units-fix, see §15)
 
 | Metric | Value |
 |---|---|
-| Trapped liquidity | **$747B (97.7%)** |
-| CPR r (lag 0) | +0.368 |
-| **Peak cross-corr** | **lag −3, r = +0.444** |
-| Runtime | ~15s cached / ~2min full rebuild (75k loans × 42 months × 2 regimes) |
+| Trapped liquidity | **$818.5B (107.0%)** — band $810B–$828B at P_q 5.5%–7.7% |
+| CPR r (lag 0) | +0.190 |
+| **Peak cross-corr** | **lag −3, r = +0.404** (stable across band) |
+| Runtime | ~15s cached / ~23s per band point (75k loans × 42 months × 2 regimes) |
 
-Literature microsim is calibrated via defendable bounds (PSA speed, Rothstein band, involuntary floor) — not fitted to $764.7B. Peak lag −3 confirms hazard leads SOMA by ~3 months (TBA pipeline).
+Literature microsim is calibrated via defendable bounds (PSA speed, Rothstein band, involuntary floor) — not fitted to $764.7B. Peak lag −3 confirms hazard leads SOMA by ~3 months (TBA pipeline). The earlier $747B (97.7%) figure predates the β₁ units fix (§15) and is reproducible from the `pre-fix-2026-07` baseline.
 
 ---
 
@@ -428,13 +428,14 @@ Reproduce: `cd abm && python3 freeze_run.py --tag run-2026-07-04` → `data/runs
 | Holdout RMSE | ~38pp |
 | Stratum FE | 295 four-way pools |
 
-### Hazard Path B — literature microsim (Freddie 2017–2021)
+### Hazard Path B — literature microsim (Freddie 2017–2021, post-β₁-fix)
 
 | Metric | Value |
 |---|---|
-| Trapped liquidity | **$747B (97.7%)** |
-| CPR r (lag 0) | +0.368 |
-| **Peak cross-corr** | **lag −3, r = +0.444** |
+| Trapped liquidity | **$818.5B (107.0%)** |
+| Rothstein band (5.5%–7.7%) | $810B – $828B (105.9%–108.2%) |
+| CPR r (lag 0) | +0.190 |
+| **Peak cross-corr** | **lag −3, r = +0.404** |
 
 ---
 
@@ -517,6 +518,54 @@ recursion between `_stratum_fe_row` and `_stratum_dummy_matrix`
 (`hazard/hazard_fit.py`); fixed mechanically, refit reproduces committed
 coefficients byte-for-byte.
 
+### Fix 3 — Rothstein elasticity band propagation (done), and the β₁ units bug it exposed
+
+**Parameterization:** `run_qt_microsim()` now takes `p_q_shock_pct` and derives
+β₁ via the survival-function conversion per band point — one parameterized
+function, no copied code paths. `extension_risk.py --mode literature --band`
+re-runs the full 75k-loan × 42-month × 2-regime microsim at 5.5% / 6.5% / 7.7%
+(same loan sample and RNG seeds; only β₁ varies), scores each against the
+benchmark, and writes `hazard/data/extension_risk_band_literature.json` with
+the Table-1 interval. Central 6.5% run keeps the standard cache; band edges
+cache as `microsim_results_pq{5.5,7.7}.parquet`. Runtime ~23s per band point.
+
+**Validation of the parameterization (pre-bug-fix):** with the original
+hazard code the central run reproduced $747.3B / 97.7% exactly, confirming
+the parameterization itself changed nothing.
+
+**Bug the band exposed:** the band came out flat ($747.1B–$747.4B), which
+diagnosis traced to a units/sign mismatch: `rothstein_beta1()` returns
+ln(h_shocked/h_base) **per +100bp of lock-in**, but `prepay_hazard()` applied
+it to the **decimal** rate gap (`beta1 * rate_gap`). At a typical QT state
+(3.0% coupon, 6.8% market) the multiplier was ×1.0026 — inert and
+wrong-signed — versus the intended ×0.77. The lock-in elasticity channel
+contributed nothing to the $747B headline; that figure was produced by the
+PSA baseline + involuntary floor + burnout alone.
+
+**Fix (user-approved):** `prepay_hazard` now applies
+`exp(-β₁ · 100 · rate_gap)` — one β₁ of suppression per −100bp of refi
+incentive, matching Path A's positive-coefficient-on-gap convention.
+`rate_gap_danish` was simultaneously moved from price units (PV/balance − 1)
+to rate-equivalent units using the NPV identity: the buyback discount exactly
+offsets the PV of the locked-in spread, so the Danish effective gap is 0 when
+out-of-the-money and `coupon − market` when in-the-money (buyback capped at
+par) — implementing the documented "resets toward baseline" semantics.
+
+**Post-fix results (supersede the $747B / 97.7% headline):**
+
+| P_q shock | Trapped | Share | CPR r (lag 0) | Peak |
+|---|---|---|---|---|
+| 5.5% | $809.9B | 105.9% | +0.248 | lag −3, r = +0.423 |
+| **6.5% (central)** | **$818.5B** | **107.0%** | +0.190 | lag −3, r = +0.404 |
+| 7.7% | $827.7B | 108.2% | +0.094 | lag −3, r = +0.371 |
+
+Sensitivity interval for Table 1 / §V.C: **$810B – $828B (105.9%–108.2% of
+benchmark)**. Peak cross-correlation lag is stable at −3 across the band
+(TBA settlement pipeline). Stronger mobility suppression now correctly maps
+to more trapped liquidity. Path B moves from just under the benchmark to
+modest over-prediction, consistent in direction with Path A (119.7%). The
+pre-fix $747B remains reproducible from the `pre-fix-2026-07` baseline tag.
+
 ---
 
 ## Appendix — File Map
@@ -541,4 +590,4 @@ Lock-in-Effect/
 
 ---
 
-*Last updated: July 2026. Hazard spec v3: stratum FE (295 pools), burnout sign fixed (−0.13), literature microsim at 97.7% trapped.*
+*Last updated: July 2026. Hazard spec v3: stratum FE (295 pools), burnout sign fixed (−0.13). Literature microsim at 107.0% trapped (band 105.9%–108.2%) after the β₁ units fix (§15).*
