@@ -129,7 +129,7 @@ actual_rolloff = -holdings * (empirical_CPR/12 + scheduled_SMM)
     df["Empirical_CPR_Pct"] = (empirical_smm.clip(lower=0) * 12 * 100)
 ```
 
-This produces an `Empirical_CPR_Pct` series ranging from 0.00% to 14.02% (mean 5.53%) over the active QT window, directly comparable to the ABM's `US_CPR_Pct` (7.55%-21.72%, mean 11.98%). Multi-cohort runs now use **cohort-weighted** `Scheduled_Amort_SMM` (not the legacy single 3.0% coupon series) so the empirical CPR back-out is apples-to-apples with the simulation. The `cpr_diagnostic.png` chart (via `plot_cpr_diagnostic()`) visualizes this month-by-month, both as a time series and as a scatter against the prevailing mortgage rate.
+This produces an `Empirical_CPR_Pct` series ranging from 0.00% to 14.02% (mean 5.53%) over the active QT window, directly comparable to the ABM's `US_CPR_Pct` (7.55%–21.72%, mean 11.98%) and `Danish_CPR_Pct` (36.26%–51.26%, mean 47.21%; institutional wedge DK−US mean 35.24pp). **All headline CPR means must use `qt_active_frame()`** (42 months, June 2022–November 2025). Aggregating with `index >= QT_START` alone pulls in eight post-QT months (December 2025 onward) and drifts means (e.g. US 12.32%, empirical 5.45%). Multi-cohort runs use **cohort-weighted** `Scheduled_Amort_SMM` (not the legacy single 3.0% coupon series) so the empirical CPR back-out is apples-to-apples with the simulation. Frozen numbers: `abm/data/runs/run-2026-07-04/manifest.json` via `freeze_run.py`. The `cpr_diagnostic.png` chart visualizes this month-by-month.
 
 ---
 
@@ -209,7 +209,7 @@ df["Danish_Missed_Rolloff_Billions"] = (
 )
 ```
 
-Because the Danish CPR is always high (borrowers can profitably prepay at a discount whenever rates rise above their coupon — roughly 21-27% CPR throughout the QT window), the simulated Danish roll-off **always exceeded** the QT cap. That means `Danish_Extension_Delta_Billions` was **negative every single month** (overshoot, never a shortfall). `.clip(lower=0)` turned every one of those negative values to zero, so summing 42 months of zeros gave **exactly $0.0B** — not because the Danish counterfactual didn't matter economically, but because the accumulation formula structurally couldn't register overshoot at all.
+Because the Danish CPR is always high under market-value buyback (current production surface: **36.3%–51.3%**, mean **47.2%** over the 42-month active QT window; historical rational-only calibration was ~21–27% with a ~17.6pp DK−US wedge), the simulated Danish roll-off **always exceeded** the QT cap. That means `Danish_Extension_Delta_Billions` was **negative every single month** (overshoot, never a shortfall). `.clip(lower=0)` turned every one of those negative values to zero, so summing 42 months of zeros gave **exactly $0.0B** — not because the Danish counterfactual didn't matter economically, but because the accumulation formula structurally couldn't register overshoot at all.
 
 This silently collapsed the "institutional gap" claim:
 
@@ -221,7 +221,7 @@ The gap figure being cited in early drafts (e.g., "$924.5B") was therefore just 
 
 ### Stage 1 — net accumulation without dynamic balance: -$1,132B
 
-Fixing the one-sided clip (Section 3) let overshoot register as a negative contribution, which is correct in principle. But the Danish roll-off was still being computed as `-holdings_b * (danish_CPR/12 + scheduled_SMM)`, where `holdings_b` is the **actual U.S. balance path** (`WSHOMCB / 1000`) — i.e., applying a ~24% annual prepayment rate to a balance that hadn't actually shrunk by that much. Compounding this error over 42 months of QT produced an economically implausible **-$1,132B** Danish trapped liquidity, and an inflated **$1,676.1B** institutional gap.
+Fixing the one-sided clip (Section 3) let overshoot register as a negative contribution, which is correct in principle. But the Danish roll-off was still being computed as `-holdings_b * (danish_CPR/12 + scheduled_SMM)`, where `holdings_b` is the **actual U.S. balance path** (`WSHOMCB / 1000`) — i.e., applying a ~47% annual prepayment rate (current surface; ~24% under the older calibration) to a balance that hadn't actually shrunk by that much. Compounding this error over 42 months of QT produced an economically implausible **-$1,132B** Danish trapped liquidity, and an inflated **$1,676.1B** institutional gap.
 
 ### Stage 2 — dynamic-balance simulation (superseded; see Section 17 for current)
 
@@ -445,34 +445,37 @@ Three compounding effects explain the counter-intuitive direction:
 
 ## 17. Final Numbers Table
 
-Single source of truth for every headline figure, **current as of the correctness-fix + settlement-lag pipeline re-run (July 2026)**. Historical figures in Sections 15–19 predate the QT-window aggregation fix (Section 5).
+Single source of truth for every headline figure, **frozen as `run-2026-07-04`** (`python3 freeze_run.py`). Reproduce via `export_headline_metrics()` / `print_summary()` — both aggregate over `qt_active_frame()` only. Historical figures in Sections 15–19 predate the QT-window aggregation fix (Section 5).
 
 | Metric | Value | Source |
 |---|---|---|
-| Empirical trapped liquidity (SOMA, phased cap, active QT window) | **$764.7B** | `print_summary()`, "Net Trapped Liquidity" |
-| ABM U.S. trapped liquidity (surface + settlement lag) | **$101.2B** (13.2% of empirical) | `print_summary()`, "U.S. System Trapped Liquidity" |
+| **Run tag** | **`run-2026-07-04`** | `abm/data/runs/run-2026-07-04/manifest.json` |
+| Empirical trapped liquidity (SOMA, phased cap, active QT window) | **$764.7B** | `manifest.json` → `metrics.dollars_b.empirical_trapped` |
+| ABM U.S. trapped liquidity (surface + settlement lag) | **$101.2B** (13.2% of empirical) | `manifest.json` → `metrics.dollars_b.us_trapped` |
 | ABM U.S. trapped (surface only, no lag) | **$117.7B** (15.4%) | `compute_metrics(apply_settlement_lag_kernel=False)` |
-| ABM Danish trapped liquidity (dynamic balance) | **-$829.1B** | `print_summary()`, "Danish System Trapped Liquidity" |
-| Danish portfolio path | $2,535B → $428B | `print_summary()`, "Danish Portfolio" |
-| Institutional gap (U.S. − Danish) | **$930.3B** | `print_summary()`, "Institutional Gap" |
-| Scheduled amortization during QT | $224.1B (≈2.68% ann.) | `print_summary()`, "Sched. amortization" |
-| Curtailment during QT | $69.6B (≈0.84% ann. avg SMM) | `print_summary()`, "Curtailment during QT" |
+| ABM Danish trapped liquidity (dynamic balance) | **-$829.1B** | `manifest.json` → `metrics.dollars_b.danish_trapped` |
+| Danish portfolio path | $2,535B → $428B | `manifest.json` → `metrics.danish_portfolio_b` |
+| Institutional gap (U.S. − Danish) | **$930.3B** | `manifest.json` → `metrics.dollars_b.institutional_gap` |
+| Scheduled amortization during QT | $224.1B (≈2.68% ann.) | `manifest.json` → `metrics.scheduled_amort_b` |
+| Curtailment during QT | $69.6B (≈0.84% ann. avg SMM) | `manifest.json` → `metrics.curtailment_b` |
 | SOMA 30yr WAC (live cohort fetch) | **2.55%** (7 buckets) | `fetch_soma_mbs_cohorts()` |
 | Reference calibration cohort | **2.00%** coupon, 39.7% weight | `reference_cohort()` |
-| Empirical CPR range | 0.00% - 14.02% (mean 5.53%) | `print_summary()`, "CPR DIAGNOSTIC" |
-| ABM U.S. CPR range | 7.55% - 21.72% (mean 11.98%) | `print_summary()`, "CPR DIAGNOSTIC" |
-| CPR goodness-of-fit (raw) | R²=-6.443, RMSE=7.73pp, MAE=6.58pp, r=-0.316 | `cpr_goodness_of_fit()` |
-| CPR goodness-of-fit (smoothed) | R²=-14.464, RMSE=7.14pp, MAE=6.41pp, r=-0.397 | `cpr_goodness_of_fit()` |
-| Cross-correlation (best lag) | +0.192 at lag -3 (not meaningful) | `cpr_cross_correlation()` |
-| Holdout split — in-sample | R²=-10.990, RMSE=8.86pp, share=-11.1% | `print_summary()`, "Holdout split" |
-| Holdout split — out-of-sample | R²=-4.222, RMSE=6.66pp, share=32.5% | `print_summary()`, "Holdout split" |
+| Empirical CPR range | 0.00% - 14.02% (mean 5.53%) | `manifest.json` → `metrics.cpr_pct.empirical` |
+| ABM U.S. CPR range | 7.55% - 21.72% (mean 11.98%) | `manifest.json` → `metrics.cpr_pct.us_abm` |
+| Danish CPR range | 36.26% - 51.26% (mean 47.21%) | `manifest.json` → `metrics.cpr_pct.danish` |
+| Institutional wedge (Danish − U.S. CPR) | 21.20–39.37pp (mean **35.24pp**) | `manifest.json` → `metrics.cpr_pct.wedge_dk_minus_us_pp` |
+| CPR goodness-of-fit (raw) | R²=-6.443, RMSE=7.73pp, MAE=6.58pp, r=-0.316 | `manifest.json` → `metrics.goodness_of_fit.raw` |
+| CPR goodness-of-fit (smoothed) | R²=-14.464, RMSE=7.14pp, MAE=6.41pp, r=-0.397 | `manifest.json` → `metrics.goodness_of_fit.smoothed` |
+| Cross-correlation (best lag) | +0.192 at lag -3 (not meaningful) | `manifest.json` → `metrics.cross_correlation_peak` |
+| Holdout split — in-sample | R²=-10.990, RMSE=8.86pp, share=-11.1% | `manifest.json` → `metrics.holdout.in_sample` |
+| Holdout split — out-of-sample | R²=-4.222, RMSE=6.66pp, share=32.5% | `manifest.json` → `metrics.holdout.out_of_sample` |
 | Sensitivity sweep range (125 scenarios) | Trapped -$265.1B–$265.5B; Share -34.7%–34.7% | `sensitivity_analysis.py` |
 | Robustness — data source | SOMA $764.7B vs WSHOMCB $763.7B (<0.2% diff) | `robustness_analysis.py`, Panel B |
 | Robustness — cap schedule (18 scenarios) | Empirical $479.6B–$782.2B; Share -24.6%–15.2% | `robustness_analysis.py`, Panel C |
 | Monte Carlo (50 population draws) | Mean $113.5B, Std $24.8B, 95% CI [$106.6B, $120.4B] | `monte_carlo_simulation.py` |
 | Monte Carlo runtime (multi-cohort) | 4.6 min total (~5.5 s/seed) | `monte_carlo_simulation.py` |
 | Vintage burnout (survivor selection) | **$1,123.9B** (147%) — failed pre-registration | Section 20 |
-| Dynamic friction range | 8.23% - 10.26% (mean 9.05%) | `print_summary()`, "DYNAMIC MACROECONOMIC FRICTION" |
+| Dynamic friction range | 8.23% - 9.96% (mean 8.95%) | `manifest.json` → `metrics.dynamic_friction_pct` |
 
 ---
 

@@ -243,7 +243,7 @@ Instead of a static 7% transaction cost, friction floats month-by-month based on
 6. **Dynamic friction**: computed first so the CPR surface can be sampled at each month's `(rate, friction)` coordinate.
 7. **ABM counterfactual CPR paths**: `US_CPR_Pct`, `Danish_CPR_Pct` interpolated from the surface.
 8. **U.S. simulated roll-off**: `−holdings · (CPR/12 + scheduled_SMM)` applied to the actual (observed) balance path, since the ABM's U.S. CPR is meant to approximate reality.
-9. **Danish simulated roll-off — dynamic balance**: rather than applying the (much higher, ~21-27%) Danish CPR to the static U.S. balance, the code simulates the Danish portfolio balance **forward month-by-month from the QT-start level**, so each month's roll-off is applied to the *already-shrunk* balance. This matters: Danish CPR is high enough that a static-balance application produces an economically implausible result (see [TECHNICAL.md §12](TECHNICAL.md) for the full bug history).
+9. **Danish simulated roll-off — dynamic balance**: rather than applying the much higher Danish CPR (**36–51%** on the current multi-cohort 3D surface; mean **47.2%** over the active QT window) to the static U.S. balance, the code simulates the Danish portfolio balance **forward month-by-month from the QT-start level**, so each month's roll-off is applied to the *already-shrunk* balance. Headline figures are frozen per run tag (`python3 freeze_run.py`; see `data/runs/`). See [TECHNICAL.md §12](TECHNICAL.md) for the full bug history.
 10. **Per-system extension deltas, missed roll-off, and cumulative trapped liquidity** for both the U.S. and Danish counterfactuals (same QT-active / flatline logic, net accumulation as in step 3).
 
 ### 5.6 Goodness-of-fit and diagnostics — `cpr_goodness_of_fit()`, `cpr_cross_correlation()`
@@ -327,6 +327,9 @@ python3 abm_lockin_simulation.py
 # 2. Macro analysis → reads the surface + SOMA API, writes the dashboard, CPR diagnostic, and console summary
 python3 fed_mbs_extension_risk.py
 
+# 2b. Freeze a tagged run (manifest + monthly CSV + figure copies) — cite this tag in docs/paper
+python3 freeze_run.py --tag run-2026-07-04
+
 # 3. (Optional) Re-render the ABM CSVs as standalone charts
 python3 visualize_abm_outputs.py
 
@@ -342,7 +345,7 @@ Alternatively, from the repo root: `python3 abm/abm_lockin_simulation.py` (same 
 
 ### Expected generated files
 
-`abm_lockin_results.csv`, `abm_cpr_surface.csv`, `abm_lockin_scurve.png`, `abm_lockin_results_viz.png`, `abm_cpr_surface_viz.png`, `mbs_extension_risk_dashboard.png`, `cpr_diagnostic.png`, `sensitivity_results.csv`, `robustness_results.csv`, `monte_carlo_results.csv`, `monte_carlo_trapped_liquidity.png`.
+`abm_lockin_results.csv`, `abm_cpr_surface.csv`, …, `monte_carlo_trapped_liquidity.png`, and per-run artifacts under `data/runs/<tag>/` (`manifest.json`, `metrics_monthly.csv`).
 
 ---
 

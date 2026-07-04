@@ -202,10 +202,10 @@ The Danish counterfactual was the most serious bug chain in the project:
 | Stage | Danish Trapped | Institutional Gap | Root cause |
 |---|---|---|---|
 | **0** | **$0.0B** | ≈ U.S. only | `.clip(lower=0)` zeroed every month of overshoot |
-| **1** | **-$1,132B** | $1,676B | ~24% Danish CPR applied to static U.S. balance |
+| **1** | **-$1,132B** | $1,676B | ~47% Danish CPR (current surface) applied to static U.S. balance |
 | **2 (current)** | **-$829.1B** | **$930.3B** | Dynamic declining-balance simulation per cohort |
 
-**Why Stage 0 happened:** Danish CPR is always high under market-value buyback (21–27% during QT). Simulated roll-off consistently **exceeded** the QT cap, producing negative extension deltas every month. One-sided clipping turned all negatives to zero.
+**Why Stage 0 happened:** Danish CPR is always high under market-value buyback (**36–51%** on the current production surface, mean **47.2%** over the 42-month active QT window; the older rational-only calibration was ~21–27%). Simulated roll-off consistently **exceeded** the QT cap, producing negative extension deltas every month. One-sided clipping turned all negatives to zero.
 
 **Why Stage 2 is correct:** Danish balance is simulated forward month-by-month from QT-start holdings, applying Danish CPR + scheduled amort + curtailment to the *already-shrunk* balance each month.
 
@@ -401,7 +401,7 @@ Literature microsim is calibrated via defendable bounds (PSA speed, Rothstein ba
 | Empirical CPR mean | 5.53% |
 | SOMA 30yr WAC | 2.55% (7 buckets) |
 
-### ABM (production: surface + settlement lag)
+### ABM (production: surface + settlement lag, **`run-2026-07-04`**)
 
 | Metric | Value |
 |---|---|
@@ -409,8 +409,12 @@ Literature microsim is calibrated via defendable bounds (PSA speed, Rothstein ba
 | Danish trapped (dynamic balance) | **-$829.1B** |
 | Institutional gap (U.S. − Danish) | **$930.3B** |
 | U.S. CPR mean | 11.98% |
+| Danish CPR mean | 47.21% (range 36.26%–51.26%) |
+| Institutional wedge (DK − US) | 35.24pp mean |
 | CPR R² (raw) | -6.443 |
 | Monte Carlo mean (50 seeds) | $113.5B [95% CI: $106.6B–$120.4B] |
+
+Reproduce: `cd abm && python3 freeze_run.py --tag run-2026-07-04` → `data/runs/run-2026-07-04/manifest.json`. All CPR means use the 42-month active QT window (`qt_active_frame`), not `index >= QT_START` alone.
 
 ### Hazard Path A — cohort fractional (Freddie 2017–2021, spec v3)
 

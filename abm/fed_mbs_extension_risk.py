@@ -1373,19 +1373,232 @@ def plot_cpr_diagnostic(df: pd.DataFrame,
 # ---------------------------------------------------------------------------
 # Section 4 – Summary Statistics
 # ---------------------------------------------------------------------------
+def expected_qt_active_months() -> int:
+    """Number of months in [QT_START, QT_END) — must match qt_active_frame()."""
+    probe = pd.date_range("2018-01-01", "2030-01-01", freq="ME")
+    return int(qt_active_mask(probe).sum())
+
+
+def _series_stats(s: pd.Series) -> dict:
+    s = s.dropna()
+    if s.empty:
+        return {"min": None, "mean": None, "max": None, "std": None, "n": 0}
+    return {
+        "min": float(s.min()),
+        "mean": float(s.mean()),
+        "max": float(s.max()),
+        "std": float(s.std()) if len(s) > 1 else 0.0,
+        "n": int(len(s)),
+    }
+
+
+def export_headline_metrics(df: pd.DataFrame) -> dict:
+    """
+    Single source of truth for headline figures.  Always aggregates over
+    qt_active_frame() — the 42-month active QT window [QT_START, QT_END).
+    """
+    qt_df = qt_active_frame(df)
+    n_months = len(qt_df)
+    expected = expected_qt_active_months()
+
+    total_trapped = float(qt_df["Extension_Delta_Billions"].sum())
+    total_trapped_us = float(qt_df["US_Missed_Rolloff_Billions"].sum())
+    total_trapped_dk = float(qt_df["Danish_Missed_Rolloff_Billions"].sum())
+    institutional_gap = total_trapped_us - total_trapped_dk
+    share_explained = (total_trapped_us / total_trapped * 100
+                       if total_trapped else float("nan"))
+
+    out = {
+        "qt_window": {
+            "start": QT_START.strftime("%Y-%m-%d"),
+            "end_exclusive": QT_END.strftime("%Y-%m-%d"),
+            "end_inclusive_label": (
+                (QT_END - pd.offsets.MonthBegin(1)).strftime("%B %Y")
+            ),
+            "n_months": n_months,
+            "n_months_expected": expected,
+        },
+        "dollars_b": {
+            "empirical_trapped": total_trapped,
+            "us_trapped": total_trapped_us,
+            "danish_trapped": total_trapped_dk,
+            "institutional_gap": institutional_gap,
+            "share_explained_pct": share_explained,
+            "avg_actual_rolloff_monthly": float(
+                qt_df["Actual_Monthly_Rolloff_Billions"].mean()
+            ),
+        },
+        "rolloff_source": (
+            str(df["Rolloff_Source"].iloc[0])
+            if "Rolloff_Source" in df.columns else None
+        ),
+    }
+
+    if "Danish_Balance_Billions" in qt_df.columns:
+        out["danish_portfolio_b"] = {
+            "start": float(qt_df["Danish_Balance_Billions"].iloc[0]),
+            "end": float(qt_df["Danish_Balance_Billions"].iloc[-1]),
+        }
+
+    if "Scheduled_Amort_SMM" in qt_df.columns:
+        smm = qt_df["Scheduled_Amort_SMM"]
+        holdings_b = qt_df["WSHOMCB"] / 1_000
+        out["scheduled_amort_b"] = {
+            "total": float((holdings_b * smm).sum()),
+            "smm_mean_pct": float(smm.mean() * 100),
+            "annualized_pct": float(smm.mean() * 12 * 100),
+        }
+
+    if "Curtailment_SMM" in qt_df.columns:
+        curt = qt_df["Curtailment_SMM"]
+        holdings_b = qt_df["WSHOMCB"] / 1_000
+        out["curtailment_b"] = {
+            "total": float((holdings_b * curt).sum()),
+            "smm_mean_pct": float(curt.mean() * 100),
+            "annualized_pct": float(curt.mean() * 12 * 100),
+        }
+
+    if "Empirical_CPR_Pct" in qt_df.columns:
+        ecpr = qt_df["Empirical_CPR_Pct"]
+        acpr = qt_df["US_CPR_Pct"]
+        dcpr = qt_df["Danish_CPR_Pct"]
+        wedge = dcpr - acpr
+        abm_gap = acpr - ecpr
+        gof = cpr_goodness_of_fit(ecpr, acpr)
+        xcorr = cpr_cross_correlation(ecpr, acpr)
+
+        out["cpr_pct"] = {
+            "empirical": _series_stats(ecpr),
+            "us_abm": _series_stats(acpr),
+            "danish": _series_stats(dcpr),
+            "wedge_dk_minus_us_pp": _series_stats(wedge),
+            "abm_minus_empirical_pp": {
+                "mean": float(abm_gap.mean()),
+                "max": float(abm_gap.max()),
+            },
+        }
+        out["goodness_of_fit"] = gof
+        out["cross_correlation"] = {str(k): v for k, v in xcorr.items()}
+        best_lag = max(xcorr, key=xcorr.get) if xcorr else None
+        out["cross_correlation_peak"] = (
+            {"lag": int(best_lag), "r": float(xcorr[best_lag])}
+            if best_lag is not None else None
+        )
+
+        holdout_date = pd.Timestamp("2024-01-01")
+        in_mask = ecpr.index < holdout_date
+        out_mask = ecpr.index >= holdout_date
+        if in_mask.sum() >= 6 and out_mask.sum() >= 6:
+            gof_in = cpr_goodness_of_fit(ecpr[in_mask], acpr[in_mask])
+            gof_out = cpr_goodness_of_fit(ecpr[out_mask], acpr[out_mask])
+            in_trapped = float(
+                qt_df.loc[in_mask, "US_Missed_Rolloff_Billions"].sum()
+            )
+            in_emp = float(qt_df.loc[in_mask, "Extension_Delta_Billions"].sum())
+            out_trapped = float(
+                qt_df.loc[out_mask, "US_Missed_Rolloff_Billions"].sum()
+            )
+            out_emp = float(
+                qt_df.loc[out_mask, "Extension_Delta_Billions"].sum()
+            )
+            out["holdout"] = {
+                "split_date": holdout_date.strftime("%Y-%m-%d"),
+                "in_sample": {
+                    **gof_in["raw"],
+                    "share_explained_pct": (
+                        in_trapped / in_emp * 100 if in_emp else float("nan")
+                    ),
+                },
+                "out_of_sample": {
+                    **gof_out["raw"],
+                    "share_explained_pct": (
+                        out_trapped / out_emp * 100 if out_emp else float("nan")
+                    ),
+                },
+            }
+
+    if "Dynamic_Friction" in qt_df.columns:
+        fric = qt_df["Dynamic_Friction"] * 100
+        out["dynamic_friction_pct"] = _series_stats(fric)
+
+    if n_months != expected:
+        out["warning"] = (
+            f"qt_active_frame has {n_months} months; expected {expected}. "
+            "Do not cite headline CPR means from index >= QT_START without "
+            "the QT_END upper bound — that includes post-QT months."
+        )
+
+    return out
+
+
+def build_production_metrics(
+    apply_settlement_lag_kernel: bool = True,
+) -> tuple:
+    """
+    Fetch live data and run the production compute_metrics() path used by
+    main(), sensitivity_analysis, and freeze_run.
+    Returns (metrics_df, calibration_meta).
+    """
+    import abm_lockin_simulation as abm
+
+    df = fetch_data()
+    soma_rolloff = fetch_soma_mbs_monthly()
+    cohorts = fetch_soma_mbs_cohorts()
+    ref = abm.reference_cohort(cohorts)
+    income, home_value = abm.fetch_macro_from_fred()
+    mobility_scale = abm.calibrate_mobility_scale(
+        income, home_value,
+        cohort_rate=ref["coupon"],
+        cohort_months=ref["months_elapsed"],
+    )
+    abm_params = {
+        "mobility_scale": mobility_scale,
+        "median_income": income,
+        "median_home_value": home_value,
+    }
+    df = compute_metrics(
+        df,
+        soma_rolloff=soma_rolloff,
+        cohorts=cohorts,
+        use_burnout=False,
+        apply_settlement_lag_kernel=apply_settlement_lag_kernel,
+        abm_params=abm_params,
+    )
+    meta = {
+        "apply_settlement_lag_kernel": apply_settlement_lag_kernel,
+        "mobility_scale": mobility_scale,
+        "median_income": income,
+        "median_home_value": home_value,
+        "reference_cohort": ref,
+        "n_cohorts": len(cohorts),
+        "cohort_wac_pct": round(
+            sum(c["coupon"] * c["weight"] for c in cohorts) * 100, 2
+        ),
+    }
+    return df, meta
+
+
 def print_summary(df: pd.DataFrame):
     """Print key aggregate metrics to stdout."""
-    qt_df = qt_active_frame(df)
+    metrics = export_headline_metrics(df)
+    n_months = metrics["qt_window"]["n_months"]
+    expected = metrics["qt_window"]["n_months_expected"]
+    if n_months != expected:
+        print(
+            f"\nWARNING: aggregating {n_months} QT months "
+            f"(expected {expected}). Use qt_active_frame(), not "
+            f"index >= QT_START alone.\n"
+        )
 
-    total_trapped = qt_df["Extension_Delta_Billions"].sum()
-    avg_rolloff = qt_df["Actual_Monthly_Rolloff_Billions"].mean()
+    dollars = metrics["dollars_b"]
+    total_trapped = dollars["empirical_trapped"]
+    total_trapped_us = dollars["us_trapped"]
+    total_trapped_dk = dollars["danish_trapped"]
+    institutional_gap = dollars["institutional_gap"]
+    share_explained = dollars["share_explained_pct"]
 
-    total_trapped_us = qt_df["US_Missed_Rolloff_Billions"].sum()
-    total_trapped_dk = qt_df["Danish_Missed_Rolloff_Billions"].sum()
-    institutional_gap = total_trapped_us - total_trapped_dk
-
-    rolloff_source = df["Rolloff_Source"].iloc[0] if "Rolloff_Source" in df else "?"
-    qt_end_prev = (QT_END - pd.offsets.MonthBegin(1)).strftime("%B %Y")
+    rolloff_source = metrics.get("rolloff_source", "?")
+    qt_end_prev = metrics["qt_window"]["end_inclusive_label"]
     print("\n" + "=" * 65)
     print(" MBS EXTENSION RISK — SUMMARY STATISTICS")
     print("=" * 65)
@@ -1397,50 +1610,48 @@ def print_summary(df: pd.DataFrame):
           f"  {QT_TARGET_FULL_B:+.0f} $B / month")
     print(f"  Post-QT Target (from {QT_END.strftime('%B %Y')}):"
           f"  {POST_QT_TARGET_B:+.0f} $B / month")
-    print(f"  Avg Actual Roll-Off:      {avg_rolloff:+.2f} $B / month")
+    print(f"  Avg Actual Roll-Off:      {dollars['avg_actual_rolloff_monthly']:+.2f} $B / month")
     print(f"  Net Trapped Liquidity (sum of monthly deltas):"
           f"  ${total_trapped:,.1f}B")
-    share_explained = (total_trapped_us / total_trapped * 100
-                       if total_trapped else float("nan"))
     print("-" * 65)
     print(" ABM-CALIBRATED COUNTERFACTUALS (CPR + sched. amort. + curtailment)")
     print(f"  U.S. System Trapped Liquidity:    ${total_trapped_us:,.1f}B"
           f"  ({share_explained:.1f}% of empirical)")
     print(f"  Danish System Trapped Liquidity:  ${total_trapped_dk:,.1f}B"
           f"  (dynamic-balance counterfactual)")
-    if "Danish_Balance_Billions" in df.columns:
-        dk_end = qt_df["Danish_Balance_Billions"].iloc[-1]
-        dk_start = qt_df["Danish_Balance_Billions"].iloc[0]
-        print(f"  Danish Portfolio: ${dk_start:,.0f}B → ${dk_end:,.0f}B "
-              f"(−${dk_start - dk_end:,.0f}B)")
+    if "danish_portfolio_b" in metrics:
+        dk = metrics["danish_portfolio_b"]
+        print(f"  Danish Portfolio: ${dk['start']:,.0f}B → ${dk['end']:,.0f}B "
+              f"(−${dk['start'] - dk['end']:,.0f}B)")
     print(f"  Institutional Gap (U.S. − Danish): ${institutional_gap:,.1f}B")
-    if "Scheduled_Amort_SMM" in df.columns:
-        smm = qt_df["Scheduled_Amort_SMM"]
-        holdings_b = qt_df["WSHOMCB"] / 1_000
-        amort_total = (holdings_b * smm).sum()
-        print(f"  Sched. amortization during QT:    ${amort_total:,.1f}B "
-              f"(SMM {smm.mean()*100:.3f}% avg ≈ "
-              f"{smm.mean()*12*100:.2f}% ann.)")
-    if "Curtailment_SMM" in df.columns:
-        curt_smm = qt_df["Curtailment_SMM"]
-        holdings_b_qt = qt_df["WSHOMCB"] / 1_000
-        curt_total = (holdings_b_qt * curt_smm).sum()
-        print(f"  Curtailment during QT:            ${curt_total:,.1f}B "
-              f"(SMM {curt_smm.mean()*100:.3f}% avg ≈ "
-              f"{curt_smm.mean()*12*100:.2f}% ann.)")
-    if "Empirical_CPR_Pct" in df.columns:
-        ecpr = qt_df["Empirical_CPR_Pct"]
-        acpr = qt_df["US_CPR_Pct"]
-        gap = acpr - ecpr
-        gof = cpr_goodness_of_fit(ecpr, acpr)
+    if "scheduled_amort_b" in metrics:
+        sa = metrics["scheduled_amort_b"]
+        print(f"  Sched. amortization during QT:    ${sa['total']:,.1f}B "
+              f"(SMM {sa['smm_mean_pct']:.3f}% avg ≈ "
+              f"{sa['annualized_pct']:.2f}% ann.)")
+    if "curtailment_b" in metrics:
+        cb = metrics["curtailment_b"]
+        print(f"  Curtailment during QT:            ${cb['total']:,.1f}B "
+              f"(SMM {cb['smm_mean_pct']:.3f}% avg ≈ "
+              f"{cb['annualized_pct']:.2f}% ann.)")
+    if "cpr_pct" in metrics:
+        cpr = metrics["cpr_pct"]
+        gof = metrics["goodness_of_fit"]
         print("-" * 65)
         print(" CPR DIAGNOSTIC (ABM vs. SOMA-implied empirical)")
-        print(f"  Empirical CPR:  min {ecpr.min():.2f}%  |  "
-              f"mean {ecpr.mean():.2f}%  |  max {ecpr.max():.2f}%")
-        print(f"  ABM U.S. CPR:   min {acpr.min():.2f}%  |  "
-              f"mean {acpr.mean():.2f}%  |  max {acpr.max():.2f}%")
-        print(f"  ABM - Empirical gap:  mean {gap.mean():+.2f}pp  |  "
-              f"max {gap.max():+.2f}pp")
+        e, u, d = cpr["empirical"], cpr["us_abm"], cpr["danish"]
+        print(f"  Empirical CPR:  min {e['min']:.2f}%  |  "
+              f"mean {e['mean']:.2f}%  |  max {e['max']:.2f}%")
+        print(f"  ABM U.S. CPR:   min {u['min']:.2f}%  |  "
+              f"mean {u['mean']:.2f}%  |  max {u['max']:.2f}%")
+        print(f"  Danish CPR:     min {d['min']:.2f}%  |  "
+              f"mean {d['mean']:.2f}%  |  max {d['max']:.2f}%")
+        w = cpr["wedge_dk_minus_us_pp"]
+        print(f"  Institutional wedge (DK−US):  mean {w['mean']:.2f}pp  |  "
+              f"range {w['min']:.2f}–{w['max']:.2f}pp")
+        ag = cpr["abm_minus_empirical_pp"]
+        print(f"  ABM - Empirical gap:  mean {ag['mean']:+.2f}pp  |  "
+              f"max {ag['max']:+.2f}pp")
         r = gof["raw"]
         s = gof["smoothed"]
         print(f"  Goodness-of-fit (N={r['n']} months):")
@@ -1449,7 +1660,7 @@ def print_summary(df: pd.DataFrame):
         print(f"    Smoothed: R²={s['r2']:.3f}  RMSE={s['rmse']:.2f}pp"
               f"  MAE={s['mae']:.2f}pp  r={s['corr']:.3f}")
 
-        xcorr = cpr_cross_correlation(ecpr, acpr)
+        xcorr = {int(k): v for k, v in metrics["cross_correlation"].items()}
         best_lag = max(xcorr, key=xcorr.get)
         print(f"  Cross-correlation (lag −3 … +3 months):")
         lags_str = "    " + "  ".join(
@@ -1463,35 +1674,24 @@ def print_summary(df: pd.DataFrame):
             print(f"  → No lag flips correlation positive; structural sign "
                   f"mismatch, not settlement noise")
 
-        # --- Holdout split: in-sample vs out-of-sample ---
-        holdout_date = pd.Timestamp("2024-01-01")
-        in_mask = ecpr.index < holdout_date
-        out_mask = ecpr.index >= holdout_date
-        if in_mask.sum() >= 6 and out_mask.sum() >= 6:
-            gof_in = cpr_goodness_of_fit(ecpr[in_mask], acpr[in_mask])
-            gof_out = cpr_goodness_of_fit(ecpr[out_mask], acpr[out_mask])
-            ri, ro = gof_in["raw"], gof_out["raw"]
-
-            in_trapped = qt_df.loc[in_mask, "US_Missed_Rolloff_Billions"].sum()
-            in_emp = qt_df.loc[in_mask, "Extension_Delta_Billions"].sum()
-            in_share = in_trapped / in_emp * 100 if in_emp else float("nan")
-
-            out_trapped = qt_df.loc[out_mask, "US_Missed_Rolloff_Billions"].sum()
-            out_emp = qt_df.loc[out_mask, "Extension_Delta_Billions"].sum()
-            out_share = out_trapped / out_emp * 100 if out_emp else float("nan")
-
+        if "holdout" in metrics:
+            h = metrics["holdout"]
+            ri, ro = h["in_sample"], h["out_of_sample"]
+            holdout_date = pd.Timestamp(h["split_date"])
             print(f"  Holdout split at {holdout_date.strftime('%b %Y')}:")
             print(f"    In-sample  (N={ri['n']:>2}): R²={ri['r2']:+.3f}  "
-                  f"RMSE={ri['rmse']:.2f}pp  share={in_share:.1f}%")
+                  f"RMSE={ri['rmse']:.2f}pp  "
+                  f"share={ri['share_explained_pct']:.1f}%")
             print(f"    Out-of-sample (N={ro['n']:>2}): R²={ro['r2']:+.3f}  "
-                  f"RMSE={ro['rmse']:.2f}pp  share={out_share:.1f}%")
+                  f"RMSE={ro['rmse']:.2f}pp  "
+                  f"share={ro['share_explained_pct']:.1f}%")
 
-    if "Dynamic_Friction" in df.columns:
-        fric = df["Dynamic_Friction"] * 100
+    if "dynamic_friction_pct" in metrics:
+        fr = metrics["dynamic_friction_pct"]
         print("-" * 65)
         print(" DYNAMIC MACROECONOMIC FRICTION (inventory + sentiment)")
-        print(f"  Friction range:  min {fric.min():.2f}%  |  "
-              f"mean {fric.mean():.2f}%  |  max {fric.max():.2f}%")
+        print(f"  Friction range:  min {fr['min']:.2f}%  |  "
+              f"mean {fr['mean']:.2f}%  |  max {fr['max']:.2f}%")
     print("=" * 65 + "\n")
 
 
@@ -1499,39 +1699,8 @@ def print_summary(df: pd.DataFrame):
 # Main
 # ---------------------------------------------------------------------------
 def main():
-    import abm_lockin_simulation as abm
-
-    print("Fetching data from FRED …")
-    df = fetch_data()
-
-    print("Fetching SOMA MBS roll-off from NY Fed …")
-    soma_rolloff = fetch_soma_mbs_monthly()
-
-    print("Fetching SOMA MBS coupon cohorts …")
-    cohorts = fetch_soma_mbs_cohorts()
-    ref = abm.reference_cohort(cohorts)
-
-    print("Fetching ABM calibration inputs …")
-    income, home_value = abm.fetch_macro_from_fred()
-    mobility_scale = abm.calibrate_mobility_scale(
-        income, home_value,
-        cohort_rate=ref["coupon"],
-        cohort_months=ref["months_elapsed"],
-    )
-
-    print("Computing extension-risk metrics (settlement lag) …")
-    df = compute_metrics(
-        df,
-        soma_rolloff=soma_rolloff,
-        cohorts=cohorts,
-        use_burnout=False,
-        apply_settlement_lag_kernel=True,
-        abm_params={
-            "mobility_scale": mobility_scale,
-            "median_income": income,
-            "median_home_value": home_value,
-        },
-    )
+    print("Building production metrics (FRED + SOMA + settlement lag) …")
+    df, _meta = build_production_metrics(apply_settlement_lag_kernel=True)
 
     print("Generating dashboard …")
     plot_dashboard(df)

@@ -20,6 +20,7 @@ export FRED_API_KEY="your_key"
 # ABM pipeline
 python3 abm/abm_lockin_simulation.py
 python3 abm/fed_mbs_extension_risk.py
+python3 abm/freeze_run.py --tag run-2026-07-04   # frozen manifest for docs/paper
 
 # Hazard framework (cohort hazard)
 python3 hazard/extension_risk.py

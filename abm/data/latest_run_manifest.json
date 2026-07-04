@@ -1,0 +1,151 @@
+{
+  "run_tag": "run-2026-07-04",
+  "created_at_utc": "2026-07-04T17:43:05.239766+00:00",
+  "git_commit": "dfe955471742c2023730611e90be860b9388b15b",
+  "pipeline": {
+    "script": "freeze_run.py",
+    "module": "fed_mbs_extension_risk.build_production_metrics",
+    "apply_settlement_lag_kernel": true,
+    "mobility_scale": 43882.8125,
+    "median_income": 83730.0,
+    "median_home_value": 403200.0,
+    "reference_cohort": {
+      "coupon": 0.02,
+      "weight": 0.3974940352642312,
+      "origin_date": "2021-07-04T00:00:00",
+      "months_elapsed": 60
+    },
+    "n_cohorts": 7,
+    "cohort_wac_pct": 2.55
+  },
+  "inputs": {
+    "abm_cpr_surface_csv": "abm_cpr_surface.csv",
+    "abm_cpr_surface_sha256": "68332a61d815168b7289438cf1cd7cef5c5b92fc4997ee7379ccb4b08529c85a"
+  },
+  "metrics": {
+    "qt_window": {
+      "start": "2022-06-01",
+      "end_exclusive": "2025-12-01",
+      "end_inclusive_label": "November 2025",
+      "n_months": 42,
+      "n_months_expected": 42
+    },
+    "dollars_b": {
+      "empirical_trapped": 764.7482532227002,
+      "us_trapped": 101.17436325001754,
+      "danish_trapped": -829.1244869809423,
+      "institutional_gap": 930.2988502309598,
+      "share_explained_pct": 13.229760620395275,
+      "avg_actual_rolloff_monthly": -15.541708256602377
+    },
+    "rolloff_source": "SOMA",
+    "danish_portfolio_b": {
+      "start": 2535.4191032548943,
+      "end": 428.21432478244844
+    },
+    "scheduled_amort_b": {
+      "total": 224.0855323785997,
+      "smm_mean_pct": 0.22367296254444097,
+      "annualized_pct": 2.6840755505332914
+    },
+    "curtailment_b": {
+      "total": 69.56220187263008,
+      "smm_mean_pct": 0.0697361088909446,
+      "annualized_pct": 0.8368333066913352
+    },
+    "cpr_pct": {
+      "empirical": {
+        "min": 0.0,
+        "mean": 5.531509209158435,
+        "max": 14.02111378805437,
+        "std": 2.8680656143868197,
+        "n": 42
+      },
+      "us_abm": {
+        "min": 7.550743017764821,
+        "mean": 11.976989724715677,
+        "max": 21.715712981450967,
+        "std": 2.449285058688654,
+        "n": 42
+      },
+      "danish": {
+        "min": 36.25542088575305,
+        "mean": 47.2143562062544,
+        "max": 51.257655128700556,
+        "std": 3.681920414704074,
+        "n": 42
+      },
+      "wedge_dk_minus_us_pp": {
+        "min": 21.19962561859174,
+        "mean": 35.23736648153873,
+        "max": 39.37089958744092,
+        "std": 4.469154745873795,
+        "n": 42
+      },
+      "abm_minus_empirical_pp": {
+        "mean": 6.445480515557243,
+        "max": 20.628110780933905
+      }
+    },
+    "goodness_of_fit": {
+      "raw": {
+        "r2": -6.443036171859481,
+        "rmse": 7.730924476648351,
+        "mae": 6.58136787547411,
+        "corr": -0.31621512794163226,
+        "n": 42
+      },
+      "smoothed": {
+        "r2": -14.464458654200284,
+        "rmse": 7.139215079390726,
+        "mae": 6.411944155818867,
+        "corr": -0.397222509679001,
+        "n": 42
+      }
+    },
+    "cross_correlation": {
+      "-3": 0.19200967006866249,
+      "-2": -0.20947668866577662,
+      "-1": -0.14029811488931665,
+      "0": -0.31621512794163226,
+      "1": -0.20594692140596094,
+      "2": -0.033372530160714106,
+      "3": 0.10302463300225212
+    },
+    "cross_correlation_peak": {
+      "lag": -3,
+      "r": 0.19200967006866249
+    },
+    "holdout": {
+      "split_date": "2024-01-01",
+      "in_sample": {
+        "r2": -10.990349831977058,
+        "rmse": 8.856114683342723,
+        "mae": 7.145582580994379,
+        "corr": -0.6379547444402943,
+        "n": 19,
+        "share_explained_pct": -11.105769057469972
+      },
+      "out_of_sample": {
+        "r2": -4.222038071353255,
+        "rmse": 6.65953888816,
+        "mae": 6.115277466566061,
+        "corr": 0.08418499567292315,
+        "n": 23,
+        "share_explained_pct": 32.4501506815573
+      }
+    },
+    "dynamic_friction_pct": {
+      "min": 8.231826380695836,
+      "mean": 8.95452454686932,
+      "max": 9.964591640649507,
+      "std": 0.4602121325086685,
+      "n": 42
+    }
+  },
+  "artifacts": {
+    "metrics_monthly_csv": "metrics_monthly.csv",
+    "dashboard_png": "mbs_extension_risk_dashboard.png",
+    "cpr_diagnostic_png": "cpr_diagnostic.png"
+  }
+}

@@ -14,3 +14,19 @@ SENSITIVITY_RESULTS_CSV = ABM_DIR / "sensitivity_results.csv"
 ROBUSTNESS_RESULTS_CSV = ABM_DIR / "robustness_results.csv"
 MONTE_CARLO_RESULTS_CSV = ABM_DIR / "monte_carlo_results.csv"
 MONTE_CARLO_HISTOGRAM_PNG = ABM_DIR / "monte_carlo_trapped_liquidity.png"
+RUNS_DIR = ABM_DIR / "data" / "runs"
+LATEST_RUN_MANIFEST = ABM_DIR / "data" / "latest_run_manifest.json"
+
+# Monthly columns written by freeze_run.py for the active QT slice
+QT_MONTHLY_EXPORT_COLS = [
+    "MORTGAGE30US",
+    "Dynamic_Friction",
+    "Empirical_CPR_Pct",
+    "US_CPR_Pct",
+    "Danish_CPR_Pct",
+    "Extension_Delta_Billions",
+    "US_Missed_Rolloff_Billions",
+    "Danish_Missed_Rolloff_Billions",
+    "Actual_Monthly_Rolloff_Billions",
+    "QT_Target_Billions",
+]
