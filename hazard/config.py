@@ -1,7 +1,20 @@
 """Paths, cohort buckets, and QT constants for the hazard framework."""
+import sys
 from pathlib import Path
 
 import pandas as pd
+
+_REPO_ROOT = Path(__file__).resolve().parents[1]
+if str(_REPO_ROOT) not in sys.path:
+    sys.path.insert(0, str(_REPO_ROOT))
+from common.qt_window import (  # noqa: E402,F401
+    POST_QT_TARGET_B,
+    QT_END,
+    QT_RAMP_END,
+    QT_START,
+    QT_TARGET_FULL_B,
+    QT_TARGET_RAMP_B,
+)
 
 HAZARD_DIR = Path(__file__).resolve().parent
 DATA_DIR = HAZARD_DIR / "data"
@@ -43,16 +56,10 @@ LITERATURE_COEFS = {
     "gamma_ltv": 0.25,
 }
 
-# FRED / QT (aligned with abm/fed_mbs_extension_risk.py empirical benchmark)
+# FRED (QT window constants come from common/qt_window.py above)
 FRED_API_KEY = "0da55cec06bcff18594e15cc9da17d2d"
 START_DATE = "2021-01-01"
 BASELINE_START = "2017-01-01"
-QT_START = pd.Timestamp("2022-06-01")
-QT_RAMP_END = pd.Timestamp("2022-09-01")
-QT_END = pd.Timestamp("2025-12-01")
-QT_TARGET_RAMP_B = -17.5
-QT_TARGET_FULL_B = -35.0
-POST_QT_TARGET_B = 0.0
 EMPIRICAL_TRAPPED_B = 764.7  # active QT window SOMA benchmark (July 2026)
 
 # Dynamic friction

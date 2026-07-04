@@ -483,6 +483,42 @@ Reproduce: `cd abm && python3 freeze_run.py --tag run-2026-07-04` → `data/runs
 
 ---
 
+## 15. Robustness Fix Program (July 2026)
+
+Four pre-registered robustness fixes, executed against the frozen
+`runs/pre-fix-2026-07/` baseline so every diff is attributable to a specific
+fix. Baseline manifest consolidates all four headline numbers with config
+hashes: $764.7B empirical, $101.2B ABM (13.2%), $915.1B Path A (119.7%),
+$747.3B Path B (97.7%).
+
+### Fix 4 — QT window filter consolidation (done)
+
+**Problem:** `QT_START`/`QT_END` and the mask/target logic were defined twice
+(`abm/fed_mbs_extension_risk.py`, `hazard/config.py` + `hazard/macro.py`).
+Duplicated window definitions were how the Error-4 post-QT drift bug
+originally crept in; two copies meant any future edit could silently
+desynchronize the frameworks.
+
+**Fix:** Single source of truth in [`common/qt_window.py`](common/qt_window.py)
+(bounds, cap schedule, `qt_active_mask/frame`, `compute_qt_target_series`,
+`expected_qt_active_months`). Both frameworks import it; duplicated logic
+deleted. Aggregations now call `assert_qt_window_only()` on the frame they
+are about to sum (`export_headline_metrics`, `score_extension_risk`) so an
+unmasked frame fails loudly.
+
+**Validation:** [`tests/test_qt_window.py`](tests/test_qt_window.py) feeds a
+synthetic series with 8 months of large nonzero values past `QT_END`;
+aggregates must be identical with and without those rows, and the pre-fix
+filter (`index >= QT_START`, no upper bound) is shown to drift by construction.
+All headline numbers reproduce the baseline exactly after consolidation.
+
+**Incidental fix:** the Path A refit was unrunnable due to infinite mutual
+recursion between `_stratum_fe_row` and `_stratum_dummy_matrix`
+(`hazard/hazard_fit.py`); fixed mechanically, refit reproduces committed
+coefficients byte-for-byte.
+
+---
+
 ## Appendix — File Map
 
 ```

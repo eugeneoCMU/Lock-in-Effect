@@ -19,12 +19,7 @@ from config import (
     BASE_FRICTION,
     BASELINE_START,
     FRED_API_KEY,
-    POST_QT_TARGET_B,
-    QT_END,
-    QT_RAMP_END,
     QT_START,
-    QT_TARGET_FULL_B,
-    QT_TARGET_RAMP_B,
     SEARCH_PENALTY_CAP,
     SENTIMENT_BASELINE,
     SENTIMENT_PENALTY_CAP,
@@ -32,29 +27,16 @@ from config import (
     START_DATE,
     TERM_MONTHS,
 )
+from common.qt_window import (  # noqa: F401  (re-exported for simulate/extension_risk)
+    assert_qt_window_only,
+    compute_qt_target_series,
+    qt_active_frame,
+    qt_active_mask,
+)
 
 SOMA_SUMMARY_URL = (
     "https://markets.newyorkfed.org/api/soma/summary.json"
 )
-
-
-def qt_active_mask(index: pd.DatetimeIndex) -> pd.Series:
-    return (index >= QT_START) & (index < QT_END)
-
-
-def qt_active_frame(df: pd.DataFrame) -> pd.DataFrame:
-    mask = qt_active_mask(df.index)
-    return df.loc[mask].dropna(subset=["Extension_Delta_Billions"])
-
-
-def compute_qt_target_series(index: pd.DatetimeIndex) -> pd.Series:
-    target = pd.Series(np.nan, index=index)
-    ramp = (index >= QT_START) & (index < QT_RAMP_END)
-    full = (index >= QT_RAMP_END) & (index < QT_END)
-    target[ramp] = QT_TARGET_RAMP_B
-    target[full] = QT_TARGET_FULL_B
-    target[index >= QT_END] = POST_QT_TARGET_B
-    return target
 
 
 def coupon_to_decimal(rate: float | np.ndarray) -> float | np.ndarray:

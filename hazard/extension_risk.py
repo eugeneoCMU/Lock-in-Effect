@@ -33,6 +33,7 @@ from config import (
     SIM_RESULTS_PATH,
 )
 from macro import (
+    assert_qt_window_only,
     build_empirical_metrics,
     cpr_cross_correlation,
     cpr_goodness_of_fit,
@@ -48,7 +49,9 @@ def score_extension_risk(
 ) -> dict:
     """Compare hazard-simulated roll-off to empirical QT extension deltas."""
     qt_emp = qt_active_frame(empirical_df)
+    assert_qt_window_only(qt_emp.index)
     qt_sim = sim.reindex(qt_emp.index).dropna(subset=["simulated_rolloff_b"])
+    assert_qt_window_only(qt_sim.index)
     qt_target = qt_emp["QT_Target_Billions"]
 
     emp_trapped = float(qt_emp["Extension_Delta_Billions"].sum())

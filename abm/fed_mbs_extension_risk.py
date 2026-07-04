@@ -34,18 +34,29 @@ from paths import (
     MBS_DASHBOARD_PNG,
 )
 
+_REPO_ROOT = Path(__file__).resolve().parents[1]
+if str(_REPO_ROOT) not in sys.path:
+    sys.path.insert(0, str(_REPO_ROOT))
+from common.qt_window import (  # noqa: E402
+    POST_QT_TARGET_B,
+    QT_END,
+    QT_RAMP_END,
+    QT_START,
+    QT_TARGET_FULL_B,
+    QT_TARGET_RAMP_B,
+    assert_qt_window_only,
+    compute_qt_target_series,
+    expected_qt_active_months,
+    qt_active_frame,
+    qt_active_mask,
+)
+
 # ---------------------------------------------------------------------------
 # Constants
 # ---------------------------------------------------------------------------
 FRED_API_KEY = "0da55cec06bcff18594e15cc9da17d2d"
 START_DATE = "2021-01-01"
 BASELINE_START = "2017-01-01"  # earlier start to compute 2017-2019 baselines
-QT_START = pd.Timestamp("2022-06-01")
-QT_RAMP_END = pd.Timestamp("2022-09-01")  # full-pace QT begins Sep 2022
-QT_END = pd.Timestamp("2025-12-01")       # Fed officially ended QT Dec 2025
-QT_TARGET_RAMP_B = -17.5  # $17.5B/month during Jun–Aug 2022 ramp-up
-QT_TARGET_FULL_B = -35.0  # $35B/month from Sep 2022 onward
-POST_QT_TARGET_B = 0.0    # no balance-sheet shrink target after QT ends
 DEFAULT_COHORT_ASOF = pd.Timestamp("2026-06-24")  # pinned SOMA as-of for fallbacks
 
 # ---------------------------------------------------------------------------
@@ -193,17 +204,6 @@ def cpr_cross_correlation(empirical: pd.Series, predicted: pd.Series,
     return out
 
 
-def qt_active_mask(index: pd.DatetimeIndex) -> pd.Series:
-    """Boolean mask for months when QT balance-sheet shrink was active."""
-    return (index >= QT_START) & (index < QT_END)
-
-
-def qt_active_frame(df: pd.DataFrame) -> pd.DataFrame:
-    """Rows during active QT with valid extension deltas (headline aggregations)."""
-    mask = qt_active_mask(df.index)
-    return df.loc[mask].dropna(subset=["Extension_Delta_Billions"])
-
-
 def _round_coupon(c: float) -> float:
     return round(float(c), 4)
 
@@ -224,22 +224,6 @@ def cohorts_from_surface(surface: dict, equal_weight: bool = True) -> List[dict]
         "months_elapsed": MONTHS_ELAPSED_DEFAULT,
     } for k in keys]
 
-
-def compute_qt_target_series(index: pd.DatetimeIndex) -> pd.Series:
-    """
-    Build a time-dependent QT roll-off target aligned to the index:
-      * before QT_START                    -> NaN  (no target regime)
-      * QT_START <= t < QT_RAMP_END       -> -17.5B/month (ramp-up)
-      * QT_RAMP_END <= t < QT_END         -> -35B/month  (full pace)
-      * t >= QT_END                        -> 0B/month    (QT ended Dec 2025)
-    """
-    target = pd.Series(np.nan, index=index)
-    ramp = (index >= QT_START) & (index < QT_RAMP_END)
-    full = (index >= QT_RAMP_END) & (index < QT_END)
-    target[ramp] = QT_TARGET_RAMP_B
-    target[full] = QT_TARGET_FULL_B
-    target[index >= QT_END] = POST_QT_TARGET_B
-    return target
 
 # ---------------------------------------------------------------------------
 # ABM-calibrated CPR anchors — loaded dynamically from the ABM output CSV
@@ -1373,12 +1357,6 @@ def plot_cpr_diagnostic(df: pd.DataFrame,
 # ---------------------------------------------------------------------------
 # Section 4 – Summary Statistics
 # ---------------------------------------------------------------------------
-def expected_qt_active_months() -> int:
-    """Number of months in [QT_START, QT_END) — must match qt_active_frame()."""
-    probe = pd.date_range("2018-01-01", "2030-01-01", freq="ME")
-    return int(qt_active_mask(probe).sum())
-
-
 def _series_stats(s: pd.Series) -> dict:
     s = s.dropna()
     if s.empty:
@@ -1398,6 +1376,7 @@ def export_headline_metrics(df: pd.DataFrame) -> dict:
     qt_active_frame() — the 42-month active QT window [QT_START, QT_END).
     """
     qt_df = qt_active_frame(df)
+    assert_qt_window_only(qt_df.index)
     n_months = len(qt_df)
     expected = expected_qt_active_months()
 
