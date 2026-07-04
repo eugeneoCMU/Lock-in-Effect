@@ -401,7 +401,7 @@ Literature microsim is calibrated via defendable bounds (PSA speed, Rothstein ba
 | Empirical CPR mean | 5.53% |
 | SOMA 30yr WAC | 2.55% (7 buckets) |
 
-### ABM (production: surface + settlement lag, **`run-2026-07-04`**)
+### ABM (production: surface + settlement lag, **`run-2026-07-04`**; superseded by `run-2026-07-04-15yr-foldin` — $91.0B / 11.9% after the 15-year fold-in, see §15 Fix 2)
 
 | Metric | Value |
 |---|---|
@@ -464,7 +464,10 @@ Reproduce: `cd abm && python3 freeze_run.py --tag run-2026-07-04` → `data/runs
 ### Data
 
 - **Freddie Mac 2017–2021** integrated via `prepare_freddie.py` (20 quarters in `hazard/data/raw/`).
-- **15-year MBS excluded** from SOMA cohort modeling (~9% of face value).
+- **15-year MBS folded in structurally** (weights + scheduled amortization;
+  coverage 99.8%). Voluntary CPR for 15yr cohorts uses the same-coupon
+  30-year surface — the ABM payment-delta gate is unreliable for
+  short-amortization loans (see §15 Fix 2).
 - **FRED API key** hardcoded in config files; should be env var for production use.
 
 ### Model
@@ -565,6 +568,47 @@ benchmark)**. Peak cross-correlation lag is stable at −3 across the band
 to more trapped liquidity. Path B moves from just under the benchmark to
 modest over-prediction, consistent in direction with Path A (119.7%). The
 pre-fix $747B remains reproducible from the `pre-fix-2026-07` baseline tag.
+
+### Fix 2 — 15-year MBS fold-in (done, structural-only)
+
+**Problem:** SOMA cohort modeling filtered to `term == "30yr"`, covering 90.6%
+of MBS face value; the ~9.1% 15-year book contributed holdings but no
+cohort-correct amortization or weights.
+
+**Fix:** `fetch_soma_mbs_cohorts(terms=("30yr","15yr"))` (new default) buckets
+both terms separately — never merged, `min_share` evaluated within-term so
+the 30-year cohort structure is invariant to the fold-in. Cohorts carry
+`term_months`; the CPR surface is keyed `(coupon, term)` (`Cohort_Term`
+column; old CSVs load as term 360); `scheduled_amortization_series` and the
+Danish balance loop are term-aware. Coverage: **90.6% → 99.8%** of $1,941B
+MBS face (11 buckets: 7×30yr identical to the pre-fix set + 4×15yr; WAC
+2.55% → 2.49%).
+
+**Behavioral finding (user-decided scope):** the ABM's payment-delta gate
+breaks down for 15-year loans. A seasoned 15yr borrower's same-term
+replacement payment is nearly flat, so loss aversion never binds — native
+15yr surfaces predict 32–61% CPR vs ~5–8% empirical, enough to flip ABM
+trapped liquidity to −$169B. Production therefore uses a **structural-only**
+fold-in: 15yr cohorts contribute real weights and 15-year scheduled
+amortization, but voluntary CPR comes from the same-coupon 30-year surface.
+Native 15yr surfaces remain in `abm_cpr_surface.csv` for inspection. Movers
+now refinance same-term (was: hardcoded fresh 30-year — identical behavior
+for the 30-year book).
+
+**Results (`run-2026-07-04-15yr-foldin`):**
+
+| Metric | 30yr-only (old) | 30+15yr (revised) |
+|---|---|---|
+| Empirical benchmark | $764.75B | **$764.75B (unchanged)** |
+| ABM U.S. trapped | $101.2B (13.2%) | **$91.0B (11.9%)** |
+| Institutional gap | $930.3B | $925.5B |
+| US CPR mean | 11.98% | 11.68% |
+| Empirical CPR back-out | 5.53% | 5.14% (15yr sched amort now weighted in) |
+
+The −$10.2B shift is modest, as pre-registered: mostly real 15-year
+scheduled principal flow the simulated roll-off was missing. 30yr-only mode
+(`terms=("30yr",)`) reproduces the baseline to all decimals — the extension
+is additive, not a rewrite.
 
 ---
 
