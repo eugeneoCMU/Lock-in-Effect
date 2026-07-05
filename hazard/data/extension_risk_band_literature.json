@@ -1,0 +1,46 @@
+{
+  "mode": "literature_microsim_band",
+  "band_pct": [
+    5.5,
+    6.5,
+    7.7
+  ],
+  "empirical_trapped_b": 764.7482532227002,
+  "benchmark_b": 764.7,
+  "results": {
+    "5.5": {
+      "p_q_shock_pct": 5.5,
+      "trapped_b": 809.9065834462376,
+      "share_pct": 105.90499292195008,
+      "cpr_r_lag0": 0.24835742961384658,
+      "best_lag": -3,
+      "peak_lag_r": 0.4232901236815834,
+      "runtime_s": 26.7
+    },
+    "6.5": {
+      "p_q_shock_pct": 6.5,
+      "trapped_b": 818.5300844066606,
+      "share_pct": 107.0326190295068,
+      "cpr_r_lag0": 0.19000395255236566,
+      "best_lag": -3,
+      "peak_lag_r": 0.40436496933191357,
+      "runtime_s": 25.6
+    },
+    "7.7": {
+      "p_q_shock_pct": 7.7,
+      "trapped_b": 827.6582704023259,
+      "share_pct": 108.22623875432453,
+      "cpr_r_lag0": 0.09383512650498131,
+      "best_lag": -3,
+      "peak_lag_r": 0.3705868123161562,
+      "runtime_s": 22.4
+    }
+  },
+  "interval": "$810B \u2013 $828B (105.9%\u2013108.2% of benchmark)",
+  "peak_lag_stability": {
+    "lags_observed": [
+      -3
+    ],
+    "stable": true
+  }
+}

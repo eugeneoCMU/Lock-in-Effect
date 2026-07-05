@@ -377,16 +377,16 @@ df = compute_metrics(df, use_hazard_microsim=True)
 
 Replaces CPR surface interpolation with microsim paths. Disables ABM settlement-lag kernel (Markov routing already handles pipeline delay). Danish dynamic balance loop unchanged.
 
-### Real-data results (Freddie 2017–2021 sample)
+### Real-data results (Freddie 2017–2021 sample; post-β₁-units-fix, see §15)
 
 | Metric | Value |
 |---|---|
-| Trapped liquidity | **$747B (97.7%)** |
-| CPR r (lag 0) | +0.368 |
-| **Peak cross-corr** | **lag −3, r = +0.444** |
-| Runtime | ~15s cached / ~2min full rebuild (75k loans × 42 months × 2 regimes) |
+| Trapped liquidity | **$818.5B (107.0%)** — band $810B–$828B at P_q 5.5%–7.7% |
+| CPR r (lag 0) | +0.190 |
+| **Peak cross-corr** | **lag −3, r = +0.404** (stable across band) |
+| Runtime | ~15s cached / ~23s per band point (75k loans × 42 months × 2 regimes) |
 
-Literature microsim is calibrated via defendable bounds (PSA speed, Rothstein band, involuntary floor) — not fitted to $764.7B. Peak lag −3 confirms hazard leads SOMA by ~3 months (TBA pipeline).
+Literature microsim is calibrated via defendable bounds (PSA speed, Rothstein band, involuntary floor) — not fitted to $764.7B. Peak lag −3 confirms hazard leads SOMA by ~3 months (TBA pipeline). The earlier $747B (97.7%) figure predates the β₁ units fix (§15) and is reproducible from the `pre-fix-2026-07` baseline.
 
 ---
 
@@ -401,7 +401,7 @@ Literature microsim is calibrated via defendable bounds (PSA speed, Rothstein ba
 | Empirical CPR mean | 5.53% |
 | SOMA 30yr WAC | 2.55% (7 buckets) |
 
-### ABM (production: surface + settlement lag, **`run-2026-07-04`**)
+### ABM (production: surface + settlement lag, **`run-2026-07-04`**; superseded by `run-2026-07-04-15yr-foldin` — $91.0B / 11.9% after the 15-year fold-in, see §15 Fix 2)
 
 | Metric | Value |
 |---|---|
@@ -428,13 +428,14 @@ Reproduce: `cd abm && python3 freeze_run.py --tag run-2026-07-04` → `data/runs
 | Holdout RMSE | ~38pp |
 | Stratum FE | 295 four-way pools |
 
-### Hazard Path B — literature microsim (Freddie 2017–2021)
+### Hazard Path B — literature microsim (Freddie 2017–2021, post-β₁-fix)
 
 | Metric | Value |
 |---|---|
-| Trapped liquidity | **$747B (97.7%)** |
-| CPR r (lag 0) | +0.368 |
-| **Peak cross-corr** | **lag −3, r = +0.444** |
+| Trapped liquidity | **$818.5B (107.0%)** |
+| Rothstein band (5.5%–7.7%) | $810B – $828B (105.9%–108.2%) |
+| CPR r (lag 0) | +0.190 |
+| **Peak cross-corr** | **lag −3, r = +0.404** |
 
 ---
 
@@ -463,7 +464,10 @@ Reproduce: `cd abm && python3 freeze_run.py --tag run-2026-07-04` → `data/runs
 ### Data
 
 - **Freddie Mac 2017–2021** integrated via `prepare_freddie.py` (20 quarters in `hazard/data/raw/`).
-- **15-year MBS excluded** from SOMA cohort modeling (~9% of face value).
+- **15-year MBS folded in structurally** (weights + scheduled amortization;
+  coverage 99.8%). Voluntary CPR for 15yr cohorts uses the same-coupon
+  30-year surface — the ABM payment-delta gate is unreliable for
+  short-amortization loans (see §15 Fix 2).
 - **FRED API key** hardcoded in config files; should be env var for production use.
 
 ### Model
@@ -480,6 +484,181 @@ Reproduce: `cd abm && python3 freeze_run.py --tag run-2026-07-04` → `data/runs
 1. **Tune trapped liquidity** toward 90–115% band (SOMA cohort weighting or mild calibration)
 2. **SOMA cohort weighting** in hazard simulation (partial via balance weights; full book alignment TBD)
 3. **Optional:** Run `fed_mbs_extension_risk.py` with `use_hazard_microsim=True` and compare institutional gap to ABM surface path
+
+---
+
+## 15. Robustness Fix Program (July 2026)
+
+Four pre-registered robustness fixes, executed against the frozen
+`runs/pre-fix-2026-07/` baseline so every diff is attributable to a specific
+fix. Baseline manifest consolidates all four headline numbers with config
+hashes: $764.7B empirical, $101.2B ABM (13.2%), $915.1B Path A (119.7%),
+$747.3B Path B (97.7%).
+
+### Fix 4 — QT window filter consolidation (done)
+
+**Problem:** `QT_START`/`QT_END` and the mask/target logic were defined twice
+(`abm/fed_mbs_extension_risk.py`, `hazard/config.py` + `hazard/macro.py`).
+Duplicated window definitions were how the Error-4 post-QT drift bug
+originally crept in; two copies meant any future edit could silently
+desynchronize the frameworks.
+
+**Fix:** Single source of truth in [`common/qt_window.py`](common/qt_window.py)
+(bounds, cap schedule, `qt_active_mask/frame`, `compute_qt_target_series`,
+`expected_qt_active_months`). Both frameworks import it; duplicated logic
+deleted. Aggregations now call `assert_qt_window_only()` on the frame they
+are about to sum (`export_headline_metrics`, `score_extension_risk`) so an
+unmasked frame fails loudly.
+
+**Validation:** [`tests/test_qt_window.py`](tests/test_qt_window.py) feeds a
+synthetic series with 8 months of large nonzero values past `QT_END`;
+aggregates must be identical with and without those rows, and the pre-fix
+filter (`index >= QT_START`, no upper bound) is shown to drift by construction.
+All headline numbers reproduce the baseline exactly after consolidation.
+
+**Incidental fix:** the Path A refit was unrunnable due to infinite mutual
+recursion between `_stratum_fe_row` and `_stratum_dummy_matrix`
+(`hazard/hazard_fit.py`); fixed mechanically, refit reproduces committed
+coefficients byte-for-byte.
+
+### Fix 3 — Rothstein elasticity band propagation (done), and the β₁ units bug it exposed
+
+**Parameterization:** `run_qt_microsim()` now takes `p_q_shock_pct` and derives
+β₁ via the survival-function conversion per band point — one parameterized
+function, no copied code paths. `extension_risk.py --mode literature --band`
+re-runs the full 75k-loan × 42-month × 2-regime microsim at 5.5% / 6.5% / 7.7%
+(same loan sample and RNG seeds; only β₁ varies), scores each against the
+benchmark, and writes `hazard/data/extension_risk_band_literature.json` with
+the Table-1 interval. Central 6.5% run keeps the standard cache; band edges
+cache as `microsim_results_pq{5.5,7.7}.parquet`. Runtime ~23s per band point.
+
+**Validation of the parameterization (pre-bug-fix):** with the original
+hazard code the central run reproduced $747.3B / 97.7% exactly, confirming
+the parameterization itself changed nothing.
+
+**Bug the band exposed:** the band came out flat ($747.1B–$747.4B), which
+diagnosis traced to a units/sign mismatch: `rothstein_beta1()` returns
+ln(h_shocked/h_base) **per +100bp of lock-in**, but `prepay_hazard()` applied
+it to the **decimal** rate gap (`beta1 * rate_gap`). At a typical QT state
+(3.0% coupon, 6.8% market) the multiplier was ×1.0026 — inert and
+wrong-signed — versus the intended ×0.77. The lock-in elasticity channel
+contributed nothing to the $747B headline; that figure was produced by the
+PSA baseline + involuntary floor + burnout alone.
+
+**Fix (user-approved):** `prepay_hazard` now applies
+`exp(-β₁ · 100 · rate_gap)` — one β₁ of suppression per −100bp of refi
+incentive, matching Path A's positive-coefficient-on-gap convention.
+`rate_gap_danish` was simultaneously moved from price units (PV/balance − 1)
+to rate-equivalent units using the NPV identity: the buyback discount exactly
+offsets the PV of the locked-in spread, so the Danish effective gap is 0 when
+out-of-the-money and `coupon − market` when in-the-money (buyback capped at
+par) — implementing the documented "resets toward baseline" semantics.
+
+**Post-fix results (supersede the $747B / 97.7% headline):**
+
+| P_q shock | Trapped | Share | CPR r (lag 0) | Peak |
+|---|---|---|---|---|
+| 5.5% | $809.9B | 105.9% | +0.248 | lag −3, r = +0.423 |
+| **6.5% (central)** | **$818.5B** | **107.0%** | +0.190 | lag −3, r = +0.404 |
+| 7.7% | $827.7B | 108.2% | +0.094 | lag −3, r = +0.371 |
+
+Sensitivity interval for Table 1 / §V.C: **$810B – $828B (105.9%–108.2% of
+benchmark)**. Peak cross-correlation lag is stable at −3 across the band
+(TBA settlement pipeline). Stronger mobility suppression now correctly maps
+to more trapped liquidity. Path B moves from just under the benchmark to
+modest over-prediction, consistent in direction with Path A (119.7%). The
+pre-fix $747B remains reproducible from the `pre-fix-2026-07` baseline tag.
+
+### Fix 2 — 15-year MBS fold-in (done, structural-only)
+
+**Problem:** SOMA cohort modeling filtered to `term == "30yr"`, covering 90.6%
+of MBS face value; the ~9.1% 15-year book contributed holdings but no
+cohort-correct amortization or weights.
+
+**Fix:** `fetch_soma_mbs_cohorts(terms=("30yr","15yr"))` (new default) buckets
+both terms separately — never merged, `min_share` evaluated within-term so
+the 30-year cohort structure is invariant to the fold-in. Cohorts carry
+`term_months`; the CPR surface is keyed `(coupon, term)` (`Cohort_Term`
+column; old CSVs load as term 360); `scheduled_amortization_series` and the
+Danish balance loop are term-aware. Coverage: **90.6% → 99.8%** of $1,941B
+MBS face (11 buckets: 7×30yr identical to the pre-fix set + 4×15yr; WAC
+2.55% → 2.49%).
+
+**Behavioral finding (user-decided scope):** the ABM's payment-delta gate
+breaks down for 15-year loans. A seasoned 15yr borrower's same-term
+replacement payment is nearly flat, so loss aversion never binds — native
+15yr surfaces predict 32–61% CPR vs ~5–8% empirical, enough to flip ABM
+trapped liquidity to −$169B. Production therefore uses a **structural-only**
+fold-in: 15yr cohorts contribute real weights and 15-year scheduled
+amortization, but voluntary CPR comes from the same-coupon 30-year surface.
+Native 15yr surfaces remain in `abm_cpr_surface.csv` for inspection. Movers
+now refinance same-term (was: hardcoded fresh 30-year — identical behavior
+for the 30-year book).
+
+**Results (`run-2026-07-04-15yr-foldin`):**
+
+| Metric | 30yr-only (old) | 30+15yr (revised) |
+|---|---|---|
+| Empirical benchmark | $764.75B | **$764.75B (unchanged)** |
+| ABM U.S. trapped | $101.2B (13.2%) | **$91.0B (11.9%)** |
+| Institutional gap | $930.3B | $925.5B |
+| US CPR mean | 11.98% | 11.68% |
+| Empirical CPR back-out | 5.53% | 5.14% (15yr sched amort now weighted in) |
+
+The −$10.2B shift is modest, as pre-registered: mostly real 15-year
+scheduled principal flow the simulated roll-off was missing. 30yr-only mode
+(`terms=("30yr",)`) reproduces the baseline to all decimals — the extension
+is additive, not a rewrite.
+
+### Fix 1 — Cross-design test: real Freddie covariates → ABM (done)
+
+**Scope (pre-registered):** only structural covariates transfer — per-loan
+coupon, loan age, and original LTV from the hazard framework's 75k stratified
+sample ([`abm/freddie_population.py`](abm/freddie_population.py),
+balance-weighted 10k draw; sample WAC 3.36%, age 22mo, LTV 72, FICO 753).
+Behavioral draws (income, home value, mobility desire, transaction cost,
+patience) stay synthetic with production distributions and seed. FICO and
+state are carried but have no ABM decision-rule analogue. Not "fully real"
+agents, and per §VII.A this does not fully resolve the data-source confound
+without the symmetric companion test (hazard framework on a synthetic
+population — still open).
+
+**Mechanics:** `--population=freddie` on `abm_lockin_simulation.py`, full
+two-variant diagnostic in [`abm/cross_design_test.py`](abm/cross_design_test.py).
+Engine internals (`_n_rem`, `_term_years_vec`, `_pmt`) are now per-household
+vectors; synthetic-mode headline metrics verified **byte-for-byte identical**
+to `run-2026-07-04-15yr-foldin` after the change (the control condition).
+
+**Pre-registered criterion (fixed before results):** recovery >50% of the
+benchmark undercuts the paradigm claim; 10–35% corroborates §VIII.A; 35–50%
+ambiguous.
+
+**Results (`abm/data/cross_design_results.json`):**
+
+| | (a) recalibrated [primary] | (b) frozen [robustness] | synthetic control |
+|---|---|---|---|
+| mobility_scale | 36,086 | 43,883 | 43,883 |
+| Trapped | **$453.5B (59.3%)** | **$159.5B (20.9%)** | $91.0B (11.9%) |
+| Mean CPR | 8.14% | 11.63% | 11.68% |
+| CPR r (lag 0) | −0.336 | −0.311 | −0.316 |
+| Peak lag | 0 | 0 | −3 (r=+0.19) |
+
+**Interpretation (reported with pre-registered symmetry):** the primary
+recalibrated variant recovers **59.3%** — above the pre-registered 50%
+threshold, so by our own criterion this **moves against the paradigm claim**:
+with real structural covariates and a like-for-like turnover anchor, the
+household-choice ABM explains far more of the benchmark than the synthetic
+population suggested. The frozen variant stays in the corroborating band
+(20.9%). The **$294B discrepancy between variants is itself the headline
+diagnostic**: earlier ABM results depended heavily on synthetic-population
+calibration, not just on the decision rules. Both variants retain the
+wrong-shaped monthly CPR path (r(lag 0) ≈ −0.32, no lead structure), so the
+path-shape critique of §VIII survives even where the aggregate share moves.
+Real LTV heterogeneity (mean 72 vs the synthetic fixed 80% LTV) is the main
+lever: smaller balances relative to home values shrink payment deltas, and
+recalibrating the anchor against that population lowers the desire scale,
+suppressing QT-window CPR toward empirical levels (8.14% vs 5.83% backed out
+under the population's own amortization assumptions).
 
 ---
 
@@ -505,4 +684,4 @@ Lock-in-Effect/
 
 ---
 
-*Last updated: July 2026. Hazard spec v3: stratum FE (295 pools), burnout sign fixed (−0.13), literature microsim at 97.7% trapped.*
+*Last updated: July 2026. Hazard spec v3: stratum FE (295 pools), burnout sign fixed (−0.13). Literature microsim at 107.0% trapped (band 105.9%–108.2%) after the β₁ units fix (§15).*

@@ -213,8 +213,10 @@ class Household:
         else:
             raise ValueError(f"Unknown system_type: {system_type}")
 
+        # Same-term replacement loan (see _new_payment_vec for why).
         new_loan = Mortgage(payoff, current_market_rate,
-                            term_years=TERM_YEARS, months_elapsed=0)
+                            term_years=self.mortgage.term_years,
+                            months_elapsed=0)
         new_payment = new_loan.calculate_monthly_payment()
         current_payment = self.mortgage.calculate_monthly_payment()
 
@@ -270,15 +272,18 @@ class HousingMarketEngine:
         self.rng = np.random.default_rng(seed)
         self._cohort_rate = ORIGINAL_RATE
         self._cohort_months_elapsed = MONTHS_ELAPSED
+        self._cohort_term_years = TERM_YEARS
         self.households = self._generate_population()
         self._attach_mortgages()
         self._precompute_arrays()
 
     def attach_cohort(self, original_rate: float,
-                      months_elapsed: int = MONTHS_ELAPSED):
-        """Rebind every household mortgage to a new coupon/seasoning cohort."""
+                      months_elapsed: int = MONTHS_ELAPSED,
+                      term_years: int = TERM_YEARS):
+        """Rebind every household mortgage to a new coupon/seasoning/term cohort."""
         self._cohort_rate = original_rate
         self._cohort_months_elapsed = months_elapsed
+        self._cohort_term_years = term_years
         self._attach_mortgages()
         self._precompute_arrays()
 
@@ -310,6 +315,7 @@ class HousingMarketEngine:
         for h in self.households:
             principal = 0.80 * h.current_home_value
             h.mortgage = Mortgage(principal, self._cohort_rate,
+                                  term_years=self._cohort_term_years,
                                   months_elapsed=self._cohort_months_elapsed)
 
     def _precompute_arrays(self):
@@ -328,10 +334,17 @@ class HousingMarketEngine:
             [h.mortgage.outstanding_principal() for h in self.households])
 
         # Danish payoff depends on market rate, so precompute partial values:
-        # monthly coupon payment and remaining term (shared across all agents
-        # since they all started with ORIGINAL_RATE mortgages).
+        # monthly coupon payment and remaining term. Derived per household
+        # from the attached mortgages so heterogeneous populations
+        # (--population=freddie) work; in cohort mode every entry is equal
+        # and the arithmetic is identical to the former scalar.
         self._pmt = self._current_payment  # same as coupon payment
-        self._n_rem = TERM_YEARS * 12 - self._cohort_months_elapsed
+        self._n_rem = np.array(
+            [h.mortgage.remaining_term_months() for h in self.households]
+        )
+        self._term_years_vec = np.array(
+            [h.mortgage.term_years for h in self.households]
+        )
 
     def _payoff_us(self, rate: float) -> np.ndarray:
         return self._outstanding_us
@@ -345,9 +358,18 @@ class HousingMarketEngine:
         return np.minimum(market_value, self._outstanding_us)
 
     def _new_payment_vec(self, payoff: np.ndarray, rate: float) -> np.ndarray:
-        """Monthly payment on a new mortgage at `rate` for each household."""
+        """
+        Monthly payment on a new mortgage at `rate` for each household.
+
+        Movers originate a fresh loan of the SAME term as their current
+        cohort (term preference persistence). Comparing a seasoned 15-year
+        payment against a fresh 30-year payment is not apples-to-apples:
+        the amortization-schedule difference alone drops the new payment so
+        far that the loss-aversion penalty turns negative and overwhelms
+        transaction costs, unlocking ~90% of the 15-year cohort per month.
+        """
         r = rate / 12
-        n = TERM_YEARS * 12
+        n = self._term_years_vec * 12
         if r == 0:
             return payoff / n
         return payoff * r / (1 - (1 + r) ** -n)
@@ -499,16 +521,19 @@ class HousingMarketEngine:
 
 def build_multi_cohort_surfaces(engine: HousingMarketEngine,
                                 cohorts: list) -> pd.DataFrame:
-    """Build one 3D CPR surface per cohort and concatenate with Cohort_Coupon."""
+    """Build one 3D CPR surface per cohort, keyed by Cohort_Coupon + Cohort_Term."""
     frames = []
     for i, cohort in enumerate(cohorts):
+        term_months = int(cohort.get("term_months", TERM_YEARS * 12))
         print(f"  Cohort {i + 1}/{len(cohorts)}: "
-              f"coupon={cohort['coupon']*100:.2f}%  "
+              f"{term_months // 12}yr coupon={cohort['coupon']*100:.2f}%  "
               f"weight={cohort['weight']*100:.1f}%  "
               f"seasoning={cohort['months_elapsed']}mo")
-        engine.attach_cohort(cohort["coupon"], cohort["months_elapsed"])
+        engine.attach_cohort(cohort["coupon"], cohort["months_elapsed"],
+                             term_years=term_months // 12)
         surf = engine.build_cpr_surface()
         surf["Cohort_Coupon"] = cohort["coupon"]
+        surf["Cohort_Term"] = term_months
         frames.append(surf)
     return pd.concat(frames, ignore_index=True)
 
@@ -569,8 +594,16 @@ def weighted_burnout_cpr_paths(
 # Calibration: anchor the mobility-desire scale to the "Baseline Floor"
 # ---------------------------------------------------------------------------
 def reference_cohort(cohorts: list) -> dict:
-    """Dominant coupon bucket (max SOMA weight)."""
-    return max(cohorts, key=lambda c: c["weight"])
+    """
+    Dominant 30-year coupon bucket (max SOMA weight).
+
+    The mobility calibration anchor stays on the 30-year book so the 4-5%
+    involuntary-turnover floor remains comparable across runs with and
+    without the 15-year fold-in.
+    """
+    thirty_yr = [c for c in cohorts
+                 if int(c.get("term_months", TERM_YEARS * 12)) == 360]
+    return max(thirty_yr or cohorts, key=lambda c: c["weight"])
 
 
 def calibrate_mobility_scale(median_income: float,
@@ -660,8 +693,45 @@ def plot_s_curve(results: pd.DataFrame,
 # ---------------------------------------------------------------------------
 # Main
 # ---------------------------------------------------------------------------
-def main():
+def main(population: str = "synthetic"):
     import fed_mbs_extension_risk as fed
+
+    if population == "freddie":
+        # Cross-design mode: real Freddie structural covariates, synthetic
+        # behavioral draws, frozen production calibration. The full
+        # two-variant diagnostic lives in cross_design_test.py.
+        from freddie_population import (
+            attach_freddie_covariates,
+            load_freddie_structural_sample,
+            population_summary,
+        )
+
+        print("Fetching SOMA MBS coupon cohorts from NY Fed …")
+        cohorts = fed.fetch_soma_mbs_cohorts()
+        print("Fetching empirical medians from FRED …")
+        median_income, median_home_value = fetch_macro_from_fred()
+        ref = reference_cohort(cohorts)
+        mobility_scale = calibrate_mobility_scale(
+            median_income, median_home_value,
+            cohort_rate=ref["coupon"],
+            cohort_months=ref["months_elapsed"],
+        )
+        loans = load_freddie_structural_sample(N_HOUSEHOLDS)
+        print(population_summary(loans))
+        engine = HousingMarketEngine(
+            median_income=median_income,
+            median_home_value=median_home_value,
+            mobility_scale=mobility_scale,
+        )
+        attach_freddie_covariates(engine, loans)
+        print("Building population-level 3D CPR surface (freddie, frozen "
+              "calibration) …")
+        surface = engine.build_cpr_surface()
+        out_csv = ABM_CPR_SURFACE_CSV.with_name(
+            "abm_cpr_surface_freddie_frozen.csv")
+        surface.to_csv(out_csv, index=False)
+        print(f"CPR surface saved to {out_csv}")
+        return
 
     print("Fetching SOMA MBS coupon cohorts from NY Fed …")
     cohorts = fed.fetch_soma_mbs_cohorts()
@@ -713,4 +783,15 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
+    import argparse
+
+    _parser = argparse.ArgumentParser(description=__doc__)
+    _parser.add_argument(
+        "--population",
+        choices=["synthetic", "freddie"],
+        default="synthetic",
+        help="synthetic: production default (unchanged); freddie: real "
+             "Freddie structural covariates (see cross_design_test.py)",
+    )
+    _args = _parser.parse_args()
+    main(population=_args.population)

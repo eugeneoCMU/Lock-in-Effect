@@ -85,12 +85,19 @@ def prepay_hazard(
     coefs: dict | None = None,
 ) -> np.ndarray:
     """
-    h_prep(t) = h0(t) * exp(beta1 * rate_gap + beta_x' X + beta_b * burnout_stratum)
+    h_prep(t) = h0(t) * exp(-beta1 * 100 * rate_gap + beta_x' X + beta_b * burnout_stratum)
+
+    rate_gap is the refi-incentive gap in decimal (coupon - market; negative
+    when locked in).  beta1 = ln(h_shocked/h_base) per +100bp of lock-in
+    (negative by construction), so the per-100bp conversion is x100 and the
+    sign flips: a -100bp incentive applies exactly one beta1 of suppression.
+    Pre-fix this was `beta1 * rate_gap` on the decimal gap — ~100x too weak
+    and wrong-signed, leaving the lock-in channel inert.
     """
     c = coefs or LITERATURE_COEFS
     h0 = baseline_hazard(loan_age)
     log_h = (
-        beta1 * rate_gap
+        (-beta1) * (rate_gap * 100.0)
         + c["beta_fico"] * fico_z
         + c["beta_ltv"] * ltv_z
         + c["beta_burnout"] * burnout

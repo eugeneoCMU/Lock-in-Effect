@@ -36,10 +36,19 @@ def rate_gap_danish(
     term_months: int = TERM_MONTHS,
 ) -> np.ndarray:
     """
-    Market-value gap: (PV of remaining payments at market rate / balance) - 1.
+    Effective rate gap under market-value buyback, in decimal — same units
+    as rate_gap_us so one elasticity applies to both regimes.
 
-    When rates rise above coupon, PV < par → gap approaches 0 or positive,
-    neutralizing lock-in relative to U.S. par-payoff.
+    NPV identity: when rates rise above coupon, the buyback discount
+    (par - PV of remaining payments at market rate) exactly equals the PV of
+    the locked-in rate spread, so prepaying is economically neutral —
+    effective gap 0, hazard resets toward baseline h0(t).  When rates fall
+    below coupon the buyback price is capped at par and the Danish borrower
+    refinances exactly like a U.S. one — effective gap = coupon - market.
+
+    Pre-fix this returned the raw price ratio (PV/balance - 1), which is in
+    price units, not rate units; under a per-100bp elasticity it would
+    mis-scale the Danish regime ~10x.
     """
     n_rem = np.maximum(term_months - loan_age, 1).astype(np.float64)
     pmt = _monthly_payment(balance, coupon, n_rem)
@@ -50,9 +59,9 @@ def rate_gap_danish(
             pmt * (1.0 - (1.0 + r_mkt) ** (-n_rem)) / r_mkt,
             pmt * n_rem,
         )
-    market_value = np.minimum(pv, balance)
-    safe_bal = np.maximum(balance, 1.0)
-    return market_value / safe_bal - 1.0
+    # PV < par ⇔ locked in ⇒ discount offsets the spread ⇒ gap 0;
+    # PV >= par ⇒ buyback capped at par ⇒ U.S.-style refi incentive.
+    return np.where(pv < balance, 0.0, coupon - market_rate)
 
 
 def rate_stress(coupon: np.ndarray, market_rate: float) -> np.ndarray:

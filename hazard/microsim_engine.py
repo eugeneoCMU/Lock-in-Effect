@@ -19,7 +19,9 @@ from config import (
     QT_END,
     QT_START,
     RNG_SEED,
+    ROTHSTEIN_Q_DECLINE_MID,
 )
+from literature_hazard import rothstein_beta1
 from loan_sample import load_or_build_loan_sample
 from macro import calculate_dynamic_friction, fetch_data
 from markov import load_transition_matrix
@@ -32,6 +34,7 @@ def _simulate_regime(
     holdings_scale_b: float,
     trans: pd.DataFrame,
     seed: int,
+    beta1: float,
 ) -> pd.DataFrame:
     """Walk one regime pool through QT window."""
     qt_index = macro.index[(macro.index >= QT_START) & (macro.index < QT_END)]
@@ -41,7 +44,7 @@ def _simulate_regime(
     records = []
     for ts in qt_index:
         mkt = float(macro.loc[ts, "MORTGAGE30US"]) / 100.0
-        result = monthly_step(pool, mkt, trans=trans)
+        result = monthly_step(pool, mkt, trans=trans, beta1=beta1)
 
         exposure = result["exposure"]
         monthly_cpr = (result["prepay_upb"] / exposure) if exposure > 0 else 0.0
@@ -81,10 +84,17 @@ def run_qt_microsim(
     regimes: tuple = ("US", "Danish"),
     seed: int = RNG_SEED,
     output: Path = MICROSIM_RESULTS_PATH,
+    p_q_shock_pct: float = ROTHSTEIN_Q_DECLINE_MID * 100,
 ) -> dict[str, pd.DataFrame]:
     """
     Forward-walk loan sample through QT window under US and Danish rate-gap regimes.
+
+    p_q_shock_pct: Rothstein quarterly mobility decline per 100bp rate gap,
+    in percent (sensitivity band 5.5–7.7, midpoint 6.5).  β₁ is derived via
+    the survival-function conversion — same loan sample and RNG seeds across
+    band points, so only the elasticity varies.
     """
+    beta1 = rothstein_beta1(p_q_shock_pct / 100.0)
     if loan_sample is None:
         loan_sample = load_or_build_loan_sample(n_loans=n_loans)
     if macro is None:
@@ -96,7 +106,7 @@ def run_qt_microsim(
 
     results = {}
     for i, regime in enumerate(regimes):
-        print(f"  Simulating {regime} regime …")
+        print(f"  Simulating {regime} regime (P_q shock {p_q_shock_pct:.1f}%, β₁={beta1:.4f}) …")
         results[regime] = _simulate_regime(
             loan_sample,
             macro,
@@ -104,6 +114,7 @@ def run_qt_microsim(
             holdings_b,
             trans,
             seed=seed + i * 1000,
+            beta1=beta1,
         )
 
     # Combined output for extension-risk scoring (US primary)

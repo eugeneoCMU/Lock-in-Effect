@@ -1,0 +1,70 @@
+{
+  "baseline_tag": "pre-fix-2026-07",
+  "created_at_utc": "2026-07-04T23:01:39.595766+00:00",
+  "git_commit": "bb0a51590c4e3fc712980668c71888bf43ade628",
+  "purpose": "Known-good pre-fix state for the four robustness fixes: QT window consolidation, elasticity band, 15-year MBS fold-in, Freddie-covariate cross-design test.",
+  "headline_numbers": {
+    "empirical_benchmark_b": 764.7482532227002,
+    "abm_trapped_b": 101.17436325001754,
+    "abm_share_explained_pct": 13.229760620395275,
+    "hazard_path_a_trapped_b": 915.067027857209,
+    "hazard_path_a_share_pct": 119.65598142932075,
+    "hazard_path_b_trapped_b": 747.3067384784514,
+    "hazard_path_b_share_pct": 97.71931290189299
+  },
+  "acceptance_vs_paper": {
+    "empirical_benchmark_b": {
+      "reproduced": 764.7482532227002,
+      "paper": 764.7,
+      "ok": true
+    },
+    "abm_trapped_b": {
+      "reproduced": 101.17436325001754,
+      "paper": 101.2,
+      "ok": true
+    },
+    "hazard_path_a_trapped_b": {
+      "reproduced": 915.067027857209,
+      "paper": 915.0,
+      "ok": true
+    },
+    "hazard_path_b_trapped_b": {
+      "reproduced": 747.3067384784514,
+      "paper": 747.0,
+      "ok": true
+    }
+  },
+  "qt_window": {
+    "start": "2022-06-01",
+    "end_exclusive": "2025-12-01",
+    "end_inclusive_label": "November 2025",
+    "n_months": 42,
+    "n_months_expected": 42
+  },
+  "path_a_diagnostics": {
+    "cpr_r_lag0": -0.4443709072594436,
+    "best_lag": 0
+  },
+  "path_b_diagnostics": {
+    "cpr_r_lag0": 0.36753803698507,
+    "best_lag": -3,
+    "peak_lag_r": 0.44366141271879744
+  },
+  "config_hashes_sha256": {
+    "abm/abm_cpr_surface.csv": "68332a61d815168b7289438cf1cd7cef5c5b92fc4997ee7379ccb4b08529c85a",
+    "abm/fed_mbs_extension_risk.py": "39d8462fefcec381535433b503416287e448b733350932036b076ee68ce0657c",
+    "abm/abm_lockin_simulation.py": "df893a713f293f0c98d6c8ca6d19aa20db933ab6d59ce4e9571a345e2b17e6b3",
+    "hazard/config.py": "9986a70f28f3db5b1ee7b822b4ad899a9d128af2936aa555fd57cfe5afc59d66",
+    "hazard/data/cohort_month_panel.parquet": "c0feca1da96e97300d840c867494cc80ca8bbe97249c5fdeeb98761a015528e2",
+    "hazard/data/loan_sample.parquet": "df4cb174b7251634126180cbbf78c2e64f83cff6578ec5d23118227cca1e3767",
+    "hazard/data/microsim_results.parquet": "d94973513669ab60803efb395670994e78d13ec167285571c000d9dbe802b794",
+    "hazard/data/simulation_results.parquet": "4d00b12f4b8954aebc4cf2915a10a2d37c5df1369cabc44d1f13d0aab6aa017d",
+    "hazard/data/hazard_coefficients.json": "80aad3ab4366fa4a4777787506bbabfd2b2002d2e6834afb1ca18194bc83fe8f"
+  },
+  "sources": {
+    "abm_manifest": "abm/data/runs/pre-fix-2026-07/manifest.json",
+    "path_a_results": "hazard/data/extension_risk_results_cohort_empirical.json",
+    "path_b_results": "hazard/data/extension_risk_results_literature_microsim.json"
+  },
+  "notes": "hazard/hazard_fit.py had an infinite mutual recursion between _stratum_fe_row and _stratum_dummy_matrix that made the Path A refit unrunnable; fixed mechanically (pass fe_index) before this baseline. Refit reproduces $915.1B / 119.7% exactly, confirming the fix is numerically neutral."
+}

@@ -33,6 +33,7 @@ from config import (
     SIM_RESULTS_PATH,
 )
 from macro import (
+    assert_qt_window_only,
     build_empirical_metrics,
     cpr_cross_correlation,
     cpr_goodness_of_fit,
@@ -48,7 +49,9 @@ def score_extension_risk(
 ) -> dict:
     """Compare hazard-simulated roll-off to empirical QT extension deltas."""
     qt_emp = qt_active_frame(empirical_df)
+    assert_qt_window_only(qt_emp.index)
     qt_sim = sim.reindex(qt_emp.index).dropna(subset=["simulated_rolloff_b"])
+    assert_qt_window_only(qt_sim.index)
     qt_target = qt_emp["QT_Target_Billions"]
 
     emp_trapped = float(qt_emp["Extension_Delta_Billions"].sum())
@@ -225,6 +228,102 @@ def run_literature_microsim(force_rebuild: bool = False):
     return paths["US"]
 
 
+ROTHSTEIN_BAND_PCT = (5.5, 6.5, 7.7)
+
+
+def _band_cache_path(p_q_shock_pct: float) -> Path:
+    """Central 6.5% run keeps the standard cache; band edges get their own."""
+    if abs(p_q_shock_pct - 6.5) < 1e-9:
+        return MICROSIM_RESULTS_PATH
+    return MICROSIM_RESULTS_PATH.with_name(
+        f"microsim_results_pq{p_q_shock_pct:.1f}.parquet"
+    )
+
+
+def run_literature_band(
+    empirical: pd.DataFrame,
+    band: tuple[float, ...] = ROTHSTEIN_BAND_PCT,
+    force_rebuild: bool = False,
+) -> dict:
+    """
+    Re-run the full literature microsim at each Rothstein band point and
+    score each against the same empirical benchmark.  Same loan sample and
+    RNG seeds throughout — only β₁ varies.
+    """
+    import time
+
+    from loan_sample import load_or_build_loan_sample
+    from microsim_engine import run_qt_microsim
+
+    loans = load_or_build_loan_sample(force_rebuild=force_rebuild)
+
+    band_results = {}
+    for pq in band:
+        cache = _band_cache_path(pq)
+        t0 = time.perf_counter()
+        if not force_rebuild and cache.exists():
+            print(f"\n— P_q shock {pq:.1f}%: cached ({cache.name})")
+            sim = pd.read_parquet(cache)
+        else:
+            print(f"\n— P_q shock {pq:.1f}%: running microsim …")
+            run_qt_microsim(loan_sample=loans, output=cache, p_q_shock_pct=pq)
+            sim = pd.read_parquet(cache)
+        runtime_s = time.perf_counter() - t0
+
+        r = score_extension_risk(sim, empirical)
+        band_results[f"{pq:.1f}"] = {
+            "p_q_shock_pct": pq,
+            "trapped_b": r["hazard_trapped_b"],
+            "share_pct": r["share_explained_pct"],
+            "cpr_r_lag0": r["cross_correlation"].get(0),
+            "best_lag": r["best_lag"],
+            "peak_lag_r": r["peak_lag_r"],
+            "runtime_s": round(runtime_s, 1),
+        }
+        print(
+            f"  trapped ${r['hazard_trapped_b']:.1f}B "
+            f"({r['share_explained_pct']:.1f}%)  "
+            f"r(lag0)={r['cross_correlation'].get(0, float('nan')):+.3f}  "
+            f"peak lag {r['best_lag']} r={r['peak_lag_r']:+.3f}  "
+            f"[{runtime_s:.1f}s]"
+        )
+
+    vals = list(band_results.values())
+    lo = min(vals, key=lambda v: v["trapped_b"])
+    hi = max(vals, key=lambda v: v["trapped_b"])
+    interval = (
+        f"${lo['trapped_b']:.0f}B – ${hi['trapped_b']:.0f}B "
+        f"({lo['share_pct']:.1f}%–{hi['share_pct']:.1f}% of benchmark)"
+    )
+    peak_lags = sorted({v["best_lag"] for v in vals})
+    payload = {
+        "mode": "literature_microsim_band",
+        "band_pct": list(band),
+        "empirical_trapped_b": float(
+            qt_active_frame(empirical)["Extension_Delta_Billions"].sum()
+        ),
+        "benchmark_b": EMPIRICAL_TRAPPED_B,
+        "results": band_results,
+        "interval": interval,
+        "peak_lag_stability": {
+            "lags_observed": peak_lags,
+            "stable": len(peak_lags) == 1,
+        },
+    }
+
+    out = Path(__file__).parent / "data" / "extension_risk_band_literature.json"
+    with open(out, "w") as f:
+        json.dump(payload, f, indent=2,
+                  default=lambda x: float(x) if isinstance(x, (np.floating, np.integer)) else x)
+    print(f"\nBand results saved to {out}")
+    print(f"Sensitivity interval (Table 1 / §V.C): {interval}")
+    if len(peak_lags) == 1:
+        print(f"Peak lag stable at {peak_lags[0]} across the band.")
+    else:
+        print(f"WARNING: peak lag moves across the band: {peak_lags} — report this.")
+    return payload
+
+
 def main():
     import argparse
 
@@ -239,6 +338,13 @@ def main():
         "--rebuild",
         action="store_true",
         help="Force rebuild panel/loan sample from Freddie raw (ignore cache)",
+    )
+    parser.add_argument(
+        "--band",
+        action="store_true",
+        help="Literature mode only: run the Rothstein sensitivity band "
+             "(5.5%%, 6.5%%, 7.7%% quarterly mobility decline) and report "
+             "the trapped-liquidity interval",
     )
     parser.add_argument(
         "--years",
@@ -258,6 +364,16 @@ def main():
             if p.exists():
                 p.unlink()
                 print(f"Removed cache: {p}")
+
+    if args.band:
+        if args.mode != "literature":
+            parser.error("--band requires --mode literature")
+        print("Scoring empirical benchmark …")
+        macro = fetch_data()
+        soma = fetch_soma_mbs_monthly()
+        empirical = build_empirical_metrics(macro, soma_rolloff=soma)
+        run_literature_band(empirical, force_rebuild=args.rebuild)
+        return
 
     if args.mode == "literature":
         sim = run_literature_microsim(force_rebuild=args.rebuild)

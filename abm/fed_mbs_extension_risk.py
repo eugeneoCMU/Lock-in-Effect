@@ -34,18 +34,29 @@ from paths import (
     MBS_DASHBOARD_PNG,
 )
 
+_REPO_ROOT = Path(__file__).resolve().parents[1]
+if str(_REPO_ROOT) not in sys.path:
+    sys.path.insert(0, str(_REPO_ROOT))
+from common.qt_window import (  # noqa: E402
+    POST_QT_TARGET_B,
+    QT_END,
+    QT_RAMP_END,
+    QT_START,
+    QT_TARGET_FULL_B,
+    QT_TARGET_RAMP_B,
+    assert_qt_window_only,
+    compute_qt_target_series,
+    expected_qt_active_months,
+    qt_active_frame,
+    qt_active_mask,
+)
+
 # ---------------------------------------------------------------------------
 # Constants
 # ---------------------------------------------------------------------------
 FRED_API_KEY = "0da55cec06bcff18594e15cc9da17d2d"
 START_DATE = "2021-01-01"
 BASELINE_START = "2017-01-01"  # earlier start to compute 2017-2019 baselines
-QT_START = pd.Timestamp("2022-06-01")
-QT_RAMP_END = pd.Timestamp("2022-09-01")  # full-pace QT begins Sep 2022
-QT_END = pd.Timestamp("2025-12-01")       # Fed officially ended QT Dec 2025
-QT_TARGET_RAMP_B = -17.5  # $17.5B/month during Jun–Aug 2022 ramp-up
-QT_TARGET_FULL_B = -35.0  # $35B/month from Sep 2022 onward
-POST_QT_TARGET_B = 0.0    # no balance-sheet shrink target after QT ends
 DEFAULT_COHORT_ASOF = pd.Timestamp("2026-06-24")  # pinned SOMA as-of for fallbacks
 
 # ---------------------------------------------------------------------------
@@ -193,17 +204,6 @@ def cpr_cross_correlation(empirical: pd.Series, predicted: pd.Series,
     return out
 
 
-def qt_active_mask(index: pd.DatetimeIndex) -> pd.Series:
-    """Boolean mask for months when QT balance-sheet shrink was active."""
-    return (index >= QT_START) & (index < QT_END)
-
-
-def qt_active_frame(df: pd.DataFrame) -> pd.DataFrame:
-    """Rows during active QT with valid extension deltas (headline aggregations)."""
-    mask = qt_active_mask(df.index)
-    return df.loc[mask].dropna(subset=["Extension_Delta_Billions"])
-
-
 def _round_coupon(c: float) -> float:
     return round(float(c), 4)
 
@@ -218,28 +218,13 @@ def cohorts_from_surface(surface: dict, equal_weight: bool = True) -> List[dict]
     keys = sorted(surface.keys())
     w = 1.0 / len(keys) if equal_weight else 1.0
     return [{
-        "coupon": k,
+        "coupon": coupon,
         "weight": w,
         "origin_date": PORTFOLIO_ORIGIN,
         "months_elapsed": MONTHS_ELAPSED_DEFAULT,
-    } for k in keys]
+        "term_months": term_months,
+    } for coupon, term_months in keys]
 
-
-def compute_qt_target_series(index: pd.DatetimeIndex) -> pd.Series:
-    """
-    Build a time-dependent QT roll-off target aligned to the index:
-      * before QT_START                    -> NaN  (no target regime)
-      * QT_START <= t < QT_RAMP_END       -> -17.5B/month (ramp-up)
-      * QT_RAMP_END <= t < QT_END         -> -35B/month  (full pace)
-      * t >= QT_END                        -> 0B/month    (QT ended Dec 2025)
-    """
-    target = pd.Series(np.nan, index=index)
-    ramp = (index >= QT_START) & (index < QT_RAMP_END)
-    full = (index >= QT_RAMP_END) & (index < QT_END)
-    target[ramp] = QT_TARGET_RAMP_B
-    target[full] = QT_TARGET_FULL_B
-    target[index >= QT_END] = POST_QT_TARGET_B
-    return target
 
 # ---------------------------------------------------------------------------
 # ABM-calibrated CPR anchors — loaded dynamically from the ABM output CSV
@@ -388,8 +373,10 @@ def load_cpr_surface(csv_path=None):
       None if file absent.
       2D tuple -> (rates_pct, frictions, Z_US, Z_DK)
       3D tuple -> (rates_pct, frictions, velocities, Z_US_3d, Z_DK_3d)
-      dict[float, tuple] when Cohort_Coupon column is present — one tuple
-        per coupon bucket keyed by decimal coupon (e.g. 0.02 for 2.0%).
+      dict[(float, int), tuple] when Cohort_Coupon column is present — one
+        tuple per cohort keyed by (decimal coupon, term_months), e.g.
+        (0.02, 360) for the 2.0% 30-year bucket. CSVs written before the
+        15-year fold-in lack Cohort_Term and load as term 360.
     """
     try:
         if csv_path is None:
@@ -400,10 +387,14 @@ def load_cpr_surface(csv_path=None):
         return None
 
     if "Cohort_Coupon" in surf.columns:
+        if "Cohort_Term" not in surf.columns:
+            surf["Cohort_Term"] = PORTFOLIO_TERM
         surfaces = {}
-        for coupon, grp in surf.groupby("Cohort_Coupon"):
-            slab = grp.drop(columns=["Cohort_Coupon"])
-            surfaces[_round_coupon(coupon)] = _surface_tuple_from_dataframe(slab)
+        for (coupon, term_months), grp in surf.groupby(
+                ["Cohort_Coupon", "Cohort_Term"]):
+            slab = grp.drop(columns=["Cohort_Coupon", "Cohort_Term"])
+            key = (_round_coupon(coupon), int(term_months))
+            surfaces[key] = _surface_tuple_from_dataframe(slab)
         n_c = len(surfaces)
         sample = next(iter(surfaces.values()))
         dim = "3D" if len(sample) == 5 else "2D"
@@ -506,22 +497,32 @@ def _default_cohort() -> List[dict]:
         "weight": 1.0,
         "origin_date": PORTFOLIO_ORIGIN,
         "months_elapsed": MONTHS_ELAPSED_DEFAULT,
+        "term_months": PORTFOLIO_TERM,
     }]
 
 
+TERM_MONTHS_BY_LABEL = {"30yr": 360, "15yr": 180}
+
+
 def fetch_soma_mbs_cohorts(min_share: float = 0.02,
-                           coupon_step_pct: float = 0.5
+                           coupon_step_pct: float = 0.5,
+                           terms: tuple = ("30yr", "15yr"),
                            ) -> List[dict]:
     """
-    Fetch CUSIP-level SOMA MBS holdings (30yr term only) and bucket into
-    coupon cohorts: [{coupon, weight, origin_date, months_elapsed}, ...].
+    Fetch CUSIP-level SOMA MBS holdings and bucket into per-term coupon
+    cohorts: [{coupon, weight, origin_date, months_elapsed, term_months}, ...].
 
     Coupon and maturity (MM/YY) are parsed from securityDescription
     (e.g. "UMBS MORTPASS 2% 10/51"). origin_date is back-derived per CUSIP
-    as maturity_date - 360 months, weighted-averaged within each rounded
-    coupon bucket. Buckets below min_share fold into the nearest surviving
-    bucket by coupon distance. Falls back to a single legacy cohort if the
-    API is unreachable.
+    as maturity_date - term months, weighted-averaged within each rounded
+    (term, coupon) bucket. 15-year and 30-year buckets are kept separate —
+    their WAC and prepay behavior differ — and weights are normalized over
+    the combined included universe. Buckets below min_share fold into the
+    nearest surviving bucket of the SAME term. Falls back to a single legacy
+    30-year cohort if the API is unreachable.
+
+    terms=("30yr",) reproduces the pre-fold-in behavior exactly (used by the
+    Step-3 no-regression check).
     """
     try:
         req = urllib.request.Request(SOMA_LATEST_DATE_URL,
@@ -539,16 +540,23 @@ def fetch_soma_mbs_cohorts(min_share: float = 0.02,
         return _default_cohort()
 
     step = coupon_step_pct / 100.0
-    bucket_value = {}       # rounded coupon -> total face value
-    bucket_elapsed_w = {}   # rounded coupon -> sum(value * months_elapsed)
-    bucket_origin_w = {}    # rounded coupon -> sum(value * origin ordinal)
+    bucket_value = {}       # (term_months, rounded coupon) -> total face value
+    bucket_elapsed_w = {}   # (term_months, rounded coupon) -> sum(value * months_elapsed)
+    bucket_origin_w = {}    # (term_months, rounded coupon) -> sum(value * origin ordinal)
+    total_mbs_face = 0.0    # all MBS rows, any term (coverage denominator)
 
     def months_between(d1: pd.Timestamp, d2: pd.Timestamp) -> int:
         return (d1.year - d2.year) * 12 + (d1.month - d2.month)
 
     for row in holdings:
-        if row.get("securityType") != "MBS" or row.get("term") != "30yr":
+        if row.get("securityType") != "MBS":
             continue
+        value = float(row["currentFaceValue"])
+        total_mbs_face += value
+        term_label = row.get("term")
+        if term_label not in terms or term_label not in TERM_MONTHS_BY_LABEL:
+            continue
+        term_months = TERM_MONTHS_BY_LABEL[term_label]
         desc = row.get("securityDescription", "")
         mc = re.search(r"(\d+(?:\.\d+)?)%", desc)
         mm = re.search(r"(\d{1,2})/(\d{2})\b", desc)
@@ -559,39 +567,52 @@ def fetch_soma_mbs_cohorts(min_share: float = 0.02,
         mat_year = 2000 + yy
         mat_date = pd.Timestamp(year=mat_year, month=mo, day=1)
         months_remaining = months_between(mat_date, as_of)
-        elapsed = max(0, PORTFOLIO_TERM - months_remaining)
-        origin = mat_date - pd.DateOffset(months=PORTFOLIO_TERM)
-        value = float(row["currentFaceValue"])
+        elapsed = max(0, term_months - months_remaining)
+        origin = mat_date - pd.DateOffset(months=term_months)
         rounded = round(coupon / step) * step
-        bucket_value[rounded] = bucket_value.get(rounded, 0.0) + value
-        bucket_elapsed_w[rounded] = (bucket_elapsed_w.get(rounded, 0.0)
-                                     + value * elapsed)
-        bucket_origin_w[rounded] = (bucket_origin_w.get(rounded, 0.0)
-                                    + value * origin.toordinal())
+        key = (term_months, rounded)
+        bucket_value[key] = bucket_value.get(key, 0.0) + value
+        bucket_elapsed_w[key] = (bucket_elapsed_w.get(key, 0.0)
+                                 + value * elapsed)
+        bucket_origin_w[key] = (bucket_origin_w.get(key, 0.0)
+                                + value * origin.toordinal())
 
     if not bucket_value:
-        print("SOMA CUSIP parse yielded no 30yr MBS; using single-cohort fallback.")
+        print("SOMA CUSIP parse yielded no MBS in requested terms; "
+              "using single-cohort fallback.")
         return _default_cohort()
 
     total = sum(bucket_value.values())
     raw = []
-    for c in sorted(bucket_value):
-        val = bucket_value[c]
+    for term_months, c in sorted(bucket_value):
+        key = (term_months, c)
+        val = bucket_value[key]
         raw.append({
             "coupon": _round_coupon(c),
             "weight": val / total,
             "origin_date": pd.Timestamp.fromordinal(
-                int(round(bucket_origin_w[c] / val))
+                int(round(bucket_origin_w[key] / val))
             ),
-            "months_elapsed": int(round(bucket_elapsed_w[c] / val)),
+            "months_elapsed": int(round(bucket_elapsed_w[key] / val)),
+            "term_months": term_months,
         })
 
-    # Fold buckets below min_share into nearest survivor by coupon distance.
-    survivors = [r for r in raw if r["weight"] >= min_share]
-    if not survivors:
-        survivors = [max(raw, key=lambda r: r["weight"])]
-    for r in raw:
-        if r["weight"] < min_share:
+    # Fold buckets below min_share into the nearest same-term survivor by
+    # coupon distance (never across terms — prepay dynamics differ).
+    # min_share is evaluated against the bucket's WITHIN-TERM share so the
+    # 30-year cohort structure is invariant to whether 15-year coverage is
+    # included; final weights remain combined-universe shares.
+    cohorts = []
+    for term_months in sorted({r["term_months"] for r in raw}):
+        term_raw = [r for r in raw if r["term_months"] == term_months]
+        term_mass = sum(r["weight"] for r in term_raw)
+        survivors = [r for r in term_raw
+                     if r["weight"] / term_mass >= min_share]
+        if not survivors:
+            survivors = [max(term_raw, key=lambda r: r["weight"])]
+        for r in term_raw:
+            if r in survivors:
+                continue
             nearest = min(survivors, key=lambda s: abs(s["coupon"] - r["coupon"]))
             old_w = nearest["weight"]
             add_w = r["weight"]
@@ -605,18 +626,26 @@ def fetch_soma_mbs_cohorts(min_share: float = 0.02,
                  + r["months_elapsed"] * add_w) / new_w
             ))
             nearest["weight"] = new_w
+        cohorts.extend(
+            s for s in survivors
+            if s["weight"] / term_mass >= min_share * 0.5
+        )
 
-    cohorts = [r for r in survivors if r["weight"] >= min_share * 0.5]
     wsum = sum(r["weight"] for r in cohorts)
     for r in cohorts:
         r["weight"] /= wsum
         r["coupon"] = _round_coupon(r["coupon"])
 
+    included_face = total * wsum  # face value surviving the fold filter
+    coverage_pct = included_face / total_mbs_face * 100 if total_mbs_face else 0.0
     wac = sum(r["coupon"] * r["weight"] for r in cohorts)
-    print(f"SOMA MBS cohorts loaded ({len(cohorts)} buckets, "
-          f"as-of {as_of_str}, WAC {wac*100:.2f}%):")
+    term_labels = "+".join(sorted(terms))
+    print(f"SOMA MBS cohorts loaded ({len(cohorts)} buckets [{term_labels}], "
+          f"as-of {as_of_str}, WAC {wac*100:.2f}%, "
+          f"coverage {coverage_pct:.1f}% of ${total_mbs_face/1e9:,.0f}B MBS face):")
     for r in cohorts:
-        print(f"  coupon {r['coupon']*100:.2f}%  weight {r['weight']*100:5.1f}%  "
+        print(f"  {r['term_months']//12}yr coupon {r['coupon']*100:.2f}%  "
+              f"weight {r['weight']*100:5.1f}%  "
               f"seasoning {r['months_elapsed']}mo  "
               f"origin {r['origin_date'].strftime('%Y-%m')}")
     return cohorts
@@ -765,6 +794,7 @@ def compute_metrics(
     apply_settlement_lag_kernel: bool = False,
     use_hazard_microsim: bool = False,
     abm_params: Optional[dict] = None,
+    sched_smm_override: Optional[pd.Series] = None,
 ) -> pd.DataFrame:
     """
     Derive roll-off, extension delta, and cumulative trapped liquidity.
@@ -896,7 +926,10 @@ def compute_metrics(
         rates_ext = df.attrs.get("MORTGAGE30US_EXTENDED", df["MORTGAGE30US"])
         cohort_paths = []
         for cohort in cohorts:
-            engine.attach_cohort(cohort["coupon"], cohort["months_elapsed"])
+            engine.attach_cohort(
+                cohort["coupon"], cohort["months_elapsed"],
+                term_years=int(cohort.get("term_months", PORTFOLIO_TERM)) // 12,
+            )
             origin = pd.Timestamp(cohort["origin_date"])
             end = df.index[-1]
             if origin > end:
@@ -912,6 +945,7 @@ def compute_metrics(
             sched_c = scheduled_amortization_series(
                 df.index, coupon=cohort["coupon"],
                 origin=cohort["origin_date"],
+                term=int(cohort.get("term_months", PORTFOLIO_TERM)),
             )
             w = cohort["weight"]
             us_cpr += w * path["US_CPR_Pct"].fillna(0.0)
@@ -922,7 +956,8 @@ def compute_metrics(
                 * (path["US_CPR_Pct"] / 100 / 12 + sched_c + curtailment_smm)
             )
             cohort_paths.append({
-                "coupon": _round_coupon(cohort["coupon"]),
+                "key": (_round_coupon(cohort["coupon"]),
+                        int(cohort.get("term_months", PORTFOLIO_TERM))),
                 "weight": w,
                 "dk_monthly_cpr": path["Danish_CPR_Pct"] / 100 / 12,
                 "sched": sched_c,
@@ -937,7 +972,7 @@ def compute_metrics(
         qt_start_idx = df.index.get_indexer([QT_START], method="nearest")[0]
         init_balance = float(holdings_b.iloc[qt_start_idx])
         cohort_balances = {
-            cp["coupon"]: init_balance * cp["weight"]
+            cp["key"]: init_balance * cp["weight"]
             for cp in cohort_paths
         }
         for i in range(len(df)):
@@ -947,15 +982,15 @@ def compute_metrics(
             total_bal = 0.0
             total_rolloff = 0.0
             for cp in cohort_paths:
-                coupon = cp["coupon"]
-                bal = cohort_balances[coupon]
+                key = cp["key"]
+                bal = cohort_balances[key]
                 drain = (float(cp["dk_monthly_cpr"].iloc[i])
                          + float(cp["sched"].iloc[i])
                          + float(curtailment_smm.iloc[i]))
                 rolloff = bal * drain
                 total_rolloff += rolloff
-                cohort_balances[coupon] = max(bal - rolloff, 0.0)
-                total_bal += cohort_balances[coupon]
+                cohort_balances[key] = max(bal - rolloff, 0.0)
+                total_bal += cohort_balances[key]
             dk_balance[i] = total_bal
             dk_rolloff[i] = -total_rolloff
         df["Danish_Simulated_Monthly_Rolloff_Billions"] = dk_rolloff
@@ -965,12 +1000,25 @@ def compute_metrics(
         cohort_paths = []
         for cohort in cohorts:
             coupon = _round_coupon(cohort["coupon"])
-            surf_c = surface.get(coupon)
+            term_months = int(cohort.get("term_months", PORTFOLIO_TERM))
+            key = (coupon, term_months)
+            # Structural-only 15-year fold-in: 15yr cohorts contribute their
+            # real weights and 15-year scheduled amortization, but voluntary
+            # CPR comes from the same-coupon 30-year surface. The ABM's
+            # payment-delta gate breaks down for short-amortization loans
+            # (a seasoned 15yr borrower's same-term replacement payment is
+            # near-flat, so loss aversion never binds → 32-61% CPR vs ~5-8%
+            # empirical). Native 15yr surfaces remain in the CSV for
+            # inspection but are not used for aggregation.
+            behav_key = (coupon, PORTFOLIO_TERM)
+            surf_c = surface.get(behav_key) or surface.get(key)
             if surf_c is None:
-                nearest = min(surface.keys(),
-                              key=lambda k: abs(k - coupon))
-                print(f"WARNING: no surface for coupon {coupon*100:.2f}%; "
-                      f"using nearest {nearest*100:.2f}%.")
+                same_term = [k for k in surface if k[1] == PORTFOLIO_TERM]
+                candidates = same_term or list(surface.keys())
+                nearest = min(candidates, key=lambda k: abs(k[0] - coupon))
+                print(f"WARNING: no behavioral surface for coupon "
+                      f"{coupon*100:.2f}%; using {nearest[1]//12}yr "
+                      f"{nearest[0]*100:.2f}%.")
                 surf_c = surface[nearest]
             cpr_c = interp_cpr_surface(
                 df["MORTGAGE30US"], df["Dynamic_Friction"], surf_c,
@@ -979,6 +1027,7 @@ def compute_metrics(
             sched_c = scheduled_amortization_series(
                 df.index, coupon=cohort["coupon"],
                 origin=cohort["origin_date"],
+                term=term_months,
             )
             w = cohort["weight"]
             us_cpr += w * cpr_c["US_CPR_Pct"]
@@ -989,7 +1038,7 @@ def compute_metrics(
                 * (cpr_c["US_CPR_Pct"] / 100 / 12 + sched_c + curtailment_smm)
             )
             cohort_paths.append({
-                "coupon": coupon,
+                "key": key,
                 "weight": w,
                 "dk_monthly_cpr": cpr_c["Danish_CPR_Pct"] / 100 / 12,
                 "sched": sched_c,
@@ -1004,7 +1053,7 @@ def compute_metrics(
         qt_start_idx = df.index.get_indexer([QT_START], method="nearest")[0]
         init_balance = float(holdings_b.iloc[qt_start_idx])
         cohort_balances = {
-            cp["coupon"]: init_balance * cp["weight"]
+            cp["key"]: init_balance * cp["weight"]
             for cp in cohort_paths
         }
         for i in range(len(df)):
@@ -1014,15 +1063,15 @@ def compute_metrics(
             total_bal = 0.0
             total_rolloff = 0.0
             for cp in cohort_paths:
-                coupon = cp["coupon"]
-                bal = cohort_balances[coupon]
+                key = cp["key"]
+                bal = cohort_balances[key]
                 drain = (float(cp["dk_monthly_cpr"].iloc[i])
                          + float(cp["sched"].iloc[i])
                          + float(curtailment_smm.iloc[i]))
                 rolloff = bal * drain
                 total_rolloff += rolloff
-                cohort_balances[coupon] = max(bal - rolloff, 0.0)
-                total_bal += cohort_balances[coupon]
+                cohort_balances[key] = max(bal - rolloff, 0.0)
+                total_bal += cohort_balances[key]
             dk_balance[i] = total_bal
             dk_rolloff[i] = -total_rolloff
         df["Danish_Simulated_Monthly_Rolloff_Billions"] = dk_rolloff
@@ -1035,7 +1084,8 @@ def compute_metrics(
         )
         df["US_CPR_Pct"] = cpr["US_CPR_Pct"]
         df["Danish_CPR_Pct"] = cpr["Danish_CPR_Pct"]
-        sched_smm = scheduled_amortization_series(df.index)
+        sched_smm = (sched_smm_override if sched_smm_override is not None
+                     else scheduled_amortization_series(df.index))
         df["Scheduled_Amort_SMM"] = sched_smm
         monthly_cpr = df["US_CPR_Pct"] / 100 / 12
         df["US_Simulated_Monthly_Rolloff_Billions"] = (
@@ -1373,12 +1423,6 @@ def plot_cpr_diagnostic(df: pd.DataFrame,
 # ---------------------------------------------------------------------------
 # Section 4 – Summary Statistics
 # ---------------------------------------------------------------------------
-def expected_qt_active_months() -> int:
-    """Number of months in [QT_START, QT_END) — must match qt_active_frame()."""
-    probe = pd.date_range("2018-01-01", "2030-01-01", freq="ME")
-    return int(qt_active_mask(probe).sum())
-
-
 def _series_stats(s: pd.Series) -> dict:
     s = s.dropna()
     if s.empty:
@@ -1398,6 +1442,7 @@ def export_headline_metrics(df: pd.DataFrame) -> dict:
     qt_active_frame() — the 42-month active QT window [QT_START, QT_END).
     """
     qt_df = qt_active_frame(df)
+    assert_qt_window_only(qt_df.index)
     n_months = len(qt_df)
     expected = expected_qt_active_months()
 
