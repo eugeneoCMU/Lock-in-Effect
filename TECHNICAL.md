@@ -1,6 +1,6 @@
 # Technical Narrative — Lock-In Effect Project
 
-This document is the **repository-level** technical history: what was built, what broke, what was fixed, what was falsified, and why the codebase now has two frameworks (`abm/` and `hazard/`). It is written for a reader who wants the full causal chain from the original **$972.3B** headline to the current validated **$764.7B** empirical benchmark, the **13.2%** ABM share explained, and the newer reduced-form hazard pipelines.
+This document is the **repository-level** technical history: what was built, what broke, what was fixed, what was falsified, and why the codebase now has two frameworks (`abm/` and `hazard/`). It is written for a reader who wants the full causal chain from the original **$972.3B** headline to the current validated **$764.7B** empirical benchmark, the **11.9%** ABM share explained (post 15-year MBS fold-in), and the newer reduced-form hazard pipelines. A July 2026 robustness-fix program (§15) revised three of the four headline figures — see that section for what changed and why.
 
 For module-level runbooks, see [README.md](README.md). For granular ABM bug archaeology (line-level citations, section-by-section), see [abm/TECHNICAL.md](abm/TECHNICAL.md). For hazard pipeline specs, see [hazard/README.md](hazard/README.md).
 
@@ -22,6 +22,7 @@ For module-level runbooks, see [README.md](README.md). For granular ABM bug arch
 12. [Current Headline Numbers](#12-current-headline-numbers)
 13. [Architectural Decisions](#13-architectural-decisions)
 14. [Known Limitations and Next Steps](#14-known-limitations-and-next-steps)
+15. [Robustness Fix Program (July 2026)](#15-robustness-fix-program-july-2026)
 
 ---
 
@@ -215,6 +216,8 @@ The Danish counterfactual was the most serious bug chain in the project:
 
 ## 8. Why the Residual Persisted
 
+*(Figures below are as of the pre-15yr-foldin, synthetic-population ABM. Current production figures are $91.0B / 11.9% — see [§12](#12-current-headline-numbers) and [§15](#15-robustness-fix-program-july-2026), which also reports that swapping in real Freddie structural covariates recovers 59.3% under recalibration — a result that revisits the diagnosis below.)*
+
 After all ABM fixes, extensions, and falsifications, the production pipeline explains **13.2%** of the $764.7B empirical trapped liquidity ($101.2B simulated vs $764.7B actual). The ABM **over-predicts** aggregate CPR (mean 11.98% vs empirical 5.53%) while **under-predicting** trapped liquidity — a sign that the monthly CPR *path* is wrong-shaped, not merely scaled wrong.
 
 Mechanisms **outside** the household decision function likely dominate the residual:
@@ -398,23 +401,26 @@ Literature microsim is calibrated via defendable bounds (PSA speed, Rothstein ba
 |---|---|
 | Empirical trapped liquidity (SOMA, active QT) | **$764.7B** |
 | QT window | June 2022 – November 2025 |
-| Empirical CPR mean | 5.53% |
-| SOMA 30yr WAC | 2.55% (7 buckets) |
+| Empirical CPR mean | 5.53% (30yr-only back-out) / 5.14% (30yr+15yr, current default) |
+| SOMA WAC | 2.55% (7 buckets, 30yr-only, 90.6% coverage) / 2.49% (11 buckets, 30yr+15yr, 99.8% coverage) |
 
-### ABM (production: surface + settlement lag, **`run-2026-07-04`**; superseded by `run-2026-07-04-15yr-foldin` — $91.0B / 11.9% after the 15-year fold-in, see §15 Fix 2)
+### ABM (production: surface + settlement lag + 15yr fold-in, **`run-2026-07-04-15yr-foldin`**)
 
 | Metric | Value |
 |---|---|
-| U.S. trapped liquidity | **$101.2B** (**13.2%** of empirical) |
-| Danish trapped (dynamic balance) | **-$829.1B** |
-| Institutional gap (U.S. − Danish) | **$930.3B** |
-| U.S. CPR mean | 11.98% |
-| Danish CPR mean | 47.21% (range 36.26%–51.26%) |
-| Institutional wedge (DK − US) | 35.24pp mean |
-| CPR R² (raw) | -6.443 |
-| Monte Carlo mean (50 seeds) | $113.5B [95% CI: $106.6B–$120.4B] |
+| U.S. trapped liquidity | **$91.0B** (**11.9%** of empirical) |
+| Danish trapped (dynamic balance) | **-$834.5B** |
+| Institutional gap (U.S. − Danish) | **$925.5B** |
+| U.S. CPR mean | 11.68% |
+| Empirical CPR back-out | 5.14% (15yr scheduled amort now weighted in; see §15 Fix 2) |
+| Danish CPR mean | 47.14% (range 36.18%–51.17%) |
+| Institutional wedge (DK − US) | 35.46pp mean |
+| CPR R² (raw) | -6.984 |
+| Monte Carlo (50 seeds) | not re-run post-fold-in; prior estimate ($113.5B, 30yr-only book) is stale |
 
-Reproduce: `cd abm && python3 freeze_run.py --tag run-2026-07-04` → `data/runs/run-2026-07-04/manifest.json`. All CPR means use the 42-month active QT window (`qt_active_frame`), not `index >= QT_START` alone.
+Superseded run `run-2026-07-04` (30yr-only, $101.2B / 13.2%) remains reproducible via `terms=("30yr",)` — see §15 Fix 2.
+
+Reproduce: `cd abm && python3 freeze_run.py --tag <name>` → `data/runs/<name>/manifest.json`. All CPR means use the 42-month active QT window (`qt_active_frame`), not `index >= QT_START` alone.
 
 ### Hazard Path A — cohort fractional (Freddie 2017–2021, spec v3)
 
@@ -456,6 +462,11 @@ Reproduce: `cd abm && python3 freeze_run.py --tag run-2026-07-04` → `data/runs
 | Settlement timing | Markov pipeline (hazard) vs lag kernel (ABM) | ABM kernel tested null (§21); hazard routes prepay directly — document lag −3, do not convolve |
 | Danish balance | Dynamic forward simulation | Static-balance application produced -$1,132B |
 | Repo layout | `abm/` frozen + `hazard/` new | Separates behavioral counterfactual from reduced-form estimation |
+| QT window definition | Single `common/qt_window.py`, imported by both frameworks | Duplicated definitions were how the Error-4 post-QT drift bug crept in (§15 Fix 4) |
+| Rothstein β₁ application | Per-100bp rate gap (`exp(-β₁·100·gap)`) | Applying β₁ to the decimal gap left the lock-in channel numerically inert (§15 Fix 3) |
+| 15-year MBS in ABM | Structural-only (weights + amortization; CPR from 30yr surface) | Payment-delta gate breaks down for short-amortization loans — predicts 32–61% CPR vs ~5–8% empirical (§15 Fix 2) |
+| Cross-design covariates | Structural only (coupon, loan age, LTV); behavioral draws stay synthetic | Freddie sample has no analogue for mobility desire, patience, transaction cost (§15 Fix 1) |
+| Cross-design calibration | Both variants reported (recalibrated primary, frozen robustness) | The variant gap is itself diagnostic of calibration-dependence (§15 Fix 1) |
 
 ---
 
@@ -472,18 +483,18 @@ Reproduce: `cd abm && python3 freeze_run.py --tag run-2026-07-04` → `data/runs
 
 ### Model
 
-- ABM monthly CPR path fit remains weak (negative R²) despite 13.2% aggregate share.
+- ABM monthly CPR path fit remains weak (negative R²) despite 11.9% aggregate share (post 15yr fold-in; see §15 Fix 2).
 - Danish counterfactual uses U.S.-calibrated friction.
 - DTI check is front-end only (no total debt).
-- Literature microsim CPR magnitudes on synthetic data are not calibrated to empirical level.
-- Empirical lag-0 CPR correlation remains negative — structural timing mismatch with SOMA settlement, not fixed with GLM lag terms.
+- Empirical lag-0 CPR correlation remains negative for the ABM and Path A (structural timing mismatch with SOMA settlement, not fixed with GLM lag terms); Path B's lag-0 correlation is positive (+0.19) with peak at lag −3, r=+0.40 — the two hazard paths disagree on contemporaneous alignment even though both lead SOMA by ~3 months at peak.
 - Hazard Path A uses Poisson GLM with stratum FE (295 dummies) and mild Ridge (α=1e-5); plain IRLS is ill-conditioned at this FE dimensionality.
+- Cross-design test (§15 Fix 1) only swaps structural covariates; the recalibrated-vs-frozen calibration gap ($294B) shows aggregate share is highly sensitive to how the mobility anchor is set, not just to which population feeds it.
 
 ### Next steps (priority order)
 
-1. **Tune trapped liquidity** toward 90–115% band (SOMA cohort weighting or mild calibration)
-2. **SOMA cohort weighting** in hazard simulation (partial via balance weights; full book alignment TBD)
-3. **Optional:** Run `fed_mbs_extension_risk.py` with `use_hazard_microsim=True` and compare institutional gap to ABM surface path
+1. **Symmetric companion test** (§15 Fix 1, optional PR6 in the original plan): run the hazard framework on a synthetic-only population to fully separate "paradigm" from "data source" — required by §VII.A before the cross-design result can be treated as conclusive.
+2. **Reconcile the cross-design result with the paper's paradigm claim.** The recalibrated primary variant recovers 59.3%, above the pre-registered 50% "undercuts" threshold — Table 1/abstract framing needs to address this directly rather than cite only the synthetic-population 11.9%.
+3. **Re-run Monte Carlo (50 seeds)** against the 15yr-foldin production tag; the $113.5B estimate on file is 30yr-only and stale.
 
 ---
 
@@ -669,19 +680,30 @@ Lock-in-Effect/
 ├── README.md                 # Quick start and index
 ├── TECHNICAL.md              # this document
 ├── requirements.txt
+├── common/                   # Shared QT window config (§15 Fix 4)
+│   └── qt_window.py           # single source of truth, imported by abm/ and hazard/
+├── tests/                     # Cross-framework regression tests
+│   └── test_qt_window.py      # 7 tests incl. post-QT-drift regression
+├── runs/                      # Frozen baseline snapshots (§15 Step 0)
+│   └── pre-fix-2026-07/       # pre-robustness-fix manifest + builder script
 ├── abm/                      # Agent-based pipeline (frozen archive)
 │   ├── README.md
 │   ├── TECHNICAL.md          # Granular ABM bug history (§1–§21)
-│   ├── abm_lockin_simulation.py
-│   ├── fed_mbs_extension_risk.py   # + use_hazard_microsim bridge
+│   ├── abm_lockin_simulation.py   # --population={synthetic,freddie} (§15 Fix 1)
+│   ├── fed_mbs_extension_risk.py   # + use_hazard_microsim bridge; term-aware cohorts (§15 Fix 2)
+│   ├── freddie_population.py       # structural-covariate loader (§15 Fix 1)
+│   ├── cross_design_test.py        # both calibration variants + report (§15 Fix 1)
+│   ├── data/runs/                  # tagged freeze_run.py manifests
 │   └── sensitivity/robustness/monte_carlo scripts
 └── hazard/                   # Reduced-form hazard framework
     ├── README.md             # Pipeline specs and equations
+    ├── config.py              # re-exports QT window from common/ (§15 Fix 4)
     ├── ingest.py, hazard_fit.py, stratum.py, simulate.py   # Path A
-    ├── loan_sample.py, microsim_engine.py, ...   # Path B
+    ├── loan_sample.py, microsim_engine.py, ...   # Path B; --band runs Rothstein sensitivity (§15 Fix 3)
+    ├── literature_hazard.py, rate_gap.py   # β₁ + regime-specific rate gap (units fixed, §15 Fix 3)
     └── data/                   # Parquet, JSON, PNG outputs
 ```
 
 ---
 
-*Last updated: July 2026. Hazard spec v3: stratum FE (295 pools), burnout sign fixed (−0.13). Literature microsim at 107.0% trapped (band 105.9%–108.2%) after the β₁ units fix (§15).*
+*Last updated: July 2026. Hazard spec v3: stratum FE (295 pools), burnout sign fixed (−0.13). Post robustness-fix program (§15): Path B at 107.0% trapped (band 105.9%–108.2%) after the β₁ units fix; ABM at 11.9% after the 15-year MBS fold-in; cross-design test with real Freddie covariates recovers 59.3% (recalibrated) / 20.9% (frozen).*
