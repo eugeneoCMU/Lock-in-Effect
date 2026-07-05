@@ -706,14 +706,23 @@ h_prep`) and only the negligible default channel (h₀=0.0003/mo) draws from the
 RNG, the spread across replicates is almost entirely the covariate-scramble
 effect, not Monte Carlo draw noise.
 
-**Results (real vs. 100-permutation null):**
+**Results (real vs. 999-permutation null).** The primary claim is the exact
+rank-based permutation p-value — the fraction of the reference set (the N nulls
+plus the observed value) at least as extreme as the real result,
+`(1 + #{null ≥ real}) / (N + 1)`. The z-score is reported only as a secondary
+descriptive statistic; it is inflated because deterministic fractional prepay
+makes the null sd tiny, and it assumes a normality the rank-based p does not.
 
-| Diagnostic | Real | Null mean ± sd | Null range | Real vs. null |
-|---|---|---|---|---|
-| Trapped liquidity | $818.5B | $816.35B ± $0.30B | [815.6, 817.1] | +$2.2B, above all 100 (z≈+7.2) |
-| Share of benchmark | 107.03% | 106.75% ± 0.04pp | [106.65, 106.85] | +0.28pp, above all 100 |
-| CPR r (lag 0) | +0.190 | +0.227 ± 0.002 | [0.222, 0.232] | −0.037, below all 100 (z≈−18) |
-| Peak cross-corr lag | −3 | −3 (100/100) | — | identical |
+| Diagnostic | Real | Null mean ± sd | Null range | Rank-based p | z (descriptive) |
+|---|---|---|---|---|---|
+| Trapped liquidity | $818.5B | $816.36B ± $0.31B | [814.9, 817.4] | 0/999, **p=0.001** | +7.1 |
+| Share of benchmark | 107.03% | 106.75% ± 0.04pp | [106.56, 106.88] | 0/999, **p=0.001** | +7.1 |
+| CPR r (lag 0) | +0.190 | +0.227 ± 0.002 | [0.220, 0.234] | 0/999, **p=0.001** | −18.0 |
+| Peak cross-corr lag | −3 | −3 (999/999) | — | — | — |
+
+The real value falls outside *every* one of the 999 draws on all three
+continuous diagnostics, so the exact two-sided p hits its floor of
+1/(999+1) = 0.001 without leaning on any distributional assumption.
 
 **Interpretation — read magnitude and significance separately.**
 
@@ -725,18 +734,20 @@ effect, not Monte Carlo draw noise.
    correlations; it is driven by the marginal distributions of coupon, FICO,
    LTV, and age (coupon → rate-gap being dominant).
 
-2. **There is a small but statistically clean real-structure signal.** Despite
-   the tiny magnitude, the real result sits outside the entire null range on
-   all three continuous diagnostics — the null sd is minuscule (deterministic
-   prepay), so a $2B effect is z≈+7. The direction is interpretable: the real
-   pool's assortative structure (high-coupon loans clustering with particular
-   FICO/LTV/age profiles) slightly *amplifies* aggregate lock-in (+$2B trapped)
-   and slightly *degrades* contemporaneous CPR alignment (−0.037 at lag 0)
-   relative to a decorrelated pool. Real, reproducible, but economically
-   second-order.
+2. **There is a small but cleanly resolved real-structure signal.** Despite the
+   tiny magnitude, the real result sits outside all 999 permutation draws
+   (rank-based p=0.001) and, per the bootstrap below, is ~2× the full width of
+   the sampling CI — so it is a genuine effect, not noise. The direction is
+   interpretable: the real pool's assortative structure (high-coupon loans
+   clustering with particular FICO/LTV/age profiles) slightly *amplifies*
+   aggregate lock-in (+$2B trapped) and slightly *degrades* contemporaneous CPR
+   alignment (−0.037 at lag 0) relative to a decorrelated pool. Real,
+   reproducible, but economically second-order. (The z-scores — +7.1 on trapped,
+   −18 on r — are large only because the null sd is minuscule under
+   deterministic prepay; they are descriptive, not the basis of the claim.)
 
 3. **The timing signature is structurally invariant.** Peak cross-correlation
-   lag is −3 in the real data and in all 100 permutations — the ~3-month
+   lag is −3 in the real data and in all 999 permutations — the ~3-month
    TBA-settlement lead is a property of the pipeline routing, not of the pool's
    joint composition. The paper's timing claim is robust to covariate scramble.
 
@@ -769,11 +780,66 @@ path-shape, not the aggregate level, is where loan-level structure matters.
 | Null model | Structure | Trapped null (mean ± sd) | Real vs. null |
 |---|---|---|---|
 | Block-shuffle (n=20) | preserved | $818.528B ± $0.003B | inside, p=0.35 |
-| Independent — main (n=100) | destroyed | $816.35B ± $0.30B | +$2.18B, above all |
+| Independent — main (n=999) | destroyed | $816.36B ± $0.31B | +$2.17B, above all (p=0.001) |
 | `loan_age` independent (n=50) | destroyed | $816.40B ± $0.34B | +$2.13B, above all |
 
+**Axis attribution — single-axis ablation (`--mode ablate --axis`, n=100 each).**
+Permuting exactly one axis while block-shuffling the other three together
+isolates that axis's cross-correlation with the rest. Two clear findings:
+
+| Axis decorrelated (other 3 kept jointly intact) | Trapped null | real − null | r(lag 0) null | real − null |
+|---|---|---|---|---|
+| coupon | $814.2B ± 0.3 | +$4.3B | +0.207 | −0.017 |
+| FICO | $813.3B ± 0.3 | +$5.3B | +0.190 | 0.000 (p=0.89) |
+| LTV | $813.4B ± 0.3 | +$5.2B | +0.179 | +0.011 |
+| origination-time | $812.9B ± 0.3 | +$5.6B | +0.237 | −0.047 |
+| *(full four-axis, ref)* | *$816.35B ± 0.3* | *+$2.18B* | *+0.227* | *−0.037* |
+
+1. **The trapped-liquidity effect is interaction-dominated, not attributable to a
+   single axis.** Every single-axis ablation lands *below* the full four-axis
+   scramble (each real−null of +$4.3B to +$5.6B *exceeds* the full +$2.18B). That
+   is the signature of non-additivity: keeping three axes clustered while
+   detaching one is *more* disruptive than decorrelating all four uniformly,
+   because uniform scrambling partially cancels the higher-order configuration
+   that single-axis scrambling exposes. All four axes matter (each p≈0.01 at the
+   n=100 floor); none is inert; but the real pool's four-way assortative
+   structure jointly *maximizes* aggregate lock-in (real $818.5B is the highest
+   of every configuration tested), and no clean per-axis decomposition of the
+   $2.2B exists.
+2. **The CPR-path signal is concentrated in origination-time.** Decorrelating the
+   vintage/age axis moves r(lag 0) the most — from real +0.190 up to +0.237 — so
+   the real age structure is what *depresses* contemporaneous alignment with
+   SOMA. FICO is inert for the path (real sits at the 48th percentile of its
+   ablation null, p=0.89); LTV pulls weakly the other way. This localizes §16's
+   "the real-structure signal lives in the CPR path" claim specifically to
+   loan-age/vintage composition — consistent with the TBA-settlement seasoning
+   story (§10–11), since age is what the PSA baseline hazard keys on.
+
+**Bootstrap context (`--mode bootstrap`, n=499).** How large is the $2.2B
+joint-structure effect relative to ordinary sampling variability — the wobble
+you would get just from drawing a different 75k sample, with no scrambling?
+Resampling the real loans with replacement centers on the real estimate
+(bootstrap mean $818.55B, real $818.53B at p=0.95) with sd **$0.27B** and a 95%
+CI of **[$818.0B, $819.1B]** (width $1.06B). So the joint-structure effect
+(+$2.18B) is **~8× the bootstrap sampling sd and ~2× the full 95% CI width**.
+This refines the "economically second-order" reading: the effect is tiny as a
+*fraction of the level* (0.27%), yet it is roughly four times larger than how
+imprecisely the level is even pinned down by a finite sample — it is a real,
+resolved signal, not sampling noise.
+
+**Stratum-sparsity check (§1.4 diagnostic).** Both Path B's burnout broadcast and
+the stratum key operate at the stratum level, so a permutation that fragmented
+strata into sparse cells could confound the result. It does not: over 20
+independent permutations the real 130 strata (median 136 loans, max 6076, 18
+cells <5 loans holding 0.22% of mass) become ~149 strata that are *more* evenly
+populated (median ~209, max ~2377, ~11 cells <5 loans, sparse mass still ~0.2%).
+Permutation slightly increases stratum count and *evens out* mass — the real
+pool is the more concentrated one — so the effect is not a stratum-sparsity
+artifact; if anything the permuted burnout cells are better-conditioned.
+
 Reproduce: `cd hazard && python3 permutation_test.py --n 100`
-(add `--mode block` or `--mode age-independent` for the controls) →
+(add `--mode block`, `--mode age-independent`, `--mode bootstrap`, or
+`--mode ablate --axis {coupon,fico,ltv,orig}`) →
 `data/permutation_test*_results.csv` + `data/permutation_test*_summary.json`.
 
 ---
@@ -812,4 +878,4 @@ Lock-in-Effect/
 
 ---
 
-*Last updated: July 2026. Hazard spec v3: stratum FE (295 pools), burnout sign fixed (−0.13). Post robustness-fix program (§15): Path B at 107.0% trapped (band 105.9%–108.2%) after the β₁ units fix; ABM at 11.9% after the 15-year MBS fold-in; cross-design test with real Freddie covariates recovers 59.3% (recalibrated) / 20.9% (frozen). Permutation test (§16): Path B's recovery is a marginal-distribution result — scrambling the joint covariate structure moves it only 0.27%.*
+*Last updated: July 2026. Hazard spec v3: stratum FE (295 pools), burnout sign fixed (−0.13). Post robustness-fix program (§15): Path B at 107.0% trapped (band 105.9%–108.2%) after the β₁ units fix; ABM at 11.9% after the 15-year MBS fold-in; cross-design test with real Freddie covariates recovers 59.3% (recalibrated) / 20.9% (frozen). Permutation test (§16, n=999, exact p=0.001): Path B's recovery is a marginal-distribution result — scrambling the joint covariate structure moves it only 0.27% ($2.2B); the trapped-level effect is interaction-dominated across axes and the CPR-path signal localizes to origination-time.*
