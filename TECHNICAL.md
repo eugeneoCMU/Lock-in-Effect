@@ -211,7 +211,7 @@ The Danish counterfactual was the most serious bug chain in the project:
 | **1** | **-$1,132B** | $1,676B | ~47% Danish CPR (current surface) applied to static U.S. balance |
 | **2 (current)** | **-$829.1B** | **$930.3B** | Dynamic declining-balance simulation per cohort |
 
-**Why Stage 0 happened:** Danish CPR is always high under market-value buyback (**36–51%** on the current production surface, mean **47.2%** over the 42-month active QT window; the older rational-only calibration was ~21–27%). Simulated roll-off consistently **exceeded** the QT cap, producing negative extension deltas every month. One-sided clipping turned all negatives to zero.
+**Why Stage 0 happened:** Danish CPR was high under the market-value-buyback surface (**36–51%**, mean **47.2%** over the 42-month active QT window; the older rational-only calibration was ~21–27%). Simulated roll-off consistently **exceeded** the QT cap, producing negative extension deltas every month. One-sided clipping turned all negatives to zero. (That ~47% surface is itself superseded by the Berger recalibration, §20, which brings Danish CPR to ~3.4%.)
 
 **Why Stage 2 is correct:** Danish balance is simulated forward month-by-month from QT-start holdings, applying Danish CPR + scheduled amort + curtailment to the *already-shrunk* balance each month.
 
@@ -915,7 +915,9 @@ ABM settlement kernel auto-disables since Markov routing already handles the
 pipeline lag). Only the micro-foundation for loan behavior varies; the
 accounting is held identical.
 
-**Result.**
+**Result** (the Danish leg here uses Path B's *pre-Berger* NPV-reset heuristic;
+§20 re-runs this hybrid with the Berger-recalibrated Danish regime — see the
+note below):
 
 | Metric | ABM-native (surface) | Hybrid (hazard micro-foundation) |
 |---|---|---|
@@ -929,21 +931,24 @@ The headline $925.5B U.S.–Danish gap is largely an artifact of *how the ABM
 surface encodes the Danish market-value buyback*: its mobility gate reads the
 sub-par payoff as a low replacement payment and fires a 47% Danish CPR refi
 wave, draining the Danish book fast (deeply negative Danish trapped). The hazard
-framework encodes the same institution through the NPV identity (§15 Fix 3):
-when rates rise above coupon the buyback discount exactly offsets the locked-in
-spread, so prepaying is economically *neutral* and the Danish hazard resets to
-the ~6% PSA baseline rather than a refi wave. Under that (more economically
-coherent) encoding the Danish and U.S. books behave similarly and the gap nearly
-vanishes ($61.2B).
+framework (here) encodes the same institution through the NPV identity (§15 Fix
+3): the buyback discount offsets the locked-in spread, so prepaying is
+economically *neutral* and the Danish hazard resets to the ~6% PSA baseline
+rather than a refi wave. Under that encoding the Danish and U.S. books behave
+similarly and the gap nearly vanishes ($61.2B).
 
-This does not overturn the *sign* of the lock-in story (U.S. par-payoff still
-traps more than a market-value system in every specification), but it shows the
-*magnitude* of the institutional gap is a micro-foundation artifact, not a
-robust structural number. The ABM's $925.5B should be read as an upper bound
-under its specific behavioral encoding, and the paper should cite the hybrid
-$61.2B alongside it. (The U.S.-side recovery also rises from Path B's standalone
-107% to 97.9% here because the shared layer additionally nets ~$70B of
-curtailment and term-aware scheduled amortization that Path B's own scorer omits.)
+This shows the *magnitude* of the institutional gap is a micro-foundation
+artifact, not a robust structural number. (The U.S.-side recovery also rises
+from Path B's standalone 107% to 97.9% here because the shared layer nets ~$70B
+of curtailment and term-aware scheduled amortization the standalone scorer
+omits.)
+
+> **Superseded by §20.** The NPV-reset heuristic used for the Danish leg above
+> was itself a mechanism-extrapolation, not an estimated elasticity. §20 replaces
+> it with Berger et al.'s estimated Danish channels (flat 3.2% moving + ≈0
+> U.S.-transplant refi) and re-runs this exact hybrid: Danish CPR 5.61% → 3.39%,
+> institutional gap **$61.2B → −$99.9B**. The qualitative point stands and
+> sharpens — the gap is small and the ~$925B figure was never a robust number.
 
 Reproduce: `cd abm && python3 hybrid_pipeline.py` →
 `data/hybrid_pipeline_results.json`.
