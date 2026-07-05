@@ -845,6 +845,50 @@ Reproduce: `cd hazard && python3 permutation_test.py --n 100`
 `--mode ablate --axis {coupon,fico,ltv,orig}`) →
 `data/permutation_test*_results.csv` + `data/permutation_test*_summary.json`.
 
+### The same permutation on Path A — a *fitted* model (roadmap 1.3)
+
+Path A *learns* its coefficients from data, so a permutation can change what the
+model learns, not just what it predicts — a strictly harder test than Path B's.
+The panel is pre-aggregated, so the permutation operates at the stratum level:
+independently reassign the four axes (vintage, coupon, FICO, LTV) across the ~297
+strata, keeping each stratum's outcome series (exposure, prepaid_upb, burnout
+stock, age) in place, then **re-fit the 295-FE ridge GLM and re-simulate** per
+replicate (`permutation_test_pathA.py`, n=50). The GLM fit is deterministic, so
+there is no RNG noise floor — any spread is structure effect. A second mode
+(`profile-block`) moves each stratum's *whole* 4-axis profile to a different
+outcome slot (within-profile joint structure preserved, profile↔outcome pairing
+broken), isolating pairing from axis correlation.
+
+| Quantity | Real | Independent null (n=50) | Profile-block null (n=50) |
+|---|---|---|---|
+| β(rate_gap_bps) | +0.673 | +0.71 ± 0.64 [−1.13, +1.19] | +0.33 ± 0.55 |
+| β(burnout_orth) | −0.130 | **+0.12 ± 0.31** (sign flips) | −0.53 ± 0.30 (stays negative) |
+| β(friction) | −0.037 | −0.14 ± 0.06 (p=0.02) | −0.17 ± 0.10 |
+| Trapped | $915B (119.7%) | $967B ± 174 [788, 1272] | $1140B ± 145 (real below all, p=0.02) |
+
+Three findings, in sharp contrast to Path B:
+
+1. **A fitted model's outputs are far more structure-dependent than a
+   literature-calibrated one's.** Where Path B's aggregate barely moved (±$0.3B),
+   Path A's forward-simulated trapped swings by **±$150–175B** and β(rate_gap)
+   ranges from −1.13 to +1.19 (it can flip sign). The specific coefficient values
+   are not robustly identified once covariate structure is scrambled.
+2. **The spec-v3 negative burnout coefficient requires the real within-profile
+   covariate correlations.** Under independent scramble β(burnout) flips to a
+   *positive* mean (+0.12); under profile-block (joint structure preserved) it
+   stays negative (−0.53). So β(burnout) < 0 is a genuine feature of the real
+   four-way covariate joint structure — corroborating the adverse-selection
+   reading (§10) — but also demonstrably sensitive to it.
+3. **The real profile↔outcome pairing *suppresses* trapped.** Breaking the
+   pairing while preserving joint covariate structure (profile-block) inflates
+   trapped to $1140B, above the real $915B in all 50 draws (p=0.02): the actual
+   loan pool's alignment of covariates to prepay outcomes is on the low-trapped
+   side of what a mismatched pairing would produce.
+
+Reproduce: `cd hazard && python3 permutation_test_pathA.py --n 50`
+(`--mode profile-block` for the second column) →
+`data/permutation_pathA_*_results.csv`.
+
 ---
 
 ## 17. Cross-Foundation Checks — Hybrid Pipeline and Full-Book Weighting
