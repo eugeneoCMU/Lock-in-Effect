@@ -24,6 +24,7 @@ For module-level runbooks, see [README.md](README.md). For granular ABM bug arch
 14. [Known Limitations and Next Steps](#14-known-limitations-and-next-steps)
 15. [Robustness Fix Program (July 2026)](#15-robustness-fix-program-july-2026)
 16. [Permutation Test — Does Path B Depend on Joint Covariate Structure?](#16-permutation-test--does-path-b-depend-on-joint-covariate-structure)
+17. [Cross-Foundation Checks — Hybrid Pipeline and Full-Book Weighting](#17-cross-foundation-checks--hybrid-pipeline-and-full-book-weighting)
 
 ---
 
@@ -843,6 +844,53 @@ Reproduce: `cd hazard && python3 permutation_test.py --n 100`
 (add `--mode block`, `--mode age-independent`, `--mode bootstrap`, or
 `--mode ablate --axis {coupon,fico,ltv,orig}`) →
 `data/permutation_test*_results.csv` + `data/permutation_test*_summary.json`.
+
+---
+
+## 17. Cross-Foundation Checks — Hybrid Pipeline and Full-Book Weighting
+
+### 17.1 Hybrid pipeline: shared accounting, hazard micro-foundation (roadmap 3.2)
+
+**What.** [`abm/hybrid_pipeline.py`](abm/hybrid_pipeline.py) runs the ABM's
+macro-accounting layer (SOMA balance tracking, phased-cap netting, curtailment,
+scheduled amortization, Danish dynamic-balance loop) but replaces the ABM CPR
+surface with Path B's literature microsim CPR (`use_hazard_microsim=True`; the
+ABM settlement kernel auto-disables since Markov routing already handles the
+pipeline lag). Only the micro-foundation for loan behavior varies; the
+accounting is held identical.
+
+**Result.**
+
+| Metric | ABM-native (surface) | Hybrid (hazard micro-foundation) |
+|---|---|---|
+| U.S. trapped | $91.0B (11.9%) | **$749.0B (97.9%)** |
+| Danish trapped | −$834.5B | **+$687.8B** |
+| Institutional gap (US − DK) | **$925.5B** | **$61.2B** |
+| U.S. / Danish CPR mean | 11.68% / 47.14% | 4.76% / 5.61% |
+
+**Interpretation — the institutional gap is not robust across micro-foundations.**
+The headline $925.5B U.S.–Danish gap is largely an artifact of *how the ABM
+surface encodes the Danish market-value buyback*: its mobility gate reads the
+sub-par payoff as a low replacement payment and fires a 47% Danish CPR refi
+wave, draining the Danish book fast (deeply negative Danish trapped). The hazard
+framework encodes the same institution through the NPV identity (§15 Fix 3):
+when rates rise above coupon the buyback discount exactly offsets the locked-in
+spread, so prepaying is economically *neutral* and the Danish hazard resets to
+the ~6% PSA baseline rather than a refi wave. Under that (more economically
+coherent) encoding the Danish and U.S. books behave similarly and the gap nearly
+vanishes ($61.2B).
+
+This does not overturn the *sign* of the lock-in story (U.S. par-payoff still
+traps more than a market-value system in every specification), but it shows the
+*magnitude* of the institutional gap is a micro-foundation artifact, not a
+robust structural number. The ABM's $925.5B should be read as an upper bound
+under its specific behavioral encoding, and the paper should cite the hybrid
+$61.2B alongside it. (The U.S.-side recovery also rises from Path B's standalone
+107% to 97.9% here because the shared layer additionally nets ~$70B of
+curtailment and term-aware scheduled amortization that Path B's own scorer omits.)
+
+Reproduce: `cd abm && python3 hybrid_pipeline.py` →
+`data/hybrid_pipeline_results.json`.
 
 ---
 
