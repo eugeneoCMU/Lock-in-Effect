@@ -749,8 +749,32 @@ place. The real-structure signal that does exist lives in the monthly CPR
 *path* (the −0.037 lag-0 shift), consistent with §8's theme that the
 path-shape, not the aggregate level, is where loan-level structure matters.
 
-Reproduce: `cd hazard && python3 permutation_test.py --n 100` →
-`data/permutation_test_results.csv` + `data/permutation_test_summary.json`.
+**Controls.** Two additional modes validate the methodology choices above.
+
+- **Block-shuffle (structure preserved, `--mode block`, n=20).** Shuffling intact
+  rows — one permutation applied to every column, so all covariate correlations
+  are preserved and only the RNG→loan alignment changes — reproduces the real
+  result: null $818.528B ± $0.003B, with the real value sitting *inside* the
+  distribution (75th percentile, p=0.35). This pins the pure draw-noise floor at
+  **~$3M**. The $2.18B independent-permutation effect is therefore **~700× the
+  noise floor** — a genuine structure signal, not an artifact of the shuffling
+  mechanics (and confirming the microsim aggregate is order-invariant, as a pool
+  statistic should be).
+- **`loan_age` permuted independently (`--mode age-independent`, n=50).** Giving
+  `loan_age` its own fifth independent permutation instead of blocking it with
+  `vintage` yields null $816.40B ± $0.34B — statistically indistinguishable from
+  the main null, same r(lag 0) (+0.228), same peak lag (−3 in all 50). The
+  origination-time blocking choice drives no conclusion.
+
+| Null model | Structure | Trapped null (mean ± sd) | Real vs. null |
+|---|---|---|---|
+| Block-shuffle (n=20) | preserved | $818.528B ± $0.003B | inside, p=0.35 |
+| Independent — main (n=100) | destroyed | $816.35B ± $0.30B | +$2.18B, above all |
+| `loan_age` independent (n=50) | destroyed | $816.40B ± $0.34B | +$2.13B, above all |
+
+Reproduce: `cd hazard && python3 permutation_test.py --n 100`
+(add `--mode block` or `--mode age-independent` for the controls) →
+`data/permutation_test*_results.csv` + `data/permutation_test*_summary.json`.
 
 ---
 

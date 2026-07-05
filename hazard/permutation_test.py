@@ -74,11 +74,27 @@ from macro import (
 )
 from microsim_engine import run_qt_microsim
 
-RESULTS_CSV = DATA_DIR / "permutation_test_results.csv"
-SUMMARY_JSON = DATA_DIR / "permutation_test_summary.json"
 _SCRATCH = DATA_DIR / "_perm_microsim_tmp.parquet"
 
 P_Q_MID_PCT = ROTHSTEIN_Q_DECLINE_MID * 100  # 6.5
+
+# Permutation modes:
+#   independent      — main test: each of the 4 axes gets its own permutation,
+#                      vintage+loan_age blocked as one origination-time axis.
+#   block            — control: shuffle intact rows (one permutation, all
+#                      columns move together). Preserves ALL covariate
+#                      correlations; only the RNG→loan position alignment
+#                      changes, so its spread is the pure draw-noise floor.
+#   age-independent  — control: like `independent` but loan_age gets a 5th
+#                      independent permutation instead of blocking with vintage,
+#                      to confirm the blocking choice does not drive the result.
+MODES = ("independent", "block", "age-independent")
+
+
+def _paths_for_mode(mode: str) -> tuple[Path, Path]:
+    tag = "" if mode == "independent" else f"_{mode.replace('-', '')}"
+    return (DATA_DIR / f"permutation_test{tag}_results.csv",
+            DATA_DIR / f"permutation_test{tag}_summary.json")
 
 
 # ---------------------------------------------------------------------------
@@ -115,17 +131,26 @@ def _verify_stratum_recipe(base: pd.DataFrame) -> None:
         )
 
 
-def permute_sample(base: pd.DataFrame, rng: np.random.Generator) -> pl.DataFrame:
-    """Independent per-axis permutation; recompute buckets + stratum_id."""
+def permute_sample(base: pd.DataFrame, rng: np.random.Generator,
+                   mode: str = "independent") -> pl.DataFrame:
+    """Per-axis permutation; recompute buckets + stratum_id. See MODES."""
     n = len(base)
-    pi_orig = rng.permutation(n)   # origination-time block: vintage + loan_age
+
+    if mode == "block":
+        # Shuffle intact rows: all columns move together, so every covariate
+        # correlation is preserved. Only RNG→position alignment changes.
+        pi = rng.permutation(n)
+        return pl.from_pandas(base.iloc[pi].reset_index(drop=True))
+
+    pi_orig = rng.permutation(n)   # origination-time: vintage (+ loan_age if blocked)
     pi_coupon = rng.permutation(n)
     pi_fico = rng.permutation(n)
     pi_ltv = rng.permutation(n)
+    pi_age = pi_orig if mode == "independent" else rng.permutation(n)
 
     out = base.copy()
     out["vintage"] = base["vintage"].to_numpy()[pi_orig]
-    out["loan_age"] = base["loan_age"].to_numpy()[pi_orig]
+    out["loan_age"] = base["loan_age"].to_numpy()[pi_age]
     out["coupon"] = base["coupon"].to_numpy()[pi_coupon]
     out["fico"] = base["fico"].to_numpy()[pi_fico]
     out["orig_ltv"] = base["orig_ltv"].to_numpy()[pi_ltv]
@@ -207,8 +232,11 @@ def main() -> None:
                         help="master seed for the permutation stream")
     parser.add_argument("--smoke", action="store_true",
                         help="quick smoke run (implies small --n)")
+    parser.add_argument("--mode", choices=MODES, default="independent",
+                        help="permutation mode (see module docstring)")
     args = parser.parse_args()
     n_perm = 2 if args.smoke else args.n
+    results_csv, summary_json = _paths_for_mode(args.mode)
 
     print("Loading real loan sample …")
     base_pl = load_or_build_loan_sample()
@@ -230,30 +258,33 @@ def main() -> None:
           f"r(lag0)={real['cpr_r_lag0']:+.3f}  peak lag {real['peak_lag']}  "
           f"[{real['runtime_s']}s]")
 
+    real["mode"] = args.mode
     rows = [real]
-    pd.DataFrame(rows).to_csv(RESULTS_CSV, index=False)
+    pd.DataFrame(rows).to_csv(results_csv, index=False)
 
     rng = np.random.default_rng(args.seed)
     perms = []
     for i in range(n_perm):
         t0 = time.perf_counter()
-        perm_sample = permute_sample(base, rng)
+        perm_sample = permute_sample(base, rng, mode=args.mode)
         r = _run_once(perm_sample, macro, empirical)
         r["replicate"] = i
+        r["mode"] = args.mode
         r["runtime_s"] = round(time.perf_counter() - t0, 1)
         perms.append(r)
         rows.append(r)
-        pd.DataFrame(rows).to_csv(RESULTS_CSV, index=False)  # checkpoint
+        pd.DataFrame(rows).to_csv(results_csv, index=False)  # checkpoint
         print(f"  perm {i + 1:>3}/{n_perm}: ${r['trapped_b']:.1f}B "
               f"({r['share_pct']:.1f}%)  r(lag0)={r['cpr_r_lag0']:+.3f}  "
               f"peak {r['peak_lag']}  [{r['runtime_s']}s]")
 
     summary = _summarize(real, perms)
-    with open(SUMMARY_JSON, "w") as f:
+    summary["mode"] = args.mode
+    with open(summary_json, "w") as f:
         json.dump(summary, f, indent=2)
 
     print("\n" + "=" * 68)
-    print(" PERMUTATION TEST — Path B, real vs. marginal-preserving null")
+    print(f" PERMUTATION TEST [{args.mode}] — Path B, real vs. null")
     print("=" * 68)
     for key, label in (("trapped_b", "Trapped $B"),
                        ("share_pct", "Share %"),
@@ -266,8 +297,8 @@ def main() -> None:
               f"p2={s['p_two_sided']:.3f}")
     print(f" Peak lag     : real {summary['real_peak_lag']}  |  null dist "
           f"{summary['null']['peak_lag_distribution']}")
-    print(f"\n Results: {RESULTS_CSV}")
-    print(f" Summary: {SUMMARY_JSON}")
+    print(f"\n Results: {results_csv}")
+    print(f" Summary: {summary_json}")
     if _SCRATCH.exists():
         _SCRATCH.unlink()
 
