@@ -334,10 +334,17 @@ class HousingMarketEngine:
             [h.mortgage.outstanding_principal() for h in self.households])
 
         # Danish payoff depends on market rate, so precompute partial values:
-        # monthly coupon payment and remaining term (shared across all agents
-        # since they all started with the same cohort mortgage).
+        # monthly coupon payment and remaining term. Derived per household
+        # from the attached mortgages so heterogeneous populations
+        # (--population=freddie) work; in cohort mode every entry is equal
+        # and the arithmetic is identical to the former scalar.
         self._pmt = self._current_payment  # same as coupon payment
-        self._n_rem = self._cohort_term_years * 12 - self._cohort_months_elapsed
+        self._n_rem = np.array(
+            [h.mortgage.remaining_term_months() for h in self.households]
+        )
+        self._term_years_vec = np.array(
+            [h.mortgage.term_years for h in self.households]
+        )
 
     def _payoff_us(self, rate: float) -> np.ndarray:
         return self._outstanding_us
@@ -362,7 +369,7 @@ class HousingMarketEngine:
         transaction costs, unlocking ~90% of the 15-year cohort per month.
         """
         r = rate / 12
-        n = self._cohort_term_years * 12
+        n = self._term_years_vec * 12
         if r == 0:
             return payoff / n
         return payoff * r / (1 - (1 + r) ** -n)
@@ -686,8 +693,45 @@ def plot_s_curve(results: pd.DataFrame,
 # ---------------------------------------------------------------------------
 # Main
 # ---------------------------------------------------------------------------
-def main():
+def main(population: str = "synthetic"):
     import fed_mbs_extension_risk as fed
+
+    if population == "freddie":
+        # Cross-design mode: real Freddie structural covariates, synthetic
+        # behavioral draws, frozen production calibration. The full
+        # two-variant diagnostic lives in cross_design_test.py.
+        from freddie_population import (
+            attach_freddie_covariates,
+            load_freddie_structural_sample,
+            population_summary,
+        )
+
+        print("Fetching SOMA MBS coupon cohorts from NY Fed …")
+        cohorts = fed.fetch_soma_mbs_cohorts()
+        print("Fetching empirical medians from FRED …")
+        median_income, median_home_value = fetch_macro_from_fred()
+        ref = reference_cohort(cohorts)
+        mobility_scale = calibrate_mobility_scale(
+            median_income, median_home_value,
+            cohort_rate=ref["coupon"],
+            cohort_months=ref["months_elapsed"],
+        )
+        loans = load_freddie_structural_sample(N_HOUSEHOLDS)
+        print(population_summary(loans))
+        engine = HousingMarketEngine(
+            median_income=median_income,
+            median_home_value=median_home_value,
+            mobility_scale=mobility_scale,
+        )
+        attach_freddie_covariates(engine, loans)
+        print("Building population-level 3D CPR surface (freddie, frozen "
+              "calibration) …")
+        surface = engine.build_cpr_surface()
+        out_csv = ABM_CPR_SURFACE_CSV.with_name(
+            "abm_cpr_surface_freddie_frozen.csv")
+        surface.to_csv(out_csv, index=False)
+        print(f"CPR surface saved to {out_csv}")
+        return
 
     print("Fetching SOMA MBS coupon cohorts from NY Fed …")
     cohorts = fed.fetch_soma_mbs_cohorts()
@@ -739,4 +783,15 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
+    import argparse
+
+    _parser = argparse.ArgumentParser(description=__doc__)
+    _parser.add_argument(
+        "--population",
+        choices=["synthetic", "freddie"],
+        default="synthetic",
+        help="synthetic: production default (unchanged); freddie: real "
+             "Freddie structural covariates (see cross_design_test.py)",
+    )
+    _args = _parser.parse_args()
+    main(population=_args.population)

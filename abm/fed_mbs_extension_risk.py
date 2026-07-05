@@ -794,6 +794,7 @@ def compute_metrics(
     apply_settlement_lag_kernel: bool = False,
     use_hazard_microsim: bool = False,
     abm_params: Optional[dict] = None,
+    sched_smm_override: Optional[pd.Series] = None,
 ) -> pd.DataFrame:
     """
     Derive roll-off, extension delta, and cumulative trapped liquidity.
@@ -1083,7 +1084,8 @@ def compute_metrics(
         )
         df["US_CPR_Pct"] = cpr["US_CPR_Pct"]
         df["Danish_CPR_Pct"] = cpr["Danish_CPR_Pct"]
-        sched_smm = scheduled_amortization_series(df.index)
+        sched_smm = (sched_smm_override if sched_smm_override is not None
+                     else scheduled_amortization_series(df.index))
         df["Scheduled_Amort_SMM"] = sched_smm
         monthly_cpr = df["US_CPR_Pct"] / 100 / 12
         df["US_Simulated_Monthly_Rolloff_Billions"] = (

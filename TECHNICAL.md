@@ -610,6 +610,56 @@ scheduled principal flow the simulated roll-off was missing. 30yr-only mode
 (`terms=("30yr",)`) reproduces the baseline to all decimals — the extension
 is additive, not a rewrite.
 
+### Fix 1 — Cross-design test: real Freddie covariates → ABM (done)
+
+**Scope (pre-registered):** only structural covariates transfer — per-loan
+coupon, loan age, and original LTV from the hazard framework's 75k stratified
+sample ([`abm/freddie_population.py`](abm/freddie_population.py),
+balance-weighted 10k draw; sample WAC 3.36%, age 22mo, LTV 72, FICO 753).
+Behavioral draws (income, home value, mobility desire, transaction cost,
+patience) stay synthetic with production distributions and seed. FICO and
+state are carried but have no ABM decision-rule analogue. Not "fully real"
+agents, and per §VII.A this does not fully resolve the data-source confound
+without the symmetric companion test (hazard framework on a synthetic
+population — still open).
+
+**Mechanics:** `--population=freddie` on `abm_lockin_simulation.py`, full
+two-variant diagnostic in [`abm/cross_design_test.py`](abm/cross_design_test.py).
+Engine internals (`_n_rem`, `_term_years_vec`, `_pmt`) are now per-household
+vectors; synthetic-mode headline metrics verified **byte-for-byte identical**
+to `run-2026-07-04-15yr-foldin` after the change (the control condition).
+
+**Pre-registered criterion (fixed before results):** recovery >50% of the
+benchmark undercuts the paradigm claim; 10–35% corroborates §VIII.A; 35–50%
+ambiguous.
+
+**Results (`abm/data/cross_design_results.json`):**
+
+| | (a) recalibrated [primary] | (b) frozen [robustness] | synthetic control |
+|---|---|---|---|
+| mobility_scale | 36,086 | 43,883 | 43,883 |
+| Trapped | **$453.5B (59.3%)** | **$159.5B (20.9%)** | $91.0B (11.9%) |
+| Mean CPR | 8.14% | 11.63% | 11.68% |
+| CPR r (lag 0) | −0.336 | −0.311 | −0.316 |
+| Peak lag | 0 | 0 | −3 (r=+0.19) |
+
+**Interpretation (reported with pre-registered symmetry):** the primary
+recalibrated variant recovers **59.3%** — above the pre-registered 50%
+threshold, so by our own criterion this **moves against the paradigm claim**:
+with real structural covariates and a like-for-like turnover anchor, the
+household-choice ABM explains far more of the benchmark than the synthetic
+population suggested. The frozen variant stays in the corroborating band
+(20.9%). The **$294B discrepancy between variants is itself the headline
+diagnostic**: earlier ABM results depended heavily on synthetic-population
+calibration, not just on the decision rules. Both variants retain the
+wrong-shaped monthly CPR path (r(lag 0) ≈ −0.32, no lead structure), so the
+path-shape critique of §VIII survives even where the aggregate share moves.
+Real LTV heterogeneity (mean 72 vs the synthetic fixed 80% LTV) is the main
+lever: smaller balances relative to home values shrink payment deltas, and
+recalibrating the anchor against that population lowers the desire scale,
+suppressing QT-window CPR toward empirical levels (8.14% vs 5.83% backed out
+under the population's own amortization assumptions).
+
 ---
 
 ## Appendix — File Map
