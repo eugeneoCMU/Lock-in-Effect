@@ -26,6 +26,7 @@ For module-level runbooks, see [README.md](README.md). For granular ABM bug arch
 16. [Permutation Test — Does Path B Depend on Joint Covariate Structure?](#16-permutation-test--does-path-b-depend-on-joint-covariate-structure)
 17. [Cross-Foundation Checks — Hybrid Pipeline and Full-Book Weighting](#17-cross-foundation-checks--hybrid-pipeline-and-full-book-weighting)
 18. [Symmetric Companion Test — Synthetic Population into the Hazard Framework](#18-symmetric-companion-test--synthetic-population-into-the-hazard-framework)
+19. [Native 15-Year Behavioral Gate](#19-native-15-year-behavioral-gate)
 
 ---
 
@@ -478,10 +479,10 @@ Reproduce: `cd abm && python3 freeze_run.py --tag <name>` → `data/runs/<name>/
 ### Data
 
 - **Freddie Mac 2017–2021** integrated via `prepare_freddie.py` (20 quarters in `hazard/data/raw/`).
-- **15-year MBS folded in structurally** (weights + scheduled amortization;
-  coverage 99.8%). Voluntary CPR for 15yr cohorts uses the same-coupon
-  30-year surface — the ABM payment-delta gate is unreliable for
-  short-amortization loans (see §15 Fix 2).
+- **15-year MBS fully folded in** (weights + scheduled amortization, coverage
+  99.8%) with a **native term-aware behavioral gate** (§19) — 15yr voluntary
+  CPR is now modeled directly (5–8% range), no longer borrowing the 30-year
+  surface.
 - **FRED API key** resolved via `common/fred_key.py` from the `FRED_API_KEY`
   env var or a gitignored `.env` (see `.env.example`); no key in committed
   source.
@@ -604,12 +605,12 @@ MBS face (11 buckets: 7×30yr identical to the pre-fix set + 4×15yr; WAC
 breaks down for 15-year loans. A seasoned 15yr borrower's same-term
 replacement payment is nearly flat, so loss aversion never binds — native
 15yr surfaces predict 32–61% CPR vs ~5–8% empirical, enough to flip ABM
-trapped liquidity to −$169B. Production therefore uses a **structural-only**
-fold-in: 15yr cohorts contribute real weights and 15-year scheduled
-amortization, but voluntary CPR comes from the same-coupon 30-year surface.
-Native 15yr surfaces remain in `abm_cpr_surface.csv` for inspection. Movers
-now refinance same-term (was: hardcoded fresh 30-year — identical behavior
-for the 30-year book).
+trapped liquidity to −$169B. Production therefore used (initially) a
+**structural-only** fold-in: 15yr cohorts contribute real weights and
+15-year scheduled amortization, but voluntary CPR came from the same-coupon
+30-year surface. Movers refinance same-term (was: hardcoded fresh 30-year —
+identical behavior for the 30-year book). **This was superseded by the native
+15yr gate — see §19.**
 
 **Results (`run-2026-07-04-15yr-foldin`):**
 
@@ -1032,6 +1033,59 @@ the one place the companion test does *not* fully close the confound, exactly as
 Reproduce: `cd hazard && python3 synthetic_companion.py` →
 `data/synthetic_companion_results.json` (population generator:
 `synthetic_population.py`).
+
+---
+
+## 19. Native 15-Year Behavioral Gate
+
+**Problem (from §15 Fix 2).** The 15-year fold-in was structural-only: 15yr
+voluntary CPR borrowed the same-coupon 30-year surface because the ABM's
+payment-delta gate produced 32–61% CPR for 15yr cohorts, versus the ~5–8%
+empirical range. Root cause: for a seasoned short-amortization loan the new
+same-term loan is financed on the much-reduced payoff, so
+`new_pmt − current_payment` is large and *negative* — a spurious "gain" that
+clears the loss-aversion gate for nearly every 15yr borrower.
+
+**Fix (roadmap 3.3).** A term-aware `MicrosimPool._mobility_penalty` in
+[`abm/abm_lockin_simulation.py`](abm/abm_lockin_simulation.py). 30-year loans
+keep the legacy payment-delta penalty unchanged. 15-year loans use the **pure
+rate-lock penalty**: the payment increase from financing the *same payoff* at
+the market rate versus the borrower's *own coupon*. This isolates the
+golden-handcuff cost (the value of below-market financing given up), is ≥0 when
+locked in and 0 otherwise, and never manufactures a false gain from the
+amortization-schedule difference. 15yr mobility is then governed by desire vs
+transaction cost + genuine rate lock-in, not an artifact.
+
+**Validation.**
+
+- Native 15yr CPR at QT-typical coordinates (market 6.8%, friction 9%):
+  **6.78%** (2.0% coupon), **8.77%** (3.0%) — squarely in the 5–8% empirical
+  band, vs 32–61% under the borrowed-30yr artifact.
+- 30-year CPR is **byte-identical** (spot check: 30yr 2.0% at 7.0%/9.0% =
+  0.0684 before and after), since 30yr uses the unchanged legacy branch.
+- The 30yr-only production path reproduces the baseline **exactly**
+  ($101.1744B U.S. trapped, gap $930.2989B) — the native gate is purely
+  additive to the 15yr treatment.
+
+**Production switch and result (`run-2026-07-05-native15yr`).** `compute_metrics`
+now uses each 15yr cohort's own native surface instead of borrowing the 30-year
+one. Headline shifts modestly:
+
+| Metric | structural-only (§15 Fix 2) | native 15yr gate (§19) |
+|---|---|---|
+| ABM U.S. trapped | $91.0B (11.9%) | **$84.5B (11.0%)** |
+| Danish trapped | −$834.5B | −$752.8B |
+| Institutional gap | $925.5B | $837.3B |
+| U.S. / Danish CPR mean | 11.68% / 47.14% | 11.76% / 44.09% |
+
+The 15yr cohorts (~9% of the book) now carry economically defensible voluntary
+CPR rather than a borrowed 30-year proxy; the ~$6.5B reduction in U.S. trapped
+and the lower Danish CPR (44.1% vs 47.1%) both flow from the 15yr book no longer
+inheriting the 30-year behavioral surface. The 15yr fold-in is now a *resolved*
+model feature, not an acknowledged scope limitation.
+
+Reproduce: `cd abm && python3 abm_lockin_simulation.py` (rebuilds the surface
+with native 15yr slabs) `&& python3 freeze_run.py --tag run-2026-07-05-native15yr`.
 
 ---
 

@@ -380,36 +380,39 @@ class HousingMarketEngine:
             return payoff / n
         return payoff * r / (1 - (1 + r) ** -n)
 
+    def _mobility_penalty(self, payoff: np.ndarray, new_pmt: np.ndarray,
+                          rate: float) -> np.ndarray:
+        """
+        Per-household loss-aversion penalty ($/month), term-aware.
+
+        30-year (legacy, frozen): payment delta of the new same-term loan vs
+        the current payment; negative deltas ("gains") pass through unscaled.
+
+        15-year (native gate, 3.3): the legacy delta is an artifact for
+        seasoned short-amortization loans — the new loan is financed on the
+        much-reduced payoff, so `new_pmt - current_payment` is large and
+        *negative*, a spurious "gain" that unlocks ~all 15yr borrowers. The
+        native rule isolates the pure rate-lock cost: the payment increase from
+        financing the SAME payoff at the market rate vs the borrower's own
+        coupon. It is ≥0 when locked in (market > coupon) and 0 otherwise — a
+        golden-handcuff cost, never a false gain — so 15yr mobility is governed
+        by desire vs transaction cost + genuine rate lock-in.
+        """
+        delta_legacy = new_pmt - self._current_payment
+        pen_legacy = np.where(delta_legacy > 0,
+                              delta_legacy * LOSS_AVERSION_LAMBDA, delta_legacy)
+        pmt_at_coupon = self._new_payment_vec(payoff, self._cohort_rate)
+        delta_rate = new_pmt - pmt_at_coupon
+        pen_rate = np.where(delta_rate > 0,
+                            delta_rate * LOSS_AVERSION_LAMBDA, 0.0)
+        is_short = self._term_years_vec <= 20
+        return np.where(is_short, pen_rate, pen_legacy)
+
     def _cpr_vec(self, rate: float, system_type: str,
                  friction: float, rate_velocity: float) -> float:
         """Fully vectorized CPR for one grid point."""
-        payoff = (self._payoff_us(rate) if system_type == "US"
-                  else self._payoff_danish(rate))
-        new_pmt = self._new_payment_vec(payoff, rate)
-
-        # Gate 1: DTI
-        dti = np.where(self._monthly_income > 0,
-                       new_pmt / self._monthly_income, 0.0)
-        passes_dti = dti <= DTI_MAX
-
-        # Gate 2: loss aversion on payment delta
-        delta = new_pmt - self._current_payment
-        penalty = np.where(delta > 0, delta * LOSS_AVERSION_LAMBDA, delta)
-
-        eff_rate = np.clip(friction + self._txn_offsets,
-                           TRANSACTION_COST_FLOOR, TRANSACTION_COST_CAP)
-        txn_cost = self._home_values * eff_rate
-        total_penalty = penalty * EXPECTED_STAY_MONTHS + txn_cost
-        passes_cost = self._desires > total_penalty
-
-        # Gate 3: wait-and-see
-        if rate_velocity > WAIT_AND_SEE_RATE_THRESHOLD:
-            passes_wait = self._patience >= WAIT_AND_SEE_PROB
-        else:
-            passes_wait = np.ones(self.n_households, dtype=bool)
-
-        movers = passes_dti & passes_cost & passes_wait
-        return float(movers.sum()) / self.n_households
+        return float(self._movers_mask(rate, system_type, friction,
+                                        rate_velocity).sum()) / self.n_households
 
     def _movers_mask(self, rate: float, system_type: str,
                      friction: float, rate_velocity: float) -> np.ndarray:
@@ -420,8 +423,7 @@ class HousingMarketEngine:
         dti = np.where(self._monthly_income > 0,
                        new_pmt / self._monthly_income, 0.0)
         passes_dti = dti <= DTI_MAX
-        delta = new_pmt - self._current_payment
-        penalty = np.where(delta > 0, delta * LOSS_AVERSION_LAMBDA, delta)
+        penalty = self._mobility_penalty(payoff, new_pmt, rate)
         eff_rate = np.clip(friction + self._txn_offsets,
                            TRANSACTION_COST_FLOOR, TRANSACTION_COST_CAP)
         txn_cost = self._home_values * eff_rate

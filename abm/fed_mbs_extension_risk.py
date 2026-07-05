@@ -1003,21 +1003,16 @@ def compute_metrics(
             coupon = _round_coupon(cohort["coupon"])
             term_months = int(cohort.get("term_months", PORTFOLIO_TERM))
             key = (coupon, term_months)
-            # Structural-only 15-year fold-in: 15yr cohorts contribute their
-            # real weights and 15-year scheduled amortization, but voluntary
-            # CPR comes from the same-coupon 30-year surface. The ABM's
-            # payment-delta gate breaks down for short-amortization loans
-            # (a seasoned 15yr borrower's same-term replacement payment is
-            # near-flat, so loss aversion never binds → 32-61% CPR vs ~5-8%
-            # empirical). Native 15yr surfaces remain in the CSV for
-            # inspection but are not used for aggregation.
-            behav_key = (coupon, PORTFOLIO_TERM)
-            surf_c = surface.get(behav_key) or surface.get(key)
+            # Native term-aware 15-year gate (§15 Fix 2 → §19): 15yr cohorts now
+            # use their OWN surface, built with the rate-lock penalty that fixes
+            # the seasoned-amortization false-gain artifact (5-8% CPR vs the old
+            # 32-61%). Falls back to nearest same-term coupon, then any term.
+            surf_c = surface.get(key)
             if surf_c is None:
-                same_term = [k for k in surface if k[1] == PORTFOLIO_TERM]
+                same_term = [k for k in surface if k[1] == term_months]
                 candidates = same_term or list(surface.keys())
                 nearest = min(candidates, key=lambda k: abs(k[0] - coupon))
-                print(f"WARNING: no behavioral surface for coupon "
+                print(f"WARNING: no surface for {term_months//12}yr coupon "
                       f"{coupon*100:.2f}%; using {nearest[1]//12}yr "
                       f"{nearest[0]*100:.2f}%.")
                 surf_c = surface[nearest]
