@@ -1,0 +1,64 @@
+{
+  "two_by_two": {
+    "abm_synthetic": {
+      "trapped_b": 91.0,
+      "share_pct": 11.9
+    },
+    "abm_real": {
+      "trapped_b": 453.5,
+      "share_pct": 59.3
+    },
+    "hazard_synthetic_pathB": {
+      "trapped_b": 810.3754477878556,
+      "share_pct": 105.96630255419079,
+      "cpr_r_lag0": -0.063022292971199
+    },
+    "hazard_synthetic_pathA": {
+      "trapped_b": 579.4775202972113,
+      "share_pct": 75.77363110739441,
+      "cpr_r_lag0": -0.49396409677901504
+    },
+    "hazard_real_pathB": {
+      "trapped_b": 818.5,
+      "share_pct": 107.0
+    }
+  },
+  "calibration_sensitivity": {
+    "baseline": {
+      "path_b": {
+        "trapped_b": 810.3754477878556,
+        "share_pct": 105.96630255419079,
+        "cpr_r_lag0": -0.063022292971199
+      },
+      "path_a": {
+        "trapped_b": 579.4775202972113,
+        "share_pct": 75.77363110739441,
+        "cpr_r_lag0": -0.49396409677901504
+      }
+    },
+    "alt_fico_looser": {
+      "path_b": {
+        "trapped_b": 809.9850546920909,
+        "share_pct": 105.9152539778626,
+        "cpr_r_lag0": -0.05610120754400705
+      },
+      "path_a": {
+        "trapped_b": 591.4952320362322,
+        "share_pct": 77.34509095557026,
+        "cpr_r_lag0": -0.493135648538647
+      }
+    },
+    "alt_ltv_higher": {
+      "path_b": {
+        "trapped_b": 810.3232531023633,
+        "share_pct": 105.9594774734832,
+        "cpr_r_lag0": -0.061714153938062066
+      },
+      "path_a": {
+        "trapped_b": 577.4855738730128,
+        "share_pct": 75.51316023795412,
+        "cpr_r_lag0": -0.49463885090122856
+      }
+    }
+  }
+}

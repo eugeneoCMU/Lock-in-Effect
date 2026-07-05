@@ -25,6 +25,7 @@ For module-level runbooks, see [README.md](README.md). For granular ABM bug arch
 15. [Robustness Fix Program (July 2026)](#15-robustness-fix-program-july-2026)
 16. [Permutation Test — Does Path B Depend on Joint Covariate Structure?](#16-permutation-test--does-path-b-depend-on-joint-covariate-structure)
 17. [Cross-Foundation Checks — Hybrid Pipeline and Full-Book Weighting](#17-cross-foundation-checks--hybrid-pipeline-and-full-book-weighting)
+18. [Symmetric Companion Test — Synthetic Population into the Hazard Framework](#18-symmetric-companion-test--synthetic-population-into-the-hazard-framework)
 
 ---
 
@@ -496,7 +497,7 @@ Reproduce: `cd abm && python3 freeze_run.py --tag <name>` → `data/runs/<name>/
 
 ### Next steps (priority order)
 
-1. **Symmetric companion test** (§15 Fix 1, optional PR6 in the original plan): run the hazard framework on a synthetic-only population to fully separate "paradigm" from "data source" — required by §VII.A before the cross-design result can be treated as conclusive.
+1. ~~**Symmetric companion test**~~ — **done (§18).** Path B on a fully synthetic population recovers 106.0% vs 107.0% real; the hazard survival structure recovers the benchmark with zero real data, while the ABM needs real covariates to reach even 59%. The paradigm gap survives the data-source swap; only the CPR *path* shape (not the level) still depends on real structure.
 2. **Reconcile the cross-design result with the paper's paradigm claim.** The recalibrated primary variant recovers 59.3%, above the pre-registered 50% "undercuts" threshold — Table 1/abstract framing needs to address this directly rather than cite only the synthetic-population 11.9%.
 3. **Re-run Monte Carlo (50 seeds)** against the 15yr-foldin production tag; the $113.5B estimate on file is 30yr-only and stale.
 
@@ -636,7 +637,7 @@ patience) stay synthetic with production distributions and seed. FICO and
 state are carried but have no ABM decision-rule analogue. Not "fully real"
 agents, and per §VII.A this does not fully resolve the data-source confound
 without the symmetric companion test (hazard framework on a synthetic
-population — still open).
+population — now done, §18).
 
 **Mechanics:** `--population=freddie` on `abm_lockin_simulation.py`, full
 two-variant diagnostic in [`abm/cross_design_test.py`](abm/cross_design_test.py).
@@ -968,6 +969,69 @@ lock-in driven by the sample's coupon skew.
 
 Reproduce: `cd hazard && python3 full_book_weighting.py` →
 `data/full_book_weighting_results.json`.
+
+---
+
+## 18. Symmetric Companion Test — Synthetic Population into the Hazard Framework
+
+**What (roadmap 2.1-2.3).** The ABM cross-design test (§15 Fix 1) put *real*
+Freddie covariates into the *behavioral* ABM. The symmetric companion is the
+mirror image: put a *fully synthetic* population — every covariate drawn from
+external, non-Freddie sources (`synthetic_population.py`: PMMS annual-average
+rates for coupon-by-vintage, published FICO/LTV/vintage priors) — into the
+*hazard* framework's survival structure. This tests whether that structure,
+divorced from any real loan-level data, still recovers the $764.7B benchmark.
+Path B uses literature calibration (Rothstein/PSA), so synthetic-population +
+Path B is a *fully* Freddie-free test. Path A applies its real fitted
+coefficients to the synthetic covariates in forward simulation (structure real,
+population synthetic; novel strata fall back to the reference fixed effect).
+
+**The 2×2 (roadmap 2.2), share of the $764.7B benchmark:**
+
+| | synthetic population | real Freddie population |
+|---|---|---|
+| **ABM (behavioral)** | 11.9% (§12) | 59.3% (§15 Fix 1, recalibrated) |
+| **Hazard Path B (survival + literature)** | **106.0%** | 107.0% (§16) |
+| *Hazard Path A (survival + fitted coefs)* | *75.8%* | *119.7% (§10)* |
+
+**This is the cleanest resolution of the paradigm-vs-data-source confound that
+runs through the paper.** Read the rows:
+
+- **The hazard survival structure recovers the benchmark with zero real data.**
+  Path B on a fully synthetic population recovers **106.0%** — within one point
+  of its real-data 107.0%. The benchmark recovery is a property of the survival
+  structure plus the coupon marginal (which the synthetic PMMS-calibrated coupons
+  reproduce), *not* of Freddie loan-level data. This is exactly what §16's
+  permutation test implied (marginal-dominated), now confirmed by construction.
+- **The ABM's recovery is data-source-limited, not structural.** The behavioral
+  paradigm goes from 11.9% (synthetic) to 59.3% (real covariates) — real data
+  buys +47pp, but even then it only reaches 59%. The gap between the ABM and the
+  hazard framework is a genuine *paradigm* gap that largely survives the
+  data-source swap: the hazard framework recovers the benchmark on synthetic data
+  where the ABM cannot.
+- **Path A sits between (75.8%), reflecting its data-dependence.** Consistent with
+  §16's Path A permutation (its fitted coefficients need the real structure),
+  Path A's synthetic recovery falls well below its real-data 119.7% — the fitted
+  stratum fixed effects cannot transfer to novel synthetic strata — whereas the
+  literature-calibrated Path B is essentially data-source-invariant.
+
+**Calibration sensitivity (roadmap 2.3).** Path B's synthetic recovery is
+**105.9%–106.0%** across all three calibrations (baseline, looser FICO, higher
+LTV) — the choice of external distribution does not move the result, echoing the
+§16 ablation finding that FICO/LTV are second-order and coupon dominates. So the
+synthetic-hazard recovery is not an artifact of a particular calibration.
+
+**Caveat — the CPR path, not the level, still needs real structure.** While the
+aggregate recovers identically, Path B's synthetic monthly CPR-path correlation
+is r(lag 0) ≈ −0.06 (vs +0.19 real): the synthetic population lacks the real
+age/vintage structure that §16 localized as the driver of contemporaneous
+alignment. Aggregate level is data-source-invariant; path shape is not. This is
+the one place the companion test does *not* fully close the confound, exactly as
+§VII.A anticipated.
+
+Reproduce: `cd hazard && python3 synthetic_companion.py` →
+`data/synthetic_companion_results.json` (population generator:
+`synthetic_population.py`).
 
 ---
 
