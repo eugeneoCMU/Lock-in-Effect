@@ -23,6 +23,7 @@ For module-level runbooks, see [README.md](README.md). For granular ABM bug arch
 13. [Architectural Decisions](#13-architectural-decisions)
 14. [Known Limitations and Next Steps](#14-known-limitations-and-next-steps)
 15. [Robustness Fix Program (July 2026)](#15-robustness-fix-program-july-2026)
+16. [Permutation Test — Does Path B Depend on Joint Covariate Structure?](#16-permutation-test--does-path-b-depend-on-joint-covariate-structure)
 
 ---
 
@@ -673,6 +674,86 @@ under the population's own amortization assumptions).
 
 ---
 
+## 16. Permutation Test — Does Path B Depend on Joint Covariate Structure?
+
+**Question.** Path B recovers ~107% of the benchmark from a real 75k Freddie
+loan pool. Is that recovery a property of the pool's *joint* covariate
+structure (which borrowers hold which coupon × FICO × LTV × vintage
+combination), or only of the covariate *marginals*? If independent marginals
+reproduce the result, the loan-level microdata adds little over marginal
+distributions for the aggregate figure.
+
+**Method (`hazard/permutation_test.py`).** A marginal-preserving permutation
+null: independently permute each stratum-defining axis across the 75k loan
+index, so every marginal is preserved but cross-column correlation is
+destroyed. `fico_bucket`/`ltv_bucket` and `stratum_id` are recomputed from the
+permuted values (recipe verified to reproduce the stored `stratum_id`
+75000/75000), and the stratum-level burnout broadcast follows the new
+assignments. The microsim is otherwise unchanged — same hazard form, same β₁
+(Rothstein 6.5% midpoint), same competing-risks logic, same draw seed. 100
+independent permutations, matching the 50-seed Monte Carlo convention.
+
+Two implementation choices: (1) LTV is permuted even though the Path B
+`stratum_id` keys only on {vintage, coupon, FICO} — LTV still enters the hazard
+continuously via `ltv_z`. (2) `vintage` and `loan_age` are permuted together as
+one origination-time block (they are two encodings of the same quantity;
+permuting them independently would fabricate contradictory loans and inject h0
+noise unrelated to cross-covariate structure). All four distinct axes still
+receive independent permutations, so cross-axis correlation is fully destroyed.
+
+Because `PREPAY_MODE="fractional"` makes prepayment deterministic (`bal ×
+h_prep`) and only the negligible default channel (h₀=0.0003/mo) draws from the
+RNG, the spread across replicates is almost entirely the covariate-scramble
+effect, not Monte Carlo draw noise.
+
+**Results (real vs. 100-permutation null):**
+
+| Diagnostic | Real | Null mean ± sd | Null range | Real vs. null |
+|---|---|---|---|---|
+| Trapped liquidity | $818.5B | $816.35B ± $0.30B | [815.6, 817.1] | +$2.2B, above all 100 (z≈+7.2) |
+| Share of benchmark | 107.03% | 106.75% ± 0.04pp | [106.65, 106.85] | +0.28pp, above all 100 |
+| CPR r (lag 0) | +0.190 | +0.227 ± 0.002 | [0.222, 0.232] | −0.037, below all 100 (z≈−18) |
+| Peak cross-corr lag | −3 | −3 (100/100) | — | identical |
+
+**Interpretation — read magnitude and significance separately.**
+
+1. **The aggregate recovery is a marginal-distribution phenomenon.** Scrambling
+   the entire borrower-level joint distribution moves trapped liquidity by only
+   **$2.2B — 0.27% of the headline** (0.28pp of the 107% share). Independent
+   marginals reproduce the ~107% to within a third of a percent. Path B's
+   benchmark recovery does **not** depend on the real cross-covariate
+   correlations; it is driven by the marginal distributions of coupon, FICO,
+   LTV, and age (coupon → rate-gap being dominant).
+
+2. **There is a small but statistically clean real-structure signal.** Despite
+   the tiny magnitude, the real result sits outside the entire null range on
+   all three continuous diagnostics — the null sd is minuscule (deterministic
+   prepay), so a $2B effect is z≈+7. The direction is interpretable: the real
+   pool's assortative structure (high-coupon loans clustering with particular
+   FICO/LTV/age profiles) slightly *amplifies* aggregate lock-in (+$2B trapped)
+   and slightly *degrades* contemporaneous CPR alignment (−0.037 at lag 0)
+   relative to a decorrelated pool. Real, reproducible, but economically
+   second-order.
+
+3. **The timing signature is structurally invariant.** Peak cross-correlation
+   lag is −3 in the real data and in all 100 permutations — the ~3-month
+   TBA-settlement lead is a property of the pipeline routing, not of the pool's
+   joint composition. The paper's timing claim is robust to covariate scramble.
+
+**Implication.** This cuts both ways. It is *reassuring* that the ~107% is not a
+fragile artifact of one particular correlation pattern — it survives complete
+joint-structure scramble. But it also *tempers* any claim that Path B's success
+demonstrates the value of real loan-level joint heterogeneity for the aggregate
+trapped-liquidity number: independent marginals get you to essentially the same
+place. The real-structure signal that does exist lives in the monthly CPR
+*path* (the −0.037 lag-0 shift), consistent with §8's theme that the
+path-shape, not the aggregate level, is where loan-level structure matters.
+
+Reproduce: `cd hazard && python3 permutation_test.py --n 100` →
+`data/permutation_test_results.csv` + `data/permutation_test_summary.json`.
+
+---
+
 ## Appendix — File Map
 
 ```
@@ -701,9 +782,10 @@ Lock-in-Effect/
     ├── ingest.py, hazard_fit.py, stratum.py, simulate.py   # Path A
     ├── loan_sample.py, microsim_engine.py, ...   # Path B; --band runs Rothstein sensitivity (§15 Fix 3)
     ├── literature_hazard.py, rate_gap.py   # β₁ + regime-specific rate gap (units fixed, §15 Fix 3)
+    ├── permutation_test.py    # marginal-preserving joint-structure null test (§16)
     └── data/                   # Parquet, JSON, PNG outputs
 ```
 
 ---
 
-*Last updated: July 2026. Hazard spec v3: stratum FE (295 pools), burnout sign fixed (−0.13). Post robustness-fix program (§15): Path B at 107.0% trapped (band 105.9%–108.2%) after the β₁ units fix; ABM at 11.9% after the 15-year MBS fold-in; cross-design test with real Freddie covariates recovers 59.3% (recalibrated) / 20.9% (frozen).*
+*Last updated: July 2026. Hazard spec v3: stratum FE (295 pools), burnout sign fixed (−0.13). Post robustness-fix program (§15): Path B at 107.0% trapped (band 105.9%–108.2%) after the β₁ units fix; ABM at 11.9% after the 15-year MBS fold-in; cross-design test with real Freddie covariates recovers 59.3% (recalibrated) / 20.9% (frozen). Permutation test (§16): Path B's recovery is a marginal-distribution result — scrambling the joint covariate structure moves it only 0.27%.*
