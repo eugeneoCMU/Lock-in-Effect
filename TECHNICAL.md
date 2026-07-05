@@ -1,6 +1,6 @@
 # Technical Narrative — Lock-In Effect Project
 
-This document is the **repository-level** technical history: what was built, what broke, what was fixed, what was falsified, and why the codebase now has two frameworks (`abm/` and `hazard/`). It is written for a reader who wants the full causal chain from the original **$972.3B** headline to the current validated **$764.7B** empirical benchmark, the **11.9%** ABM share explained (post 15-year MBS fold-in), and the newer reduced-form hazard pipelines. A July 2026 robustness-fix program (§15) revised three of the four headline figures — see that section for what changed and why.
+This document is the **repository-level** technical history: what was built, what broke, what was fixed, what was falsified, and why the codebase now has two frameworks (`abm/` and `hazard/`). It is written for a reader who wants the full causal chain from the original **$972.3B** headline to the current validated **$764.7B** empirical benchmark, the **11.1%** ABM share explained (post native 15-year gate, §19), and the newer reduced-form hazard pipelines. A July 2026 robustness-fix program (§15) plus follow-on analyses (§16–§19) revised the headline figures and added permutation, cross-foundation, and synthetic-companion tests — see those sections for what changed and why.
 
 For module-level runbooks, see [README.md](README.md). For granular ABM bug archaeology (line-level citations, section-by-section), see [abm/TECHNICAL.md](abm/TECHNICAL.md). For hazard pipeline specs, see [hazard/README.md](hazard/README.md).
 
@@ -220,7 +220,7 @@ The Danish counterfactual was the most serious bug chain in the project:
 
 ## 8. Why the Residual Persisted
 
-*(Figures below are as of the pre-15yr-foldin, synthetic-population ABM. Current production figures are $91.0B / 11.9% — see [§12](#12-current-headline-numbers) and [§15](#15-robustness-fix-program-july-2026), which also reports that swapping in real Freddie structural covariates recovers 59.3% under recalibration — a result that revisits the diagnosis below.)*
+*(Figures below are as of the pre-15yr-foldin, synthetic-population ABM. Current production figures are $84.5B / 11.1% — see [§12](#12-current-headline-numbers), [§15](#15-robustness-fix-program-july-2026), and [§19](#19-native-15-year-behavioral-gate); [§18](#18-symmetric-companion-test--synthetic-population-into-the-hazard-framework) shows real Freddie covariates recover 59.3% under recalibration while the hazard framework recovers the benchmark even on synthetic data — results that revisit the diagnosis below.)*
 
 After all ABM fixes, extensions, and falsifications, the production pipeline explains **13.2%** of the $764.7B empirical trapped liquidity ($101.2B simulated vs $764.7B actual). The ABM **over-predicts** aggregate CPR (mean 11.98% vs empirical 5.53%) while **under-predicting** trapped liquidity — a sign that the monthly CPR *path* is wrong-shaped, not merely scaled wrong.
 
@@ -408,21 +408,26 @@ Literature microsim is calibrated via defendable bounds (PSA speed, Rothstein ba
 | Empirical CPR mean | 5.53% (30yr-only back-out) / 5.14% (30yr+15yr, current default) |
 | SOMA WAC | 2.55% (7 buckets, 30yr-only, 90.6% coverage) / 2.49% (11 buckets, 30yr+15yr, 99.8% coverage) |
 
-### ABM (production: surface + settlement lag + 15yr fold-in, **`run-2026-07-04-15yr-foldin`**)
+### ABM (production: surface + settlement lag + native 15yr gate, **`run-2026-07-05-native15yr`**)
 
 | Metric | Value |
 |---|---|
-| U.S. trapped liquidity | **$91.0B** (**11.9%** of empirical) |
-| Danish trapped (dynamic balance) | **-$834.5B** |
-| Institutional gap (U.S. − Danish) | **$925.5B** |
-| U.S. CPR mean | 11.68% |
-| Empirical CPR back-out | 5.14% (15yr scheduled amort now weighted in; see §15 Fix 2) |
-| Danish CPR mean | 47.14% (range 36.18%–51.17%) |
-| Institutional wedge (DK − US) | 35.46pp mean |
-| CPR R² (raw) | -6.984 |
-| Monte Carlo (50 seeds) | not re-run post-fold-in; prior estimate ($113.5B, 30yr-only book) is stale |
+| U.S. trapped liquidity | **$84.5B** (**11.1%** of empirical) |
+| Danish trapped (dynamic balance) | **-$752.8B** |
+| Institutional gap (U.S. − Danish) | **$837.3B** |
+| U.S. CPR mean | 11.76% |
+| Empirical CPR back-out | 5.14% (15yr scheduled amort weighted in; §15 Fix 2) |
+| Danish CPR mean | 44.09% |
+| Institutional wedge (DK − US) | 32.32pp mean |
+| Monte Carlo (50 seeds) | not re-run; prior estimate ($113.5B, 30yr-only book) is stale |
 
-Superseded run `run-2026-07-04` (30yr-only, $101.2B / 13.2%) remains reproducible via `terms=("30yr",)` — see §15 Fix 2.
+Lineage (each reproducible): `run-2026-07-04` (30yr-only, $101.2B / 13.2%,
+`terms=("30yr",)`) → `run-2026-07-04-15yr-foldin` (structural-only 15yr,
+$91.0B / 11.9%, §15 Fix 2) → **`run-2026-07-05-native15yr`** (native 15yr
+behavioral gate, $84.5B / 11.1%, §19, current). Note: the §15 Fix 1
+cross-design, §17.1 hybrid, and §18 2×2 analyses were run against the
+immediately-prior $91.0B / 11.9% baseline; the native-15yr revision shifts the
+ABM cell by <1pp and leaves every qualitative conclusion unchanged.
 
 Reproduce: `cd abm && python3 freeze_run.py --tag <name>` → `data/runs/<name>/manifest.json`. All CPR means use the 42-month active QT window (`qt_active_frame`), not `index >= QT_START` alone.
 
@@ -489,7 +494,7 @@ Reproduce: `cd abm && python3 freeze_run.py --tag <name>` → `data/runs/<name>/
 
 ### Model
 
-- ABM monthly CPR path fit remains weak (negative R²) despite 11.9% aggregate share (post 15yr fold-in; see §15 Fix 2).
+- ABM monthly CPR path fit remains weak (negative R²) despite 11.1% aggregate share (post native 15yr gate; §19).
 - Danish counterfactual uses U.S.-calibrated friction.
 - DTI check is front-end only (no total debt).
 - Empirical lag-0 CPR correlation remains negative for the ABM and Path A (structural timing mismatch with SOMA settlement, not fixed with GLM lag terms); Path B's lag-0 correlation is positive (+0.19) with peak at lag −3, r=+0.40 — the two hazard paths disagree on contemporaneous alignment even though both lead SOMA by ~3 months at peak.
@@ -499,7 +504,7 @@ Reproduce: `cd abm && python3 freeze_run.py --tag <name>` → `data/runs/<name>/
 ### Next steps (priority order)
 
 1. ~~**Symmetric companion test**~~ — **done (§18).** Path B on a fully synthetic population recovers 106.0% vs 107.0% real; the hazard survival structure recovers the benchmark with zero real data, while the ABM needs real covariates to reach even 59%. The paradigm gap survives the data-source swap; only the CPR *path* shape (not the level) still depends on real structure.
-2. **Reconcile the cross-design result with the paper's paradigm claim.** The recalibrated primary variant recovers 59.3%, above the pre-registered 50% "undercuts" threshold — Table 1/abstract framing needs to address this directly rather than cite only the synthetic-population 11.9%.
+2. **Reconcile the cross-design and synthetic-companion results with the paper's paradigm claim.** The recalibrated cross-design variant recovers 59.3% (above the pre-registered 50% threshold), and §18 shows the hazard framework recovers 106% even on a fully synthetic population — Table 1/abstract framing needs to address both directly rather than cite only the synthetic-population ABM figure (11.1%).
 3. **Re-run Monte Carlo (50 seeds)** against the 15yr-foldin production tag; the $113.5B estimate on file is 30yr-only and stale.
 
 ---
@@ -1123,4 +1128,4 @@ Lock-in-Effect/
 
 ---
 
-*Last updated: July 2026. Hazard spec v3: stratum FE (295 pools), burnout sign fixed (−0.13). Post robustness-fix program (§15): Path B at 107.0% trapped (band 105.9%–108.2%) after the β₁ units fix; ABM at 11.9% after the 15-year MBS fold-in; cross-design test with real Freddie covariates recovers 59.3% (recalibrated) / 20.9% (frozen). Permutation test (§16, n=999, exact p=0.001): Path B's recovery is a marginal-distribution result — scrambling the joint covariate structure moves it only 0.27% ($2.2B); the trapped-level effect is interaction-dominated across axes and the CPR-path signal localizes to origination-time.*
+*Last updated: July 2026. Hazard spec v3: stratum FE (295 pools), burnout sign fixed (−0.13). Post robustness-fix program (§15): Path B at 107.0% trapped (band 105.9%–108.2%) after the β₁ units fix; ABM at 11.1% after the native 15-year gate (§19); cross-design test with real Freddie covariates recovers 59.3% (recalibrated) / 20.9% (frozen). Follow-on analyses: permutation test (§16, n=999, exact p=0.001) — Path B's recovery is a marginal-distribution result, moved only 0.27% ($2.2B) by scrambling joint structure, interaction-dominated across axes with the CPR-path signal localized to origination-time; Path A's fitted coefficients are far more structure-dependent (β can flip sign). Cross-foundation (§17): the institutional gap collapses $925.5B→$61.2B under a shared accounting layer; full-book SOMA weighting lifts Path B to 109.1%, Path A to 126.1%. Symmetric companion (§18): Path B recovers 106.0% on a fully synthetic population (zero Freddie data) — the hazard survival structure recovers the benchmark independent of data source, while the ABM needs real covariates to reach 59.3%.*
