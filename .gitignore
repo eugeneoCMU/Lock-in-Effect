@@ -11,3 +11,6 @@ venv/
 
 # OS
 .DS_Store
+
+# Local secrets (FRED API key etc.)
+.env

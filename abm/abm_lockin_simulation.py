@@ -79,7 +79,13 @@ FRICTION_GRID = np.arange(0.05, 0.18, 0.005)
 RATE_VELOCITY_GRID = np.arange(-0.01, 0.0351, 0.005)  # -1.0% to +3.5%, step 0.5%
 
 # FRED settings (same key as fed_mbs_extension_risk.py)
-FRED_API_KEY = "0da55cec06bcff18594e15cc9da17d2d"
+import sys as _sys
+from pathlib import Path as _Path
+_REPO_ROOT = _Path(__file__).resolve().parents[1]
+if str(_REPO_ROOT) not in _sys.path:
+    _sys.path.insert(0, str(_REPO_ROOT))
+from common.fred_key import get_fred_api_key  # noqa: E402
+FRED_API_KEY = get_fred_api_key()
 FALLBACK_MEDIAN_INCOME = 80_000       # used if FRED is unreachable
 FALLBACK_MEDIAN_HOME_VALUE = 420_000  # used if FRED is unreachable
 

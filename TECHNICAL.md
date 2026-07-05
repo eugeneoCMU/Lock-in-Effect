@@ -480,7 +480,9 @@ Reproduce: `cd abm && python3 freeze_run.py --tag <name>` → `data/runs/<name>/
   coverage 99.8%). Voluntary CPR for 15yr cohorts uses the same-coupon
   30-year surface — the ABM payment-delta gate is unreliable for
   short-amortization loans (see §15 Fix 2).
-- **FRED API key** hardcoded in config files; should be env var for production use.
+- **FRED API key** resolved via `common/fred_key.py` from the `FRED_API_KEY`
+  env var or a gitignored `.env` (see `.env.example`); no key in committed
+  source.
 
 ### Model
 
