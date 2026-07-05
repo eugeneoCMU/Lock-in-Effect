@@ -159,6 +159,49 @@ class MicrosimPool:
     def agent(self, idx: int) -> MortgageAgent:
         return MortgageAgent(self, idx)
 
+    def reweight_to_soma_coupons(self, soma_cohorts: list) -> None:
+        """
+        Full-book weighting: rescale per-loan balances so the pool's coupon
+        composition matches the actual SOMA book (roadmap 3.1), instead of the
+        Freddie 2017-2021 sample's own coupon mix.
+
+        For each 0.5% coupon bucket, multiply member balances by
+        soma_share / current_balance_share, so the reweighted balance share of
+        each bucket equals its SOMA portfolio share. Buckets absent from SOMA
+        are zeroed; SOMA buckets absent from the sample cannot be created and
+        their share is renormalized away. Call BEFORE scale_to_holdings, which
+        then restores the total to Fed holdings.
+        """
+        step = 0.005
+        soma_share = {}
+        for c in soma_cohorts:
+            if int(c.get("term_months", 360)) != 360:
+                continue  # hazard sample is 30-year
+            b = round(round(float(c["coupon"]) / step) * step, 4)
+            soma_share[b] = soma_share.get(b, 0.0) + float(c["weight"])
+        tot = sum(soma_share.values())
+        if tot <= 0:
+            return
+        soma_share = {k: v / tot for k, v in soma_share.items()}
+
+        buckets = np.round(np.round(self.coupon / step) * step, 4)
+        total_bal = self.balance.sum()
+        if total_bal <= 0:
+            return
+        w = np.zeros(self.n, dtype=np.float64)
+        for b, share in soma_share.items():
+            mask = np.isclose(buckets, b)
+            cur = self.balance[mask].sum() / total_bal
+            if cur > 0:
+                w[mask] = share / cur
+        self.balance = self.balance * w
+        self.orig_upb = self.orig_upb * w
+        # Recompute stratum original UPB under the new weights.
+        self.stratum_orig_upb = np.zeros(self.n_strata, dtype=np.float64)
+        for i in range(self.n):
+            self.stratum_orig_upb[self.stratum_id_code[i]] += self.orig_upb[i]
+        self._update_active_mask()
+
     def scale_to_holdings(self, target_billions: float):
         """Scale all balances so total UPB matches Fed holdings at QT start."""
         total = self.balance.sum()

@@ -57,7 +57,8 @@ LITERATURE_COEFS = {
 }
 
 # FRED (QT window constants come from common/qt_window.py above)
-FRED_API_KEY = "0da55cec06bcff18594e15cc9da17d2d"
+from common.fred_key import get_fred_api_key  # noqa: E402
+FRED_API_KEY = get_fred_api_key()
 START_DATE = "2021-01-01"
 BASELINE_START = "2017-01-01"
 EMPIRICAL_TRAPPED_B = 764.7  # active QT window SOMA benchmark (July 2026)

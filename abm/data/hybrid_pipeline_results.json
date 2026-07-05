@@ -1,0 +1,12 @@
+{
+  "pipeline": "hybrid (shared macro-accounting + Path B microsim CPR)",
+  "us_trapped_b": 748.9678825340305,
+  "danish_trapped_b": 848.8697561693841,
+  "institutional_gap_b": -99.90187363535358,
+  "share_explained_pct": 97.9365273968041,
+  "empirical_trapped_b": 764.7482532227002,
+  "us_cpr_mean_pct": 4.763203719157251,
+  "danish_cpr_mean_pct": 3.385567764608408,
+  "abm_native_gap_b": 925.5,
+  "gap_delta_vs_abm_native_b": -1025.4018736353537
+}

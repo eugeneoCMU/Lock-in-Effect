@@ -1,7 +1,7 @@
 {
-  "run_tag": "run-2026-07-05-berger",
-  "created_at_utc": "2026-07-05T22:28:36.100778+00:00",
-  "git_commit": "51fbd8373ddcdebd50a320cab6268ccc54821cde",
+  "run_tag": "run-2026-07-05-native15yr",
+  "created_at_utc": "2026-07-05T21:10:09.812187+00:00",
+  "git_commit": "2ff5e3e48c82cf205754df588b20ec2ac87f0468",
   "pipeline": {
     "script": "freeze_run.py",
     "module": "fed_mbs_extension_risk.build_production_metrics",
@@ -21,7 +21,7 @@
   },
   "inputs": {
     "abm_cpr_surface_csv": "abm_cpr_surface.csv",
-    "abm_cpr_surface_sha256": "a828fcbe5c33ce40b75719f64c64ad84c8135da45c00089578c6146889caa2d6"
+    "abm_cpr_surface_sha256": "fe319b7b6f490405c4cadcfe3cf9a04d9a920acbd4f20f6e8afb5d93dae1f445"
   },
   "metrics": {
     "qt_window": {
@@ -34,15 +34,15 @@
     "dollars_b": {
       "empirical_trapped": 764.7482532227002,
       "us_trapped": 84.50667328005531,
-      "danish_trapped": 812.9212962858466,
-      "institutional_gap": -728.4146230057912,
+      "danish_trapped": -752.823961552692,
+      "institutional_gap": 837.3306348327474,
       "share_explained_pct": 11.050260386204029,
       "avg_actual_rolloff_monthly": -15.541708256602377
     },
     "rolloff_source": "SOMA",
     "danish_portfolio_b": {
-      "start": 2679.9256266540983,
-      "end": 2086.0454515555525
+      "start": 2543.38588796452,
+      "end": 504.305658633417
     },
     "scheduled_amort_b": {
       "total": 260.02482165944826,
@@ -70,17 +70,17 @@
         "n": 42
       },
       "danish": {
-        "min": 3.3069017591565997,
-        "mean": 3.3605729629547856,
-        "max": 3.3977284258232654,
-        "std": 0.018477050060251164,
+        "min": 34.06917667626862,
+        "mean": 44.085552857430635,
+        "max": 47.904633473919574,
+        "std": 3.401346444072139,
         "n": 42
       },
       "wedge_dk_minus_us_pp": {
-        "min": -17.744422367718066,
-        "mean": -8.40033138046812,
-        "max": -4.1244523042465895,
-        "std": 2.354522750204132,
+        "min": 19.448886222570486,
+        "mean": 32.324648514007734,
+        "max": 36.112731188709844,
+        "std": 4.098064686867501,
         "n": 42
       },
       "abm_minus_empirical_pp": {

@@ -63,11 +63,48 @@ def build_cohort_inventory(panel: pl.DataFrame) -> pd.DataFrame:
     return latest
 
 
+def _reweight_balances_to_soma(balances: dict, coupons: dict,
+                               soma_cohorts: list) -> dict:
+    """
+    Full-book weighting (roadmap 3.1): rescale per-cohort balances so the
+    coupon-bucket composition matches the SOMA book instead of the Freddie
+    panel's own mix. Returns a new balances dict (total is renormalized by the
+    caller's soma_scale afterward).
+    """
+    step = 0.005
+    soma_share: dict = {}
+    for c in soma_cohorts:
+        if int(c.get("term_months", 360)) != 360:
+            continue
+        b = round(round(float(c["coupon"]) / step) * step, 4)
+        soma_share[b] = soma_share.get(b, 0.0) + float(c["weight"])
+    tot = sum(soma_share.values())
+    if tot <= 0:
+        return balances
+    soma_share = {k: v / tot for k, v in soma_share.items()}
+
+    total_bal = sum(balances.values())
+    if total_bal <= 0:
+        return balances
+    cur_share: dict = {}
+    for key, bal in balances.items():
+        b = round(round(float(coupons[key]) / step) * step, 4)
+        cur_share[b] = cur_share.get(b, 0.0) + bal / total_bal
+
+    out = {}
+    for key, bal in balances.items():
+        b = round(round(float(coupons[key]) / step) * step, 4)
+        w = (soma_share.get(b, 0.0) / cur_share[b]) if cur_share.get(b, 0) > 0 else 0.0
+        out[key] = bal * w
+    return out
+
+
 def simulate_qt_window(
     panel: Optional[pl.DataFrame] = None,
     coefs: Optional[dict] = None,
     trans: Optional[pd.DataFrame] = None,
     output: Path = SIM_RESULTS_PATH,
+    soma_cohorts: Optional[list] = None,
 ) -> pd.DataFrame:
     """
     Forward-walk cohort balances through QT window on actual rate path.
@@ -104,6 +141,10 @@ def simulate_qt_window(
     ages = {k: v["loan_age"] for k, v in cohort_meta.items()}
     coupons = {k: v["coupon"] for k, v in cohort_meta.items()}
     stratum_ids = {k: v["stratum_id"] for k, v in cohort_meta.items()}
+
+    if soma_cohorts is not None:
+        balances = _reweight_balances_to_soma(balances, coupons, soma_cohorts)
+        total_balance = sum(balances.values())
 
     holdings_at_qt = float(
         macro.loc[qt_index[0], "WSHOMCB"]

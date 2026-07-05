@@ -88,11 +88,31 @@ P_Q_MID_PCT = ROTHSTEIN_Q_DECLINE_MID * 100  # 6.5
 #   age-independent  — control: like `independent` but loan_age gets a 5th
 #                      independent permutation instead of blocking with vintage,
 #                      to confirm the blocking choice does not drive the result.
-MODES = ("independent", "block", "age-independent")
+#   ablate           — single-axis ablation: permute exactly ONE axis (--axis
+#                      coupon|fico|ltv|orig) while block-shuffling the other
+#                      three together, isolating that axis's cross-correlation
+#                      contribution to the full four-axis effect.
+#   bootstrap        — resample the real loans WITH replacement, no covariate
+#                      scramble: ordinary sampling variability of the estimate.
+MODES = ("independent", "block", "age-independent", "ablate", "bootstrap")
+ABLATE_AXES = ("coupon", "fico", "ltv", "orig")
+
+# Axis → the sample columns it controls (origination-time is a vintage+age block).
+_AXIS_COLS = {
+    "coupon": ["coupon"],
+    "fico": ["fico"],
+    "ltv": ["orig_ltv"],
+    "orig": ["vintage", "loan_age"],
+}
 
 
-def _paths_for_mode(mode: str) -> tuple[Path, Path]:
-    tag = "" if mode == "independent" else f"_{mode.replace('-', '')}"
+def _paths_for_mode(mode: str, axis: str | None = None) -> tuple[Path, Path]:
+    if mode == "ablate":
+        tag = f"_ablate_{axis}"
+    elif mode == "independent":
+        tag = ""
+    else:
+        tag = f"_{mode.replace('-', '')}"
     return (DATA_DIR / f"permutation_test{tag}_results.csv",
             DATA_DIR / f"permutation_test{tag}_summary.json")
 
@@ -132,7 +152,8 @@ def _verify_stratum_recipe(base: pd.DataFrame) -> None:
 
 
 def permute_sample(base: pd.DataFrame, rng: np.random.Generator,
-                   mode: str = "independent") -> pl.DataFrame:
+                   mode: str = "independent",
+                   axis: str | None = None) -> pl.DataFrame:
     """Per-axis permutation; recompute buckets + stratum_id. See MODES."""
     n = len(base)
 
@@ -142,18 +163,34 @@ def permute_sample(base: pd.DataFrame, rng: np.random.Generator,
         pi = rng.permutation(n)
         return pl.from_pandas(base.iloc[pi].reset_index(drop=True))
 
-    pi_orig = rng.permutation(n)   # origination-time: vintage (+ loan_age if blocked)
-    pi_coupon = rng.permutation(n)
-    pi_fico = rng.permutation(n)
-    pi_ltv = rng.permutation(n)
-    pi_age = pi_orig if mode == "independent" else rng.permutation(n)
+    if mode == "bootstrap":
+        # Resample loans with replacement; covariates travel intact per loan.
+        idx = rng.integers(0, n, size=n)
+        return pl.from_pandas(base.iloc[idx].reset_index(drop=True))
+
+    # --- permutation modes: assign each axis a row-permutation --------------
+    if mode == "ablate":
+        # One axis decorrelated from the rest; the other three move together
+        # (block) so their mutual correlations are preserved.
+        pi_axis = rng.permutation(n)
+        pi_rest = rng.permutation(n)
+        axis_perm = {a: (pi_axis if a == axis else pi_rest) for a in ABLATE_AXES}
+    else:
+        # independent / age-independent: every axis its own permutation.
+        axis_perm = {a: rng.permutation(n) for a in ABLATE_AXES}
+        if mode == "independent":
+            axis_perm["orig"] = axis_perm["orig"]  # vintage+loan_age share it
 
     out = base.copy()
+    # origination-time block: vintage + loan_age share the 'orig' permutation,
+    # except in age-independent mode where loan_age gets its own.
+    pi_orig = axis_perm["orig"]
+    pi_age = rng.permutation(n) if mode == "age-independent" else pi_orig
     out["vintage"] = base["vintage"].to_numpy()[pi_orig]
     out["loan_age"] = base["loan_age"].to_numpy()[pi_age]
-    out["coupon"] = base["coupon"].to_numpy()[pi_coupon]
-    out["fico"] = base["fico"].to_numpy()[pi_fico]
-    out["orig_ltv"] = base["orig_ltv"].to_numpy()[pi_ltv]
+    out["coupon"] = base["coupon"].to_numpy()[axis_perm["coupon"]]
+    out["fico"] = base["fico"].to_numpy()[axis_perm["fico"]]
+    out["orig_ltv"] = base["orig_ltv"].to_numpy()[axis_perm["ltv"]]
 
     out["fico_bucket"] = _fico_bucket(out["fico"].to_numpy())
     out["ltv_bucket"] = _ltv_bucket(out["orig_ltv"].to_numpy())
@@ -194,12 +231,16 @@ def _summarize(real: dict, perms: list[dict]) -> dict:
     for key in ("trapped_b", "share_pct", "cpr_r_lag0"):
         vals = col(key)
         r = real[key]
-        # Two-sided empirical p: fraction of |null − nullmean| >= |real − nullmean|.
+        n = len(vals)
         mu, sd = float(vals.mean()), float(vals.std(ddof=1))
+        # Exact rank-based permutation p-values (observed value included in the
+        # reference set): p = (1 + #{null at least as extreme}) / (N + 1).
+        # This is the primary claim; the z-score below is a descriptive stat.
+        n_ge = int((vals >= r).sum())
+        n_le = int((vals <= r).sum())
+        n_one = min(n_ge, n_le)  # smaller tail for a two-sided-by-doubling read
         centered_real = abs(r - mu)
-        p_two = float((np.abs(vals - mu) >= centered_real).mean())
-        # One-sided: fraction of null at least as extreme (high) as real.
-        p_ge = float((vals >= r).mean())
+        n_two = int((np.abs(vals - mu) >= centered_real).sum())
         summary["null"][key] = {
             "mean": mu,
             "std": sd,
@@ -211,8 +252,11 @@ def _summarize(real: dict, perms: list[dict]) -> dict:
             "real": r,
             "real_z": (r - mu) / sd if sd > 0 else float("nan"),
             "real_percentile": float((vals < r).mean() * 100),
-            "p_two_sided": p_two,
-            "p_real_ge_null": p_ge,
+            "n_permutations": n,
+            "n_null_ge_real": n_ge,
+            "n_null_le_real": n_le,
+            "p_exact_one_sided": (1 + n_one) / (n + 1),
+            "p_exact_two_sided": (1 + n_two) / (n + 1),
         }
     # Peak lag is categorical: report the distribution.
     lags = [p["peak_lag"] for p in perms]
@@ -234,9 +278,13 @@ def main() -> None:
                         help="quick smoke run (implies small --n)")
     parser.add_argument("--mode", choices=MODES, default="independent",
                         help="permutation mode (see module docstring)")
+    parser.add_argument("--axis", choices=ABLATE_AXES, default=None,
+                        help="axis to permute in --mode ablate")
     args = parser.parse_args()
+    if args.mode == "ablate" and args.axis is None:
+        parser.error("--mode ablate requires --axis {coupon,fico,ltv,orig}")
     n_perm = 2 if args.smoke else args.n
-    results_csv, summary_json = _paths_for_mode(args.mode)
+    results_csv, summary_json = _paths_for_mode(args.mode, args.axis)
 
     print("Loading real loan sample …")
     base_pl = load_or_build_loan_sample()
@@ -266,10 +314,10 @@ def main() -> None:
     perms = []
     for i in range(n_perm):
         t0 = time.perf_counter()
-        perm_sample = permute_sample(base, rng, mode=args.mode)
+        perm_sample = permute_sample(base, rng, mode=args.mode, axis=args.axis)
         r = _run_once(perm_sample, macro, empirical)
         r["replicate"] = i
-        r["mode"] = args.mode
+        r["mode"] = args.mode if args.mode != "ablate" else f"ablate_{args.axis}"
         r["runtime_s"] = round(time.perf_counter() - t0, 1)
         perms.append(r)
         rows.append(r)
@@ -292,9 +340,10 @@ def main() -> None:
         s = summary["null"][key]
         print(f" {label:<12}: real {s['real']:.3f}  |  null "
               f"{s['mean']:.3f} ± {s['std']:.3f}  "
-              f"[{s['p05']:.3f}, {s['p95']:.3f}]  "
-              f"z={s['real_z']:+.2f}  pctile={s['real_percentile']:.0f}  "
-              f"p2={s['p_two_sided']:.3f}")
+              f"[{s['min']:.3f}, {s['max']:.3f}]  "
+              f"p_exact(2-sided)={s['p_exact_two_sided']:.4f}  "
+              f"(#null≥real={s['n_null_ge_real']}/{s['n_permutations']}, "
+              f"z={s['real_z']:+.1f})")
     print(f" Peak lag     : real {summary['real_peak_lag']}  |  null dist "
           f"{summary['null']['peak_lag_distribution']}")
     print(f"\n Results: {results_csv}")
