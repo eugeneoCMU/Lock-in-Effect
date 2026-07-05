@@ -119,14 +119,28 @@ def monthly_step(
     )
     stress = rate_stress(pool.coupon[active], market_rate)
 
-    h_prep = prepay_hazard(
-        pool.loan_age[active],
-        pool.rate_gap[active],
-        pool.burnout[active],
-        pool.fico_z[active],
-        pool.ltv_z[active],
-        beta1=beta1,
-    )
+    if pool.regime.upper() in ("DANISH", "DK"):
+        # Berger et al. Danish counterfactual (§20): import the estimated
+        # U.S.-transplant elasticities directly instead of the NPV-reset
+        # heuristic. Danish prepay = flat 3.2%/yr moving + refi-in-place (≈0
+        # under U.S. tax). Same population, only the prepay hazard swaps.
+        from common.berger_calibration import (
+            _annual_to_monthly_cpr, danish_cpr_annual,
+        )
+        cpr_ann = danish_cpr_annual(
+            pool.coupon[active], market_rate, pool.loan_age[active],
+            regime="US", term_months=pool.term_months,
+        )
+        h_prep = _annual_to_monthly_cpr(cpr_ann)
+    else:
+        h_prep = prepay_hazard(
+            pool.loan_age[active],
+            pool.rate_gap[active],
+            pool.burnout[active],
+            pool.fico_z[active],
+            pool.ltv_z[active],
+            beta1=beta1,
+        )
     h_def = default_hazard(stress, pool.fico_z[active], pool.ltv_z[active])
     h_prep_n, h_def_n = normalize_competing_hazards(h_prep, h_def)
 

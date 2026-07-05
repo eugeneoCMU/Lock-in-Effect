@@ -411,8 +411,20 @@ class HousingMarketEngine:
     def _cpr_vec(self, rate: float, system_type: str,
                  friction: float, rate_velocity: float) -> float:
         """Fully vectorized CPR for one grid point."""
+        if system_type == "Danish":
+            # Berger et al. Danish counterfactual (§20): import the estimated
+            # U.S.-transplant elasticities directly rather than routing a
+            # near-zero Danish rate gap through the U.S. mobility gate. Danish
+            # CPR = flat 3.2%/yr moving channel + refi-in-place (≈0 under U.S.
+            # tax, ~1bp GE). Replaces the old market-value-payoff path that
+            # produced a spurious ~47% CPR.
+            from common.berger_calibration import danish_cpr_annual
+            return float(danish_cpr_annual(
+                np.array([self._cohort_rate]), rate,
+                np.array([self._cohort_months_elapsed]), regime="US",
+                term_months=self._cohort_term_years * 12)[0])
         return float(self._movers_mask(rate, system_type, friction,
-                                        rate_velocity).sum()) / self.n_households
+                                       rate_velocity).sum()) / self.n_households
 
     def _movers_mask(self, rate: float, system_type: str,
                      friction: float, rate_velocity: float) -> np.ndarray:

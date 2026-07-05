@@ -27,6 +27,7 @@ For module-level runbooks, see [README.md](README.md). For granular ABM bug arch
 17. [Cross-Foundation Checks — Hybrid Pipeline and Full-Book Weighting](#17-cross-foundation-checks--hybrid-pipeline-and-full-book-weighting)
 18. [Symmetric Companion Test — Synthetic Population into the Hazard Framework](#18-symmetric-companion-test--synthetic-population-into-the-hazard-framework)
 19. [Native 15-Year Behavioral Gate](#19-native-15-year-behavioral-gate)
+20. [Berger et al. Danish Recalibration — Two Estimated Channels](#20-berger-et-al-danish-recalibration--two-estimated-channels)
 
 ---
 
@@ -214,7 +215,7 @@ The Danish counterfactual was the most serious bug chain in the project:
 
 **Why Stage 2 is correct:** Danish balance is simulated forward month-by-month from QT-start holdings, applying Danish CPR + scheduled amort + curtailment to the *already-shrunk* balance each month.
 
-**Interpretation caveat:** Danish friction is still U.S.-calibrated. The $930.3B institutional gap is an **upper bound** under U.S.-style transaction costs.
+**Interpretation caveat:** Danish friction was U.S.-calibrated here — the $930.3B institutional gap is an **upper bound** under U.S.-style transaction costs. **This was superseded by the Berger et al. recalibration (§20)**, which imports estimated Danish elasticities and collapses the gap to approximately zero (Path B hybrid −$99.9B), showing the large gap was an artifact of extrapolating the U.S. mobility function to a Danish rate gap.
 
 ---
 
@@ -408,18 +409,22 @@ Literature microsim is calibrated via defendable bounds (PSA speed, Rothstein ba
 | Empirical CPR mean | 5.53% (30yr-only back-out) / 5.14% (30yr+15yr, current default) |
 | SOMA WAC | 2.55% (7 buckets, 30yr-only, 90.6% coverage) / 2.49% (11 buckets, 30yr+15yr, 99.8% coverage) |
 
-### ABM (production: surface + settlement lag + native 15yr gate, **`run-2026-07-05-native15yr`**)
+### ABM (production: native 15yr gate + Berger Danish recalibration, **`run-2026-07-05-berger`**)
 
 | Metric | Value |
 |---|---|
 | U.S. trapped liquidity | **$84.5B** (**11.1%** of empirical) |
-| Danish trapped (dynamic balance) | **-$752.8B** |
-| Institutional gap (U.S. − Danish) | **$837.3B** |
+| Danish trapped (dynamic balance) | **+$812.9B** (Berger elasticities; §20) |
+| Institutional gap (U.S. − Danish) | **−$728.4B** (was +$925.5B pre-Berger; see §20 caveat) |
 | U.S. CPR mean | 11.76% |
 | Empirical CPR back-out | 5.14% (15yr scheduled amort weighted in; §15 Fix 2) |
-| Danish CPR mean | 44.09% |
-| Institutional wedge (DK − US) | 32.32pp mean |
+| Danish CPR mean | **3.36%** (was 44.09%; Berger 3.2% flat moving + ≈0 refi) |
+| Institutional wedge (DK − US) | −8.40pp mean |
 | Monte Carlo (50 seeds) | not re-run; prior estimate ($113.5B, 30yr-only book) is stale |
+
+The defensible institutional-gap headline is the **Path B hybrid −$99.9B** (both
+regimes empirically grounded); the ABM's −$728B overstates the reversal because
+its U.S. leg is over-predicted (§20).
 
 Lineage (each reproducible): `run-2026-07-04` (30yr-only, $101.2B / 13.2%,
 `terms=("30yr",)`) → `run-2026-07-04-15yr-foldin` (structural-only 15yr,
@@ -1094,6 +1099,73 @@ with native 15yr slabs) `&& python3 freeze_run.py --tag run-2026-07-05-native15y
 
 ---
 
+## 20. Berger et al. Danish Recalibration — Two Estimated Channels
+
+**Problem.** Both frameworks previously computed the Danish counterfactual by
+taking a *U.S.-calibrated* response function and feeding it a Danish-style rate
+gap (ABM: market-value payoff through the U.S. mobility gate → ~47% Danish CPR;
+Path B: NPV-reset-to-baseline heuristic → ~6%). That calibrates against a
+*mechanism*, not against an elasticity estimated for this exact counterfactual,
+and it conflates two channels that behave differently under a U.S. transplant.
+
+**Fix.** [`common/berger_calibration.py`](common/berger_calibration.py) imports
+Berger, Milbradt, Tourre & Vavra's estimated elasticities directly (Table 3
+structural parameters; §3.3.1 / §4.9.1) and models **two separate channels**:
+
+- **Moving channel** — anchored to the Danish unconditional moving rate of
+  **3.2%/yr**, with the (statistically flat) Danish moving-hazard slope
+  (−0.198 … +0.12 %/yr per 100bp). The moving attenuation vs the U.S. slope
+  (Fonseca–Liu 0.57–1.20 %/yr per 100bp) is **0.044** — i.e. Danish moving is
+  ~insensitive to the coupon gap (no lock-in on the moving margin), so it is
+  imported as a near-flat 3.2%/yr curve rather than derived from the U.S. model.
+- **Refinance-in-place channel** (discount buyback while staying put) — new to
+  both frameworks. The buyback is NPV-neutral on the financing, so its value is
+  the *tax* treatment of the realized discount. Denmark: capital-gains exempt
+  (θ=33%) → strong shield → a large home refi channel. U.S. transplant: taxable
+  gain (θg=15%) with a smaller deduction (θi=22%) removes the shield; Berger's
+  realistic-tax scenario moves the equilibrium mortgage rate only **~1bp**, so
+  the U.S.-transplant refi channel is anchored to that GE result as **negligible**
+  (a partial-equilibrium reduced form over-predicts because it omits the rate
+  adjustment; the Danish-home reduced form is retained for the contrast).
+
+So the U.S.-transplant Danish CPR = flat 3.2% moving + ≈0 refi.
+
+**Result — the institutional gap collapses and reverses.**
+
+| | old (mechanism-extrapolated) | Berger-recalibrated |
+|---|---|---|
+| ABM Danish CPR mean | 47.1% | **3.4%** |
+| ABM Danish trapped | −$834.5B | **+$812.9B** |
+| ABM institutional gap (US−DK) | +$925.5B | **−$728.4B** |
+| ABM DK−US CPR wedge | +32.3pp | −8.4pp |
+| Path B (hybrid) institutional gap | +$925.5B | **−$99.9B** |
+| Path B (hybrid) US / Danish CPR | 11.68% / 47.1% | 4.76% / 3.39% |
+
+**Interpretation.** The old +$925B institutional gap was largely an artifact of
+the ABM's market-value-payoff path generating a spurious ~47% Danish CPR. Under
+Berger's *estimated* Danish elasticities the Danish counterfactual prepays only
+~3.4%/yr — barely faster than the empirical U.S. book — so the "Danish system
+frees up far more trapped liquidity" claim does not survive contact with the
+real elasticities. This is exactly Berger's own conclusion: under U.S. tax law
+the buyback institution adds ~1bp, i.e. almost nothing.
+
+The two frameworks now bracket the sign honestly. The **Path B hybrid** puts
+both regimes on empirically-grounded footing (US 4.76%, Danish 3.39%) and gives
+a **small −$99.9B gap** (≈−13% of benchmark) — the defensible headline: the
+institutional benefit is small and slightly *negative* under U.S. conditions.
+The **ABM's larger −$728B** gap is partly an artifact of the *opposite* problem
+on the U.S. side (the ABM over-predicts U.S. CPR at 11.76% vs empirical 5.5%),
+so comparing an over-predicted U.S. leg to the empirical Danish 3.4% overstates
+the reversal. Either way, the direction of the correction is unambiguous: real
+Danish elasticities shrink the institutional wedge from tens of points to
+approximately zero.
+
+Reproduce: `cd abm && python3 abm_lockin_simulation.py && python3 freeze_run.py
+--tag run-2026-07-05-berger && python3 hybrid_pipeline.py`
+(channel sanity check: `python3 common/berger_calibration.py`).
+
+---
+
 ## Appendix — File Map
 
 ```
@@ -1128,4 +1200,4 @@ Lock-in-Effect/
 
 ---
 
-*Last updated: July 2026. Hazard spec v3: stratum FE (295 pools), burnout sign fixed (−0.13). Post robustness-fix program (§15): Path B at 107.0% trapped (band 105.9%–108.2%) after the β₁ units fix; ABM at 11.1% after the native 15-year gate (§19); cross-design test with real Freddie covariates recovers 59.3% (recalibrated) / 20.9% (frozen). Follow-on analyses: permutation test (§16, n=999, exact p=0.001) — Path B's recovery is a marginal-distribution result, moved only 0.27% ($2.2B) by scrambling joint structure, interaction-dominated across axes with the CPR-path signal localized to origination-time; Path A's fitted coefficients are far more structure-dependent (β can flip sign). Cross-foundation (§17): the institutional gap collapses $925.5B→$61.2B under a shared accounting layer; full-book SOMA weighting lifts Path B to 109.1%, Path A to 126.1%. Symmetric companion (§18): Path B recovers 106.0% on a fully synthetic population (zero Freddie data) — the hazard survival structure recovers the benchmark independent of data source, while the ABM needs real covariates to reach 59.3%.*
+*Last updated: July 2026. Hazard spec v3: stratum FE (295 pools), burnout sign fixed (−0.13). Post robustness-fix program (§15): Path B at 107.0% trapped (band 105.9%–108.2%) after the β₁ units fix; ABM at 11.1% after the native 15-year gate (§19); cross-design test with real Freddie covariates recovers 59.3% (recalibrated) / 20.9% (frozen). Follow-on analyses: permutation test (§16, n=999, exact p=0.001) — Path B's recovery is a marginal-distribution result, moved only 0.27% ($2.2B) by scrambling joint structure, interaction-dominated across axes with the CPR-path signal localized to origination-time; Path A's fitted coefficients are far more structure-dependent (β can flip sign). Cross-foundation (§17): the institutional gap collapses $925.5B→$61.2B under a shared accounting layer; full-book SOMA weighting lifts Path B to 109.1%, Path A to 126.1%. Symmetric companion (§18): Path B recovers 106.0% on a fully synthetic population (zero Freddie data) — the hazard survival structure recovers the benchmark independent of data source, while the ABM needs real covariates to reach 59.3%. Berger recalibration (§20): importing estimated Danish elasticities (3.2% flat moving + tax-attenuated refi, ≈0 under U.S. taxes) collapses the institutional gap from +$925.5B to −$99.9B (Path B hybrid) — the large gap was an artifact of extrapolating a U.S.-calibrated mobility function to a Danish rate gap.*
