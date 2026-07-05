@@ -208,7 +208,7 @@ The Danish counterfactual was the most serious bug chain in the project:
 | Stage | Danish Trapped | Institutional Gap | Root cause |
 |---|---|---|---|
 | **0** | **$0.0B** | ≈ U.S. only | `.clip(lower=0)` zeroed every month of overshoot |
-| **1** | **-$1,132B** | $1,676B | ~47% Danish CPR (current surface) applied to static U.S. balance |
+| **1** | **-$1,132B** | $1,676B | ~47% Danish CPR (market-value surface, pre-Berger §20) applied to static U.S. balance |
 | **2 (current)** | **-$829.1B** | **$930.3B** | Dynamic declining-balance simulation per cohort |
 
 **Why Stage 0 happened:** Danish CPR was high under the market-value-buyback surface (**36–51%**, mean **47.2%** over the 42-month active QT window; the older rational-only calibration was ~21–27%). Simulated roll-off consistently **exceeded** the QT cap, producing negative extension deltas every month. One-sided clipping turned all negatives to zero. (That ~47% surface is itself superseded by the Berger recalibration, §20, which brings Danish CPR to ~3.4%.)
