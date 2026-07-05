@@ -51,11 +51,39 @@ THETA_G_DK = 0.0
 # Equilibrium mortgage-rate shift under realistic U.S. buyback-with-taxable-gains.
 US_BUYBACK_EQUIL_RATE_SHIFT_BP = 1.0
 # Berger §4.9.1: that ~1bp equilibrium shift means the U.S.-transplant buyback
-# adds essentially no incremental refinancing. We anchor the U.S.-transplant
-# refi-in-place channel to that GE result (≈0 annual CPR) rather than to a
-# partial-equilibrium reduced form, which over-predicts because it omits the
-# rate adjustment. Set from Berger's realized rate here if it becomes available.
-US_TRANSPLANT_REFI_ANNUAL = 0.0
+# adds essentially no incremental refinancing. Best estimate is therefore ≈0
+# annual CPR (a partial-equilibrium reduced form over-predicts because it omits
+# the rate adjustment). The value is a module global so it can be SWEPT (see
+# refi_sweep.py) to test how far the institutional-gap sign is from breakeven.
+US_TRANSPLANT_REFI_BEST_ESTIMATE = 0.0  # Berger realistic-tax GE anchor
+_US_TRANSPLANT_REFI_ANNUAL = US_TRANSPLANT_REFI_BEST_ESTIMATE
+
+
+def set_us_transplant_refi(value: float) -> None:
+    """Override the U.S.-transplant refi-in-place annual CPR (for sweeps)."""
+    global _US_TRANSPLANT_REFI_ANNUAL
+    _US_TRANSPLANT_REFI_ANNUAL = float(value)
+
+
+def get_us_transplant_refi() -> float:
+    return _US_TRANSPLANT_REFI_ANNUAL
+
+
+def us_transplant_refi_reduced_form(coupon, market_rate, loan_age,
+                                    term_months: int = 360):
+    """
+    The partial-equilibrium reduced form rejected in §20 as over-predicting
+    (retained here only to ground the sweep ceiling). Tax-arbitrage take-up of
+    the buyback discount under U.S. taxes (θi − θg), λ_US opportunity hazard.
+    """
+    from math import erf, sqrt
+    disc = _buyback_discount_frac(coupon, market_rate, loan_age, term_months)
+    benefit = disc * (THETA_I_US - THETA_G_US)
+    z = (benefit - KAPPA_LAMBDA["US"]) / max(SIGMA_LAMBDA["US"], 1e-9)
+    take = np.where(disc > 0.0,
+                    0.5 * (1.0 + np.vectorize(lambda x: erf(x / sqrt(2.0)))(z)),
+                    0.0)
+    return np.clip(LAMBDA["US"] * take, 0.0, 1.0)
 
 
 def _annual_to_monthly_cpr(cpr_annual: np.ndarray) -> np.ndarray:
@@ -117,8 +145,10 @@ def danish_refi_in_place_cpr_annual(coupon: np.ndarray, market_rate: float,
     disc = _buyback_discount_frac(coupon, market_rate, loan_age, term_months)
     if not (regime.upper().startswith("DK") or regime.upper() == "DANISH"):
         # U.S. transplant: taxable capital gain removes the buyback tax shield →
-        # negligible incremental refi (Berger §4.9.1, ~1bp equilibrium).
-        return np.full(np.shape(disc), US_TRANSPLANT_REFI_ANNUAL, dtype=np.float64)
+        # negligible incremental refi (Berger §4.9.1, ~1bp equilibrium). Value is
+        # the sweepable module global (best estimate ≈0); see refi_sweep.py.
+        return np.full(np.shape(disc), _US_TRANSPLANT_REFI_ANNUAL,
+                       dtype=np.float64)
     # Danish home: tax-free discount (θ_dk − θg_dk = 0.33) drives take-up.
     from math import sqrt
     tax_adv = THETA_DK - THETA_G_DK

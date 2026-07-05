@@ -1154,20 +1154,61 @@ frees up far more trapped liquidity" claim does not survive contact with the
 real elasticities. This is exactly Berger's own conclusion: under U.S. tax law
 the buyback institution adds ~1bp, i.e. almost nothing.
 
-The two frameworks now bracket the sign honestly. The **Path B hybrid** puts
-both regimes on empirically-grounded footing (US 4.76%, Danish 3.39%) and gives
-a **small −$99.9B gap** (≈−13% of benchmark) — the defensible headline: the
-institutional benefit is small and slightly *negative* under U.S. conditions.
-The **ABM's larger −$728B** gap is partly an artifact of the *opposite* problem
-on the U.S. side (the ABM over-predicts U.S. CPR at 11.76% vs empirical 5.5%),
-so comparing an over-predicted U.S. leg to the empirical Danish 3.4% overstates
-the reversal. Either way, the direction of the correction is unambiguous: real
-Danish elasticities shrink the institutional wedge from tens of points to
-approximately zero.
+The two frameworks now bracket the sign. The **Path B hybrid** puts both regimes
+on empirically-grounded footing (US 4.76%, Danish 3.39%) and gives a **small
+−$99.9B gap** (≈−13% of benchmark); the **ABM's larger −$728B** gap is partly an
+artifact of the *opposite* problem on the U.S. side (the ABM over-predicts U.S.
+CPR at 11.76% vs empirical 5.5%). The unambiguous statement is that real Danish
+elasticities shrink the institutional wedge from tens of points to approximately
+zero — but the **sign of that near-zero gap is not robust in Path B**; see the
+sweep in §20.1.
 
 Reproduce: `cd abm && python3 abm_lockin_simulation.py && python3 freeze_run.py
 --tag run-2026-07-05-berger && python3 hybrid_pipeline.py`
 (channel sanity check: `python3 common/berger_calibration.py`).
+
+### 20.1 Sensitivity sweep of the U.S.-transplant refi channel
+
+§20 anchors the U.S.-transplant refi-in-place CPR to Berger's ~1bp GE result
+(≈0). Because that zero drives the *sign* of the institutional gap, it is
+parameterized (`set_us_transplant_refi`) and swept from 0 to the partial-
+equilibrium reduced-form ceiling (**~18%/yr** — the estimate §20 rejected as
+over-predicting, representative ~17.4% at QT rates; Denmark's own ~33%/yr
+opportunity hazard is an even-more-generous alternative), holding the moving
+channel and both U.S.-side calibrations fixed through to the gap.
+
+| refi-in-place CPR | ABM gap | Path B (hybrid) gap |
+|---|---|---|
+| **0% (best estimate)** | **−$728.4B** | **−$99.9B** |
+| 3% | −$525.8B | +$116.8B |
+| 6% | −$342.5B | +$317.3B |
+| 9% | −$176.6B | +$502.4B |
+| 12% | −$26.5B | +$672.7B |
+| 15% | +$109.2B | +$829.0B |
+| 18% (PE ceiling) | +$231.9B | +$972.0B |
+
+**Breakeven** (gap = 0): **ABM at refi ≈ 12.6%**, **Path B at refi ≈ 1.4%**.
+
+**Where the best estimate sits — and the honest conclusion.** The best-evidence
+refi is ≈0 (Berger's realistic-tax ~1bp). Against that:
+
+- The **ABM's** negative gap has a **wide ~12.6pp margin** to breakeven — its
+  sign is robust to any plausible refi. But the ABM's U.S. leg is over-predicted
+  (§20), so that robustness is less meaningful than it looks.
+- The **Path B hybrid's** negative gap has only a **~1.4pp margin** — a refi
+  contribution of just 1.4%/yr (far below even the rejected ~18% PE estimate,
+  and well within what a non-zero channel could plausibly deliver) flips the
+  sign positive. **So in the more defensible framework the sign is *not* robust.**
+
+The correct takeaway is therefore the *magnitude*, not the sign: across the
+entire plausible refi range the institutional gap stays small relative to the
+$925.5B the old calibration reported, and it is approximately zero at the best
+estimate. Claiming a robustly *negative* gap would overstate the evidence — the
+honest headline is "the Danish institutional benefit is approximately zero under
+U.S. conditions, with the sign sensitive to a refi channel that Berger's GE
+result puts near zero but does not pin to exactly zero."
+
+Reproduce: `cd abm && python3 refi_sweep.py` → `data/refi_sweep_results.json`.
 
 ---
 
@@ -1178,8 +1219,10 @@ Lock-in-Effect/
 ├── README.md                 # Quick start and index
 ├── TECHNICAL.md              # this document
 ├── requirements.txt
-├── common/                   # Shared QT window config (§15 Fix 4)
-│   └── qt_window.py           # single source of truth, imported by abm/ and hazard/
+├── common/                   # Shared config, imported by abm/ and hazard/
+│   ├── qt_window.py           # QT window single source of truth (§15 Fix 4)
+│   ├── fred_key.py            # FRED key from env/.env (§15, 3.4)
+│   └── berger_calibration.py  # Danish two-channel elasticities (§20)
 ├── tests/                     # Cross-framework regression tests
 │   └── test_qt_window.py      # 7 tests incl. post-QT-drift regression
 ├── runs/                      # Frozen baseline snapshots (§15 Step 0)
@@ -1191,6 +1234,8 @@ Lock-in-Effect/
 │   ├── fed_mbs_extension_risk.py   # + use_hazard_microsim bridge; term-aware cohorts (§15 Fix 2)
 │   ├── freddie_population.py       # structural-covariate loader (§15 Fix 1)
 │   ├── cross_design_test.py        # both calibration variants + report (§15 Fix 1)
+│   ├── hybrid_pipeline.py          # shared accounting + hazard micro-foundation (§17.1)
+│   ├── refi_sweep.py               # refi-in-place gap sensitivity sweep (§20.1)
 │   ├── data/runs/                  # tagged freeze_run.py manifests
 │   └── sensitivity/robustness/monte_carlo scripts
 └── hazard/                   # Reduced-form hazard framework
@@ -1205,4 +1250,4 @@ Lock-in-Effect/
 
 ---
 
-*Last updated: July 2026. Hazard spec v3: stratum FE (295 pools), burnout sign fixed (−0.13). Post robustness-fix program (§15): Path B at 107.0% trapped (band 105.9%–108.2%) after the β₁ units fix; ABM at 11.1% after the native 15-year gate (§19); cross-design test with real Freddie covariates recovers 59.3% (recalibrated) / 20.9% (frozen). Follow-on analyses: permutation test (§16, n=999, exact p=0.001) — Path B's recovery is a marginal-distribution result, moved only 0.27% ($2.2B) by scrambling joint structure, interaction-dominated across axes with the CPR-path signal localized to origination-time; Path A's fitted coefficients are far more structure-dependent (β can flip sign). Cross-foundation (§17): the institutional gap collapses $925.5B→$61.2B under a shared accounting layer; full-book SOMA weighting lifts Path B to 109.1%, Path A to 126.1%. Symmetric companion (§18): Path B recovers 106.0% on a fully synthetic population (zero Freddie data) — the hazard survival structure recovers the benchmark independent of data source, while the ABM needs real covariates to reach 59.3%. Berger recalibration (§20): importing estimated Danish elasticities (3.2% flat moving + tax-attenuated refi, ≈0 under U.S. taxes) collapses the institutional gap from +$925.5B to −$99.9B (Path B hybrid) — the large gap was an artifact of extrapolating a U.S.-calibrated mobility function to a Danish rate gap.*
+*Last updated: July 2026. Hazard spec v3: stratum FE (295 pools), burnout sign fixed (−0.13). Post robustness-fix program (§15): Path B at 107.0% trapped (band 105.9%–108.2%) after the β₁ units fix; ABM at 11.1% after the native 15-year gate (§19); cross-design test with real Freddie covariates recovers 59.3% (recalibrated) / 20.9% (frozen). Follow-on analyses: permutation test (§16, n=999, exact p=0.001) — Path B's recovery is a marginal-distribution result, moved only 0.27% ($2.2B) by scrambling joint structure, interaction-dominated across axes with the CPR-path signal localized to origination-time; Path A's fitted coefficients are far more structure-dependent (β can flip sign). Cross-foundation (§17): the institutional gap collapses $925.5B→$61.2B under a shared accounting layer; full-book SOMA weighting lifts Path B to 109.1%, Path A to 126.1%. Symmetric companion (§18): Path B recovers 106.0% on a fully synthetic population (zero Freddie data) — the hazard survival structure recovers the benchmark independent of data source, while the ABM needs real covariates to reach 59.3%. Berger recalibration (§20): importing estimated Danish elasticities (3.2% flat moving + tax-attenuated refi, ≈0 under U.S. taxes) collapses the institutional gap from +$925.5B to −$99.9B (Path B hybrid) — the large gap was an artifact of extrapolating a U.S.-calibrated mobility function to a Danish rate gap. Sweeping the refi channel (§20.1) shows the gap's *magnitude* stays small across [0, 18%] but its *sign* is not robust in Path B (breakeven at just 1.4% refi vs 12.6% for the ABM) — the honest headline is "institutional benefit ≈ 0 under U.S. conditions", not "robustly negative".*
