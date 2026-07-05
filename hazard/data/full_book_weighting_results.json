@@ -1,0 +1,31 @@
+{
+  "sample_wac_pct": 3.864892813333334,
+  "path_b": {
+    "balance_weighted": {
+      "trapped_b": 818.5300844066606,
+      "share_pct": 107.0326190295068,
+      "cpr_r_lag0": 0.19000395255236566,
+      "peak_lag": -3
+    },
+    "full_book_weighted": {
+      "trapped_b": 834.6397001192607,
+      "share_pct": 109.13914436574825,
+      "cpr_r_lag0": 0.27823879699900067,
+      "peak_lag": -3
+    }
+  },
+  "path_a": {
+    "balance_weighted": {
+      "trapped_b": 915.067027857209,
+      "share_pct": 119.65598142932075,
+      "cpr_r_lag0": -0.4443709072594436,
+      "peak_lag": 0
+    },
+    "full_book_weighted": {
+      "trapped_b": 964.3347895659045,
+      "share_pct": 126.09833177155141,
+      "cpr_r_lag0": -0.4406253458536417,
+      "peak_lag": 0
+    }
+  }
+}

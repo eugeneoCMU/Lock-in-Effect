@@ -892,6 +892,39 @@ curtailment and term-aware scheduled amortization that Path B's own scorer omits
 Reproduce: `cd abm && python3 hybrid_pipeline.py` →
 `data/hybrid_pipeline_results.json`.
 
+### 17.2 Full-book SOMA cohort weighting (roadmap 3.1)
+
+**What.** Both hazard paths draw their loan population from the Freddie 2017-2021
+sample (WAC ~3.4%), then scale total UPB to Fed holdings — but neither aligned
+the pool's *coupon composition* to the actual SOMA book (WAC ~2.5%, dominated by
+2.0-2.5% pandemic coupons). Full-book weighting rescales per-cohort (Path A,
+`simulate.py`) and per-loan (Path B, `MicrosimPool.reweight_to_soma_coupons`)
+balances so each 0.5% coupon bucket's share matches SOMA.
+
+**Result.**
+
+| | balance-weighted | full-book | shift |
+|---|---|---|---|
+| Path B trapped | $818.5B (107.0%) | **$834.6B (109.1%)** | +$16.1B, +2.1pp |
+| Path B CPR r(lag 0) | +0.190 | **+0.278** | +0.088 |
+| Path A trapped | $915.1B (119.7%) | **$964.3B (126.1%)** | +$49.3B, +6.4pp |
+| Path A CPR r(lag 0) | −0.444 | −0.441 | ~0 |
+
+**Interpretation.** Contrary to the prior expectation that full-book weighting
+would *tighten* the estimates toward 100%, it moves **both paths up**. The Freddie
+sample's higher WAC (3.4% vs SOMA's 2.5%) had *understated* lock-in: aligning to
+the real, lower-coupon book deepens the rate gap at 6-7% market rates, suppresses
+voluntary prepay, and raises trapped liquidity. Path A shifts more (+6.4pp) than
+Path B (+2.1pp) because its cohort composition was further from SOMA. Path B's
+contemporaneous CPR-path correlation also *improves* materially (+0.190 → +0.278),
+a second-order benefit of matching the real coupon mix. The full-book figures
+(Path B 109.1%, Path A 126.1%) are the more portfolio-faithful estimates; the
+balance-weighted headline numbers should be read as mild under-statements of
+lock-in driven by the sample's coupon skew.
+
+Reproduce: `cd hazard && python3 full_book_weighting.py` →
+`data/full_book_weighting_results.json`.
+
 ---
 
 ## Appendix — File Map
