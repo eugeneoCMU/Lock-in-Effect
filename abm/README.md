@@ -2,6 +2,14 @@
 
 > **Location:** this is the **agent-based model** subproject. The repo root [README.md](../README.md) indexes this folder and the [`../hazard/`](../hazard/) reduced-form hazard framework (cohort hazard + literature microsim with competing risks).
 
+> **Currency note (July 2026):** results quoted in this runbook predate the
+> repository-wide robustness program. Current production is
+> **$84.5B / 11.1%** U.S. trapped (`run-2026-07-05-berger`), Danish CPR
+> **3.4%** under the Berger recalibration (the $930.3B institutional gap is
+> superseded — see root [TECHNICAL.md §20](../TECHNICAL.md)), and Monte Carlo
+> mean **$96.7B** [95% CI $89.8–103.6B]. This document remains accurate as
+> the pre-program record.
+
 Extension-risk scoring can use the literature hazard microsim instead of the utility ABM CPR surface:
 
 ```python
@@ -359,7 +367,7 @@ Alternatively, from the repo root: `python3 abm/abm_lockin_simulation.py` (same 
 - **Historical falsification tests** (behavioral extensions §15, curtailment §16, multi-cohort §19) are documented with their original $672.9B-era numbers; see [TECHNICAL.md §17](TECHNICAL.md) for the current headline table.
 - **The institutional gap**: under the dynamic-balance Danish counterfactual, the portfolio would have **overshot** the QT cap by **-$829.1B** (shrinking from $2,535B to $428B), versus the U.S. system's $101.2B shortfall. The resulting **institutional gap is $930.3B**.
 - **Monthly CPR fit is weak**: raw r = -0.316 at lag 0; peak cross-correlation remains +0.192 at lag -3. Out-of-sample share explained (32.5%) exceeds in-sample (-11.1%), but both R² values are deeply negative.
-- **Robustness**: empirical benchmark is stable across data sources (SOMA vs. WSHOMCB differ by <0.2%) and ranges $479.6B–$782.2B across 18 QT cap-schedule assumptions. Monte Carlo (50 CPR surface rebuilds): mean **$113.5B**, 95% CI **[$106.6B, $120.4B]**.
+- **Robustness**: empirical benchmark is stable across data sources (SOMA vs. WSHOMCB differ by <0.2%) and ranges $479.6B–$782.2B across 18 QT cap-schedule assumptions. Monte Carlo (50 CPR surface rebuilds): mean **$113.5B**, 95% CI **[$106.6B, $120.4B]** on the pre-program 30yr-only book; **current pipeline: mean $96.7B, 95% CI [$89.8B, $103.6B]**.
 - **Dynamic friction** — During 2022-2025, depressed housing inventory and weak consumer sentiment pushed effective friction to roughly **8-10%** (well above the 7% static baseline).
 
 For the complete numbers, methodology, and the history of every bug found and corrected along the way, see [TECHNICAL.md](TECHNICAL.md).
