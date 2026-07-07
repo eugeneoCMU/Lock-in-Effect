@@ -420,7 +420,7 @@ Literature microsim is calibrated via defendable bounds (PSA speed, Rothstein ba
 | Empirical CPR back-out | 5.14% (15yr scheduled amort weighted in; §15 Fix 2) |
 | Danish CPR mean | **3.36%** (was 44.09%; Berger 3.2% flat moving + ≈0 refi) |
 | Institutional wedge (DK − US) | −8.40pp mean |
-| Monte Carlo (50 seeds) | not re-run; prior estimate ($113.5B, 30yr-only book) is stale |
+| Monte Carlo (50 seeds, current pipeline) | mean **$96.7B**, std $24.8B, 95% CI of mean **[$89.8B, $103.6B]** |
 
 The defensible institutional-gap headline is the **Path B hybrid −$99.9B** (both
 regimes empirically grounded); the ABM's −$728B overstates the reversal because
@@ -428,11 +428,15 @@ its U.S. leg is over-predicted (§20).
 
 Lineage (each reproducible): `run-2026-07-04` (30yr-only, $101.2B / 13.2%,
 `terms=("30yr",)`) → `run-2026-07-04-15yr-foldin` (structural-only 15yr,
-$91.0B / 11.9%, §15 Fix 2) → **`run-2026-07-05-native15yr`** (native 15yr
-behavioral gate, $84.5B / 11.1%, §19, current). Note: the §15 Fix 1
-cross-design, §17.1 hybrid, and §18 2×2 analyses were run against the
-immediately-prior $91.0B / 11.9% baseline; the native-15yr revision shifts the
-ABM cell by <1pp and leaves every qualitative conclusion unchanged.
+$91.0B / 11.9%, §15 Fix 2) → `run-2026-07-05-native15yr` (native 15yr
+behavioral gate, $84.5B / 11.1%, §19) → **`run-2026-07-05-berger`** (Berger
+Danish recalibration, U.S. leg unchanged at $84.5B, §20, current). Note: the
+§15 Fix 1 cross-design, §17.1 hybrid, and §18 2×2 analyses were run against
+the $91.0B / 11.9% baseline; the native-15yr revision shifts the ABM cell by
+<1pp and leaves every qualitative conclusion unchanged. Monte Carlo (seeds
+0–49, surface rebuilt per draw against this pipeline) puts population-draw
+uncertainty at std $24.8B — ~29% of the point estimate — so the ABM headline
+should be quoted as “~$85–97B (11–13%)” rather than to three digits.
 
 Reproduce: `cd abm && python3 freeze_run.py --tag <name>` → `data/runs/<name>/manifest.json`. All CPR means use the 42-month active QT window (`qt_active_frame`), not `index >= QT_START` alone.
 
@@ -510,7 +514,7 @@ Reproduce: `cd abm && python3 freeze_run.py --tag <name>` → `data/runs/<name>/
 
 1. ~~**Symmetric companion test**~~ — **done (§18).** Path B on a fully synthetic population recovers 106.0% vs 107.0% real; the hazard survival structure recovers the benchmark with zero real data, while the ABM needs real covariates to reach even 59%. The paradigm gap survives the data-source swap; only the CPR *path* shape (not the level) still depends on real structure.
 2. **Reconcile the cross-design and synthetic-companion results with the paper's paradigm claim.** The recalibrated cross-design variant recovers 59.3% (above the pre-registered 50% threshold), and §18 shows the hazard framework recovers 106% even on a fully synthetic population — Table 1/abstract framing needs to address both directly rather than cite only the synthetic-population ABM figure (11.1%).
-3. **Re-run Monte Carlo (50 seeds)** against the 15yr-foldin production tag; the $113.5B estimate on file is 30yr-only and stale.
+3. ~~**Re-run Monte Carlo (50 seeds)**~~ — **done.** Against the current pipeline (native 15yr gate + Berger Danish): mean **$96.7B**, std $24.8B, 95% CI of mean [$89.8B, $103.6B] (was $113.5B on the 30yr-only book). Verified bit-identical under the contiguous-subgrid speedup before running. Population-draw uncertainty is ~29% of the point estimate — quote the ABM headline as a range, not to three digits.
 
 ---
 

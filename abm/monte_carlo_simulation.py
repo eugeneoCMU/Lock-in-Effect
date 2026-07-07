@@ -17,6 +17,7 @@ Run:
     python3 monte_carlo_simulation.py
 """
 
+import argparse
 import random
 import time
 
@@ -42,16 +43,62 @@ N_RUNS = 50
 def surface_df_to_surfaces(surf: pd.DataFrame):
     """
     Convert the ABM surface DataFrame into the format fed.compute_metrics
-    expects: a dict keyed by coupon when Cohort_Coupon is present, else a
-    single 2D/3D tuple.
+    expects: a dict keyed by (coupon, term_months) when Cohort_Coupon is
+    present (matching fed.load_cpr_surface), else a single 2D/3D tuple.
     """
     if "Cohort_Coupon" in surf.columns:
+        if "Cohort_Term" not in surf.columns:
+            surf = surf.copy()
+            surf["Cohort_Term"] = fed.PORTFOLIO_TERM
         surfaces = {}
-        for coupon, grp in surf.groupby("Cohort_Coupon"):
-            slab = grp.drop(columns=["Cohort_Coupon"])
-            surfaces[float(coupon)] = fed._surface_tuple_from_dataframe(slab)
+        for (coupon, term), grp in surf.groupby(["Cohort_Coupon", "Cohort_Term"]):
+            slab = grp.drop(columns=["Cohort_Coupon", "Cohort_Term"])
+            key = (fed._round_coupon(coupon), int(term))
+            surfaces[key] = fed._surface_tuple_from_dataframe(slab)
         return surfaces
     return fed._surface_tuple_from_dataframe(surf)
+
+
+def restrict_grids_to_observed(fred_df: pd.DataFrame) -> None:
+    """
+    Shrink the ABM's surface grids to the contiguous sub-ranges that bracket
+    every coordinate compute_metrics will query for this macro frame.
+
+    Correctness: interp_cpr_surface uses nested np.interp over each grid
+    array. For any query q, np.interp only reads the two nodes bracketing q,
+    so a CONTIGUOUS subset of the original grid that still brackets all
+    queries returns bit-identical interpolants. This is a pure speedup
+    (~4-5x per seed), not an approximation. Asserts coverage before trimming.
+    """
+    macro = fed.calculate_dynamic_friction(fred_df.copy())
+    macro["Rate_6M_Change"] = macro["MORTGAGE30US"].diff(6).fillna(0.0) / 100.0
+
+    def contiguous_subrange(grid: np.ndarray, lo: float, hi: float) -> np.ndarray:
+        grid = np.sort(np.asarray(grid))
+        # Queries beyond the original grid clamp to its end nodes; keeping the
+        # original boundary node preserves that clamping exactly.
+        lo, hi = max(lo, float(grid[0])), min(hi, float(grid[-1]))
+        i0 = max(int(np.searchsorted(grid, lo, side="right")) - 1, 0)
+        i1 = min(int(np.searchsorted(grid, hi, side="left")) + 1, len(grid))
+        sub = grid[i0:i1]
+        assert sub[0] <= lo and sub[-1] >= hi, "subgrid must bracket queries"
+        return sub
+
+    rates = macro["MORTGAGE30US"] / 100.0
+    abm.RATE_GRID = contiguous_subrange(
+        abm.RATE_GRID, float(rates.min()), float(rates.max()))
+    abm.FRICTION_GRID = contiguous_subrange(
+        abm.FRICTION_GRID,
+        float(macro["Dynamic_Friction"].min()),
+        float(macro["Dynamic_Friction"].max()))
+    abm.RATE_VELOCITY_GRID = contiguous_subrange(
+        abm.RATE_VELOCITY_GRID,
+        float(macro["Rate_6M_Change"].min()),
+        float(macro["Rate_6M_Change"].max()))
+    print(f"Grids restricted to observed ranges: "
+          f"{len(abm.RATE_GRID)} rates x {len(abm.FRICTION_GRID)} frictions "
+          f"x {len(abm.RATE_VELOCITY_GRID)} velocities "
+          f"(interpolation-identical to the full grid)")
 
 
 def us_trapped(metrics: pd.DataFrame) -> float:
@@ -130,6 +177,17 @@ def plot_histogram(values: np.ndarray, mean: float,
 # Main
 # ---------------------------------------------------------------------------
 def main():
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--seeds", nargs=2, type=int, default=[0, N_RUNS],
+                        metavar=("START", "STOP"),
+                        help="half-open seed range for this chunk")
+    parser.add_argument("--out", default=None,
+                        help="chunk CSV path (default: production CSV)")
+    parser.add_argument("--no-plot", action="store_true")
+    args = parser.parse_args()
+    seed_start, seed_stop = args.seeds
+    out_csv = args.out or RESULTS_CSV
+
     print("Fetching empirical medians and FRED data once …")
     income, home_value = abm.fetch_macro_from_fred()
     fred_df = fed.fetch_data()
@@ -139,6 +197,8 @@ def main():
 
     print("Fetching SOMA MBS coupon cohorts once …")
     cohorts = fed.fetch_soma_mbs_cohorts()
+
+    restrict_grids_to_observed(fred_df)
 
     ref = abm.reference_cohort(cohorts)
     print("Calibrating mobility desire once (reused across all seeds) …")
@@ -162,11 +222,12 @@ def main():
     soma_target = empirical_trapped(baseline_metrics)
     print(f"Empirical trapped liquidity (SOMA): ${soma_target:,.1f}B")
 
-    print(f"\nRunning {N_RUNS} Monte Carlo iterations "
+    n_chunk = seed_stop - seed_start
+    print(f"\nRunning seeds [{seed_start}, {seed_stop}) "
           f"(CPR surface rebuild per seed) …")
     rows = []
     t0 = time.perf_counter()
-    for i in range(N_RUNS):
+    for i in range(seed_start, seed_stop):
         iter_t0 = time.perf_counter()
         trapped = run_single_iteration(i, fred_df, mobility_scale,
                                        income, home_value,
@@ -175,16 +236,19 @@ def main():
         iter_elapsed = time.perf_counter() - iter_t0
         rows.append({"seed": i, "trapped_us_b": trapped,
                        "elapsed_sec": iter_elapsed})
-        print(f"  [{i + 1:>2}/{N_RUNS}] seed={i:>2}  "
+        pd.DataFrame(rows).to_csv(out_csv, index=False)  # checkpoint
+        print(f"  [{i - seed_start + 1:>2}/{n_chunk}] seed={i:>2}  "
               f"U.S. trapped = ${trapped:,.1f}B  "
               f"({iter_elapsed:.1f}s)")
     total_elapsed = time.perf_counter() - t0
-    print(f"\nTotal Monte Carlo runtime: {total_elapsed/60:.1f} min "
-          f"({total_elapsed/N_RUNS:.1f}s per seed avg)")
+    print(f"\nChunk runtime: {total_elapsed/60:.1f} min "
+          f"({total_elapsed/max(n_chunk,1):.1f}s per seed avg)")
 
     results = pd.DataFrame(rows)
-    results.to_csv(RESULTS_CSV, index=False)
-    print(f"\nResults saved to {RESULTS_CSV}")
+    results.to_csv(out_csv, index=False)
+    print(f"\nResults saved to {out_csv}")
+    if args.no_plot or n_chunk < N_RUNS:
+        return
 
     values = results["trapped_us_b"].to_numpy()
     mean = float(values.mean())
