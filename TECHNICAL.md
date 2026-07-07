@@ -1031,6 +1031,26 @@ runs through the paper.** Read the rows:
   stratum fixed effects cannot transfer to novel synthetic strata — whereas the
   literature-calibrated Path B is essentially data-source-invariant.
 
+**Variance decomposition of the 2×2, and reconciliation with §15's
+pre-registered classification.** The two factor effects, in share points:
+
+| Effect | holding population synthetic | holding population real | average |
+|---|---|---|---|
+| Paradigm (hazard − ABM) | +94.1pp | +47.7pp | **+70.9pp** |
+| Data source (real − synthetic) | +47.4pp (ABM) | +1.0pp (hazard) | **+24.2pp** |
+
+with a large negative interaction (−46.4pp): real data substitutes for the
+paradigm *only inside the ABM*. On average the paradigm factor is ~3× the
+data-source factor, and the hazard row is data-source-invariant. This resolves
+the apparent tension between §15 Fix 1 and this section: §15's pre-registered
+criterion asked whether household choice *could* explain >50% once fed real
+covariates — it can (59.3%, recalibrated), so the narrow claim "the ABM's low
+share proves household choice cannot matter" is indeed undercut. But the 2×2
+shows the broader paradigm claim survives: the survival structure reaches ~106%
+with *no* real data, while the fully-fed behavioral ABM reaches only 59.3% (and
+20.9% without recalibration). Both statements are true at their own scope; the
+paper should state them together rather than choose one.
+
 **Calibration sensitivity (roadmap 2.3).** Path B's synthetic recovery is
 **105.9%–106.0%** across all three calibrations (baseline, looser FICO, higher
 LTV) — the choice of external distribution does not move the result, echoing the
