@@ -1,5 +1,13 @@
 # Technical Narrative — Corrections, Validation, and Final Numbers
 
+> **Currency note (July 2026):** this module-level history predates the
+> repository-wide robustness program. Figures cited here (e.g. $101.2B / 13.2%
+> ABM share, ~47% Danish CPR) have been superseded — current production is
+> **$84.5B / 11.1%** with Danish CPR **3.4%** under the Berger recalibration.
+> See the root [TECHNICAL.md §12](../TECHNICAL.md#12-current-headline-numbers)
+> and [§15–§20](../TECHNICAL.md#15-robustness-fix-program-july-2026) for
+> current numbers; this document remains accurate as the pre-program record.
+
 This document is a chronological record of the investigation that took the project's headline "trapped liquidity" figure from an unsupported **$972.3B** to a validated **$764.7B** (active QT window), fixed aggregation and multi-cohort correctness bugs, tested vintage burnout (failed, §20) and a settlement-lag kernel (null, §21), and documents the full validation suite. Historical milestones along the way include the **$672.9B** figure (pre QT-window fix) and **$257.6B / 38.3%** ABM share (pre reference-cohort calibration).
 
 For the high-level project description and how to run the code, see [README.md](README.md). This document assumes familiarity with that overview and focuses on *why* each number is what it is.

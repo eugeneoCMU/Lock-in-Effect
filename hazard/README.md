@@ -1,5 +1,11 @@
 # Reduced-Form Hazard Framework (Freddie Mac Loan-Level Data)
 
+> **Currency note (July 2026):** figures in this runbook predate the β₁ units
+> fix and follow-on analyses. Path B is currently **$818.5B / 107.0%** (band
+> 105.9–108.2%), Path A **$915B / 119.7%** (full-book variant 126.1%); the
+> Danish regime now uses the Berger two-channel calibration. See the root
+> [TECHNICAL.md §15–§20](../TECHNICAL.md#15-robustness-fix-program-july-2026).
+
 Complements the archived agent-based pipeline in [`../abm/`](../abm/) with two hazard paths:
 
 1. **Cohort fractional hazard** — loan-level → cohort-month → proportional hazards (no utility functions)
