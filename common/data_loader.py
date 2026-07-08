@@ -15,13 +15,13 @@ from typing import Optional
 
 import pandas as pd
 
-from common.google_drive import authenticate_service_account, get_or_download
+from common.google_drive import authenticate, get_or_download, _read_dotenv
 
 
 @lru_cache(maxsize=1)
 def _get_data_folder_id() -> str:
     """Resolve Google Drive folder ID for data."""
-    folder_id = os.environ.get("DATA_FOLDER_ID")
+    folder_id = os.environ.get("DATA_FOLDER_ID") or _read_dotenv("DATA_FOLDER_ID")
     if not folder_id:
         raise RuntimeError(
             "DATA_FOLDER_ID environment variable not set. "
@@ -74,7 +74,7 @@ def load_freddie_data(
 
     # Download if not cached
     if not cache_path.is_file():
-        service = authenticate_service_account()
+        service = authenticate()
         folder_id = _get_data_folder_id()
         cache_path = get_or_download(service, folder_id, filename, cache_dir)
 
@@ -112,7 +112,7 @@ def load_soma_data(
 
     # Download if not cached
     if not cache_path.is_file():
-        service = authenticate_service_account()
+        service = authenticate()
         folder_id = _get_data_folder_id()
         cache_path = get_or_download(service, folder_id, filename, cache_dir)
 

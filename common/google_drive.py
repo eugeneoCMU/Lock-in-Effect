@@ -1,27 +1,26 @@
 """
 Google Drive integration for fetching data files.
 
-Credential resolution order:
-  1. GOOGLE_DRIVE_CREDENTIALS_JSON environment variable (path to service account JSON)
-  2. A `GOOGLE_DRIVE_CREDENTIALS_JSON=...` line in gitignored `.env` at the repo root
-  3. Raise, pointing the user at `.env.example`
+Supports two authentication methods:
 
-Service account credentials are obtained from Google Cloud Console:
-  https://console.cloud.google.com → Create service account → Download JSON key
+1. API Key (simple, recommended for data access):
+   - Set GOOGLE_DRIVE_API_KEY in environment or .env
+   - Get a free key: https://console.cloud.google.com → APIs & Services → Credentials
+   - Enable Google Drive API for your project
 
-Share your Google Drive folder with the service account email to grant access.
+2. Service Account (advanced, for automation with elevated permissions):
+   - Set GOOGLE_DRIVE_CREDENTIALS_JSON to path of service account JSON file
+   - Create at: https://console.cloud.google.com → Service Accounts
+   - Share folder with service account email
 """
 
 from __future__ import annotations
 
-import json
 import os
 from functools import lru_cache
 from pathlib import Path
 from typing import Any, Dict, Optional
 
-from google.auth.transport.requests import Request
-from google.oauth2.service_account import Credentials
 from googleapiclient.discovery import build
 from googleapiclient.http import MediaIoBaseDownload
 
@@ -44,43 +43,58 @@ def _read_dotenv(key: str) -> str | None:
 
 
 @lru_cache(maxsize=1)
-def _get_credentials_path() -> str:
-    """Resolve path to service account JSON credentials."""
-    cred_path = os.environ.get("GOOGLE_DRIVE_CREDENTIALS_JSON") or _read_dotenv(
-        "GOOGLE_DRIVE_CREDENTIALS_JSON"
+def _get_api_key() -> str | None:
+    """Get Google Drive API key from environment or .env."""
+    return os.environ.get("GOOGLE_DRIVE_API_KEY") or _read_dotenv(
+        "GOOGLE_DRIVE_API_KEY"
     )
-    if not cred_path:
-        raise RuntimeError(
-            "GOOGLE_DRIVE_CREDENTIALS_JSON not found. Set the "
-            "GOOGLE_DRIVE_CREDENTIALS_JSON environment variable or copy "
-            ".env.example to .env and fill it in with the path to your service "
-            "account JSON key. Create one at: "
-            "https://console.cloud.google.com → Service Accounts"
-        )
-    return cred_path
 
 
 @lru_cache(maxsize=1)
-def authenticate_service_account() -> Any:
+def _get_service_account_path() -> str | None:
+    """Get path to service account JSON from environment or .env."""
+    return os.environ.get("GOOGLE_DRIVE_CREDENTIALS_JSON") or _read_dotenv(
+        "GOOGLE_DRIVE_CREDENTIALS_JSON"
+    )
+
+
+@lru_cache(maxsize=1)
+def authenticate() -> Any:
     """
-    Authenticate using Google Drive service account credentials.
+    Authenticate with Google Drive API using either API key or service account.
+    Priority: API key → Service account JSON
     Returns a Google Drive API service object.
     """
-    cred_path = _get_credentials_path()
-    cred_path = Path(cred_path).expanduser().resolve()
+    api_key = _get_api_key()
+    if api_key:
+        try:
+            service = build("drive", "v3", developerKey=api_key)
+            return service
+        except Exception as e:
+            raise RuntimeError(f"Failed to authenticate with API key: {e}")
 
-    if not cred_path.is_file():
-        raise FileNotFoundError(f"Credentials file not found: {cred_path}")
+    sa_path = _get_service_account_path()
+    if sa_path:
+        from google.oauth2.service_account import Credentials
 
-    try:
-        credentials = Credentials.from_service_account_file(
-            str(cred_path), scopes=["https://www.googleapis.com/auth/drive.readonly"]
-        )
-    except Exception as e:
-        raise RuntimeError(f"Failed to load credentials from {cred_path}: {e}")
+        sa_path = Path(sa_path).expanduser().resolve()
+        if not sa_path.is_file():
+            raise FileNotFoundError(f"Credentials file not found: {sa_path}")
 
-    service = build("drive", "v3", credentials=credentials)
-    return service
+        try:
+            credentials = Credentials.from_service_account_file(
+                str(sa_path), scopes=["https://www.googleapis.com/auth/drive.readonly"]
+            )
+            service = build("drive", "v3", credentials=credentials)
+            return service
+        except Exception as e:
+            raise RuntimeError(f"Failed to load service account credentials: {e}")
+
+    raise RuntimeError(
+        "No Google Drive credentials found. Set GOOGLE_DRIVE_API_KEY in "
+        "environment or .env. Get a free key at: "
+        "https://console.cloud.google.com → APIs & Services → Credentials"
+    )
 
 
 def list_folder_files(

@@ -28,20 +28,16 @@ export FRED_API_KEY="your_key"
 ### 3. Set up Google Drive (for Freddie Mac & SOMA data)
 If using Freddie Mac loan-level or SOMA data from Google Drive:
 
-1. **Create a Google Cloud service account:**
+1. **Get a Google Drive API key:**
    - Go to [Google Cloud Console](https://console.cloud.google.com)
    - Create a project or select an existing one
-   - Enable the Google Drive API
-   - Create a service account and download the JSON key
+   - Go to **APIs & Services** → **Credentials**
+   - Click **+ Create Credentials** → **API Key**
+   - Enable the **Google Drive API** for your project
 
-2. **Share your data folder:**
-   - Copy the service account email address (from the JSON key)
-   - Go to your Google Drive folder containing `orig_*.txt`, `perf_*.txt`, `soma_holdings.txt`
-   - Share the folder with the service account email (view-only is sufficient)
-
-3. **Configure credentials:**
+2. **Configure credentials:**
    - Copy `.env.example` to `.env`
-   - Set `GOOGLE_DRIVE_CREDENTIALS_JSON` to the path of the JSON key
+   - Set `GOOGLE_DRIVE_API_KEY` to your API key
    - Set `DATA_FOLDER_ID` to your Google Drive folder ID (from the folder URL: `https://drive.google.com/drive/folders/{FOLDER_ID}`)
 
 ### 4. Run pipelines

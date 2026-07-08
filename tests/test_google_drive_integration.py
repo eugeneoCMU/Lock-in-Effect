@@ -10,7 +10,7 @@ from pathlib import Path
 _REPO_ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(_REPO_ROOT))
 
-from common.google_drive import _get_credentials_path, authenticate_service_account
+from common.google_drive import _get_api_key, _get_service_account_path
 from common.data_loader import _get_data_folder_id, _get_cache_dir
 
 
@@ -33,23 +33,26 @@ def test_credentials():
     """Test that credentials can be loaded (if configured)."""
     print("\nTesting credential resolution...")
 
-    try:
-        cred_path = _get_credentials_path()
-        print(f"  ✓ Credentials path found: {cred_path}")
+    api_key = _get_api_key()
+    if api_key:
+        print(f"  ✓ API key found (length: {len(api_key)} chars)")
+        return True
 
-        # Check if file exists
-        cred_file = Path(cred_path).expanduser()
+    sa_path = _get_service_account_path()
+    if sa_path:
+        cred_file = Path(sa_path).expanduser()
         if cred_file.is_file():
-            print(f"  ✓ Credentials file exists")
+            print(f"  ✓ Service account file found: {cred_file}")
             return True
         else:
-            print(f"  ✗ Credentials file not found: {cred_file}")
-            print("    Hint: Set GOOGLE_DRIVE_CREDENTIALS_JSON in .env or environment")
+            print(f"  ✗ Service account file not found: {cred_file}")
+            print("    Hint: Set GOOGLE_DRIVE_CREDENTIALS_JSON to the correct path")
             return False
-    except RuntimeError as e:
-        print(f"  ⓘ Credentials not configured: {e}")
-        print("    Hint: Set GOOGLE_DRIVE_CREDENTIALS_JSON in .env or environment")
-        return False
+
+    print("  ⓘ No credentials configured")
+    print("    Hint: Set GOOGLE_DRIVE_API_KEY in .env or environment (recommended)")
+    print("    Alternative: Set GOOGLE_DRIVE_CREDENTIALS_JSON for service account")
+    return False
 
 
 def test_folder_id():
