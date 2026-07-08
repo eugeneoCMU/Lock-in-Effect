@@ -8,6 +8,7 @@ Never materializes full loan-level frames; aggregates immediately to
 from __future__ import annotations
 
 import re
+import sys
 from pathlib import Path
 from typing import Iterable, Optional
 
@@ -24,6 +25,11 @@ from config import (
     VINTAGE_YEARS,
 )
 from schema import ORIG_COLS, PERF_COLS, ZB_VOLUNTARY_PREPAY
+
+# Add repo root to path for importing common modules
+_REPO_ROOT = Path(__file__).resolve().parents[1]
+if str(_REPO_ROOT) not in sys.path:
+    sys.path.insert(0, str(_REPO_ROOT))
 
 # Columns to read from raw files (by name after rename)
 ORIG_READ = [
@@ -138,10 +144,15 @@ def _scan_perf(path: Path) -> pl.LazyFrame:
 
 
 def discover_raw_files(raw_dir: Path = RAW_DIR) -> list[tuple[Path, Path]]:
-    """Return (orig_path, perf_path) pairs found in raw_dir."""
+    """
+    Return (orig_path, perf_path) pairs found in raw_dir.
+    If files are missing locally, attempt to download from Google Drive.
+    """
     pairs = []
     if not raw_dir.exists():
-        return pairs
+        raw_dir.mkdir(parents=True, exist_ok=True)
+
+    # First, try to find locally available files
     for year in VINTAGE_YEARS:
         for pattern in [
             (f"orig_{year}.txt", f"perf_{year}.txt"),
@@ -150,12 +161,25 @@ def discover_raw_files(raw_dir: Path = RAW_DIR) -> list[tuple[Path, Path]]:
             o, p = raw_dir / pattern[0], raw_dir / pattern[1]
             if o.exists() and p.exists():
                 pairs.append((o, p))
+
     # Also pick up any orig_*.txt / perf_*.txt pairs
     for o in sorted(raw_dir.glob("orig_*.txt")):
         suffix = o.stem.replace("orig_", "")
         p = raw_dir / f"perf_{suffix}.txt"
         if p.exists() and (o, p) not in pairs:
             pairs.append((o, p))
+
+    # If no files found locally, try Google Drive
+    if not pairs:
+        try:
+            from common.data_loader import ensure_raw_freddie_files
+            print("No local Freddie files found. Attempting to download from Google Drive...")
+            pairs = ensure_raw_freddie_files(VINTAGE_YEARS, cache_dir=raw_dir)
+            if pairs:
+                print(f"Downloaded {len(pairs)} Freddie file pair(s) from Google Drive.")
+        except (ImportError, RuntimeError, FileNotFoundError) as e:
+            print(f"Google Drive download failed or not configured: {e}")
+
     return pairs
 
 

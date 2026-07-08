@@ -13,10 +13,40 @@ This repository hosts **two complementary frameworks**:
 
 ## Quick start
 
+### 1. Install dependencies
 ```bash
 pip install -r requirements.txt
-export FRED_API_KEY="your_key"
+```
 
+### 2. Set up FRED API (for macroeconomic data)
+```bash
+export FRED_API_KEY="your_key"
+# Or add to .env: FRED_API_KEY=your_fred_api_key_here
+# Get a free key: https://fred.stlouisfed.org/docs/api/api_key.html
+```
+
+### 3. Set up Google Drive (for Freddie Mac & SOMA data)
+If using Freddie Mac loan-level or SOMA data from Google Drive:
+
+1. **Create a Google Cloud service account:**
+   - Go to [Google Cloud Console](https://console.cloud.google.com)
+   - Create a project or select an existing one
+   - Enable the Google Drive API
+   - Create a service account and download the JSON key
+
+2. **Share your data folder:**
+   - Copy the service account email address (from the JSON key)
+   - Go to your Google Drive folder containing `orig_*.txt`, `perf_*.txt`, `soma_holdings.txt`
+   - Share the folder with the service account email (view-only is sufficient)
+
+3. **Configure credentials:**
+   - Copy `.env.example` to `.env`
+   - Set `GOOGLE_DRIVE_CREDENTIALS_JSON` to the path of the JSON key
+   - Set `DATA_FOLDER_ID` to your Google Drive folder ID (from the folder URL: `https://drive.google.com/drive/folders/{FOLDER_ID}`)
+
+### 4. Run pipelines
+
+```bash
 # ABM pipeline
 python3 abm/abm_lockin_simulation.py
 python3 abm/fed_mbs_extension_risk.py
@@ -29,6 +59,8 @@ python3 hazard/extension_risk.py
 # Hazard framework (literature microsim)
 python3 hazard/extension_risk.py --mode literature
 ```
+
+**Note:** If Freddie Mac files are not found locally, they will be automatically downloaded from Google Drive on first use. Subsequent runs use the cached copies. To force a fresh download, run with the environment variable `FORCE_REFRESH=1` or manually clear the cache in `./data/cache/`.
 
 ## Layout
 

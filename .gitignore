@@ -12,5 +12,7 @@ venv/
 # OS
 .DS_Store
 
-# Local secrets (FRED API key etc.)
+# Local secrets (FRED API key, Google Drive service account, etc.)
 .env
+*-service-account*.json
+service-account*.json
