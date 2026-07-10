@@ -1,0 +1,15 @@
+{
+  "mode": "no_lockin_null",
+  "p_q_shock_pct": 0.0,
+  "beta1": 0.0,
+  "null_trapped_b": 748.1850239867648,
+  "null_share_pct": 97.83415925879702,
+  "null_cpr_r_lag0": 0.3669902953388254,
+  "null_best_lag": -3,
+  "null_peak_lag_r": 0.44376461325997124,
+  "runtime_s": 22.7,
+  "central_trapped_b": 818.5300844066606,
+  "central_share_pct": 107.0326190295068,
+  "lockin_marginal_b": 70.34506041989584,
+  "lockin_marginal_share_pp": 9.198459770709789
+}
