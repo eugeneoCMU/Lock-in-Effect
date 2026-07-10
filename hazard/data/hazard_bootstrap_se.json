@@ -1,0 +1,54 @@
+{
+  "n_reps": 200,
+  "n_failed": 2,
+  "ridge_alpha": 0.0001,
+  "seed": 42,
+  "cluster": "stratum",
+  "alpha_reselected_per_rep": false,
+  "production_scales": {
+    "gap_std": 220.9672399353969,
+    "burn_std": 0.12023165105258038,
+    "fric_std": 0.00408347579150525
+  },
+  "point_production_units": {
+    "rate_gap_bps": 0.6733519352905115,
+    "burnout_orth": -0.13009048732147674,
+    "friction": -0.037066025306261775
+  },
+  "se": {
+    "rate_gap_bps": 1.1524183275992108,
+    "burnout_orth": 1.3633337414553404,
+    "friction": 0.5060654034737094
+  },
+  "ci_95": {
+    "rate_gap_bps": {
+      "lo": 0.6038694206026911,
+      "hi": 4.108538287772931
+    },
+    "burnout_orth": {
+      "lo": -1.7563793589910415,
+      "hi": 1.4303110311223504
+    },
+    "friction": {
+      "lo": -0.2530889688116257,
+      "hi": 1.380968449572465
+    }
+  },
+  "frac_le_0": {
+    "rate_gap_bps": 0.005050505050505051,
+    "burnout_orth": 0.7525252525252525,
+    "friction": 0.4797979797979798
+  },
+  "spec_version": 3,
+  "n_train": 10176,
+  "point_refit_native_units": {
+    "rate_gap_bps": 0.6733519352905115,
+    "burnout_orth": -0.13009048732147674,
+    "friction": -0.037066025306261775
+  },
+  "production_coefficients": {
+    "rate_gap_bps": 0.6733519352905115,
+    "burnout_orth": -0.13009048732147674,
+    "friction": -0.037066025306261775
+  }
+}
