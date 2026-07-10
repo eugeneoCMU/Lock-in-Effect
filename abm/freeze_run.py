@@ -22,6 +22,7 @@ from datetime import datetime, timezone
 from pathlib import Path
 
 import fed_mbs_extension_risk as fed
+from common.berger_calibration import get_us_transplant_refi
 from paths import (
     ABM_CPR_SURFACE_CSV,
     ABM_DIR,
@@ -112,6 +113,10 @@ def freeze_run(
             "script": "freeze_run.py",
             "module": "fed_mbs_extension_risk.build_production_metrics",
             "apply_settlement_lag_kernel": apply_settlement_lag_kernel,
+            # Sweepable module global (common/berger_calibration.py) that
+            # drives the sign of the institutional gap (§20.1); record it or
+            # the manifest under-specifies the run.
+            "us_transplant_refi_annual": get_us_transplant_refi(),
             **calib,
         }),
         "inputs": {
