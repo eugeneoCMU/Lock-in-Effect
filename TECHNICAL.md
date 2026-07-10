@@ -1,6 +1,6 @@
 # Technical Narrative — Lock-In Effect Project
 
-This document is the **repository-level** technical history: what was built, what broke, what was fixed, what was falsified, and why the codebase now has two frameworks (`abm/` and `hazard/`). It is written for a reader who wants the full causal chain from the original **$972.3B** headline to the current validated **$764.7B** empirical benchmark, the **11.1%** ABM share explained (post native 15-year gate, §19), and the newer reduced-form hazard pipelines. A July 2026 robustness-fix program (§15) plus follow-on analyses (§16–§19) revised the headline figures and added permutation, cross-foundation, and synthetic-companion tests — see those sections for what changed and why.
+This document is the **repository-level** technical history: what was built, what broke, what was fixed, what was falsified, and why the codebase now has two frameworks (`abm/` and `hazard/`). It is written for a reader who wants the full causal chain from the original **$972.3B** headline to the current validated **$764.7B** empirical benchmark and the current reconciled model results: the ABM explains **11.1%** on its synthetic population (post native 15-year gate, §19) but **59.3%** when fed real Freddie structural covariates with a recalibrated anchor (§15 Fix 1) — the share is calibration- and data-source-dependent, and both figures must be quoted together (§18). The hazard paths recover 107–120% of the benchmark, but an executed no-lock-in null (β₁=0) recovers **97.8%** (§12), so aggregate benchmark recovery is not by itself evidence about lock-in; the frameworks are distinguished by marginal lock-in contribution and monthly CPR-path fit. The Danish institutional gap is approximately **zero** under estimated elasticities, with its sign not identified (§20–§20.1). A July 2026 robustness-fix program (§15) plus follow-on analyses (§16–§19) revised the headline figures and added permutation, cross-foundation, and synthetic-companion tests — see those sections for what changed and why.
 
 For module-level runbooks, see [README.md](README.md). For granular ABM bug archaeology (line-level citations, section-by-section), see [abm/TECHNICAL.md](abm/TECHNICAL.md). For hazard pipeline specs, see [hazard/README.md](hazard/README.md).
 
@@ -28,6 +28,7 @@ For module-level runbooks, see [README.md](README.md). For granular ABM bug arch
 18. [Symmetric Companion Test — Synthetic Population into the Hazard Framework](#18-symmetric-companion-test--synthetic-population-into-the-hazard-framework)
 19. [Native 15-Year Behavioral Gate](#19-native-15-year-behavioral-gate)
 20. [Berger et al. Danish Recalibration — Two Estimated Channels](#20-berger-et-al-danish-recalibration--two-estimated-channels)
+21. [July 2026 Verification Round — Committed Artifacts and Manuscript v14](#21-july-2026-verification-round--committed-artifacts-and-manuscript-v14)
 
 ---
 
@@ -35,7 +36,9 @@ For module-level runbooks, see [README.md](README.md). For granular ABM bug arch
 
 When the Federal Reserve began **Quantitative Tightening (QT)** in June 2022, it targeted a phased reduction in its Mortgage-Backed Securities (MBS) holdings. The plan assumed mortgages would prepay at something close to historical turnover rates. Instead, the post-2022 rate shock created a **lock-in effect**: households with below-market fixed coupons faced punitive par-payoff math if they moved or refinanced, crushing voluntary prepayment.
 
-The empirical signature is **extension risk** — actual MBS roll-off consistently fell short of the QT cap, trapping liquidity on the Fed's balance sheet far longer than planned.
+The empirical signature is **extension risk** — actual MBS roll-off consistently fell short of the QT cap, keeping MBS on the Fed's balance sheet far longer than planned.
+
+**Terminology.** "Trapped liquidity" is used throughout as shorthand for the **cumulative QT roll-off shortfall versus the cap** — an extension/duration phenomenon. It is *not* a claim about monetary liquidity: slower runoff means the balance sheet shrinks (and reserves drain) *more slowly*, so nothing is trapped in a monetary-operations sense. Where precision matters, read "trapped liquidity" as "QT roll-off shortfall" or "extension shortfall."
 
 This project quantifies that shortfall and asks two structural questions:
 
@@ -43,6 +46,8 @@ This project quantifies that shortfall and asks two structural questions:
 2. **How much of the shortfall is explained by household lock-in under U.S. mortgage rules, versus other mechanisms (pool composition, servicer pipelines, income stress, institutional design)?**
 
 The **Danish counterfactual** isolates institutional design: Danish borrowers can buy back mortgage debt at **market price** rather than par, neutralizing lock-in when rates rise. Contrasting U.S. and Danish simulated roll-off paths separates *rate dynamics* from *contract design*.
+
+**Outcome (so the motivation is not read as the conclusion):** under Berger et al.'s *estimated* Danish elasticities the institutional gap collapses to **approximately zero**, and its sign is not identified (§20–§20.1). The large early gap estimates (±$900B range) were artifacts of extrapolating a U.S.-calibrated mobility function to a Danish rate gap.
 
 ---
 
@@ -64,7 +69,7 @@ The project went through three structural phases:
 
 ## 3. Empirical Benchmark: From $972.3B to $764.7B
 
-The original pipeline reported **$972.3B** in cumulative trapped liquidity. Independent reasoning (Fed ~$600B actual redemptions vs. cap-implied shortfall) suggested the true figure was closer to **$800–870B**. Investigation found **three compounding errors**:
+The original pipeline reported **$972.3B** in cumulative trapped liquidity. Independent reasoning (Fed ~$600B actual redemptions vs. cap-implied shortfall) suggested the true figure was closer to **$800–870B**. Investigation found **four compounding errors**:
 
 ### Error 1 — Flat QT cap (why it inflated the headline)
 
@@ -107,7 +112,7 @@ The agent-based model ([`abm/abm_lockin_simulation.py`](abm/abm_lockin_simulatio
 
 ### Behavioral gates (literature-grounded, not tuned to $764.7B)
 
-1. **DTI hard wall** — 43% front-end payment/income (CFPB QM/ATR)
+1. **DTI hard wall** — 43% housing-payment/income, applied **front-end**. Caveat: the CFPB QM/ATR 43% threshold is a *back-end total-debt* ratio; the model has no non-housing debts (§14), so this gate is QM-*inspired* rather than QM-implementing, and binds less often than the regulation would
 2. **Loss aversion** — payment increases scaled 2.25× (Kahneman-Tversky)
 3. **Wait-and-see** — 20% freeze when 6-month rate change exceeds 150 bps
 
@@ -277,12 +282,21 @@ $$\log(h_{c,t}) = \text{spline}(\text{loan\_age}) + \beta_1 \cdot \text{RateGap\
 
 ### Real-data results (Freddie 2017–2021, 20 quarters)
 
+> **Status: robustness exhibit, not a headline estimate.** Path A's monthly
+> CPR is *anticorrelated* with the empirical series (r(lag 0) = −0.444), its
+> holdout RMSE (~38pp) is large against ~5% CPR levels, stratum-bootstrap
+> CIs (§21) leave only the rate-gap coefficient distinguishable from zero
+> (burnout and friction are controls, not findings), and §16's permutation shows
+> β(rate_gap) is not sign-stable under covariate scramble ([−1.13, +1.19]).
+> The $915B (119.7%) aggregate is retained for the fitted-vs-literature
+> contrast (§16, §18) and should not be quoted as a standalone estimate.
+
 | Metric | Value |
 |---|---|
 | Trapped liquidity | **$915B (119.7%)** |
-| β(rate_gap_bps) | +0.67 (OK, standardized) |
-| β(burnout_orth) | **−0.13 (OK)** |
-| β(friction) | −0.037 (OK) |
+| β(rate_gap_bps) | +0.67 (standardized; stratum-bootstrap 95% CI **[+0.60, +4.11]**, sign stable in 99.5% of reps, §21) |
+| β(burnout_orth) | **−0.13** (n.s. — bootstrap CI [−1.76, +1.43], §21; sign also not stable under permutation, §16) |
+| β(friction) | −0.037 (n.s. — bootstrap CI [−0.25, +1.38], §21) |
 | CPR r (lag 0) | −0.444 |
 | Holdout RMSE | ~38pp |
 
@@ -364,7 +378,7 @@ Each month per active agent:
 2. **Normalize** if \(h_{prep} + h_{def} > 1\) (row-wise scale)
 3. Single uniform draw: prepay → `Prepaid`; default band → `D30`/pipeline; else survive
 4. Delinquent agents transition via Markov matrix
-5. Prepay UPB routed through `route_through_pipeline()` (replaces ABM settlement kernel)
+5. Voluntary prepay UPB settles to SOMA **same-month** (`settled_b = prepay_upb`, `competing_risks.py`) — no settlement delay is modeled in the hazard path. The Markov matrix governs **delinquency-state transitions only** (`_markov_step_delinquent`). (`route_through_pipeline()` in `markov.py` implements delayed settlement but is **not wired into the microsim** — retained as dead code.)
 
 ### Danish counterfactual isolation
 
@@ -383,7 +397,7 @@ When rates rise above coupon, U.S. gap is large and negative → prepay crushed.
 df = compute_metrics(df, use_hazard_microsim=True)
 ```
 
-Replaces CPR surface interpolation with microsim paths. Disables ABM settlement-lag kernel (Markov routing already handles pipeline delay). Danish dynamic balance loop unchanged.
+Replaces CPR surface interpolation with microsim paths. Disables the ABM settlement-lag kernel because the hazard path deliberately models **no** settlement delay — prepay settles same-month, and the lag −3 lead vs SOMA (§10) is the *unmodeled* TBA delay appearing in the diagnostic, not delay handled elsewhere. Danish dynamic balance loop unchanged.
 
 ### Real-data results (Freddie 2017–2021 sample; post-β₁-units-fix, see §15)
 
@@ -420,7 +434,7 @@ Literature microsim is calibrated via defendable bounds (PSA speed, Rothstein ba
 | Empirical CPR back-out | 5.14% (15yr scheduled amort weighted in; §15 Fix 2) |
 | Danish CPR mean | **3.36%** (was 44.09%; Berger 3.2% flat moving + ≈0 refi) |
 | Institutional wedge (DK − US) | −8.40pp mean |
-| Monte Carlo (50 seeds, current pipeline) | mean **$96.7B**, std $24.8B, 95% CI of mean **[$89.8B, $103.6B]** |
+| Monte Carlo (50 seeds, current pipeline) | mean **$96.7B**, seed-draw std **$24.8B** (production seed ~0.5σ below the mean) |
 
 The defensible institutional-gap headline is the **Path B hybrid −$99.9B** (both
 regimes empirically grounded); the ABM's −$728B overstates the reversal because
@@ -436,18 +450,30 @@ the $91.0B / 11.9% baseline; the native-15yr revision shifts the ABM cell by
 <1pp and leaves every qualitative conclusion unchanged. Monte Carlo (seeds
 0–49, surface rebuilt per draw against this pipeline) puts population-draw
 uncertainty at std $24.8B — ~29% of the point estimate — so the ABM headline
-should be quoted as “~$85–97B (11–13%)” rather than to three digits.
+should be quoted as **$84.5B ± $25B (1σ population-draw)**, not to three
+digits. The production seed sits ~0.5σ below the 50-seed mean ($96.7B). The
+95% CI of the *mean* ([$89.8B, $103.6B]) narrows mechanically with seed count
+and is not a prediction interval — do not quote it as the uncertainty range.
+
+A second, spec-distinct Monte Carlo exists for the **paper's production
+headline** (the $91.0B fold-in freeze): mean **$103.7B**, SD **$24.5B**, CI of
+mean [$96.9B, $110.5B], seed 42 reproducing the frozen **$90.98B** to the cent
+(34th percentile). It was run at code commit `5cf33a3`, not HEAD, because the
+unconditional native gate at HEAD cannot reproduce the fold-in spec; artifacts
+are committed under `abm/data/runs/run-2026-07-04-15yr-foldin/monte_carlo_*`
+(§21). Do not mix the two MCs: $96.7B belongs to the native-gate pipeline,
+$103.7B to the fold-in paper spec.
 
 Reproduce: `cd abm && python3 freeze_run.py --tag <name>` → `data/runs/<name>/manifest.json`. All CPR means use the 42-month active QT window (`qt_active_frame`), not `index >= QT_START` alone.
 
-### Hazard Path A — cohort fractional (Freddie 2017–2021, spec v3)
+### Hazard Path A — cohort fractional (Freddie 2017–2021, spec v3; robustness exhibit only, see §10 status note)
 
 | Metric | Value |
 |---|---|
 | Trapped liquidity | **$915B (119.7%)** |
-| β(rate_gap_bps) | +0.67 (OK, standardized) |
-| β(burnout_orth) | **−0.13 (OK)** |
-| β(friction) | −0.037 (OK) |
+| β(rate_gap_bps) | +0.67 (standardized; stratum-bootstrap 95% CI **[+0.60, +4.11]**, sign stable in 99.5% of reps, §21) |
+| β(burnout_orth) | **−0.13** (n.s. — bootstrap CI [−1.76, +1.43], §21; sign also not stable under permutation, §16) |
+| β(friction) | −0.037 (n.s. — bootstrap CI [−0.25, +1.38], §21) |
 | CPR r (lag 0) | −0.444 |
 | Holdout RMSE | ~38pp |
 | Stratum FE | 295 four-way pools |
@@ -460,6 +486,60 @@ Reproduce: `cd abm && python3 freeze_run.py --tag <name>` → `data/runs/<name>/
 | Rothstein band (5.5%–7.7%) | $810B – $828B (105.9%–108.2%) |
 | CPR r (lag 0) | +0.190 |
 | **Peak cross-corr** | **lag −3, r = +0.404** |
+
+**Which number is production — balance-weighted vs full-book.** The Path A/B
+headlines above are the **balance-weighted sample estimates** (Freddie
+2017–2021 sample composition); they remain the quoted production numbers
+because the loan sample is the estimation population. §17.2's full-book SOMA
+reweighting (Path B **109.1%**, Path A **126.1%**) is the more
+portfolio-faithful projection onto the Fed's actual coupon mix and should
+accompany the headline as the primary robustness reading — the
+balance-weighted figures understate lock-in by the sample's coupon skew
+(WAC 3.4% vs SOMA 2.5%).
+
+### No-lock-in null — what benchmark recovery can and cannot validate
+
+An explicit null run ([`hazard/no_lockin_null.py`](hazard/no_lockin_null.py))
+executes Path B with the lock-in elasticity disabled exactly — `p_q_shock_pct=0`,
+so `rothstein_beta1(0) == 0` (regression-tested in
+[`tests/test_units_conventions.py`](tests/test_units_conventions.py)) — on the
+identical 75k loan sample and RNG seed. The mechanical model (PSA seasoning
+baseline, involuntary floor, FICO/LTV covariates, burnout, competing-risk
+default, scheduled amortization) recovers:
+
+| Metric | No-lock-in null (β₁=0) | Central (P_q 6.5%) | Lock-in marginal |
+|---|---|---|---|
+| Trapped liquidity | **$748.2B (97.8%)** | $818.5B (107.0%) | **+$70.3B (9.2pp)** |
+| CPR r (lag 0) | **+0.367** | +0.190 | −0.177 |
+| Peak cross-corr | lag −3, r = +0.444 | lag −3, r = +0.404 | — |
+
+This corroborates the §15 Fix 3 accident (pre-fix inert channel: $747.3B /
+97.7%) as a designed experiment: a $35B/month cap sits far above what routine
+turnover plus amortization delivers on this book, so nearly all of the
+$764.7B shortfall exists with *no* lock-in channel at all. Note also that the
+null's contemporaneous CPR correlation (+0.367) is *better* than the central
+run's (+0.190) — switching the lock-in channel on buys +$70B of aggregate
+level at the cost of monthly path fit.
+
+Three implications, which govern how every recovery figure in this document
+should be read:
+
+1. **The lock-in channel's marginal contribution in Path B is +$70.3B
+   (9.2pp of benchmark)** — that, not the 107%, is the quantity the lock-in
+   mechanism is responsible for.
+2. **"Recovers ~100% of the benchmark" is not by itself evidence for a
+   lock-in mechanism.** Any amortization-respecting model clears most of the
+   bar; model comparisons must be stated as marginal contribution above the
+   null and judged on the monthly CPR-path diagnostics, where the frameworks
+   genuinely differ (r(lag 0): ABM ≈ −0.32, Path A −0.44, Path B +0.19).
+3. **This reframes §18.** Path B's 106.0% recovery on a fully synthetic
+   population is *expected under the null* — the survival structure plus a
+   coupon marginal recovers the level because the level is mostly mechanical —
+   so the 2×2's hazard row demonstrates the benchmark's insensitivity to
+   loan-level data, not independent confirmation of the survival paradigm.
+
+Reproduce: `cd hazard && python3 no_lockin_null.py` →
+`data/no_lockin_null_results.json` (cache `microsim_results_pq0.0.parquet`).
 
 ---
 
@@ -477,7 +557,7 @@ Reproduce: `cd abm && python3 freeze_run.py --tag <name>` → `data/runs/<name>/
 | Hazard GLM fixed effects | 295 stratum dummies (4-way cohort) | Vintage FE (4 dummies) insufficient for cross-section heterogeneity |
 | Rothstein β₁ | Survival-function conversion | Divide-by-3 mis-scales quarterly elasticity |
 | Competing risks | Normalized hazard sum ≤ 1 | Independent literature priors can exceed unity in tails |
-| Settlement timing | Markov pipeline (hazard) vs lag kernel (ABM) | ABM kernel tested null (§21); hazard routes prepay directly — document lag −3, do not convolve |
+| Settlement timing | No delay modeled (hazard) vs lag kernel (ABM) | ABM kernel tested null (§21); hazard settles prepay same-month (Markov matrix is delinquency-only) — document lag −3 as the unmodeled TBA delay, do not convolve |
 | Danish balance | Dynamic forward simulation | Static-balance application produced -$1,132B |
 | Repo layout | `abm/` frozen + `hazard/` new | Separates behavioral counterfactual from reduced-form estimation |
 | QT window definition | Single `common/qt_window.py`, imported by both frameworks | Duplicated definitions were how the Error-4 post-QT drift bug crept in (§15 Fix 4) |
@@ -507,14 +587,45 @@ Reproduce: `cd abm && python3 freeze_run.py --tag <name>` → `data/runs/<name>/
 - Danish counterfactual uses U.S.-calibrated friction.
 - DTI check is front-end only (no total debt).
 - Empirical lag-0 CPR correlation remains negative for the ABM and Path A (structural timing mismatch with SOMA settlement, not fixed with GLM lag terms); Path B's lag-0 correlation is positive (+0.19) with peak at lag −3, r=+0.40 — the two hazard paths disagree on contemporaneous alignment even though both lead SOMA by ~3 months at peak.
-- Hazard Path A uses Poisson GLM with stratum FE (295 dummies) and mild Ridge (α=1e-5); plain IRLS is ill-conditioned at this FE dimensionality.
+- Hazard Path A uses Poisson GLM with stratum FE (295 dummies) and mild ridge; plain IRLS is ill-conditioned at this FE dimensionality. Production α = **1e-4**, selected from `RIDGE_ALPHA_GRID = [1e-5, 1e-4]` on a temporally blocked holdout (all cohort-months ≥ `HOLDOUT_DATE` 2024-01-01 — no within-stratum leakage); `config.py: RIDGE_ALPHA = 1e-5` is only the IRLS-fallback default, not the production choice (§21).
 - Cross-design test (§15 Fix 1) only swaps structural covariates; the recalibrated-vs-frozen calibration gap ($294B) shows aggregate share is highly sensitive to how the mobility anchor is set, not just to which population feeds it.
+
+### Engineering (audit flags, July 2026 — known risks, not yet fixed)
+
+- **Silent synthetic-data fallback.** `hazard/ingest.py` (`load_or_build_panel`)
+  falls back to `generate_synthetic_fixture()` with only a `print()` when raw
+  Freddie pairs are missing. Any run whose claim depends on the real/synthetic
+  distinction (§15 Fix 1, §18) could silently be synthetic; this should be a
+  hard failure unless synthetic mode is explicitly requested.
+- **Mutable global calibration state.** The U.S.-transplant refi channel that
+  drives the *sign* of the institutional gap (§20.1) is a module global set via
+  `set_us_transplant_refi()` (`common/berger_calibration.py`) — order-dependent
+  and invisible to `freeze_run.py` manifests unless separately recorded.
+  *(Partially addressed, §21: `freeze_run.py` now writes
+  `us_transplant_refi_annual` into every manifest; the global itself remains
+  order-dependent.)*
+- **Test coverage is thin relative to the bug history.** *(Partially
+  addressed, §21: `test_units_conventions.py` now covers both §15 Fix 3 units
+  bugs and `rothstein_beta1(0) == 0`; `test_bootstrap_se.py` covers the
+  bootstrap resampler; `test_loan_sample_cache.py` guards the cache path.)*
+  Still untested: the `.clip()` bug in §3, the self-comparison bug in §5, the
+  mutual-recursion refit breakage in §15 Fix 4.
+- **Dead settlement-routing code.** `route_through_pipeline()` (`hazard/markov.py`)
+  has no callers; earlier revisions of this document described it as live (§11
+  now corrected — prepay settles same-month).
+- **Discrete-branch burnout ordering bug.** In `competing_risks.py`'s
+  non-production discrete branch (`PREPAY_MODE != "fractional"`), prepaid
+  balances are zeroed *before* `prepaid_bal` is computed from `pool.balance`,
+  so `cohort_burnout` can never accumulate in that branch. Production uses the
+  fractional branch (`config.py: PREPAY_MODE = "fractional"`), which updates
+  burnout from pre-zeroing amounts and is unaffected — but the discrete branch
+  is misleading as written.
 
 ### Next steps (priority order)
 
 1. ~~**Symmetric companion test**~~ — **done (§18).** Path B on a fully synthetic population recovers 106.0% vs 107.0% real; the hazard survival structure recovers the benchmark with zero real data, while the ABM needs real covariates to reach even 59%. The paradigm gap survives the data-source swap; only the CPR *path* shape (not the level) still depends on real structure.
-2. **Reconcile the cross-design and synthetic-companion results with the paper's paradigm claim.** The recalibrated cross-design variant recovers 59.3% (above the pre-registered 50% threshold), and §18 shows the hazard framework recovers 106% even on a fully synthetic population — Table 1/abstract framing needs to address both directly rather than cite only the synthetic-population ABM figure (11.1%).
-3. ~~**Re-run Monte Carlo (50 seeds)**~~ — **done.** Against the current pipeline (native 15yr gate + Berger Danish): mean **$96.7B**, std $24.8B, 95% CI of mean [$89.8B, $103.6B] (was $113.5B on the 30yr-only book). Verified bit-identical under the contiguous-subgrid speedup before running. Population-draw uncertainty is ~29% of the point estimate — quote the ABM headline as a range, not to three digits.
+2. ~~**Reconcile the cross-design and synthetic-companion results with the paper's paradigm claim.**~~ — **addressed in manuscript v14 (§21).** The abstract now conditions the household-choice claim on the synthetic population and flags the cross-design complication; the estimator table carries both cross-design variants (59.3% recalibrated / 20.9% frozen) alongside the synthetic-population figure, and the §18 synthesis is quoted with the null-corrected reading (§12).
+3. ~~**Re-run Monte Carlo (50 seeds)**~~ — **done.** Against the current pipeline (native 15yr gate + Berger Danish): mean **$96.7B**, seed-draw std $24.8B (was $113.5B on the 30yr-only book). Verified bit-identical under the contiguous-subgrid speedup before running. Population-draw uncertainty is ~29% of the point estimate — quote the ABM headline as **$84.5B ± $25B (1σ)**, not to three digits; the CI of the mean is not a prediction interval (§12).
 
 ---
 
@@ -709,8 +820,10 @@ destroyed. `fico_bucket`/`ltv_bucket` and `stratum_id` are recomputed from the
 permuted values (recipe verified to reproduce the stored `stratum_id`
 75000/75000), and the stratum-level burnout broadcast follows the new
 assignments. The microsim is otherwise unchanged — same hazard form, same β₁
-(Rothstein 6.5% midpoint), same competing-risks logic, same draw seed. 100
-independent permutations, matching the 50-seed Monte Carlo convention.
+(Rothstein 6.5% midpoint), same competing-risks logic, same draw seed. The
+reported null uses **999 independent permutations** (exact-p floor 1/1000);
+the reproduce command's default `--n 100` runs a faster 100-draw check
+consistent with the 50-seed Monte Carlo convention.
 
 Two implementation choices: (1) LTV is permuted even though the Path B
 `stratum_id` keys only on {vintage, coupon, FICO} — LTV still enters the hazard
@@ -1112,7 +1225,7 @@ one. Headline shifts modestly:
 
 | Metric | structural-only (§15 Fix 2) | native 15yr gate (§19) |
 |---|---|---|
-| ABM U.S. trapped | $91.0B (11.9%) | **$84.5B (11.0%)** |
+| ABM U.S. trapped | $91.0B (11.9%) | **$84.5B (11.1%)** |
 | Danish trapped | −$834.5B | −$752.8B |
 | Institutional gap | $925.5B | $837.3B |
 | U.S. / Danish CPR mean | 11.68% / 47.14% | 11.76% / 44.09% |
@@ -1236,6 +1349,73 @@ Reproduce: `cd abm && python3 refi_sweep.py` → `data/refi_sweep_results.json`.
 
 ---
 
+## 21. July 2026 Verification Round — Committed Artifacts and Manuscript v14
+
+The v11→v14 manuscript revision (a simulated editorial panel producing a
+17-item action ledger) triggered a code-level verification pass over this
+repository; the full trace — every re-run, diagnostic, and replacement number
+— is in [REVISION_VERIFICATION.md](REVISION_VERIFICATION.md). **No headline
+result changed.** What the round produced, now committed:
+
+| Artifact | Commit | What it settles |
+|---|---|---|
+| `abm/data/runs/run-2026-07-04-15yr-foldin/monte_carlo_*` | `0878eac` | Seed uncertainty for the paper's fold-in headline: mean $103.7B, SD $24.5B, CI of mean [$96.9B, $110.5B]; seed 42 reproduces $90.98B exactly (34th pctile). See §12 on why this MC is spec-distinct from the $96.7B pipeline MC |
+| `hazard/no_lockin_null.py` + `data/no_lockin_null_results.json` (+ `microsim_results_pq0.0.parquet` cache) | `b4e31f5` | β₁ = 0 null: $748.2B / 97.8%, peak lag −3 shared with production — timing does not identify lock-in; the marginal +$70.3B / +9.2pp does (§12) |
+| `hazard/bootstrap_se.py` + `data/hazard_bootstrap_{se.json,draws.csv}` + `tests/test_bootstrap_se.py` | `b6a3e51` | Path A coefficient uncertainty (table below) |
+| `abm/freeze_run.py` manifest field + `tests/test_units_conventions.py` | `3476dfe` | Manifests now record `us_transplant_refi_annual` (§20.1 audit flag); regression tests for both §15 Fix 3 units bugs and `rothstein_beta1(0) == 0` |
+
+### Path A stratum block-bootstrap (closes the "no SE" gap in §10)
+
+Stratum-level cluster bootstrap: strata resampled with replacement, a fresh
+FE label per resampled stratum (so duplicates contribute independent fixed
+effects), per-replication standardization rescaled to production units, ridge
+α **held at the production 1e-4** rather than re-selected (re-selection would
+bootstrap a different estimator: coefficient-plus-model-selection). 198/200
+replications converged; the point refit reproduces production coefficients to
+four decimals on the same 10,176 training cells.
+
+| Coefficient | Point | Bootstrap SE | 95% pctile CI | Draws ≤ 0 |
+|---|---|---|---|---|
+| rate_gap_bps | +0.673 | 1.152 | **[+0.60, +4.11]** | **0.5%** |
+| burnout_orth | −0.130 | 1.363 | [−1.76, +1.43] | 75.3% |
+| friction | −0.037 | 0.506 | [−0.25, +1.38] | 48.0% |
+
+Reading: only the rate-gap coefficient survives — sign-stable, CI excludes
+zero — but the distribution is heavily right-skewed with the point estimate
+near the lower bound (identification concentrated in a subset of strata), so
+the magnitude is imprecise. Burnout and friction are **controls, not
+findings**. The α = 1e-4 production choice was made on a temporally blocked
+holdout (all cohort-months ≥ 2024-01-01), so no within-stratum information
+crosses the split — which is also what licenses holding α fixed inside the
+bootstrap (§13).
+
+Reproduce: `cd hazard && python3 bootstrap_se.py --reps 200` (~12 min).
+
+### Manuscript v14 (2026-07-10)
+
+`revised_paper_v14` (.tex canonical; .pdf; .docx regenerated from the tex)
+applied the full editorial ledger against this repository's artifacts:
+
+- **Bootstrap table inserted** in the Path A section (sourced from
+  `hazard_bootstrap_se.json`), with burnout/friction demoted to controls.
+- **Timing claims null-corrected** per `no_lockin_null_results.json`: the
+  abstract and Path B section no longer cite the three-month lead as evidence
+  for the lock-in elasticity (the null shares the lead); the elasticity's
+  identified content is the +9.2pp marginal and band monotonicity.
+- **Estimator-table Danish row** prints the berger run's own $84.5B U.S. leg
+  (single-freeze consistency, §19–§20) instead of mixing runs, and the notes
+  state the peak-lag convention (max-|r| vs most-positive-r — the §15 B2
+  finding that both conventions coexist in this codebase).
+- **Bibliography rebuilt** (natbib author-year; the previous
+  biblatex-on-bibtex build silently dropped author labels for `@misc` entries
+  and title-sorted the Works Cited), both blank display equations restored,
+  robustness moved before the conclusion, declarations added, and the title's
+  "Failure of Quantitative Tightening" softened to "Shortfall".
+- **15-year exclusion correctly scoped**: hazard side only — the ABM folds
+  15-year MBS structurally (§15 Fix 2, §19).
+
+---
+
 ## Appendix — File Map
 
 ```
@@ -1248,7 +1428,10 @@ Lock-in-Effect/
 │   ├── fred_key.py            # FRED key from env/.env (§15, 3.4)
 │   └── berger_calibration.py  # Danish two-channel elasticities (§20)
 ├── tests/                     # Cross-framework regression tests
-│   └── test_qt_window.py      # 7 tests incl. post-QT-drift regression
+│   ├── test_qt_window.py      # 7 tests incl. post-QT-drift regression
+│   ├── test_units_conventions.py  # §15 Fix 3 units bugs + β₁(0)=0 (§21)
+│   ├── test_bootstrap_se.py       # stratum bootstrap resampler (§21)
+│   └── test_loan_sample_cache.py  # cache hits never touch download path
 ├── runs/                      # Frozen baseline snapshots (§15 Step 0)
 │   └── pre-fix-2026-07/       # pre-robustness-fix manifest + builder script
 ├── abm/                      # Agent-based pipeline (frozen archive)
@@ -1260,7 +1443,7 @@ Lock-in-Effect/
 │   ├── cross_design_test.py        # both calibration variants + report (§15 Fix 1)
 │   ├── hybrid_pipeline.py          # shared accounting + hazard micro-foundation (§17.1)
 │   ├── refi_sweep.py               # refi-in-place gap sensitivity sweep (§20.1)
-│   ├── data/runs/                  # tagged freeze_run.py manifests
+│   ├── data/runs/                  # tagged freeze_run.py manifests (+ fold-in MC artifacts, §21)
 │   └── sensitivity/robustness/monte_carlo scripts
 └── hazard/                   # Reduced-form hazard framework
     ├── README.md             # Pipeline specs and equations
@@ -1269,9 +1452,11 @@ Lock-in-Effect/
     ├── loan_sample.py, microsim_engine.py, ...   # Path B; --band runs Rothstein sensitivity (§15 Fix 3)
     ├── literature_hazard.py, rate_gap.py   # β₁ + regime-specific rate gap (units fixed, §15 Fix 3)
     ├── permutation_test.py    # marginal-preserving joint-structure null test (§16)
+    ├── no_lockin_null.py      # β₁=0 mechanical null — lock-in marginal $70.3B (§12)
+    ├── bootstrap_se.py        # stratum block-bootstrap SEs for Path A (§21)
     └── data/                   # Parquet, JSON, PNG outputs
 ```
 
 ---
 
-*Last updated: July 2026. Hazard spec v3: stratum FE (295 pools), burnout sign fixed (−0.13). Post robustness-fix program (§15): Path B at 107.0% trapped (band 105.9%–108.2%) after the β₁ units fix; ABM at 11.1% after the native 15-year gate (§19); cross-design test with real Freddie covariates recovers 59.3% (recalibrated) / 20.9% (frozen). Follow-on analyses: permutation test (§16, n=999, exact p=0.001) — Path B's recovery is a marginal-distribution result, moved only 0.27% ($2.2B) by scrambling joint structure, interaction-dominated across axes with the CPR-path signal localized to origination-time; Path A's fitted coefficients are far more structure-dependent (β can flip sign). Cross-foundation (§17): the institutional gap collapses $925.5B→$61.2B under a shared accounting layer; full-book SOMA weighting lifts Path B to 109.1%, Path A to 126.1%. Symmetric companion (§18): Path B recovers 106.0% on a fully synthetic population (zero Freddie data) — the hazard survival structure recovers the benchmark independent of data source, while the ABM needs real covariates to reach 59.3%. Berger recalibration (§20): importing estimated Danish elasticities (3.2% flat moving + tax-attenuated refi, ≈0 under U.S. taxes) collapses the institutional gap from +$925.5B to −$99.9B (Path B hybrid) — the large gap was an artifact of extrapolating a U.S.-calibrated mobility function to a Danish rate gap. Sweeping the refi channel (§20.1) shows the gap's *magnitude* stays small across [0, 18%] but its *sign* is not robust in Path B (breakeven at just 1.4% refi vs 12.6% for the ABM) — the honest headline is "institutional benefit ≈ 0 under U.S. conditions", not "robustly negative".*
+*Last updated: July 2026. Hazard spec v3: stratum FE (295 pools), burnout sign fixed (−0.13). Post robustness-fix program (§15): Path B at 107.0% trapped (band 105.9%–108.2%) after the β₁ units fix; ABM at 11.1% after the native 15-year gate (§19); cross-design test with real Freddie covariates recovers 59.3% (recalibrated) / 20.9% (frozen). Follow-on analyses: permutation test (§16, n=999, exact p=0.001) — Path B's recovery is a marginal-distribution result, moved only 0.27% ($2.2B) by scrambling joint structure, interaction-dominated across axes with the CPR-path signal localized to origination-time; Path A's fitted coefficients are far more structure-dependent (β can flip sign). Cross-foundation (§17): the institutional gap collapses $925.5B→$61.2B under a shared accounting layer; full-book SOMA weighting lifts Path B to 109.1%, Path A to 126.1%. Symmetric companion (§18): Path B recovers 106.0% on a fully synthetic population (zero Freddie data) — the hazard survival structure recovers the benchmark independent of data source, while the ABM needs real covariates to reach 59.3%. Berger recalibration (§20): importing estimated Danish elasticities (3.2% flat moving + tax-attenuated refi, ≈0 under U.S. taxes) collapses the institutional gap from +$925.5B to −$99.9B (Path B hybrid) — the large gap was an artifact of extrapolating a U.S.-calibrated mobility function to a Danish rate gap. Sweeping the refi channel (§20.1) shows the gap's *magnitude* stays small across [0, 18%] but its *sign* is not robust in Path B (breakeven at just 1.4% refi vs 12.6% for the ABM) — the honest headline is "institutional benefit ≈ 0 under U.S. conditions", not "robustly negative". July 2026 verification round (§21): Path A coefficients now carry stratum-bootstrap CIs (rate-gap sign-stable in 99.5% of replications; burnout/friction not distinguishable from zero), the fold-in-spec Monte Carlo (mean $103.7B; seed 42 = $90.98B exactly) and the β₁=0 no-lock-in null ($748.2B / 97.8%) are committed artifacts, and manuscript v14 aligns the paper with all of the above.*
