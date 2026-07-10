@@ -1,0 +1,22 @@
+{
+  "purpose": "Seed-uncertainty CI for the run-2026-07-04-15yr-foldin headline (Section IV.A)",
+  "n_seeds": 50,
+  "mean_b": 103.68,
+  "std_b": 24.5,
+  "ci95_mean_b": [
+    96.89,
+    110.47
+  ],
+  "min_b": 46.58,
+  "max_b": 150.79,
+  "production_seed": 42,
+  "production_seed_draw_b": 90.98,
+  "production_draw_percentile": 34.0,
+  "provenance": {
+    "code_commit": "5cf33a3 (Fold 15-year MBS into SOMA cohorts, structural-only in production)",
+    "soma_as_of": "2026-07-08",
+    "mobility_scale": 43882.8125,
+    "note": "monte_carlo_simulation.py surface_df_to_surfaces backported from 5c96de4 to key surfaces by (coupon, term); model code unchanged. Seed 42 reproduces the frozen headline $90.98B exactly, confirming SOMA as-of drift since the 2026-07-04 freeze is immaterial.",
+    "supersedes": "mean $113.5B, CI [$106.6B, $120.4B] computed on the 30yr-only spec"
+  }
+}
