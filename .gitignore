@@ -16,3 +16,6 @@ venv/
 .env
 *-service-account*.json
 service-account*.json
+
+# Manuscript editions — kept local-only, not published with the repo
+paper/
