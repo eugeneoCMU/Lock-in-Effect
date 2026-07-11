@@ -42,7 +42,10 @@ def hits_for(lines, src):
     out = []
     for ln, line in enumerate(lines, 1):
         for ph in FAMILY:
-            for m in re.finditer(r'(?<![A-Za-z])' + re.escape(ph) + r'(?![A-Za-z])',
+            # optional trailing 's' keeps plural/verb forms ('offsets',
+            # 'leads') in scope, matching the round-4/5 logs' behavior; the
+            # word boundary still rejects 'flags'-class false positives
+            for m in re.finditer(r'(?<![A-Za-z])' + re.escape(ph) + r's?(?![A-Za-z])',
                                  line, re.IGNORECASE):
                 a, b = max(0, m.start() - 55), min(len(line), m.end() + 55)
                 ctx = ('…' if a > 0 else '') + line[a:b] + ('…' if b < len(line) else '')

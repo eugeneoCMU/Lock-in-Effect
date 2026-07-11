@@ -1,0 +1,32 @@
+{
+  "origination_wal_years": {
+    "30yr_at_2.49": 16.89,
+    "15yr_at_2.49": 8.01
+  },
+  "cell_2021_age12_30yr": 16.27,
+  "blend_standin_ages": 14.7,
+  "blend_midpoint_ages": 14.92,
+  "soma_derived_ages_june2022_months": {
+    "2021": 11.6,
+    "2020": 28.0,
+    "2017-19": 50.5,
+    "2022": 0.0,
+    "pre2017": 96.0
+  },
+  "soma_derived_face_shares": {
+    "2021": 0.732,
+    "2020": 0.009,
+    "2017-19": 0.258,
+    "2022": 0.0,
+    "pre2017": 0.001
+  },
+  "blend_soma_ages": 14.94,
+  "standin_ages_june2022_months": {
+    "2022": 2,
+    "2021": 12,
+    "2020": 32,
+    "2017-19": 60,
+    "pre2017": 120
+  },
+  "note": "Ages derived from CUSIP-level origin dates (maturity \u2212 term, the production back-derivation), face-weighted within vintage cells, as-of the holdings file at run date \u2014 no reference to Table 6. Two disclosed limitations: (i) as-of drift \u2014 the June-2022 stock differs from today's surviving face by composition; (ii) origin dates are value-weighted within (term, coupon) buckets before cell assignment, which smears adjacent vintages (visible in the derived cell shares vs the printed tabulation), so the blend uses the PRINTED vintage face shares with the derived ages. The point of the exercise survives both: externally anchored ages give a scheduled-only blend within 0.3 years of the printed 14.7 and nowhere near 16-17."
+}

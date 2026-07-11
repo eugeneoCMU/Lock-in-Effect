@@ -1,11 +1,13 @@
-# Timing-phrase-family sweep log — round 8 (2026-07-11)
+# Timing-phrase-family sweep log — round 9 (2026-07-11)
 
 LEGEND: round-5 dispositions recorded ACTIONS taken in that revision; rounds 6+ record
 STEADY STATE (a RETAINED row may have been demoted in an earlier round).
 Matcher: word-boundary regex; EVERY family phrase on a line records its own row — the
 round-6 log's one-row-per-line design silently dropped 'trails' and 'moves first' when
 they followed 'ahead' on the same source line (panel finding, confirmed); dispositions
-are evaluated on a ±200-char window around each hit. The generator is committed at
+are evaluated on a ±200-char window around each hit. Round-9 matcher fix: an optional
+trailing 's' restores plural/verb forms ('offsets', 'leads') that rounds 4-5 matched and
+the round-8 rewrite had silently dropped (self-caught; 6 rows restored). The generator is committed at
 tools/timing_sweep.py (round-8 remedy: the tool itself is now part of the record).
 
 Family: {timing, lead, path diagnostics, nonnegative, not outright negative, materially better, offset, ahead, trails, moves first, precedes, lags}.
@@ -19,6 +21,7 @@ Family: {timing, lead, path diagnostics, nonnegative, not outright negative, mat
 | tex | 192 | nonnegative | …led object is the prepayment rate $y_{s,t}/n_{s,t}$, a nonnegative fraction, so the model is estimated by Poisson pseudo-… | RETAINED - econometric term of art |
 | tex | 192 | offset | …outcome is dollars, not a count: with the log-exposure offset the modeled object is the prepayment rate $y_{s,t}/n_{… | RETAINED - econometric term of art |
 | tex | 248 | timing | …ecovery as evidence about the aggregate level only. No timing claim rests on Path B either: its apparent levels adva… | RETAINED - states the retraction / carries the guard |
+| tex | 268 | offset | …quivalent units, so that the buyback discount properly offsets the locked-in spread --- $g_{\mathrm{DK}} = g_{\mathrm… | RETAINED - Danish NPV identity (mechanism-substitution variant, scoped as non-production in round 9) |
 | tex | 270 | ahead | …SOMA-derived CPR path moves approximately three months ahead of the simulated path (a peak selected across the seve… | RETAINED - direction-check / raw correlogram description, guarded in-line by the adjacent retraction |
 | tex | 270 | trails | …tation a peak at $k=-3$ means the simulated path \emph{trails} the empirical path by three months --- the empirical … | RETAINED - direction-check / raw correlogram description, guarded in-line by the adjacent retraction |
 | tex | 270 | moves first | …mpirical path by three months --- the empirical series moves first. At this peak, the empirical SOMA-derived CPR path mov… | RETAINED - direction-check / raw correlogram description, guarded in-line by the adjacent retraction |
@@ -36,6 +39,7 @@ Family: {timing, lead, path diagnostics, nonnegative, not outright negative, mat
 | tex | 278 | offset | …by less than \$1.5 billion across the entire scan. The offset is therefore a property of the fitted path's smooth ag… | RETAINED - mechanism-not-isolated statement, credential-free |
 | tex | 280 | lags | … the lag-0 correlation at $[-0.13, +0.44]$; with seven lags searched, individual band-point differences in peak $r… | RETAINED - lag-search bookkeeping |
 | tex | 294 | path diagnostics | …d liquidity & \% of benchmark & CPR path corr. (lag) & Path diagnostics \\ | RETAINED - open-question statement, credential-free |
+| tex | 299 | lead | …76\%; $r = +0.190$ at lag 0; 3-month offset (empirical leads; reference only, Section~\ref{sec:pathb}) \\ | RETAINED - states the retraction / carries the guard |
 | tex | 299 | offset | …-3$) & mean CPR 4.76\%; $r = +0.190$ at lag 0; 3-month offset (empirical leads; reference only, Section~\ref{sec:pat… | RETAINED - states the retraction / carries the guard |
 | tex | 307 | timing | …ation choices; neither reproduces the empirical path's timing (no estimator does; see above), but the recalibrated v… | RETAINED - states the retraction / carries the guard |
 | tex | 307 | timing | …-0.20$ to $-0.30$; Section~\ref{sec:pathb}) --- and no timing evidence is claimed for any estimator. Block-length se… | RETAINED - states the retraction / carries the guard |
@@ -46,6 +50,7 @@ Family: {timing, lead, path diagnostics, nonnegative, not outright negative, mat
 | tex | 389 | timing | …c:pathb}); Path B's distinction is level accuracy, not timing. The timing critique of Section~\ref{sec:abm} therefor… | RETAINED - open-question statement, credential-free |
 | tex | 389 | timing | …ath B's distinction is level accuracy, not timing. The timing critique of Section~\ref{sec:abm} therefore survives r… | RETAINED - open-question statement, credential-free |
 | tex | 393 | timing | …h paradigms still depend on real structure for correct timing. We treat the aggregate-level paradigm claim of Sectio… | RETAINED - open-question statement, credential-free |
+| tex | 443 | offset | …equivalent units so that the buyback discount properly offsets the locked-in spread. Section~\ref{sec:pathb} reports … | RETAINED - Danish NPV identity (mechanism-substitution variant, scoped as non-production in round 9) |
 | tex | 449 | timing | …g within 2.1\% --- a level-accuracy distinction, not a timing one: no estimator's monthly co-movement survives detre… | RETAINED - states the retraction / carries the guard |
 | tex | 449 | timing | …M's share is calibration-sensitive, and the path-level timing question remains open. | RETAINED - open-question statement, credential-free |
 | tex | 467 | timing | … matching its real-data recovery, while its path-level timing does not transfer to synthetic data. Also complete as … | RETAINED - open-question statement, credential-free |
@@ -60,6 +65,7 @@ Family: {timing, lead, path diagnostics, nonnegative, not outright negative, mat
 | docx | 94 | nonnegative | …the modeled object is the prepayment rate ys,t/ns,t, a nonnegative fraction, so the model is estimated by Poisson pseudo-… | RETAINED - econometric term of art |
 | docx | 94 | offset | …outcome is dollars, not a count: with the log-exposure offset the modeled object is the prepayment rate ys,t/ns,t, a… | RETAINED - econometric term of art |
 | docx | 171 | timing | …ecovery as evidence about the aggregate level only. No timing claim rests on Path B either: its apparent levels adva… | RETAINED - states the retraction / carries the guard |
+| docx | 181 | offset | …quivalent units, so that the buyback discount properly offsets the locked-in spread — gDK = gUS + Δybuyback ≈ 0 whene… | RETAINED - Danish NPV identity (mechanism-substitution variant, scoped as non-production in round 9) |
 | docx | 182 | ahead | …SOMA-derived CPR path moves approximately three months ahead of the simulated path (a peak selected across the seve… | RETAINED - direction-check / raw correlogram description, guarded in-line by the adjacent retraction |
 | docx | 182 | trails | …implementation a peak at k=−3 means the simulated path trails the empirical path by three months — the empirical ser… | RETAINED - direction-check / raw correlogram description, guarded in-line by the adjacent retraction |
 | docx | 182 | moves first | … empirical path by three months — the empirical series moves first. At this peak, the empirical SOMA-derived CPR path mov… | RETAINED - direction-check / raw correlogram description, guarded in-line by the adjacent retraction |
@@ -77,6 +83,7 @@ Family: {timing, lead, path diagnostics, nonnegative, not outright negative, mat
 | docx | 186 | offset | … by less than $1.5 billion across the entire scan. The offset is therefore a property of the fitted path’s smooth ag… | RETAINED - mechanism-not-isolated statement, credential-free |
 | docx | 187 | lags | …on the lag-0 correlation at [−0.13, +0.44]; with seven lags searched, individual band-point differences in peak r … | RETAINED - lag-search bookkeeping |
 | docx | 195 | path diagnostics | Path diagnostics | RETAINED - open-question statement, credential-free |
+| docx | 215 | lead | … 4.76%; r = +0.190 at lag 0; 3-month offset (empirical leads; reference only, Section V.C) | RETAINED - states the retraction / carries the guard |
 | docx | 215 | offset | mean CPR 4.76%; r = +0.190 at lag 0; 3-month offset (empirical leads; reference only, Section V.C) | RETAINED - states the retraction / carries the guard |
 | docx | 227 | timing | …ation choices; neither reproduces the empirical path’s timing (no estimator does; see above), but the recalibrated v… | RETAINED - states the retraction / carries the guard |
 | docx | 227 | timing | …ators cluster at −0.20 to −0.30; Section V.C) — and no timing evidence is claimed for any estimator. Block-length se… | RETAINED - states the retraction / carries the guard |
@@ -87,6 +94,7 @@ Family: {timing, lead, path diagnostics, nonnegative, not outright negative, mat
 | docx | 279 | timing | …tion V.C); Path B’s distinction is level accuracy, not timing. The timing critique of Section IV therefore survives … | RETAINED - open-question statement, credential-free |
 | docx | 279 | timing | …ath B’s distinction is level accuracy, not timing. The timing critique of Section IV therefore survives regardless o… | RETAINED - open-question statement, credential-free |
 | docx | 281 | timing | …h paradigms still depend on real structure for correct timing. We treat the aggregate-level paradigm claim of Sectio… | RETAINED - open-question statement, credential-free |
+| docx | 317 | offset | …equivalent units so that the buyback discount properly offsets the locked-in spread. Section V.C reports the correcte… | RETAINED - Danish NPV identity (mechanism-substitution variant, scoped as non-production in round 9) |
 | docx | 320 | timing | …ding within 2.1% — a level-accuracy distinction, not a timing one: no estimator’s monthly co-movement survives detre… | RETAINED - states the retraction / carries the guard |
 | docx | 320 | timing | …M’s share is calibration-sensitive, and the path-level timing question remains open. | RETAINED - open-question statement, credential-free |
 | docx | 329 | timing | … matching its real-data recovery, while its path-level timing does not transfer to synthetic data. Also complete as … | RETAINED - open-question statement, credential-free |
@@ -95,4 +103,4 @@ Family: {timing, lead, path diagnostics, nonnegative, not outright negative, mat
 | docx | 343 | trails | …k = −3. Every direction claim in that draft (simulated trails; empirical moves first) was computed under, and verifi… | RETAINED - Appendix A erratum record of the corrected convention definition (round 8), guarded by construction |
 | docx | 343 | moves first | …ction claim in that draft (simulated trails; empirical moves first) was computed under, and verified against synthetic da… | RETAINED - Appendix A erratum record of the corrected convention definition (round 8), guarded by construction |
 
-Total: 82 rows. Tally (computed from table rows): {'RETAINED': 82}.
+Total: 88 rows. Tally (computed from table rows): {'RETAINED': 88}.

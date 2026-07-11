@@ -209,12 +209,21 @@ def main() -> None:
         "note": ("Unpenalized Poisson PML on the 276 strata with at least "
                  "one training prepayment event converges and is exactly "
                  "reference-invariant; its macro coefficients reproduce the "
-                 "production point to the third decimal. The 20 zero-event "
+                 "production point to within 0.002 in standardized units "
+                 "(largest gap: burnout, -0.1317 vs -0.1301 — third-decimal "
+                 "at face; rate gap 0.6727 vs 0.6734 and friction -0.0373 "
+                 "vs -0.0371 agree to the third decimal). The burnout gap "
+                 "arises because dropping the 423 zero-event cells changes "
+                 "the within-stratum demeaning and age-orthogonalization "
+                 "sample for the burnout regressor. The 20 zero-event "
                  "strata (whose FE MLEs do not exist) are the true source "
                  "of the ill-conditioning the ridge papers over, and the "
                  "reference-swap sensitivity above is an optimizer-path "
                  "artifact of penalized cold-start refits, not information "
-                 "in the production point."),
+                 "in the production point. The production reference stratum "
+                 "(2017_200_740+_<=80) is NOT among the 20 zero-event "
+                 "strata; 296 = observed strata, 295 = FE dummies (one "
+                 "absorbed), and all 20 inestimable FEs are among the 295."),
     }
     print(json.dumps(out["estimable_strata_mle"], indent=1))
 
