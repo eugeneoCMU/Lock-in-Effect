@@ -13,6 +13,7 @@
     "2022": 0.0,
     "pre2017": 96.0
   },
+  "age_floor_note": "The 2022 cell's 0.0 is FLOORED AT ZERO, not data: 4 bucket(s) carry value-weighted origin dates after June 2022 (late-2022 originations dominate the bucket average), and negative as-of ages are clamped. The true 2022-vintage mean age at June 2022 is ~2-3 months; at the cell's 23.1% weight the difference moves the blend by under 0.05 years.",
   "soma_derived_face_shares": {
     "2021": 0.732,
     "2020": 0.009,

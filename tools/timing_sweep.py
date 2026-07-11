@@ -27,11 +27,19 @@ FAMILY = ["timing", "lead", "path diagnostics", "nonnegative",
 
 LEGEND = """LEGEND: round-5 dispositions recorded ACTIONS taken in that revision; rounds 6+ record
 STEADY STATE (a RETAINED row may have been demoted in an earlier round).
-Matcher: word-boundary regex; EVERY family phrase on a line records its own row — the
-round-6 log's one-row-per-line design silently dropped 'trails' and 'moves first' when
-they followed 'ahead' on the same source line (panel finding, confirmed); dispositions
-are evaluated on a ±200-char window around each hit. The generator is committed at
-tools/timing_sweep.py (round-8 remedy: the tool itself is now part of the record)."""
+Matcher: word-boundary regex with an optional trailing 's'; EVERY family phrase on a
+line records its own row — the round-6 log's one-row-per-line design silently dropped
+'trails' and 'moves first' when they followed 'ahead' on the same source line (panel
+finding, confirmed); dispositions are evaluated on a ±200-char window around each hit.
+The generator is committed at tools/timing_sweep.py and must pass the golden-fixture
+test (tools/test_timing_sweep.py) — three matcher generations produced three distinct
+silent defects (round-6 first-match-per-line; round-6 'flags' false positive; round-8
+suffix-s truncation), so the tool is now tested against a hand-enumerated hit set.
+CORRECTED ROUND-8 RECONCILIATION (panel finding, round 9): the round-8 letter presented
+v4→v5 as +22 additive (60→82: paragraph splits, new sentences, errata). The true
+movement was two-sided: 60 − 6 + 28 = 82 — the round-8 matcher rewrite silently DROPPED
+six suffix-s rows ('offsets' tex 255/420 + docx 155/285; 'leads' tex 278 + docx 185,
+v4 numbering) while adding 28. v6 restored the six (82 + 6 = 88); this log carries them."""
 
 
 def core(ctx: str) -> str:

@@ -82,10 +82,14 @@ def main() -> None:
     cohorts = fed.fetch_soma_mbs_cohorts(min_share=0.0)
     cells_w: dict[str, float] = {}
     cells_age_w: dict[str, float] = {}
+    n_floored = 0
     for c in cohorts:
         cell = vintage_cell(c["origin_date"].year)
-        age = max(0.0, (ASOF.year - c["origin_date"].year) * 12
-                  + (ASOF.month - c["origin_date"].month))
+        raw_age = ((ASOF.year - c["origin_date"].year) * 12
+                   + (ASOF.month - c["origin_date"].month))
+        if raw_age < 0:
+            n_floored += 1
+        age = max(0.0, raw_age)
         cells_w[cell] = cells_w.get(cell, 0.0) + c["weight"]
         cells_age_w[cell] = cells_age_w.get(cell, 0.0) + c["weight"] * age
     soma_ages = {cell: round(cells_age_w[cell] / w, 1)
@@ -93,6 +97,13 @@ def main() -> None:
     for cell in VINTAGE_SHARES:
         soma_ages.setdefault(cell, float(AGES_JUNE_2022[cell]))
     out["soma_derived_ages_june2022_months"] = soma_ages
+    out["age_floor_note"] = (
+        f"The 2022 cell's 0.0 is FLOORED AT ZERO, not data: {n_floored} "
+        "bucket(s) carry value-weighted origin dates after June 2022 "
+        "(late-2022 originations dominate the bucket average), and negative "
+        "as-of ages are clamped. The true 2022-vintage mean age at June 2022 "
+        "is ~2-3 months; at the cell's 23.1% weight the difference moves the "
+        "blend by under 0.05 years.")
     out["soma_derived_face_shares"] = {k: round(v, 3) for k, v in cells_w.items()}
     out["blend_soma_ages"] = round(blend(soma_ages), 2)
     out["standin_ages_june2022_months"] = AGES_JUNE_2022

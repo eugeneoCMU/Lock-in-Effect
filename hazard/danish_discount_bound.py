@@ -179,6 +179,21 @@ def main() -> None:
                  "(max |Δ| fields above), so every scorer — including the "
                  "printed basis — maps them to the same dollar; the $0.00 "
                  "delta is scorer-invariant."),
+        "remainder_definition": (
+            "The $15.05B dynamic-balance-loop remainder is the roll-off "
+            "conversion analogue of the +$0.77B curtailment differential "
+            "already quantified in §VII.F, produced by the same design "
+            "feature: the shared layer's Danish leg deliberately compounds a "
+            "counterfactual balance (the slower Danish drain, 3.39% vs 4.76% "
+            "mean CPR, leaves that balance higher than the actual path), so "
+            "each month's Danish CPR converts to more roll-off dollars than "
+            "the standalone scorer's fixed sample-to-book scaling produces — "
+            "more roll-off, hence less net trapped, hence the shared figure "
+            "sits $15.05B below standalone net of curtailment. U.S. legs "
+            "have no analogue because their dollar conversion is rescaled "
+            "month-by-month to the actual WSHOMCB holdings path (the "
+            "US-legs-only invariance stated in §VII.F), which pins their "
+            "standalone-to-shared bridge to the curtailment flow alone."),
     }
     assert abs(shared["danish_trapped_b"] - PRINTED_TABLE1_DANISH_B) < 1.0, \
         f"shared-layer parity vs Table 1 failed ({shared['danish_trapped_b']})"

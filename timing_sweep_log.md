@@ -1,14 +1,20 @@
-# Timing-phrase-family sweep log — round 9 (2026-07-11)
+# Timing-phrase-family sweep log — round 10 (2026-07-11)
 
 LEGEND: round-5 dispositions recorded ACTIONS taken in that revision; rounds 6+ record
 STEADY STATE (a RETAINED row may have been demoted in an earlier round).
-Matcher: word-boundary regex; EVERY family phrase on a line records its own row — the
-round-6 log's one-row-per-line design silently dropped 'trails' and 'moves first' when
-they followed 'ahead' on the same source line (panel finding, confirmed); dispositions
-are evaluated on a ±200-char window around each hit. Round-9 matcher fix: an optional
-trailing 's' restores plural/verb forms ('offsets', 'leads') that rounds 4-5 matched and
-the round-8 rewrite had silently dropped (self-caught; 6 rows restored). The generator is committed at
-tools/timing_sweep.py (round-8 remedy: the tool itself is now part of the record).
+Matcher: word-boundary regex with an optional trailing 's'; EVERY family phrase on a
+line records its own row — the round-6 log's one-row-per-line design silently dropped
+'trails' and 'moves first' when they followed 'ahead' on the same source line (panel
+finding, confirmed); dispositions are evaluated on a ±200-char window around each hit.
+The generator is committed at tools/timing_sweep.py and must pass the golden-fixture
+test (tools/test_timing_sweep.py) — three matcher generations produced three distinct
+silent defects (round-6 first-match-per-line; round-6 'flags' false positive; round-8
+suffix-s truncation), so the tool is now tested against a hand-enumerated hit set.
+CORRECTED ROUND-8 RECONCILIATION (panel finding, round 9): the round-8 letter presented
+v4→v5 as +22 additive (60→82: paragraph splits, new sentences, errata). The true
+movement was two-sided: 60 − 6 + 28 = 82 — the round-8 matcher rewrite silently DROPPED
+six suffix-s rows ('offsets' tex 255/420 + docx 155/285; 'leads' tex 278 + docx 185,
+v4 numbering) while adding 28. v6 restored the six (82 + 6 = 88); this log carries them.
 
 Family: {timing, lead, path diagnostics, nonnegative, not outright negative, materially better, offset, ahead, trails, moves first, precedes, lags}.
 
@@ -54,6 +60,8 @@ Family: {timing, lead, path diagnostics, nonnegative, not outright negative, mat
 | tex | 449 | timing | …g within 2.1\% --- a level-accuracy distinction, not a timing one: no estimator's monthly co-movement survives detre… | RETAINED - states the retraction / carries the guard |
 | tex | 449 | timing | …M's share is calibration-sensitive, and the path-level timing question remains open. | RETAINED - open-question statement, credential-free |
 | tex | 467 | timing | … matching its real-data recovery, while its path-level timing does not transfer to synthetic data. Also complete as … | RETAINED - open-question statement, credential-free |
+| tex | 467 | timing | … the Danish counterfactual's description; and (iv) the timing-sweep generator's golden-fixture test (\texttt{tools/t… | RETAINED - process/tooling reference (freeze-gate item name), not a timing claim |
+| tex | 467 | timing | …p generator's golden-fixture test (\texttt{tools/test\_timing\_sweep.py}) must pass at the freeze, three matcher gen… | RETAINED - process/tooling reference (freeze-gate item name), not a timing claim |
 | tex | 467 | timing | …od-frictions}); and the monthly-frequency question the timing diagnosis leaves --- the empirical path's variation at… | RETAINED - open-question statement, credential-free |
 | tex | 469 | timing | …n choice and data source --- and leaves the path-level timing question as the one part that remains genuinely open. | RETAINED - open-question statement, credential-free |
 | tex | 496 | trails | … = -3$. Every direction claim in that draft (simulated trails; empirical moves first) was computed under, and verifi… | RETAINED - Appendix A erratum record of the corrected convention definition (round 8), guarded by construction |
@@ -98,9 +106,11 @@ Family: {timing, lead, path diagnostics, nonnegative, not outright negative, mat
 | docx | 320 | timing | …ding within 2.1% — a level-accuracy distinction, not a timing one: no estimator’s monthly co-movement survives detre… | RETAINED - states the retraction / carries the guard |
 | docx | 320 | timing | …M’s share is calibration-sensitive, and the path-level timing question remains open. | RETAINED - open-question statement, credential-free |
 | docx | 329 | timing | … matching its real-data recovery, while its path-level timing does not transfer to synthetic data. Also complete as … | RETAINED - open-question statement, credential-free |
+| docx | 329 | timing | … the Danish counterfactual’s description; and (iv) the timing-sweep generator’s golden-fixture test (tools/test_timi… | RETAINED - process/tooling reference (freeze-gate item name), not a timing claim |
+| docx | 329 | timing | …ming-sweep generator’s golden-fixture test (tools/test_timing_sweep.py) must pass at the freeze, three matcher gener… | RETAINED - process/tooling reference (freeze-gate item name), not a timing claim |
 | docx | 329 | timing | …Section III.C); and the monthly-frequency question the timing diagnosis leaves — the empirical path’s variation at t… | RETAINED - open-question statement, credential-free |
 | docx | 330 | timing | …ion choice and data source — and leaves the path-level timing question as the one part that remains genuinely open. | RETAINED - open-question statement, credential-free |
 | docx | 343 | trails | …k = −3. Every direction claim in that draft (simulated trails; empirical moves first) was computed under, and verifi… | RETAINED - Appendix A erratum record of the corrected convention definition (round 8), guarded by construction |
 | docx | 343 | moves first | …ction claim in that draft (simulated trails; empirical moves first) was computed under, and verified against synthetic da… | RETAINED - Appendix A erratum record of the corrected convention definition (round 8), guarded by construction |
 
-Total: 88 rows. Tally (computed from table rows): {'RETAINED': 88}.
+Total: 92 rows. Tally (computed from table rows): {'RETAINED': 92}.
