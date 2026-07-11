@@ -234,5 +234,26 @@
     "linear_detrended_r_lag0": -0.2029,
     "n_differences": 41,
     "reference_1p96_over_sqrt_n": 0.306
+  },
+  "output_side_all_estimators": {
+    "note": "corr(simulated, empirical CPR) per estimator on three constructions, QT window. i.i.d. zero band \u00b10.31 at n=41 changes; the paper's moving-block band is wider, which strengthens any indistinguishability conclusion.",
+    "abm": {
+      "levels_r0": -0.316,
+      "diff_r0": -0.195,
+      "detrended_r0": -0.301,
+      "n": 42
+    },
+    "path_a": {
+      "levels_r0": -0.444,
+      "diff_r0": -0.205,
+      "detrended_r0": -0.289,
+      "n": 42
+    },
+    "path_b": {
+      "levels_r0": 0.19,
+      "diff_r0": -0.227,
+      "detrended_r0": -0.203,
+      "n": 42
+    }
   }
 }

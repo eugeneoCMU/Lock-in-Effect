@@ -86,8 +86,9 @@ def fig1_recovery_dotplot():
     ]
     ax.legend(handles=handles, loc="lower right", fontsize=8.6, frameon=False)
     fig.text(0.005, 0.005,
-             "Raw lag-0 correlations (r₀) annotated for reference only: no estimator's "
-             "contemporaneous co-movement — Path B's included — survives detrending (§V.C).",
+             "Raw lag-0 correlations (r₀) annotated for reference only: once the shared trend "
+             "is removed no estimator's co-movement is positive (detrended r: ABM −0.30, "
+             "Path A −0.29, Path B −0.20; §V.C).",
              fontsize=8, color=C_GRAY)
     fig.tight_layout(rect=(0, 0.035, 1, 1))
     fig.savefig(OUT / "fig1_recovery_by_estimator.png", dpi=DPI)
