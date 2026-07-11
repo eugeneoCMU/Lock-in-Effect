@@ -92,7 +92,7 @@
       }
     }
   },
-  "netting_mechanics": "The curtailment flow is computed as holdings x curtailment_smm on the ACTUAL Fed holdings path (WSHOMCB), which is also the path every estimator's roll-off is rescaled to month-by-month inside its own simulation. It is therefore a common flow, identical across estimators by construction ($69.562B for every run), not a per-run quantity computed on simulated balances. This also makes the shared-layer wedge exactly -9.1pp for every run and makes the composed (joint) run equal the one-at-a-time deltas composed, exactly.",
+  "netting_mechanics": "The curtailment flow is computed as holdings x curtailment_smm on the ACTUAL Fed holdings path (WSHOMCB), which is also the path every U.S. LEG's roll-off is rescaled to month-by-month inside its own simulation (Danish legs deliberately propagate a dynamic counterfactual balance and compute curtailment on it - see danish_leg_curtailment). It is therefore a common flow across the U.S. legs, identical by construction ($69.562B for every run), not a per-run quantity computed on simulated balances. This makes the shared-layer wedge exactly -9.1pp for every U.S. leg and makes the composed (joint) run equal the one-at-a-time deltas composed, exactly. Scope: U.S. legs only, consistent with the manuscript's SS III.B and V.B per-leg statements.",
   "danish_leg_curtailment": {
     "us_leg_on_actual_holdings_b": 69.56,
     "danish_leg_on_counterfactual_balance_b": 70.33,
