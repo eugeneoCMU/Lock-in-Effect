@@ -60,16 +60,12 @@ def fig1_recovery_dotplot():
     ys = np.arange(len(rows))[::-1]
     for y, (label, share, r0, color, standalone) in zip(ys, rows):
         ax.plot([0, share], [y, y], color="#dddddd", lw=1.4, zorder=1)
-        filled = r0 > 0
         ax.scatter([share], [y], s=150, zorder=3,
-                   facecolor=color if filled else "white",
-                   edgecolor=color, linewidth=2.0,
-                   hatch=None if filled else "////")
+                   facecolor=color, edgecolor=color, linewidth=2.0)
         note = f"{share:.1f}%" + (f" ({standalone:.1f})" if standalone else "")
         ax.annotate(note + f"   r₀={r0:+.2f}",
                     (share, y), xytext=(8, 0), textcoords="offset points",
-                    va="center", fontsize=9.5,
-                    color="black" if filled else C_GRAY)
+                    va="center", fontsize=9.5, color="black")
     ax.axvline(100, color=C_GRAY, lw=1.2, ls="--", zorder=0)
     ax.text(100, len(rows) - 0.25, " 100% of $764.7B benchmark",
             color=C_GRAY, fontsize=9, va="bottom")
@@ -87,13 +83,11 @@ def fig1_recovery_dotplot():
                    label="cross-design (real covariates → ABM)"),
         plt.Line2D([], [], marker="o", ls="", mfc=C_CHOICE, mec=C_CHOICE, ms=10,
                    label="household choice (ABM)"),
-        plt.Line2D([], [], marker="o", ls="", mfc="white", mec="black", ms=10,
-                   label="hollow = negative lag-0 path corr."),
     ]
     ax.legend(handles=handles, loc="lower right", fontsize=8.6, frameon=False)
     fig.text(0.005, 0.005,
-             "Hollow markers match the level without matching the monthly path "
-             "(lag-0 corr < 0) — level recovery alone does not rank models (§V.B).",
+             "Raw lag-0 correlations (r₀) annotated for reference only: no estimator's "
+             "contemporaneous co-movement — Path B's included — survives detrending (§V.C).",
              fontsize=8, color=C_GRAY)
     fig.tight_layout(rect=(0, 0.035, 1, 1))
     fig.savefig(OUT / "fig1_recovery_by_estimator.png", dpi=DPI)

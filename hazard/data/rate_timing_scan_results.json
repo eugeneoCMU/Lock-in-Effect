@@ -226,5 +226,13 @@
         -0.611
       ]
     }
+  },
+  "output_side": {
+    "note": "corr between simulated and empirical CPR paths themselves (QT window)",
+    "levels_r_lag0": 0.19,
+    "first_differences_r_lag0": -0.2272,
+    "linear_detrended_r_lag0": -0.2029,
+    "n_differences": 41,
+    "reference_1p96_over_sqrt_n": 0.306
   }
 }
