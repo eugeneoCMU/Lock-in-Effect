@@ -1,0 +1,35 @@
+{
+  "mode": "bootstrap_resimulate",
+  "n_reps": 198,
+  "held_at_production": [
+    "const",
+    "age_spline",
+    "stratum_fe"
+  ],
+  "resampled": [
+    "rate_gap_bps",
+    "burnout_orth",
+    "friction"
+  ],
+  "point_trapped_b": 915.067027857209,
+  "point_share_pct": 119.65598142932075,
+  "trapped_b": {
+    "mean": 598.8526094183436,
+    "se": 1543.8910745483506,
+    "ci_95": [
+      -4459.7936261770865,
+      1190.1355126947665
+    ],
+    "median": 922.6022056753297
+  },
+  "share_pct": {
+    "mean": 78.307156230137,
+    "se": 201.8822623055745,
+    "ci_95": [
+      -583.1714694846595,
+      155.62448265549557
+    ],
+    "median": 120.64129624192306
+  },
+  "frac_above_benchmark": 0.8383838383838383
+}

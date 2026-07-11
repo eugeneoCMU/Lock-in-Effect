@@ -1,0 +1,24 @@
+{
+  "mode": "ginnie_composition_bound",
+  "ginnie_share_of_soma_face": 0.204,
+  "cpr_differential_pp": {
+    "feb_2023": 1.2,
+    "may_2025": 2.8,
+    "source": "Ginnie Mae Global Markets Analysis Report (Recursion data): Mar-2023 issue (Fannie 4.2 / Freddie 4.0 / Ginnie 5.2); Jun-2025 issue (7.3 / 7.5 / 10.3)"
+  },
+  "cdr_differential_pp": {
+    "may_2025": 1.7,
+    "source": "GMAR Jun-2025: fixed-rate CDR Ginnie 2.1% vs Freddie 0.4% (servicer buyouts)"
+  },
+  "trapped_sensitivity_b_per_pp": 82.8,
+  "sensitivity_source": "beta1=0 null vs central: $70.3B per 0.85pp mean CPR",
+  "bound_b": [
+    20.3,
+    47.3
+  ],
+  "bound_pp_of_benchmark": [
+    2.6,
+    6.2
+  ],
+  "direction": "Ginnie prepays faster than conventional; a Freddie-only calibration understates book-wide CPR, so the composition error is signed toward OVERSTATING trapped liquidity by at most the bound."
+}

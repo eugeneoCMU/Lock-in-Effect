@@ -1,0 +1,189 @@
+{
+  "mode": "panel_disclosures",
+  "table2_scale": {
+    "population": "full Freddie 2017-2021-vintage loan universe (not the 75k sample)",
+    "weights": "none \u2014 exposure and events are raw dollars; the PML is UPB-weighted by construction",
+    "peak_monthly_active_loans": 8840896,
+    "training_window": "2021-01 .. 2023-12 (macro frame begins 2021-01)",
+    "train": {
+      "cells": 10176,
+      "months": 36,
+      "exposure_usd_t": 72.48481852086663,
+      "prepaid_usd_t": 0.6500358809642899,
+      "loan_months": 288488814
+    },
+    "holdout": {
+      "cells": 6077,
+      "months": 21,
+      "exposure_usd_t": 37.42588653056953,
+      "prepaid_usd_t": 0.13131186515679,
+      "loan_months": 157081899
+    }
+  },
+  "microsim_attrition": {
+    "sampled_loans": 75000,
+    "state_at_window_start": {
+      "Current": 39752,
+      "D30": 274,
+      "D60": 50,
+      "D90+": 158,
+      "Defaulted": 32,
+      "Prepaid": 34734
+    },
+    "active_at_window_start": 40234,
+    "absorbed_before_window": 34766,
+    "evaluated_loan_months_production": 1683124,
+    "implied_mean_monthly_active": 40074.4
+  },
+  "markov_cell_counts": {
+    "estimation_unit": "consecutive stratum-month modal servicer states, exposure-UPB weighted",
+    "raw_counts": {
+      "Current": {
+        "Current": 22257,
+        "D30": 19,
+        "D60": 3,
+        "D90+": 4,
+        "Prepaid": 33
+      },
+      "D30": {
+        "Current": 13,
+        "D30": 2,
+        "D60": 5,
+        "Defaulted": 1
+      },
+      "D60": {
+        "Current": 6,
+        "D90+": 3
+      },
+      "D90+": {
+        "Current": 7,
+        "D30": 1,
+        "D90+": 30
+      },
+      "Defaulted": {
+        "D60": 1,
+        "Defaulted": 1
+      },
+      "Prepaid": {
+        "Current": 25,
+        "D90+": 1
+      }
+    },
+    "row_totals": {
+      "Current": 22316,
+      "D30": 21,
+      "D60": 9,
+      "D90+": 38,
+      "Defaulted": 2,
+      "Prepaid": 26
+    },
+    "upb_shares": {
+      "Current": {
+        "Current": 1.0,
+        "D30": 0.0,
+        "D60": 0.0,
+        "D90+": 0.0,
+        "Prepaid": 0.0
+      },
+      "D30": {
+        "Current": 0.956,
+        "D30": 0.0083,
+        "D60": 0.0314,
+        "Defaulted": 0.0043
+      },
+      "D60": {
+        "Current": 0.5685,
+        "D90+": 0.4315
+      },
+      "D90+": {
+        "Current": 0.3034,
+        "D30": 0.0079,
+        "D90+": 0.6887
+      },
+      "Defaulted": {
+        "D60": 0.2193,
+        "Defaulted": 0.7807
+      },
+      "Prepaid": {
+        "Current": 0.5431,
+        "D90+": 0.4569
+      }
+    },
+    "count_shares": {
+      "Current": {
+        "Current": 0.9974,
+        "D30": 0.0009,
+        "D60": 0.0001,
+        "D90+": 0.0002,
+        "Prepaid": 0.0015
+      },
+      "D30": {
+        "Current": 0.619,
+        "D30": 0.0952,
+        "D60": 0.2381,
+        "Defaulted": 0.0476
+      },
+      "D60": {
+        "Current": 0.6667,
+        "D90+": 0.3333
+      },
+      "D90+": {
+        "Current": 0.1842,
+        "D30": 0.0263,
+        "D90+": 0.7895
+      },
+      "Defaulted": {
+        "D60": 0.5,
+        "Defaulted": 0.5
+      },
+      "Prepaid": {
+        "Current": 0.9615,
+        "D90+": 0.0385
+      }
+    },
+    "reconciliation_note": "The production transition matrix equals upb_shares exactly (exposure-UPB-weighted estimation, markov.py); raw_counts are stratum-month transition events. The divergence between count_shares and upb_shares (e.g. D30 cure 13/21=0.62 by count vs 0.956 by UPB) means a few larger-balance stratum-months carry the weight.",
+    "upb_weights_usd_m": {
+      "Current": {
+        "Current": 137904313.536,
+        "D30": 60.199,
+        "D60": 1.225,
+        "D90+": 4.794,
+        "Prepaid": 42.098
+      },
+      "D30": {
+        "Current": 55.765,
+        "D30": 0.485,
+        "D60": 1.834,
+        "Defaulted": 0.25
+      },
+      "D60": {
+        "Current": 1.764,
+        "D90+": 1.339
+      },
+      "D90+": {
+        "Current": 23.113,
+        "D30": 0.598,
+        "D90+": 52.463
+      },
+      "Defaulted": {
+        "D60": 0.07,
+        "Defaulted": 0.249
+      },
+      "Prepaid": {
+        "Current": 23.052,
+        "D90+": 19.392
+      }
+    }
+  },
+  "markov_consequence_bound": {
+    "all_cure": {
+      "trapped_b": 818.5258140201685,
+      "share_pct": 107.03206062529023
+    },
+    "all_default": {
+      "trapped_b": 818.9164284469629,
+      "share_pct": 107.08313814330327
+    },
+    "bound_width_b": 0.39061442679440006
+  }
+}

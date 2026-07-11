@@ -284,3 +284,36 @@ Reproduction notes:
 - **Bootstrap (§5):** `cd hazard && python3 bootstrap_se.py --reps 200`. ~12 min.
 - **C1/C3/C4 diagnostics:** one-file scripts (monkeypatch counter; SOMA CUSIP tabulation) — see §7/§9/§10 for the exact numbers; each rerunnable in under a minute plus one ~50s microsim per regime for C1.
 - **Manifest caution:** do not trust `manifest.json::git_commit` to identify a spec (§4); use commit messages and the cohort-bucket count (7 = 30yr-only, 11 = fold-in).
+
+---
+
+# Referee Round 2 — Three-Persona Audit (2026-07-10)
+
+Executed against the v15 manuscript (all three editions updated in lockstep: `revised_paper_v15.{tex,docx,pdf}` in `~/Downloads`). Every requested computation was run; each new script carries a parity gate that reproduces a published number before producing its variant. **One headline framing changes:** recoveries are now stated on the shared accounting layer (benchmark-consistent basis), where Path B = 97.9%, Path A = 110.6%, β₁=0 null = 88.7%, and the composed (shared-layer + full-book) Path B = **$765.1B = 100.0% of benchmark**. The lock-in marginal (+9.2pp) is basis-invariant.
+
+| Item | Script → artifact (`hazard/`) | Key result |
+|---|---|---|
+| Shared-layer scoring + composed correction | `shared_layer_scoring.py` → `data/shared_layer_scoring_results.json` | B 97.9 / A 110.6 / null 88.7%; composed B 100.0%, A 117.0%; curtailment netted $69.6B; parity 97.9% vs §17.1 |
+| Rate-input timing diagnosis | `rate_timing_scan.py` → `data/rate_timing_scan_results.json` | Empirical CPR ~ rate(t) (r +0.40); sim CPR ~ rate(t−4) (r +0.60); no ±1–3mo shift kills the −3 offset; trapped invariant <$1.5B |
+| FICO/LTV priors estimated | `covariate_priors_estimation.py` → `data/covariate_priors_results.json` | β̂_F −0.39 [−1.51,+0.65], β̂_L +0.21 [−0.59,+1.00] — priors' signs supported (turnover regime); zero-out 108.3%, estimated 101.3% |
+| Seasonality + concave gap | `seasonality_concave_gap.py` → `data/seasonality_concave_gap_results.json` | Month effects to +0.43; r(lag0) −0.444→−0.378, peak −2, 121.5%; concave gap 105.7%, r(lag0) +0.281 |
+| Refit-and-resimulate interval (Path A) | `bootstrap_resimulate.py` → `data/bootstrap_resimulate_results.json` + draws CSV | median $922.6B, IQR [900.1, 1130.6], 95% pctile [−4459.8, +1190.1] — 15 burnout/friction blowups; $915B demoted from abstract |
+| WAL table + no-shock row | `wal_table.py` → `data/wal_table_results.json` | Reproduces all printed Table 6 values exactly; 2021-speed row (22.81% CPR) WAL 3.4y ⇒ extension 6.0y |
+| Ginnie composition bound | inline → `data/ginnie_bound.json` | 0.204 × (1.2–2.8pp GMAR differential) × ~$83B/pp ⇒ $20–47B (2.6–6.2%), toward overstating trapped |
+| Panel/attrition/Markov disclosures | `panel_disclosures.py` → `data/panel_disclosures.json` | Panel = full universe (peak 8.84M loans, $72.48T/$37.43T raw, no weights); attrition 75,000→40,234 active; Markov cell counts thin (D30 row n=21); extreme-matrix bound $0.39B |
+
+**Two structural facts surfaced by the audit and now disclosed in the paper:** (1) Path A's estimation panel is the full Freddie 2017–2021 origination universe, not the 75,000-loan sample (Table 2's $72.5T is raw dollars, unweighted; the fit's training window is 2021-01–2023-12 because the macro frame starts 2021-01); (2) the delinquency matrix rests on thin modal-state counts, but replacing it wholesale with either extreme moves the estimate by $0.39B — consequence-free.
+
+Manuscript deltas: abstract restated on the shared basis; §V.C timing paragraph replaces "unexplained regularity" with the state-dynamics diagnosis; Danish gap functional form corrected in place (v14 carry-over); Table 1 hybrid legs printed ($749.0B / $848.9B); Table 4 gains both hazard-path mean CPRs and the corrected significance note; Table 6 gains the no-shock row; Appendix B gains the cell counts, draw-vs-matrix reconciliation, attrition accounting, and estimated priors. Docx-only fixes: Eq. (2) OMML now (s,t)-indexed with the conditional; all 5 equations converted to display `m:oMathPara`; LaTeX residue (\\, natexlab×4) removed; headings black; "From \ To" header. LibreOffice render check pending (not installed on this machine); XML validates and the Apple importer reads the package.
+
+## Round 3 addendum (2026-07-10, adjudication)
+
+The panel's adjudication of round 2 surfaced five substantive corrections, all applied:
+
+1. **Netting mechanics disclosed.** The shared-layer netting is exactly $69.562B for every estimator — pure income-scaled curtailment on the *actual* WSHOMCB holdings path, common by construction because every simulation rescales its roll-off to that path monthly. v15's "curtailment and term-aware amortization" attribution was wrong (curtailment only). §VII.F now states the flat-wedge mechanism; `shared_layer_scoring_results.json` carries per-run `netting_decomposition` + `netting_mechanics`. The composed 100.0% is a joint run (`path_b_fullbook_composed`), with the additive identity exact (zero cross-term) and demoted to cross-check.
+2. **Timing attribution withdrawn.** β_b=0 and β₁=0 both preserve the −3 peak, so burnout/floor cannot carry it; levels correlations were trend-contaminated. New Δ-based diagnostic (`part1_variants`): sim ΔCPR vs Δrate r=−0.94 at lag 0 (correct sign, mechanical); empirical ΔCPR vs Δrate +0.25 (wrong sign) — empirical monthly variation is not rate-driven; seasonality is the live suspect. §V.C says "mechanism not isolated."
+3. **Markov crosstab reconciled.** Matrix is exposure-UPB-weighted; printed probabilities equal UPB shares exactly (D30 cure: 13 events = 95.6% of $58.3M row exposure vs 0.62 count share). Full crosstab in Appendix B + artifact. 482-vs-154: both true (window-start stock vs month-end stock after matrix routing); extreme-matrix bound runs included the initial 482, bound stands at $0.39B.
+4. **Erratum logged (Appendix A):** v15 Table 2 note ("75,000 unique loans … aggregated to 296 strata") was false; Path A panel is the full universe. Global per-path 75,000 sweep (§III.A, §III, §V.C, §VII.A, §VIII.A).
+5. **Basis propagated everywhere:** Table 4 note (all rows' shared equivalents + Path A interval as lower bound), band 96.8–99.1% shared, §VII.E companion 96.9% shared, §V.D "lands within" scoped to Path B only, Fig 1 regenerated on shared basis (composed row at 100.0%), covariate endpoints 99.2/92.2% shared with production vector declared (priors retained).
+
+New artifacts: `~/Downloads/v15r2_bundle/` (tex+docx+pdf, both redlines vs pristine v15, `v15_parity_report.json` — 94.8% sentence containment docx↔PDF, all sampled misses triaged to extraction noise), regenerated `figures/fig1_recovery_by_estimator.png` (+ `make_figures.py` updated). The parity check caught two round-2 edits present in tex but missing from docx (seasonality passage; β_b/FICO-LTV sentence) — repaired before the bundle was cut. Still open: LibreOffice render of the five display equations (no LibreOffice on this machine; requires install authorization), Word REF-field conversion.

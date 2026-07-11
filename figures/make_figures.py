@@ -44,24 +44,29 @@ def _j(rel: str):
 
 def fig1_recovery_dotplot():
     """Fig 1 — benchmark recovery by estimator, path-correlation annotated."""
-    rows = [  # (label, share %, r_lag0, paradigm color)
-        ("Path A — cohort GLM (fitted survival)", 119.7, -0.444, C_SURV),
-        ("Path B — literature microsim", 107.0, +0.190, C_SURV),
-        ("Path B — fully synthetic population (§18)", 106.0, -0.063, C_SURV),
-        ("Cross-design ABM — recalibrated (§15.1)", 59.3, -0.336, C_CROSS),
-        ("Cross-design ABM — frozen calibration", 20.9, -0.311, C_CROSS),
-        ("ABM — production (household choice)", 11.1, -0.315, C_CHOICE),
+    # Shares on the SHARED ACCOUNTING BASIS (TECHNICAL.md §17.1 / referee
+    # round 2): hazard-path standalone-scorer values shown in parentheses.
+    # ABM rows run through the shared layer natively and are unchanged.
+    rows = [  # (label, share %, r_lag0, paradigm color, standalone %)
+        ("Path A — cohort GLM (fitted survival)", 110.6, -0.444, C_SURV, 119.7),
+        ("Path B — composed (SOMA coupon mix, shared layer)", 100.0, +0.278, C_SURV, 109.1),
+        ("Path B — literature microsim", 97.9, +0.190, C_SURV, 107.0),
+        ("Path B — fully synthetic population (§18)", 96.9, -0.063, C_SURV, 106.0),
+        ("Cross-design ABM — recalibrated (§15.1)", 59.3, -0.336, C_CROSS, None),
+        ("Cross-design ABM — frozen calibration", 20.9, -0.311, C_CROSS, None),
+        ("ABM — production (household choice)", 11.1, -0.315, C_CHOICE, None),
     ]
-    fig, ax = plt.subplots(figsize=(8.6, 4.4))
+    fig, ax = plt.subplots(figsize=(10.4, 4.8))
     ys = np.arange(len(rows))[::-1]
-    for y, (label, share, r0, color) in zip(ys, rows):
+    for y, (label, share, r0, color, standalone) in zip(ys, rows):
         ax.plot([0, share], [y, y], color="#dddddd", lw=1.4, zorder=1)
         filled = r0 > 0
         ax.scatter([share], [y], s=150, zorder=3,
                    facecolor=color if filled else "white",
                    edgecolor=color, linewidth=2.0,
                    hatch=None if filled else "////")
-        ax.annotate(f"{share:.1f}%   r₀={r0:+.2f}",
+        note = f"{share:.1f}%" + (f" ({standalone:.1f})" if standalone else "")
+        ax.annotate(note + f"   r₀={r0:+.2f}",
                     (share, y), xytext=(8, 0), textcoords="offset points",
                     va="center", fontsize=9.5,
                     color="black" if filled else C_GRAY)
@@ -70,8 +75,9 @@ def fig1_recovery_dotplot():
             color=C_GRAY, fontsize=9, va="bottom")
     ax.set_yticks(ys)
     ax.set_yticklabels([r[0] for r in rows], fontsize=10)
-    ax.set_xlabel("Share of $764.7B empirical trapped liquidity recovered (%)")
-    ax.set_xlim(0, 165)
+    ax.set_xlabel("Share of $764.7B empirical trapped liquidity recovered (%)\n"
+                  "shared accounting basis — standalone-scorer values in parentheses")
+    ax.set_xlim(0, 185)
     ax.set_title("Figure 1 — Benchmark recovery by estimator and paradigm",
                  loc="left", fontsize=11.5)
     handles = [

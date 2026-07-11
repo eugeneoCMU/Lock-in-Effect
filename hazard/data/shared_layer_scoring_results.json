@@ -1,0 +1,96 @@
+{
+  "mode": "shared_layer_scoring",
+  "layer": "fed_mbs_extension_risk.compute_metrics(use_hazard_microsim=True)",
+  "published_parity": {
+    "path_b_central_expected_pct": 97.9,
+    "path_b_central_got_pct": 97.9365273968041
+  },
+  "results": {
+    "path_b_central": {
+      "us_trapped_b": 748.9678825340305,
+      "share_pct": 97.9365273968041,
+      "empirical_trapped_b": 764.7482532227002,
+      "danish_trapped_b": 848.8697561693841,
+      "institutional_gap_b": -99.90187363535358,
+      "curtailment_netted_b": 69.56220187263008,
+      "sched_amort_layer_b": 209.40040843409105,
+      "standalone_trapped_b": 818.5300844066606,
+      "standalone_share_pct": 107.0326190295068,
+      "netting_decomposition": {
+        "standalone_minus_shared_b": 69.562,
+        "curtailment_b": 69.562,
+        "scheduled_amortization_b": 0.0,
+        "note": "US-leg netting is income-scaled curtailment ONLY; scheduled amortization is already inside each run's own simulated roll-off."
+      }
+    },
+    "no_lockin_null": {
+      "us_trapped_b": 678.6228221141348,
+      "share_pct": 88.73806762609433,
+      "empirical_trapped_b": 764.7482532227002,
+      "danish_trapped_b": 848.8697561693841,
+      "institutional_gap_b": -170.2469340552493,
+      "curtailment_netted_b": 69.56220187263008,
+      "sched_amort_layer_b": 209.40040843409105,
+      "standalone_trapped_b": 748.1850239867648,
+      "standalone_share_pct": 97.83415925879702,
+      "netting_decomposition": {
+        "standalone_minus_shared_b": 69.562,
+        "curtailment_b": 69.562,
+        "scheduled_amortization_b": 0.0,
+        "note": "US-leg netting is income-scaled curtailment ONLY; scheduled amortization is already inside each run's own simulated roll-off."
+      }
+    },
+    "path_a": {
+      "us_trapped_b": 845.5048259845789,
+      "share_pct": 110.55988979661807,
+      "empirical_trapped_b": 764.7482532227002,
+      "danish_trapped_b": 848.8697561693841,
+      "institutional_gap_b": -3.364930184805189,
+      "curtailment_netted_b": 69.56220187263008,
+      "sched_amort_layer_b": 209.40040843409105,
+      "standalone_trapped_b": 915.067027857209,
+      "standalone_share_pct": 119.65598142932075,
+      "netting_decomposition": {
+        "standalone_minus_shared_b": 69.562,
+        "curtailment_b": 69.562,
+        "scheduled_amortization_b": 0.0,
+        "note": "US-leg netting is income-scaled curtailment ONLY; scheduled amortization is already inside each run's own simulated roll-off."
+      }
+    },
+    "path_b_fullbook_composed": {
+      "us_trapped_b": 765.0774982466306,
+      "share_pct": 100.04305273304554,
+      "empirical_trapped_b": 764.7482532227002,
+      "danish_trapped_b": 846.6912914390132,
+      "institutional_gap_b": -81.61379319238256,
+      "curtailment_netted_b": 69.56220187263008,
+      "sched_amort_layer_b": 209.40040843409105,
+      "standalone_trapped_b": 834.6397001192607,
+      "standalone_share_pct": 109.13914436574825,
+      "netting_decomposition": {
+        "standalone_minus_shared_b": 69.562,
+        "curtailment_b": 69.562,
+        "scheduled_amortization_b": 0.0,
+        "note": "US-leg netting is income-scaled curtailment ONLY; scheduled amortization is already inside each run's own simulated roll-off."
+      }
+    },
+    "path_a_fullbook_composed": {
+      "us_trapped_b": 894.7725876932744,
+      "share_pct": 117.0022401388487,
+      "empirical_trapped_b": 764.7482532227002,
+      "danish_trapped_b": 846.6912914390132,
+      "institutional_gap_b": 48.08129625426125,
+      "curtailment_netted_b": 69.56220187263008,
+      "sched_amort_layer_b": 209.40040843409105,
+      "standalone_trapped_b": 964.3347895659045,
+      "standalone_share_pct": 126.09833177155141,
+      "netting_decomposition": {
+        "standalone_minus_shared_b": 69.562,
+        "curtailment_b": 69.562,
+        "scheduled_amortization_b": 0.0,
+        "note": "US-leg netting is income-scaled curtailment ONLY; scheduled amortization is already inside each run's own simulated roll-off."
+      }
+    }
+  },
+  "netting_mechanics": "The curtailment flow is computed as holdings x curtailment_smm on the ACTUAL Fed holdings path (WSHOMCB), which is also the path every estimator's roll-off is rescaled to month-by-month inside its own simulation. It is therefore a common flow, identical across estimators by construction ($69.562B for every run), not a per-run quantity computed on simulated balances. This also makes the shared-layer wedge exactly -9.1pp for every run and makes the composed (joint) run equal the one-at-a-time deltas composed, exactly."
+}
