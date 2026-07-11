@@ -242,7 +242,9 @@
       "diff_r0": -0.195,
       "detrended_r0": -0.301,
       "n": 42,
-      "levels_r0_production_convention": -0.3183
+      "levels_r0_production_convention": -0.3183,
+      "detrended_r0_production_convention": -0.303,
+      "diff_r0_production_convention": -0.1981
     },
     "path_a": {
       "levels_r0": -0.444,
@@ -257,6 +259,6 @@
       "n": 42
     },
     "convention_note": "All three estimators are scored against ONE common empirical series (the hazard-side back-out of macro.build_empirical_metrics) so the cross-estimator comparison is apples-to-apples; under this convention the ABM levels r0 is -0.316. The manuscript's -0.318 (Table 4, S IV.A) uses the frozen run's own empirical back-out with cohort-weighted term-aware scheduled amortization; recomputing against that series reproduces -0.3183 exactly (metrics_monthly.csv, n=42). Path A and Path B are scored against the hazard-side series in both the manuscript and this artifact, hence identical. The difference is convention, confined to the ABM row's third decimal.",
-    "zero_band_note": "Band construction: 1.96/sqrt(n), i.i.d. reference. Governing n per statistic: n=41 for first differences (band 0.306), n=42 for detrended levels (band 0.302). The ABM's detrended -0.301 is the closest call and inside; the manuscript's moving-block band is wider, strengthening every indistinguishability conclusion; t-based constructions do not change any verdict."
+    "zero_band_note": "Band construction: 1.96/sqrt(n), i.i.d. reference. Governing n per statistic: n=41 for first differences (band 0.306), n=42 for detrended levels (band 0.302). The ABM's detrended value STRADDLES the i.i.d. band's edge across the two empirical-series conventions (-0.301 common-series, inside by 0.001; -0.303 production-series, outside by 0.001), so its indistinguishability verdict rests on the wider moving-block band, not the i.i.d. reference; Path A (-0.29) and Path B (-0.20) are inside under both conventions. No manuscript claim depends on the ABM cell: the guarded conclusions are that no estimator's detrended co-movement is POSITIVE (holds under every construction) and that Path B carries no timing credential."
   }
 }
