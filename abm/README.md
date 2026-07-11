@@ -27,7 +27,7 @@ A quantitative research project that measures and simulates the mortgage **"lock
 
 The two core models are linked: the ABM precomputes a 3D behavioral **CPR (Conditional Prepayment Rate) surface** per coupon cohort over `(rate × friction × rate_velocity)`, and the macro model interpolates those surfaces month-by-month (weighted by live NY Fed SOMA composition) to build counterfactual "what the Fed's roll-off would have looked like under each institutional regime" scenarios — including **scheduled amortization** and **income-scaled curtailment** (partial voluntary prepayments), so the comparison is apples-to-apples with reality.
 
-> **For the full technical narrative of every bug found and fixed in this project (the corrected $972B→$673B benchmark, the Danish counterfactual bug history, goodness-of-fit methodology, and the holdout-split results), see [TECHNICAL.md](TECHNICAL.md).**
+> **For the full technical narrative of every bug found and fixed in this project (the corrected $972B→$673B benchmark, the Danish counterfactual bug history, goodness-of-fit methodology, and the holdout-split results), see root [TECHNICAL.md](../TECHNICAL.md) — granular ABM-era detail is in its [Appendix B](../TECHNICAL.md#appendix-b--abm-era-granular-archaeology).**
 
 ---
 
@@ -85,7 +85,7 @@ Denmark's mortgage system allows borrowers to **buy back** their mortgage at mar
 | `monte_carlo_trapped_liquidity.png` | Image (output) | Histogram of the 50 Monte Carlo trapped-liquidity draws vs. the empirical benchmark. |
 | `requirements.txt` | Config | Python dependencies. |
 | `README.md` | Docs | This document — project overview and how-to-reproduce. |
-| `TECHNICAL.md` | Docs | Detailed technical narrative of the corrections and validation methodology. |
+| `../TECHNICAL.md` | Docs | Technical narrative of corrections and validation methodology (ABM-era detail: Appendix B). |
 
 ---
 
@@ -220,12 +220,12 @@ Quantifies the Fed's MBS extension risk from live data and overlays the ABM beha
 
 The friction drivers are pulled from `BASELINE_START = 2017-01-01` (vs. `START_DATE = 2021-01-01` for the balance sheet) so a healthy pre-pandemic **2017-2019 inventory baseline** can be computed. That baseline is stashed in `df.attrs["inventory_baseline"]`. All friction columns are aligned to the monthly index and `ffill().bfill()`-ed so there are never NaNs.
 
-**`fetch_soma_mbs_monthly()`** pulls weekly SOMA MBS current-face-value holdings directly from the NY Fed Markets API (`markets.newyorkfed.org/api/soma/summary.json`), resamples to month-end, and differences to get the preferred actual roll-off series. Because SOMA reports current face value (remaining unpaid principal) rather than `WSHOMCB`'s amortized cost, this also avoids the premium/discount amortization drift baked into FRED's balance-sheet series — SOMA MBS were largely bought at a premium during QE, so amortized cost declines independent of actual principal paydown, while current face value does not have this issue (see [TECHNICAL.md](TECHNICAL.md) for the full accounting explanation). Both series remain settlement-date based, so TBA-settlement lag is a limitation neither source fixes on its own. If the API is unreachable, `compute_metrics()` falls back to `WSHOMCB.diff()` automatically.
+**`fetch_soma_mbs_monthly()`** pulls weekly SOMA MBS current-face-value holdings directly from the NY Fed Markets API (`markets.newyorkfed.org/api/soma/summary.json`), resamples to month-end, and differences to get the preferred actual roll-off series. Because SOMA reports current face value (remaining unpaid principal) rather than `WSHOMCB`'s amortized cost, this also avoids the premium/discount amortization drift baked into FRED's balance-sheet series — SOMA MBS were largely bought at a premium during QE, so amortized cost declines independent of actual principal paydown, while current face value does not have this issue (see [TECHNICAL.md Appendix B.1](../TECHNICAL.md#b1-benchmark-accounting-detail) for the full accounting explanation). Both series remain settlement-date based, so TBA-settlement lag is a limitation neither source fixes on its own. If the API is unreachable, `compute_metrics()` falls back to `WSHOMCB.diff()` automatically.
 
 ### 5.2 QT policy modeling
 
 - `QT_START = 2022-06-01`, `QT_RAMP_END = 2022-09-01`, `QT_END = 2025-12-01` (the Fed officially ended QT in December 2025).
-- **`compute_qt_target_series(index)`** builds a **phased** time-dependent target: `NaN` before QT, **−$17.5B/month** during the June-August 2022 ramp-up, **−$35B/month** at full pace from September 2022, and **$0B/month** after QT ends. This phased cap (rather than a flat −$35B from day one) is one of the corrections that brought the headline empirical figure down from the original, inflated $972.3B — see [TECHNICAL.md §2](TECHNICAL.md).
+- **`compute_qt_target_series(index)`** builds a **phased** time-dependent target: `NaN` before QT, **−$17.5B/month** during the June-August 2022 ramp-up, **−$35B/month** at full pace from September 2022, and **$0B/month** after QT ends. This phased cap (rather than a flat −$35B from day one) is one of the corrections that brought the headline empirical figure down from the original, inflated $972.3B — see [TECHNICAL.md §3](../TECHNICAL.md#3-empirical-benchmark-from-9723b-to-7647b).
 
 ### 5.3 Dynamic Macroeconomic Friction — `calculate_dynamic_friction()`
 
@@ -251,7 +251,7 @@ Instead of a static 7% transaction cost, friction floats month-by-month based on
 6. **Dynamic friction**: computed first so the CPR surface can be sampled at each month's `(rate, friction)` coordinate.
 7. **ABM counterfactual CPR paths**: `US_CPR_Pct`, `Danish_CPR_Pct` interpolated from the surface.
 8. **U.S. simulated roll-off**: `−holdings · (CPR/12 + scheduled_SMM)` applied to the actual (observed) balance path, since the ABM's U.S. CPR is meant to approximate reality.
-9. **Danish simulated roll-off — dynamic balance**: rather than applying the much higher Danish CPR (**36–51%** on the current multi-cohort 3D surface; mean **47.2%** over the active QT window) to the static U.S. balance, the code simulates the Danish portfolio balance **forward month-by-month from the QT-start level**, so each month's roll-off is applied to the *already-shrunk* balance. Headline figures are frozen per run tag (`python3 freeze_run.py`; see `data/runs/`). See [TECHNICAL.md §12](TECHNICAL.md) for the full bug history.
+9. **Danish simulated roll-off — dynamic balance**: rather than applying the much higher Danish CPR (**36–51%** on the current multi-cohort 3D surface; mean **47.2%** over the active QT window) to the static U.S. balance, the code simulates the Danish portfolio balance **forward month-by-month from the QT-start level**, so each month's roll-off is applied to the *already-shrunk* balance. Headline figures are frozen per run tag (`python3 freeze_run.py`; see `data/runs/`). See [TECHNICAL.md §7](../TECHNICAL.md#7-danish-counterfactual-three-stages-of-bugs) for the full bug history.
 10. **Per-system extension deltas, missed roll-off, and cumulative trapped liquidity** for both the U.S. and Danish counterfactuals (same QT-active / flatline logic, net accumulation as in step 3).
 
 ### 5.6 Goodness-of-fit and diagnostics — `cpr_goodness_of_fit()`, `cpr_cross_correlation()`
@@ -360,17 +360,17 @@ Alternatively, from the repo root: `python3 abm/abm_lockin_simulation.py` (same 
 ## 9. Key Results and Interpretation
 
 - **The S-curve** — As market rates climb from the 2.0% dominant-coupon cohort toward 8%, the U.S. mobility curve **collapses toward its ~4.8% involuntary floor**, while the Danish curve stays high (~20-30%). The shaded gap between them is pure institutional lock-in: identical households, identical rates, different mortgage rules. Reference cohort for calibration and the exported S-curve is the **max-weight 2.0% bucket** (39.7% of SOMA), not the legacy flat 3.0% assumption.
-- **Empirical trapped liquidity**: using the phased QT cap, SOMA roll-off, and the **active QT window only** (June 2022 – November 2025), the Fed's MBS portfolio has trapped **$764.7B** relative to the QT schedule — corrected upward from $672.9B after fixing a post-QT aggregation bug (see [TECHNICAL.md §5](TECHNICAL.md)).
+- **Empirical trapped liquidity**: using the phased QT cap, SOMA roll-off, and the **active QT window only** (June 2022 – November 2025), the Fed's MBS portfolio has trapped **$764.7B** relative to the QT schedule — corrected upward from $672.9B after fixing a post-QT aggregation bug (see [TECHNICAL.md §3](../TECHNICAL.md#3-empirical-benchmark-from-9723b-to-7647b), Error 4).
 - **ABM explains ~13% of the gap (current)**: the production pipeline (multi-cohort surface + dynamic friction + scheduled amortization + curtailment + settlement-lag kernel) predicts **$101.2B** of U.S. trapped liquidity — **13.2%** of the empirical figure. The ABM **over-predicts** aggregate CPR (mean 11.98% vs empirical 5.53%), so the residual ~87% reflects mechanisms outside the household decision function (loan-level heterogeneity, servicer effects, pool replenishment).
 - **Vintage burnout failed a pre-registered test** (§20): survivor-selection burnout drove CPR to ~0% and trapped liquidity to 147% of empirical — wrong direction. Surface interpolation remains the production default.
 - **Settlement-lag kernel is a null timing fix** (§21): convolving roll-off with UMBS/GNMA remittance weights `[0.10, 0.60, 0.30]` did not shift the cross-correlation peak toward lag 0; headline trapped liquidity moves only -$16.5B (mass-conserving).
-- **Historical falsification tests** (behavioral extensions §15, curtailment §16, multi-cohort §19) are documented with their original $672.9B-era numbers; see [TECHNICAL.md §17](TECHNICAL.md) for the current headline table.
+- **Historical falsification tests** (behavioral extensions §15, curtailment §16, multi-cohort §19) are documented with their original $672.9B-era numbers; see [TECHNICAL.md §12](../TECHNICAL.md#12-current-headline-numbers) for the current headline table.
 - **The institutional gap**: under the dynamic-balance Danish counterfactual, the portfolio would have **overshot** the QT cap by **-$829.1B** (shrinking from $2,535B to $428B), versus the U.S. system's $101.2B shortfall. The resulting **institutional gap is $930.3B**.
 - **Monthly CPR fit is weak**: raw r = -0.316 at lag 0; peak cross-correlation remains +0.192 at lag -3. Out-of-sample share explained (32.5%) exceeds in-sample (-11.1%), but both R² values are deeply negative.
 - **Robustness**: empirical benchmark is stable across data sources (SOMA vs. WSHOMCB differ by <0.2%) and ranges $479.6B–$782.2B across 18 QT cap-schedule assumptions. Monte Carlo (50 CPR surface rebuilds): mean **$113.5B**, 95% CI **[$106.6B, $120.4B]** on the pre-program 30yr-only book; **current pipeline: mean $96.7B, 95% CI [$89.8B, $103.6B]**.
 - **Dynamic friction** — During 2022-2025, depressed housing inventory and weak consumer sentiment pushed effective friction to roughly **8-10%** (well above the 7% static baseline).
 
-For the complete numbers, methodology, and the history of every bug found and corrected along the way, see [TECHNICAL.md](TECHNICAL.md).
+For the complete numbers, methodology, and the history of every bug found and corrected along the way, see root [TECHNICAL.md](../TECHNICAL.md) (ABM-era granular detail: [Appendix B](../TECHNICAL.md#appendix-b--abm-era-granular-archaeology)).
 
 ---
 

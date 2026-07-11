@@ -2,7 +2,7 @@
 
 This document is the **repository-level** technical history: what was built, what broke, what was fixed, what was falsified, and why the codebase now has two frameworks (`abm/` and `hazard/`). It is written for a reader who wants the full causal chain from the original **$972.3B** headline to the current validated **$764.7B** empirical benchmark and the current reconciled model results: the ABM explains **11.1%** on its synthetic population (post native 15-year gate, §19) but **59.3%** when fed real Freddie structural covariates with a recalibrated anchor (§15 Fix 1) — the share is calibration- and data-source-dependent, and both figures must be quoted together (§18). The hazard paths recover 107–120% of the benchmark, but an executed no-lock-in null (β₁=0) recovers **97.8%** (§12), so aggregate benchmark recovery is not by itself evidence about lock-in; the frameworks are distinguished by marginal lock-in contribution and monthly CPR-path fit. The Danish institutional gap is approximately **zero** under estimated elasticities, with its sign not identified (§20–§20.1). A July 2026 robustness-fix program (§15) plus follow-on analyses (§16–§19) revised the headline figures and added permutation, cross-foundation, and synthetic-companion tests — see those sections for what changed and why.
 
-For module-level runbooks, see [README.md](README.md). For granular ABM bug archaeology (line-level citations, section-by-section), see [abm/TECHNICAL.md](abm/TECHNICAL.md). For hazard pipeline specs, see [hazard/README.md](hazard/README.md).
+For module-level runbooks, see [README.md](README.md). For hazard pipeline specs, see [hazard/README.md](hazard/README.md). The former `abm/TECHNICAL.md` (granular ABM archaeology) and `REVISION_VERIFICATION.md` (manuscript verification record) were consolidated into this file on 2026-07-11 — see [Appendix B](#appendix-b--abm-era-granular-archaeology) and [§22](#22-manuscript-verification-record-referee-rounds-july-2026); their full texts remain in git history.
 
 ---
 
@@ -29,6 +29,9 @@ For module-level runbooks, see [README.md](README.md). For granular ABM bug arch
 19. [Native 15-Year Behavioral Gate](#19-native-15-year-behavioral-gate)
 20. [Berger et al. Danish Recalibration — Two Estimated Channels](#20-berger-et-al-danish-recalibration--two-estimated-channels)
 21. [July 2026 Verification Round — Committed Artifacts and Manuscript v14](#21-july-2026-verification-round--committed-artifacts-and-manuscript-v14)
+22. [Manuscript Verification Record (Referee Rounds, July 2026)](#22-manuscript-verification-record-referee-rounds-july-2026)
+
+Appendices: [A — File Map](#appendix-a--file-map) · [B — ABM-Era Granular Archaeology](#appendix-b--abm-era-granular-archaeology)
 
 ---
 
@@ -311,9 +314,9 @@ $$\log(h_{c,t}) = \text{spline}(\text{loan\_age}) + \beta_1 \cdot \text{RateGap\
 | Literature microsim | +0.368 | **−3** | **+0.444** |
 | Empirical cohort GLM (spec v3) | −0.444 | 0 | −0.444 |
 
-**Literature peak lag −3** is the primary timing diagnostic: hazard CPR leads SOMA empirical CPR by ~3 months, consistent with the 45–90 day TBA settlement pipeline between Freddie loan-level prepay and NY Fed SOMA cash receipt.
+**Convention (corrected in the v15 referee round, §22.3b):** under the implemented cross-correlation, a peak at lag −3 means the **empirical path leads and the simulated path trails** by ~3 months — a synthetic-data test proved the direction. The earlier settlement-pipeline reading (hazard CPR leads SOMA by the TBA delay) had the two series interchanged and is **retracted**. The β₁=0 null shares the −3 peak and the peak correlation is not distinguishable from zero under block-bootstrap bands, so no timing credential attaches to any estimator; the estimators are distinguished by level accuracy and the +9.2pp lock-in marginal only.
 
-The ABM tested a `[0.10, 0.60, 0.30]` settlement kernel and found it **null for timing** ([`abm/TECHNICAL.md` §21](abm/TECHNICAL.md)). The hazard path routes voluntary prepay directly to SOMA — lag −3 is **expected**, not a bug. Empirical cohort lag-0 negative r reflects contemporaneous alignment misspecification, not a failure to model settlement delay.
+The ABM tested a `[0.10, 0.60, 0.30]` settlement kernel and found it **null for timing** ([Appendix B.8](#b8-settlement-lag-kernel--pre-registered-null)). Empirical cohort lag-0 negative r reflects contemporaneous alignment misspecification, not a failure to model settlement delay.
 
 ---
 
@@ -408,7 +411,7 @@ Replaces CPR surface interpolation with microsim paths. Disables the ABM settlem
 | **Peak cross-corr** | **lag −3, r = +0.404** (stable across band) |
 | Runtime | ~15s cached / ~23s per band point (75k loans × 42 months × 2 regimes) |
 
-Literature microsim is calibrated via defendable bounds (PSA speed, Rothstein band, involuntary floor) — not fitted to $764.7B. Peak lag −3 confirms hazard leads SOMA by ~3 months (TBA pipeline). The earlier $747B (97.7%) figure predates the β₁ units fix (§15) and is reproducible from the `pre-fix-2026-07` baseline.
+Literature microsim is calibrated via defendable bounds (PSA speed, Rothstein band, involuntary floor) — not fitted to $764.7B. Under the corrected convention (§22.3b), the −3 peak means the simulated path **trails** the empirical series; the peak correlation is not distinguishable from zero under block-bootstrap bands and carries no timing credential. The earlier $747B (97.7%) figure predates the β₁ units fix (§15) and is reproducible from the `pre-fix-2026-07` baseline.
 
 ---
 
@@ -1354,7 +1357,8 @@ Reproduce: `cd abm && python3 refi_sweep.py` → `data/refi_sweep_results.json`.
 The v11→v14 manuscript revision (a simulated editorial panel producing a
 17-item action ledger) triggered a code-level verification pass over this
 repository; the full trace — every re-run, diagnostic, and replacement number
-— is in [REVISION_VERIFICATION.md](REVISION_VERIFICATION.md). **No headline
+— is in [§22.1](#22-manuscript-verification-record-referee-rounds-july-2026)
+(absorbed from the former `REVISION_VERIFICATION.md`). **No headline
 result changed.** What the round produced, now committed:
 
 | Artifact | Commit | What it settles |
@@ -1416,7 +1420,263 @@ applied the full editorial ledger against this repository's artifacts:
 
 ---
 
-## Appendix — File Map
+## 22. Manuscript Verification Record (Referee Rounds, July 2026)
+
+> Absorbed from the former `REVISION_VERIFICATION.md` on 2026-07-11 — the full
+> round-by-round text is preserved in git history (through commit `d0549e7`).
+> This section keeps every settled number and standing rule; the per-round
+> narrative is consolidated thematically. Manuscript editions live outside the
+> repository (`~/Downloads/revised_paper_v15.*` canonical; versioned delivery
+> bundles `v15r*_bundle.zip`).
+
+### 22.1 v11 → v12 verification pass (2026-07-09)
+
+**No headline result changed** ($764.7B benchmark; $91.0B / 11.9% ABM; $915B /
+119.7% Path A; $818.5B / 107.0% Path B). Findings, each traced to a committed
+artifact or reproducible run:
+
+- **Table 1 Danish row was a mixed-runs error, not arithmetic.** The berger
+  manifest is internally consistent: U.S. leg **$84.507B**, Danish
+  **+$812.921B**, gap **−$728.415B** (exact). The paper had substituted the
+  $90.98B fold-in headline U.S. leg into that row. Fix adopted: print the
+  berger run's own $84.5B leg (single-freeze consistency, §21).
+- **Two peak-lag conventions coexist in the codebase.**
+  `abm/cross_design_test.py` uses max-|r| (lag **0**, r −0.318);
+  `abm/fed_mbs_extension_risk.py` uses most-positive-r (lag **−3**, +0.195).
+  Neither is stale; the convention is now stated wherever a peak lag is printed.
+- **Sample provenance:** the production Path B sample is **75,000 unique real
+  Freddie loans** (all 20 quarters 2017–2021, coupons 1.75–6.875%, natural
+  dispersion); the synthetic fixture (5,000 single-vintage loans on a coupon
+  grid) never fired. "Synthetic-augmented" deleted from the paper. (Path A's
+  estimation panel is the **full origination universe** — a round-3 erratum;
+  see §22.3f.)
+- **Fold-in-spec Monte Carlo** (50 seeds at `5cf33a3`, one harness function
+  backported, model code unchanged): mean **$103.7B**, SD $24.5B, CI of mean
+  [$96.9B, $110.5B]; **seed 42 reproduces $90.98B to the cent** (34th
+  percentile, z −0.52). Two premise corrections en route: the HEAD MC ($96.7B)
+  was the native-15yr spec, not fold-in; and manifest `git_commit` fields are
+  unreliable (the freeze ran on a dirty tree 2 minutes before its code was
+  committed) — identify specs by cohort-bucket count (7 = 30yr-only,
+  11 = fold-in), not by manifest commit.
+- **Ridge α selection is temporally blocked** (train < 2024-01-01): no
+  within-stratum leakage; this also licenses holding α fixed in the bootstrap.
+- **Competing-risks normalization never binds:** 0 events in 2 × 1,683,124
+  loan-months; max h_prep + h_def = **0.0155** against a threshold of 1.
+- **β₁ = 0 no-lock-in null:** $748.2B / **97.8%**; elasticity band strictly
+  monotone ($809.9 / $818.5 / $827.7B at P_q 5.5 / 6.5 / 7.7%); lock-in
+  marginal **+$70.3B (+9.2pp)**. The null also peaks at lag −3 — timing never
+  discriminates the elasticity (see §22.3b).
+- **SOMA coverage:** 66.2% of face value in 2017–2021 vintages (2022 tail
+  23.1%, pre-2017 10.6%); the cohort parse includes **GNMA (20.4%** vs UMBS
+  79.6%; terms 30yr 90.7% / 15yr 9.1% / other 0.2%).
+- **R² convention:** 1 − SSE/SST against a mean-only null over the 42
+  active-QT months, identical in both frameworks. Value map: **−6.984**
+  current (fold-in), −6.443 stale (30yr-only), −7.086 native-15yr; simulated
+  U.S. CPR **11.68%** (fold-in).
+- **"Pre-registered" downgraded to "specified ex ante":** the repo has no git
+  tags and the registration commit postdates the results file by 2 minutes.
+- **FRED key (closed 2026-07-10):** the key hard-coded in early public history
+  was rotated; the old key is issuer-deactivated (FRED returns 400 on it), so
+  historical copies are inert — no history rewrite, by panel-accepted scope.
+  The replacement key appears in zero tracked files and zero commits
+  (`git log --all -S` empty); it lives only in the untracked `.env`.
+
+Path A bootstrap SEs from this pass: table and method in §21. Defense
+one-liners: the elasticity's verified content is the +9.2pp marginal and band
+monotonicity, never timing; 66.2% vintage coverage; normalization never binds;
+significance is rate-gap-only; the headline is a 34th-percentile seed.
+
+### 22.2 Referee round 2 — three-persona audit (2026-07-10): the shared accounting basis
+
+Executed against manuscript v15; every requested computation ran, each script
+carrying a parity gate that reproduces a published number first. **Headline
+framing changed:** recoveries are stated on the shared accounting layer
+(benchmark-consistent), where Path B = 97.9%, Path A = 110.6%, β₁=0 null =
+88.7%, and the composed (shared-layer + full-book) Path B = **$765.1B =
+100.0%** of benchmark. The +9.2pp lock-in marginal is basis-invariant.
+
+| Item | Script → artifact (`hazard/`) | Key result |
+|---|---|---|
+| Shared-layer scoring + composed | `shared_layer_scoring.py` | B 97.9 / A 110.6 / null 88.7%; composed B 100.0%; curtailment netted $69.6B |
+| Rate-input timing scan | `rate_timing_scan.py` | Empirical CPR ~ rate(t) (+0.40); sim ~ rate(t−4) (+0.60); no ±1–3mo shift kills the −3 peak; trapped moves <$1.5B |
+| FICO/LTV priors estimated | `covariate_priors_estimation.py` | β̂_F −0.39 [−1.51,+0.65], β̂_L +0.21 [−0.59,+1.00] — priors' signs supported (turnover regime); zero-out 108.3%, estimated 101.3% |
+| Seasonality + concave gap | `seasonality_concave_gap.py` | Month effects to +0.43; Path A r(lag0) −0.444→−0.378, peak −2, 121.5%; concave gap 105.7%, r(lag0) +0.281 |
+| Path A refit-and-resimulate | `bootstrap_resimulate.py` | median $922.6B, IQR [900.1, 1130.6], 95% pctile [−4459.8, +1190.1] (15 blowups) — $915B demoted from abstract |
+| WAL table + no-shock row | `wal_table.py` | Reproduces every printed Table 6 cell; 2021-speed row (22.81% CPR) WAL 3.4y ⇒ extension 6.0y |
+| Ginnie composition bound | `ginnie_bound.json` | 20.4% face × 1.2–2.8pp GMAR differential × ~$83B/pp ⇒ $20–47B (2.6–6.2%), toward overstating trapped |
+| Panel/attrition/Markov | `panel_disclosures.py` | Full-universe panel (peak 8.84M loans, $72.48T/$37.43T raw); attrition 75,000→40,234; thin Markov cells, extreme-matrix bound $0.39B |
+
+### 22.3 Rounds 3–12 — adjudication findings, consolidated
+
+Chronological ledger (one commit per round; full narratives in git history):
+
+| Round | Commit | Scope |
+|---|---|---|
+| 2–3 | `749c5a8` + `14fe816` | Shared basis (§22.2); netting mechanics; timing attribution withdrawn; Markov crosstab; Table-2 erratum; LO render check |
+| 4 | `5989023` | Output-side timing demotion; per-leg netting scope; bidirectional parity v2 |
+| 5 | `d182958` | All-estimator detrended collapse; sweep-log process adopted; composed covariate band |
+| 6 | `0e1fa20` | Artifact regates; −0.316/−0.318 convention; zero-band bookkeeping; versioned bundles |
+| 7 | `369fd8a` | Table 4 per-row convention; closest-call straddle; sweep multi-hit fix |
+| 8 | `554c0f7` | Full 45-item review: temporal bootstrap, ridge/reference audit, Danish discount bound, convention-definition fix, floor circularity, WAL defense |
+| 9 | `dedaf5a` | Danish bound reconciled to printed basis; WAL external anchor; dead-code re-scope |
+| 10 | `96d7fd1` | Remainder/age-floor notes; golden fixture; parity tally discipline |
+| 11 | `5e759ea` | Convergence declared; three provenance one-liners |
+| 12 | `d0549e7` | Round-11 parity embed defect found and fixed |
+
+**(a) Accounting basis and netting.** The shared layer nets exactly
+**$69.562B** for every U.S. leg — pure income-scaled curtailment on the
+*actual* WSHOMCB path, common by construction because every simulation
+rescales its roll-off to that path monthly. Conversion is **per-leg**:
+invariance is scoped to U.S. legs; the Danish leg's curtailment on
+counterfactual balances is $70.33B (+$0.77B, immaterial). Composed Path B
+prints **$765.077B = 100.04%** of the unrounded $764.748B benchmark (a joint
+run; the additive identity is exact with zero cross-term and demoted to
+cross-check); covariate band 92.2–99.2% shared, ≈94.3–101.3% composed.
+Danish standalone basis chain: $934.254B = shared **$848.870B** (printed
+848.9; U.S. leg 748.97 vs printed 749.0) + Danish-leg curtailment $70.33B +
+dynamic-balance remainder **$15.05B** — the remainder is the
+roll-off-conversion analogue of the +$0.77B differential (the Danish leg
+compounds a counterfactual balance that the slower drain leaves higher, so
+each month's CPR converts to more roll-off dollars; U.S. legs are pinned by
+the monthly rescale). The Danish **discount-rate wedge is exactly $0.00**:
+the production Danish leg uses the imported Berger flat elasticity, and
+`rate_gap_danish`'s PV classification is computed but consumed by nothing
+(7,803/32,486 classifications flip under −50/−100bp; paths bit-identical).
+
+**(b) Timing credential — fully demoted.** Round 3 withdrew the burnout/floor
+attribution (both ablations keep peak −3; levels correlations
+trend-contaminated; sim ΔCPR ~ Δrate r = −0.94 at lag 0 — correct sign,
+mechanical — while empirical Δ is +0.25, wrong sign: empirical monthly
+variation is not rate-driven; "mechanism not isolated"). Round 4:
+corr(Δsim, Δemp) = −0.23, detrended levels −0.20 — Path B's +0.190 lag-0
+levels r is trend-carried; its distinction is **level accuracy only**.
+Round 5: detrended r₀ = ABM −0.30 / Path A −0.29 / Path B −0.20 — one
+indistinguishable cluster. Zero bands are 1.96/√n (±0.30 at n=42 detrended;
+±0.31 at n=41 differences; per-lag n−k, so lag-3 has n=39 → ±0.314). Two
+empirical back-out conventions: the manuscript's ABM −0.318 is the frozen
+run's own cohort-weighted series (recomputed −0.3183 exactly); the common
+hazard-side series gives −0.316 — and the closest call **straddles**: ABM
+detrended r₀ = −0.3030 under the production convention vs the ±0.3024 i.i.d.
+band (outside; common-series −0.301 inside), so all in/out verdicts rest on
+moving-block bands. Round 8 identified the printed intervals as circular
+joint-series MBB with fixed lags (reconstruction parity ±0.02); block lengths
+4/6/8 change no zero-inclusion verdict except Path A's lag-0 upper endpoint at
+block 8 (+0.04) — "significantly negative" is block-scoped ("excluding zero at
+block 4; marginal at 6 — upper −0.02 at the production seed, −0.00 under the
+committed reconstruction — and 8"). The §V.C convention-definition sentence
+was inverted in print (series interchanged); synthetic re-verification proved
+a peak at k=−3 means the simulated path **trails**; every direction claim was
+computed under the implemented convention and stands
+(`hazard/extension_risk.py::lag_interpretation` fixed likewise). **Standing
+rule:** no timing claim returns; the identified content is the +9.2pp marginal
+and band monotonicity.
+
+**(c) Estimation and inference.** Temporal moving-block bootstrap (blocks of
+6 over 36 training months; 196/200 converged): `Dynamic_Friction` is built
+from national series only, so the stratum scheme is structurally silent about
+it — temporal friction SE **2.80 vs 0.51** (≈5.5×), CI [−3.71, +7.69];
+burnout SE 2.59, CI [−3.16, +6.16]; rate gap CI [+0.44, +12.18]. **Rate-gap
+sign stability is 99.5% under both schemes**; the burnout sign is
+point-estimate-only (temporal center +1.23 / +0.52, opposite sign). Ridge and
+reference audit: the two ridge-grid fits are **bit-identical** (max |Δ|
+4.5e-17 — grid selection vacuous, the penalty a no-op from the IRLS start;
+"mildly shrunk" removed from print); a reference-stratum swap moves cold-start
+penalized refits by Δ1.29; the true ill-conditioning is **20 of 296 strata
+with zero training events** (FE MLEs nonexistent; the production reference is
+not among them; 295-dummies status stated). Dropping those strata (423/10,176
+cells), unpenalized PML is exactly reference-invariant (Δ ≈ 6e-15) and
+reproduces the production macro coefficients **to within 0.002** standardized
+(rate gap 0.6727/0.6734 and friction −0.0373/−0.0371 third-decimal; burnout
+−0.1317/−0.1301 — a demeaning/orthogonalization sample change). The
+inestimable FEs are pinned by the warm-started optimizer, not the penalty.
+Holdout RMSE: exposure-weighted **2.53pp** vs 37.8pp unweighted (both
+printed). Panel holdout recount: **6,077** (printed 6,076 — fixed, erratum).
+eq(β₁) print/code mismatch: the printed equation was the continuous-hazard
+transform (0.0693) while the code compounds discretely (**0.0686**; both
+print 0.069) — the equation was corrected to the implemented form (range
+0.0672–0.0701 over P_q ∈ (0, 0.12]). **Floor circularity conceded:** the 4%
+involuntary floor is anchored to 2023–24 in-window turnover;
+benchmark-independence is not window-independence, and the clean verification
+content is the +9.2pp marginal only.
+
+**(d) WAL.** The 14.7y approximate WAL was defended against a 16–17y
+replication: origination WAL at 2.49% is 16.89y (15yr sleeve 8.01y), and the
+9.1% 15-year sleeve plus the aged book pull the blend down (midpoint ages
+give only 14.9). External anchor (`hazard/wal_anchors.py`): SOMA-CUSIP
+back-derived ages (origin = maturity − term, face-weighted, no reference to
+Table 6) give {2021: 11.6, 2020: 28.0, 2017–19: 50.5} months → blend
+**14.94** — 16–17y excluded externally. The grid-search age objective is
+disclosed as a reconstruction of the printed table; the 2022 cell's 0.0
+months is floored, not data (bucket origin postdates June 2022; <0.05y effect
+at 23.1% weight). Coverage reconciliation: 90.7 + 9.1 = 99.8 exact (0.2%
+other-term); 90.6% is the production parse's as-of-date share.
+
+**(e) Danish-leg liveness.** §V.C re-scoped: the rate-gap swap defines the
+mechanism-substitution *variant* (the superseded 47.1% surface); the
+production leg is the Berger flat elasticity, whose PV classification is
+computed but unconsumed (cross-referenced to the $0.00 diagnostic). The bound
+script's baseline reproduces the frozen production Danish CPR path **exactly**
+(max |Δ| = 0.0) once the full production regime tuple and a shared macro frame
+are used — the earlier 2.7e-06 residual was per-regime RNG stream ordering.
+A claims-vs-code liveness audit joined the §VIII freeze gate (no grep family
+covers liveness claims).
+
+**(f) Panel and Markov disclosures.** Path A's estimation panel is the
+**full Freddie 2017–2021 origination universe** (peak 8.84M active loans;
+$72.48T/$37.43T are raw unweighted dollars; fit window 2021-01–2023-12);
+"75,000 loans" is Path-B-scoped (the v15 Table 2 note said otherwise —
+erratum). Attrition: 75,000 → 40,234 window-start survivors → 1,683,124
+loan-months. The delinquency matrix is exposure-UPB-weighted; printed
+probabilities equal UPB shares exactly (D30 cure: 13 events = 95.6% of $58.3M
+row exposure vs 0.62 count share); the crosstab is published; 482
+(window-start stock) and 154 (max month-end stock; mean 24, end 14) are both
+true; the extreme-matrix bound is **$0.39B** (0.05pp) with the 482 included.
+Seasonality is real but insufficient (Path A 121.5% with peak −2); the
+concave-gap variant scores 105.7% — extrapolation is not load-bearing.
+
+**(g) Document-integrity tooling and process.** *Parity checker:* 94.8%
+containment (round 3) → bidirectional with full hand-clearing (round 4; found
+2 real tex→docx drifts; real drift 0 both directions ever since) → rebuilt
+with escaped-\$/rendered-ref handling (round 8; 59/59 edit probes) →
+per-miss class on every miss (round 9) → computed tally==misses assertion
+embedded in the report (round 10; 27 + 98 = 125; motivated by the round-9
+letter hand-miscounting a cross-sum 126 ≠ 124). The 135→97 docx→tex miss drop
+is the round-8 bibliography trim having been ineffective (wrong heading
+occurrence, ~1 character removed); corroboration exact — 37 rendered entries
+(= the 37 `.bib` keys) + heading = 38 units = the drop. *Timing sweep:*
+committed generator (`tools/timing_sweep.py`) regenerated per round; defect
+history — word-boundary matching (v3; "flags" false positive),
+every-phrase-per-line (v4; first-match shadowing had hidden 22 rows),
+suffix-s truncation self-caught and restored (v6; the v4→v5 reconciliation is
+two-sided: 60 − 6 + 28 = 82); v7 = 92 rows, all dispositioned. Golden fixture
+`tools/test_timing_sweep.py` hand-enumerates an 11-hit multiset covering all
+three defect classes; exact multiset match required. *Renders:* LibreOffice
+26.2.4 headless (`writer_pdf_Export`), 46 pp at v15r4/r5, equation pages
+7/16/20/21 content-verified each round (U+2223→U+007C glyph fix). *Bundles:*
+editions versioned per round (v15r2…v15r5); the manifest is generated last and
+excludes the current letter and itself; letters inline evidence verbatim
+(SHA256SUMS + JSON excerpts) since round 5. *Round-12 defect:* the round-11
+parity corroboration was recorded in the letter and the verification record
+but never written into the artifact (hash unchanged at `ba26e2…`,
+contradicting the letter's own inlined manifest); fixed before delivery after
+independently re-verifying the docx entry count; new hash `078f0cae…`.
+**Standing lesson:** after writing any claim about an artifact's content or
+hash, re-hash the artifact in the same session and diff it against the claim
+before cutting a bundle.
+
+**(h) Standing state.** The panel declared the review **converged on paper**
+at round 11: every open item is delivery-gated or inside the §VIII
+pre-submission freeze gate — (i) seasonal Path A production adoption with
+restated Table 4/WAL/interval, (ii) Word REF-field conversion, (iii)
+claims-vs-code liveness audit, (iv) golden fixture passing at freeze,
+(v) clean two-pass build with log. Panel-accepted facts not to relitigate:
+per-leg netting and the $0.77B differential; the crosstab reconciliation;
+482/154; 100.04% against the unrounded benchmark; the FRED-key scope
+decision (no history rewrite).
+
+---
+
+## Appendix A — File Map
 
 ```
 Lock-in-Effect/
@@ -1435,8 +1695,7 @@ Lock-in-Effect/
 ├── runs/                      # Frozen baseline snapshots (§15 Step 0)
 │   └── pre-fix-2026-07/       # pre-robustness-fix manifest + builder script
 ├── abm/                      # Agent-based pipeline (frozen archive)
-│   ├── README.md
-│   ├── TECHNICAL.md          # Granular ABM bug history (§1–§21)
+│   ├── README.md             # Granular ABM history: Appendix B of this file
 │   ├── abm_lockin_simulation.py   # --population={synthetic,freddie} (§15 Fix 1)
 │   ├── fed_mbs_extension_risk.py   # + use_hazard_microsim bridge; term-aware cohorts (§15 Fix 2)
 │   ├── freddie_population.py       # structural-covariate loader (§15 Fix 1)
@@ -1459,4 +1718,155 @@ Lock-in-Effect/
 
 ---
 
-*Last updated: July 2026. Hazard spec v3: stratum FE (295 pools), burnout sign fixed (−0.13). Post robustness-fix program (§15): Path B at 107.0% trapped (band 105.9%–108.2%) after the β₁ units fix; ABM at 11.1% after the native 15-year gate (§19); cross-design test with real Freddie covariates recovers 59.3% (recalibrated) / 20.9% (frozen). Follow-on analyses: permutation test (§16, n=999, exact p=0.001) — Path B's recovery is a marginal-distribution result, moved only 0.27% ($2.2B) by scrambling joint structure, interaction-dominated across axes with the CPR-path signal localized to origination-time; Path A's fitted coefficients are far more structure-dependent (β can flip sign). Cross-foundation (§17): the institutional gap collapses $925.5B→$61.2B under a shared accounting layer; full-book SOMA weighting lifts Path B to 109.1%, Path A to 126.1%. Symmetric companion (§18): Path B recovers 106.0% on a fully synthetic population (zero Freddie data) — the hazard survival structure recovers the benchmark independent of data source, while the ABM needs real covariates to reach 59.3%. Berger recalibration (§20): importing estimated Danish elasticities (3.2% flat moving + tax-attenuated refi, ≈0 under U.S. taxes) collapses the institutional gap from +$925.5B to −$99.9B (Path B hybrid) — the large gap was an artifact of extrapolating a U.S.-calibrated mobility function to a Danish rate gap. Sweeping the refi channel (§20.1) shows the gap's *magnitude* stays small across [0, 18%] but its *sign* is not robust in Path B (breakeven at just 1.4% refi vs 12.6% for the ABM) — the honest headline is "institutional benefit ≈ 0 under U.S. conditions", not "robustly negative". July 2026 verification round (§21): Path A coefficients now carry stratum-bootstrap CIs (rate-gap sign-stable in 99.5% of replications; burnout/friction not distinguishable from zero), the fold-in-spec Monte Carlo (mean $103.7B; seed 42 = $90.98B exactly) and the β₁=0 no-lock-in null ($748.2B / 97.8%) are committed artifacts, and manuscript v14 aligns the paper with all of the above.*
+## Appendix B — ABM-Era Granular Archaeology
+
+> Absorbed from the former `abm/TECHNICAL.md` on 2026-07-11 (full text in git
+> history). This is the **pre-robustness-program record**: figures here (e.g.
+> $101.2B / 13.2% share, ~47% Danish CPR, $672.9B-era comparisons) are
+> superseded — current production is **$84.5B / 11.1%** with Danish CPR
+> **3.4%** under the Berger recalibration (§12, §15–§20). §§3, 5–8 summarize
+> this material; what follows is the granular detail those sections do not
+> repeat.
+
+### B.1 Benchmark accounting detail
+
+**Why WSHOMCB diffs were wrong:** per the Fed's Financial Accounting Manual,
+SOMA holdings (including `WSHOMCB`) are booked at **amortized cost on a
+settlement-date basis** — not face value. The Fed's MBS were largely bought
+at a premium, so `WSHOMCB` declines every period from premium amortization
+on top of, and independent of, actual principal paydown. The NY Fed SOMA
+current-face-value series moves only when principal is actually paid down.
+Both series remain settlement-date accounting through the TBA forward market
+(allocation only 2 business days before settlement, per the SIFMA schedule),
+so switching to SOMA removes the amortized-cost confound but **not**
+TBA-settlement lag.
+
+**Scheduled amortization:** `scheduled_amortization_smm()` is calibrated to
+the same mortgage assumptions as the ABM. At the time of the fix it accounted
+for **$242.1B** of QT-window roll-off (SMM ≈ 0.213%/month ≈ 2.55%
+annualized); the frozen `run-2026-07-04` records $224.1B (≈ 2.68% ann.) after
+subsequent corrections.
+
+**Empirical CPR back-out:** inverts the simulated-roll-off relationship —
+`empirical_CPR = (|actual_rolloff| / holdings − sched_SMM) × 12`, clipped at
+zero. Frozen ranges: empirical 0.00–14.02% (mean **5.53%**), ABM U.S.
+7.55–21.72% (mean **11.98%**), Danish 36.26–51.26% (mean 47.21%; wedge mean
+35.24pp). All headline CPR means must use `qt_active_frame()` (42 months);
+`index >= QT_START` alone pulls in post-QT months and drifts means (U.S.
+12.32%, empirical 5.45%). Multi-cohort runs use cohort-weighted
+`Scheduled_Amort_SMM` so the back-out is apples-to-apples.
+
+### B.2 Fit diagnostics (frozen `run-2026-07-04`)
+
+| | R² | RMSE | MAE | r |
+|---|---|---|---|---|
+| Raw | −6.443 | 7.73pp | 6.58pp | −0.316 |
+| Smoothed (3-mo) | −14.464 | 7.14pp | 6.41pp | −0.397 |
+
+Smoothing makes fit *worse* — the "settlement noise" explanation was tested
+directly and rejected. Full cross-correlation profile (N=42): −3: +0.192,
+−2: −0.209, −1: −0.140, **0: −0.316**, +1: −0.206, +2: −0.033, +3: +0.103.
+Temporal holdout (split at 2024-01-01): in-sample N=19, R² −10.990, RMSE
+8.86pp, share −11.1%; out-of-sample N=23, R² −4.222, RMSE 6.66pp, share
+32.5% — the model over-predicts roll-off early in QT and under-predicts late.
+
+### B.3 Validation-suite detail
+
+- **Sensitivity** (125 combinations: `BASE_FRICTION` 5–9%,
+  `SEARCH_PENALTY_CAP` 0–400bp, `SENTIMENT_PENALTY_CAP` 0–300bp). Bug found:
+  `aggregate_trapped()` compared the ABM to **itself** (trivially 100% share);
+  fixed with an independent `empirical_trapped()` anchor. Post-fix ranges:
+  trapped −$265.1B–$265.5B, share −34.7%–34.7%, R² −16.6 to −3.5, RMSE
+  6.01–11.88pp.
+- **Robustness**: Panel B (data source) — SOMA $764.7B vs WSHOMCB $763.7B
+  (0.1% apart). Panel C (18 cap-schedule scenarios: ramp 2/3/4 months, cap
+  $30/$35B, end Jun/Sep/Dec 2025) — empirical $479.6–782.2B, share
+  −24.6%–15.2%.
+- **Monte Carlo** (historical; superseded by the fold-in-spec MC, §22.1):
+  50 seeds, population and CPR surface rebuilt per draw — mean $113.5B, std
+  $24.8B, CI [$106.6B, $120.4B]. An earlier fixed-CSV-surface run (std ≈ $0)
+  was a bug: surfaces must be rebuilt per seed.
+
+### B.4 Behavioral extensions — parameters and outcome
+
+Sources: DTI 43% front-end (CFPB QM/ATR, 12 CFR 1026.43(e)(2)(vi); the
+regulatory threshold is back-end — the gate is QM-*inspired*); loss aversion
+2.25× (Kahneman–Tversky); wait-and-see 150bp/20% (stated assumptions; a fixed
+per-agent patience draw keeps the surface deterministic). The velocity axis
+(−1.0% to +3.5%, 0.5% steps) turned the surface 3D; vectorization
+(`_precompute_arrays` + `_cpr_vec`) gave a ~120× speedup (~6.7 min → ~3 s per
+surface; 50-seed MC ~5.5 h → ~46 s).
+
+| Metric | Rational only | Behavioral |
+|---|---|---|
+| U.S. trapped | $544.0B (80.8%) | **$419.6B (62.3%)** |
+| Danish trapped | −$359.7B | −$764.2B |
+| Institutional gap | $903.8B | $1,183.8B |
+| U.S. CPR mean | 6.62% | 7.92% |
+| CPR R² (raw) | −0.590 | −1.586 |
+
+Why the wrong direction: maintaining the 4–5% involuntary floor under a
+steeper penalty forced `MOBILITY_DESIRE_SCALE` from ~12,500 to ~36,086,
+raising CPR at **all** rate levels — including 5–7% where most QT data lives.
+(Historical $672.9B-era figures.)
+
+### B.5 Curtailment channel
+
+Pre-registered: curtailment is additive-only and near-zero in stress months
+(over-prediction bias vs `DSPIC96` YoY growth: r = −0.487), so adding it
+should **worsen** the match by $60–90B. Result: trapped fell **$75.0B**
+($419.6B → $344.6B, 51.2% share; curtailment contribution $74.9B); CPR-path
+diagnostics unchanged. Implementation: macro-layer only —
+`CURTAILMENT_CPR_HEALTHY = 0.012`, scaled continuously from 0% at −2% income
+growth to full at +4%.
+
+### B.6 Multi-vintage coupon cohorts
+
+CUSIP-level parse of `securityDescription` (30-year pass; origin =
+maturity − 360 months; `min_share = 2%` folding). Verified cohort table
+(as-of 2026-06-24, $1,769.6B of 30yr face): 1.50% $53.6B / 3.0%; **2.00%
+$703.1B / 39.7%**; 2.50% $518.4B / 29.3%; 3.00% $209.4B / 11.8%; 3.50%
+$143.0B / 8.1%; 4.00% $90.6B / 5.1%; 4.50%+ $51.5B / 2.9%. Architecture:
+`attach_cohort()` decouples household economics from mortgage terms;
+per-cohort 3D surfaces (23,660 rows); weighted U.S. roll-off sum; independent
+per-cohort Danish declining-balance loops. Result: **hypothesis falsified** —
+trapped fell $87.0B (51.2% → 38.3%, historical) and weighted CPR rose to
+8.67%; slower low-coupon amortization is dominated by younger seasoning on
+the dominant buckets and per-coupon surface effects.
+
+### B.7 Vintage burnout (survivor selection) — pre-registered, failed
+
+| Configuration | U.S. trapped | Share | QT-window CPR |
+|---|---|---|---|
+| Surface baseline | $117.7B | 15.4% | 8.41% |
+| Survivor burnout | **$1,123.9B** | **147.0%** | ~0.00% |
+
+Pandemic-era cohorts deplete their mobile mass in the 2020–21 low-rate
+window; survivors are exclusively never-movers — an absorbing state
+incompatible with a real pool that retains involuntary turnover and ongoing
+origination. Production: `use_burnout=False`; code retained.
+
+### B.8 Settlement-lag kernel — pre-registered, null
+
+Mass-conserving `[0.10, 0.60, 0.30]` convolution over lags 0/1/2 (documented
+UMBS ~55-day / GNMA II ~50-day remittance delays, not tuned):
+
+| Configuration | U.S. trapped | Share | Peak cross-corr |
+|---|---|---|---|
+| Surface only | $117.7B | 15.4% | +0.192 at lag −3 |
+| Surface + kernel | $101.2B | 13.2% | **+0.192 at lag −3 (unchanged)** |
+
+Timing alignment did not improve; the kernel is kept in production as a
+documented null with modest aggregate effect.
+
+### B.9 Frozen reference: `run-2026-07-04`
+
+Headline rows (full table: `abm/data/runs/run-2026-07-04/manifest.json`;
+**stale** — see §12 for current): empirical $764.7B; ABM U.S. trapped $101.2B
+(13.2%; surface-only $117.7B / 15.4%); Danish −$829.1B (path $2,535B →
+$428B); institutional gap $930.3B; SOMA 30yr WAC 2.55% (7 buckets); reference
+cohort 2.00% at 39.7% weight; dynamic friction 8.23–9.96% (mean 8.95%).
+
+---
+
+*Last updated: July 2026. Hazard spec v3: stratum FE (295 pools), burnout sign fixed (−0.13). Post robustness-fix program (§15): Path B at 107.0% trapped (band 105.9%–108.2%) after the β₁ units fix; ABM at 11.1% after the native 15-year gate (§19); cross-design test with real Freddie covariates recovers 59.3% (recalibrated) / 20.9% (frozen). Follow-on analyses: permutation test (§16, n=999, exact p=0.001) — Path B's recovery is a marginal-distribution result, moved only 0.27% ($2.2B) by scrambling joint structure, interaction-dominated across axes with the CPR-path signal localized to origination-time; Path A's fitted coefficients are far more structure-dependent (β can flip sign). Cross-foundation (§17): the institutional gap collapses $925.5B→$61.2B under a shared accounting layer; full-book SOMA weighting lifts Path B to 109.1%, Path A to 126.1%. Symmetric companion (§18): Path B recovers 106.0% on a fully synthetic population (zero Freddie data) — the hazard survival structure recovers the benchmark independent of data source, while the ABM needs real covariates to reach 59.3%. Berger recalibration (§20): importing estimated Danish elasticities (3.2% flat moving + tax-attenuated refi, ≈0 under U.S. taxes) collapses the institutional gap from +$925.5B to −$99.9B (Path B hybrid) — the large gap was an artifact of extrapolating a U.S.-calibrated mobility function to a Danish rate gap. Sweeping the refi channel (§20.1) shows the gap's *magnitude* stays small across [0, 18%] but its *sign* is not robust in Path B (breakeven at just 1.4% refi vs 12.6% for the ABM) — the honest headline is "institutional benefit ≈ 0 under U.S. conditions", not "robustly negative". July 2026 verification round (§21): Path A coefficients now carry stratum-bootstrap CIs (rate-gap sign-stable in 99.5% of replications; burnout/friction not distinguishable from zero), the fold-in-spec Monte Carlo (mean $103.7B; seed 42 = $90.98B exactly) and the β₁=0 no-lock-in null ($748.2B / 97.8%) are committed artifacts, and manuscript v14 aligns the paper with all of the above. Referee rounds 2–12 (§22) took the manuscript to v15r5 on the shared accounting basis; on 2026-07-11 the former `abm/TECHNICAL.md` and `REVISION_VERIFICATION.md` were consolidated into this file (Appendix B, §22).*

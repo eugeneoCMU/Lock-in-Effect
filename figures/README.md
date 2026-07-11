@@ -13,8 +13,8 @@ purple = cross-design hybrids).
 
 | File | What it shows | Data source |
 |---|---|---|
-| `fig1_recovery_by_estimator.png` | Benchmark recovery (% of $764.7B) per estimator, dot plot with 100% reference line. **Hollow/hatched markers = negative lag-0 path correlation** — Path A's 119.7% is deliberately not presented as "best model" (§V.B). | run manifests, `extension_risk_results_*.json`, `cross_design_results.json`, `synthetic_companion_results.json` |
-| `fig2_ccf.png` | Cross-correlation functions, lags −6…+6, all three estimators. Makes "Path B alone reproduces the timing structure" visually explicit (peak at −3/−4, TBA settlement lead). | `ccf_data.json` (see below) |
+| `fig1_recovery_by_estimator.png` | Benchmark recovery (% of $764.7B) per estimator, dot plot with 100% reference line, on the shared accounting basis. Paradigm colors only — marker-fill semantics were removed in the v15 round; lag-0 correlations are reference-only ([TECHNICAL.md §22.3b](../TECHNICAL.md#22-manuscript-verification-record-referee-rounds-july-2026)). | run manifests, `extension_risk_results_*.json`, `cross_design_results.json`, `synthetic_companion_results.json` |
+| `fig2_ccf.png` | Cross-correlation functions, lags −6…+6, all three estimators. Under the corrected convention (§22.3b), the −3/−4 peaks mean the simulated paths **trail** the empirical series; no estimator shows positive contemporaneous alignment, and the peaks are not distinguishable from zero under block-bootstrap bands. | `ccf_data.json` (see below) |
 | `fig3_abm_waterfall.png` | ABM falsification bridge: rational baseline 71.1% → behavioral gates 54.9% → curtailment 45.1% → multi-vintage 33.7% → 15yr fold-in 11.9% → production (native gate) 11.1%. Every pre-registered extension moves away from 100%. | stage levels 71.1/54.9/45.1/33.7 as supplied from the paper's falsification table; final two stages from `run-2026-07-04-15yr-foldin` / `run-2026-07-05-berger` manifests |
 | `fig4_institutional_gap_sensitivity.png` | Institutional gap vs assumed U.S.-transplant refi-in-place CPR (0–18%), zero line, breakevens (ABM 12.6%, Path B 1.4%), Berger best-estimate ≈0 marked. The "sign is fragile, magnitude is not" chart (§20.1). | `abm/data/refi_sweep_results.json` |
 | `fig5_cross_design.png` | Cross-design variants as paired panels: (a) level recovery with the pre-registered 50% threshold and 10–35% synthetic band; (b) lag-0 path correlation — **all negative**, so 59.3% cannot be read as "the ABM basically works" (§VIII.D). | `abm/data/cross_design_results.json` (synthetic control at its contemporaneous 11.9% baseline) |
@@ -33,7 +33,7 @@ result JSONs only cover ±3; their overlapping values match exactly):
   empirical series (`macro.build_empirical_metrics`), 42-month QT window,
   `cpr_cross_correlation(max_lag=6)`
 
-Sign convention: negative lag = model CPR leads SOMA empirical CPR.
+Sign convention (corrected in the v15 referee round, [TECHNICAL.md §22.3b](../TECHNICAL.md#22-manuscript-verification-record-referee-rounds-july-2026)): a peak at negative lag means the **empirical series leads and the model CPR trails** under the implemented `cpr_cross_correlation` convention.
 
 ## Numbers cited (for cross-checking against TECHNICAL.md)
 

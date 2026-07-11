@@ -8,7 +8,7 @@ This repository hosts **two complementary frameworks**:
 
 | Folder | Approach | Status |
 | --- | --- | --- |
-| [`abm/`](abm/) | Agent-based model (10,000 households) + FRED/SOMA macro pipeline + validation suite | **Complete** — see [abm/README.md](abm/README.md) and [abm/TECHNICAL.md](abm/TECHNICAL.md) |
+| [`abm/`](abm/) | Agent-based model (10,000 households) + FRED/SOMA macro pipeline + validation suite | **Complete** — see [abm/README.md](abm/README.md) and [TECHNICAL.md Appendix B](TECHNICAL.md#appendix-b--abm-era-granular-archaeology) |
 | [`hazard/`](hazard/) | Reduced-form prepayment hazard (Freddie Mac loan-level) + literature microsim | **Implemented** — see [hazard/README.md](hazard/README.md) |
 
 ## Quick start
@@ -67,7 +67,6 @@ Lock-in-Effect/
 ├── requirements.txt
 ├── abm/                   # agent-based lock-in pipeline (scripts, outputs, docs)
 │   ├── README.md
-│   ├── TECHNICAL.md
 │   ├── paths.py           # anchored output paths
 │   └── *.py, *.csv, *.png
 └── hazard/                # reduced-form hazard framework

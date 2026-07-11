@@ -165,7 +165,7 @@ Freddie Mac `prepaid_upb` records the **economic prepayment month** (loan-level 
 
 1. **TBA forward market** — MBS pools are allocated ~2 business days before settlement; standard UMBS/GNMA remittance cycles run **45–55 days** from loan closing to investor cash receipt.
 2. **Hazard path** — voluntary prepay in `simulate.py` and literature `competing_risks.py` settles to SOMA in the **same month** as the hazard draw (no pipeline delay by design).
-3. **ABM path** — tested a `[0.10, 0.60, 0.30]` settlement kernel; **null for timing** ([`../abm/TECHNICAL.md` §21](../abm/TECHNICAL.md)).
+3. **ABM path** — tested a `[0.10, 0.60, 0.30]` settlement kernel; **null for timing** ([TECHNICAL.md Appendix B.8](../TECHNICAL.md#b8-settlement-lag-kernel--pre-registered-null)).
 
 ### Primary timing diagnostic: peak cross-correlation lag
 
@@ -174,7 +174,7 @@ Freddie Mac `prepaid_upb` records the **economic prepayment month** (loan-level 
 | Literature microsim | +0.368 | **−3 months** | **+0.444** |
 | Empirical cohort GLM (spec v3) | −0.444 | 0 | −0.444 |
 
-**Interpretation:** Negative lag means hazard CPR **leads** SOMA empirical CPR. Literature peak at lag −3 (hazard leads SOMA ~3 months) is consistent with the 45–90 day TBA settlement pipeline — expected, not a model bug.
+**Interpretation (corrected in the v15 referee round — see [TECHNICAL.md §22.3b](../TECHNICAL.md#22-manuscript-verification-record-referee-rounds-july-2026)):** under the implemented convention, a peak at lag −3 means the **empirical path leads and the simulated path trails** — a synthetic-data test of `cpr_cross_correlation` proved the direction. The earlier settlement-pipeline reading (sim leads SOMA by the TBA delay) had the two series interchanged and is **retracted**; the β₁=0 null shares the −3 peak and the peak correlation is not distinguishable from zero under block-bootstrap bands, so no timing credential attaches to any estimator.
 
 The empirical cohort path shows wrong-sign contemporaneous correlation (lag 0). This likely reflects GLM misspecification at same-month alignment, **not** a timing failure to fix with month-lag GLM terms.
 
