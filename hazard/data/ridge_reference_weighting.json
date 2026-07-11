@@ -1,0 +1,59 @@
+{
+  "units": "annualized stratum-month CPR, percentage points",
+  "holdout_rmse_grid": {
+    "alpha_1e-05": {
+      "rmse_unweighted_pp": 37.82953213310002,
+      "rmse_exposure_weighted_pp": 2.533826267952145
+    },
+    "alpha_0.0001": {
+      "rmse_unweighted_pp": 37.8295321331,
+      "rmse_exposure_weighted_pp": 2.5338262679523766
+    }
+  },
+  "alpha_ranking_invariant_to_weighting": false,
+  "selected_alpha_unweighted": "alpha_0.0001",
+  "selected_alpha_weighted": "alpha_1e-05",
+  "reference_swap": {
+    "production_reference": "2017_200_740+_\u226480",
+    "swapped_reference": "2021_750_680-740_>80",
+    "betas_production_ref": {
+      "rate_gap_bps": 0.6733519352905115,
+      "burnout_orth": -0.13009048732147674,
+      "friction": -0.037066025306261775
+    },
+    "betas_swapped_ref": {
+      "rate_gap_bps": 1.9625812678980252,
+      "burnout_orth": -0.7569839314098592,
+      "friction": -0.2480389280136497
+    },
+    "deltas": {
+      "rate_gap_bps": 1.2892293326075137,
+      "burnout_orth": -0.6268934440883824,
+      "friction": -0.21097290270738794
+    },
+    "max_abs_delta": 1.2892293326075137,
+    "note": "Ridge penalizes the full coefficient vector while one stratum is absorbed as reference, so the estimator is not reparameterization-invariant; this bounds the effect at the production alpha."
+  },
+  "grid_fit_identity": {
+    "max_abs_param_diff": 4.5102810375396984e-17,
+    "note": "The two grid alphas return bit-identical coefficient vectors from the IRLS warm start: the ridge step is a numerical no-op on the full panel and the alpha selection is inconsequential."
+  },
+  "estimable_strata_mle": {
+    "n_zero_event_strata": 20,
+    "n_cells_dropped": 423,
+    "betas_production_ref": {
+      "converged": true,
+      "rate_gap_bps": 0.6727292125124604,
+      "burnout_orth": -0.1317392380399241,
+      "friction": -0.037261601591178806
+    },
+    "betas_swapped_ref": {
+      "converged": true,
+      "rate_gap_bps": 0.6727292125124565,
+      "burnout_orth": -0.1317392380399271,
+      "friction": -0.03726160159117309
+    },
+    "max_abs_delta": 5.717648576819556e-15,
+    "note": "Unpenalized Poisson PML on the 276 strata with at least one training prepayment event converges and is exactly reference-invariant; its macro coefficients reproduce the production point to the third decimal. The 20 zero-event strata (whose FE MLEs do not exist) are the true source of the ill-conditioning the ridge papers over, and the reference-swap sensitivity above is an optimizer-path artifact of penalized cold-start refits, not information in the production point."
+  }
+}

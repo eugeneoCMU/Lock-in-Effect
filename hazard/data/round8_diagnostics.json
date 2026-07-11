@@ -1,0 +1,184 @@
+{
+  "moving_block_sensitivity": {
+    "abm_lag0": {
+      "r_point": -0.3183,
+      "lag": 0,
+      "n": 42,
+      "block4": [
+        -0.622,
+        0.057
+      ],
+      "block6": [
+        -0.592,
+        0.057
+      ],
+      "block8": [
+        -0.58,
+        0.051
+      ]
+    },
+    "path_a_lag0": {
+      "r_point": -0.4444,
+      "lag": 0,
+      "n": 42,
+      "block4": [
+        -0.71,
+        -0.043
+      ],
+      "block6": [
+        -0.68,
+        -0.001
+      ],
+      "block8": [
+        -0.656,
+        0.038
+      ]
+    },
+    "path_b_lag0": {
+      "r_point": 0.19,
+      "lag": 0,
+      "n": 42,
+      "block4": [
+        -0.107,
+        0.449
+      ],
+      "block6": [
+        -0.145,
+        0.449
+      ],
+      "block8": [
+        -0.165,
+        0.415
+      ]
+    },
+    "path_b_peak_m3": {
+      "r_point": 0.4044,
+      "lag": -3,
+      "n": 42,
+      "block4": [
+        -0.268,
+        0.392
+      ],
+      "block6": [
+        -0.209,
+        0.493
+      ],
+      "block8": [
+        -0.221,
+        0.505
+      ]
+    }
+  },
+  "parity_block6": {
+    "abm_lag0": {
+      "printed": [
+        -0.6,
+        0.04
+      ],
+      "recomputed_block6": [
+        -0.592,
+        0.057
+      ],
+      "within_0.02": true
+    },
+    "path_a_lag0": {
+      "printed": [
+        -0.68,
+        -0.02
+      ],
+      "recomputed_block6": [
+        -0.68,
+        -0.001
+      ],
+      "within_0.02": true
+    },
+    "path_b_lag0": {
+      "printed": [
+        -0.13,
+        0.44
+      ],
+      "recomputed_block6": [
+        -0.145,
+        0.449
+      ],
+      "within_0.02": true
+    },
+    "path_b_peak_m3": {
+      "printed": [
+        -0.21,
+        0.49
+      ],
+      "recomputed_block6": [
+        -0.209,
+        0.493
+      ],
+      "within_0.02": true
+    }
+  },
+  "interval_contains_zero": {
+    "abm_lag0": {
+      "block4": true,
+      "block6": true,
+      "block8": true
+    },
+    "path_a_lag0": {
+      "block4": false,
+      "block6": false,
+      "block8": true
+    },
+    "path_b_lag0": {
+      "block4": true,
+      "block6": true,
+      "block8": true
+    },
+    "path_b_peak_m3": {
+      "block4": true,
+      "block6": true,
+      "block8": true
+    }
+  },
+  "design_note": "Circular moving-block bootstrap of the joint monthly series, 4,000 replications, correlation recomputed at the FIXED printed lag per replication; identified by exact reconstruction of all four printed block-6 intervals. Seed noise on endpoints is about \u00b10.015.",
+  "per_lag_zero_bands": {
+    "-3": {
+      "n_overlap": 39,
+      "iid_band": 0.3139
+    },
+    "-2": {
+      "n_overlap": 40,
+      "iid_band": 0.3099
+    },
+    "-1": {
+      "n_overlap": 41,
+      "iid_band": 0.3061
+    },
+    "0": {
+      "n_overlap": 42,
+      "iid_band": 0.3024
+    },
+    "1": {
+      "n_overlap": 41,
+      "iid_band": 0.3061
+    },
+    "2": {
+      "n_overlap": 40,
+      "iid_band": 0.3099
+    },
+    "3": {
+      "n_overlap": 39,
+      "iid_band": 0.3139
+    }
+  },
+  "per_lag_note": "n=42 QT months; a lag-k levels cross-correlation uses n-|k| overlapping pairs, so its i.i.d. reference band is 1.96/sqrt(n-|k|): 0.3024 at lag 0, 0.3061 at |k|=1, 0.3099 at |k|=2, 0.3139 at |k|=3. First-difference statistics lose one further observation (n=41 at lag 0). Detrended-levels statistics keep n=42 at lag 0.",
+  "panel_recount": {
+    "train_cells": 10176,
+    "holdout_cells": 6077,
+    "printed_tab_panel": {
+      "train": 10176,
+      "holdout": 6076
+    },
+    "artifact_hazard_coefficients": {
+      "train": 10176,
+      "holdout": 6077
+    }
+  }
+}

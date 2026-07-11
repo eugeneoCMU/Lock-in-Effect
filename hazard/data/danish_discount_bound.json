@@ -1,0 +1,38 @@
+{
+  "spreads_bp": [
+    0,
+    50,
+    100
+  ],
+  "runs": {
+    "spread_0bp": {
+      "danish_trapped_b": 934.2537223431874,
+      "share_of_benchmark_pct": 122.17258040318914,
+      "mean_danish_cpr_pct": 3.385569752786403,
+      "flipped_loan_months": 0,
+      "evaluated_loan_months": 0,
+      "parity_max_abs_cpr_diff_vs_production": 2.725950813520228e-06
+    },
+    "spread_50bp": {
+      "danish_trapped_b": 934.2537223431874,
+      "share_of_benchmark_pct": 122.17258040318914,
+      "mean_danish_cpr_pct": 3.385569752786403,
+      "flipped_loan_months": 7803,
+      "evaluated_loan_months": 1683124
+    },
+    "spread_100bp": {
+      "danish_trapped_b": 934.2537223431874,
+      "share_of_benchmark_pct": 122.17258040318914,
+      "mean_danish_cpr_pct": 3.385569752786403,
+      "flipped_loan_months": 32486,
+      "evaluated_loan_months": 1683124
+    }
+  },
+  "deltas_vs_baseline_b": {
+    "spread_0bp": 0.0,
+    "spread_50bp": 0.0,
+    "spread_100bp": 0.0
+  },
+  "note": "Discount-only shift: the refi-side gap is untouched, so the U.S. leg and the capped-at-par branch are unaffected by construction. Deltas are on the standalone scorer; the shared-accounting netting is common to both runs and cancels in the difference.",
+  "structural_finding": "The deltas are exactly zero because the production Danish leg's prepay hazard is the imported Berger flat-elasticity calibration (competing_risks.monthly_step, DANISH branch, via common.berger_calibration.danish_cpr_annual): rate_gap_danish's PV-vs-par classification is computed into pool.rate_gap but that array is consumed only by the non-Danish prepay branch. The primary/secondary discount wedge therefore cannot reach the Berger-recalibrated production finding by construction \u2014 the manuscript's 'immaterial' is exact \u2014 while the classification itself flips 7,803 (50bp) / 32,486 (100bp) of 1,683,124 loan-months, which is the exposure a PV-proxy-driven Danish leg (the superseded mechanism-substitution ABM variant) would carry."
+}

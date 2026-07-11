@@ -70,10 +70,15 @@ def score_extension_risk(
     )
     best_lag = max(xcorr, key=lambda k: abs(xcorr[k])) if xcorr else 0
     peak_lag_r = xcorr.get(best_lag, 0.0) if xcorr else 0.0
+    # Direction verified against synthetic data (v15 round, re-verified round
+    # 8): under macro.cpr_cross_correlation's pairing, a NEGATIVE peak lag
+    # means the simulated path TRAILS the empirical path (empirical moves
+    # first). The settlement-delay reading printed here through round 7 was
+    # inverted and is retracted in the manuscript (Appendix A erratum).
     lag_interp = (
-        "Negative lag = hazard CPR leads SOMA empirical CPR. "
-        "Consistent with 45-90d TBA settlement delay between "
-        "Freddie loan-level prepay and NY Fed SOMA cash receipt."
+        "Negative lag = simulated CPR trails SOMA empirical CPR "
+        "(empirical moves first; direction verified on synthetic data). "
+        "No settlement interpretation is attached (manuscript §V.C)."
     )
 
     results = {
