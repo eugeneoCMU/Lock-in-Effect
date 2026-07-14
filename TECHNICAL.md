@@ -1,6 +1,6 @@
 # Technical Narrative — Lock-In Effect Project
 
-This document is the **repository-level** technical history: what was built, what broke, what was fixed, what was falsified, and why the codebase now has two frameworks (`abm/` and `hazard/`). It is written for a reader who wants the full causal chain from the original **$972.3B** headline to the current validated **$764.7B** empirical benchmark and the current reconciled model results: the ABM explains **11.1%** on its synthetic population (post native 15-year gate, §19) but **59.3%** when fed real Freddie structural covariates with a recalibrated anchor (§15 Fix 1) — the share is calibration- and data-source-dependent, and both figures must be quoted together (§18). The hazard paths recover 107–120% of the benchmark, but an executed no-lock-in null (β₁=0) recovers **97.8%** (§12), so aggregate benchmark recovery is not by itself evidence about lock-in; the frameworks are distinguished by marginal lock-in contribution and monthly CPR-path fit. The Danish institutional gap is approximately **zero** under estimated elasticities, with its sign not identified (§20–§20.1). A July 2026 robustness-fix program (§15) plus follow-on analyses (§16–§19) revised the headline figures and added permutation, cross-foundation, and synthetic-companion tests — see those sections for what changed and why.
+This document is the **repository-level** technical history: what was built, what broke, what was fixed, what was falsified, and why the codebase now has two frameworks (`abm/` and `hazard/`). It is written for a reader who wants the full causal chain from the original **$972.3B** headline to the current validated **$764.7B** empirical benchmark and the current reconciled model results: the ABM explains **11.1%** on its synthetic population (post native 15-year gate, §19) but **59.3%** when fed real Freddie structural covariates with a recalibrated anchor (§15 Fix 1) — the share is calibration- and data-source-dependent, and both figures must be quoted together (§18). The hazard paths recover 107–121.5% of the benchmark (Path A spec v4 calendar-month production as of the 2026-07-14 freeze, §22.5), but an executed no-lock-in null (β₁=0) recovers **97.8%** (§12), so aggregate benchmark recovery is not by itself evidence about lock-in; the frameworks are distinguished by marginal lock-in contribution and monthly CPR-path fit. The Danish institutional gap is approximately **zero** under estimated elasticities, with its sign not identified (§20–§20.1). A July 2026 robustness-fix program (§15) plus follow-on analyses (§16–§19) revised the headline figures and added permutation, cross-foundation, and synthetic-companion tests — see those sections for what changed and why.
 
 For module-level runbooks, see [README.md](README.md). For hazard pipeline specs, see [hazard/README.md](hazard/README.md). The former `abm/TECHNICAL.md` (granular ABM archaeology) and `REVISION_VERIFICATION.md` (manuscript verification record) were consolidated into this file on 2026-07-11 — see [Appendix B](#appendix-b--abm-era-granular-archaeology) and [§22](#22-manuscript-verification-record-referee-rounds-july-2026); their full texts remain in git history.
 
@@ -293,6 +293,8 @@ $$\log(h_{c,t}) = \text{spline}(\text{loan\_age}) + \beta_1 \cdot \text{RateGap\
 > β(rate_gap) is not sign-stable under covariate scramble ([−1.13, +1.19]).
 > The $915B (119.7%) aggregate is retained for the fitted-vs-literature
 > contrast (§16, §18) and should not be quoted as a standalone estimate.
+> (Status note superseded at the 2026-07-14 freeze: the calendar-month
+> spec v4 is now production Path A — §12 and §22.5.)
 
 | Metric | Value |
 |---|---|
@@ -469,17 +471,24 @@ $103.7B to the fold-in paper spec.
 
 Reproduce: `cd abm && python3 freeze_run.py --tag <name>` → `data/runs/<name>/manifest.json`. All CPR means use the 42-month active QT window (`qt_active_frame`), not `index >= QT_START` alone.
 
-### Hazard Path A — cohort fractional (Freddie 2017–2021, spec v3; robustness exhibit only, see §10 status note)
+### Hazard Path A — cohort fractional (Freddie 2017–2021, spec v4 calendar-month; production as of the 2026-07-14 freeze, §22.5)
 
 | Metric | Value |
 |---|---|
-| Trapped liquidity | **$915B (119.7%)** |
-| β(rate_gap_bps) | +0.67 (standardized; stratum-bootstrap 95% CI **[+0.60, +4.11]**, sign stable in 99.5% of reps, §21) |
-| β(burnout_orth) | **−0.13** (n.s. — bootstrap CI [−1.76, +1.43], §21; sign also not stable under permutation, §16) |
-| β(friction) | −0.037 (n.s. — bootstrap CI [−0.25, +1.38], §21) |
-| CPR r (lag 0) | −0.444 |
-| Holdout RMSE | ~38pp |
+| Trapped liquidity | **$928.9B (121.5%)** (`run-2026-07-14-pathA-seasonal`) |
+| β(rate_gap_bps) | +0.65 (standardized, spec v4 point; the uncertainty exhibit remains spec v3 — stratum-bootstrap 95% CI **[+0.60, +4.11]**, sign stable in 99.5% of reps, §21 — because bootstrap replications under the seasonal design are branch-unstable, §22.5) |
+| β(burnout_orth) | **−0.17** (spec v3 CI [−1.76, +1.43], §21; sign also not stable under permutation, §16) |
+| β(friction) | −0.007 (month dummies absorb most within-year variation of the time-only friction index; spec v3 CI [−0.25, +1.38], §21) |
+| Month log-effects (Jan = 0) | +0.12 to +0.43 (peak March/September–October) |
+| CPR r (lag 0) | −0.378 |
+| Peak cross-corr | lag −2 |
+| Mean sim CPR | 3.34% |
+| Holdout RMSE | ~38pp (spec v3; not re-evaluated at adoption) |
 | Stratum FE | 295 four-way pools |
+
+Prior spec v3 ($915.1B / 119.7%, r(lag0) −0.444, +0.67/−0.13/−0.037) is
+preserved as `hazard_coefficients_specv3.json`; `permutation_test_pathA.py`
+remains a spec-v3 exhibit.
 
 ### Hazard Path B — literature microsim (Freddie 2017–2021, post-β₁-fix)
 
@@ -1808,6 +1817,60 @@ numbering safely through `\ref`.
 Open beyond it: the title is still a placeholder while the conclusion
 invokes "the Securitization Trade-Off of this paper's title" — the title
 must carry the phrase now that the abstract leads with the decomposition.
+
+### 22.5 Pre-submission freeze execution (2026-07-14): Path A spec v4 adoption and restatement
+
+**(a) Phases 0–1.** Repo hygiene (`0141614`: §17.1 kernel/Markov claim
+corrected to code truth; editor dirs gitignored) and the liveness gates
+mechanized as `tools/liveness_gates.py` (`e828240`): 8 zero-count phrases,
+4 exactly-one phrases, and the settlement-lag-kernel manifest cross-check;
+all 13 gates pass, and `tools/test_timing_sweep.py` passes (freeze item iv).
+
+**(b) Adoption (freeze item i) — two pre-registrations.** The FIRST
+attempt (`7c3c673`) failed Gate B: re-assembling the seasonal design inside
+`fit_hazard_glm` (pandas ddof-1 standardization) flipped Poisson IRLS into
+its cold-start ridge fallback and a different, incompletely converged
+penalized optimum (rate-gap ≈ +1.96; near-uniform −0.30 "month effects" —
+an intercept split). Read-only diagnostic: the committed construction,
+`seasonality_concave_gap.fit_with_month_dummies`, reproduces its artifact
+to zero drift — the seasonal numbers are **construction-pinned**. The
+SECOND pre-registration (`4e11124`) defines spec v4 as that construction
+verbatim; both gates then passed exactly (`6895b2e`): Gate A reproduced
+the v3 macro coefficients to 1e-6, Gate B reproduced the committed
+seasonal artifact to the 4th decimal ($928.8930B, r(lag0) −0.3782, peak
+lag −2). v3 preserved as `hazard_coefficients_specv3.json`; frozen tag
+`run-2026-07-14-pathA-seasonal` (`9234b96`), artifacts sha256-pinned.
+
+**(c) Downstream restatements, Path B invariant.** WAL table (`ecdb927`):
+Path A 10.9/9.7yr at 3.34% mean CPR, spec v3 row kept as a gated exhibit.
+Shared layer (`8f58e57`): Path A 112.4% shared (121.5% standalone); every
+Path B figure unchanged (97.9/88.7/composed 100.0). Full book (`656e054`):
+Path A 127.5%; Path B invariant to 4 decimals (107.0326 → 109.1391).
+Unblocking fix (`9721beb`): loan-sample cache path + dead
+`authenticate_service_account` call (suite 26/26; frozen sample untouched).
+Known wart: `full_book_weighting` writes its reweighted sim over
+`simulation_results.parquet` (restored from the committed artifact).
+
+**(d) Bootstrap under v4: invalid, reverted, prior-spec retained.** All
+200 stratum-cluster replications jumped to the +1.96 alternative optimum
+despite production warm-starts (95% CI [+1.91, +2.01] excluding its own
++0.6469 point), and the resimulate pass propagated those draws ($1,122B
+mean around a $928.9B point). Mechanism: eleven month dummies are nearly
+collinear with the time-only friction regressor, flattening the resampled
+likelihood into two basins. Artifacts reverted to committed spec v3 state;
+the manuscript labels the coefficient-uncertainty table and the
+refit-and-resimulate interval as spec v3 prior-spec exhibits with the
+branch-instability disclosure. This is also why the v4 friction point
+(−0.007) is a fifth of v3's (−0.037).
+
+**(e) Manuscript restatement.** 27 assert-checked edits (Path A material
+only): production statement and promotion provenance in §V.B, v4
+coefficients with the friction-identification note, Table 2 row, Table 4
+note, WAL row, §V.D comparatives, §VII shared/full-book sentences,
+conclusion ranges, freeze item (i) marked executed with the prior-spec
+labeling, in/out-of-sample split scoped to spec v3 (not recomputed).
+Build clean (53 pp, zero undefined); all 13 liveness gates pass on the
+restated manuscript; md/txt editions regenerated in lockstep.
 
 ---
 
