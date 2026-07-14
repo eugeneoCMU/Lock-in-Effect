@@ -47,6 +47,17 @@ EXACTLY_ONE = [
 
 KERNEL_TEX_PHRASE = "kernel is retained in production"
 
+# Freeze item (ii), LaTeX half: every cross-reference goes through \ref —
+# a hardcoded "Table 7" / "Section V.C" literal would silently drift when
+# floats renumber. Comments are stripped before matching.
+HARDCODED_XREF = {
+    "Table N literal": r"Table[~ ]\d",
+    "Figure N literal": r"Figure[~ ]\d",
+    "Section roman literal": r"Section[~ ][IVX]+(?:\.[A-Z])?(?![a-zA-Z}])",
+    "Appendix letter literal": r"Appendix[~ ][AB](?![a-zA-Z}])",
+    "Equation (N) literal": r"[Ee]quation[~ ]\(\d\)",
+}
+
 
 def main() -> int:
     tex = TEX.read_text()
@@ -63,6 +74,14 @@ def main() -> int:
         ok = n == 1
         failures += 0 if ok else 1
         print(f"[{'PASS' if ok else 'FAIL'}] exactly-one {phrase!r}: {n}")
+
+    import re
+    tex_nc = re.sub(r"(?<!\\)%.*", "", tex)
+    for label, pat in HARDCODED_XREF.items():
+        n = len(re.findall(pat, tex_nc))
+        ok = n == 0
+        failures += 0 if ok else 1
+        print(f"[{'PASS' if ok else 'FAIL'}] no-hardcoded-xref {label}: {n}")
 
     manifest = json.loads(MANIFEST.read_text())
     flag = bool(manifest.get("pipeline", {}).get("apply_settlement_lag_kernel"))
