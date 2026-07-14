@@ -88,9 +88,11 @@ def fig1_recovery_dotplot():
          recal["share_pct"], recal["cpr_r_lag0"], C_CROSS, None),
         ("Cross-design ABM — frozen calibration",
          frozen["share_pct"], frozen["cpr_r_lag0"], C_CROSS, None),
+        # Production ABM row = the fold-in run Table 2 quotes; earlier
+        # editions showed the Berger-run native-gate variant here.
         ("ABM — production (household choice)",
-         BERGER["dollars_b"]["share_explained_pct"],
-         BERGER["cross_correlation"]["0"], C_CHOICE, None),
+         FOLDIN["dollars_b"]["share_explained_pct"],
+         FOLDIN["cross_correlation"]["0"], C_CHOICE, None),
     ]
     fig, ax = plt.subplots(figsize=(10.4, 4.8))
     ys = np.arange(len(rows))[::-1]
@@ -172,9 +174,9 @@ def fig3_abm_waterfall():
     """ABM falsification bridge: every extension moves away from 100%."""
     early = _j("figures/fig3_stage_levels.json")["stages"]
     stages = [(s["label"], s["share_pct"]) for s in early]
-    stages.append(("+ 15yr fold-in\n(structural)",
+    stages.append(("+ 15yr fold-in\n(production headline)",
                    FOLDIN["dollars_b"]["share_explained_pct"]))
-    stages.append(("Production\n(native 15yr gate)",
+    stages.append(("Native 15yr gate\n(Berger-run variant)",
                    BERGER["dollars_b"]["share_explained_pct"]))
     fig, ax = plt.subplots(figsize=(8.8, 4.8))
     xs = np.arange(len(stages))
