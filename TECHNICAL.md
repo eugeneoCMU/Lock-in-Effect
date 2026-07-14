@@ -1872,6 +1872,40 @@ labeling, in/out-of-sample split scoped to spec v3 (not recomputed).
 Build clean (53 pp, zero undefined); all 13 liveness gates pass on the
 restated manuscript; md/txt editions regenerated in lockstep.
 
+**(f) Freeze items (ii) and (iii) executed (2026-07-14, later).**
+Item (ii), LaTeX half: the master carries zero hardcoded
+Table/Figure/Section/Appendix/Equation cross-reference literals —
+machine-checked by five strictly-additive gates in
+`tools/liveness_gates.py` (v2; 18 gates total) — and builds clean with
+zero unresolved references or citations, the log shipping in the local
+bundle (`paper/v16/tectonic_build_freeze.log`). The Word REF-field half
+awaits a v16 Word submission master (none exists; the only Word edition
+is the superseded v15r5). Item (iii): a claims-versus-code liveness
+audit ran as an adversarial multi-agent sweep —
+**77 production-mechanism claims extracted, each independently traced
+to its executing code path; 68 traced as written, 9 did not**
+(`tools/claims_liveness_audit_2026-07-14.json` carries every claim,
+verdict, and disposition). The nine: curtailment is netted on the
+simulated side, not in the empirical CPR back-out (corrected — the
+audit's headline catch); the 15-year borrowed-30yr-surface sentences
+now scope to the frozen headline specification (native gate at HEAD),
+two sites; "recorded reproduction commit" removed (manifest
+`git_commit` is the pre-run parent; no artifact records a reproduction
+checkout); "bit-identical" grid fits restated as machine-precision
+identity (4.5e-17, per artifact); two ridge/reference verification
+baselines scoped to spec v3 post-adoption; the Danish rate-gap unit
+correction scoped as computed-but-unconsumed in the production leg
+(round-9 defect class, resurfaced in one §VII sentence); the
+"declining as defaults absorb" attrition mechanism dropped (a static
+month-one zero-balance exclusion dominates; the verifier's live
+decomposition traces to no committed artifact, so no replacement
+numbers were printed). One failure was extraction over-reach (the
+seven-cohort sentence is correctly scoped to the superseded diagnostic)
+and received no edit. Freeze-list items (ii)/(iii) marked executed in
+the manuscript; build clean at 54 pp; all 18 gates pass; editions in
+lockstep. Item (iv) passes (`tools/test_timing_sweep.py`); item (v)
+(title ratification) remains the author's.
+
 ---
 
 ## Appendix A — File Map

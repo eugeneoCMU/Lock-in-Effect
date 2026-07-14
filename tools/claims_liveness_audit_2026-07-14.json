@@ -1,0 +1,869 @@
+{
+  "mode": "claims_vs_code_liveness_audit",
+  "date": "2026-07-14",
+  "freeze_item": "(iii)",
+  "method": "Six extraction agents swept the manuscript for sentences presenting a mechanism as production behavior (excluding results numbers, labeled robustness/superseded/spec-v3 exhibits, and history); each claim was then adversarially verified by an independent agent instructed to refute it against the executing code path (dead code and variants do not count as tracing).",
+  "n_claims": 77,
+  "n_traced": 68,
+  "n_failed_as_written": 9,
+  "failures_with_dispositions": [
+    {
+      "quote": "nets cohort-weighted scheduled amortization and an income-scaled curtailment assumption averaging approximately 0.84% annualized",
+      "claim": "The empirical CPR back-out subtracts cohort-weighted scheduled amortization plus an income-scaled curtailment averaging ~0.84% annualized; two implementations exist in the pipeline (ABM side: cohort-weighted term-aware amortization; hazard side: single-pool amortization approximation).",
+      "expected_code": "abm/fed_mbs_extension_risk.py (ABM-side back-out); hazard/macro.py and hazard/shared_layer_scoring.py (hazard-side single-pool approximation)",
+      "region": "method",
+      "verdict": {
+        "traces": false,
+        "code_path": "abm/fed_mbs_extension_risk.py:1149-1152 (ABM back-out) and hazard/macro.py:244-247 (hazard back-out); curtailment defined at abm/fed_mbs_extension_risk.py:141-155 and applied only to simulated roll-off (lines 895, 957, 990, 1088, 1119)",
+        "note": "Partially traces, but the central mechanism is misstated: the empirical CPR back-out does NOT net curtailment in either implementation. ABM side: `empirical_smm = (actual_abs / holdings_b) - df[\"Scheduled_Amort_SMM\"]` (fed_mbs_extension_risk.py:1151) subtracts only scheduled amortization; hazard side is identical (macro.py:246: `empirical_smm = (actual_abs / holdings_b) - sched_smm`). No curtailment term appears in either back-out, so Empirical_CPR_Pct retains the ~0.84pp curtailment component rather than netting it. Curtailment enters the pipeline only on the SIMULATED roll-off side \u2014 added to the simulated drain (CPR + sched + curtailment) at lines 957/990/1088/1119 (and subtracted from microsim rolloff at line 895) \u2014 and is reported as a netted dollar item `curtailment_b` (fed_mbs_extension_risk.py:1493-1500; exposed as \"curtailment_netted_b\" in hazard/shared_layer_scoring.py:99-100). What DOES trace: (a) the 0.84% figure \u2014 income-scaled curtailment via curtailment_series (1.2% CPR at healthy DSPIC96 YoY >= 4%, linearly scaled to 0 at -2%, /12 monthly), with all five frozen manifests (abm/data/runs/*/manifest.json, incl. headline run-2026-07-05-berger) reporting curtailment_b.annualized_pct = 0.8368% \u2248 0.84%; (b) two amortization implementations \u2014 ABM burnout mode builds cohort-weighted, term-aware sched_smm_weighted from per-cohort coupon/origin/term_months (lines 946-968; headline manifest confirms n_cohorts=11 burnout mode, sched annualized 3.12%), while hazard/macro.py uses a single-pool approximation (coupon=0.025, origin 2020-06, lines 240-243). The manuscript sentence (\"nets cohort-weighted scheduled amortization AND an income-scaled curtailment assumption\") should be corrected: the back-out nets amortization only; curtailment is a simulation-side assumption netted in the dollar decomposition, not in the empirical CPR back-out. Note also the microsim/shared-layer configuration (shared_layer_scoring.py:82-87) uses the single-pool amortization at line 890-891 even on the ABM accounting layer, consistent with the paper's \"which rows use which\" caveat."
+      },
+      "disposition": "CORRECTED in tex: back-out nets amortization only; curtailment enters on the simulated side and is netted as a common dollar item in the shared layer."
+    },
+    {
+      "quote": "drawn from the Federal Reserve's actual holdings composition: the live CUSIP-level SOMA parse",
+      "claim": "In the production multi-vintage specification, each simulated household's mortgage coupon and origination date are drawn from a live CUSIP-level parse of actual SOMA holdings, bucketed across seven coupon cohorts (with the earlier diagnostic pass approximating origination dates from parsed maturity strings under a 360-month term assumption and excluding 15-year MBS).",
+      "expected_code": "abm/fed_mbs_extension_risk.py (CUSIP-level SOMA parse and cohort bucketing), abm/abm_lockin_simulation.py (population endowment)",
+      "region": "method",
+      "verdict": {
+        "traces": false,
+        "code_path": "abm/fed_mbs_extension_risk.py::fetch_soma_mbs_cohorts (lines 508-652, live NY Fed CUSIP parse + coupon bucketing) -> abm/abm_lockin_simulation.py::build_multi_cohort_surfaces (lines 542-556) + fed_mbs_extension_risk.py::build_production_metrics (cohort-weight aggregation ~lines 866, 951, 1614)",
+        "note": "The mechanism exists and is production-reachable: fetch_soma_mbs_cohorts pulls the latest CUSIP-level SOMA holdings from the NY Fed API, parses coupon and MM/YY maturity from securityDescription, back-derives origin_date as maturity minus term (360mo for 30yr, 180mo for 15yr via TERM_MONTHS_BY_LABEL), and buckets into 0.5pp coupon cohorts with a 2% within-term min-share fold. The parenthetical about the earlier diagnostic pass is accurate: at commit 0899d12 the function filtered term != \"30yr\" (excluding 15-year MBS) and used origin = maturity - PORTFOLIO_TERM (360 months), yielding 7 cohorts. BUT the headline count is inverted: \"seven coupon cohorts\" is the EARLIER 30yr-only spec (manifests run-2026-07-04 and pre-fix-2026-07: n_cohorts=7), while the production multi-vintage/15yr-fold-in headline run (run-2026-07-04-15yr-foldin, per memory the paper's headline tag; also berger and native15yr) records n_cohorts=11 (WAC 2.49%). The claim attributes the seven-cohort bucketing to the very spec that superseded it. Secondary imprecision: coupons/origination are not drawn per household \u2014 engine.attach_cohort rebinds ALL households to one cohort at a time and cohort outputs are weight-averaged by SOMA face-value shares, so the composition holds only at the aggregate CPR level; and the maturity-string/term-assumption approximation of origination dates is not unique to the diagnostic pass \u2014 production code does the same (with 180mo added for 15yr)."
+      },
+      "disposition": "NO EDIT (extraction over-reach): the seven-cohort sentence is explicitly scoped to the superseded diagnostic pass; the manuscript nowhere attributes a cohort count to production. Production fold-in manifest records n_cohorts=11."
+    },
+    {
+      "quote": "voluntary CPR for 15-year cohorts continues to use the same-coupon 30-year surface",
+      "claim": "For 15-year cohorts, voluntary CPR is looked up from the same-coupon 30-year CPR surface rather than a 15-year-specific surface, because the payment-delta gate is unreliable for short-amortization loans.",
+      "expected_code": "abm/abm_lockin_simulation.py (CPR surface lookup logic for 15-year cohorts), abm/abm_cpr_surface*.csv inputs",
+      "region": "abm-results",
+      "verdict": {
+        "traces": false,
+        "code_path": "abm/fed_mbs_extension_risk.py:1000-1022 (compute_metrics multi-cohort branch) \u2014 surfaces keyed (coupon, term_months); 15yr cohorts use their OWN native surface, per comment \"15yr cohorts now use their OWN surface\" (lines 1006-1009); native gate implemented in abm/abm_lockin_simulation.py:383-409 (MicrosimPool._mobility_penalty, is_short branch)",
+        "note": "The claim describes the superseded structural-only fold-in (TECHNICAL.md \u00a715 Fix 2, run-2026-07-04-15yr-foldin). Commit bc07d32 \"Native 15-year behavioral gate (replaces borrowed 30yr surface)\" (TECHNICAL.md \u00a719) switched production to per-cohort native 15-year surfaces: abm/abm_cpr_surface.csv contains Cohort_Term=180 slabs for coupons 1.5-3.0%, and its SHA-256 matches the input hash frozen in abm/data/latest_run_manifest.json (run-2026-07-05-berger) and abm/data/runs/run-2026-07-05-native15yr/manifest.json. The payment-delta-gate-unreliability rationale is real, but production fixes it with a term-aware rate-lock penalty that generates native 15yr surfaces, not by borrowing the 30-year surface; the missing-slab fallback (lines 1011-1018) prefers nearest same-term coupon and never fires for production 15yr cohorts. The word \"continues\" is false at HEAD and for all frozen runs from 2026-07-05 onward."
+      },
+      "disposition": "CORRECTED in tex: borrowed 30yr surface scoped to the frozen headline specification; native-gate replacement at HEAD named in-sentence."
+    },
+    {
+      "quote": "the run is reproduced via freeze_run.py --tag run-2026-07-04-15yr-foldin at the run ledger's recorded reproduction commit",
+      "claim": "The frozen headline run can be reproduced by invoking freeze_run.py with a --tag argument naming the run, checked out at a reproduction commit recorded in a run ledger; at HEAD an unpinned rerun produces a different specification (native 15-year gate, Berger Danish path).",
+      "expected_code": "abm/freeze_run.py (CLI --tag, reproduction logic), abm/data/runs/ ledger and manifests",
+      "region": "abm-results",
+      "verdict": {
+        "traces": false,
+        "code_path": "abm/freeze_run.py:160-177 (--tag CLI) + abm/data/runs/run-2026-07-04-15yr-foldin/manifest.json; HEAD drift confirmed at abm/abm_lockin_simulation.py:408-409 (unconditional native 15yr gate) and :414-422 (Berger Danish path via common/berger_calibration.py)",
+        "note": "The mechanism halves trace: freeze_run.py --tag exists and writes the tagged manifest, and an unpinned HEAD rerun genuinely yields a different spec (native 15yr gate is unconditional, Danish leg is Berger-calibrated, live abm_cpr_surface.csv hash a828fcbe... != frozen input hash ae6eb1b7...; TECHNICAL.md:466-467 says HEAD cannot reproduce the fold-in spec). The failing specific is \"at the run ledger's recorded reproduction commit\": no repository artifact records a reproduction commit. The runs index abm/data/runs/README.md records zero commits and still names stale run-2026-07-04 as the current production tag; the manifest's git_commit (0899d12) is the pre-fold-in parent from a dirty-tree freeze and does NOT reproduce the run (TECHNICAL.md \u00a722.1: manifest git_commit unreliable, identify specs by cohort-bucket count); the true reproduction commit 5cf33a3 appears only in TECHNICAL.md \u00a712 prose in the Monte Carlo context, not in any run ledger. The manuscript's companion sentence \"the repository's run ledger records the exact reproduction commits\" (v16 app:ledger/limitations) describes an artifact that does not exist at HEAD 879ba24 \u2014 grep for \"run ledger\"/\"reproduction commit\" across repo markdown returns nothing. To make the claim true, either add reproduction commits (5cf33a3 for the fold-in tag) to abm/data/runs/README.md or soften the manuscript wording."
+      },
+      "disposition": "CORRECTED in tex: 'recorded reproduction commit' replaced \u2014 the manifest git_commit is the pre-run parent (documented convention), no artifact records a reproduction checkout."
+    },
+    {
+      "quote": "the two grid points return bit-identical coefficient vectors from the IRLS warm start",
+      "claim": "At production magnitudes the ridge penalty is a numerical no-op (both grid points yield bit-identical coefficients from the IRLS warm start), the 20 zero-event strata's fixed effects are pinned by the warm-started optimizer rather than the penalty, and the bootstrap machinery warm-starts every replication and discards non-converged draws.",
+      "expected_code": "hazard/hazard_fit.py (warm-start IRLS), hazard/bootstrap_se.py / hazard/temporal_block_bootstrap.py (warm start + convergence filtering), hazard/ridge_reference_weighting.py",
+      "region": "path-a",
+      "verdict": {
+        "traces": false,
+        "code_path": "hazard/hazard_fit.py:164-190 (_fit_poisson_glm IRLS\u2192ridge warm start), fit_hazard_glm:319-343 grid over config.py:84 RIDGE_ALPHA_GRID=[1e-5,1e-4]; diagnostic hazard/ridge_reference_weighting.py:157-227 + frozen artifact hazard/data/ridge_reference_weighting.json; bootstrap warm start/filtering hazard/bootstrap_se.py:133-156,217-225 and hazard/temporal_block_bootstrap.py:98-106",
+        "note": "Two of three sub-claims fully trace: (a) 20 zero-event strata \u2014 artifact records n_zero_event_strata=20, n_cells_dropped=423, and the pinned-by-warm-started-optimizer-not-penalty interpretation matches the code (IRLS maxiter=100 sets inestimable FEs; the no-op ridge step leaves them); (b) bootstrap \u2014 run_bootstrap passes start_head=point['params_head'] on every replication in both schemes, and fit_betas raises on non-finite params or |macro beta|>20, with the caller counting n_failed and discarding the draw. The mismatch is the quoted adjective: the frozen artifact's grid_fit_identity.max_abs_param_diff = 4.51e-17 is NONZERO, so the two grid-point coefficient vectors are identical to machine precision (~1 ULP) but NOT bit-identical (bit-identity requires a diff of exactly 0.0; the holdout RMSEs likewise differ in trailing digits, 37.82953213310002 vs 37.8295321331, which is what made the strict rmse<best_rmse selection pick alpha=1e-4). The substantive content \u2014 ridge penalty numerically a no-op from the IRLS warm start, alpha selection inconsequential \u2014 is supported by the artifact; the manuscript should say 'identical to machine precision (max |\u0394| 4.5e-17)' rather than 'bit-identical'. TECHNICAL.md:1657 propagates the same overstatement while printing the contradicting number beside it."
+      },
+      "disposition": "CORRECTED in tex: 'bit-identical' -> identical to machine precision with the artifact's max parameter difference (4.5e-17)."
+    },
+    {
+      "quote": "dropping the 20 zero-event strata (423 of 10,176 cells) and fitting unpenalized Poisson PML converges, is exactly invariant to the reference choice, and reproduces the production macro coefficients",
+      "claim": "A verification fit exists that drops the 20 strata with no training prepayment events (423 of 10,176 cells), fits unpenalized Poisson PML, and reproduces the production standardized macro coefficients to within 0.002 (rate gap +0.6727 vs +0.6734, friction -0.0373 vs -0.0371, burnout -0.1317 vs -0.1301).",
+      "expected_code": "hazard/ridge_reference_weighting.py or hazard/panel_disclosures.py (estimable-strata unpenalized refit)",
+      "region": "path-a",
+      "verdict": {
+        "traces": false,
+        "code_path": "hazard/ridge_reference_weighting.py:169-228 (estimable_strata_mle: zero-event strata dropped, unpenalized sm.GLM Poisson PML) -> frozen artifact hazard/data/ridge_reference_weighting.json",
+        "note": "Every mechanical specific reproduces exactly: 20 zero-event strata / 423 of 10,176 cells dropped (JSON: n_zero_event_strata=20, n_cells_dropped=423, n_train=10176); unpenalized Poisson PML via sm.GLM(Poisson, offset=log exposure).fit() with no ridge; converged=true; exactly reference-invariant (max_abs_delta 5.7e-15); refit betas 0.67273/-0.13174/-0.03726 vs comparison 0.67335/-0.13009/-0.03707, max gap 0.00165 < 0.002 \u2014 all matching the claimed +0.6727 vs +0.6734, -0.0373 vs -0.0371, -0.1317 vs -0.1301. THE MISMATCH: the word 'production'. The comparison baseline is the spec-v3 point (bit-identical to hazard/data/hazard_coefficients_specv3.json), but production Path A at HEAD is spec v4 with calendar-month effects (hazard/data/hazard_coefficients.json: rate gap 0.6469, burnout -0.1713, friction -0.0071), which the manuscript itself declares production ('became production Path A (spec v4) at the pre-submission freeze', v16 tex line 249; estimator table line 345). The verification refit contains no month dummies and was never re-run under spec v4, so it validates the spec-v3 exhibit point, not the current production coefficients \u2014 and the sentence at paper/v16/revised_paper_v16.tex:247 carries no 'prior spec v3' qualifier (unlike the bootstrap table, which is explicitly so labeled). Fix is either a spec-v3 label on this sentence or a re-run of the estimable-strata diagnostic under the spec v4 design."
+      },
+      "disposition": "CORRECTED in tex: verification baselines scoped to spec v3 in both sites; noted the device is unchanged under v4 but its verification artifacts were not recomputed at adoption."
+    },
+    {
+      "quote": "voluntary CPR for those cohorts continues to be drawn from the same-coupon 30-year surface",
+      "claim": "Production uses a structural-only 15-year fold-in: 15-year cohorts contribute real face weights and real 15-year scheduled amortization, but their voluntary CPR is looked up from the same-coupon 30-year CPR surface (no 15-year-specific behavioral surface in the production headline).",
+      "expected_code": "abm/abm_lockin_simulation.py and/or abm/fed_mbs_extension_risk.py (CPR surface lookup keyed on coupon using the 30-year surface for 15-year cohorts)",
+      "region": "robustness",
+      "verdict": {
+        "traces": false,
+        "code_path": "HEAD: abm/fed_mbs_extension_risk.py:1000-1017 (compute_metrics multi-cohort branch) \u2014 does the OPPOSITE of the claim: key=(coupon, term_months); surf_c=surface.get(key), i.e. 15yr cohorts use their OWN native 15yr surface. The claimed mechanism (behav_key=(coupon, 360) borrowing the 30yr surface) exists only at superseded commit 5cf33a3 (abm/fed_mbs_extension_risk.py ~line 1012), the code that generated the frozen headline run abm/data/runs/run-2026-07-04-15yr-foldin/.",
+        "note": "Split verdict, resolved against the claim. (1) Everything the claim says WAS true of the code that produced the frozen $90.98B/11.90% headline (commit 5cf33a3, 2026-07-04): fetch_soma_mbs_cohorts(terms=(\"30yr\",\"15yr\")) gives real per-term face weights; scheduled_amortization_series(term=term_months) gives real 180-month amortization; voluntary CPR looked up via behav_key=(coupon, PORTFOLIO_TERM=360), so same-coupon 30-year surface, native 15yr slabs left unused. Manifest abm/data/runs/run-2026-07-04-15yr-foldin/manifest.json confirms us_trapped=$90.981B, share 11.897%. (2) But that path is dead at HEAD: commit bc07d32 (\"Native 15-year behavioral gate (replaces borrowed 30yr surface)\") changed the lookup to surface.get((coupon, term_months)) \u2014 15yr cohorts now draw from their own 15yr surface \u2014 and made the native gate unconditional in abm/abm_lockin_simulation.py::_mobility_penalty (is_short branch), so HEAD cannot reproduce the fold-in headline. TECHNICAL.md \u00a719 explicitly marks the structural-only fold-in \"superseded\"; repo-declared current ABM production is run-2026-07-05-berger ($84.5B/11.1%, native gate) per abm/data/latest_run_manifest.json. Therefore the manuscript's present-tense \"Production uses\u2026 continues to be drawn from the same-coupon 30-year surface\" mismatches the executing production code; it is accurate only as a description of the frozen 2026-07-04 artifact. Fix: either rephrase to past/frozen-run scope (\"the frozen headline run used\u2026\") or adopt the native-gate run as the headline ($84.5B/11.1%) \u2014 the v16 .bak-restatement draft already acknowledges the native gate is implemented and its headline adoption \"deferred to the pre-submission freeze.\""
+      },
+      "disposition": "CORRECTED in tex: same scoping as F3 in the robustness section."
+    },
+    {
+      "quote": "simultaneously corrected the Danish counterfactual's rate-gap function to rate-equivalent units so that the buyback discount properly offsets the locked-in spread",
+      "claim": "The Danish counterfactual's rate-gap function is expressed in rate-equivalent units so the market-value buyback discount offsets the locked-in coupon spread inside the gap fed to the hazard/CPR response.",
+      "expected_code": "abm/hybrid_pipeline.py Danish leg and/or hazard/danish_discount_bound.py, common/berger_calibration.py",
+      "region": "robustness",
+      "verdict": {
+        "traces": false,
+        "code_path": "hazard/rate_gap.py:31-64 (rate_gap_danish, corrected to rate-equivalent units) \u2014 but the production Danish CPR is computed by common/berger_calibration.py:168 (danish_cpr_annual), reached via hazard/competing_risks.py:122-134 (Path B) and abm/abm_lockin_simulation.py:414-425 (ABM), neither of which consumes the Danish rate gap",
+        "note": "The correction itself is real: rate_gap_danish now returns np.where(pv < balance, 0.0, coupon - market_rate) \u2014 rate-equivalent units with the NPV identity (buyback discount offsets locked-in spread => gap 0), documented in the docstring, tests/test_units_conventions.py (Bug 2), and TECHNICAL.md ~line 770. What fails is the claim's operative clause \"inside the gap fed to the hazard/CPR response\": in production, competing_risks.py::monthly_step writes rate_gap_danish output into pool.rate_gap (line 113) but the Danish regime branch (line 122) computes its prepay hazard from berger_calibration.danish_cpr_annual and never reads pool.rate_gap \u2014 only the non-Danish prepay_hazard branch (line 136) consumes it. danish_cpr_annual uses a RAW coupon-minus-market gap for the moving channel and the buyback discount in PRICE units (fraction of balance, _buyback_discount_frac) as a tax-shield input \u2014 not the offsetting rate-equivalent gap. The ABM Danish branch (_cpr_vec) likewise routes to danish_cpr_annual, explicitly replacing the old market-value-payoff path. The repo's own audit confirms deadness: hazard/danish_discount_bound.py and TECHNICAL.md ~line 1617 record that rate_gap_danish's PV classification \"is computed but consumed by nothing\" \u2014 shifting the discount rate flips 7,803/32,486 classifications yet Danish CPR paths are bit-identical. The manuscript sentence is accurate only as history of a fix made in the beta1-units round; at production HEAD the corrected Danish rate-gap function is dead code with respect to the Danish hazard/CPR, superseded by the Berger (section 20) flat-elasticity import."
+      },
+      "disposition": "CORRECTED in tex: correction scoped to the mechanism-substitution variant; production Danish leg's response is the Berger elasticity (computed-but-unconsumed classification disclosed, mirroring the Section V.C scoping)."
+    },
+    {
+      "quote": "34,734 had already prepaid and 32 defaulted before the QT window opens, so 40,234 are active at the June 2022 start",
+      "claim": "The production pipeline drops loans that terminated (prepaid or defaulted) before the QT window opens and simulates only the 40,234 loans active at June 2022 over the 42-month window, yielding 1,683,124 evaluated loan-months with defaults absorbing (removing loans) over time.",
+      "expected_code": "hazard/loan_sample.py / hazard/prepare_freddie.py (pre-window attrition filter) and hazard/microsim_engine.py with common/qt_window.py (42-month window, active-loan-month accounting)",
+      "region": "appendices",
+      "verdict": {
+        "traces": false,
+        "code_path": "hazard/loan_sample.py::_loan_snapshot_one_pair (pre-QT snapshot, lines 51-57) -> hazard/microsim_engine.py::run_qt_microsim/_simulate_regime (42-month window from common/qt_window.py QT_START=2022-06-01, QT_END=2025-12-01) -> hazard/agents.py::MicrosimPool._update_active_mask (lines 148-153) + hazard/competing_risks.py::monthly_step",
+        "note": "Mostly traces, one specific fails. CONFIRMED: loan_sample.py snapshots each loan's last pre-June-2022 performance row; frozen production parquet (hazard/data/loan_sample.parquet) verified live: 75,000 loans with Prepaid=34,734, Defaulted=32, state-active=40,234 (Current 39,752, D30 274, D60 50, D90+ 158) \u2014 the quoted sentence's numbers are exact. Window is 42 months (June 2022 start, half-open at Dec 2025). Absorbed-before-window loans are masked out (never evaluated), and Defaulted is permanently absorbing (_markov_step_delinquent never touches Defaulted rows). 1,683,124 is reproduced by production-path instrumentation (floor_sweep.py BindTally; floor_sweep_results.json parity gate n_got=1,683,124, pass). MISMATCH: the engine's active mask is (~absorbing) & (balance > 0), and the frozen sample has 158 state-active loans (145 Current, 8 D30, 2 D60, 3 D90+) with balance=0; instantiating the production MicrosimPool gives an initial active count of 40,076, not 40,234. The loan-month arithmetic confirms 40,076 is what runs: 40,076x42=1,683,192, so only 68 loan-months of within-window default absorption reconcile to 1,683,124; the claim's implied reconciliation (40,234x42=1,689,828 minus defaults absorbing over time) is wrong \u2014 6,636 of the 6,704-loan-month gap is a static month-1 zero-balance exclusion, not gradual default attrition. The manuscript sentence quoted is accurate; the appendix claim that the pipeline 'simulates only the 40,234 loans' with defaults as the attrition channel is not."
+      },
+      "disposition": "CORRECTED in tex: dropped the false 'declining as defaults absorb' mechanism (verifier's live decomposition shows a static month-one zero-balance exclusion dominates; specifics not added since they trace to no committed artifact)."
+    }
+  ],
+  "passes": [
+    {
+      "quote": "netting realized roll-off against the actual phased redemption cap schedule",
+      "claim": "The $764.7B benchmark is built from NY Fed SOMA current face value by accumulating NET (signed, not one-sided) monthly differences between realized roll-off and the phased caps ($17.5B/month June-August 2022, $35B/month from September 2022), strictly within the June 2022 - November 2025 QT window.",
+      "expected_code": "abm/fed_mbs_extension_risk.py (benchmark construction), common/data_loader.py, common/qt_window.py",
+      "region": "method",
+      "verdict": {
+        "traces": true,
+        "code_path": "abm/fed_mbs_extension_risk.py: fetch_soma_mbs_monthly (655-696, SOMA current face value -> month-end diff) -> compute_metrics (816-844, signed Extension_Delta = actual - phased target, net cumsum over qt_active mask) -> export_headline_metrics (1435-1476, empirical_trapped = sum over qt_active_frame); cap schedule and window from common/qt_window.py (QT_START 2022-06-01, QT_RAMP_END 2022-09-01, QT_END 2025-12-01 exclusive, -17.5B ramp / -35B full)",
+        "note": "Every specific matches: (1) NY Fed SOMA summary API current face value (\"remaining unpaid principal, not amortized cost\"), month-end resample + diff; frozen manifests record rolloff_source=SOMA with empirical_trapped=764.7482532227002. (2) Netting is signed with no clipping \u2014 code comment says \"NET accumulation... months where roll-off exceeded the cap offset months that fell short\", and frozen metrics_monthly.csv shows deltas of both signs. (3) Phased caps exactly -17.5B/mo for Jun-Aug 2022 and -35B/mo from Sep 2022 (QT_TARGET_RAMP_B/QT_TARGET_FULL_B). (4) Aggregation is strictly within the half-open window [2022-06-01, 2025-12-01) = June 2022 through November 2025, 42 months, enforced by qt_active_frame + assert_qt_window_only; manifest qt_window block confirms. Minor caveat only: a WSHOMCB fallback exists if the SOMA API is down, but all frozen headline runs used SOMA."
+      }
+    },
+    {
+      "quote": "a stratum-month discrete-time hazard model estimated by Poisson pseudo-maximum likelihood on the full 2017--2021 origination universe",
+      "claim": "Path A is a discrete-time hazard model estimated by Poisson pseudo-maximum likelihood on the full 2017-2021 Freddie Mac origination universe aggregated to stratum-months.",
+      "expected_code": "hazard/hazard_fit.py (PPML estimation), hazard/stratum.py, hazard/prepare_freddie.py / hazard/ingest.py",
+      "region": "method",
+      "verdict": {
+        "traces": true,
+        "code_path": "hazard/hazard_fit.py:157 (_fit_poisson_glm: sm.GLM Poisson + log(exposure) offset) called from fit_hazard_glm and from hazard/seasonality_concave_gap.py:104 (fit_with_month_dummies, the spec-v4 artifact's recorded provenance); cells built by hazard/ingest.py::build_panel_from_files (group_by vintage/coupon/fico/ltv/reporting_period); data via hazard/prepare_freddie.py (Freddie Standard Dataset zips) with VINTAGE_YEARS=2017-2021 at hazard/config.py:99",
+        "note": "Claim traces. Poisson GLM on aggregated stratum-month cells with log(exposure) offset, events = prepaid UPB dollars (continuous outcome, hence pseudo-ML); monthly hazard h=exp(Xb) makes it discrete-time. Panel confirms vintages exactly 2017-2021 with 569M loan-months (full Standard Dataset scale, not the 50k/year sample); frozen artifact hazard_coefficients.json is spec v4, link poisson_log, n_train=10176 cells, 296 strata. Two disclosure-level caveats (not refutations): production fit is ridge-penalized PPML (fit_method ridge(alpha=1e-4), L1_wt=0, alpha chosen on holdout RMSE over [1e-5,1e-4]) because stratum FE make plain IRLS ill-conditioned; and 'full origination universe' is modulo QC filters in ingest.py::_scan_orig (amortization_type==FRM, UPB>0, LTV 1-200, FICO 300-850)."
+      }
+    },
+    {
+      "quote": "a loan-level microsimulation with competing prepayment and default risks on a stratified 75,000-loan sample",
+      "claim": "Path B simulates loans individually with competing prepayment and default risks, on a stratified sample of 75,000 loans drawn from the 2017-2021 origination universe.",
+      "expected_code": "hazard/microsim_engine.py, hazard/competing_risks.py, hazard/loan_sample.py",
+      "region": "method",
+      "verdict": {
+        "traces": true,
+        "code_path": "hazard/microsim_engine.py::run_qt_microsim \u2192 competing_risks.py::monthly_step (per-loan prepay_hazard/default_hazard + normalize_competing_hazards, literature_hazard.py:78/112/132); sample: hazard/loan_sample.py::_stratified_sample with N_LOANS=75_000 (config.py:32) over VINTAGE_YEARS 2017\u20132021 (config.py:99)",
+        "note": "Frozen hazard/data/loan_sample.parquet verified: exactly 75,000 loans, only vintages 2017\u20132021 (~15k each), 130 vintage\u00d7coupon\u00d7FICO strata; loans are individual agents (agents.py::MicrosimPool per-loan arrays) with competing prepay/default hazards normalized per loan and per-loan Bernoulli defaults + Markov delinquency; path is production-reachable via extension_risk.py --mode literature and has frozen outputs (microsim_results.parquet, extension_risk_results_literature_microsim.json). Minor nuance: production PREPAY_MODE=\"fractional\" applies prepayment as fractional SMM of each loan's balance rather than discrete whole-loan payoff events \u2014 still loan-level, consistent with the claim's wording."
+      }
+    },
+    {
+      "quote": "precomputed once and interpolated month-by-month against the live population of simulated market conditions",
+      "claim": "Household move/stay decisions are evaluated over a three-dimensional grid of market rate, dynamic friction, and rate velocity (times seven coupon cohorts in the multi-vintage spec), aggregated to an annualized pool-level CPR surface that is precomputed once and then interpolated month-by-month during simulation, rather than re-solving per-month household loops.",
+      "expected_code": "abm/abm_lockin_simulation.py (CPR surface build over the grid), abm/fed_mbs_extension_risk.py (monthly interpolation against simulated conditions)",
+      "region": "method",
+      "verdict": {
+        "traces": true,
+        "code_path": "abm/abm_lockin_simulation.py::HousingMarketEngine.build_cpr_surface (line 506, sweeps RATE_GRID x FRICTION_GRID x RATE_VELOCITY_GRID with per-grid-point household evaluation via _cpr_vec/_decide_mask) + build_multi_cohort_surfaces (line 542, one surface per cohort) -> abm/abm_cpr_surface.csv; consumed by abm/fed_mbs_extension_risk.py::compute_metrics multi-cohort branch (load_cpr_surface once at line 860-861; interp_cpr_surface trilinear np.interp per month at lines 1019-1022 against MORTGAGE30US, Dynamic_Friction, Rate_6M_Change), invoked from build_production_metrics (line 1575) with use_burnout=False (line 1604)",
+        "note": "All specifics verified. Grid is exactly 3D: 13 market rates x 26 dynamic frictions x 10 rate velocities (confirmed in the shipped CSV). \"Seven coupon cohorts\" is exact for the frozen production headline (run-2026-07-04-15yr-foldin): its manifest surface sha ae6eb1b7 matches git show 5cf33a3:abm/abm_cpr_surface.csv, which holds 11 (coupon, term) slabs spanning seven distinct coupons (1.5-4.5%), and at that commit the behavioral lookup forces behav_key=(coupon, 360) so all cohorts draw voluntary CPR from the seven 30-year coupon surfaces (comment: native 15yr surfaces \"not used for aggregation\"). Surface is precomputed once (written by abm_lockin_simulation main, loaded once per run) and interpolated month-by-month; CPR is consumed as annualized (US_CPR_Pct/100/12 -> monthly SMM, line 1034); the per-month household-loop alternative (simulate_cohort_path burnout mode) is gated behind use_burnout, which build_production_metrics hard-sets to False. Two non-breaking caveats: (1) at HEAD the native 15-year gate uses per-term keys (surface.get(key), line 1010), so an unpinned rerun consumes all 11 slabs, not 7 \u2014 spec drift the paper discloses in its manifest footnote (headline must be reproduced at the pinned commit); (2) the \"simulated market conditions\" interpolated against are empirical FRED series (MORTGAGE30US, inventory/sentiment friction, 6-month rate diff) on the simulation's monthly panel, a wording looseness, not a mechanism mismatch."
+      }
+    },
+    {
+      "quote": "the present value of the remaining scheduled payments discounted at the current 30-year primary mortgage rate (FRED MORTGAGE30US), capped at par",
+      "claim": "Under the Danish market-value repurchase rule, the payoff cost is computed as the option-free present value of remaining scheduled payments discounted at the current MORTGAGE30US rate, capped at par (while under US par-payoff the cost equals outstanding principal); and in the Berger-recalibrated production Danish leg the prepayment hazard is an imported flat moving elasticity, not this pricing proxy.",
+      "expected_code": "abm/abm_lockin_simulation.py and abm/fed_mbs_extension_risk.py (Danish payoff-cost PV), common/berger_calibration.py (imported flat elasticity), abm/hybrid_pipeline.py",
+      "region": "method",
+      "verdict": {
+        "traces": true,
+        "code_path": "abm/abm_lockin_simulation.py:157-174 (get_payoff_cost_danish) & :358-364 (_payoff_danish): PV = pmt*(1-(1+r_mkt)^-n_rem)/r_mkt, min(..., outstanding_principal) = par cap; :153-155/:355-356 US par payoff = outstanding_principal(); Berger leg: abm_lockin_simulation.py:414-425 (_cpr_vec Danish branch imports common.berger_calibration.danish_cpr_annual, bypassing _payoff_danish); production: fed_mbs_extension_risk.py:1575-1619 build_production_metrics (use_burnout=False) \u2192 surface branch sampling at df[\"MORTGAGE30US\"] (:1020,:1078; series fetched at :709)",
+        "note": "All specifics match. Danish payoff = option-free annuity PV of remaining scheduled payments at the current market rate (MORTGAGE30US in the pipeline), capped at par via min with outstanding principal; US payoff = outstanding principal. Production Danish leg (frozen run-2026-07-05-berger manifest, module build_production_metrics, surface sha256 a828fcbe... matches abm/abm_cpr_surface.csv at HEAD) short-circuits to berger_calibration.danish_cpr_annual \u2014 frozen surface CPR_Danish is flat 3.17-3.41% across rates 2-8% while CPR_US swings ~48.6%\u2192floor, confirming the pricing proxy is not executed in the production Danish leg. Caveats: (1) danish_cpr_annual = moving + refi-in-place, but refi is anchored to exactly 0.0 in production regime=\"US\" (berger_calibration.py:58), so the executed hazard is the moving channel alone; (2) \"flat\" = CI-midpoint slope \u22120.039 pp/yr per 100bp (CI \u22120.198..+0.12 spans zero), statistically flat rather than literal zero; (3) the pricing proxy remains live in the non-production burnout path (simulate_cohort_path \u2192 _movers_mask(\"Danish\") \u2192 _payoff_danish), unused because production sets use_burnout=False."
+      }
+    },
+    {
+      "quote": "simulated forward on a dynamic, declining-balance basis",
+      "claim": "The Danish counterfactual balance path applies each month's elevated Danish roll-off to the already-shrunk balance carried over from the prior month (compounding declining balance), not to a static initial balance.",
+      "expected_code": "abm/fed_mbs_extension_risk.py (Danish counterfactual balance loop), abm/hybrid_pipeline.py",
+      "region": "method",
+      "verdict": {
+        "traces": true,
+        "code_path": "abm/fed_mbs_extension_risk.py:1047-1074 (multi-cohort Danish dynamic-balance loop inside compute_metrics), reached via build_production_metrics (line 1575) -> compute_metrics(surface=None) -> load_cpr_surface() returning a cohort dict (abm_cpr_surface.csv has Cohort_Coupon), matching frozen production manifests under abm/data/runs/",
+        "note": "Per-cohort balances are seeded once at QT start (init_balance * weight, from actual holdings at QT_START), then each month rolloff = bal * (Danish_monthly_CPR + sched_amort + curtailment) and cohort_balances[key] = max(bal - rolloff, 0.0), so the elevated Danish drain is applied to the prior month's shrunk balance \u2014 compounding declining balance, not a static initial balance. All other reachable branches (hazard microsim 898-916, burnout 971-998, single-surface 1090-1108, anchors fallback 1121-1139) use the same carry-forward recursion, and hybrid_pipeline.py reuses this same loop. Minor immaterial nuance: the multi-cohort branch records Danish_Balance_Billions as the post-rolloff balance rather than pre-rolloff."
+      }
+    },
+    {
+      "quote": "scored as incremental friction at +5bp per point short, capped at +150bp during acute sentiment stress",
+      "claim": "The dynamic transaction-friction parameter is built from two FRED series: search friction as the Active Listing Count (ACTLISCOUUS) shortfall against a 2017-2019 baseline, and psychological friction as UMCSENT readings below 85.0 scored at +5bp per point short, capped at +150bp; the resulting friction ranges 8.23%-9.96% of home value over the 42 active QT months.",
+      "expected_code": "abm/fed_mbs_extension_risk.py (FRED series ingestion and friction scaling), abm/abm_lockin_simulation.py (friction dimension of the surface)",
+      "region": "method",
+      "verdict": {
+        "traces": true,
+        "code_path": "abm/fed_mbs_extension_risk.py:292-334 (calculate_dynamic_friction), :727-751 (fetch_data FRED ingestion + 2017-2019 baseline), :782 (production call site); hazard/config.py:67-71 + hazard/macro.py (identical duplicate used by hazard/simulate.py:167 and hazard/microsim_engine.py:105); abm/abm_lockin_simulation.py:242-245 (friction applied as rate on home value)",
+        "note": "Every specific matches the executing production code. (1) Two FRED series: fetch_data pulls ACTLISCOUUS (\"search friction\") and UMCSENT (\"psych friction\") at fed_mbs_extension_risk.py:727-730. (2) Search friction is the ACTLISCOUUS shortfall vs a 2017-2019 baseline: base_slice = inventory_m.loc[\"2017-01-01\":\"2019-12-31\"].mean() (lines 737-739), shortfall = (baseline - ACTLISCOUUS).clip(lower=0) (line 316), scaled to a +200bp cap. (3) Psychological friction: SENTIMENT_BASELINE = 85.0, SENTIMENT_PENALTY_PER_PT = 0.0005 (+5bp/point), SENTIMENT_PENALTY_CAP = 0.015 (+150bp) at lines 68-70, applied at lines 326-329 as (85.0 - UMCSENT).clip(lower=0)*0.0005 clipped at 0.015 \u2014 exactly \"+5bp per point short, capped at +150bp\". (4) \"Of home value\": ABM computes transaction_cost = current_home_value * eff_rate where eff_rate = friction + idiosyncratic offset (abm_lockin_simulation.py:242-245). (5) Numeric range: headline frozen run run-2026-07-04 (the current production tag per abm/data/runs/README.md) manifest reports dynamic_friction_pct min=8.2318, max=9.9646, n=42, and metrics_monthly.csv (42 rows, June 2022-November 2025 active QT window) reproduces Dynamic_Friction min 0.08232 / max 0.09965 \u2014 i.e., 8.23%-9.96% over 42 active QT months. Reachability: calculate_dynamic_friction is invoked in the production metrics path (line 782) and the hazard Path A/B pipelines import the identical implementation (hazard/macro.py with the same constants from hazard/config.py:67-71). Minor unclaimed detail (not a mismatch): the search penalty is normalized so the lowest-inventory month exactly hits the +200bp cap, and Dynamic_Friction = 0.07 base + search + sentiment penalties; the manuscript quote's \"acute sentiment stress\" cap phrasing is consistent with the code's hard clip at 0.015."
+      }
+    },
+    {
+      "quote": "vetoes any move in which the new housing payment would exceed 43% of gross monthly income",
+      "claim": "A DTI gate in the household decision function vetoes any move where the new housing payment exceeds 43% of gross monthly income (a front-end ratio, applied as a behavioral anchor).",
+      "expected_code": "abm/abm_lockin_simulation.py (household decision function / behavioral extensions)",
+      "region": "method",
+      "verdict": {
+        "traces": true,
+        "code_path": "abm/abm_lockin_simulation.py:435-448 (HousingMarketEngine._movers_mask, executing vectorized gate; scalar mirror Household.evaluate_move:229-232; DTI_MAX=0.43 at line 58), reached in production via abm/fed_mbs_extension_risk.py:919-944 (build_production_metrics burnout path -> simulate_cohort_path -> _cpr_vec -> _movers_mask)",
+        "note": "Gate matches every specific: passes_dti = new_pmt/monthly_income <= 0.43, strict-exceed vetoes the move unconditionally (ANDed into the mover mask); numerator is mortgage payment only, explicitly documented as front-end (lines 56-57: \"Front-end only (mortgage payment / gross income); no other-debt data\"); denominator is gross monthly income = annual income/12 with incomes drawn around FRED median household income (MEHOINUSA672N). Applied inside the household decision function as the first of \"Three behavioral gates\" (docstring line 201), anchored to the CFPB QM/ATR 43% rule (12 CFR 1026.43(e)(2)(vi)). Production reachability confirmed by frozen manifest abm/data/runs/run-2026-07-05-native15yr/manifest.json (module fed_mbs_extension_risk.build_production_metrics, cohort/burnout mode)."
+      }
+    },
+    {
+      "quote": "scales perceived payment increases by 2.25$\\times$ while leaving decreases unscaled",
+      "claim": "Two further behavioral gates operate in the decision function: asymmetric loss aversion multiplying perceived payment increases by 2.25x (decreases unscaled), and a wait-and-see freeze holding 20% of otherwise-mobile households in place whenever the trailing six-month mortgage-rate change exceeds 150bp, implemented as a fixed per-agent trait so the CPR surface stays deterministic.",
+      "expected_code": "abm/abm_lockin_simulation.py (loss-aversion scaling and per-agent freeze trait)",
+      "region": "method",
+      "verdict": {
+        "traces": true,
+        "code_path": "abm/abm_lockin_simulation.py:63 (LOSS_AVERSION_LAMBDA = 2.25), :234-237 (scalar Household.evaluate_move gate 2), :401-403 (vectorized _mobility_penalty legacy branch), :68-69 (WAIT_AND_SEE_RATE_THRESHOLD = 0.015, WAIT_AND_SEE_PROB = 0.20), :250-253 and :444-447 (wait-and-see gate), :309 (per-agent patience_draw from seeded RNG); velocity input from abm/fed_mbs_extension_risk.py:858 (Rate_6M_Change = MORTGAGE30US.diff(6)/100)",
+        "note": "Every specific checks out on the reachable production path. (1) Loss aversion: monthly_penalty *= 2.25 only when new_payment - current_payment > 0; negative deltas pass through unscaled \u2014 both in the scalar evaluate_move and the vectorized _movers_mask path (np.where(delta_legacy > 0, delta_legacy * LOSS_AVERSION_LAMBDA, delta_legacy)). At the headline-run commit 5cf33a3 (run-2026-07-04-15yr-foldin) the vectorized penalty is exactly np.where(delta > 0, delta*2.25, delta) for all cohorts. (2) Wait-and-see: gate fires iff rate_velocity > 0.015 (150bp, decimal units matching the driver's diff(6)/100 of MORTGAGE30US in percent) AND patience_draw < 0.20; it is applied after the DTI and cost-benefit gates, so it holds only otherwise-mobile agents. (3) Determinism: patience_draws = self.rng.random(n) drawn once per agent in _generate_population from the seeded default_rng(RNG_SEED), stored on each Household, reused unchanged at every grid point and across attach_cohort \u2014 no per-decision randomness, so the CPR surface is deterministic. Reachability: fed_mbs_extension_risk.py imports abm_lockin_simulation (lines 919/1583) and drives simulate_cohort_path -> _movers_mask with the Rate_6M_Change series; the CPR surface generator routes through _cpr_vec -> _movers_mask. One caveat that does not break the claim: at HEAD the 15-year (term <= 20yr) native gate in _mobility_penalty clamps payment DECREASES to 0 (np.where(delta_rate > 0, delta_rate*2.25, 0.0)) instead of leaving them unscaled; the 'decreases unscaled' wording is exactly true for the 30-year branch and for the headline fold-in run spec (all cohorts legacy rule at 5cf33a3), but is a documented term-aware exception for 15yr cohorts at current HEAD."
+      }
+    },
+    {
+      "quote": "the mobility-desire scale, and only that parameter, is re-derived so that the simulation continues to reproduce the empirically observed 4--5% involuntary-turnover floor",
+      "claim": "Whenever a specification change alters the penalty or covariate structure, the pipeline re-derives only the mobility-desire scale parameter so the simulation reproduces a 4-5% CPR involuntary-turnover floor at 8% market rates, leaving every other parameter untouched (under loss aversion this requires nearly tripling that scale).",
+      "expected_code": "abm/abm_lockin_simulation.py (turnover-floor calibration routine), abm/cross_design_test.py (recalibrated vs frozen variants)",
+      "region": "method",
+      "verdict": {
+        "traces": true,
+        "code_path": "abm/abm_lockin_simulation.py:629 calibrate_mobility_scale() \u2014 binary-searches only the mobility-desire scale until cpr_at(0.08, \"US\") is in [0.04, 0.05]; invoked at production runtime by abm/fed_mbs_extension_risk.py:1590 (build_production_metrics), monte_carlo_simulation.py:205, sensitivity_analysis.py:156, robustness_analysis.py:152; recalibrated-vs-frozen variants in abm/cross_design_test.py:81 and :207",
+        "note": "All specifics match: target band 0.04-0.05 evaluated at 8% market rate under the US par-payoff rule; the binary search varies only the scale while every other behavioral parameter is a fixed module constant (LOSS_AVERSION_LAMBDA=2.25, DTI_MAX=0.43, transaction-cost and wait-and-see constants, lines 46-70); frozen manifests record mobility_scale as the only derived parameter (run-2026-07-05-native15yr: 43,882.8). The \"nearly tripling under loss aversion\" matches TECHNICAL.md B.4: maintaining the floor under the lambda-steepened penalty (applied in _mobility_penalty, lines 401-407, on the same _movers_mask path the calibrator evaluates) forced the scale from ~12,500 (code default, line 53) to ~36,086 = 2.89x; 36,086 also appears in the cross-design recalibrated variant. Caveats: the no-loss-aversion baseline is a documented ablation, not a live switch at HEAD, and the current HEAD synthetic calibration is 43,883 (3.5x) due to later term-aware spec changes \u2014 but the tripling parenthetical refers to the loss-aversion step specifically, consistent with the repo record."
+      }
+    },
+    {
+      "quote": "mapping real income growth linearly from zero curtailment at $-2$% growth to a full-scale annualized rate of 1.2% CPR at +4% growth",
+      "claim": "Curtailment is implemented as a strictly additive, income-scaled addition to simulated roll-off: year-over-year real disposable income growth (FRED DSPIC96) is mapped linearly from zero curtailment at -2% growth to 1.2% annualized CPR at +4% growth.",
+      "expected_code": "abm/fed_mbs_extension_risk.py (DSPIC96 ingestion and curtailment addition to simulated roll-off), abm/hybrid_pipeline.py",
+      "region": "method",
+      "verdict": {
+        "traces": true,
+        "code_path": "abm/fed_mbs_extension_risk.py:141-155 (curtailment_series) with constants at lines 85-87; DSPIC96 fetched at lines 731-735, YoY computed at line 872, applied additively to roll-off at lines 895, 909-911, 957, 1034, 1088, 1119 inside simulate_qt_window",
+        "note": "Exact match: DSPIC96 pulled from FRED (fredapi), YoY = pct_change(12)*100; curtailment SMM = clip((yoy+2)/6, 0, 1) * 0.012/12, i.e., linear from 0 at -2% growth to 1.2% annualized CPR (simple /12 monthly convention) at +4% growth, saturating outside; added (never multiplied) to simulated roll-off / monthly drain in every simulation branch, including the production hazard-microsim path (line 895: us_rolloff - holdings_b * curtailment_smm). Module is live production: abm/hybrid_pipeline.py:22 imports it, and line 873 computes curtailment before any mode branch."
+      }
+    },
+    {
+      "quote": "The kernel is retained in production, and both frozen run manifests record it as applied",
+      "claim": "The production ABM run applies the settlement-lag kernel, and the frozen run manifests (both run-2026-07-04-15yr-foldin and run-2026-07-05-berger) record kernel-applied status; all reported figures come from the kernel-applied run.",
+      "expected_code": "abm/abm_lockin_simulation.py (kernel application to simulated CPR/roll-off), abm/freeze_run.py (manifest writing), abm/data/runs/run-2026-07-04-15yr-foldin/manifest.json and abm/data/runs/run-2026-07-05-berger/manifest.json",
+      "region": "abm-results",
+      "verdict": {
+        "traces": true,
+        "code_path": "abm/fed_mbs_extension_risk.py:759 (apply_settlement_lag) applied at :1141-1146 inside compute_metrics; invoked with kernel=True via build_production_metrics (:1575-1607) from abm/freeze_run.py:84-92; manifest key written at freeze_run.py:115",
+        "note": "Kernel SETTLEMENT_LAG_KERNEL=[0.10,0.60,0.30] (fed_mbs_extension_risk.py:91) is convolved into US and Danish simulated roll-off in the production compute_metrics path; freeze_run.py defaults apply_settlement_lag_kernel=True and never sets use_hazard_microsim, so the guard 'if apply_settlement_lag_kernel and not use_hazard_microsim' executes. Both manifests (run-2026-07-04-15yr-foldin, run-2026-07-05-berger) record \"apply_settlement_lag_kernel\": true at line 8, and inspection of the code at each manifest's recorded git commit (0899d127, 51fbd837) confirms the flag deterministically implies actual application at freeze time, so all frozen metrics come from the kernel-applied DataFrame. Minor caveats: the kernel lives in fed_mbs_extension_risk.py, not the claim's expected abm_lockin_simulation.py (which contains no kernel code), and the manifest records the requested flag rather than a runtime applied-check, though the two cannot diverge in the freeze path at those commits."
+      }
+    },
+    {
+      "quote": "scheduled amortization, a live CUSIP-level parse of SOMA holdings, a corrected empirical CPR back-out, and a settlement-lag kernel",
+      "claim": "The production ABM adds four features on top of the rational baseline: scheduled amortization, a CUSIP-level parse of SOMA holdings data, a corrected back-out of empirical CPR, and a settlement-lag kernel.",
+      "expected_code": "abm/abm_lockin_simulation.py (scheduled amortization, CPR back-out), abm/fed_mbs_extension_risk.py and/or common/data_loader.py (SOMA CUSIP-level parse)",
+      "region": "abm-results",
+      "verdict": {
+        "traces": true,
+        "code_path": "abm/fed_mbs_extension_risk.py \u2014 all four features: scheduled_amortization_smm/series (lines 95-140), fetch_soma_mbs_cohorts CUSIP parse (lines 490-590), empirical CPR back-out (lines ~1148-1152), SETTLEMENT_LAG_KERNEL + apply_settlement_lag (lines 91, 759-767, applied at 1141); all reached via build_production_metrics (line 1575) -> compute_metrics, which main() and freeze_run.py execute",
+        "note": "Each feature exists, is reachable, and matches specifics. (1) Scheduled amortization: scheduled_amortization_smm() computes the principal-payment SMM of a fully amortizing fixed-rate mortgage; per-cohort series are weight-summed into Scheduled_Amort_SMM and added to the monthly drain in every compute_metrics branch, including the multi-cohort surface branch the production path takes. (2) Live CUSIP parse: fetch_soma_mbs_cohorts() hits the NY Fed SOMA API (markets.newyorkfed.org/api/soma/agency/get/all/asof/{date}.json) at runtime, regex-parses coupon and MM/YY maturity from each CUSIP's securityDescription, back-derives origin_date, and buckets into 30yr/15yr coupon cohorts; called unconditionally in build_production_metrics (it lives here, not in common/data_loader.py as the expected-code hint guessed, but the claim names no file). (3) Corrected CPR back-out: Empirical_CPR_Pct = clip(|actual_rolloff|/holdings - Scheduled_Amort_SMM, 0) * 12 * 100 \u2014 the 'correction' is subtracting cohort-weighted scheduled amortization so the back-out isolates prepayment (TECHNICAL.md B.1 documents this exact formula and the pre-fix single-coupon version it replaced). (4) Settlement-lag kernel: SETTLEMENT_LAG_KERNEL = [0.10, 0.60, 0.30] (lags 0/1/2 months, mass-conserving) convolved onto both simulated roll-off series when apply_settlement_lag_kernel=True; build_production_metrics defaults it True, main() passes True, and all five frozen manifests under abm/data/runs/ (including headline run-2026-07-04-15yr-foldin) record pipeline.apply_settlement_lag_kernel = true. One nuance, not a mismatch: TECHNICAL.md \u00a710/B.8 records the kernel as a pre-registered null for timing \u2014 it is applied in production but buys no timing credential; the claim only asserts the feature is added, which is accurate."
+      }
+    },
+    {
+      "quote": "incorporation of the previously excluded 15-year MBS book into cohort weighting and scheduled amortization (structural terms only",
+      "claim": "The production (fold-in) specification includes the 15-year MBS book in cohort weighting and in scheduled-amortization structural terms only \u2014 i.e., 15-year cohorts contribute weight and scheduled principal but not their own behavioral prepayment estimation.",
+      "expected_code": "abm/abm_lockin_simulation.py and abm/freddie_population.py (cohort construction/weighting); possibly hazard/full_book_weighting.py for the shared basis",
+      "region": "abm-results",
+      "verdict": {
+        "traces": true,
+        "code_path": "abm/fed_mbs_extension_risk.py at commit 5cf33a3 (the code that produced the frozen headline run abm/data/runs/run-2026-07-04-15yr-foldin): fetch_soma_mbs_cohorts (terms=(\"30yr\",\"15yr\") default, called by build_production_metrics) for cohort weighting; multi_cohort branch ~lines 998-1030 for structural terms (scheduled_amortization_series term=180; term-aware Danish balance loop) and behav_key=(coupon, 360) for the 30yr-surface-only behavioral CPR",
+        "note": "Every specific matches the fold-in production spec: 15yr cohorts enter cohort weights (within-term min_share, n_cohorts=11 in the frozen manifest) and contribute their own 15-year scheduled amortization, while voluntary CPR is looked up at behav_key=(coupon, PORTFOLIO_TERM=360) \u2014 the same-coupon 30-year surface \u2014 with native 15yr surface slabs left in the CSV \"for inspection but not used for aggregation\" (commit 5cf33a3 comment and message: \"structural-only in production\"). Two caveats: (1) HEAD has since replaced this path with the unconditional native 15yr gate (abm/fed_mbs_extension_risk.py:1006-1016, 15yr cohorts use their OWN surface = run-2026-07-05-native15yr variant, $84.5B), so the claim describes the frozen production run's code, not HEAD; (2) the frozen manifest's git_commit field records the pre-fold-in parent 0899d12 (dirty-tree freeze), so trace via commit 5cf33a3 content, not the manifest field."
+      }
+    },
+    {
+      "quote": "Monte Carlo population-draw distribution of ABM trapped liquidity (50 seeds, fold-in specification; CPR surface rebuilt per draw)",
+      "claim": "The Monte Carlo exercise draws 50 seeds under the same fold-in production specification and rebuilds the CPR surface for each population draw (not reusing one frozen surface across seeds).",
+      "expected_code": "abm/monte_carlo_simulation.py (seed loop, per-draw CPR surface rebuild), outputs abm/monte_carlo_results.csv",
+      "region": "abm-results",
+      "verdict": {
+        "traces": true,
+        "code_path": "abm/monte_carlo_simulation.py:110-134 (run_single_iteration) inside the seed loop at :230-242; per-draw surface rebuild via abm_lockin_simulation.py:542 build_multi_cohort_surfaces -> :506 HousingMarketEngine.build_cpr_surface; population redraw per seed via HousingMarketEngine.__init__ (abm_lockin_simulation.py:264-284)",
+        "note": "All specifics confirmed: N_RUNS=50 (monte_carlo_simulation.py:37) with 50 rows in abm/monte_carlo_results.csv and n_seeds=50 in the frozen run-2026-07-04-15yr-foldin/monte_carlo_summary.json; each iteration constructs a fresh HousingMarketEngine(seed=seed) that redraws the 10k-agent population and rebuilds the full 3D CPR surface per cohort (no frozen surface is read inside the loop \u2014 compute_metrics only loads abm_cpr_surface.csv when surface is None, fed_mbs_extension_risk.py:860); fold-in spec matches production: cohorts from fetch_soma_mbs_cohorts() default terms=(\"30yr\",\"15yr\") (fed_mbs_extension_risk.py:508-510), use_burnout=False + apply_settlement_lag_kernel=True identical to build_production_metrics, same mobility_scale 43882.8125 as headline manifest. Minor caveat, not a mismatch: restrict_grids_to_observed trims interpolation grids for speed, but this is interpolation-identical (np.interp bracketing, asserted coverage) and the frozen summary records seed 42 reproducing the frozen headline $90.98B exactly."
+      }
+    },
+    {
+      "quote": "a debt-to-income constraint, asymmetric loss aversion, and a rate-shock freeze",
+      "claim": "The first behavioral extension implements three gates in the household decision rule \u2014 a DTI constraint, asymmetric loss aversion, and a rate-shock freeze \u2014 and its calibration holds a real-world turnover floor fixed, which forces a recalibration that inflates rate sensitivity.",
+      "expected_code": "abm/abm_lockin_simulation.py (behavioral gate flags and calibration to a fixed turnover floor); possibly abm/robustness_analysis.py for the staged bridge runs",
+      "region": "abm-results",
+      "verdict": {
+        "traces": true,
+        "code_path": "abm/abm_lockin_simulation.py \u2014 gates: Household.evaluate_move (lines 229-253) and the vectorized production path HousingMarketEngine._movers_mask (lines 429-448); calibration: calibrate_mobility_scale (lines 629-665), invoked in production by abm/fed_mbs_extension_risk.py:1590 and abm_lockin_simulation.py main() (lines 734, 766)",
+        "note": "All three gates execute exactly as claimed, in both the scalar and vectorized (production) decision paths: (1) DTI hard wall \u2014 new_payment/monthly_income > DTI_MAX = 0.43 (CFPB QM/ATR, line 56-58) rejects the move (lines 229-232; vectorized 435-437); (2) asymmetric loss aversion \u2014 payment increases scaled by LOSS_AVERSION_LAMBDA = 2.25 (Kahneman-Tversky), decreases unscaled (lines 234-237; vectorized via _mobility_penalty, lines 386-407 using np.where(delta>0, delta*LAMBDA, ...)); (3) rate-shock freeze \u2014 when rate_velocity > WAIT_AND_SEE_RATE_THRESHOLD, WAIT_AND_SEE_PROB = 20% of otherwise-cleared movers freeze (lines 250-253; vectorized 444-448). Calibration holds the real-world turnover floor fixed: calibrate_mobility_scale binary-searches the exponential mobility_desire scale until CPR at 8% market rate (maximum lock-in, US par-payoff) lands in the 4-5% involuntary-turnover band (death/divorce/default), i.e., the floor is the fixed anchor and the mobility scale is the free parameter. This is live in production: fed_mbs_extension_risk.py (the ABM production artifact) calls abm.calibrate_mobility_scale at line 1590. The \"forces a recalibration that inflates rate sensitivity\" consequence is documented in TECHNICAL.md \u00a76 (\"Behavioral extensions (DTI + loss aversion + wait-and-see)\", line 164-168): loss aversion steepened the penalty, \"forcing mobility-scale recalibration upward to maintain the 4-5% turnover floor \u2014 which increased CPR at all rate levels, including the 5-7% band,\" dropping share explained 80.8% -> 62.3%; with CPR pinned at the floor at the 8% anchor and raised elsewhere, the S-curve steepens, i.e., inflated rate sensitivity. Two minor caveats, neither contradicting the claim: the gates are unconditional constants at HEAD (no on/off flags \u2014 the pre-gates baseline variant is historical, and the 80.8%->62.3% bridge figures live in TECHNICAL.md, not in a rerunnable staged script; robustness_analysis.py covers data-source/cap-schedule panels, not the gate bridge); and it is the behavioral-extension section listed first in TECHNICAL.md \u00a76, consistent with \"first behavioral extension.\""
+      }
+    },
+    {
+      "quote": "The institutional wedge is the mean over those months of the difference between the cohort-weighted Danish and U.S. simulated CPR series.",
+      "claim": "The Danish-vs-U.S. institutional wedge is computed as the mean, over the 42 active QT months (June 2022\u2013November 2025), of the difference between cohort-weighted Danish and U.S. simulated CPR series; CPR means aggregate over those same 42 months.",
+      "expected_code": "common/qt_window.py (QT window definition), abm/abm_lockin_simulation.py or abm/hybrid_pipeline.py (Danish counterfactual leg and wedge computation)",
+      "region": "abm-results",
+      "verdict": {
+        "traces": true,
+        "code_path": "abm/fed_mbs_extension_risk.py::export_headline_metrics (lines 1440-1441, 1504-1515: qt_active_frame + wedge = Danish_CPR_Pct - US_CPR_Pct, _series_stats mean); window from common/qt_window.py (QT_START 2022-06-01, QT_END 2025-12-01 exclusive = 42 months); cohort weighting in the multi-cohort surface branch of compute_metrics (lines 1028-1030: us_cpr/dk_cpr += w * cohort CPR), reached via build_production_metrics (line 1600)",
+        "note": "Executing production path confirmed, not dead code: build_production_metrics -> load_cpr_surface(abm_cpr_surface.csv with Cohort_Coupon column) -> multi_cohort branch with normalized SOMA cohort weights; export_headline_metrics masks to qt_active_frame with assert_qt_window_only before all CPR stats, so wedge mean and CPR means use the identical 42-month slice. Frozen manifest run-2026-07-04-15yr-foldin (cited by the footnote containing the quote) records n_months=42/expected=42, end_inclusive_label November 2025, danish mean 47.14 (paper 47.1%), wedge_dk_minus_us_pp mean 35.46pp n=42, institutional_gap 925.51 (paper ~$925.5B), pipeline.module=build_production_metrics, n_cohorts=11. Only trivial nit: the expected files abm_lockin_simulation.py/hybrid_pipeline.py are not where the wedge lives; it is in fed_mbs_extension_risk.py, the actual ABM production module."
+      }
+    },
+    {
+      "quote": "Importing Denmark's flat 3.2% moving elasticity and treating the U.S.-transplant refinance-in-place channel as negligible",
+      "claim": "The Berger-recalibrated Danish specification sets the Danish moving channel to a flat 3.2%/year unconditional rate (invariant to coupon gap) and sets the refinance-in-place channel contribution to approximately zero, in both the ABM and hybrid frameworks.",
+      "expected_code": "common/berger_calibration.py (channel parameters), abm run run-2026-07-05-berger (abm/data/runs/run-2026-07-05-berger/), hazard/danish_discount_bound.py",
+      "region": "abm-results",
+      "verdict": {
+        "traces": true,
+        "code_path": "common/berger_calibration.py:95-103 (danish_moving_cpr_annual, DK_UNCOND_MOVE_ANNUAL=0.032) and :126-160 (danish_refi_in_place_cpr_annual, regime=\"US\" returns _US_TRANSPLANT_REFI_ANNUAL=0.0); consumed by abm/abm_lockin_simulation.py:414-425 (_cpr_vec Danish branch) and hazard/competing_risks.py:122-134 (Danish-regime pool via hazard/microsim_engine.py)",
+        "note": "Mechanism traces in both frameworks: Danish CPR = 3.2%/yr moving anchor + refi-in-place channel that is exactly 0.0 in production (US_TRANSPLANT_REFI_BEST_ESTIMATE=0.0, regime=\"US\" passed by both callers; sweepable global). Two precision caveats: (1) \"invariant to coupon gap\" is not literal \u2014 the executing formula adds the CI-midpoint slope of -0.039pp per 100bp (CI -0.198..+0.12 spans zero, code calls it \"statistically flat\"), so the frozen run run-2026-07-05-berger shows Danish CPR 3.31-3.40% (mean 3.361%, std 0.018), not a constant 3.2%; the manuscript's \"flat 3.2%\" wording is defensible but \"invariant\" overstates it, and any reported Danish mean of ~3.36% comes from this gap term. (2) Manifest provenance: the frozen manifest's git_commit 51fbd83 predates the berger recalibration commit d3e21f6 (dirty-tree freeze; that tree has no berger_calibration.py), but the frozen Danish CPR band 3.31-3.40% is only producible by the berger channel, confirming it executed for the headline run."
+      }
+    },
+    {
+      "quote": "the ABM's macro-accounting layer with Path B's microsimulated CPR as the micro-foundation",
+      "claim": "The shared-accounting hybrid pipeline runs the ABM's macro-accounting layer on top of Path B's microsimulated CPR series, and the hybrid table row's two legs are printed from the shared-layer scoring artifact, putting U.S. and Danish regimes on one accounting basis.",
+      "expected_code": "abm/hybrid_pipeline.py, hazard/shared_layer_scoring.py, hazard/microsim_engine.py (Path B CPR input)",
+      "region": "abm-results",
+      "verdict": {
+        "traces": true,
+        "code_path": "abm/hybrid_pipeline.py:35-41 \u2192 abm/fed_mbs_extension_risk.py::compute_metrics use_hazard_microsim branch (lines 882-909+, hook _load_hazard_microsim_paths at line 770) \u2192 hazard/microsim_engine.py::run_qt_microsim (Path B: literature_hazard.rothstein_beta1 + competing_risks.monthly_step, US+Danish regimes; Danish leg Berger-recalibrated at competing_risks.py:122-130); table-row artifact: hazard/shared_layer_scoring.py::score_on_shared_layer \u2192 hazard/data/shared_layer_scoring_results.json",
+        "note": "Every specific checks out. (1) hybrid_pipeline.py calls fed.compute_metrics(use_hazard_microsim=True); that branch keeps the ABM macro-accounting layer intact (SOMA roll-off, phased-cap QT netting lines 826-845, curtailment netting line 895, scheduled amortization line 890, Danish dynamic-balance loop lines 898+) while substituting the ABM CPR surface with Path B's run_qt_microsim CPR (hazard_cpr_pct/CPR_Danish columns, lines 888-889); settlement kernel auto-disabled in microsim mode (line 1141). (2) shared_layer_scoring.py runs the same layer over the cached production Path B parquet and writes shared_layer_scoring_results.json, whose path_b_central entry (us_trapped_b 748.9679, danish_trapped_b 848.8698, gap -99.902, share 97.937) matches the manuscript table row at tex line 189 (+$749.0B / +$848.9B / -$99.9B) and footnote c's explicit provenance sentence at line 196; a parity gate (lines 172-177) asserts agreement with the published 97.9%, and abm/data/hybrid_pipeline_results.json independently reproduces the identical figures to full precision including the printed 4.76%/3.39% CPR means. (3) Both US and Danish legs flow through the single compute_metrics layer (common $69.56B curtailment netting recorded per estimator), i.e., one accounting basis. Reachable production: both scripts are live entry points with frozen, mutually consistent JSON artifacts; the Danish regime routing to Berger calibration executes inside competing_risks.monthly_step."
+      }
+    },
+    {
+      "quote": "a direct sensitivity sweep of that one input, from 0% up to the partial-equilibrium reduced-form estimate",
+      "claim": "A sensitivity sweep varies the U.S.-transplant refinance-in-place CPR contribution from 0% up to roughly 18% and recomputes the institutional gap through both the hybrid pipeline (zero-crossing at 1.4% CPR) and the ABM (zero-crossing at 12.6%), producing Figure 4.",
+      "expected_code": "abm/refi_sweep.py (sweep driver), abm/hybrid_pipeline.py (gap recomputation per sweep point)",
+      "region": "abm-results",
+      "verdict": {
+        "traces": true,
+        "code_path": "abm/refi_sweep.py:35-63 (SWEEP 0\u21920.18, _gap_abm + _gap_pathB per point) \u2192 abm/fed_mbs_extension_risk.py:786 compute_metrics(use_hazard_microsim=True) [same path as abm/hybrid_pipeline.py] \u2192 hazard/microsim_engine.run_qt_microsim \u2192 hazard/competing_risks.py:127 danish_cpr_annual reading common/berger_calibration.set_us_transplant_refi global; figure: figures/make_figures.py:191 fig4_refi_sweep \u2192 figures/fig4_institutional_gap_sensitivity.png",
+        "note": "All specifics confirmed: sweep is 7 points from 0.0 to 0.18 (PE reduced-form ceiling; representative PE value 17.4% \u2248 \"roughly 18%\"); frozen output abm/data/refi_sweep_results.json gives breakeven_refi.abm=0.12586 (12.6%) and breakeven_refi.path_b=0.013828 (1.4%), matching the claimed zero-crossings exactly; the refi parameter genuinely propagates into the Path B microsim (module global read per re-run, not cached). Minor nuance: refi_sweep.py does not import abm/hybrid_pipeline.py \u2014 it invokes the identical executing configuration (compute_metrics with use_hazard_microsim=True) directly, and the Figure 4 legend labels that arm \"Path B (hybrid pipeline)\"."
+      }
+    },
+    {
+      "quote": "the net shortfall of simulated roll-off relative to the phased redemption cap over the QT window",
+      "claim": "Trapped liquidity for each leg is computed as signed net shortfall of simulated roll-off relative to the phased redemption cap path over the QT window (positive = runoff below cap, negative = runoff exceeds the phased cap path).",
+      "expected_code": "abm/abm_lockin_simulation.py and/or hazard/shared_layer_scoring.py (trapped-liquidity accounting against the cap), common/qt_window.py (phased redemption cap path)",
+      "region": "abm-results",
+      "verdict": {
+        "traces": true,
+        "code_path": "abm/fed_mbs_extension_risk.py:1156-1182 (compute_metrics per-leg deltas) + :1445-1447 (export_headline_metrics QT-window sums); cap path: common/qt_window.py:60-73 (compute_qt_target_series)",
+        "note": "Per-leg trapped = sum over qt_active_frame [2022-06, 2025-12) of {US,Danish}_Simulated_Monthly_Rolloff_Billions minus QT_Target_Billions (phased: -17.5B Jun-Aug 2022, -35B Sep 2022 onward). Signed net (no clipping; comment \"positive = shortfall, negative = overshoot\", \"NET accumulation\"). Sign convention verified: roll-off and cap both negative, so delta>0 iff runoff magnitude below cap, delta<0 iff runoff exceeds cap \u2014 matches claim. Reachable: main() -> compute_metrics (line 1600) -> export_headline_metrics (line 1624); hazard/shared_layer_scoring.py consumes these outputs rather than recomputing. Minor nuance: the aggregate empirical Extension_Delta_Billions uses actual SOMA/WSHOMCB roll-off, but the claim's \"each leg\" quantities use simulated roll-off as stated."
+      }
+    },
+    {
+      "quote": "aggregates Freddie Mac loan-level performance data to the stratum-month level: strata $s$ are the 296 observed four-way cells",
+      "claim": "The Path A production panel is built by aggregating Freddie Mac loan-level performance data to stratum-month cells, where strata are the 296 observed four-way combinations of vintage x coupon x FICO bucket x LTV bucket, and the unit of observation is (stratum, calendar month).",
+      "expected_code": "hazard/stratum.py, hazard/prepare_freddie.py, hazard/ingest.py (stratum key construction and panel aggregation)",
+      "region": "path-a",
+      "verdict": {
+        "traces": true,
+        "code_path": "hazard/ingest.py:202-280 (build_panel_from_files: group_by vintage/coupon/fico_bucket/ltv_bucket/reporting_period), hazard/stratum.py:6-14 (build_stratum_id four-way key), hazard/prepare_freddie.py (Freddie Mac Standard Dataset orig+perf extraction), hazard/hazard_fit.py:148,273-281,371 (stratum FE, n_strata=len(fe_columns)+1)",
+        "note": "Panel is built by joining Freddie performance to origination files on loan_sequence_number and immediately aggregating to (vintage, coupon, fico_bucket, ltv_bucket, reporting_period) cells; reporting_period is calendar month YYYYMM. Strata are exactly the four claimed dimensions (stratum.py docstring: '4-way cohort stratum identifiers'). The production artifact hazard/data/hazard_coefficients.json (spec v4 with month_effects) records n_strata=296 with 295 FE dummies plus reference stratum 2017_200_740+_\u226480; ridge_reference_weighting.py:225 confirms '296 = observed strata, 295 = FE dummies'. Only nuance: 296 is the count of strata observed in the training split (dummies from train unique stratum_ids), consistent with 'observed' in the quote."
+      }
+    },
+    {
+      "quote": "the model is estimated by Poisson pseudo-maximum likelihood",
+      "claim": "Path A is fit as a discrete-time hazard via Poisson PML with a log-exposure offset log(n_st), where the outcome y_st is prepaid UPB in dollars (not a count) and n_st is UPB exposure, so the modeled object is the prepayment rate y/n.",
+      "expected_code": "hazard/hazard_fit.py (design matrix / offset construction and IRLS Poisson fit)",
+      "region": "path-a",
+      "verdict": {
+        "traces": true,
+        "code_path": "hazard/hazard_fit.py::fit_hazard_glm (lines 316-317: y_events=train[\"events\"], offset=np.log(train[\"exposure\"])) \u2192 _fit_poisson_glm (lines 157-190: sm.GLM Poisson family, IRLS fit); y built at hazard_fit.py:145 (events=prepaid_upb) from ingest.py:228-234 (sum of prev_upb dollars on prepay events); n built at hazard_fit.py:146 (exposure=exposure_upb.clip(1)) from ingest.py:226 (sum of current_upb)",
+        "note": "Every specific checks out: Poisson GLM (PML \u2014 y is non-integer dollars) fit by IRLS with offset=log(exposure_upb); y_st = prepaid_upb in dollars (sum of prior-month UPB of prepaying loans, ingest.py:228-234), not loan_count; n_st = UPB exposure (sum current_upb); with log link + offset, exp(X\u03b2) is the dollar prepayment rate y/n, which the code itself computes as prepay_rate (line 267) and scores on holdout. Production artifact hazard/data/hazard_coefficients.json (spec_version 4, link poisson_log, month_effects, n_train 10176) matches exactly what fit_hazard_glm(seasonal=True) writes, so the path is live. Minor caveat, not a contradiction: the frozen artifact has ridge_alpha=1e-4, so production coefficients came from the L2-penalized branch (fit_regularized, elastic_net L1_wt=0, initialized at the IRLS solution, alpha chosen on holdout RMSE) \u2014 a lightly ridge-penalized Poisson PML; the manuscript sentence is silent on the penalty."
+      }
+    },
+    {
+      "quote": "truncated quadratic power basis: a linear term plus $(a - k)_+^2$ at knots $k \\in \\{12, 24, 36, 60, 84, 120\\}$ months, seven basis columns",
+      "claim": "The loan-age seasoning spline f(a) is a truncated quadratic power basis: one linear term plus squared hinge terms (a-k)+^2 at knots 12, 24, 36, 60, 84, 120 months, giving exactly seven basis columns, evaluated at mean loan age per stratum-month.",
+      "expected_code": "hazard/hazard_fit.py (spline basis builder)",
+      "region": "path-a",
+      "verdict": {
+        "traces": true,
+        "code_path": "hazard/hazard_fit.py:58-63 (_age_spline_basis), knots from hazard/config.py:81 (AGE_SPLINE_KNOTS = [12, 24, 36, 60, 84, 120]), evaluated on mean loan age via hazard/hazard_fit.py:144 <- hazard/ingest.py:235",
+        "note": "_age_spline_basis builds cols = [age] + [np.maximum(age - k, 0.0)**2 for k in knots] \u2014 exactly one linear term plus squared hinge (a-k)+^2 terms. With the six configured knots {12, 24, 36, 60, 84, 120} that is 1 + 6 = 7 basis columns, matching the design-column names ['age_linear'] + ['age_spline_{k}'] at hazard_fit.py:304. The age input is mean loan age per stratum-month: ingest.py:235 aggregates pl.col('loan_age').mean().alias('mean_loan_age') within group_by(vintage, coupon, fico_bucket, ltv_bucket, reporting_period), and hazard_fit.py:144 sets pdf['loan_age'] = pdf['mean_loan_age'].fillna(12) before the basis is built at hazard_fit.py:283 (train) and :207 (holdout). Reachability in production confirmed: the frozen artifact hazard/data/hazard_coefficients.json (spec_version 4) contains exactly the seven coefficients age_linear and age_spline_{12,24,36,60,84,120}, and hazard_fit.py:415 re-evaluates the same basis at prediction time. Only unstated nuance (not a contradiction): missing mean loan age is imputed to 12 months via fillna(12)."
+      }
+    },
+    {
+      "quote": "exposure and the outcome are raw dollars, so the pseudo-maximum-likelihood fit is UPB-weighted by construction",
+      "claim": "The panel carries no sampling weights: it aggregates the full Freddie Mac 2017-2021 origination universe (8.84M active loans at peak, not the 75,000-loan Path B sample), and because exposure and outcome enter as raw dollars the PML fit is UPB-weighted by construction.",
+      "expected_code": "hazard/prepare_freddie.py, hazard/ingest.py, hazard/hazard_fit.py (no per-loan sampling/weighting in the Path A panel path)",
+      "region": "path-a",
+      "verdict": {
+        "traces": true,
+        "code_path": "hazard/ingest.py:202 (build_panel_from_files, no sampling, exposure_upb/prepaid_upb summed as raw dollars) \u2192 hazard/hazard_fit.py:145-146,316-317 (events=prepaid_upb $, offset=log(exposure_upb $)) \u2192 hazard/hazard_fit.py:157-190 (_fit_poisson_glm, sm.GLM Poisson with offset, no weights arg)",
+        "note": "Every specific checks out: (1) grep finds zero weighting anywhere in prepare_freddie.py/ingest.py/hazard_fit.py and sm.GLM is called without freq_weights/var_weights; (2) panel vintages are exactly 2017-2021 (config.py:99) with only deterministic quality filters (FRM, UPB>0, LTV 1-200, FICO 300-850) in ingest.py:102-105 \u2014 no per-loan sampling; (3) recomputed peak monthly active loans from the frozen cohort_month_panel.parquet = 8,840,896 (2022-01), matching 8.84M, and hazard/data/panel_disclosures.json records the same number; (4) loan_sample.parquet is exactly 75,000 rows and is never imported by the panel/fit path; (5) events and exposure enter the Poisson GLM in raw dollars with log-exposure offset, so the pseudo-ML score weights each cell proportionally to its UPB \u2014 UPB-weighted by construction, as quoted. Minor caveat only: 'origination universe' is FRM-and-valid-field filtered, but the frozen artifact reproduces the claim's numbers exactly."
+      }
+    },
+    {
+      "quote": "The specification includes 295 stratum fixed effects (296 observed four-way combinations ... one absorbed as the reference)",
+      "claim": "The production design matrix contains 295 stratum fixed-effect dummies with one stratum absorbed as the reference category.",
+      "expected_code": "hazard/hazard_fit.py (fixed-effect dummy construction / reference absorption)",
+      "region": "path-a",
+      "verdict": {
+        "traces": true,
+        "code_path": "hazard/hazard_fit.py:273-281 (dummy construction with reference absorption); frozen artifact hazard/data/hazard_coefficients.json; consumed at hazard/simulate.py:187-195 inside simulate_qt_window",
+        "note": "Confirmed on every specific. (1) Construction: hazard_fit.py:273-281 sets reference_stratum = sorted(train[\"stratum_id\"].unique())[0], then pd.get_dummies(train[\"stratum_id\"], prefix=\"fe_stratum\", drop_first=True) \u2014 exactly one stratum absorbed as reference. (2) Counts: production artifact hazard/data/hazard_coefficients.json (spec_version 4, with month_effects \u2014 the stated production Path A artifact) has n_strata=296, len(fe_columns)=295, exactly 295 fe_stratum_* coefficients, len(stratum_burnout_mean)=296, reference_stratum=\"2017_200_740+_\u226480\" (absent from fe_columns). (3) Four-way: hazard/stratum.py build_stratum_id concatenates vintage \u00d7 coupon(bps) \u00d7 fico_bucket \u00d7 ltv_bucket \u2014 a four-way combination as claimed. (4) Reachability: not dead code \u2014 simulate.py::simulate_qt_window loads this artifact (load_coefficients/load_predict_scales at lines 123-126) and applies the FE layout via reference_stratum/fe_columns/fe_index at lines 187-195, using hazard_fit._stratum_fe_row (lines 82-98), which emits a zero row for the reference stratum and a 1 in the matching fe_stratum column otherwise. 295 = 296 - 1 arithmetic holds throughout."
+      }
+    },
+    {
+      "quote": "The burnout regressor is a within-stratum demeaned measure of the surviving loan stock, orthogonalized against the loan-age spline",
+      "claim": "The Path A burnout regressor is constructed as a within-stratum demeaned surviving-loan-stock measure that is then residualized (orthogonalized) against the loan-age spline columns so it is not collinear with seasoning.",
+      "expected_code": "hazard/hazard_fit.py (burnout state construction, demeaning, and orthogonalization step)",
+      "region": "path-a",
+      "verdict": {
+        "traces": true,
+        "code_path": "hazard/hazard_fit.py:284-292 (within-stratum demean then _orthogonalize_burnout at lines 46-55, OLS residual on constant + age-spline basis), burnout stock measure built in hazard/ingest.py:271-276",
+        "note": "Executing production path matches: ingest.py computes burnout as cumulative prepaid UPB / original UPB per cohort (depletion of surviving loan stock); hazard_fit.py fit() demeans it within stratum_id (groupby transform s - s.mean(), line 284) and then residualizes the demeaned series on the loan-age truncated-power spline basis plus constant via OLS (_orthogonalize_burnout), using the residual (standardized) as regressor 'burnout_orth'. The frozen spec-v4 artifact hazard/data/hazard_coefficients.json contains this path's outputs (burnout_orth=-0.1713, stratum_burnout_mean, burnout_age_adjust, burnout_demean_std), and predict_hazard replays the same transform for Path A simulation. Minor wording caveat: the regressor is the cumulative prepaid share (complement of surviving fraction), which the manuscript describes as 'a measure of the surviving loan stock' \u2014 same quantity, inverse parameterization; all construction/ordering specifics trace."
+      }
+    },
+    {
+      "quote": "$\\lambda_{\\mathrm{ridge}}$ chosen over the grid $\\{10^{-5}, 10^{-4}\\}$ on a temporally blocked holdout comprising all stratum-months from January 2024 onward",
+      "claim": "The fit carries a ridge penalty on the full coefficient vector, with lambda selected over the two-point grid {1e-5, 1e-4} on a temporal holdout of all stratum-months from January 2024 onward (train window Jan 2021-Dec 2023, 36 months), and the bootstrap holds lambda fixed at the production 1e-4 rather than re-selecting per replication.",
+      "expected_code": "hazard/hazard_fit.py (ridge grid + temporal train/holdout split), hazard/bootstrap_se.py (fixed lambda)",
+      "region": "path-a",
+      "verdict": {
+        "traces": true,
+        "code_path": "hazard/hazard_fit.py::fit_hazard_glm (lines 269-270 temporal split, 319-346 grid selection; _fit_poisson_glm lines 157-190 ridge on full X) + hazard/config.py:80,84 (HOLDOUT_DATE, RIDGE_ALPHA_GRID) + hazard/bootstrap_se.py:271 (fixed production alpha)",
+        "note": "Every specific checks out. (1) Grid: config.py:84 RIDGE_ALPHA_GRID = [1e-5, 1e-4]; fit_hazard_glm loops over it (hazard_fit.py:319-343) selecting by holdout RMSE. (2) Holdout: config.py:80 HOLDOUT_DATE = 2024-01-01; train = period < holdout_date, holdout = period >= holdout_date (hazard_fit.py:269-270), so the holdout is all stratum-months Jan 2024 onward (actual: 2024-01 to 2025-09, 6077 cells = artifact n_holdout). (3) Train window: panel starts 2017-01, but macro fetch pulls WSHOMCB from START_DATE=2021-01-01 and drops pre-2021 rows (macro.py:180-189), leaving rate_gap_bps NaN before 2021; fit_hazard_glm's dropna (line 265) trims train to exactly 2021-01..2023-12 = 36 months, 10176 cells \u2014 matches artifact n_train=10176 exactly. (4) Full coefficient vector: _fit_poisson_glm calls GLM.fit_regularized(method=\"elastic_net\", alpha=scalar, L1_wt=0.0) on X = const + age spline + macro + stratum FE; a scalar alpha in statsmodels penalizes all coefficients including the constant and FE dummies \u2014 no intercept exclusion. (5) Production lambda: hazard/data/hazard_coefficients.json has ridge_alpha=0.0001, fit_method=\"ridge(alpha=0.0001)\". (6) Bootstrap: bootstrap_se.py defaults alpha to float(prod[\"ridge_alpha\"]) (line 271), docstring states alpha is FIXED not re-selected per replication, and the frozen artifact hazard_bootstrap_se.json records ridge_alpha=0.0001, alpha_reselected_per_rep=False. One nuance (not a contradiction of the claim as worded): the spec v4 production coefficients were refit with month dummies at the alpha inherited from the v3 artifact (seasonality_concave_gap.py:187 reads prod_meta[\"ridge_alpha\"]); the grid selection itself executed in the v3 fit, whose 1e-4 (differing from the RIDGE_ALPHA=1e-5 single-value default) the v4 refit and bootstrap both hold fixed."
+      }
+    },
+    {
+      "quote": "the seasonal design, whose eleven month dummies absorb most within-year variation",
+      "claim": "The production Path A specification (spec v4, adopted at the pre-submission freeze under pre-registered parity gates, run tag run-2026-07-14-pathA-seasonal) augments equation (1) with eleven calendar-month dummies against a January base, and this seasonal spec is what produces the production coefficients (rate gap +0.65 standardized, burnout -0.17, friction -0.007) and the 121.5% recovery.",
+      "expected_code": "hazard/pathA_seasonal_adoption.py, hazard/hazard_fit.py (month-dummy columns, January reference)",
+      "region": "path-a",
+      "verdict": {
+        "traces": true,
+        "code_path": "hazard/seasonality_concave_gap.py:77 fit_with_month_dummies (executing fit construction, called by hazard/pathA_seasonal_adoption.py:~205) -> production artifact hazard/data/hazard_coefficients.json (spec_version 4) -> consumed by hazard/simulate.py::simulate_qt_window (season multiplier at simulate.py:168, applied to hazard at ~line 153 `predict_hazard(...) * season`)",
+        "note": "Every checkable detail matches. (1) Eleven month dummies, January base: fit_with_month_dummies builds pd.get_dummies(train['period'].dt.month, prefix='m', drop_first=True) yielding m_2..m_12 (11 columns, month 1 dropped), and the production artifact's month_effects map has '1': 0.0 with 11 non-zero entries; hazard_fit.py:36 _month_dummy_matrix documents the same convention. (2) Production coefficients in hazard/data/hazard_coefficients.json (spec_version=4): rate_gap_bps +0.64686 (fitted on z-standardized rate gap, so '+0.65 standardized' is correct), burnout_orth -0.17126, friction -0.00711 \u2014 these are the seasonal v4 fit's values, distinct from the preserved v3 values (+0.6734/-0.1301/-0.0371 in hazard_coefficients_specv3.json), confirming the seasonal spec is what produces the quoted numbers. (3) Recovery: run manifest headline share_pct = 121.4639 \u2248 121.5%. (4) Run tag run-2026-07-14-pathA-seasonal exists under hazard/data/runs/ with gates gate_a_v3_control and gate_b_v4_target all pass; frozen hazard_coefficients.json sha256 (f8b9fedc...) is byte-identical to the live production artifact. (5) Pre-registration: pathA_seasonal_adoption.py docstring fixes both parity gates ex ante ('freeze item (i); spec committed before any run'), with a documented amendment after a first Gate B failure (commit 7c3c673) that left gate targets/tolerances unchanged. (6) Reachability: simulate_qt_window loads month_effects from the artifact and multiplies each cohort-month hazard by exp(effect[month]) \u2014 live production path, not a variant. One nuance, not a mismatch: the producing fit is seasonality_concave_gap.fit_with_month_dummies, NOT hazard_fit.fit_hazard_glm(seasonal=True) \u2014 the latter re-assembly failed Gate B in the first pre-registered attempt and is not the producing construction; the manifest's 'construction' field and the artifact provenance both record fit_with_month_dummies as production spec v4."
+      }
+    },
+    {
+      "quote": "draining each cohort's balance deterministically each month by balance times hazard, with fractional prepayment settling directly to simulated SOMA roll-off and no settlement-lag convolution",
+      "claim": "The Path A forward simulation drains each cohort's balance deterministically each month by balance times fitted hazard (fractional, not stochastic per-loan), and prepaid balances settle directly into simulated SOMA roll-off with no settlement-lag convolution applied.",
+      "expected_code": "hazard/simulate.py (Path A forward simulation and SOMA settlement)",
+      "region": "path-a",
+      "verdict": {
+        "traces": true,
+        "code_path": "hazard/simulate.py::simulate_qt_window (lines 183-229)",
+        "note": "Traces exactly: prepay_amt = bal * hazard (line 199) with hazard from predict_hazard on the fitted spec-v4 coefficients artifact times seasonal multiplier; balances drained deterministically (line 205, no RNG in file); settled_total = prepay_amt same month (line 203) feeds simulated_rolloff_b = -(month_settled + month_sched) * scale (line 225) with no convolution/lag anywhere. Reachable in production via extension_risk.py:216, shared_layer_scoring.py:142, full_book_weighting.py:48. Notable: the module docstring (lines 4-5) claims a Markov servicer-pipeline routing and the transition matrix is loaded at lines 127-128, but trans is never used in the loop \u2014 stale docstring/dead load; the executing code matches the manuscript, not the docstring. Minor: total drain also includes scheduled amortization (bal * sched), which the claim omits but does not contradict."
+      }
+    },
+    {
+      "quote": "resimulating the QT window under each of the 198 converged replications (the three macro coefficients swapped in per draw; intercept, age spline, and fixed effects held at the production fit)",
+      "claim": "The recovery uncertainty pass resimulates the QT window once per converged bootstrap replication, swapping in only the three macro coefficients (rate gap, burnout, friction) per draw while holding the intercept, age spline, and stratum fixed effects at the production fit.",
+      "expected_code": "hazard/bootstrap_resimulate.py",
+      "region": "path-a",
+      "verdict": {
+        "traces": true,
+        "code_path": "hazard/bootstrap_resimulate.py:66-72 (main loop) -> hazard/simulate.py:103 simulate_qt_window",
+        "note": "Loop iterates hazard/data/hazard_bootstrap_draws.csv (199 lines = 198 converged draws from bootstrap_se.py, which raises/skips non-converged fits), calls simulate_qt_window exactly once per rep with coefs = dict(prod_coefs) where only BETA_NAMES = [rate_gap_bps, burnout_orth, friction] are overwritten (lines 67-69); const, age spline terms, and all fe_stratum_* keys stay at the hazard_coefficients.json production values. Frozen output data/bootstrap_resimulate_results.json confirms n_reps=198, resampled=[rate_gap_bps,burnout_orth,friction], held_at_production=[const,age_spline,stratum_fe]. Minor under-enumeration only: month effects m_2..m_12 and prediction scales are also held at production, which is consistent with (not contrary to) the claim."
+      }
+    },
+    {
+      "quote": "each resampled stratum receives a fresh fixed-effect label so duplicated strata contribute independent fixed effects, and per-replication standardization (including the burnout orthogonalization, which is refit inside every replication)",
+      "claim": "The stratum-cluster bootstrap resamples strata with replacement, assigns each resampled stratum a fresh fixed-effect label so duplicates get independent fixed effects, refits standardization and the burnout orthogonalization inside every replication, rescales coefficients back to production standardized units, and counts non-finite or |beta|>20 replications as failures rather than draws.",
+      "expected_code": "hazard/bootstrap_se.py",
+      "region": "path-a",
+      "verdict": {
+        "traces": true,
+        "code_path": "hazard/bootstrap_se.py \u2014 resample_strata (lines 55-70: with-replacement draw + fresh label \"{sid}__b{k:03d}\"), fit_betas (lines 76-167: per-rep standardization lines 107-111, per-rep _orthogonalize_burnout line 105, non-finite/|macro beta|>20 raise lines 153-156 with MAX_ABS_BETA=20.0 line 73), rescale_to_production_units (lines 186-195), run_bootstrap (lines 198-256: failure caught and counted as n_failed, not appended to draws)",
+        "note": "All five claimed mechanisms verified in the executing path: (1) rng.choice(ids, size=len(ids), replace=True) resamples strata with replacement; (2) each draw relabeled stratum_id=f\"{sid}__b{k:03d}\" and FE dummies built from the relabeled column, so duplicates get independent FE; (3) gap/friction/burnout standardization constants recomputed inside fit_betas per replication; (4) _orthogonalize_burnout refit on each resampled frame (with stratum de-meaning by new labels); (5) rescale beta_rep/rep_std*prod_std using scales from production hazard_coefficients.json; (6) non-finite params or max |macro beta|>20 raises RuntimeError, caught in run_bootstrap as n_failed += 1 and skipped, never entering draws. Production reachability confirmed: frozen artifact hazard/data/hazard_bootstrap_se.json (n_reps=200, n_failed=2, cluster=stratum) and TECHNICAL.md line 1444 pins bootstrap_se.py + artifact to commit b6a3e51. Minor precision (non-refuting): the >20 gate checks only the three macro betas; the finiteness check covers all params. Frozen artifact is spec_version 3; code at HEAD also handles the v4 seasonal design with identical mechanisms."
+      }
+    },
+    {
+      "quote": "the 36 training months are resampled in moving blocks of six with each month's cross-section kept intact",
+      "claim": "The temporal bootstrap is a moving-block scheme that resamples the 36 training months in blocks of length six, keeping each month's full stratum cross-section intact, with the same refit-and-rescale machinery as the cluster scheme.",
+      "expected_code": "hazard/temporal_block_bootstrap.py",
+      "region": "path-a",
+      "verdict": {
+        "traces": true,
+        "code_path": "hazard/temporal_block_bootstrap.py::resample_months (lines 52-64) + main (lines 67-113)",
+        "note": "Every specific checks out. (1) Moving-block scheme: resample_months draws block start s uniformly from the T-block+1 admissible starts (overlapping blocks, no wrap) and concatenates months[s:s+block] until T months are picked, truncating to T \u2014 a textbook moving-block bootstrap over the ordered month index. (2) Block length six: --block default is 6 (line 72), and the frozen artifact hazard/data/temporal_block_bootstrap.json records block_length_months=6. (3) 36 training months: not hardcoded, but load_train filters period < HOLDOUT_DATE and the artifact records n_months=36 (with scheme \"temporal_moving_block\", 200 reps, 4 failed). (4) Cross-section intact: resampling is done via train.groupby(\"period\") and whole-month chunks are concatenated, so each sampled month carries its full stratum cross-section unchanged. (5) Same refit-and-rescale machinery as the cluster scheme: the script imports fit_betas, production_start_head, and rescale_to_production_units directly from bootstrap_se (the stratum-cluster scheme, lines 32-37) and calls fit_betas per replication then rescale_to_production_units to production standardized units (lines 101-107), so the two schemes literally share the estimator code and differ only in the resampled dimension. Minor non-refuting caveat: the on-disk artifact lacks the spec_version/seasonal_design keys the current script writes, indicating it was produced by an earlier revision of the script \u2014 but that revision's resampling mechanism (block 6 over 36 months, cross-sections intact, bootstrap_se.fit_betas + rescale) is the same as claimed."
+      }
+    },
+    {
+      "quote": "the exposure-weighted RMSE (the weighting the fit itself uses) is 2.5 percentage points",
+      "claim": "The holdout diagnostic computes stratum-month CPR RMSE two ways, unweighted and UPB-exposure-weighted, on the January-2024-onward holdout, and both ridge-grid candidate fits are numerically identical on this holdout.",
+      "expected_code": "hazard/hazard_fit.py or hazard/round8_diagnostics.py (holdout RMSE computation with both weightings)",
+      "region": "path-a",
+      "verdict": {
+        "traces": true,
+        "code_path": "hazard/ridge_reference_weighting.py::holdout_rmse (lines 92-115) + main() alpha-grid loop (lines 122-133); artifact hazard/data/ridge_reference_weighting.json",
+        "note": "All specifics match. (1) Holdout: load_split() splits at period >= HOLDOUT_DATE = 2024-01-01 (hazard/config.py:80). (2) Both weightings computed on annualized stratum-month CPR in pp: rmse_unweighted_pp and rmse_exposure_weighted_pp with weights w = holdout[\"exposure\"]. (3) Exposure is UPB dollars: hazard_fit.py:146 sets exposure = exposure_upb.clip(lower=1), and the Poisson fit uses offset log(exposure), so \"the weighting the fit itself uses\" is correct. (4) Both ridge-grid candidates (RIDGE_ALPHA_GRID = [1e-5, 1e-4], config.py:84) are fitted and scored on the same holdout; the committed artifact shows RMSEs identical to ~12 decimal places (exposure-weighted 2.533826267952145 vs 2.5338262679523766) and coefficient vectors identical to 4.5e-17 (grid_fit_identity), supporting \"numerically identical\". (5) Quoted 2.5 pp matches artifact rmse_exposure_weighted_pp = 2.5338. Minor: the code lives in ridge_reference_weighting.py (a Round-8 audit script), not hazard_fit.py/round8_diagnostics.py as the expected-code hint suggested; also the artifact's own note says \"bit-identical\" while max_abs_param_diff is 4.5e-17 (machine-epsilon, not literally bit-identical) \u2014 neither affects the manuscript claim."
+      }
+    },
+    {
+      "quote": "$\\underline{h}$ is the involuntary-turnover floor: the monthly single-month-mortality (SMM) equivalent of 4\\% annual CPR",
+      "claim": "The production prepayment hazard is floored via max{h_floor, hazard}, where the floor equals 1-(1-0.04)^(1/12) \u2248 0.0034 monthly (4% annual CPR converted to SMM), and proportionality holds only above the floor (the max is applied after the exp() covariate term).",
+      "expected_code": "hazard/config.py (floor parameter), hazard/literature_hazard.py or hazard/microsim_engine.py (max application in the monthly hazard evaluation)",
+      "region": "path-b",
+      "verdict": {
+        "traces": true,
+        "code_path": "hazard/literature_hazard.py:105-109 (prepay_hazard: h_vol = h0*exp(log_h); return np.clip(np.maximum(h_floor, h_vol), 0, 1)), floor from hazard/config.py:47 (INVOLUNTARY_CPR_ANNUAL = 0.04) converted at literature_hazard.py:51-54 (1-(1-cpr)^(1/12)); reached in Path B via hazard/competing_risks.py:136 (monthly_step) called from hazard/microsim_engine.py:15/run_qt_microsim",
+        "note": "Formula matches exactly: 1-(1-0.04)^(1/12) = 0.0033961 \u2248 0.0034 monthly SMM; max(h_floor, h_vol) is applied after the h0*exp(covariates) proportional term, so proportionality holds only above the floor. Floor parameter is an annual CPR in config.py with the SMM conversion in literature_hazard.py (not a pre-converted monthly constant in config \u2014 immaterial to the claim). Downstream normalize_competing_hazards only rescales if h_prep+h_def > 1 (never binding at these magnitudes), and the Danish counterfactual regime branch bypasses prepay_hazard, but the US production regime executes the floored path."
+      }
+    },
+    {
+      "quote": "The baseline hazard follows the 100~PSA seasoning ramp (CPR rising 0.2 percentage points per month of loan age to 6\\% at month 30)",
+      "claim": "The baseline hazard h0(age) is the 100 PSA ramp \u2014 CPR = 0.2pp per month of loan age, capped at 6% from month 30 \u2014 converted to a monthly hazard via SMM = 1-(1-CPR)^(1/12).",
+      "expected_code": "hazard/literature_hazard.py (PSA baseline function), hazard/config.py",
+      "region": "path-b",
+      "verdict": {
+        "traces": true,
+        "code_path": "hazard/literature_hazard.py:57-64 (h0_psa) + :51-54 (cpr_annual_to_monthly_hazard), dispatched via baseline_hazard (:72-75, BASELINE_MODE=\"psa\", PSA_SPEED=100.0 in hazard/config.py:34-35), executed inside prepay_hazard (:98) \u2190 competing_risks.py:136 monthly_step \u2190 microsim_engine.py:50 run_qt_microsim",
+        "note": "Exact match: cpr_ann = 0.06 * (psa_speed/100) * min(age,30)/30 with PSA_SPEED=100 gives CPR rising 0.2pp per month of loan age, flat at 6% from month 30; converted via SMM = 1-(1-CPR)^(1/12). Path is the live non-Danish branch of Path B's monthly_step; Weibull baseline exists but is a non-default variant. Minor immaterial details: CPR clipped to [0,0.99], monthly hazard clipped to [1e-8,0.5] (never binding in PSA range except 1e-8 floor at age 0)."
+      }
+    },
+    {
+      "quote": "converted to a monthly hazard via the survival-function transform",
+      "claim": "Production computes beta_1 from the quarterly mobility decline delta via the discrete survival-function transform of eq. (beta1) \u2014 beta_1 = -ln[(1-(1-(1-delta)P_q)^(1/3))/(1-(1-P_q)^(1/3))] with P_q = 0.06 \u2014 giving unrounded 0.0686 at the central delta = 0.065 (the discrete form, not the continuous-hazard form that gives 0.0693).",
+      "expected_code": "hazard/literature_hazard.py or hazard/config.py (beta1 conversion function)",
+      "region": "path-b",
+      "verdict": {
+        "traces": true,
+        "code_path": "hazard/literature_hazard.py:31-43 (rothstein_beta1) + :25-28 (quarterly_to_monthly_hazard), constants hazard/config.py:41,44; executed via hazard/microsim_engine.py:101 (run_qt_microsim, default p_q_shock_pct = 6.5) and hazard/competing_risks.py:86 (monthly_step default BETA1_PREPAY_MID)",
+        "note": "Discrete survival-function transform confirmed: h_m = 1-(1-P_q)^(1/3), beta_1 = ln(h(P_q*(1-delta))/h(P_q)) with P_Q_BASELINE=0.06, central delta=ROTHSTEIN_Q_DECLINE_MID=0.065. Computed |beta_1| = 0.0685705 (rounds to 0.0686), vs continuous-hazard form 0.0692583 (0.0693) \u2014 matches the claim's discrete-vs-continuous distinction exactly; module docstring says 'derived via survival-function conversion (not divide-by-3)'. Sign convention: code returns the negative log ratio (-0.0686) and applies the minus at use (prepay_hazard line 100: (-beta1)*(rate_gap*100)), so the executed per-100bp magnitude equals the manuscript's +0.0686 from eq. (beta1) with its leading minus. Reachable in production Path B (default arguments, band points 5.5/7.7 use the same function)."
+      }
+    },
+    {
+      "quote": "\\eqref{eq:pathB} then applies $\\beta_1$ linearly per 100bp of gap",
+      "claim": "In production the rate gap enters the prepayment hazard in 100-basis-point units multiplied linearly by beta_1 inside exp() (yielding ~x0.77 at a -380bp gap); the earlier decimal-units mis-scaling is fixed in the live code, not just documented.",
+      "expected_code": "hazard/rate_gap.py (gap construction and units), hazard/literature_hazard.py or hazard/microsim_engine.py (hazard evaluation)",
+      "region": "path-b",
+      "verdict": {
+        "traces": true,
+        "code_path": "hazard/literature_hazard.py:100 (prepay_hazard: log_h includes (-beta1)*(rate_gap*100.0) inside exp), called from hazard/competing_risks.py:136 (monthly_step), reached from hazard/microsim_engine.py:50 (_simulate_regime, Path B production); gap built in decimal by hazard/rate_gap.py:16 via compute_rate_gap at competing_risks.py:113",
+        "note": "Verified end-to-end. Gap is decimal on the executing path (coupon = original_interest_rate/100 in loan_sample.py:65, idempotent coupon_to_decimal in macro.py:42-48; market rate = MORTGAGE30US/100 at microsim_engine.py:49), so rate_gap*100.0 is per-100bp units, multiplied linearly by beta1 inside exp(). Ran the live code: BETA1_PREPAY_MID = -0.068571 (rothstein_beta1(0.065), survival-function conversion), and prepay_hazard at rate_gap=-0.038 vs 0.0 gives ratio 0.77061 \u2014 matches the claimed ~x0.77 at -380bp. The (-beta1) sign flip is correct given beta1<0 by construction (one beta1 of suppression per -100bp gap). The decimal-units pre-fix form (beta1*rate_gap) survives only in the docstring (lines 94-95) as history; the executing line has the x100 scaling. Not dead code: it is the US-regime branch of monthly_step in the production QT microsim. Caveat outside claim scope: the Danish regime branch bypasses prepay_hazard (Berger calibration), and prepay_hazard applies an involuntary-CPR floor via max(), which did not bind in the numeric check."
+      }
+    },
+    {
+      "quote": "$h^{\\mathrm{def}}_0 = 3\\times10^{-4}$ monthly",
+      "claim": "A competing default hazard is evaluated each month for every active loan as h0_def * exp(gamma_r*sigma + gamma_F*zFICO + gamma_L*zLTV), with baseline 3e-4 monthly and rate stress sigma = max{0, -g/100} computed in decimal units (gap divided by 100 before entering the default hazard, unlike the prepayment hazard).",
+      "expected_code": "hazard/competing_risks.py, hazard/config.py (gamma parameters and h0_def)",
+      "region": "path-b",
+      "verdict": {
+        "traces": true,
+        "code_path": "hazard/literature_hazard.py:112-129 (default_hazard) + hazard/rate_gap.py:67-69 (rate_stress) + hazard/config.py:53-56 (h0_default_monthly=0.0003, gammas), invoked monthly per active loan by hazard/competing_risks.py::monthly_step, reached from hazard/microsim_engine.py::run_qt_microsim \u2192 _simulate_regime",
+        "note": "Formula matches exactly: h0_def*exp(2.0*stress - 0.20*fico_z + 0.25*ltv_z) with h0_def=3e-4 monthly (config.py:53), clipped to [0,1] then normalized with prepay only if sum>1. Units: coupon decimal (agents.py:119 coupon_to_decimal) and market rate MORTGAGE30US/100 (microsim_engine.py:49), so rate_stress = max(0, market-coupon) = max(0, -g) in decimal = max(0, -g_pp/100) for percentage-point g; prepay hazard instead uses rate_gap*100 (literature_hazard.py:100), confirming the factor-100 asymmetry the claim asserts. Nuance: no literal '/100' \u2014 code keeps the gap decimal and multiplies by 100 on the prepay side; algebraically identical to the manuscript's g/100 statement."
+      }
+    },
+    {
+      "quote": "the production engine drains prepayments fractionally and the draw seed touches only the small delinquency channel",
+      "claim": "In the production configuration prepayment is fractional/deterministic \u2014 each active loan's balance is drained by h_prep with no random draw \u2014 so the RNG seed affects only the delinquency/default channel (the paper's seed-invariance of the +$70.3B marginal to <$0.01B across 10 paired seeds depends on this).",
+      "expected_code": "hazard/microsim_engine.py (fractional vs discrete prepayment mode), hazard/no_lockin_null.py (paired-seed reruns)",
+      "region": "path-b",
+      "verdict": {
+        "traces": true,
+        "code_path": "hazard/config.py:37 (PREPAY_MODE = \"fractional\") gating hazard/competing_risks.py:151-167 (monthly_step fractional branch), executed by hazard/microsim_engine.py:50 via hazard/no_lockin_null.py:65",
+        "note": "Mechanism confirmed in the reachable production path. config.py:37 sets PREPAY_MODE=\"fractional\" (sole definition, no override; only consumer is competing_risks.py:151). In that branch prepayment is deterministic: prepay_amts = bal_active * h_prep_n (line 152) drains each active loan's balance (line 154) with no random draw; the Bernoulli \"absorbing\" prepay branch (lines 169-202) is the inactive else. In the executing branch pool.rng is consumed only for default draws (competing_risks.py:157, u < h_def_n) and delinquent-state Markov transitions (_markov_step_delinquent, rng.uniform at line 55, called at line 204) \u2014 i.e., exactly the delinquency/default channel. No other RNG use exists in the stack (agents.py stores rng at lines 99/102 but never draws; literature_hazard.py, rate_gap.py, macro.py have none), and the seed passed to run_qt_microsim (microsim_engine.py:120, seed + i*1000 per regime) reaches only MicrosimPool.rng; the 75k loan sample is a fixed committed parquet (no_lockin_null.py:57 reads LOAN_SAMPLE_PATH directly). The +$70.3B marginal is real: hazard/data/no_lockin_null_results.json has lockin_marginal_b = 70.345, computed in no_lockin_null.py:92-94 as central minus null on the same sample/seed. Seed can still perturb the marginal slightly since default draws remove loans from the active set and shift later exposure \u2014 consistent with the paper's \"<$0.01B, not exactly 0\" phrasing. One caveat (does not break the traced claim, which is about the engine mechanism): the 10-paired-seed rerun itself has no committed script or artifact \u2014 no_lockin_null.py runs only the single production seed (RNG_SEED=42) and exposes no seed parameter; run_qt_microsim's seed kwarg makes paired reruns trivially possible ad hoc, but the \"<$0.01B across 10 paired seeds\" number is not reproducible from committed code/artifacts in the repo."
+      }
+    },
+    {
+      "quote": "a uniform draw governs the default hazard, sending hits into the delinquency pipeline (current loans to D30, already-delinquent loans to default)",
+      "claim": "Default is stochastic: a per-loan uniform draw against h_def sends current loans to D30 and already-delinquent loans to default, after which they transition through a Markov delinquency-resolution matrix.",
+      "expected_code": "hazard/microsim_engine.py (default draw and routing), hazard/markov.py (delinquency transition matrix)",
+      "region": "path-b",
+      "verdict": {
+        "traces": true,
+        "code_path": "hazard/competing_risks.py:157-165 (monthly_step, PREPAY_MODE=\"fractional\" branch per hazard/config.py:37) \u2014 u = rng.uniform(size=n_active); default_hits = u < h_def_n; Current\u2192D30, DELINQUENT_CODES\u2192Defaulted; then _markov_step_delinquent at line 204 applies the matrix from hazard/markov.py::load_transition_matrix; reached via hazard/microsim_engine.py:50 (run_qt_microsim \u2192 _simulate_regime \u2192 monthly_step)",
+        "note": "All specifics confirmed in the executing production branch: per-loan uniform draw against the default hazard (h_def from literature_hazard.py::default_hazard, competing-risks-normalized via normalize_competing_hazards \u2014 a no-op unless h_prep+h_def>1); hits route Current\u2192D30 and already-delinquent (D30/D60/D90+/Forbearance)\u2192Defaulted; delinquent loans then step through the Markov transition matrix each month. Minor cosmetic point only: the draw uses normalized h_def_n, not raw h_def, which is the stated competing-hazards cap and consistent with the claim."
+      }
+    },
+    {
+      "quote": "it is a safety clamp, not a competing-risks construction, and it never binds in production",
+      "claim": "A proportional rescaling is applied only when h_prep + h_def > 1, and in the production run this clamp never fires \u2014 the maximum hazard sum across all 1,683,124 evaluated loan-months is 0.016.",
+      "expected_code": "hazard/microsim_engine.py or hazard/competing_risks.py (hazard-sum clamp)",
+      "region": "path-b",
+      "verdict": {
+        "traces": true,
+        "code_path": "hazard/literature_hazard.py:132-139 normalize_competing_hazards (scale = np.where(h_sum > 1.0, 1/h_sum, 1.0)), called from hazard/competing_risks.py:145 inside monthly_step, which is the per-month step invoked by the production Path B loop at hazard/microsim_engine.py:50 (run_qt_microsim / _simulate_regime)",
+        "note": "Formula matches exactly: proportional rescaling of both hazards applied only where h_prep + h_def > 1, identity otherwise \u2014 a guard, not an exponential competing-risks construction. Path is live production: run_qt_microsim is the entry used by extension_risk.py, floor_sweep.py, panel_disclosures.py. Never-binds evidence: TECHNICAL.md:1539-1540 records 0 clamp events in 2 x 1,683,124 loan-months (two regimes on the same sample; manuscript says 'per regime') with max h_prep + h_def = 0.0155; the manuscript's 0.016 is that value rounded to 2 s.f. The 1,683,124 count matches the frozen panel disclosure (hazard/data/panel_disclosures.json evaluated_loan_months_production=1683124; 75,000 loans -> 40,234 survivors -> 1,683,124 loan-months). Caveat: the 0.0155 maximum traces to the committed verification record (TECHNICAL.md sect. 22.1), not to a machine-readable frozen artifact; I did not re-run the microsim to recompute it."
+      }
+    },
+    {
+      "quote": "simulated prepaid UPB is scaled by the ratio of the Fed's MBS book to the sample balance, with no reweighting toward Ginnie Mae collateral",
+      "claim": "Production aggregation from the 75,000-loan sample to the SOMA book is a single balance-weight scaling (Fed MBS book / sample balance), with no Ginnie Mae or out-of-vintage reweighting, and prepaid balances count as SOMA cash flow in the month they occur (no settlement delay on Path B).",
+      "expected_code": "hazard/simulate.py (aggregation/scoring), hazard/shared_layer_scoring.py; full-book reweighting confined to hazard/full_book_weighting.py (non-production)",
+      "region": "path-b",
+      "verdict": {
+        "traces": true,
+        "code_path": "hazard/microsim_engine.py:56-61 (_simulate_regime: scale = WSHOMCB/1000 / (pool balance/1e9)); hazard/agents.py:205 (scale_to_holdings); hazard/competing_risks.py:220-221 (settled_b = prepay_upb, immediate); production entry points hazard/extension_risk.py:232 and abm/fed_mbs_extension_risk.py:783 both call run_qt_microsim without soma_cohorts",
+        "note": "Confirmed on all specifics: N_LOANS=75_000 (hazard/config.py:32); aggregation is a pure balance-weight ratio Fed MBS book (WSHOMCB, $B) / sample balance applied to prepaid+scheduled UPB, with no coupon/agency reweighting in the production Path B path \u2014 reweight_to_soma_coupons (agents.py:162) fires only when soma_cohorts is passed, which happens only in the shared-layer full-book robustness variant (shared_layer_scoring.py:131-142; full_book_weighting.py), and even that variant reweights coupon buckets of Freddie collateral, not toward Ginnie (Ginnie exists only as a separate signed bound, hazard/data/ginnie_bound.json). Prepaid balances count as SOMA cash flow in-month: competing_risks.py:221 settled_b = prepay_upb ('Voluntary prepayments reach SOMA immediately'), and the ABM settlement lag kernel is skipped for microsim (fed_mbs_extension_risk.py:1141 'if apply_settlement_lag_kernel and not use_hazard_microsim'). One benign nuance: the balance ratio is recomputed monthly against the actual Fed book path (WSHOMCB(t)), not a single fixed scalar frozen at QT start; the manuscript wording ('scaled by the ratio of the Fed's MBS book to the sample balance') is accurate to the executing formula."
+      }
+    },
+    {
+      "quote": "each stratum accumulates its cumulative prepaid UPB as a share of its original UPB",
+      "claim": "Burnout is cohort-level: after all of a month's prepayment transitions, each stratum's cumulative prepaid UPB share of original UPB (capped at 1) is updated and broadcast to that stratum's remaining active loans before the next month's hazard evaluation, entering the prepayment hazard with fixed prior beta_b = -0.5 (scaling by e^{-0.5B}).",
+      "expected_code": "hazard/microsim_engine.py (burnout state update ordering and broadcast), hazard/stratum.py, hazard/config.py (beta_b)",
+      "region": "path-b",
+      "verdict": {
+        "traces": true,
+        "code_path": "hazard/competing_risks.py:65-79 (update_cohort_burnout_amounts, called at line 167 after fractional prepay applied), hazard/agents.py:155-157 (broadcast_burnout), hazard/competing_risks.py:96 (broadcast at start of next monthly_step, before prepay_hazard at line 136), hazard/literature_hazard.py:103 (c[\"beta_burnout\"]*burnout inside exp), hazard/config.py:50 (beta_burnout=-0.5); driven by hazard/microsim_engine.py:50",
+        "note": "Every specific traces: burnout is stratum-level (cohort_burnout array), updated after all of the month's prepay transitions in the production fractional mode (PREPAY_MODE=\"fractional\", config.py:37) as min(1.0, prior + prepaid_UPB/stratum_orig_upb) \u2014 cumulative prepaid share of original UPB capped at 1 \u2014 and broadcast to per-loan burnout at the start of the next monthly_step before hazard evaluation. beta_burnout=-0.5 is a fixed LITERATURE_COEFS prior (prepay_hazard called with default coefs), giving exp(-0.5*B) scaling. Denominator stays consistent under SOMA reweighting/holdings scaling (agents.py rescales orig_upb and stratum_orig_upb). Two benign nuances: broadcast writes to all loans but hazard is evaluated only on active ones; the e^{-0.5B} factor scales only the voluntary component before the involuntary CPR floor max(h_floor, h_vol). Mechanics live in agents.py/competing_risks.py rather than the expected microsim_engine.py/stratum.py, but the path is live production Path B."
+      }
+    },
+    {
+      "quote": "the production Danish hazard does not respond to the buyback discount at all",
+      "claim": "The production Danish counterfactual leg uses the Berger-recalibrated flat moving elasticity, not the rate-gap swap (g_DK = g_US + buyback delta); the swap machinery still computes its PV-versus-par classification each month in the codebase but no production output consumes it (moves the production Danish leg by exactly $0.00B).",
+      "expected_code": "hazard/simulate.py or hazard/microsim_engine.py (Danish regime branch), common/berger_calibration.py, hazard/danish_discount_bound.py (diagnostic)",
+      "region": "path-b",
+      "verdict": {
+        "traces": true,
+        "code_path": "hazard/competing_risks.py:122-134 (monthly_step DANISH branch \u2192 common/berger_calibration.py::danish_cpr_annual(regime=\"US\")); swap machinery hazard/rate_gap.py:31-64 (rate_gap_danish PV-vs-par) executed monthly at competing_risks.py:113 but pool.rate_gap consumed only by the non-Danish branch at competing_risks.py:138",
+        "note": "Verified end-to-end. (1) Production Path B Danish leg (microsim_engine.py::run_qt_microsim, regimes=(\"US\",\"Danish\"), consumed by shared_layer_scoring.py:65-66 and abm/fed_mbs_extension_risk.py:254) takes its prepay hazard from berger_calibration.danish_cpr_annual(regime=\"US\"): flat 3.2%/yr moving channel (Danish slope mid -0.039 %/yr per 100bp, CI spans zero) plus US-transplant refi-in-place that computes the buyback discount (line 145) then discards it, returning constant _US_TRANSPLANT_REFI_ANNUAL=0.0 \u2014 so the hazard does not respond to the buyback discount, matching the quote. (2) compute_rate_gap runs unconditionally each month (competing_risks.py:113) and for the Danish pool executes the PV-vs-par classification np.where(pv < balance, 0.0, coupon - market_rate); the resulting pool.rate_gap is read only by prepay_hazard in the else/US branch (line 138) \u2014 repo grep finds no other consumer, so it is dead for Danish output. (3) Frozen diagnostic hazard/data/danish_discount_bound.json: deltas_vs_baseline_b exactly 0.0 at 0/50/100bp discount-rate spreads with bit-identical Danish CPR/rolloff paths, while the classification flips 7,805/32,488 loan-months \u2014 confirming machinery computes, nothing consumes, $0.00B move. Minor non-refuting nuances: the claim's \"g_DK = g_US + buyback delta\" is an economic paraphrase of the literal binary classification (gap=0 when PV<par, else g_US); \"flat\" moving is statistically flat (tiny coupon-gap slope), which is a gap response, not a buyback-discount response."
+      }
+    },
+    {
+      "quote": "the cross-correlation at lag $k$ pairs the simulated series at month $t$ with the empirical series at month $t+k$",
+      "claim": "The implemented cross-correlation convention pairs sim(t) with emp(t+k), both series demeaned over the overlap with boundary months dropped, so the peak at k = -3 means the simulated path trails the empirical path by three months (verified with a synthetic-data direction check).",
+      "expected_code": "tools/timing_sweep.py (CCF computation and lag convention), hazard/rate_timing_scan.py, hazard/round8_diagnostics.py",
+      "region": "path-b",
+      "verdict": {
+        "traces": true,
+        "code_path": "hazard/macro.py:131-147 (cpr_cross_correlation), executed for Path B by hazard/extension_risk.py:67-82 (score_extension_risk on Empirical_CPR_Pct vs microsim hazard_cpr_pct) and hazard/round8_diagnostics.py:95,100 (case path_b_peak_m3, lag -3 on MICROSIM_RESULTS_PATH)",
+        "note": "Every specific matches. (1) Pairing convention: cpr_cross_correlation(empirical=e, predicted=p) slices e_s=e[k:], p_s=p[:-k] for k>0 and e_s=e[:k], p_s=p[-k:] for k<0, which in both branches pairs p(t)=sim(t) with e(t+k)=emp(t+k) \u2014 exactly the manuscript sentence. (2) Demeaning over overlap: correlation is np.corrcoef (Pearson), which demeans each series over the per-lag overlapping sample; the initial notna mask restricts to the emp/sim overlap. (3) Boundary months dropped: shifting is by slicing (no zero-padding), so |k| boundary months are discarded per lag (round8_diagnostics.py:138-143 documents n-|k| overlap, 39 pairs at |k|=3). (4) Direction: I re-ran the synthetic check against the actual function \u2014 constructing sim(t)=emp(t-3) (sim trails emp by 3 months) yields peak at lag -3 with r=1.0, confirming peak k=-3 means simulated trails empirical; matches extension_risk.py:73-82 lag_interpretation, rate_timing_scan.py:132, and TECHNICAL.md 319/1644 (v15 correction, retracted settlement reading). (5) Reachability: this is the live Path B scoring path (score_extension_risk on microsim_engine output), not a variant. Two minor caveats, neither refuting: the expected file tools/timing_sweep.py is a manuscript-text lint scanner, not the CCF implementation (the CCF lives in hazard/macro.py); and the synthetic-data direction check is documented in TECHNICAL.md \u00a722.3b and code comments rather than committed as a regression test in tests/ \u2014 I independently reproduced it and the stated direction is correct."
+      }
+    },
+    {
+      "quote": "replaces the ABM's CPR surface with Path B's microsimulated CPR path; no settlement kernel applies",
+      "claim": "The hybrid pipeline runs the ABM's macro-accounting layer unchanged (SOMA balance tracking, phased-cap netting, income-scaled curtailment, term-aware scheduled amortization, Danish dynamic-balance loop) but substitutes Path B's microsimulated CPR path for the ABM CPR surface, and applies no settlement/pipeline-delay kernel to the Path B path because Path B settles prepayments in the month they occur.",
+      "expected_code": "abm/hybrid_pipeline.py (accounting layer reuse, CPR-path injection, absence of kernel application on the Path B leg); hazard/microsim_engine.py (same-month settlement)",
+      "region": "robustness",
+      "verdict": {
+        "traces": true,
+        "code_path": "abm/hybrid_pipeline.py:35-40 -> abm/fed_mbs_extension_risk.py::compute_metrics (CPR injection 882-896; SOMA 816-819; phased-cap netting 826-845; curtailment 872-874/895/911; sched amort 890; Danish dynamic-balance loop 898-916; kernel gated off at 1141) ; same-month settlement: hazard/competing_risks.py:220-221 via hazard/microsim_engine.py::run_qt_microsim",
+        "note": "All specifics trace in reachable production code. compute_metrics is the shared accounting layer; with use_hazard_microsim=True the ABM CPR surface is never loaded (line 860) and US/Danish CPR come from the Path B microsim paths (882-896). The settlement kernel is structurally skipped on this leg \u2014 line 1141 requires `not use_hazard_microsim`, so the True flag passed by hybrid_pipeline.py:39 is ignored. Path B settles voluntary prepayments in the event month: competing_risks.py:220-221 ('Voluntary prepayments reach SOMA immediately'; settled_b = prepay_upb, balances zeroed same step), and the Markov step routes only delinquency states. Caveats (non-refuting): in-code comments (hybrid_pipeline.py:34, fed_mbs_extension_risk.py:893) attribute kernel disablement to 'Markov routing handles lag' \u2014 a stale rationale; actual behavior matches the manuscript's same-month-settlement reason. Also the hybrid leg's scheduled amortization uses the term-aware formula but at the single 30yr default (hazard TERM_MONTHS=360), unlike the 15yr-foldin comparator run \u2014 the amortization is term/seasoning-aware but not multi-term in this mode."
+      }
+    },
+    {
+      "quote": "the shared layer adds the income-scaled curtailment flow that Path B's standalone scorer omits: \\$69.56 billion",
+      "claim": "A shared accounting layer now scores every estimator and adds an income-scaled curtailment flow, computed on actual holdings, to each simulated roll-off; the netted amount is identical across all U.S.-leg runs ($69.56B), i.e. it is a common flow, not a per-run quantity.",
+      "expected_code": "hazard/shared_layer_scoring.py (curtailment computed on actual holdings path, common across runs); abm/hybrid_pipeline.py",
+      "region": "robustness",
+      "verdict": {
+        "traces": true,
+        "code_path": "hazard/shared_layer_scoring.py:73-103,147-168 (scores all 5 estimators via fed.compute_metrics(use_hazard_microsim=True), same call as abm/hybrid_pipeline.py:35-39); curtailment mechanism in abm/fed_mbs_extension_risk.py:141-155 (curtailment_series), :871-873 (holdings_b = WSHOMCB/1000, income driver DSPIC96 YoY), :895 (us_rolloff = us_rolloff - holdings_b * curtailment_smm), :1493-1500 (export_headline_metrics curtailment_b total)",
+        "note": "Every specific traces. (1) Shared layer scores every estimator: shared_layer_scoring.py main() puts path_b_central, no_lockin_null, path_a, and both full-book variants through fed_mbs_extension_risk.compute_metrics(use_hazard_microsim=True) \u2014 identical layer invocation to production abm/hybrid_pipeline.py (grep confirms use_hazard_microsim=True at hybrid_pipeline.py:38). (2) Income-scaled: curtailment_series linearly scales 1.2% annual CPR (/12 monthly) by real disposable income YoY (DSPIC96), clipped between -2% (0x) and +4% (1x). (3) Computed on actual holdings and added to each simulated roll-off: microsim branch line 895 applies holdings_b * curtailment_smm where holdings_b is actual Fed SOMA MBS holdings (FRED WSHOMCB/1000), extending the (negative-signed) simulated US roll-off. (4) Standalone scorer omits it: hazard/extension_risk.py:46-97 score_extension_risk sums simulated_rolloff_b minus QT target with no curtailment term anywhere. (5) $69.56B identical across all U.S.-leg runs: hazard/data/shared_layer_scoring_results.json shows curtailment_netted_b = 69.56220187263008 for all five estimators, and it is identical by construction \u2014 export_headline_metrics computes total = sum(WSHOMCB/1000 * Curtailment_SMM) over the 42-month QT window, a function of macro data only, independent of any estimator's CPR path. Scope caveat matches the manuscript's own: the Danish leg computes curtailment on counterfactual balances (line 909-911), so invariance holds for U.S. legs only, exactly as the claim states. Parity gate (published 97.9% vs got 97.94%) passes in the frozen results."
+      }
+    },
+    {
+      "quote": "simulated roll-off is rescaled month-by-month to the actual holdings path (WSHOMCB) by the book-to-sample ratio",
+      "claim": "Every U.S.-leg dollar conversion is common: each estimator's simulated roll-off is rescaled monthly to the actual SOMA holdings series (FRED WSHOMCB) via a book-to-sample ratio, even though hazard dynamics evolve on internal balances.",
+      "expected_code": "hazard/shared_layer_scoring.py and/or hazard/extension_risk.py (monthly book-to-sample rescaling against WSHOMCB from common/data_loader.py)",
+      "region": "robustness",
+      "verdict": {
+        "traces": true,
+        "code_path": "hazard/simulate.py:213-225 (simulate_qt_window, Path A); hazard/microsim_engine.py:56-62 (_simulate_regime, Path B); abm/fed_mbs_extension_risk.py:871 with 955-958 / 1087-1089 / 1118-1120 (ABM U.S. leg, all modes) and :894 (hazard-microsim mode imports Path B's already-rescaled roll-off)",
+        "note": "Mechanism confirmed in every U.S.-leg estimator: Path A computes scale = (WSHOMCB_t/1000)/(sample_balance/1e9) each QT month and multiplies simulated prepay/sched/settled dollars by it while the internal cohort balances dict evolves un-rescaled; Path B does the identical per-month ratio on pool exposure; the ABM converts simulated monthly CPR+sched+curtailment rates directly against the actual monthly WSHOMCB holdings path (-holdings_b * SMM), the rate-form equivalent of the same monthly book-to-sample conversion. WSHOMCB is fetched via fredapi in hazard/macro.py::fetch_data (line 182, month-end resample at line 192) and abm/fed_mbs_extension_risk.py:708. Danish legs intentionally lack this rescale (dynamic counterfactual-balance loops), matching the claim's U.S.-leg scoping; hazard/danish_discount_bound.py:192-196 contains the quoted sentence and states the US-legs-only invariance. Caveats: the claim brief's expected locations are wrong \u2014 hazard/shared_layer_scoring.py and hazard/extension_risk.py contain no WSHOMCB/rescaling (they consume the already-rescaled simulated_rolloff_b), and common/data_loader.py does not load WSHOMCB; also Path A's ratio uses start-of-month sample balance while Path B uses post-step exposure, an immaterial difference the claim does not specify."
+      }
+    },
+    {
+      "quote": "Danish legs compute curtailment on their own counterfactual balances inside the Danish loop",
+      "claim": "Unlike U.S. legs, the Danish counterfactual legs compute curtailment on their own dynamic counterfactual balances inside the Danish loop (yielding $70.33B vs the U.S. legs' common $69.56B for the central hybrid), so the shared-netting invariance is scoped to U.S. legs only.",
+      "expected_code": "abm/hybrid_pipeline.py Danish loop (curtailment on counterfactual balance, not on WSHOMCB); possibly abm/fed_mbs_extension_risk.py",
+      "region": "robustness",
+      "verdict": {
+        "traces": true,
+        "code_path": "abm/fed_mbs_extension_risk.py::compute_metrics, use_hazard_microsim branch \u2014 US leg netting at line 895 (`us_rolloff - holdings_b * curtailment_smm`, holdings_b = WSHOMCB/1000 from line 871); Danish dynamic-balance loop at lines 898-916, where line 909-912 adds `curtailment_smm` into `monthly_drain` and applies it to the dynamic counterfactual `bal` (seeded from holdings at QT start, decremented monthly). Reached in production via abm/hybrid_pipeline.py:35-40 (use_hazard_microsim=True) and hazard/shared_layer_scoring.py::score_on_shared_layer (same layer).",
+        "note": "All specifics verified. (1) Mechanism: inside the Danish loop, curtailment is one term of `monthly_drain` multiplied by the leg's own compounding counterfactual balance `bal` (fed_mbs_extension_risk.py:904-914), whereas the US leg subtracts `holdings_b * curtailment_smm` on the actual WSHOMCB path (line 895) \u2014 and the exported `curtailment_b.total` is likewise `(WSHOMCB/1000 * Curtailment_SMM).sum()` over the QT window (lines 1493-1500), independent of any simulated path, so it is common across US legs by construction. The same on-own-balance Danish structure holds in every other branch too (burnout loop lines 979-996; surface branches ~1043-1073, 1090-1138), so it is not a variant-only path. (2) Numbers: hazard/data/shared_layer_scoring_results.json shows curtailment_netted_b = 69.56220187263008 bit-identical for all five legs including path_b_central (the central hybrid), matching abm/data/latest_run_manifest.json and all frozen run manifests; its danish_leg_curtailment block records 70.33 on the counterfactual balance, differential +0.77, with the invariance note explicitly scoped to US legs. Also cross-consistent with hazard/data/danish_discount_bound.json and danish_discount_bound.py:169 (which uses 70.33 in the standalone-to-printed reconciliation with a parity gate against Table 1's $848.9B). Direction and magnitude are plausible: the slower Danish drain (manifest danish_portfolio end $2,086B vs start $2,680B) leaves balances ~1% higher on average, giving +0.77B on a 69.56B base. Two minor caveats, neither breaking the trace: the $70.33B value itself is a frozen round-4 artifact number (hardcoded in danish_discount_bound.py and stored in the JSONs) rather than recomputed by a committed script at HEAD; and the loop physically lives in fed_mbs_extension_risk.py (invoked by hybrid_pipeline.py), not in hybrid_pipeline.py itself as the expected-code hint suggested \u2014 the manuscript wording \"inside the Danish loop\" matches the actual code."
+      }
+    },
+    {
+      "quote": "the production engine drains prepayments fractionally and the draw seed touches only the small delinquency channel",
+      "claim": "The production Path B microsimulation drains prepayments as fractional (expected-value) balance reductions rather than Bernoulli draws, and random seeds enter only the delinquency (Markov) channel, so the lock-in marginal is essentially seed-invariant.",
+      "expected_code": "hazard/microsim_engine.py (fractional prepayment drain; RNG used only in delinquency/Markov transitions, hazard/markov.py)",
+      "region": "robustness",
+      "verdict": {
+        "traces": true,
+        "code_path": "hazard/competing_risks.py:151-167 (fractional prepay drain, gated by PREPAY_MODE=\"fractional\" at hazard/config.py:37), reached via hazard/microsim_engine.py:50 (_simulate_regime \u2192 monthly_step); RNG uses: competing_risks.py:157-165 (default-onset Bernoulli) and competing_risks.py:35-62 _markov_step_delinquent (called at :204)",
+        "note": "Confirmed: production config sets PREPAY_MODE=\"fractional\", so prepayments are drained as balance*hazard expected-value reductions with no RNG (competing_risks.py:152-154); the Bernoulli prepay branch (lines 168-202) is dead code under production config. pool.rng is drawn from only for (a) default-onset Bernoulli draws entering delinquency (Current\u2192D30) and (b) Markov transitions of already-delinquent loans \u2014 i.e., only the delinquency channel. literature_hazard.py, markov.py, and agents.py contain no other RNG draws. Two minor caveats: Markov transitions execute in competing_risks.py (markov.py only loads the transition matrix, so the expected-code pointer 'hazard/markov.py' is slightly off), and seed-invariance is approximate (seed-driven defaults remove small balances from the active pool), which the manuscript's hedge ('essentially', 'small delinquency channel') already covers."
+      }
+    },
+    {
+      "quote": "Path A drains cohort balances, Path B drains loan balances, and the Danish legs deliberately compound a dynamic counterfactual balance",
+      "claim": "Each estimator's hazard dynamics evolve on its own internal balances: Path A drains cohort-level balances, Path B drains individual loan balances, and the Danish legs compound a dynamic counterfactual balance.",
+      "expected_code": "hazard/simulate.py or hazard/pathA_seasonal_adoption.py (cohort balances); hazard/microsim_engine.py (loan balances); abm/hybrid_pipeline.py (Danish dynamic balance)",
+      "region": "robustness",
+      "verdict": {
+        "traces": true,
+        "code_path": "Path A: hazard/simulate.py::simulate_qt_window lines 148-207 (per-cohort balances dict, drained line 205); Path B: hazard/competing_risks.py::monthly_step lines 154/182/213-214 draining per-loan MicrosimPool.balance array (agents.py line 121), driven by hazard/microsim_engine.py::_simulate_regime; Danish legs: abm/fed_mbs_extension_risk.py::compute_metrics 'Danish dynamic balance forward loop' \u2014 lines 898-916 (microsim branch used by abm/hybrid_pipeline.py), 971-998 (burnout multi-cohort), 1090-1108 (ABM-native surface, headline), 1121-1139 (anchor fallback)",
+        "note": "All three mechanisms exist and are reachable in production. Path A drains cohort-keyed balances (vintage/coupon/fico/ltv; balances[key] = max(bal - prepay - sched, 0)). Path B drains an individual-loan numpy balance array via fractional prepay, full-prepay zeroing, and per-loan scheduled amortization. Every Danish leg in compute_metrics evolves its own counterfactual balance geometrically (bal_{t+1} = bal_t(1 - drain_t)) seeded from actual holdings at QT start, while the US leg in the surface/anchor branches instead multiplies actual monthly holdings_b (lines 1087-1089) \u2014 confirming the deliberate dynamic-counterfactual contrast the manuscript claims. 'Compound' = multiplicative/geometric balance evolution; consistent with code behavior."
+      }
+    },
+    {
+      "quote": "Level-payment amortization with monthly SMM; November 2025 values age the same cells 42 months",
+      "claim": "The WAL table is computed with a single-pool-per-cell approximation: level-payment amortization plus SMM = 1-(1-CPR)^(1/12) applied to surviving balance, WAL = sum(t*p_t)/(12*sum(p_t)), fixed vintage face shares, a 90.7%/9.1% 30y/15y term split at 2.49% WAC, each scenario's window-mean CPR held constant, and end-of-window values obtained by aging the same cells 42 months.",
+      "expected_code": "hazard/wal_table.py, hazard/wal_anchors.py (wal_anchor_results.json)",
+      "region": "robustness",
+      "verdict": {
+        "traces": true,
+        "code_path": "hazard/wal_table.py::cell_wal (lines 57-77) + book_wal (lines 80-88) + main (lines 91-125), artifact hazard/data/wal_table_results.json; external-anchor companion hazard/wal_anchors.py::blend reusing the same cell_wal, artifact hazard/data/wal_anchor_results.json",
+        "note": "Every specific traces. (1) Single pool per vintage-by-term cell: book_wal iterates VINTAGE_SHARES x TERM_SPLIT, one representative age per cell (AGES_JUNE_2022). (2) SMM formula exact: line 60 `smm = 1 - (1 - cpr) ** (1 / 12)`; level-payment scheduled principal line 67, prepay applied to surviving balance net of scheduled principal `(bal - sched) * smm` (line 68, the standard convention matching 'applied to surviving balance'). (3) WAL = num/paid/12 (line 77) = sum(t*p_t)/(12*sum(p_t)), with a residual-balance balloon at remaining term (lines 75-76) so all principal is counted. (4) Fixed vintage face shares: module constant VINTAGE_SHARES {2022:.231, 2021:.439, 2020:.163, 2017-19:.060, pre2017:.106}, unchanged between the two dates. (5) Term split/WAC exact: TERM_SPLIT = {360: 0.907/0.998, 180: 0.091/0.998} (the 90.7%/9.1% split, renormalized over the 99.8% covered), WAC = 0.0249. (6) Window-mean CPR held constant per scenario: SCENARIOS dict of constant CPRs fed to cell_wal, which uses a single smm for all months. (7) Nov 2025 = same cells aged 42 months: line 97 `book_wal(cpr, extra_age=42)` with `a = min(AGES_JUNE_2022[v] + extra_age, term)`. Reachable production, not dead code: main() has parity gates asserting the printed v15 Table 6 values, writes hazard/data/wal_table_results.json (present, regenerated Jul 14, rows match the printed table: 14.7/12.6, 9.4/8.5, 6.0/5.6, 9.7/8.7); wal_anchors.py imports cell_wal/TERM_SPLIT/VINTAGE_SHARES from wal_table and its artifact wal_anchor_results.json is present with its own 14.7 parity gate. Only trivia beyond the claim's wording: the 0.998 renormalization of the term split and the maturity balloon term, neither contradicting the claim."
+      }
+    },
+    {
+      "quote": "extended the SOMA cohort parser to bucket 15-year holdings separately by coupon, never merging 15-year and 30-year buckets",
+      "claim": "The production SOMA cohort parser buckets 15-year MBS holdings by coupon separately from 30-year buckets (never merged), and 15-year scheduled amortization is incorporated into both the empirical CPR back-out and the ABM's simulated roll-off, raising coverage from 90.6% to 99.8% of face and shifting WAC from 2.55% to 2.49%.",
+      "expected_code": "common/data_loader.py (SOMA CUSIP/cohort parser); abm/fed_mbs_extension_risk.py (empirical CPR back-out and ABM roll-off amortization)",
+      "region": "robustness",
+      "verdict": {
+        "traces": true,
+        "code_path": "abm/fed_mbs_extension_risk.py::fetch_soma_mbs_cohorts (lines 508-652: (term_months, coupon) bucket keys, same-term-only fold at 601-633); production entry build_production_metrics (line 1575) -> compute_metrics multi-cohort branch (lines 1000-1074: per-cohort scheduled_amortization_series with term=180 for 15yr, feeding simulated roll-off at 1032-1035/1061-1070) and empirical CPR back-out at line 1151 subtracting the cohort-weighted Scheduled_Amort_SMM",
+        "note": "Claim traces with one location correction: the SOMA cohort parser is NOT in common/data_loader.py (that file only downloads soma_holdings.txt; zero cohort/coupon/bucket logic) \u2014 it is fetch_soma_mbs_cohorts in abm/fed_mbs_extension_risk.py. Mechanism verified: buckets keyed (term_months, rounded coupon); min-share fold explicitly restricted to nearest SAME-term survivor (\"never across terms\" per code comment, loop iterates per term), so 15yr/30yr never merge. Production path (build_production_metrics -> compute_metrics use_burnout=False, abm_cpr_surface.csv with native Cohort_Term=180 rows) computes per-cohort scheduled amortization at each cohort's own term and uses it in both the simulated roll-off and the empirical back-out (line 1151). Numbers confirmed: pre-fix manifest cohort_wac_pct 2.55 (7 buckets) vs headline run-2026-07-04-15yr-foldin and later manifests 2.49 (11 buckets); TECHNICAL.md lines 429 and 793-804 record coverage 90.6% -> 99.8% of $1,941B face. Minor: Path B hazard-microsim branch (line 890) still uses 30yr-only default schedule, but claim is scoped to the ABM whose production branch is term-aware."
+      }
+    },
+    {
+      "quote": "We corrected the coefficient's application to $\\exp(100\\,\\beta_1\\,\\tilde g_{i,t})$",
+      "claim": "Production Path B applies the Liebersohn-calibrated rate-gap coefficient as a multiplier exp(100*beta1*gap_decimal) (equivalently exp(beta1*gap) in per-100bp units), with beta1 stored positive so a negative (locked-in) gap suppresses the prepayment hazard, matching Path A's sign/unit convention.",
+      "expected_code": "hazard/microsim_engine.py and/or hazard/literature_hazard.py, hazard/config.py (beta1 sign and 100x unit application)",
+      "region": "robustness",
+      "verdict": {
+        "traces": true,
+        "code_path": "hazard/literature_hazard.py:100 (prepay_hazard: log_h = (-beta1)*(rate_gap*100.0)), reached via hazard/microsim_engine.py:101,121 -> hazard/competing_risks.py:136-142 (monthly_step)",
+        "note": "Verified numerically: gap=-200bp gives hazard multiplier 0.8718 = exp(-0.0686*2), i.e., exp(beta1_magnitude * gap_per_100bp) \u2014 correct 100x unit fix and suppression under negative (locked-in) gap; gap = coupon - market in decimal (rate_gap.py:14-16), same sign convention as Path A's rate_gap_bps regressor (hazard_fit.py:431). Docstring at literature_hazard.py:94-95 documents the pre-fix bug (beta1*rate_gap on decimal, ~100x too weak, wrong-signed). CAVEAT on one claim detail: beta1 is NOT stored positive \u2014 rothstein_beta1 returns ln(h_shocked/h_base) = -0.0686 (mid), negative by construction, and the code negates it at application ((-beta1)). The executed multiplier is algebraically identical to the manuscript's exp(100*beta1*gap) with positive beta1, so the manuscript formula traces, but any manuscript text asserting the code stores a positive coefficient would be wrong. 'Liebersohn-calibrated' is consistent: repo calls it the Liebersohn-Rothstein elasticity (seasonality_concave_gap.py:13); config constants named ROTHSTEIN_Q_DECLINE_* (config.py:39-42)."
+      }
+    },
+    {
+      "quote": "the hazard specification takes a maximum against the floor, so wherever the floor binds the elasticity is inert",
+      "claim": "Path B's production hazard is floored via a max() against the involuntary-turnover floor (4% annual CPR in production), making the lock-in elasticity inert in floor-bound loan-months, and the code instruments the floor-bind share (36.3% of 1,683,124 evaluated loan-months at the production point).",
+      "expected_code": "hazard/microsim_engine.py (max against floor; bind-share instrumentation), hazard/floor_sweep.py, hazard/floor_band_cross.py",
+      "region": "robustness",
+      "verdict": {
+        "traces": true,
+        "code_path": "hazard/literature_hazard.py:109 (prepay_hazard: np.maximum(h_floor, h_vol)), floor h_floor from config.py:47 INVOLUNTARY_CPR_ANNUAL=0.04; reached via hazard/microsim_engine.py:15 \u2192 competing_risks.py:136 (monthly_step, U.S. branch); bind-share instrumentation hazard/floor_sweep.py:82-117 (BindTally + _tallying_prepay wrapper), reused by floor_band_cross.py",
+        "note": "All specifics verified: production Path B hazard is max(floor, volitional) with 4% annual CPR floor converted to monthly hazard; elasticity beta1 enters only h_vol, so it is mechanically inert wherever the floor binds. Frozen artifact hazard/data/floor_sweep_results.json (commit d0ef130) records floor_bind_share=0.36269 (36.3%) and floor_bind_loan_months=1,683,124 at the production point (4% floor, p_q 6.5). Minor location caveats only: the max() is in literature_hazard.py (not microsim_engine.py itself), and the bind instrumentation is a value-preserving wrapper in floor_sweep.py rather than inline in the engine \u2014 consistent with the claim's wording."
+      }
+    },
+    {
+      "quote": "rerunning the production central and $\\beta_1 = 0$ null legs at every floor under the production convention: same committed 75,000-loan sample, same seed and regime tuple",
+      "claim": "The floor-by-band box reruns the actual production central and beta1=0 null legs under the production convention \u2014 the same committed 75,000-loan sample, same seed and regime tuple, one shared macro frame \u2014 and its marginals are basis-invariant because the shared-layer netting is common to the central and null legs of each cell.",
+      "expected_code": "hazard/floor_sweep.py, hazard/floor_band_cross.py, hazard/no_lockin_null.py, hazard/loan_sample.py (committed sample), hazard/macro.py (shared frame)",
+      "region": "robustness",
+      "verdict": {
+        "traces": true,
+        "code_path": "hazard/floor_sweep.py:168-170 (main loop reruns null p_q=0 and central p_q=6.5 at every floor) via _run_scored (floor_sweep.py:120-147) -> microsim_engine.py:83-123 run_qt_microsim(seed=RNG_SEED=42, regimes=(\"US\",\"Danish\"), per-regime offset seed+i*1000) on committed hazard/data/loan_sample.parquet; band edges completed by hazard/floor_band_cross.py:90-104 reusing floor_sweep._run_scored unchanged; netting commonality: abm/fed_mbs_extension_risk.py:871-895",
+        "note": "Claim traces, with two precise caveats. (1) Rerun legs: floor_sweep.py does rerun the production central (p_q 6.5 = ROTHSTEIN_Q_DECLINE_MID*100, config.py:41) and beta1=0 null (p_q 0, with runtime assert rothstein_beta1(0.0)==0.0, floor_sweep.py:151) at all seven floors, under production defaults: the git-committed 75,000-row hazard/data/loan_sample.parquet (verified: tracked, shape (75000,14), N_LOANS=75_000, RNG_SEED=42 in config.py:32-33), regimes=(\"US\",\"Danish\") with per-regime seed offsets, scored by the production scorer extension_risk.score_extension_risk. However, floor_band_cross.py explicitly does NOT rerun the central/null legs (docstring lines 13-17; code lines 68-77 read them from committed floor_sweep_results.json) \u2014 so 'the floor-by-band box reruns the central and null legs' is true only of the two-sweep exercise jointly (the manuscript sentence at revised_paper_v16.tex:503 describes both sweeps jointly, so its wording is accurate; attributing the rerun to floor_band_cross.py alone would be false). Cross-run consistency of the reused null is enforced by parity gates: band cross gates (4.0,5.5)/(4.0,7.7) against extension_risk_band_literature.json; sweep gates against no_lockin_null_results.json (central 818.530/null 748.185/marginal 70.345 all match, parity_gates_all_pass=true in both committed artifacts; bind 36.27% of 1,683,124 matches manuscript). (2) 'One shared macro frame' is literally true only on the scoring side: the empirical benchmark frame is fetched once per script (floor_sweep.py:154-157), but _run_scored passes no macro to run_qt_microsim, so the simulation-input macro is refetched from FRED per run (microsim_engine.py:104-105; macro.fetch_data has no cache) \u2014 identical within a session in practice and pinned by the passing parity gates, but not one shared object. (3) Basis-invariance of marginals verifies architecturally: on the shared layer's microsim branch (fed_mbs_extension_risk.py:894-895) US rolloff = the run's own simulated_rolloff_b minus holdings_b*curtailment_smm, where holdings_b is the actual WSHOMCB path (line 871) and curtailment derives from DSPIC96 (lines 872-874) \u2014 a run-independent additive flow, so it cancels exactly in any central-minus-null difference; confirmed empirically at the production cell (107.0-97.8 standalone = 97.9-88.7 shared = 9.2pp; shared_layer_scoring.py parity gate at 97.9%). The 'every cell' invariance is by-construction (the shared layer was not literally rerun at all 21 box cells), which is what the manuscript states ('because the shared-accounting netting is common', tex:505)."
+      }
+    },
+    {
+      "quote": "Delinquent loans transition monthly through the matrix of Table~\\ref{tab:delinq}, estimated from consecutive stratum-month \\emph{modal} servicer states in the Freddie cohort panel, exposure-UPB weighted",
+      "claim": "The production Path B microsimulation applies a delinquency transition matrix every month, and that matrix is estimated from consecutive stratum-month modal servicer states in the Freddie panel with exposure-UPB weighting (each printed probability is an exposure-UPB share of transition events, not a count share).",
+      "expected_code": "hazard/markov.py (matrix estimation from Freddie panel, exposure weighting) and hazard/microsim_engine.py (monthly application in simulation)",
+      "region": "appendices",
+      "verdict": {
+        "traces": true,
+        "code_path": "hazard/markov.py:24-85 (estimate_transitions_from_panel: stratum-sorted shift(1) of mode_state, counts += exposure_upb, row-normalize) \u2192 artifact hazard/data/markov_transition_matrix.parquet; applied monthly via hazard/microsim_engine.py:107+50 \u2192 hazard/competing_risks.py:204 (_markov_step_delinquent, lines 35-62)",
+        "note": "Panel is Freddie-derived (ingest.py builds cohort_month_panel.parquet from Freddie raw; mode_state = modal servicer_state per stratum-month at ingest.py:236, exposure_upb = summed current_upb at :226). Weighting is exposure-UPB (markov.py:49-50, w = row exposure_upb), row-normalized so each probability is an exposure-UPB share of transition events, not a count share. The literature-prior fallback branch (markov.py:54-75) did not fire: the persisted artifact differs from the hardcoded priors and matches Table tab:delinq in paper/v16 cell-for-cell (D30: 0.956/0.008/0.031/0.004; D60: 0.568/0.432; D90+: 0.303/0.008/0.689). Monthly application is unconditional each simulated month, restricted to delinquent-state agents. Nuances (non-refuting): \"consecutive\" is within-stratum shift(1) without enforcing a 1-month gap; weight is the destination month's exposure_upb; modal ties broken by mode().first()."
+      }
+    },
+    {
+      "quote": "the default-hazard draw moves loans \\emph{into} the pipeline (Current $\\to$ D30) and terminates already-delinquent loans it hits",
+      "claim": "In production, the default-hazard Bernoulli/probability draw has two roles: it transitions Current loans into D30 (pipeline entry) and it terminates (defaults) already-delinquent loans that it hits; the matrix only governs movement within the delinquency pipeline.",
+      "expected_code": "hazard/microsim_engine.py monthly state-update loop (default draw handling for current vs. delinquent loans)",
+      "region": "appendices",
+      "verdict": {
+        "traces": true,
+        "code_path": "hazard/competing_risks.py::monthly_step lines 157-165 (fractional branch, active since config.PREPAY_MODE=\"fractional\" at hazard/config.py:37), called from hazard/microsim_engine.py::_simulate_regime line 50",
+        "note": "Confirmed: the default-hazard Bernoulli draw (u = rng.uniform; u < h_def_n) transitions Current->D30 (pipeline entry, lines 162-163) and sends already-delinquent loans (D30/D60/D90+/Forbearance) to Defaulted (lines 164-165), which is absorbing (agents.py ABSORBING_STATES + _update_active_mask), i.e. true termination. The Markov step (_markov_step_delinquent, lines 35-62, called line 204) is applied only to loans in DELINQUENT_CODES, so pipeline entry is exclusively via the draw. Caveat on the gloss clause: the frozen matrix (hazard/data/markov_transition_matrix.parquet) is applied only within the pipeline but its destinations are not purely intra-pipeline - D30 row has Defaulted=0.0043 (a small second termination channel) and large cure-to-Current mass (D30->Current 0.956, D60->Current 0.569, D90+->Current 0.303). The quoted sentence about the draw's two roles traces exactly; a reading that the draw is the SOLE termination channel would be slightly wrong (matrix terminates D30 loans at 0.43%/mo)."
+      }
+    },
+    {
+      "quote": "the matrix runs after the draw each month, so a loan entering D30 via the draw can also take a matrix transition in its entry month",
+      "claim": "Within each simulated month the execution order is: default-hazard draw first, then the delinquency transition matrix, so a loan that enters D30 via the draw can take a matrix transition in that same entry month.",
+      "expected_code": "hazard/microsim_engine.py monthly loop ordering (default draw before markov/matrix step)",
+      "region": "appendices",
+      "verdict": {
+        "traces": true,
+        "code_path": "hazard/competing_risks.py::monthly_step \u2014 default draw at lines 157-165 (production PREPAY_MODE=\"fractional\", hazard/config.py:37; Current\u2192D30 at line 163), then _markov_step_delinquent at line 204; called once per month from hazard/microsim_engine.py::_simulate_regime line 50",
+        "note": "Ordering matches exactly: the default-hazard Bernoulli draw (u < h_def_n) runs before _markov_step_delinquent within the same monthly_step call. A loan flipped Current\u2192D30 by the draw remains active (D30 is non-absorbing, balance unchanged; agents.py:148-153) and is captured by the matrix step's mask (competing_risks.py:45, DELINQUENT_CODES includes D30 at line 28), so it can take a matrix transition in its entry month. Holds in both fractional and discrete prepay branches (matrix call at line 204 follows either draw)."
+      }
+    },
+    {
+      "quote": "Only the delinquency rows are used in simulation, terminal states are absorbing by construction, and the forbearance state is unpopulated",
+      "claim": "Production simulation uses only the D30/D60/D90+ rows of the transition matrix; terminal states (Prepaid/Defaulted) are absorbing by construction; and the forbearance state is never entered in production runs.",
+      "expected_code": "hazard/markov.py state-space definition and hazard/microsim_engine.py (no forbearance entry path; absorbing terminal states)",
+      "region": "appendices",
+      "verdict": {
+        "traces": true,
+        "code_path": "hazard/competing_risks.py:27-62 (_markov_step_delinquent, DELINQUENT_CODES) + hazard/agents.py:22,148-153 (ABSORBING_STATES, _update_active_mask) + hazard/microsim_engine.py:107 (load_transition_matrix) reading hazard/data/markov_transition_matrix.parquet",
+        "note": "All three sub-claims trace. (1) The only production consumer of the matrix, _markov_step_delinquent, masks to DELINQUENT_CODES; Current-state agents transition via the hazard model (Current->D30 at competing_risks.py:162-163), not the matrix; markov.py::route_through_pipeline (which uses all rows) has zero callers, and Path A simulate.py loads trans at line 128 but never uses it. (2) Prepaid/Defaulted/Liquidated absorption is enforced by the engine (ABSORBING_STATES + active mask), which is essential because the estimated matrix's Prepaid row (0.54->Current, 0.46->D90+) and Defaulted row (0.22->D60) are NOT absorbing -- those rows are simply never read, matching 'absorbing by construction'. (3) Forbearance is unpopulated in production: the frozen matrix artifact has an all-zero Forbearance column and row (D30/D60/D90+ -> Forbearance = 0.0), the production loan_sample.parquet contains zero Forbearance-state loans (Current 39752, Prepaid 34734, D30 274, D90+ 158, D60 50, Defaulted 32), and monthly_step only assigns D30/Defaulted/Prepaid; the literature-prior fallback (D60->Forbearance 0.10, markov.py:65) was not the artifact used. Caveats: state space lives in config.py:87-96 and agents.py rather than markov.py as hinted; DELINQUENT_CODES technically includes the Forbearance code, so its row would execute if ever populated -- it never is."
+      }
+    },
+    {
+      "quote": "the hazard specification takes a maximum against the floor, so wherever the floor binds the elasticity is inert",
+      "claim": "The production prepayment hazard is computed as a max() against the involuntary-turnover floor (h_floor = 0.0034 monthly SMM = 4% annual CPR per Table tab:params), so when the floor binds the lock-in elasticity has no effect on that loan-month's hazard.",
+      "expected_code": "hazard/literature_hazard.py or hazard/microsim_engine.py (max(hazard, floor) application); floor value in hazard/config.py",
+      "region": "appendices",
+      "verdict": {
+        "traces": true,
+        "code_path": "hazard/literature_hazard.py:106-109 (prepay_hazard: np.maximum(h_floor, h_vol)), floor value hazard/config.py:47 (INVOLUNTARY_CPR_ANNUAL = 0.04), invoked from production Path B via hazard/competing_risks.py:136 (monthly_step) \u2190 hazard/microsim_engine.py:50",
+        "note": "Verified all specifics: literal np.maximum(h_floor, h_vol) with floor = 0.04 annual CPR converting to 1-(0.96)^(1/12) = 0.003396 \u2248 0.0034 monthly SMM (cpr_annual_to_monthly_hazard, literature_hazard.py:51-54). Elasticity beta1 enters only h_vol (line 100: (-beta1)*rate_gap*100), so when h_vol < h_floor the returned hazard equals h_floor and is beta1-independent; the subsequent normalize_competing_hazards rescale is also beta1-free. The pre-registered floor_sweep.py:96-113 instruments bind as (h_vol < h_floor), matching this semantics. Caveat: the floor/max exists only in the Path B structural microsim hazard; Path A (hazard/simulate.py::simulate_qt_window, empirical hazard_coefficients.json) applies no floor, so the claim is accurate for the microsim hazard specification but does not describe Path A."
+      }
+    },
+    {
+      "quote": "All values are fixed a priori in the configuration; none is estimated on, or tuned to, the \\$764.7 billion benchmark.",
+      "claim": "Every Path B parameter in Table tab:params (beta_1, delta band, P_q, beta_F, beta_L, beta_b, floor, PSA speed, h_def_0, gamma_r, gamma_F, gamma_L) lives as a fixed value in the configuration file rather than being fit to the benchmark.",
+      "expected_code": "hazard/config.py (all Table tab:params values present as config constants matching 0.069, 0.055-0.077, 0.06, -0.15, +0.10, -0.5, 0.0034, 100, 3e-4, 2.0, -0.20, +0.25)",
+      "region": "appendices",
+      "verdict": {
+        "traces": true,
+        "code_path": "hazard/config.py:34-57 (P_Q_BASELINE, ROTHSTEIN_Q_DECLINE_LOW/MID/HIGH, INVOLUNTARY_CPR_ANNUAL, PSA_SPEED, LITERATURE_COEFS) consumed by hazard/literature_hazard.py:31-109 (rothstein_beta1, prepay_hazard, default_hazard) via hazard/microsim_engine.py:83-101 (run_qt_microsim) -> hazard/competing_risks.py:82+ (monthly_step)",
+        "note": "10 of 12 table values are literal config constants: 0.055/0.077 band, P_q=0.06, beta_F=-0.15, beta_L=+0.10, beta_b=-0.5, PSA=100.0, h_def_0=0.0003, gamma_r=2.0, gamma_F=-0.20, gamma_L=+0.25. The remaining 2 are deterministic, parameter-free transforms of config constants rather than literal file entries \u2014 beta_1=0.069 is rothstein_beta1(delta=0.065, P_q=0.06) = -0.06857 computed in literature_hazard.py (config stores 0.065/0.06), and floor 0.0034 = 1-(1-0.04)^(1/12) computed in prepay_hazard from INVOLUNTARY_CPR_ANNUAL=0.04 \u2014 but the manuscript table's provenance column itself states these derivations ('eq:beta1 at delta=0.065'; '4% annual CPR'), so the claim's substance holds. Benchmark independence verified: EMPIRICAL_TRAPPED_B=764.7 (config.py:64) appears only in extension_risk.py as a scoring denominator; no code mutates LITERATURE_COEFS and no optimization/tuning loop over Path B parameters exists in the production path. Caveat for the EXPECTED CODE phrasing: 0.069 and 0.0034 are NOT present as constants in config.py; only their anchors (0.065, 0.04) are."
+      }
+    },
+    {
+      "quote": "$\\beta_1$ (central) & $0.069$ & per 100bp gap & \\eqref{eq:beta1} at $\\delta = 0.065$",
+      "claim": "The central lock-in coefficient beta_1 = 0.069 per 100bp of rate gap is derived from the Liebersohn-Rothstein quarterly moving-decline delta = 0.065 via the conversion formula eq:beta1 using P_q = 0.06 quarterly turnover probability as the conversion auxiliary.",
+      "expected_code": "hazard/literature_hazard.py or hazard/config.py (delta-to-beta_1 conversion computation using P_q = 0.06)",
+      "region": "appendices",
+      "verdict": {
+        "traces": true,
+        "code_path": "hazard/literature_hazard.py:31-48 (rothstein_beta1 + BETA1_PREPAY_MID = rothstein_beta1(ROTHSTEIN_Q_DECLINE_MID)), constants at hazard/config.py:41 (ROTHSTEIN_Q_DECLINE_MID = 0.065) and hazard/config.py:44 (P_Q_BASELINE = 0.06); consumed in production Path B at hazard/competing_risks.py:86,136 via prepay_hazard",
+        "note": "Executed the module: rothstein_beta1(0.065, p_q_base=0.06) = -0.06857, magnitude 0.069 per 100bp, matching the claimed central value and eq:beta1 mechanics exactly (P_q_shocked = 0.06*(1-0.065); quarterly-to-monthly survival conversion 1-P_q=(1-h_m)^3; beta_1 = ln(h_shocked/h_base)). BETA1_PREPAY_MID is the default beta1 in prepay_hazard and competing_risks (Path B microsim), so the path is live, not a variant. Minor sign convention: code stores beta_1 negative and flips sign at application (literature_hazard.py:100, (-beta1)*(rate_gap*100)); manuscript reports the magnitude, consistent with the code's documented per-100bp convention."
+      }
+    },
+    {
+      "quote": "PSA speed & 100 & --- & industry seasoning convention",
+      "claim": "The production Path B baseline hazard applies a 100 PSA seasoning ramp (industry convention: linear ramp over the first 30 months of loan age) to the baseline prepayment hazard.",
+      "expected_code": "hazard/literature_hazard.py or hazard/microsim_engine.py (PSA-100 seasoning multiplier on the baseline hazard)",
+      "region": "appendices",
+      "verdict": {
+        "traces": true,
+        "code_path": "hazard/literature_hazard.py:57-64 (h0_psa), executed via hazard/competing_risks.py:136 (monthly_step -> prepay_hazard -> baseline_hazard) inside hazard/microsim_engine.py (run_qt_microsim imports monthly_step at line 15)",
+        "note": "Exact match on every specific. (1) Speed 100: hazard/config.py:35 sets PSA_SPEED = 100.0 and it is the default argument of h0_psa; no override anywhere (grep shows no other assignment, and hazard/data/runs contains only a Path A manifest with no PSA key). (2) Industry-convention linear 30-month ramp: literature_hazard.py:63 computes cpr_ann = 0.06 * (psa_speed/100.0) * min(age, 30)/30, i.e., CPR ramps linearly from 0 to 6% annual over loan-age months 1-30 and is flat thereafter -- the standard PSA schedule. (3) Applied to the baseline prepayment hazard: hazard/config.py:34 sets BASELINE_MODE = \"psa\", so baseline_hazard() returns h0_psa, which is the multiplicative baseline h0 in prepay_hazard (literature_hazard.py:98,105: h_vol = h0 * exp(...)). (4) Reachable in production Path B: microsim_engine.run_qt_microsim -> _simulate_regime -> monthly_step (competing_risks.py:136) calls prepay_hazard with pool.loan_age for the U.S. regime (only the Danish counterfactual branch bypasses it). Two benign nuances that do not contradict the claim: the PSA CPR is converted to a monthly hazard via constant-hazard compounding (not raw CPR/12), and an involuntary-turnover CPR floor is max()'d with the ramped voluntary hazard, so at very young ages the floor binds -- the ramp is still the baseline being applied."
+      }
+    },
+    {
+      "quote": "$\\beta_F$ (FICO, z) & $-0.15$ & per SD & calibration prior",
+      "claim": "The production prepayment hazard includes FICO and LTV as z-scored covariates (beta_F = -0.15 and beta_L = +0.10 per standard deviation), and the default hazard includes gamma_r = 2.0 per decimal unit of rate stress plus z-scored FICO/LTV loadings (gamma_F = -0.20, gamma_L = +0.25).",
+      "expected_code": "hazard/microsim_engine.py and/or hazard/literature_hazard.py (z-scoring of FICO/LTV and covariate application in both prepayment and default hazards); values in hazard/config.py",
+      "region": "appendices",
+      "verdict": {
+        "traces": true,
+        "code_path": "hazard/config.py:49-56 (LITERATURE_COEFS values) \u2192 hazard/agents.py:129-130 (MicrosimPool z-scoring of FICO/LTV) \u2192 hazard/literature_hazard.py:101-102 (prepay_hazard applies beta_fico/beta_ltv) and :124-127 (default_hazard applies gamma_rate_stress/gamma_fico/gamma_ltv) \u2192 called from hazard/competing_risks.py:136-144 (monthly_step) \u2192 driven by hazard/microsim_engine.py",
+        "note": "All five coefficients match exactly: beta_fico=-0.15, beta_ltv=+0.10, gamma_rate_stress=2.0, gamma_fico=-0.20, gamma_ltv=+0.25 (config.py LITERATURE_COEFS). FICO/LTV are true z-scores from the pool's own moments (agents.py:129-130; the max(std,1.0) floor is inert for FICO/LTV scales). Rate stress = max(0, market_rate - coupon) in decimal units (rate_gap.py:67-69; market rate is MORTGAGE30US/100 at microsim_engine.py:49, coupon via coupon_to_decimal at agents.py:119), so gamma_r=2.0 per decimal unit is correct. Path is live production Path B: microsim_engine.py imports MicrosimPool and monthly_step, which calls prepay_hazard/default_hazard with pool.fico_z/ltv_z and coefs defaulting to LITERATURE_COEFS. covariate_priors_estimation.py:57 independently records the same priors, consistent with the 'calibration prior' label."
+      }
+    },
+    {
+      "quote": "The 482 loans delinquent at the window start are routed by the matrix from the first month",
+      "claim": "Loans that are already delinquent at the June 2022 window start (482 of them) are initialized in their delinquent states and processed through the transition matrix from the very first simulated month, rather than being reset to Current or dropped.",
+      "expected_code": "hazard/microsim_engine.py initialization (initial state assignment from observed servicer state at window start) with hazard/loan_sample.py or hazard/prepare_freddie.py supplying the start-of-window states",
+      "region": "appendices",
+      "verdict": {
+        "traces": true,
+        "code_path": "hazard/microsim_engine.py:48-50 (_simulate_regime monthly loop) \u2192 hazard/competing_risks.py:204 \u2192 _markov_step_delinquent (competing_risks.py:35-62); initial states set in hazard/agents.py:124-127 from loan_sample 'state' column built by hazard/loan_sample.py:56-70 using ingest.py:67-79 _map_servicer_state on the latest pre-QT_START (2022-06-01, common/qt_window.py:19) perf row",
+        "note": "Count verified exactly: frozen hazard/data/loan_sample.parquet has D30=274 + D60=50 + D90+=158 = 482 delinquent at window start. These map to state codes 1-3 via STATE_TO_CODE (not reset: fillna/fallback-to-Current applies only to null/unknown states; D30/D60/D90+ are in config MARKOV_STATES), stay in active_mask (agents.py:148-153 excludes only Prepaid/Defaulted/Liquidated), and _markov_step_delinquent applies the fitted transition matrix (rows D30/D60/D90+ present, cure-heavy) every month of qt_index starting June 2022. Minor unstated nuance, not contradictory: delinquent loans also face the competing-risks prepay/default hazards each month, with the Markov routing applied after the hazard draw within the month."
+      }
+    },
+    {
+      "quote": "Every current headline figure cites a frozen, tagged run manifest",
+      "claim": "The pipeline produces frozen, tagged run manifests recording git hash and run identity for every headline figure (Appendix A run-ledger tags such as run-2026-07-04-15yr-foldin and run-2026-07-05-berger), i.e., there is manifest-freezing machinery that stamps runs with tags and git hashes.",
+      "expected_code": "abm/freeze_run.py (manifest freeze/tagging) and manifest artifacts referenced from abm/ and hazard/ run outputs",
+      "region": "appendices",
+      "verdict": {
+        "traces": true,
+        "code_path": "abm/freeze_run.py:80 freeze_run() \u2014 manifest dict at lines 108-134 stamps \"run_tag\" and \"git_commit\" via _git_head() (lines 37-47, `git rev-parse HEAD`); invoked as CLI with --tag (main(), lines 160-188); runs production module fed_mbs_extension_risk.build_production_metrics (line 90)",
+        "note": "Both cited ledger tags exist as frozen artifacts: abm/data/runs/run-2026-07-04-15yr-foldin/manifest.json (run_tag matches, git_commit 0899d127... verified as a real commit) and abm/data/runs/run-2026-07-05-berger/manifest.json (git_commit 51fbd837... verified). Manifests include created_at_utc, pipeline metadata, input SHA-256s, and headline metrics; abm/data/runs/README.md codifies the headline-must-match-manifest rule. Hazard side has a tagged manifest too (hazard/data/runs/run-2026-07-14-pathA-seasonal/manifest.json, git_commit 6895b2e verified) but no hazard script writes it \u2014 the freeze script is ABM-only, hazard manifest follows the convention manually. Caveats: freeze_run records HEAD without a dirty-tree check, and 'every headline figure cites' is enforced by convention, not code; neither contradicts the claim that manifest-freezing machinery stamps tags and git hashes."
+      }
+    }
+  ]
+}
