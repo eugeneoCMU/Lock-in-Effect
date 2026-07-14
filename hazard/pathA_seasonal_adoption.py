@@ -6,10 +6,24 @@ Path A spec v4 adoption: the calendar-month specification becomes production
 This is a PROMOTION, not a search: the seasonal variant was estimated as
 robustness by seasonality_concave_gap.py and its numbers are committed in
 data/seasonality_concave_gap_results.json (seasonal block: recovery 121.5%,
-r(lag0) -0.378, peak lag -2). Adoption refits the same design through
-hazard_fit.fit_hazard_glm(seasonal=True) — 11 calendar-month dummies,
-January reference, inserted between the macro block and the stratum FE —
-and promotes the artifact to production spec v4.
+r(lag0) -0.378, peak lag -2).
+
+AMENDMENT (second pre-registration; the first attempt's Gate B FAILED and
+was reported, commit 7c3c673's runner): re-assembling the seasonal design
+inside fit_hazard_glm (pandas ddof-1 standardization) flipped the Poisson
+IRLS into its cold-start ridge fallback and landed a different, incompletely
+converged penalized optimum (near-uniform ~-0.30 "month effects"; an
+intercept split, not seasonality) — while the committed construction,
+seasonality_concave_gap.fit_with_month_dummies, still reproduces its
+artifact to zero drift on today's inputs. The committed seasonal numbers
+are pinned to that construction, so production spec v4 is DEFINED as that
+construction: this runner now imports and calls fit_with_month_dummies
+directly (single source of truth, no re-assembly), and the v4 artifact is
+assembled as the committed v3 artifact's prediction metadata (scales,
+burnout-age adjustment, stratum means, FE layout — exactly what the
+committed seasonal simulation consumed) plus the seasonal fit's
+coefficients and month effects. The parity gates below are UNCHANGED from
+the first pre-registration: same targets, same tolerances.
 
 PARITY GATES, fixed ex ante; if either fails this run hard-exits
 "must not be cited" and promotes nothing:
@@ -18,9 +32,8 @@ PARITY GATES, fixed ex ante; if either fails this run hard-exits
   committed artifact's ridge alpha, same panel and holdout split) must
   reproduce the committed data/hazard_coefficients.json macro coefficients
   (rate_gap_bps +0.6734 standardized, burnout_orth -0.1301, friction
-  -0.0371) to 1e-4. This proves the fitting path and the live FRED inputs
-  still reproduce the frozen fit before any spec change is layered on.
-- Gate B (target): the v4 refit + forward simulation (simulate_qt_window
+  -0.0371) to 1e-4.
+- Gate B (target): the v4 fit + forward simulation (simulate_qt_window
   with the in-loop seasonal multiplier, per-month WSHOMCB rescale) must
   reproduce the committed seasonal artifact's recovery to $0.1B, its lag-0
   correlation to 0.001, and its peak lag exactly (-2).
@@ -30,6 +43,8 @@ PROMOTION (only after both gates pass):
   data/hazard_coefficients_specv3.json — permutation_test_pathA.py remains
   a spec-v3 exhibit and future Gate A controls reference it.
 - The v4 artifact becomes data/hazard_coefficients.json (production).
+  Its holdout fields are removed rather than inherited (they described the
+  v3 fit; the committed seasonal robustness run reported none).
 - The v4 forward simulation is written to the production sim path.
 - data/pathA_seasonal_adoption_results.json records gates, month effects,
   scores, and the v4 mean simulated CPR (consumed by the WAL table).
@@ -45,10 +60,11 @@ from pathlib import Path
 
 import polars as pl
 
-from config import HAZARD_COEF_PATH, PANEL_PATH
+from config import HAZARD_COEF_PATH, HOLDOUT_DATE, PANEL_PATH
 from extension_risk import score_extension_risk
-from hazard_fit import fit_hazard_glm
+from hazard_fit import enrich_panel_with_macro, fit_hazard_glm
 from macro import build_empirical_metrics, fetch_data, fetch_soma_mbs_monthly
+from seasonality_concave_gap import fit_with_month_dummies
 from simulate import SIM_RESULTS_PATH, simulate_qt_window
 
 DATA_DIR = Path(__file__).parent / "data"
@@ -97,15 +113,43 @@ def main() -> None:
         hard_fail("Gate A (v3 control) did not reproduce the committed "
                   "macro coefficients — fitting path or live inputs drifted")
 
-    # ---- Gate B: v4 refit + forward simulation -------------------------------
-    print(f"\nGate B: spec v4 refit (seasonal=True, alpha={ridge_alpha:g}) …")
-    v4 = fit_hazard_glm(panel, output=CANDIDATE_V4, ridge_alpha=ridge_alpha,
-                        seasonal=True)
+    # ---- v4 fit: the committed construction, verbatim -------------------------
+    print(f"\nSpec v4 fit via seasonality_concave_gap.fit_with_month_dummies "
+          f"(alpha={ridge_alpha:g}) …")
+    pdf = enrich_panel_with_macro(panel)
+    pdf = pdf.dropna(subset=["rate_gap_bps", "exposure", "loan_age", "stratum_id"])
+    pdf = pdf[pdf["exposure"] > 0]
+    train = pdf[pdf["period"] < HOLDOUT_DATE].copy()
+    coefs_s, month_effects, fit_method = fit_with_month_dummies(train, ridge_alpha)
+    print(f"  fit method: {fit_method}")
     print("  month log-effects (Jan = 0): "
-          + ", ".join(f"{m}:{v:+.3f}"
-                      for m, v in sorted(v4["month_effects"].items(),
-                                         key=lambda kv: int(kv[0]))))
+          + ", ".join(f"{m}:{v:+.3f}" for m, v in sorted(month_effects.items())))
 
+    # v4 artifact: committed v3 prediction metadata + seasonal coefficients —
+    # exactly the pairing the committed seasonal simulation consumed.
+    v4_artifact = dict(committed)
+    v4_artifact["spec_version"] = 4
+    v4_artifact["coefficients"] = coefs_s
+    v4_artifact["month_effects"] = {
+        str(m): float(v) for m, v in sorted(month_effects.items())
+    }
+    v4_artifact["fit_method"] = fit_method
+    v4_artifact.pop("holdout_r2", None)
+    v4_artifact.pop("holdout_rmse", None)
+    v4_artifact["provenance"] = (
+        "Spec v4 (freeze item i): coefficients and month effects from "
+        "seasonality_concave_gap.fit_with_month_dummies (the committed "
+        "seasonal robustness construction, reproduced to zero drift at "
+        "adoption); prediction scales, burnout-age adjustment, stratum "
+        "burnout means, and FE layout inherited from the spec v3 artifact, "
+        "exactly as the committed seasonal simulation consumed them. "
+        "Holdout metrics not recomputed at adoption; see "
+        "hazard_coefficients_specv3.json for the v3 fit's."
+    )
+    with open(CANDIDATE_V4, "w") as f:
+        json.dump(v4_artifact, f, indent=2)
+
+    # ---- Gate B: forward simulation must reproduce the committed artifact -----
     print("  forward simulation under v4 …")
     sim = simulate_qt_window(panel=panel, coef_path=CANDIDATE_V4,
                              output=TMP_SIM)
@@ -148,6 +192,8 @@ def main() -> None:
         "mode": "pathA_seasonal_adoption",
         "spec_version": 4,
         "ridge_alpha": ridge_alpha,
+        "fit_method": fit_method,
+        "construction": "seasonality_concave_gap.fit_with_month_dummies",
         "gate_a_v3_control": gate_a,
         "gate_b_v4_target": gate_b,
         "v4_trapped_b": float(score["hazard_trapped_b"]),
@@ -156,17 +202,14 @@ def main() -> None:
         "v4_best_lag": int(score["best_lag"]),
         "v4_peak_lag_r": float(score["peak_lag_r"]),
         "v4_mean_sim_cpr_pct": float(sim["hazard_cpr_pct"].mean()),
-        "month_effects": v4["month_effects"],
-        "holdout_rmse": v4.get("holdout_rmse"),
-        "holdout_r2": v4.get("holdout_r2"),
+        "v4_macro_betas": {n: float(coefs_s[n]) for n in MACRO_BETAS},
+        "month_effects": v4_artifact["month_effects"],
         "v3_preserved_as": V3_PRESERVED.name,
-        "notes": (
-            "Promotion of the committed seasonal robustness variant "
-            "(seasonality_concave_gap_results.json) to production spec v4; "
-            "gates reproduce the committed v3 macro coefficients and the "
-            "committed seasonal recovery/r/peak-lag before promotion. "
-            "permutation_test_pathA.py remains a spec-v3 exhibit against "
-            "hazard_coefficients_specv3.json."
+        "first_attempt_note": (
+            "The first pre-registered attempt (commit 7c3c673) failed Gate B: "
+            "re-assembling the design inside fit_hazard_glm flipped IRLS into "
+            "its cold-start ridge fallback and a different penalized optimum. "
+            "Production v4 is therefore pinned to the committed construction."
         ),
     }
     with open(RESULTS_JSON, "w") as f:

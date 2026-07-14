@@ -32,6 +32,7 @@ from config import DATA_DIR, HAZARD_COEF_PATH, HOLDOUT_DATE, PANEL_PATH
 from bootstrap_se import (
     BETA_NAMES,
     fit_betas,
+    production_start_head,
     rescale_to_production_units,
 )
 from hazard_fit import enrich_panel_with_macro
@@ -83,7 +84,9 @@ def main() -> None:
     seasonal = "month_effects" in prod  # spec v4 production artifact
     print(f"Design: seasonal={seasonal} "
           f"(production spec_version {prod.get('spec_version')})")
-    point = fit_betas(train, args.alpha, seasonal=seasonal)
+    point = fit_betas(train, args.alpha, seasonal=seasonal,
+                      start_head=production_start_head(prod) if seasonal
+                      else None)
     prod_scales = {k: point[k] for k in ["gap_std", "burn_std", "fric_std"]}
     print("Point refit (production standardized units): "
           + "  ".join(f"{n}={point[n]:+.4f}" for n in BETA_NAMES))

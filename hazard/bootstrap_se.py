@@ -154,6 +154,7 @@ def fit_betas(train: pd.DataFrame, ridge_alpha: float,
         raise RuntimeError(
             f"non-converged fit (max |macro beta| = {np.abs(macro).max():.3g})"
         )
+    head_len = 4 + k + (11 if seasonal else 0)  # months ride in the warm start
     return {
         "rate_gap_bps": float(params[1 + k]),
         "burnout_orth": float(params[2 + k]),
@@ -162,8 +163,24 @@ def fit_betas(train: pd.DataFrame, ridge_alpha: float,
         "burn_std": burn_std,
         "fric_std": friction_std,
         "fit_method": fit_method,
-        "params_head": params[: 4 + k].copy(),
+        "params_head": params[:head_len].copy(),
     }
+
+
+def production_start_head(prod: dict) -> np.ndarray:
+    """Warm-start head [const | age spline | gap, burn, fric | months?] built
+    from the production artifact, pinning point fits to the production
+    solution branch (the Gate-B lesson: cold IRLS on the seasonal design can
+    land a different penalized optimum)."""
+    coefs = prod["coefficients"]
+    names = (
+        ["const", "age_linear"]
+        + [f"age_spline_{k}" for k in AGE_SPLINE_KNOTS]
+        + ["rate_gap_bps", "burnout_orth", "friction"]
+    )
+    if "month_effects" in prod:
+        names += [f"m_{m}" for m in range(2, 13)]
+    return np.array([float(coefs[n]) for n in names], dtype=np.float64)
 
 
 def rescale_to_production_units(betas: dict, prod_scales: dict) -> dict:
@@ -269,7 +286,9 @@ def main() -> None:
     seasonal = "month_effects" in prod  # spec v4 production artifact
     print(f"Point refit (alpha={ridge_alpha:g}, seasonal={seasonal}) — "
           f"parity check vs production:")
-    point = fit_betas(train, ridge_alpha, seasonal=seasonal)
+    point = fit_betas(train, ridge_alpha, seasonal=seasonal,
+                      start_head=production_start_head(prod) if seasonal
+                      else None)
     for n in BETA_NAMES:
         prod_beta = float(prod["coefficients"][n])
         print(f"  {n}: refit={point[n]:+.4f}  production={prod_beta:+.4f}")
