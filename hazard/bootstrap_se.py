@@ -42,6 +42,7 @@ from config import (
 from hazard_fit import (
     _age_spline_basis,
     _fit_poisson_glm,
+    _month_dummy_matrix,
     _orthogonalize_burnout,
     enrich_panel_with_macro,
 )
@@ -73,13 +74,20 @@ MAX_ABS_BETA = 20.0  # standardized units; beyond this the IRLS diverged
 
 
 def fit_betas(train: pd.DataFrame, ridge_alpha: float,
-              start_head: np.ndarray | None = None) -> dict:
+              start_head: np.ndarray | None = None,
+              seasonal: bool = False) -> dict:
     """
     Refit the production spec (age spline + standardized macro terms +
     stratum FE, Poisson log link, log-exposure offset) on `train`.
     Returns macro betas in THIS SAMPLE's standardized units plus the
     standardization scales needed to convert them.
     Mirrors hazard_fit.fit_hazard_glm's training path exactly.
+
+    seasonal=True mirrors spec v4: 11 fixed-column calendar-month dummies
+    (January reference) between the macro block and the stratum FE. The
+    macro betas stay at positions [1+k : 4+k], so extraction and the
+    warm-start head are unchanged; month coefficients are nuisance terms
+    here and are not returned.
 
     start_head: optional warm-start for [const | age spline | gap, burn,
     fric] from the point fit; FE coefficients start at zero. Poisson IRLS
@@ -106,13 +114,16 @@ def fit_betas(train: pd.DataFrame, ridge_alpha: float,
         train["stratum_id"], prefix="fe_stratum", drop_first=True
     ).to_numpy(dtype=np.float64)
 
-    X = np.column_stack([
+    blocks = [
         age_basis,
         (train["rate_gap_bps"].to_numpy() - gap_mean) / gap_std,
         burnout_orth / burn_std,
         (train["friction"].to_numpy() - friction_mean) / friction_std,
-        dummies,
-    ])
+    ]
+    if seasonal:
+        blocks.append(_month_dummy_matrix(train["period"]))
+    blocks.append(dummies)
+    X = np.column_stack(blocks)
     X = sm.add_constant(X, has_constant="add")
 
     y_events = train["events"].to_numpy()
@@ -174,9 +185,10 @@ def run_bootstrap(
     seed: int,
     prod_scales: dict | None = None,
     draws_csv: Path | None = None,
+    seasonal: bool = False,
 ) -> dict:
     """Full bootstrap: point fit + n_reps cluster replications."""
-    point = fit_betas(train, ridge_alpha)
+    point = fit_betas(train, ridge_alpha, seasonal=seasonal)
     if prod_scales is None:
         prod_scales = {k: point[k] for k in ["gap_std", "burn_std", "fric_std"]}
 
@@ -188,7 +200,8 @@ def run_bootstrap(
     for i in range(n_reps):
         boot = resample_strata(train, rng)
         try:
-            b = fit_betas(boot, ridge_alpha, start_head=start_head)
+            b = fit_betas(boot, ridge_alpha, start_head=start_head,
+                          seasonal=seasonal)
         except Exception as exc:  # non-converged replication: count, move on
             n_failed += 1
             print(f"  rep {i + 1}/{n_reps}: FAILED ({exc})")
@@ -253,8 +266,10 @@ def main() -> None:
     train = pdf[pdf["period"] < HOLDOUT_DATE].copy()
     print(f"Training cells: {len(train):,}  |  strata: {train['stratum_id'].nunique()}")
 
-    print(f"Point refit (alpha={ridge_alpha:g}) — parity check vs production:")
-    point = fit_betas(train, ridge_alpha)
+    seasonal = "month_effects" in prod  # spec v4 production artifact
+    print(f"Point refit (alpha={ridge_alpha:g}, seasonal={seasonal}) — "
+          f"parity check vs production:")
+    point = fit_betas(train, ridge_alpha, seasonal=seasonal)
     for n in BETA_NAMES:
         prod_beta = float(prod["coefficients"][n])
         print(f"  {n}: refit={point[n]:+.4f}  production={prod_beta:+.4f}")
@@ -262,9 +277,11 @@ def main() -> None:
     print(f"\nBlock bootstrap: {args.reps} reps, cluster=stratum, "
           f"fixed alpha={ridge_alpha:g}, seed={args.seed}")
     out = run_bootstrap(train, args.reps, ridge_alpha, args.seed,
-                        prod_scales=prod_scales, draws_csv=BOOTSTRAP_DRAWS_CSV)
+                        prod_scales=prod_scales, draws_csv=BOOTSTRAP_DRAWS_CSV,
+                        seasonal=seasonal)
 
     out["spec_version"] = int(prod.get("spec_version", -1))
+    out["seasonal_design"] = bool(seasonal)
     out["n_train"] = int(len(train))
     out["point_refit_native_units"] = {n: point[n] for n in BETA_NAMES}
     out["production_coefficients"] = {

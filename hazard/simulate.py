@@ -27,6 +27,7 @@ from config import (
 from hazard_fit import (
     load_burnout_age_adjust,
     load_coefficients,
+    load_month_effects,
     load_predict_scales,
     predict_hazard,
 )
@@ -105,16 +106,24 @@ def simulate_qt_window(
     trans: Optional[pd.DataFrame] = None,
     output: Path = SIM_RESULTS_PATH,
     soma_cohorts: Optional[list] = None,
+    coef_path: Path = HAZARD_COEF_PATH,
 ) -> pd.DataFrame:
     """
     Forward-walk cohort balances through QT window on actual rate path.
+
+    Under a spec-v4 coefficients artifact (freeze item (i)) the artifact's
+    month_effects enter as an in-loop seasonal multiplier exp(effect[month]),
+    January = 0 — the committed seasonal robustness run's convention. A v3
+    artifact has no month_effects, so the multiplier is exp(0) = 1 and the
+    pre-adoption behavior is reproduced exactly.
     """
     if panel is None:
         panel = pl.read_parquet(PANEL_PATH)
     if coefs is None:
-        coefs = load_coefficients(HAZARD_COEF_PATH)
-    burnout_adj = load_burnout_age_adjust(HAZARD_COEF_PATH)
-    scales = load_predict_scales(HAZARD_COEF_PATH)
+        coefs = load_coefficients(coef_path)
+    burnout_adj = load_burnout_age_adjust(coef_path)
+    scales = load_predict_scales(coef_path)
+    month_effects = load_month_effects(coef_path)
     if trans is None:
         trans = load_transition_matrix(MARKOV_MATRIX_PATH)
 
@@ -156,6 +165,7 @@ def simulate_qt_window(
     for ts in qt_index:
         mkt = float(macro.loc[ts, "MORTGAGE30US"]) / 100.0
         fric = float(macro.loc[ts, "Dynamic_Friction"])
+        season = float(np.exp(month_effects.get(ts.month, 0.0)))
         month_prepay = 0.0
         month_sched = 0.0
         month_settled = 0.0
@@ -183,7 +193,7 @@ def simulate_qt_window(
                 burnout_demean_std=scales["burnout_demean_std"],
                 stratum_burnout_mean=scales["stratum_burnout_mean"],
                 fe_index=scales["fe_index"],
-            )
+            ) * season
             sched = scheduled_amortization_smm(coupon, TERM_MONTHS, int(age))
 
             prepay_amt = bal * hazard

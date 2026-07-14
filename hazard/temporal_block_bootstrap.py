@@ -28,7 +28,7 @@ import numpy as np
 import pandas as pd
 import polars as pl
 
-from config import DATA_DIR, HOLDOUT_DATE, PANEL_PATH
+from config import DATA_DIR, HAZARD_COEF_PATH, HOLDOUT_DATE, PANEL_PATH
 from bootstrap_se import (
     BETA_NAMES,
     fit_betas,
@@ -79,7 +79,11 @@ def main() -> None:
     print(f"Training cells: {len(train):,} | months: {len(months)} | "
           f"block: {args.block} | reps: {args.reps}")
 
-    point = fit_betas(train, args.alpha)
+    prod = json.load(open(HAZARD_COEF_PATH))
+    seasonal = "month_effects" in prod  # spec v4 production artifact
+    print(f"Design: seasonal={seasonal} "
+          f"(production spec_version {prod.get('spec_version')})")
+    point = fit_betas(train, args.alpha, seasonal=seasonal)
     prod_scales = {k: point[k] for k in ["gap_std", "burn_std", "fric_std"]}
     print("Point refit (production standardized units): "
           + "  ".join(f"{n}={point[n]:+.4f}" for n in BETA_NAMES))
@@ -91,7 +95,8 @@ def main() -> None:
     for i in range(args.reps):
         boot = resample_months(train, months, args.block, rng)
         try:
-            b = fit_betas(boot, args.alpha, start_head=point["params_head"])
+            b = fit_betas(boot, args.alpha, start_head=point["params_head"],
+                          seasonal=seasonal)
         except Exception as exc:
             n_failed += 1
             print(f"  rep {i + 1}/{args.reps}: FAILED ({exc})")
@@ -112,6 +117,8 @@ def main() -> None:
         "n_failed": n_failed,
         "ridge_alpha": args.alpha,
         "seed": args.seed,
+        "spec_version": int(prod.get("spec_version", -1)),
+        "seasonal_design": bool(seasonal),
         "production_scales": prod_scales,
         "point_production_units": {n: point[n] for n in BETA_NAMES},
         "note": ("Months resampled in moving blocks (cross-sections kept "

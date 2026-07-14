@@ -28,7 +28,19 @@ from config import (
 from macro import fetch_data, calculate_dynamic_friction, coupon_to_decimal
 from stratum import build_stratum_id
 
-SPEC_VERSION = 3
+SPEC_VERSION = 4
+
+MONTH_COLS = [f"m_{m}" for m in range(2, 13)]  # January reference
+
+
+def _month_dummy_matrix(periods: pd.Series) -> np.ndarray:
+    """11 calendar-month dummies (January reference), fixed column order
+    m_2..m_12 regardless of which months appear in the sample — stable under
+    bootstrap resamples that drop months."""
+    month = pd.to_datetime(periods).dt.month.to_numpy()
+    return np.column_stack([
+        (month == m).astype(np.float64) for m in range(2, 13)
+    ])
 
 
 def _orthogonalize_burnout(
@@ -190,6 +202,7 @@ def _holdout_metrics(
     stratum_burnout_mean: dict,
     reference_stratum: str,
     fe_columns: list[str],
+    seasonal: bool = False,
 ) -> tuple[float, float]:
     age_h = _age_spline_basis(holdout["loan_age"].to_numpy(), AGE_SPLINE_KNOTS)
     burn_demean_h = holdout["burnout"].to_numpy() - holdout["stratum_id"].map(
@@ -201,13 +214,16 @@ def _holdout_metrics(
     stratum_h = _stratum_dummy_matrix(
         holdout["stratum_id"], reference_stratum, fe_columns
     )
-    X_h = np.column_stack([
+    blocks = [
         age_h,
         (holdout["rate_gap_bps"].to_numpy() - gap_mean) / gap_std,
         burnout_h_orth / burn_std,
         (holdout["friction"].to_numpy() - friction_mean) / friction_std,
-        stratum_h,
-    ])
+    ]
+    if seasonal:
+        blocks.append(_month_dummy_matrix(holdout["period"]))
+    blocks.append(stratum_h)
+    X_h = np.column_stack(blocks)
     X_h = sm.add_constant(X_h, has_constant="add")
     X_h = np.asarray(X_h, dtype=np.float64)
     params = np.asarray(result.params, dtype=np.float64).ravel()
@@ -228,10 +244,19 @@ def fit_hazard_glm(
     output: Path = HAZARD_COEF_PATH,
     ridge_alpha: float | None = None,
     ridge_grid: bool = True,
+    seasonal: bool = False,
 ) -> dict:
     """
     Grouped Poisson GLM with log(exposure) offset, rate gap in bps,
     optional Ridge penalty, and stratum fixed effects.
+
+    seasonal=True is spec v4 (freeze item (i)): 11 calendar-month dummies,
+    January reference, inserted between the macro block and the stratum FE
+    (the construction of seasonality_concave_gap.fit_with_month_dummies).
+    The artifact then records spec_version 4 and a month_effects map; the
+    month coefficients enter the forward simulation as an in-loop
+    multiplier (simulate.simulate_qt_window), NOT through predict_hazard's
+    linear predictor, matching the committed seasonal robustness run.
     """
     if panel is None:
         panel = pl.read_parquet(PANEL_PATH)
@@ -273,19 +298,18 @@ def fit_hazard_glm(
     train_fric = (train["friction"].to_numpy() - friction_mean) / friction_std
     train_gap = (train["rate_gap_bps"].to_numpy() - gap_mean) / gap_std
     train_burn = burnout_orth / burn_std
-    X = np.column_stack([
-        age_basis,
-        train_gap,
-        train_burn,
-        train_fric,
-        stratum_extra,
-    ])
-    col_names = (
+    design_blocks = [age_basis, train_gap, train_burn, train_fric]
+    macro_names = (
         ["age_linear"]
         + [f"age_spline_{k}" for k in AGE_SPLINE_KNOTS]
         + ["rate_gap_bps", "burnout_orth", "friction"]
-        + fe_columns
     )
+    if seasonal:
+        design_blocks.append(_month_dummy_matrix(train["period"]))
+        macro_names += MONTH_COLS
+    design_blocks.append(stratum_extra)
+    X = np.column_stack(design_blocks)
+    col_names = macro_names + fe_columns
     X = sm.add_constant(X, has_constant="add")
     col_names = ["const"] + col_names
 
@@ -305,6 +329,7 @@ def fit_hazard_glm(
                 holdout, result, burnout_age_adj,
                 friction_mean, friction_std, gap_mean, gap_std, burn_std,
                 stratum_burnout_mean, reference_stratum, fe_columns,
+                seasonal=seasonal,
             )
             print(f"  alpha={alpha:g}  holdout RMSE={rmse:.2f}pp")
             if rmse < best_rmse:
@@ -326,7 +351,7 @@ def fit_hazard_glm(
     print(f"  ... + {len(fe_columns)} stratum FE coefficients")
 
     diag = {
-        "spec_version": SPEC_VERSION,
+        "spec_version": SPEC_VERSION if seasonal else 3,
         "link": "poisson_log",
         "rate_gap_units": RATE_GAP_UNITS,
         "ridge_alpha": ridge_alpha,
@@ -345,12 +370,17 @@ def fit_hazard_glm(
         "n_holdout": len(holdout),
         "n_strata": len(fe_columns) + 1,
     }
+    if seasonal:
+        diag["month_effects"] = {
+            "1": 0.0, **{c.split("_")[1]: coefs[c] for c in MONTH_COLS}
+        }
 
     if len(holdout) > 0:
         r2, rmse = _holdout_metrics(
             holdout, result, burnout_age_adj,
             friction_mean, friction_std, gap_mean, gap_std, burn_std,
             stratum_burnout_mean, reference_stratum, fe_columns,
+            seasonal=seasonal,
         )
         diag["holdout_r2"] = r2
         diag["holdout_rmse"] = rmse
@@ -431,6 +461,14 @@ def load_burnout_age_adjust(path: Path = HAZARD_COEF_PATH) -> dict:
     with open(path) as f:
         data = json.load(f)
     return data.get("burnout_age_adjust", {})
+
+
+def load_month_effects(path: Path = HAZARD_COEF_PATH) -> dict[int, float]:
+    """Seasonal log-effects (January = 0) from a spec-v4 artifact; empty dict
+    for a v3 artifact, which the forward simulation treats as exp(0) = 1."""
+    with open(path) as f:
+        data = json.load(f)
+    return {int(k): float(v) for k, v in data.get("month_effects", {}).items()}
 
 
 def load_fe_meta(path: Path = HAZARD_COEF_PATH) -> dict:
