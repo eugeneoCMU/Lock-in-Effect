@@ -38,7 +38,10 @@ SCENARIOS = {
     "scheduled_only": 0.0,
     "empirical": 0.0514,
     "abm": 0.1168,
-    "path_a": 0.0351,
+    # Spec v4 production Path A mean simulated CPR (3.3368%), from
+    # data/pathA_seasonal_adoption_results.json / run-2026-07-14-pathA-seasonal.
+    "path_a": 0.0334,
+    "path_a_specv3": 0.0351,  # prior-spec exhibit; stays gated vs printed v15
     "path_b": 0.0476,
     "no_shock_2021_speeds": 0.2281,  # 2021 mean empirical CPR (FRED/SOMA back-out)
 }
@@ -46,7 +49,7 @@ V15_PRINTED = {
     "scheduled_only": (14.7, 12.6),
     "empirical": (9.4, 8.5),
     "abm": (6.0, 5.6),
-    "path_a": (10.7, 9.5),
+    "path_a_specv3": (10.7, 9.5),
     "path_b": (9.7, 8.7),
 }
 
@@ -106,7 +109,10 @@ def main() -> None:
         "ages_june_2022_months": AGES_JUNE_2022,
         "rows": rows,
         "extension_years_vs_no_shock": extension,
-        "parity": "all v15 printed values reproduced exactly",
+        "parity": ("v15 printed values reproduced exactly for the four "
+                   "unchanged rows and the spec-v3 Path A exhibit; path_a "
+                   "is the spec v4 restatement (freeze item i), mean CPR "
+                   "from pathA_seasonal_adoption_results.json"),
     }
     OUT.write_text(json.dumps(payload, indent=2) + "\n")
 

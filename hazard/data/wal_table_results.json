@@ -24,6 +24,11 @@
       "wal_nov_2025": 5.6
     },
     "path_a": {
+      "mean_cpr_pct": 3.34,
+      "wal_june_2022": 10.9,
+      "wal_nov_2025": 9.7
+    },
+    "path_a_specv3": {
       "mean_cpr_pct": 3.51,
       "wal_june_2022": 10.7,
       "wal_nov_2025": 9.5
@@ -40,5 +45,5 @@
     }
   },
   "extension_years_vs_no_shock": 6.0,
-  "parity": "all v15 printed values reproduced exactly"
+  "parity": "v15 printed values reproduced exactly for the four unchanged rows and the spec-v3 Path A exhibit; path_a is the spec v4 restatement (freeze item i), mean CPR from pathA_seasonal_adoption_results.json"
 }
