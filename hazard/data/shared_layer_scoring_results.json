@@ -15,13 +15,7 @@
       "curtailment_netted_b": 69.56220187263008,
       "sched_amort_layer_b": 209.40040843409105,
       "standalone_trapped_b": 818.5300844066606,
-      "standalone_share_pct": 107.0326190295068,
-      "netting_decomposition": {
-        "standalone_minus_shared_b": 69.562,
-        "curtailment_b": 69.562,
-        "scheduled_amortization_b": 0.0,
-        "note": "US-leg netting is income-scaled curtailment ONLY; scheduled amortization is already inside each run's own simulated roll-off."
-      }
+      "standalone_share_pct": 107.0326190295068
     },
     "no_lockin_null": {
       "us_trapped_b": 678.6228221141348,
@@ -32,30 +26,18 @@
       "curtailment_netted_b": 69.56220187263008,
       "sched_amort_layer_b": 209.40040843409105,
       "standalone_trapped_b": 748.1850239867648,
-      "standalone_share_pct": 97.83415925879702,
-      "netting_decomposition": {
-        "standalone_minus_shared_b": 69.562,
-        "curtailment_b": 69.562,
-        "scheduled_amortization_b": 0.0,
-        "note": "US-leg netting is income-scaled curtailment ONLY; scheduled amortization is already inside each run's own simulated roll-off."
-      }
+      "standalone_share_pct": 97.83415925879702
     },
     "path_a": {
-      "us_trapped_b": 845.5048259845789,
-      "share_pct": 110.55988979661807,
+      "us_trapped_b": 859.3307684172509,
+      "share_pct": 112.36779748053998,
       "empirical_trapped_b": 764.7482532227002,
       "danish_trapped_b": 848.8697561693841,
-      "institutional_gap_b": -3.364930184805189,
+      "institutional_gap_b": 10.461012247866734,
       "curtailment_netted_b": 69.56220187263008,
       "sched_amort_layer_b": 209.40040843409105,
-      "standalone_trapped_b": 915.067027857209,
-      "standalone_share_pct": 119.65598142932075,
-      "netting_decomposition": {
-        "standalone_minus_shared_b": 69.562,
-        "curtailment_b": 69.562,
-        "scheduled_amortization_b": 0.0,
-        "note": "US-leg netting is income-scaled curtailment ONLY; scheduled amortization is already inside each run's own simulated roll-off."
-      }
+      "standalone_trapped_b": 928.892970289881,
+      "standalone_share_pct": 121.46388911324269
     },
     "path_b_fullbook_composed": {
       "us_trapped_b": 765.0774982466306,
@@ -66,37 +48,18 @@
       "curtailment_netted_b": 69.56220187263008,
       "sched_amort_layer_b": 209.40040843409105,
       "standalone_trapped_b": 834.6397001192607,
-      "standalone_share_pct": 109.13914436574825,
-      "netting_decomposition": {
-        "standalone_minus_shared_b": 69.562,
-        "curtailment_b": 69.562,
-        "scheduled_amortization_b": 0.0,
-        "note": "US-leg netting is income-scaled curtailment ONLY; scheduled amortization is already inside each run's own simulated roll-off."
-      }
+      "standalone_share_pct": 109.13914436574825
     },
     "path_a_fullbook_composed": {
-      "us_trapped_b": 894.7725876932744,
-      "share_pct": 117.0022401388487,
+      "us_trapped_b": 905.1467494843001,
+      "share_pct": 118.35878613255424,
       "empirical_trapped_b": 764.7482532227002,
       "danish_trapped_b": 846.6912914390132,
-      "institutional_gap_b": 48.08129625426125,
+      "institutional_gap_b": 58.455458045286946,
       "curtailment_netted_b": 69.56220187263008,
       "sched_amort_layer_b": 209.40040843409105,
-      "standalone_trapped_b": 964.3347895659045,
-      "standalone_share_pct": 126.09833177155141,
-      "netting_decomposition": {
-        "standalone_minus_shared_b": 69.562,
-        "curtailment_b": 69.562,
-        "scheduled_amortization_b": 0.0,
-        "note": "US-leg netting is income-scaled curtailment ONLY; scheduled amortization is already inside each run's own simulated roll-off."
-      }
+      "standalone_trapped_b": 974.7089513569304,
+      "standalone_share_pct": 127.45487776525697
     }
-  },
-  "netting_mechanics": "The curtailment flow is computed as holdings x curtailment_smm on the ACTUAL Fed holdings path (WSHOMCB), which is also the path every U.S. LEG's roll-off is rescaled to month-by-month inside its own simulation (Danish legs deliberately propagate a dynamic counterfactual balance and compute curtailment on it - see danish_leg_curtailment). It is therefore a common flow across the U.S. legs, identical by construction ($69.562B for every run), not a per-run quantity computed on simulated balances. This makes the shared-layer wedge exactly -9.1pp for every U.S. leg and makes the composed (joint) run equal the one-at-a-time deltas composed, exactly. Scope: U.S. legs only, consistent with the manuscript's SS III.B and V.B per-leg statements.",
-  "danish_leg_curtailment": {
-    "us_leg_on_actual_holdings_b": 69.56,
-    "danish_leg_on_counterfactual_balance_b": 70.33,
-    "differential_b": 0.77,
-    "note": "The common-netting/invariance argument applies to U.S. legs only: U.S.-leg dollar conversion rescales monthly to actual WSHOMCB holdings, so curtailment on actual holdings is the common flow. Danish legs propagate a dynamic counterfactual balance (deliberately - it is a counterfactual), and their curtailment is computed on that balance inside the Danish loop; the slower Danish drain leaves higher balances and hence more curtailment dollars, already embedded in every printed gap."
   }
 }
