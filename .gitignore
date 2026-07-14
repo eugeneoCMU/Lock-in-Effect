@@ -19,3 +19,6 @@ service-account*.json
 
 # Manuscript editions — kept local-only, not published with the repo
 paper/
+
+# Floor-sweep per-run parquets (regenerable via hazard/floor_sweep.py)
+hazard/data/floor_sweep/
