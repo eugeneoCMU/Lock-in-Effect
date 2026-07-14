@@ -1903,8 +1903,13 @@ numbers were printed). One failure was extraction over-reach (the
 seven-cohort sentence is correctly scoped to the superseded diagnostic)
 and received no edit. Freeze-list items (ii)/(iii) marked executed in
 the manuscript; build clean at 54 pp; all 18 gates pass; editions in
-lockstep. Item (iv) passes (`tools/test_timing_sweep.py`); item (v)
-(title ratification) remains the author's.
+lockstep. Item (iv) passes (`tools/test_timing_sweep.py`). Item (v):
+the author ratified the title as "The Securitization Trade-Off:
+Mortgage Lock-In and the Federal Reserve's QT Shortfall" (2026-07-14) —
+the Trade-Off lead is preserved, so the conclusion's title-reference
+sentence and the pre-registered title gate hold unchanged, and the
+subtitle now names the paper's subject mechanism. All five freeze items
+are closed.
 
 ---
 
