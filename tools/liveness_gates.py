@@ -36,6 +36,7 @@ ZERO_COUNT = [
     "stranding an estimated",
     "roughly 13\\% of the benchmark",
     "That mortgage lock-in slowed",
+    "1.3 years too long",
 ]
 
 EXACTLY_ONE = [
@@ -46,6 +47,40 @@ EXACTLY_ONE = [
 ]
 
 KERNEL_TEX_PHRASE = "kernel is retained in production"
+
+# --- Post-freeze consistency pass (2026-07-14) ------------------------------
+# Superseded spec v3 figures that must stay out of the tex except where
+# explicitly labeled, ledger-completeness checks, and figure-script
+# hardcoded-literal gates (the defect class the pass existed to kill:
+# figure generators must READ committed artifacts, never carry the numbers).
+
+# "894.8" (the spec v3 composed Path A) may appear only within 120 chars of
+# a "spec v3" label; the unlabeled form was the §VII.F defect.
+SUPERSEDED_CONTEXTUAL = {"894.8": "spec v3"}
+
+# The Appendix A run ledger must record the Path A spec v3 -> v4 supersession.
+LEDGER_SECTION = "\\section{Superseded Figures and Run Ledger}"
+LEDGER_REQUIRED = ["spec v3", "121.5"]
+
+FIGURE_SCRIPTS = [
+    "figures/make_figures.py",
+    "figures/make_ccf_data.py",
+    "abm/monte_carlo_simulation.py",
+]
+
+# Benchmark shares (% of the $764.7B benchmark) and headline dollar figures
+# that have ever been displayed in a figure; none may be hardcoded in a
+# figure script (values arrive via json/manifest reads).
+SHARE_LITERALS = [
+    "119.7", "894.8", "117.0", "110.6", "112.4", "121.5", "127.5",
+    "107.0", "109.1", "97.9", "96.9", "106.0", "100.04", "88.7",
+    "59.3", "20.9", "11.9", "11.1", "71.1", "54.9", "45.1", "33.7",
+    "764.7", "915.0", "915.1", "928.9", "905.1", "818.5", "834.6",
+    "974.7", "91.0", "84.5", "453.5", "159.5", "765.1",
+]
+
+# The retracted timing convention may not reappear in any figure script.
+FIGURE_FORBIDDEN = ["model CPR leads", "model leads", "TBA settlement"]
 
 # Freeze item (ii), LaTeX half: every cross-reference goes through \ref —
 # a hardcoded "Table 7" / "Section V.C" literal would silently drift when
@@ -82,6 +117,42 @@ def main() -> int:
         ok = n == 0
         failures += 0 if ok else 1
         print(f"[{'PASS' if ok else 'FAIL'}] no-hardcoded-xref {label}: {n}")
+
+    # --- Post-freeze pass gates ---------------------------------------------
+    for phrase, label in SUPERSEDED_CONTEXTUAL.items():
+        bad = 0
+        start = 0
+        while (idx := tex.find(phrase, start)) != -1:
+            window = tex[max(0, idx - 120): idx + 120]
+            if label not in window:
+                bad += 1
+            start = idx + len(phrase)
+        ok = bad == 0
+        failures += 0 if ok else 1
+        print(f"[{'PASS' if ok else 'FAIL'}] superseded-unless-labeled "
+              f"{phrase!r} (label {label!r}): {bad} unlabeled")
+
+    lstart = tex.find(LEDGER_SECTION)
+    lend = tex.find("\\section{", lstart + 1) if lstart != -1 else -1
+    ledger = tex[lstart:lend] if lstart != -1 and lend != -1 else ""
+    for needle in LEDGER_REQUIRED:
+        ok = lstart != -1 and needle in ledger
+        failures += 0 if ok else 1
+        print(f"[{'PASS' if ok else 'FAIL'}] ledger-contains {needle!r}")
+
+    for rel in FIGURE_SCRIPTS:
+        src = (ROOT / rel).read_text()
+        hits = [lit for lit in SHARE_LITERALS
+                if re.search(rf"(?<![\d.]){re.escape(lit)}(?!\d)", src)]
+        ok = not hits
+        failures += 0 if ok else 1
+        print(f"[{'PASS' if ok else 'FAIL'}] figure-script-no-share-literals "
+              f"{rel}: {hits if hits else 0}")
+        fhits = [p for p in FIGURE_FORBIDDEN if p in src]
+        ok = not fhits
+        failures += 0 if ok else 1
+        print(f"[{'PASS' if ok else 'FAIL'}] figure-script-no-retracted-timing "
+              f"{rel}: {fhits if fhits else 0}")
 
     manifest = json.loads(MANIFEST.read_text())
     flag = bool(manifest.get("pipeline", {}).get("apply_settlement_lag_kernel"))
