@@ -22,3 +22,10 @@ paper/
 
 # Floor-sweep per-run parquets (regenerable via hazard/floor_sweep.py)
 hazard/data/floor_sweep/
+
+# Editor/agent workspaces (stale worktree copies pollute repo greps)
+.claude/
+.cursor/
+
+# Phase backups made by the freeze protocol
+*.bak-*

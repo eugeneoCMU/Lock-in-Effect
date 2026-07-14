@@ -1095,10 +1095,12 @@ Reproduce: `cd hazard && python3 permutation_test_pathA.py --n 50`
 **What.** [`abm/hybrid_pipeline.py`](abm/hybrid_pipeline.py) runs the ABM's
 macro-accounting layer (SOMA balance tracking, phased-cap netting, curtailment,
 scheduled amortization, Danish dynamic-balance loop) but replaces the ABM CPR
-surface with Path B's literature microsim CPR (`use_hazard_microsim=True`; the
-ABM settlement kernel auto-disables since Markov routing already handles the
-pipeline lag). Only the micro-foundation for loan behavior varies; the
-accounting is held identical.
+surface with Path B's literature microsim CPR (`use_hazard_microsim=True`; no
+settlement kernel applies — the kernel is skipped under a hazard
+micro-foundation (`fed_mbs_extension_risk.py`) because Path B settles
+prepayments in the month they occur; `hazard/markov.py`'s
+`route_through_pipeline` has no callers). Only the micro-foundation for loan
+behavior varies; the accounting is held identical.
 
 **Result** (the Danish leg here uses Path B's *pre-Berger* NPV-reset heuristic;
 §20 re-runs this hybrid with the Berger-recalibrated Danish regime — see the
