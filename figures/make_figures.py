@@ -153,7 +153,7 @@ def fig2_ccf():
     ax.axhline(0, color="black", lw=0.8)
     ax.axvline(0, color=C_GRAY, lw=0.8, ls=":")
     ax.set_xlabel("Lag (months); a peak at negative lag means the empirical "
-                  "series leads and the simulated path trails (§V.C)")
+                  "series leads\nand the simulated path trails (§V.C)")
     ax.set_ylabel("Cross-correlation")
     ax.set_xlim(-6.5, 6.5)
     ax.set_ylim(-0.6, 0.75)
