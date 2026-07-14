@@ -1,0 +1,70 @@
+{
+  "mode": "pathA_seasonal_adoption",
+  "spec_version": 4,
+  "ridge_alpha": 0.0001,
+  "fit_method": "ridge(alpha=0.0001)",
+  "construction": "seasonality_concave_gap.fit_with_month_dummies",
+  "gate_a_v3_control": {
+    "rate_gap_bps": {
+      "got": 0.6733519352905115,
+      "want": 0.6733519352905115,
+      "pass": true
+    },
+    "burnout_orth": {
+      "got": -0.13009048732147674,
+      "want": -0.13009048732147674,
+      "pass": true
+    },
+    "friction": {
+      "got": -0.037066025306261775,
+      "want": -0.037066025306261775,
+      "pass": true
+    }
+  },
+  "gate_b_v4_target": {
+    "trapped_b": {
+      "got": 928.892970289881,
+      "want": 928.892970289881,
+      "tol": 0.1,
+      "pass": true
+    },
+    "r_lag0": {
+      "got": -0.37817286723880483,
+      "want": -0.37817286723880483,
+      "tol": 0.001,
+      "pass": true
+    },
+    "peak_lag": {
+      "got": -2,
+      "want": -2,
+      "pass": true
+    }
+  },
+  "v4_trapped_b": 928.892970289881,
+  "v4_share_pct": 121.46388911324269,
+  "v4_r_lag0": -0.37817286723880483,
+  "v4_best_lag": -2,
+  "v4_peak_lag_r": -0.4384631771366396,
+  "v4_mean_sim_cpr_pct": 3.3367571815611323,
+  "v4_macro_betas": {
+    "rate_gap_bps": 0.6468566611612588,
+    "burnout_orth": -0.17126111626112517,
+    "friction": -0.007112288418868083
+  },
+  "month_effects": {
+    "1": 0.0,
+    "2": 0.11681411404755108,
+    "3": 0.4297095699613983,
+    "4": 0.24562401926403457,
+    "5": 0.18514535581051808,
+    "6": 0.31101800340985924,
+    "7": 0.18482595872406016,
+    "8": 0.36093803795648605,
+    "9": 0.4040331791742214,
+    "10": 0.41704227181449144,
+    "11": 0.29447029187035073,
+    "12": 0.1880636212175964
+  },
+  "v3_preserved_as": "hazard_coefficients_specv3.json",
+  "first_attempt_note": "The first pre-registered attempt (commit 7c3c673) failed Gate B: re-assembling the design inside fit_hazard_glm flipped IRLS into its cold-start ridge fallback and a different penalized optimum. Production v4 is therefore pinned to the committed construction."
+}

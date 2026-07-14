@@ -1,0 +1,60 @@
+{
+  "tag": "run-2026-07-14-pathA-seasonal",
+  "created_utc": "2026-07-14T07:32:43.341829+00:00",
+  "git_commit": "6895b2ee62a6b0096b7eeffa7a78b583c0cdc5b7",
+  "note_git_commit": "records the commit at freeze time (artifact commit 6895b2e + spec commits 7c3c673/4e11124 precede it); the run-ledger commit that adds this manifest necessarily postdates it \u2014 the known manifest convention, see TECHNICAL.md",
+  "spec_version": 4,
+  "construction": "seasonality_concave_gap.fit_with_month_dummies",
+  "ridge_alpha": 0.0001,
+  "gates": {
+    "gate_a_v3_control": {
+      "rate_gap_bps": {
+        "got": 0.6733519352905115,
+        "want": 0.6733519352905115,
+        "pass": true
+      },
+      "burnout_orth": {
+        "got": -0.13009048732147674,
+        "want": -0.13009048732147674,
+        "pass": true
+      },
+      "friction": {
+        "got": -0.037066025306261775,
+        "want": -0.037066025306261775,
+        "pass": true
+      }
+    },
+    "gate_b_v4_target": {
+      "trapped_b": {
+        "got": 928.892970289881,
+        "want": 928.892970289881,
+        "tol": 0.1,
+        "pass": true
+      },
+      "r_lag0": {
+        "got": -0.37817286723880483,
+        "want": -0.37817286723880483,
+        "tol": 0.001,
+        "pass": true
+      },
+      "peak_lag": {
+        "got": -2,
+        "want": -2,
+        "pass": true
+      }
+    }
+  },
+  "headline": {
+    "trapped_b": 928.892970289881,
+    "share_pct": 121.46388911324269,
+    "r_lag0": -0.37817286723880483,
+    "best_lag": -2,
+    "mean_sim_cpr_pct": 3.3367571815611323
+  },
+  "files": {
+    "hazard_coefficients.json": "f8b9fedce0a02c2d7b89a9a2cb32e22fbb07b66f8df43e152be27cf815aea15a",
+    "simulation_results.parquet": "1dd863e521c0918b4e0b49162b2711119330920494f2f6847b6eb8a583f39759",
+    "pathA_seasonal_adoption_results.json": "e600bdb8bbb3f0566b214639c2e70f61ddc5b5230c718f2f00520a153c0939e4",
+    "metrics_monthly.csv": "2a9f528ef6da5b23665801a5db451b5c6fe903aec2b70fac287ca22938fac24e"
+  }
+}
