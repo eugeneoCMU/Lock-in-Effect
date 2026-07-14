@@ -16,16 +16,16 @@
   },
   "path_a": {
     "balance_weighted": {
-      "trapped_b": 915.067027857209,
-      "share_pct": 119.65598142932075,
-      "cpr_r_lag0": -0.4443709072594436,
-      "peak_lag": 0
+      "trapped_b": 928.892970289881,
+      "share_pct": 121.46388911324269,
+      "cpr_r_lag0": -0.37817286723880483,
+      "peak_lag": -2
     },
     "full_book_weighted": {
-      "trapped_b": 964.3347895659045,
-      "share_pct": 126.09833177155141,
-      "cpr_r_lag0": -0.4406253458536417,
-      "peak_lag": 0
+      "trapped_b": 974.7089513569304,
+      "share_pct": 127.45487776525697,
+      "cpr_r_lag0": -0.3759090958480381,
+      "peak_lag": -1
     }
   }
 }
