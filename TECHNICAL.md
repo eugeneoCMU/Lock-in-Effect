@@ -576,7 +576,8 @@ conditional on the floor calibration — its sign is floor-robust (positive
 at every swept floor, +2.3pp even at 6%), its magnitude is not.** Manuscript
 sentences presenting the marginal as the floor-independent "clean
 verification content" must state the 5.5–10.8pp range over the empirically
-plausible floor band. Artifact:
+plausible floor band — executed in the v16 weakening pass (§22.4(d)).
+Artifact:
 [`hazard/data/floor_sweep_results.json`](hazard/data/floor_sweep_results.json)
 (per-run parquets regenerable, gitignored).
 
@@ -604,7 +605,8 @@ ex-ante 12–14pp range. Ceiling phrasing note: 13.17% of benchmark exceeds
 "about an eighth" (12.5%); a ceiling sentence should say "never exceeds
 roughly 13%" (or "about a seventh" if a fraction is wanted), and even
 restricted to the empirically plausible 3–5% floor band the box maximum is
-+12.6pp, still above an eighth. Artifact:
++12.6pp, still above an eighth. The "roughly 13%" phrasing was adopted in
+the v16 weakening pass (§22.4(d)). Artifact:
 [`hazard/data/floor_band_cross_results.json`](hazard/data/floor_band_cross_results.json).
 
 ---
@@ -1736,6 +1738,74 @@ claims-vs-code liveness audit, (iv) golden fixture passing at freeze,
 per-leg netting and the $0.77B differential; the crosstab reconciliation;
 482/154; 100.04% against the unrounded benchmark; the FRED-key scope
 decision (no history rewrite).
+
+### 22.4 v16 round (2026-07-13): intro reposition, Fed-source citations, and the calibration-box weakening pass
+
+The manuscript advanced to a v16 edition. Editions live outside version
+control (`paper/` is gitignored, `b54f551`); this section records the
+verification history, per this document's standing practice.
+
+**(a) Edition.** v16 was assembled from the review-converged v15r5 content
+with eight repository figures wired in (`figures/` output regenerated
+title-free so the in-image "Figure N" headers no longer collide with LaTeX
+caption numbering; stale TECHNICAL.md-numbered §-references stripped from
+in-figure annotations — the committed generator was not modified). v16
+prose is em-dash-free; the only `---` tokens are table-cell markers.
+
+**(b) Intro reposition (decomposition lead).** The introduction was
+repositioned to open on priority concession and decomposition ("not a new
+claim … this paper's contribution is its decomposition") rather than the
+Securitization Trade-Off framing. The ordering was adjudicated with a
+fresh-reader review plus a devil's-advocate steelman of the trade-off-led
+alternative, each claim adversarially verified against the tex: the
+decomposition lead stands because it inoculates against the
+Fed-staff-priority objection in sentence one, while the trade-off's third
+leg is the paper's weakest, partially retracted material (the Danish gap
+collapsed to ~$100B with unidentified sign) and must not lead. Cleanups
+applied with the verdict: the three Fed-staff quotes now appear only in
+the related-literature paragraph (they had been duplicated verbatim in the
+opening paragraph), the $764.7B benchmark is defined at first use, and the
+trade-off paragraph gained the bridge sentence explaining why the frame
+survives the decomposition (mobility genuinely constrained; plumbing, not
+household choice, governs the cash-flow shortfall).
+
+**(c) New sources, verified.** Four keys were added and each verified
+against its primary source: `na2024` (Na, Newman & Schlusche, FEDS Notes
+2024-09-20 — both quotes verbatim; the $450B actual vs $820B binding-cap
+June 2022–June 2024 runoff figures match the note), `perli2024` (NY Fed
+speech 2024-05-08; quote is a faithfully marked elision; then-SOMA-Manager
+role confirmed), `hammack2025` (Cleveland Fed speech 2025-04-23; quote
+verbatim, and the manuscript's attribution was tightened from "the
+low-coupon book" to "some of the low-coupon holdings" to match the
+source's scope), and `eyal2026` (Eyal, Na & Skaperdas, FEDS Notes
+2026-02-02; the manuscript's macro-vs-loan-level contrast matches the
+note's own decomposition). Build after insertion: zero undefined
+citations, no dead keys.
+
+**(d) Calibration-box weakening pass.** The §12.1 sweeps trip their
+pre-registered threshold, so the manuscript executed the pre-registered
+remedy in a 13-edit pass (surgery script with per-edit uniqueness
+assertions; pre-pass backup retained): every statement of the +9.2pp
+lock-in marginal is now conditioned "at the production calibration" and
+bounded by the calibration box (+2.1 to +13.2 points; ceiling stated as
+"never exceeds roughly 13% of the benchmark" — deliberately not "an
+eighth," which the +13.17pp corner exceeds); the phrase "clean
+verification content" is retired in favor of the floor-conditional
+interval; a new manuscript subsection (Floor and Elasticity-Band
+Sensitivity: The Calibration Box) carries the 3×7 marginal table with the
+pre-registration commit chain named in prose; the abstract was resynced to
+the decomposition lead; and the basis-invariance claim is extended to
+every cell (the shared-accounting netting is common to the central and
+null legs of each cell). Definition of done, both checked by grep: zero
+unconditioned "+9.2" instances, zero occurrences of "clean verification".
+Build: 52 pp, zero undefined references or citations; no hardcoded
+table-number literals, so the new table's insertion shifts downstream
+numbering safely through `\ref`.
+
+**(e) Standing state.** The §VIII freeze gate (h, above) is unchanged.
+Open beyond it: the title is still a placeholder while the conclusion
+invokes "the Securitization Trade-Off of this paper's title" — the title
+must carry the phrase now that the abstract leads with the decomposition.
 
 ---
 
