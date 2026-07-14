@@ -1911,6 +1911,75 @@ sentence and the pre-registered title gate hold unchanged, and the
 subtitle now names the paper's subject mechanism. All five freeze items
 are closed.
 
+### 22.6 Post-freeze consistency pass (2026-07-14)
+
+A full 54-page review of the built PDF after the freeze found the text
+layer correct but the figure layer never regenerated, plus four small
+text defects and one open diagnostic. All were closed in one pass
+(commits `28536d4`, `33c9862`, `0065d6a`, `b93886c`, `33eb8ea`; the
+manuscript editions themselves are local-only, `paper/` being
+gitignored).
+
+**(a) Spec v4 out-of-sample evaluation (the §V.B open diagnostic).**
+`hazard/pathA_v4_holdout.py` (spec commit before the run) re-scored the
+frozen spec v4 coefficients prediction-only on the identical
+≥ 2024-01-01 holdout (n = 6,077): exposure-weighted RMSE **3.04pp**,
+unweighted **37.90pp**, versus spec v3's 2.53 / 37.83 — the seasonal
+terms do not improve the out-of-sample fit. A parity gate reproduced
+the committed v3 values through the same prediction path to 1e-6pp
+before the v4 numbers were trusted; the pre-registered STOP gate
+(weighted ≤ 5.0pp) passed. §V.B and §VIII.A now print both specs
+(`hazard/data/pathA_v4_holdout_results.json`).
+
+**(b) §VII.F composed Path A restated to spec v4.** The printed
+"$894.8B / 117.0%" was the spec v3 joint figure, unlabeled beside v4
+numbers. The v4 joint run already existed as a committed freeze
+artifact (`shared_layer_scoring_results.json`,
+`path_a_fullbook_composed`: a genuine one-pass reweighted-simulation
+scoring, commit `8f58e57`): **$905.1B / 118.4%**, equal to the
+composition identity to 1.4e-14pp (exactness is what common netting
+predicts). No rerun; the sentence now prints the committed values.
+
+**(c) Figure layer regenerated, artifact-fed.** `figures/make_figures.py`
+rewritten so every share/dollar/correlation is read from committed
+artifacts; `figures/make_ccf_data.py` (new, gated) replaces the README
+snippet and rebuilt `ccf_data.json` with the spec v4 Path A curve
+(lag-0 r −0.3782 gated to the frozen manifest, ±3 peak −2) and the
+**production fold-in** ABM series (lag-0 −0.318, the series Table 2
+quotes; the old file plotted the Berger variant). The CCF figure drops
+the retracted model-leads/TBA-settlement annotations and the 119.7
+footer; axis states the implemented convention (empirical leads,
+simulated path trails); footer is the no-timing-evidence statement.
+Recovery figure: Path A 112.4% (121.5), r₀ −0.38; ABM row and the
+waterfall's final-stage labels aligned to the production naming of
+Table 2 (fold-in 11.9% = production headline; native gate 11.1% =
+Berger-run variant). Architecture footer restated to the standalone-
+scorer production headlines; cross-design footer neutralized. The
+paper's Monte Carlo PNG was verified hash-identical to the frozen
+`run-2026-07-04-15yr-foldin` copy.
+
+**(d) Text fixes.** WAL sentence corrected to "1.5 years too long"
+(10.9 − 9.4, `wal_table_results.json`); Appendix A ledger gained the
+Path A spec v3 → v4 supersession bullet ($915.0B / 119.7%, r −0.444 at
+lag 0, peak −3 → $928.9B / 121.5%, peak −2;
+`run-2026-07-14-pathA-seasonal`); the conclusion's two-word orphan page
+resolved by reflow of the §V.B/§VIII.A insertions (final conclusion
+page carries three full lines; full-PDF scan confirms no page below
+three); §III.D's curtailment-accounting sentence verified as traced in
+the audit artifact (`claims_liveness_audit_2026-07-14.json`,
+`failures_with_dispositions[0]`: amortization-only back-out at
+`fed_mbs_extension_risk.py:1151` / `macro.py:246`, curtailment
+simulated-side, netted commonly) — no edit needed.
+
+**(e) Gates.** `tools/liveness_gates.py` v3, strictly additive, 28
+gates: zero-count "1.3 years too long"; "894.8" allowed only within
+120 chars of a "spec v3" label; the Appendix A ledger must contain
+"spec v3" and "121.5"; three figure scripts zero-grepped for 35
+benchmark-share/headline-dollar literals and the retracted timing
+phrases. All 28 pass; `tools/test_timing_sweep.py` golden fixture
+passes; tectonic builds twice with zero undefined references (54 pp);
+tex/md/txt editions in lockstep.
+
 ---
 
 ## Appendix A — File Map
