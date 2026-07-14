@@ -1,0 +1,56 @@
+{
+  "mode": "pathA_v4_holdout",
+  "holdout_definition": "cohort-month cells with period >= 2024-01-01 from the production panel pipeline (hazard_fit split; prediction only, no refitting)",
+  "panel_sha256": "c0feca1da96e97300d840c867494cc80ca8bbe97249c5fdeeb98761a015528e2",
+  "spec_v4": {
+    "artifact": "hazard/data/runs/run-2026-07-14-pathA-seasonal/hazard_coefficients.json",
+    "artifact_sha256": "f8b9fedce0a02c2d7b89a9a2cb32e22fbb07b66f8df43e152be27cf815aea15a",
+    "spec_version": 4,
+    "n_holdout": 6077,
+    "rmse_unweighted_pp": 37.903228802264934,
+    "rmse_exposure_weighted_pp": 3.037942336998421,
+    "holdout_r2_unweighted": -0.011428527641577979,
+    "holdout_obs_cpr_mean_unweighted_pp": 7.041628590244825,
+    "holdout_obs_cpr_mean_exposure_weighted_pp": 4.210290920254706
+  },
+  "spec_v3_reference": {
+    "artifact": "hazard/data/hazard_coefficients_specv3.json",
+    "artifact_sha256": "80aad3ab4366fa4a4777787506bbabfd2b2002d2e6834afb1ca18194bc83fe8f",
+    "spec_version": 3,
+    "n_holdout": 6077,
+    "rmse_unweighted_pp": 37.8295321331,
+    "rmse_exposure_weighted_pp": 2.5338262679523766,
+    "holdout_r2_unweighted": -0.007499234463333337,
+    "holdout_obs_cpr_mean_unweighted_pp": 7.041628590244825,
+    "holdout_obs_cpr_mean_exposure_weighted_pp": 4.210290920254706
+  },
+  "parity_gate": {
+    "pass": true,
+    "checks": {
+      "unweighted_vs_specv3_artifact": {
+        "got": 37.8295321331,
+        "want": 37.8295321331,
+        "tol_pp": 1e-06,
+        "pass": true
+      },
+      "unweighted_vs_ridge_reference": {
+        "got": 37.8295321331,
+        "want": 37.8295321331,
+        "tol_pp": 1e-06,
+        "pass": true
+      },
+      "exposure_weighted_vs_ridge_reference": {
+        "got": 2.5338262679523766,
+        "want": 2.5338262679523766,
+        "tol_pp": 1e-06,
+        "pass": true
+      }
+    }
+  },
+  "stop_gate": {
+    "rule": "STOP if spec v4 exposure-weighted holdout RMSE > 5.0 pp (double the spec v3 2.5 pp); do not print in the manuscript",
+    "threshold_pp": 5.0,
+    "got_pp": 3.037942336998421,
+    "pass": true
+  }
+}
