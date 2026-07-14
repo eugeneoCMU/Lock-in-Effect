@@ -179,11 +179,22 @@ def load_or_build_loan_sample(
     n_loans: int = N_LOANS,
     force_rebuild: bool = False,
 ) -> pl.DataFrame:
-    from prepare_freddie import ensure_raw_files
-    ensure_raw_files()
-    if force_rebuild and LOAN_SAMPLE_PATH.exists():
-        LOAN_SAMPLE_PATH.unlink()
-    return build_loan_sample(n_loans=n_loans, force_rebuild=force_rebuild)
+    # Raw-file verification (and the Drive download fallback) only when a
+    # build is actually needed: a cache hit must return the committed frozen
+    # sample without touching raw files. The unconditional pre-check made
+    # every caller crash on machines without raw files via the dead
+    # authenticate_service_account path (removed in 506ca2b) — the defect
+    # tests/test_loan_sample_cache.py was written to catch.
+    if force_rebuild or not LOAN_SAMPLE_PATH.exists():
+        from prepare_freddie import ensure_raw_files
+        ensure_raw_files()
+        if force_rebuild and LOAN_SAMPLE_PATH.exists():
+            LOAN_SAMPLE_PATH.unlink()
+    # Pass the module-global path explicitly: build_loan_sample's default was
+    # bound at def time, which silently ignored any override of
+    # loan_sample.LOAN_SAMPLE_PATH (same value in production either way).
+    return build_loan_sample(n_loans=n_loans, output=LOAN_SAMPLE_PATH,
+                             force_rebuild=force_rebuild)
 
 
 if __name__ == "__main__":

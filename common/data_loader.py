@@ -142,7 +142,9 @@ def ensure_raw_freddie_files(
         cache_dir = Path(cache_dir)
 
     cache_dir.mkdir(parents=True, exist_ok=True)
-    service = authenticate_service_account()
+    # API-key auth entry point; authenticate_service_account was removed in
+    # 506ca2b but this call site was missed (NameError on any Drive fallback).
+    service = authenticate()
     folder_id = _get_data_folder_id()
 
     pairs = []
