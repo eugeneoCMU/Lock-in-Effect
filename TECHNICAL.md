@@ -580,6 +580,33 @@ plausible floor band. Artifact:
 [`hazard/data/floor_sweep_results.json`](hazard/data/floor_sweep_results.json)
 (per-run parquets regenerable, gitignored).
 
+**Floor × band cross** ([`hazard/floor_band_cross.py`](hazard/floor_band_cross.py),
+pre-registered `651d1a0`): the calibration box has a second axis, the
+Rothstein 5.5–7.7% band. Running both band edges across all seven floors
+(central row and nulls reused from the committed artifacts; parity gates at
+the 4% floor reproduce `extension_risk_band_literature.json` exactly)
+completes the box. Lock-in marginal in pp of benchmark:
+
+| Floor | p_q 5.5 | p_q 6.5 | p_q 7.7 | Bind (7.7) |
+|---|---|---|---|---|
+| 2.0% | +9.7 | +11.3 | **+13.2** | 4.4% |
+| 3.0% | +9.3 | +10.8 | +12.6 | 14.3% |
+| 3.5% | +8.9 | +10.3 | +11.8 | 25.9% |
+| 4.0% | +8.1 | **+9.2** | +10.4 | 42.2% |
+| 4.5% | +6.7 | +7.5 | +8.4 | 59.5% |
+| 5.0% | +5.0 | +5.5 | +6.0 | 73.7% |
+| 6.0% | +2.1 | +2.3 | +2.4 | 90.8% |
+
+Both ex-ante monotonicities hold (marginal decreases in floor, increases in
+band; bind share increases in both axes). **Box maximum = +13.17pp
+($100.7B) at the (2% floor, 7.7) corner** — the expected corner, inside the
+ex-ante 12–14pp range. Ceiling phrasing note: 13.17% of benchmark exceeds
+"about an eighth" (12.5%); a ceiling sentence should say "never exceeds
+roughly 13%" (or "about a seventh" if a fraction is wanted), and even
+restricted to the empirically plausible 3–5% floor band the box maximum is
++12.6pp, still above an eighth. Artifact:
+[`hazard/data/floor_band_cross_results.json`](hazard/data/floor_band_cross_results.json).
+
 ---
 
 ## 13. Architectural Decisions
