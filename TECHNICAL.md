@@ -544,6 +544,42 @@ should be read:
 Reproduce: `cd hazard && python3 no_lockin_null.py` →
 `data/no_lockin_null_results.json` (cache `microsim_results_pq0.0.parquet`).
 
+### 12.1 Involuntary-turnover floor sweep (pre-registered)
+
+The 4% floor is calibrated on in-window 2023–24 discount-cohort turnover
+(the floor-circularity concession, manuscript §V.C / App. B), so the null
+comparison above inherits a floor-level assumption. A pre-registered sweep
+([`hazard/floor_sweep.py`](hazard/floor_sweep.py), spec committed before any
+run in `ad52db6`; ex-ante threshold: marginal stable within ±2pp over the
+empirically plausible 3–5% floor range) reran the central and null legs at
+seven floors, production convention otherwise. Parity gates at 4.0%
+reproduce the committed artifacts exactly, and the bind instrumentation
+reproduces the published 36.3% of 1,683,124 evaluated loan-months.
+
+| Floor (ann. CPR) | Null $B (%) | Central $B (%) | Marginal $B (pp) | Floor binds |
+|---|---|---|---|---|
+| 2.0% | 763.1 (99.8) | 849.4 (111.1) | +86.4 (+11.3) | 3.9% |
+| 3.0% | 758.6 (99.2) | 841.3 (110.0) | +82.7 (+10.8) | 12.1% |
+| 3.5% | 754.4 (98.6) | 832.8 (108.9) | +78.5 (+10.3) | 21.6% |
+| **4.0%** | **748.2 (97.8)** | **818.5 (107.0)** | **+70.3 (+9.2)** | **36.3%** |
+| 4.5% | 738.9 (96.6) | 796.5 (104.2) | +57.6 (+7.5) | 53.5% |
+| 5.0% | 724.6 (94.8) | 766.9 (100.3) | +42.3 (+5.5) | 69.1% |
+| 6.0% | 674.6 (88.2) | 692.1 (90.5) | +17.4 (+2.3) | 88.7% |
+
+The ex-ante threshold trips: the marginal spans **+10.8pp → +5.5pp across
+3–5% floors** (range 5.28pp > 2pp). Mechanism: the hazard is
+`max(floor, h_vol)`, so wherever the floor binds the elasticity is inert;
+raising the floor mechanically crowds out the lock-in channel (bind share
+12% → 69% across that range). Governing implication, superseding the
+unqualified reading of implication 1 above: **the +9.2pp marginal is itself
+conditional on the floor calibration — its sign is floor-robust (positive
+at every swept floor, +2.3pp even at 6%), its magnitude is not.** Manuscript
+sentences presenting the marginal as the floor-independent "clean
+verification content" must state the 5.5–10.8pp range over the empirically
+plausible floor band. Artifact:
+[`hazard/data/floor_sweep_results.json`](hazard/data/floor_sweep_results.json)
+(per-run parquets regenerable, gitignored).
+
 ---
 
 ## 13. Architectural Decisions
