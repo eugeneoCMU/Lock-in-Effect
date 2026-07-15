@@ -1,0 +1,48 @@
+{
+  "mode": "bootstrap_pathb",
+  "spec": "within-stratum loan resample with replacement, stratum sizes preserved; resample rng seed = replicate index; engine seed 42 fixed; US regime only; central (p_q 6.5) + null (p_q 0) per replicate; raw-basis scoring; percentile intervals",
+  "n_reps": 200,
+  "central_share_pct": {
+    "p2_5": 106.96100384122117,
+    "median": 107.03394456557265,
+    "p97_5": 107.102702632372,
+    "mean": 107.03354598717662,
+    "sd": 0.03415825087840566
+  },
+  "null_share_pct": {
+    "p2_5": 97.75291960844743,
+    "median": 97.84074862619227,
+    "p97_5": 97.92201859568428,
+    "mean": 97.83660340307608,
+    "sd": 0.043673856034741616
+  },
+  "marginal_pp": {
+    "p2_5": 9.166412038908136,
+    "median": 9.197013404198074,
+    "p97_5": 9.228594662666818,
+    "mean": 9.196942584100528,
+    "sd": 0.016399089265543645
+  },
+  "central_trapped_b": {
+    "p2_5": 817.9824085052043,
+    "median": 818.5402214205702,
+    "p97_5": 819.0660475353679,
+    "mean": 818.5371732992487,
+    "sd": 0.2612246269240383
+  },
+  "null_trapped_b": {
+    "p2_5": 747.563745179792,
+    "median": 748.2354160588184,
+    "p97_5": 748.8569267309032,
+    "mean": 748.2037155374452,
+    "sd": 0.3339950511406845
+  },
+  "marginal_b": {
+    "p2_5": 70.0999759507453,
+    "median": 70.33399935726243,
+    "p97_5": 70.57551647974792,
+    "mean": 70.33345776180346,
+    "sd": 0.1254117487026709
+  },
+  "runtime_s": 4368.2
+}

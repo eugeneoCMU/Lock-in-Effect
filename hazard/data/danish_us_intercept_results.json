@@ -1,0 +1,72 @@
+{
+  "mode": "danish_us_intercept",
+  "spec": "us_intercept anchor: Danish moving = production U.S. hazard at zero rate gap (floor, burnout, FICO/LTV retained) + U.S.-transplant refi channel; production convention otherwise (75k sample, seed 42, US+Danish tuple, shared macro frame); shared-accounting-layer gap, Table 1 convention (US - DK); parity gates on the untouched U.S. leg; refi sweep 0-18%",
+  "point": {
+    "us_trapped_shared_b": 748.9678825340305,
+    "us_share_shared_pct": 97.9365273968041,
+    "danish_trapped_shared_b": 687.7795451639257,
+    "institutional_gap_shared_b": 61.18833737010482,
+    "danish_trapped_standalone_b": 748.1810597333473,
+    "mean_us_cpr_pct": 4.763203719157251,
+    "mean_danish_cpr_pct": 5.613626373336359
+  },
+  "sweep": [
+    {
+      "refi_inplace_cpr": 0.0,
+      "gap_hybrid_us_intercept_b": 61.18833737010482,
+      "danish_trapped_shared_b": 687.7795451639257,
+      "mean_danish_cpr_pct": 5.613626373336359
+    },
+    {
+      "refi_inplace_cpr": 0.03,
+      "gap_hybrid_us_intercept_b": 256.8415840324639,
+      "danish_trapped_shared_b": 492.1262985015666,
+      "mean_danish_cpr_pct": 8.572144115988056
+    },
+    {
+      "refi_inplace_cpr": 0.06,
+      "gap_hybrid_us_intercept_b": 438.7546757291987,
+      "danish_trapped_shared_b": 310.2132068048318,
+      "mean_danish_cpr_pct": 11.623361250690012
+    },
+    {
+      "refi_inplace_cpr": 0.09,
+      "gap_hybrid_us_intercept_b": 607.4142146289687,
+      "danish_trapped_shared_b": 141.5536679050618,
+      "mean_danish_cpr_pct": 14.772480097480882
+    },
+    {
+      "refi_inplace_cpr": 0.12,
+      "gap_hybrid_us_intercept_b": 763.3201068939285,
+      "danish_trapped_shared_b": -14.352224359897956,
+      "mean_danish_cpr_pct": 18.02523056086547
+    },
+    {
+      "refi_inplace_cpr": 0.15,
+      "gap_hybrid_us_intercept_b": 906.9816097894501,
+      "danish_trapped_shared_b": -158.01372725541952,
+      "mean_danish_cpr_pct": 21.38789469914885
+    },
+    {
+      "refi_inplace_cpr": 0.18,
+      "gap_hybrid_us_intercept_b": 1038.9180061046532,
+      "danish_trapped_shared_b": -289.9501235706225,
+      "mean_danish_cpr_pct": 24.867435835449555
+    }
+  ],
+  "sweep_sign_robust": true,
+  "parity_gates": {
+    "us_standalone_b": {
+      "got": 818.5300844066606,
+      "want": 818.5300844066606,
+      "pass": true
+    },
+    "us_shared_pct": {
+      "got": 97.9365273968041,
+      "want": 97.9,
+      "pass": true
+    }
+  },
+  "parity_gates_all_pass": true,
+  "runtime_s": 190.7
+}

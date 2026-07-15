@@ -122,16 +122,43 @@ def monthly_step(
     if pool.regime.upper() in ("DANISH", "DK"):
         # Berger et al. Danish counterfactual (§20): import the estimated
         # U.S.-transplant elasticities directly instead of the NPV-reset
-        # heuristic. Danish prepay = flat 3.2%/yr moving + refi-in-place (≈0
-        # under U.S. tax). Same population, only the prepay hazard swaps.
+        # heuristic. Same population, only the prepay hazard swaps. Two
+        # moving-channel anchors (common.berger_calibration):
+        #   dk_level     — Danish descriptive level: flat 3.2%/yr moving +
+        #                  refi-in-place (≈0 under U.S. tax).
+        #   us_intercept — rule-only transplant: Berger's flatness fact at
+        #                  the U.S. zero-gap intercept (production U.S.
+        #                  hazard with the rate-gap term switched off;
+        #                  involuntary floor retained) + the same refi
+        #                  channel.
         from common.berger_calibration import (
-            _annual_to_monthly_cpr, danish_cpr_annual,
+            _annual_to_monthly_cpr,
+            danish_cpr_annual,
+            danish_refi_in_place_cpr_annual,
+            get_danish_moving_anchor,
         )
-        cpr_ann = danish_cpr_annual(
-            pool.coupon[active], market_rate, pool.loan_age[active],
-            regime="US", term_months=pool.term_months,
-        )
-        h_prep = _annual_to_monthly_cpr(cpr_ann)
+        if get_danish_moving_anchor() == "us_intercept":
+            h_move = prepay_hazard(
+                pool.loan_age[active],
+                np.zeros_like(pool.rate_gap[active]),
+                pool.burnout[active],
+                pool.fico_z[active],
+                pool.ltv_z[active],
+                beta1=beta1,
+            )
+            refi_ann = danish_refi_in_place_cpr_annual(
+                pool.coupon[active], market_rate, pool.loan_age[active],
+                regime="US", term_months=pool.term_months,
+            )
+            h_refi = _annual_to_monthly_cpr(refi_ann)
+            # competing risks on the survival scale
+            h_prep = 1.0 - (1.0 - h_move) * (1.0 - h_refi)
+        else:
+            cpr_ann = danish_cpr_annual(
+                pool.coupon[active], market_rate, pool.loan_age[active],
+                regime="US", term_months=pool.term_months,
+            )
+            h_prep = _annual_to_monthly_cpr(cpr_ann)
     else:
         h_prep = prepay_hazard(
             pool.loan_age[active],

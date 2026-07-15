@@ -12,6 +12,7 @@ import numpy as np
 
 from config import (
     BASELINE_MODE,
+    FLOOR_MODE,
     INVOLUNTARY_CPR_ANNUAL,
     LITERATURE_COEFS,
     P_Q_BASELINE,
@@ -106,7 +107,13 @@ def prepay_hazard(
     h_floor = cpr_annual_to_monthly_hazard(
         np.full_like(h0, INVOLUNTARY_CPR_ANNUAL, dtype=np.float64)
     )
-    return np.clip(np.maximum(h_floor, h_vol), 0.0, 1.0)
+    if FLOOR_MODE == "additive":
+        # Competing-risks form: involuntary + voluntary combine on the
+        # survival scale, so the elasticity is never censored by the floor.
+        combined = 1.0 - (1.0 - h_floor) * (1.0 - h_vol)
+    else:
+        combined = np.maximum(h_floor, h_vol)
+    return np.clip(combined, 0.0, 1.0)
 
 
 def default_hazard(

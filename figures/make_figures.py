@@ -49,7 +49,10 @@ SHARED = _j("hazard/data/shared_layer_scoring_results.json")["results"]
 PATHA_HEADLINE = _j(
     "hazard/data/runs/run-2026-07-14-pathA-seasonal/manifest.json")["headline"]
 FOLDIN = _j("abm/data/runs/run-2026-07-04-15yr-foldin/manifest.json")["metrics"]
+FOLDIN_MC = _j("abm/data/runs/run-2026-07-04-15yr-foldin/monte_carlo_summary.json")
+PREFOLDIN = _j("abm/data/runs/run-2026-07-04/manifest.json")["metrics"]
 BERGER = _j("abm/data/runs/run-2026-07-05-berger/manifest.json")["metrics"]
+DK_INTERCEPT = _j("hazard/data/danish_us_intercept_results.json")
 CROSS = _j("abm/data/cross_design_results.json")
 SYNTH = _j("hazard/data/synthetic_companion_results.json")["two_by_two"]
 FULLBOOK = _j("hazard/data/full_book_weighting_results.json")
@@ -96,11 +99,23 @@ def fig1_recovery_dotplot():
     ]
     fig, ax = plt.subplots(figsize=(10.4, 4.8))
     ys = np.arange(len(rows))[::-1]
+    # Fifty-seed ±1 SD band for the production ABM row (headline is the seed
+    # mean; the frozen draw is the reproducibility anchor).
+    mc_mean = FOLDIN_MC["mean_b"] / BENCH_B * 100.0
+    mc_sd = FOLDIN_MC["std_b"] / BENCH_B * 100.0
     for y, (label, share, r0, color, standalone) in zip(ys, rows):
         ax.plot([0, share], [y, y], color="#dddddd", lw=1.4, zorder=1)
+        if label.startswith("ABM — production"):
+            ax.plot([mc_mean - mc_sd, mc_mean + mc_sd], [y, y], color=color,
+                    lw=5, alpha=0.25, zorder=2, solid_capstyle="butt")
+            ax.scatter([mc_mean], [y], s=60, zorder=3, marker="D",
+                       facecolor="white", edgecolor=color, linewidth=1.6)
         ax.scatter([share], [y], s=150, zorder=3,
                    facecolor=color, edgecolor=color, linewidth=2.0)
         note = f"{share:.1f}%" + (f" ({standalone:.1f})" if standalone else "")
+        if label.startswith("ABM — production"):
+            note = (f"frozen draw {share:.1f}%; seed mean {mc_mean:.1f}% "
+                    f"±{mc_sd:.1f}")
         ax.annotate(note + f"   r₀={r0:+.2f}",
                     (share, y), xytext=(8, 0), textcoords="offset points",
                     va="center", fontsize=9.5, color="black")
@@ -122,7 +137,7 @@ def fig1_recovery_dotplot():
         plt.Line2D([], [], marker="o", ls="", mfc=C_CHOICE, mec=C_CHOICE, ms=10,
                    label="household choice (ABM)"),
     ]
-    ax.legend(handles=handles, loc="lower right", fontsize=8.6, frameon=False)
+    ax.legend(handles=handles, loc="upper left", fontsize=8.6, frameon=False)
     fig.text(0.005, 0.03,
              "Raw lag-0 correlations (r₀) annotated for reference only: once "
              "the shared trend is removed no estimator's co-movement is",
@@ -174,11 +189,13 @@ def fig3_abm_waterfall():
     """ABM falsification bridge: every extension moves away from 100%."""
     early = _j("figures/fig3_stage_levels.json")["stages"]
     stages = [(s["label"], s["share_pct"]) for s in early]
-    stages.append(("+ 15yr fold-in\n(production headline)",
+    stages.append(("+ production corrections\n(parse, back-out,\namort., kernel)",
+                   PREFOLDIN["dollars_b"]["share_explained_pct"]))
+    stages.append(("+ 15yr fold-in\n(production\nheadline)",
                    FOLDIN["dollars_b"]["share_explained_pct"]))
-    stages.append(("Native 15yr gate\n(Berger-run variant)",
+    stages.append(("Native 15yr gate\n(Berger-run\nvariant)",
                    BERGER["dollars_b"]["share_explained_pct"]))
-    fig, ax = plt.subplots(figsize=(8.8, 4.8))
+    fig, ax = plt.subplots(figsize=(11.0, 5.0))
     xs = np.arange(len(stages))
     prev = None
     for x, (label, val) in zip(xs, stages):
@@ -206,13 +223,14 @@ def fig3_abm_waterfall():
     ax.text(len(stages) - 0.4, 101.5, "benchmark (100%)", color=C_GRAY,
             fontsize=9, ha="right")
     ax.set_xticks(xs)
-    ax.set_xticklabels([s[0] for s in stages], fontsize=8.8)
+    ax.set_xticklabels([s[0] for s in stages], fontsize=8.0)
     ax.set_ylabel(f"Share of ${BENCH_B:.1f}B benchmark explained (%)")
     ax.set_ylim(0, 112)
     fig.text(0.005, 0.005,
-             "Each extension was pre-registered with an expected direction and "
-             "moved the ABM away from 100% — the residual is not missing "
-             "household behavior (§VI).",
+             "Behavioral extensions (stages 2-4) were pre-committed with "
+             "expected directions; multi-vintage ran against its expected "
+             "direction (§VII.C). Stages 5-7 are corrections and fold-ins, "
+             "not behavioral extensions.",
              fontsize=8, color=C_GRAY)
     fig.tight_layout(rect=(0, 0.045, 1, 1))
     fig.savefig(OUT / "fig3_abm_waterfall.png", dpi=DPI)
@@ -220,36 +238,44 @@ def fig3_abm_waterfall():
 
 
 def fig4_refi_sweep():
-    """Institutional gap vs assumed U.S.-transplant refi CPR (§20.1)."""
+    """Institutional gap vs assumed U.S.-transplant refi CPR, both anchors."""
     d = _j("abm/data/refi_sweep_results.json")
     x = [r["refi_inplace_cpr"] * 100 for r in d["sweep"]]
     g_abm = [r["gap_abm_b"] for r in d["sweep"]]
     g_pb = [r["gap_pathB_b"] for r in d["sweep"]]
     be_abm = d["breakeven_refi"]["abm"] * 100
     be_pb = d["breakeven_refi"]["path_b"] * 100
+    xu = [r["refi_inplace_cpr"] * 100 for r in DK_INTERCEPT["sweep"]]
+    g_us = [r["gap_hybrid_us_intercept_b"] for r in DK_INTERCEPT["sweep"]]
 
     fig, ax = plt.subplots(figsize=(8.2, 4.8))
     ax.axhline(0, color="black", lw=1.0)
-    ax.plot(x, g_abm, "o-", color=C_CHOICE, lw=2, label="ABM")
-    ax.plot(x, g_pb, "s-", color=C_SURV, lw=2, label="Path B (hybrid pipeline)")
-    for be, color, dy in ((be_abm, C_CHOICE, -60), (be_pb, C_SURV, 60)):
-        ax.axvline(be, color=color, lw=1.0, ls=":")
-        ax.annotate(f"breakeven {be:.1f}%", xy=(be, 0), xytext=(be + 0.4, dy),
-                    fontsize=9, color=color,
-                    arrowprops=dict(arrowstyle="->", color=color, lw=1.0))
-    ax.annotate("best estimate ≈ 0\n(Berger ~1bp GE result)", xy=(0, g_pb[0]),
-                xytext=(1.4, -560), fontsize=9, color="black",
+    ax.plot(xu, g_us, "D-", color=C_SURV, lw=2.4,
+            label="Hybrid, U.S.-intercept anchor (production, rule-only)")
+    ax.plot(x, g_pb, "s--", color=C_SURV, lw=1.4, alpha=0.55,
+            label="Hybrid, Danish-level anchor (bracketing)")
+    ax.plot(x, g_abm, "o--", color=C_CHOICE, lw=1.2, alpha=0.45,
+            label="ABM, Danish-level anchor")
+    for be, color, dy in ((be_abm, C_CHOICE, -160), (be_pb, C_SURV, 160)):
+        ax.axvline(be, color=color, lw=0.9, ls=":", alpha=0.6)
+        ax.annotate(f"crossing {be:.1f}%", xy=(be, 0), xytext=(be + 0.4, dy),
+                    fontsize=8.5, color=color, alpha=0.8,
+                    arrowprops=dict(arrowstyle="->", color=color, lw=0.9,
+                                    alpha=0.6))
+    ax.annotate("best estimate ≈ 0 (Berger ~1bp GE result):\n"
+                f"rule-only gap +${g_us[0]:.0f}B, no crossing anywhere",
+                xy=(0, g_us[0]), xytext=(1.2, 480), fontsize=9, color="black",
                 arrowprops=dict(arrowstyle="->", lw=1.0))
     ax.axvspan(17.0, 18.4, color="#f0f0f0", zorder=0)
     ax.text(17.7, -650, "PE reduced-form\nceiling (rejected)", fontsize=8,
             color=C_GRAY, ha="center")
     ax.set_xlabel("Assumed U.S.-transplant refinance-in-place CPR (%/yr)")
     ax.set_ylabel("Institutional gap, U.S. − Danish ($B)")
-    ax.legend(loc="upper left", fontsize=9.5, frameon=False)
+    ax.legend(loc="upper left", fontsize=8.8, frameon=False)
     fig.text(0.005, 0.005,
-             "Positive gap = U.S. par-payoff traps more than Danish buyback. "
-             f"Path B flips sign at {be_pb:.1f}% refi — the honest claim is "
-             "gap ≈ 0, not robustly negative (§20.1).",
+             "Positive gap = U.S. par-payoff traps more. Rule-only anchor: "
+             "positive at every sweep point; the sign question is the "
+             "anchor, not the refinance channel (§IV.C).",
              fontsize=8, color=C_GRAY)
     fig.tight_layout(rect=(0, 0.04, 1, 1))
     fig.savefig(OUT / "fig4_institutional_gap_sensitivity.png", dpi=DPI)

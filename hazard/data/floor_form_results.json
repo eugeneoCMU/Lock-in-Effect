@@ -1,0 +1,176 @@
+{
+  "mode": "floor_form_test",
+  "spec": "forms {max, additive-survival-scale}; floors {3,4,5}% annual CPR; central (p_q 6.5) + null (p_q 0) per (form, floor); production convention otherwise (75k sample, seed 42, US+Danish regime tuple, shared macro frame); raw-basis scoring; parity gates vs no_lockin_null_results.json at (max, 4%); ex-ante threshold: additive marginal within +/-1pp of max at 4%",
+  "rows": [
+    {
+      "form": "max",
+      "floor_annual_cpr_pct": 3.0,
+      "null": {
+        "form": "max",
+        "floor_annual_cpr_pct": 3.0,
+        "p_q_shock_pct": 0.0,
+        "beta1": 0.0,
+        "trapped_b": 758.5968979336753,
+        "share_pct": 99.1956365688836,
+        "mean_us_cpr_pct": 5.5024471344482935
+      },
+      "central": {
+        "form": "max",
+        "floor_annual_cpr_pct": 3.0,
+        "p_q_shock_pct": 6.5,
+        "beta1": -0.06857052676484808,
+        "trapped_b": 841.3353506615701,
+        "share_pct": 110.01468092488302,
+        "mean_us_cpr_pct": 4.507151282959557
+      },
+      "lockin_marginal_b": 82.73845272789481,
+      "lockin_marginal_share_pp": 10.819044355999424
+    },
+    {
+      "form": "max",
+      "floor_annual_cpr_pct": 4.0,
+      "null": {
+        "form": "max",
+        "floor_annual_cpr_pct": 4.0,
+        "p_q_shock_pct": 0.0,
+        "beta1": 0.0,
+        "trapped_b": 748.1850239867648,
+        "share_pct": 97.83415925879702,
+        "mean_us_cpr_pct": 5.613584778161411
+      },
+      "central": {
+        "form": "max",
+        "floor_annual_cpr_pct": 4.0,
+        "p_q_shock_pct": 6.5,
+        "beta1": -0.06857052676484808,
+        "trapped_b": 818.5300844066606,
+        "share_pct": 107.0326190295068,
+        "mean_us_cpr_pct": 4.763203719157251
+      },
+      "lockin_marginal_b": 70.34506041989584,
+      "lockin_marginal_share_pp": 9.198459770709789
+    },
+    {
+      "form": "max",
+      "floor_annual_cpr_pct": 5.0,
+      "null": {
+        "form": "max",
+        "floor_annual_cpr_pct": 5.0,
+        "p_q_shock_pct": 0.0,
+        "beta1": 0.0,
+        "trapped_b": 724.6043821529022,
+        "share_pct": 94.7507077132077,
+        "mean_us_cpr_pct": 5.877490314740471
+      },
+      "central": {
+        "form": "max",
+        "floor_annual_cpr_pct": 5.0,
+        "p_q_shock_pct": 6.5,
+        "beta1": -0.06857052676484808,
+        "trapped_b": 766.9372675115623,
+        "share_pct": 100.28623985470217,
+        "mean_us_cpr_pct": 5.366119853554831
+      },
+      "lockin_marginal_b": 42.332885358660064,
+      "lockin_marginal_share_pp": 5.535532141494471
+    },
+    {
+      "form": "additive",
+      "floor_annual_cpr_pct": 3.0,
+      "null": {
+        "form": "additive",
+        "floor_annual_cpr_pct": 3.0,
+        "p_q_shock_pct": 0.0,
+        "beta1": 0.0,
+        "trapped_b": 513.3230106541868,
+        "share_pct": 67.12313607661204,
+        "mean_us_cpr_pct": 8.39711543498111
+      },
+      "central": {
+        "form": "additive",
+        "floor_annual_cpr_pct": 3.0,
+        "p_q_shock_pct": 6.5,
+        "beta1": -0.06857052676484808,
+        "trapped_b": 599.6719139182851,
+        "share_pct": 78.41429011327945,
+        "mean_us_cpr_pct": 7.369585642465978
+      },
+      "lockin_marginal_b": 86.34890326409834,
+      "lockin_marginal_share_pp": 11.291154036667407
+    },
+    {
+      "form": "additive",
+      "floor_annual_cpr_pct": 4.0,
+      "null": {
+        "form": "additive",
+        "floor_annual_cpr_pct": 4.0,
+        "p_q_shock_pct": 0.0,
+        "beta1": 0.0,
+        "trapped_b": 427.7040999885527,
+        "share_pct": 55.92743732152105,
+        "mean_us_cpr_pct": 9.401835337899733
+      },
+      "central": {
+        "form": "additive",
+        "floor_annual_cpr_pct": 4.0,
+        "p_q_shock_pct": 6.5,
+        "beta1": -0.06857052676484808,
+        "trapped_b": 513.7265922748531,
+        "share_pct": 67.17590921064219,
+        "mean_us_cpr_pct": 8.3800710205081
+      },
+      "lockin_marginal_b": 86.02249228630046,
+      "lockin_marginal_share_pp": 11.248471889121141
+    },
+    {
+      "form": "additive",
+      "floor_annual_cpr_pct": 5.0,
+      "null": {
+        "form": "additive",
+        "floor_annual_cpr_pct": 5.0,
+        "p_q_shock_pct": 0.0,
+        "beta1": 0.0,
+        "trapped_b": 341.05489007340606,
+        "share_pct": 44.59701459090334,
+        "mean_us_cpr_pct": 10.416973431064875
+      },
+      "central": {
+        "form": "additive",
+        "floor_annual_cpr_pct": 5.0,
+        "p_q_shock_pct": 6.5,
+        "beta1": -0.06857052676484808,
+        "trapped_b": 426.75753843724794,
+        "share_pct": 55.803663053673304,
+        "mean_us_cpr_pct": 9.400894540118331
+      },
+      "lockin_marginal_b": 85.70264836384189,
+      "lockin_marginal_share_pp": 11.206648462769962
+    }
+  ],
+  "parity_gates": {
+    "central_trapped_b": {
+      "got": 818.5300844066606,
+      "want": 818.5300844066606,
+      "pass": true
+    },
+    "null_trapped_b": {
+      "got": 748.1850239867648,
+      "want": 748.1850239867648,
+      "pass": true
+    },
+    "lockin_marginal_b": {
+      "got": 70.34506041989584,
+      "want": 70.34506041989584,
+      "pass": true
+    },
+    "lockin_marginal_share_pp": {
+      "got": 9.198459770709789,
+      "want": 9.198459770709789,
+      "pass": true
+    }
+  },
+  "parity_gates_all_pass": true,
+  "form_delta_pp_at_production_floor": 2.0500121184113524,
+  "ex_ante_verdict": "additive-form marginal moves by more than 1pp \u2014 report the form-dependence alongside the level-dependence wherever the marginal is quoted",
+  "runtime_s": 273.0
+}

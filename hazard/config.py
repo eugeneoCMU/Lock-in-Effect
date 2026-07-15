@@ -45,6 +45,11 @@ P_Q_BASELINE = 0.06
 
 # Involuntary turnover floor (death, divorce, relocation) — annual CPR %
 INVOLUNTARY_CPR_ANNUAL = 0.04
+# Floor functional form: "max" (production, eq. 3 hard max — elasticity inert
+# wherever the floor binds) | "additive" (competing-risks form: involuntary
+# hazard + rate-responsive voluntary hazard, elasticity never censored).
+# Production stays "max"; floor_form_test.py monkey-patches to "additive".
+FLOOR_MODE = "max"
 
 LITERATURE_COEFS = {
     "beta_burnout": -0.5,

@@ -58,6 +58,35 @@ US_BUYBACK_EQUIL_RATE_SHIFT_BP = 1.0
 US_TRANSPLANT_REFI_BEST_ESTIMATE = 0.0  # Berger realistic-tax GE anchor
 _US_TRANSPLANT_REFI_ANNUAL = US_TRANSPLANT_REFI_BEST_ESTIMATE
 
+# --- Moving-channel transplant anchor ------------------------------------
+# "dk_level"     — import the Danish descriptive level (3.2%/yr unconditional
+#                  moving) with the near-flat Danish slope. This transplants
+#                  Denmark's LEVEL onto U.S. households, i.e. a rule+country
+#                  bundle: it assumes U.S. households adopt Danish baseline
+#                  mobility along with the Danish payoff rule.
+# "us_intercept" — rule-only counterfactual: keep Berger's identified SLOPE
+#                  fact (moving is flat in the coupon gap under market-value
+#                  payoff) but anchor the level at the U.S. zero-gap intercept
+#                  (each framework's own U.S. hazard evaluated at zero rate
+#                  gap, involuntary floor retained). U.S. life-event turnover
+#                  (death, divorce, forced relocation) cannot fall because the
+#                  payoff rule changed, so this anchor respects the U.S.
+#                  involuntary-turnover floor by construction. Consumed by the
+#                  frameworks' Danish branches, not here.
+_DANISH_MOVING_ANCHOR = "dk_level"
+
+
+def set_danish_moving_anchor(mode: str) -> None:
+    """Select the Danish moving-channel anchor: 'dk_level' | 'us_intercept'."""
+    global _DANISH_MOVING_ANCHOR
+    if mode not in ("dk_level", "us_intercept"):
+        raise ValueError(f"unknown Danish moving anchor: {mode!r}")
+    _DANISH_MOVING_ANCHOR = mode
+
+
+def get_danish_moving_anchor() -> str:
+    return _DANISH_MOVING_ANCHOR
+
 
 def set_us_transplant_refi(value: float) -> None:
     """Override the U.S.-transplant refi-in-place annual CPR (for sweeps)."""

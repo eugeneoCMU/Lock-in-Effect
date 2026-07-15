@@ -414,11 +414,31 @@ class HousingMarketEngine:
         if system_type == "Danish":
             # Berger et al. Danish counterfactual (§20): import the estimated
             # U.S.-transplant elasticities directly rather than routing a
-            # near-zero Danish rate gap through the U.S. mobility gate. Danish
-            # CPR = flat 3.2%/yr moving channel + refi-in-place (≈0 under U.S.
-            # tax, ~1bp GE). Replaces the old market-value-payoff path that
-            # produced a spurious ~47% CPR.
-            from common.berger_calibration import danish_cpr_annual
+            # near-zero Danish rate gap through the U.S. mobility gate.
+            # Two moving-channel anchors (common.berger_calibration):
+            #   dk_level     — Danish descriptive level: flat 3.2%/yr moving
+            #                  + refi-in-place (≈0 under U.S. tax, ~1bp GE).
+            #                  Replaces the old market-value-payoff path that
+            #                  produced a spurious ~47% CPR.
+            #   us_intercept — rule-only transplant: the ABM's own U.S.
+            #                  mobility gate evaluated at zero rate gap
+            #                  (market = cohort coupon, so no lock-in
+            #                  penalty; all other frictions intact) + the
+            #                  same refi channel on the survival scale.
+            from common.berger_calibration import (
+                danish_cpr_annual,
+                danish_refi_in_place_cpr_annual,
+                get_danish_moving_anchor,
+            )
+            if get_danish_moving_anchor() == "us_intercept":
+                move = float(self._movers_mask(
+                    self._cohort_rate, "US", friction, rate_velocity,
+                ).sum()) / self.n_households
+                refi = float(danish_refi_in_place_cpr_annual(
+                    np.array([self._cohort_rate]), rate,
+                    np.array([self._cohort_months_elapsed]), regime="US",
+                    term_months=self._cohort_term_years * 12)[0])
+                return 1.0 - (1.0 - move) * (1.0 - refi)
             return float(danish_cpr_annual(
                 np.array([self._cohort_rate]), rate,
                 np.array([self._cohort_months_elapsed]), regime="US",

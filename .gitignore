@@ -22,6 +22,8 @@ paper/
 
 # Floor-sweep per-run parquets (regenerable via hazard/floor_sweep.py)
 hazard/data/floor_sweep/
+# Floor-form-test per-run parquets (regenerable via hazard/floor_form_test.py)
+hazard/data/floor_form/
 
 # Editor/agent workspaces (stale worktree copies pollute repo greps)
 .claude/

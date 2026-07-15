@@ -1139,12 +1139,19 @@ from Path B's standalone 107% to 97.9% here because the shared layer nets ~$70B
 of curtailment and term-aware scheduled amortization the standalone scorer
 omits.)
 
-> **Superseded by §20.** The NPV-reset heuristic used for the Danish leg above
-> was itself a mechanism-extrapolation, not an estimated elasticity. §20 replaces
-> it with Berger et al.'s estimated Danish channels (flat 3.2% moving + ≈0
-> U.S.-transplant refi) and re-runs this exact hybrid: Danish CPR 5.61% → 3.39%,
-> institutional gap **$61.2B → −$99.9B**. The qualitative point stands and
-> sharpens — the gap is small and the ~$925B figure was never a robust number.
+> **Superseded by §20, then restored by §23.** The NPV-reset heuristic used for
+> the Danish leg above was itself a mechanism-extrapolation, not an estimated
+> elasticity. §20 replaced it with Berger et al.'s estimated Danish channels
+> (flat 3.2% moving + ≈0 U.S.-transplant refi) and re-ran this exact hybrid:
+> Danish CPR 5.61% → 3.39%, institutional gap **$61.2B → −$99.9B**. A referee
+> round then established that §20's 3.2% import is Denmark's descriptive LEVEL
+> (a rule+country bundle whose Danish CPR sits below the 4% involuntary floor),
+> and §23's U.S.-intercept anchor — Berger's flatness fact anchored at the U.S.
+> zero-gap hazard — is the rule-only production reading. Because the NPV
+> identity zeroes the effective rate gap, §23's run reproduces THIS hybrid leg
+> for leg ($+\$61.2B$, Danish CPR 5.61%): the construction above turned out to
+> be right for a reason it could not, at the time, cite. The ~$925B figure was
+> never a robust number either way.
 
 Reproduce: `cd abm && python3 hybrid_pipeline.py` →
 `data/hybrid_pipeline_results.json`.
@@ -1982,6 +1989,92 @@ tex/md/txt editions in lockstep.
 
 ---
 
+## 23. Referee Round 13 — External Critique Implementation (July 2026)
+
+A 30-item external critique (methodological / logical / structural / minor)
+was triaged claim-by-claim against the manuscript and code; ~27 items
+confirmed, 2 rejected on evidence (no unresolved `(?)` citation exists — the
+build log is clean and `nyfed2022` resolves; the 97.9–112.4% range was never
+in the abstract), 1 falsifier tested and failed (floor form, below). Three
+new ex-ante-specified runs and one production restatement implement the fixes.
+All spec headers were written before their runs executed; no committed
+production artifact changed.
+
+### 23.1 Danish counterfactual: U.S.-intercept anchor (production restatement)
+
+The critique's flagship objection held up: the §20 Danish legs import
+Denmark's descriptive 3.2%/yr moving LEVEL, producing Danish mean CPRs
+(3.39–3.40%) below the 4% involuntary-turnover floor, conflating the payoff
+rule with Danish baseline mobility. Berger's identified moving-margin fact is
+the SLOPE (flat in the coupon gap). Fix: `common/berger_calibration.py` gains
+a transplant-anchor switch (`set_danish_moving_anchor`, default `dk_level`
+preserving all committed artifacts); the Danish branches of
+`hazard/competing_risks.py` and `abm/abm_lockin_simulation.py` gain a
+`us_intercept` mode = each framework's own U.S. hazard at zero rate gap
+(floor, PSA baseline, burnout, covariates retained) + the sweepable refi
+channel, combined on the survival scale.
+
+Run `hazard/danish_us_intercept.py` → `hazard/data/danish_us_intercept_results.json`
+(+ `microsim_results_us_intercept.parquet`): U.S. leg reproduces committed
+central artifacts exactly (standalone $818.5301B, shared 97.94% — both parity
+gates PASS); Danish leg 5.61% mean CPR, $687.8B trapped (shared); gap
+**+$61.2B (8.0% of benchmark)**, positive at every point of the 0–18% refi
+sweep (+$61.2B → +$1,038.9B; no crossing). Reproduces the §17 NPV-identity
+hybrid leg for leg (see §17 note). The paper adopts us_intercept as
+production (Table 1 row d), retains dk_level rows as a labeled rule+country
+bracketing case, and rewrites §IV.C, fig4 (both anchors), abstract, intro,
+and conclusion accordingly: the institutional gap is now signed, equals the
+lock-in marginal in size and origin, and the "sign not robustly identified"
+reading survives only for the bracketing anchor. ABM us_intercept direction
+follows a fortiori without a run (the lock-in penalty only suppresses
+moving, so the zero-gap intercept exceeds the locked-in leg by construction).
+
+### 23.2 Floor functional-form test
+
+Critique: eq. (3)'s hard max censors the elasticity wherever the floor binds
+(36% of loan-months at production), and the floor's LEVEL was swept seven
+ways while its FORM never was. Fix: `FLOOR_MODE` in `hazard/config.py` +
+survival-scale competing-risks combination in
+`hazard/literature_hazard.py:prepay_hazard` (`h = 1-(1-h_floor)(1-h_vol)`),
+production default `max` unchanged. Run `hazard/floor_form_test.py` (spec in header before runs) →
+`hazard/data/floor_form_results.json`; max-form pair at 4% reproduces
+committed artifacts to 4 decimals (all parity gates PASS).
+
+Results: additive marginal at 4% floor **+11.25pp** vs max-form +9.20pp
+(delta +2.05pp — exceeds the critique's ±1pp immateriality falsifier, so the
+form-dependence is real and now reported in §VII.I). But the additive
+marginal is nearly floor-invariant (+11.29/+11.25/+11.21 at 3/4/5% floors vs
+the max form's +10.82/+9.20/+5.54): the failed ±2pp stability gate of the
+floor sweep was measuring max-form censoring mechanics, not elasticity
+instability. Levels are strongly form-dependent (additive central 67.2% at
+4%) because additive lifts book-wide hazards; max remains production because
+the 4–5% anchor is a minimum-total-turnover reading measured where h_vol≈0,
+where the forms coincide. Form-robust statement: lock-in marginal ≈ +9 to
++11pp, positive under every level/band/form combination tested.
+
+### 23.3 Path B stratified loan-level bootstrap
+
+Critique: 107.0% rides on a single stratified 75,000-loan draw with no
+loan- or stratum-level bootstrap, an omission §VIII.A conceded. Net-new
+machinery: `hazard/bootstrap_pathb.py` (spec fixed in header before runs; script and artifact enter the repo in one revision) —
+within-stratum resample with replacement preserving stratum sizes, resample
+rng = replicate index, engine seed fixed at 42, US regime only (seed-offset
+0 ⇒ draw-identical to the production tuple), central (p_q 6.5) + null (p_q
+0) paired per replicate, 200 replicates, ~21.8 s/rep (73 min total).
+Artifacts: `hazard/data/bootstrap_pathb_results.json` + per-replicate
+`bootstrap_pathb_draws.csv`.
+
+Results (standalone basis; the 9.1pp shared-basis netting is common and
+cancels from the marginal): central 107.03% median, 95% [106.96, 107.10],
+sd 0.034pp; null 97.84% [97.75, 97.92]; paired marginal +9.20pp [+9.17,
++9.23], sd 0.016pp (+$70.33B [70.10, 70.58]). Sampling uncertainty from
+the loan draw is negligible at reporting precision — the operative
+uncertainty in Path B's level and marginal is calibration (floor level,
+band, floor form), not sampling. Reported in §V.C; §VIII.A's concession
+("rather than with estimated sampling uncertainty") replaced; the global
+"no untouched evaluation months exist anywhere in this paper" statement
+added in the same pass.
+
 ## Appendix A — File Map
 
 ```
@@ -2175,4 +2268,4 @@ cohort 2.00% at 39.7% weight; dynamic friction 8.23–9.96% (mean 8.95%).
 
 ---
 
-*Last updated: July 2026. Hazard spec v3: stratum FE (295 pools), burnout sign fixed (−0.13). Post robustness-fix program (§15): Path B at 107.0% trapped (band 105.9%–108.2%) after the β₁ units fix; ABM at 11.1% after the native 15-year gate (§19); cross-design test with real Freddie covariates recovers 59.3% (recalibrated) / 20.9% (frozen). Follow-on analyses: permutation test (§16, n=999, exact p=0.001) — Path B's recovery is a marginal-distribution result, moved only 0.27% ($2.2B) by scrambling joint structure, interaction-dominated across axes with the CPR-path signal localized to origination-time; Path A's fitted coefficients are far more structure-dependent (β can flip sign). Cross-foundation (§17): the institutional gap collapses $925.5B→$61.2B under a shared accounting layer; full-book SOMA weighting lifts Path B to 109.1%, Path A to 126.1%. Symmetric companion (§18): Path B recovers 106.0% on a fully synthetic population (zero Freddie data) — the hazard survival structure recovers the benchmark independent of data source, while the ABM needs real covariates to reach 59.3%. Berger recalibration (§20): importing estimated Danish elasticities (3.2% flat moving + tax-attenuated refi, ≈0 under U.S. taxes) collapses the institutional gap from +$925.5B to −$99.9B (Path B hybrid) — the large gap was an artifact of extrapolating a U.S.-calibrated mobility function to a Danish rate gap. Sweeping the refi channel (§20.1) shows the gap's *magnitude* stays small across [0, 18%] but its *sign* is not robust in Path B (breakeven at just 1.4% refi vs 12.6% for the ABM) — the honest headline is "institutional benefit ≈ 0 under U.S. conditions", not "robustly negative". July 2026 verification round (§21): Path A coefficients now carry stratum-bootstrap CIs (rate-gap sign-stable in 99.5% of replications; burnout/friction not distinguishable from zero), the fold-in-spec Monte Carlo (mean $103.7B; seed 42 = $90.98B exactly) and the β₁=0 no-lock-in null ($748.2B / 97.8%) are committed artifacts, and manuscript v14 aligns the paper with all of the above. Referee rounds 2–12 (§22) took the manuscript to v15r5 on the shared accounting basis; on 2026-07-11 the former `abm/TECHNICAL.md` and `REVISION_VERIFICATION.md` were consolidated into this file (Appendix B, §22).*
+*Last updated: July 2026. Hazard spec v3: stratum FE (295 pools), burnout sign fixed (−0.13). Post robustness-fix program (§15): Path B at 107.0% trapped (band 105.9%–108.2%) after the β₁ units fix; ABM at 11.1% after the native 15-year gate (§19); cross-design test with real Freddie covariates recovers 59.3% (recalibrated) / 20.9% (frozen). Follow-on analyses: permutation test (§16, n=999, exact p=0.001) — Path B's recovery is a marginal-distribution result, moved only 0.27% ($2.2B) by scrambling joint structure, interaction-dominated across axes with the CPR-path signal localized to origination-time; Path A's fitted coefficients are far more structure-dependent (β can flip sign). Cross-foundation (§17): the institutional gap collapses $925.5B→$61.2B under a shared accounting layer; full-book SOMA weighting lifts Path B to 109.1%, Path A to 126.1%. Symmetric companion (§18): Path B recovers 106.0% on a fully synthetic population (zero Freddie data) — the hazard survival structure recovers the benchmark independent of data source, while the ABM needs real covariates to reach 59.3%. Berger recalibration (§20): importing estimated Danish elasticities (3.2% flat moving + tax-attenuated refi, ≈0 under U.S. taxes) collapses the institutional gap from +$925.5B to −$99.9B (Path B hybrid) — the large gap was an artifact of extrapolating a U.S.-calibrated mobility function to a Danish rate gap. Sweeping the refi channel (§20.1) shows the gap's *magnitude* stays small across [0, 18%] but its *sign* is not robust in Path B under that anchor (breakeven at just 1.4% refi vs 12.6% for the ABM). Referee round 13 (§23) then established that §20's 3.2% import is Denmark's descriptive LEVEL (rule+country bundle; Danish CPR below the 4% involuntary floor) and restated production to the U.S.-intercept anchor — Berger's flatness fact at the U.S. zero-gap hazard — which reproduces the §17 hybrid leg for leg: gap **+$61.2B (8.0%)**, signed positive at every refi sweep point, the counterfactual image of the +9.2pp lock-in marginal; the dk_level rows are retained as a labeled bracketing case. Round 13 also added the floor functional-form test (additive marginal +11.25pp at 4%, nearly floor-invariant — the floor sweep's failed ±2pp gate was max-form censoring, not elasticity instability) and the Path B stratified loan-level bootstrap (200 reps: central 95% [106.96, 107.10]%, paired marginal [+9.17, +9.23]pp — sampling noise negligible; uncertainty is calibration). July 2026 verification round (§21): Path A coefficients now carry stratum-bootstrap CIs (rate-gap sign-stable in 99.5% of replications; burnout/friction not distinguishable from zero), the fold-in-spec Monte Carlo (mean $103.7B; seed 42 = $90.98B exactly) and the β₁=0 no-lock-in null ($748.2B / 97.8%) are committed artifacts, and manuscript v14 aligns the paper with all of the above. Referee rounds 2–12 (§22) took the manuscript to v15r5 on the shared accounting basis; on 2026-07-11 the former `abm/TECHNICAL.md` and `REVISION_VERIFICATION.md` were consolidated into this file (Appendix B, §22).*
