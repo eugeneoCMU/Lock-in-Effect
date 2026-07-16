@@ -37,3 +37,5 @@ hazard/data/floor_form/
 hazard/data/fannie_native/
 hazard/data/cohort_month_panel_fannie.parquet
 hazard/data/*fannie*.parquet
+hazard/data/fannie_quarters/
+hazard/data/hazard_coefficients_fannie.json
