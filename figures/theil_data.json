@@ -1,0 +1,351 @@
+{
+  "mode": "theil_dynamic_fit_diagnostics",
+  "spec": "round-16 W4: Theil U1/U2 + bias/variance/covariance MSE decomposition (levels, first diffs, linearly detrended) and cumulative rolloff-error profiles, 42-month QT window; fit diagnostics only \u2014 no timing credential is claimed for any estimator",
+  "window": {
+    "start": "2022-06",
+    "end": "2025-11",
+    "n_months": 42,
+    "n_diffs": 41
+  },
+  "units_note": "u1/u2 dimensionless; decomp *_share values are PERCENT of the Theil decomposition sum (== MSE, ddof=0); mse in pp^2 of annualized CPR; cumulative error in $B",
+  "estimators": {
+    "abm": {
+      "u1_levels": 0.4120413657397791,
+      "u2_diffs": 1.2255670624710835,
+      "u1_detrended": 0.807227764532273,
+      "decomp": {
+        "levels": {
+          "bias_share": 68.0900578057853,
+          "var_share": 0.40649050869905,
+          "cov_share": 31.503451685515632,
+          "mse": 55.70600485118731
+        },
+        "diffs": {
+          "bias_share": 0.1177344254978886,
+          "var_share": 14.03515311152789,
+          "cov_share": 85.84711246297422,
+          "mse": 24.505880880745313
+        },
+        "detrended": {
+          "bias_share": 1.7138748965813467e-28,
+          "var_share": 0.5480404133697308,
+          "cov_share": 99.45195958663028,
+          "mse": 16.177873282122498
+        }
+      }
+    },
+    "path_a": {
+      "u1_levels": 0.4309757177218461,
+      "u2_diffs": 1.00961700984873,
+      "u1_detrended": 0.837180869984254,
+      "decomp": {
+        "levels": {
+          "bias_share": 26.453858890697546,
+          "var_share": 10.577897802726678,
+          "cov_share": 62.968243306575786,
+          "mse": 17.98682211644089
+        },
+        "diffs": {
+          "bias_share": 0.343782414972918,
+          "var_share": 70.65567446367626,
+          "cov_share": 29.000543121350823,
+          "mse": 16.630659608360645
+        },
+        "detrended": {
+          "bias_share": 3.203741115706641e-29,
+          "var_share": 42.64484844907973,
+          "cov_share": 57.35515155092026,
+          "mse": 8.16897013385612
+        }
+      }
+    },
+    "path_b": {
+      "u1_levels": 0.265315104696536,
+      "u2_diffs": 1.0029223469568262,
+      "u1_detrended": 0.9797114319696317,
+      "decomp": {
+        "levels": {
+          "bias_share": 6.731128471454453,
+          "var_share": 86.56732361679774,
+          "cov_share": 6.701547911747812,
+          "mse": 8.465917762660371
+        },
+        "diffs": {
+          "bias_share": 0.14151819109963984,
+          "var_share": 96.72686616660916,
+          "cov_share": 3.1316156422912087,
+          "mse": 16.410838571477413
+        },
+        "detrended": {
+          "bias_share": 2.3600437576885732e-29,
+          "var_share": 93.68446939082534,
+          "cov_share": 6.31553060917466,
+          "mse": 7.050849868919601
+        }
+      }
+    }
+  },
+  "cumulative_error": {
+    "months": [
+      "2022-06",
+      "2022-07",
+      "2022-08",
+      "2022-09",
+      "2022-10",
+      "2022-11",
+      "2022-12",
+      "2023-01",
+      "2023-02",
+      "2023-03",
+      "2023-04",
+      "2023-05",
+      "2023-06",
+      "2023-07",
+      "2023-08",
+      "2023-09",
+      "2023-10",
+      "2023-11",
+      "2023-12",
+      "2024-01",
+      "2024-02",
+      "2024-03",
+      "2024-04",
+      "2024-05",
+      "2024-06",
+      "2024-07",
+      "2024-08",
+      "2024-09",
+      "2024-10",
+      "2024-11",
+      "2024-12",
+      "2025-01",
+      "2025-02",
+      "2025-03",
+      "2025-04",
+      "2025-05",
+      "2025-06",
+      "2025-07",
+      "2025-08",
+      "2025-09",
+      "2025-10",
+      "2025-11"
+    ],
+    "pathA": [
+      -19.68063420276569,
+      -47.093739035749024,
+      -62.167453548936976,
+      -70.74867174357014,
+      -67.62800382229626,
+      -62.757913555966226,
+      -60.489716938386934,
+      -57.119297695909694,
+      -67.03980460284768,
+      -57.49020827124912,
+      -53.467148800065374,
+      -49.44367502000143,
+      -42.929420851496644,
+      -34.40635787118349,
+      -28.296831781330063,
+      -21.410945938141413,
+      -15.833733363680494,
+      -10.282072751338442,
+      -5.555632927410814,
+      -0.6350440981864924,
+      3.4026795055037127,
+      6.870985409091766,
+      0.7081261242133241,
+      21.645615779835623,
+      30.59679187157665,
+      39.37439769210878,
+      47.61925318876069,
+      54.66076644219146,
+      60.50813389776219,
+      68.57606727789266,
+      75.84591388541484,
+      84.09448983305727,
+      90.59081275752155,
+      95.87871398337514,
+      103.77737150100863,
+      112.77770433893875,
+      122.2775114164106,
+      132.32401568579772,
+      141.6753855935862,
+      136.37372062340245,
+      156.50772838467304,
+      164.14471706718075
+    ],
+    "pathB": [
+      -17.372587001596806,
+      -40.959430077817984,
+      -48.506000878197746,
+      -52.78688984552706,
+      -48.239342725763215,
+      -43.494242917383474,
+      -41.26419186931743,
+      -39.71055750672091,
+      -50.38054664521324,
+      -39.57814184004749,
+      -35.882385363693786,
+      -33.26732664341004,
+      -27.914206598914866,
+      -21.982222775281972,
+      -17.803058999024987,
+      -13.09599801777006,
+      -10.51369199947776,
+      -8.8520434078759,
+      -8.050544996623342,
+      -7.956507937954306,
+      -8.480118501675868,
+      -8.058023754413174,
+      -18.693371432923726,
+      -2.779927301854201,
+      1.7208380796588933,
+      5.417390963292185,
+      9.623833654662414,
+      13.087542545382261,
+      15.120272490919758,
+      18.293267795332724,
+      20.202935246014405,
+      22.355779745346943,
+      23.10389763795415,
+      23.889117756292297,
+      26.51164105295353,
+      30.008866214613896,
+      34.46725311218022,
+      39.15278041443075,
+      43.88359093890718,
+      34.33847924452789,
+      50.50327115668578,
+      53.78183118396042
+    ],
+    "abm": [
+      -46.7126438014993,
+      -95.33325996248762,
+      -128.73670266066918,
+      -165.64742720804045,
+      -184.95854912935621,
+      -193.3544367937198,
+      -203.8755869374641,
+      -220.43250194940245,
+      -252.9967171861622,
+      -265.3274845353803,
+      -282.1176785143166,
+      -299.95901857369205,
+      -314.7006217311482,
+      -326.62272373793206,
+      -338.9027020178857,
+      -348.9797055214137,
+      -359.44742625421134,
+      -368.42842537444056,
+      -377.69144003279763,
+      -391.24451864882775,
+      -408.80931844418643,
+      -425.25173061786234,
+      -451.5574298545185,
+      -450.3128595792847,
+      -459.15429096552975,
+      -469.06126711088206,
+      -479.4754488403701,
+      -493.21293298205114,
+      -511.8016633461168,
+      -529.0021408515628,
+      -543.8570625726079,
+      -557.2647922520961,
+      -570.3890665242252,
+      -582.8262943501958,
+      -594.5161135178395,
+      -605.5600821235249,
+      -614.8860614753975,
+      -623.768423563105,
+      -633.406394840899,
+      -658.2024714414041,
+      -658.9529226587733,
+      -673.7670973925377
+    ],
+    "bases": {
+      "pathA": "hazard/data/simulation_results.parquet simulated_rolloff_b (settlement-weighted engine rolloff, spec v4) minus hazard-side SOMA Actual_Monthly_Rolloff_Billions (macro.build_empirical_metrics)",
+      "pathB": "hazard/data/microsim_results.parquet simulated_rolloff_b minus the same hazard-side SOMA actual",
+      "abm": "committed metrics_monthly.csv: cumsum(US_Missed_Rolloff_Billions - Extension_Delta_Billions) = cumsum(US simulated rolloff - ABM-side SOMA actual); settlement-lag kernel on the simulated leg per the fold-in manifest",
+      "common": "all legs share the QT cap schedule, so each terminal value equals that leg's trapped-$B aggregate minus the empirical trapped-$B on its own basis"
+    },
+    "terminal_b": {
+      "pathA": 164.14471706718075,
+      "pathB": 53.78183118396042,
+      "abm": -673.7670973925377
+    }
+  },
+  "empirical_variant_check": {
+    "r_lag0_pathb_hazard_side": 0.19000395255236566,
+    "r_lag0_pathb_abm_side": 0.18256619661220183,
+    "abs_diff": 0.007437755940163826,
+    "tolerance": 0.02
+  },
+  "gates": {
+    "G1_abm_ccf": {
+      "tol": 1e-09,
+      "lag0": -0.3183375411255578,
+      "pass": true
+    },
+    "G2_abm_dollar_sums": {
+      "us_trapped_b": 90.98115583016241,
+      "diff_b": 0.0,
+      "empirical_trapped_b": 764.7482532227002,
+      "empirical_diff_b": 0.0,
+      "tol_b": 1e-09,
+      "pass": true
+    },
+    "G3_empirical_parity": {
+      "live_trapped_b": 764.7482532227002,
+      "committed_b": 764.7482532227002,
+      "diff_b": 0.0,
+      "tol_b": 0.01,
+      "rolloff_source": "SOMA",
+      "pass": true
+    },
+    "G4_patha_ccf": {
+      "r_lag0": -0.37817286723880483,
+      "manifest_r_lag0": -0.37817286723880483,
+      "peak_lag": -2,
+      "tol": 0.001,
+      "pass": true
+    },
+    "G5_pathb_ccf": {
+      "tol": 1e-06,
+      "lag0": 0.19000395255236566,
+      "pass": true
+    },
+    "G6_patha_terminal": {
+      "recomputed_trapped_b": 928.892970289881,
+      "reference_b": 928.892970289881,
+      "diff_b": 0.0,
+      "cumsum_sim_rolloff_b": -488.607029710119,
+      "tol_b": 0.1,
+      "pass": true
+    },
+    "G7_pathb_terminal": {
+      "recomputed_trapped_b": 818.5300844066606,
+      "reference_b": 818.5300844066606,
+      "diff_b": 0.0,
+      "cumsum_sim_rolloff_b": -598.9699155933394,
+      "tol_b": 0.1,
+      "pass": true
+    },
+    "G8_empirical_variant": {
+      "abs_diff": 0.007437755940163826,
+      "tol": 0.02,
+      "pass": true
+    },
+    "G9_theil_identity": {
+      "max_rel_err": 3.9503517139396577e-16,
+      "max_share_sum_err_pp": 1.4210854715202004e-14,
+      "tol": 1e-09,
+      "pass": true
+    }
+  },
+  "sources": {
+    "abm": "abm/data/runs/run-2026-07-04-15yr-foldin/metrics_monthly.csv (production fold-in run; US_CPR_Pct scored against the primary hazard-side empirical series)",
+    "path_a": "hazard/data/simulation_results.parquet (spec v4, hash-identical to run-2026-07-14-pathA-seasonal) vs macro.build_empirical_metrics",
+    "path_b": "hazard/data/microsim_results.parquet vs macro.build_empirical_metrics"
+  },
+  "note": "Fit diagnostics, not timing credentials (posture pre-committed in the spec header): no timing claim is made for any estimator; peak-lag intervals span zero and the beta1=0 null shares Path B's -3 peak (manuscript \u00a7V.C). Feeds appendix table tab:theil and 2-3 sentences in sec:pathb."
+}
