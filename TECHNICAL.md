@@ -2075,6 +2075,49 @@ band, floor form), not sampling. Reported in §V.C; §VIII.A's concession
 "no untouched evaluation months exist anywhere in this paper" statement
 added in the same pass.
 
+## 24. Referee Round 14 — Author-Ratified Data Runs (July 2026)
+
+On 2026-07-15 (evening) the author ratified, in one message, every decision
+round 14 had left open: the Fannie ZBC 06/16 treatment (censor, report the
+0.38% bracket), the replication-package license posture (CODE ONLY — no
+Fannie data and, conservatively, no derived cells), commits/pushes, and the
+production-pull green light; the parked W2 cyclical-floor variant was
+green-lit in the same message. Both NEEDS-NEW-RUN items were then executed
+with pre-committed specs (spec-before-run, strong form). This entry was
+first committed while the W4 production pull was still in flight; §24.1
+records the completed W2 run, §24.2 the Fannie replication when it lands.
+No committed production artifact changed in either run.
+
+### 24.1 W2 cyclical-floor variant (spec 47e8ea9, run 9a00e7e)
+
+The V.C acyclical-floor concession's residual: the marginal-over-null
+cancels the floor's LEVEL but not a floor co-varying with the rate cycle.
+Run: floor_t = 4%·(1 + κ·z_t), z_t the QT-window-standardized MORTGAGE30US
+(ddof=1), window mean pinned at 4% exactly so κ=0 nests production
+(implemented as a `monthly_step` wrapper — at κ=0 the production code path
+runs bit-for-bit); κ ∈ {±0.5, ±0.25, ±0.1, 0}; central (p_q 6.5) + null
+(0.0) legs per κ under full production convention (committed 75k sample,
+RNG_SEED 42, shared macro frame, raw-basis scoring).
+
+Parity gate at κ=0: EXACT (818.5301/748.1850/+70.3451B/+9.1985pp, all
+PASS). Marginals across the grid span **[+7.09, +9.36]pp** — every cell
+inside the constant-floor level-sweep envelope [+5.54, +10.82]pp (p_q 6.5,
+floors 3–5%, floor_sweep_results.json) → ex-ante verdict: **cyclicality is
+bounded by the reported level sweep; the acyclical-floor concession stands
+as written.** Direction: κ>0 (floor rising with rates) lowers the marginal
+(more involuntary exits exactly when voluntary refinancing is suppressed),
+κ<0 raises it slightly then falls back — the grid maximum is +9.36pp at
+κ=−0.1, within 0.2pp of production. The |κ|=0.5 stress cells hit the ≥0
+clip (flagged per spec; the spec header's parenthetical expectation that
+the floor stays strictly positive across the grid was wrong for those two
+cells — the per-cell flag governs, and pinning is exact everywhere else).
+Artifact: `hazard/data/floor_cyclical_results.json` (runtime 238 s;
+per-run parquets under `hazard/data/floor_cyclical/`, regenerable,
+gitignored). Manuscript: V.C's concession paragraph upgraded from
+"future work" to the tested bound; the VIII.A next-steps sentence
+restated in the same pass as §24.2's edits. Gate arithmetic (mean-pin,
+κ=0 nesting, clip flag) is test-gated in `tests/test_floor_cyclical.py`.
+
 ## Appendix A — File Map
 
 ```
