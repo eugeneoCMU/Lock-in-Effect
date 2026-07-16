@@ -74,6 +74,25 @@ RESULTS_JSON = DATA_DIR / "expectation_benchmark_results.json"
 CAP_BENCHMARK_B = 764.748          # the production cap-relative benchmark
 PARITY_TOL_PP = 0.01
 
+# ---- SPEC AMENDMENT (disclosed 2026-07-16, BEFORE transcription) ------------
+# The spec header pins "Open Market Operations During 2022" while requiring
+# (a) a projection vintage contemporaneous with QT's start and (b) coverage
+# of the full June 2022 - November 2025 window. Those clauses are satisfiable
+# only by the report published DURING 2022: "Open Market Operations During
+# 2021" (Markets Group, FRBNY, May 2022), whose projections start from the
+# February 28, 2022 balance sheet, incorporate the FOMC's May 2022 Plans,
+# and model runoff beginning June 2022. The "During 2022" report (published
+# April 2023) projects from the December 30, 2022 balance sheet ("Projections
+# start with the Federal Reserve balance sheet as of December 30, 2022",
+# its Appendix 4) and cannot cover Jun-Dec 2022 at all, and contains no
+# agency-MBS-specific paydown series. Root cause: title/vintage confusion in
+# the round-14 spec sketch (the same sketch also mis-identified the report
+# with the manuscript's nyfed2022, which is the September 2022 Teller Window
+# post). Document name corrected here, in a commit that PRECEDES the
+# transcription commit so the ordering is auditable; every other spec clause
+# (window, construction, gates, threshold, spread rule) is unchanged. Same
+# amendment convention as TECHNICAL.md §24.2 (a3ef6b7).
+
 # ---- REQUIRED TRANSCRIPTION (see EXECUTION BLOCKER in the spec) ------------
 # {"YYYY-MM" or "YYYY": projected agency-MBS runoff, $B} at the report's
 # printed granularity; None until transcribed.
