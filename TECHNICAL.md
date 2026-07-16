@@ -2355,7 +2355,17 @@ expectations-complement paragraph, V.D basis sentence, VI.B cap-rule
 backtest sentence (caps ≈ 2× the Fed's own contemporaneous projection of
 achievable runoff: 1417.5 vs 740.6). Artifact:
 expectation_benchmark_results.json; liveness gate #33 cross-checks
-threshold/parity/literals.
+threshold/parity/literals. AMENDMENT (2026-07-16, author-ratified
+"implement"): settlement-aware allocation sensitivity added (disclosed,
+supplementary, not gated) — the 88.51% anticipated share is the
+pre-committed uniform-spread rule's value; allocating the projection's 2022
+first-half settlement inflows to Jan–May (proxy: realized H1-2022 rise
++$92.32B in the benchmark's own SOMA series) implies Jun–Dec projected
+runoff $108.22B → anticipated share 75.58% (lower bound), null share_E
+400.6%, threshold survives. Manuscript: abstract's point value replaced
+with "the large majority" (robust to any intra-2022 allocation); III.D
+gains the precision-discipline sentence quoting both bounds; gate #33
+extended to cross-check the $92.3/75.6% literals and the alt-threshold.
 
 ## Appendix A — File Map
 

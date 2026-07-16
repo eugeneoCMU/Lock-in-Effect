@@ -271,10 +271,15 @@ def main() -> int:
     lit_e = f"\\${exp['e_benchmark_b']:.1f}"
     lit_wedge_share = f"{wedge['expected_share_of_realized_cap_shortfall_pct']:.1f}\\%"
     max_parity = max(abs(v) for v in exp["gates"]["ii_cap_parity"].values())
+    saa = exp["settlement_aware_allocation"]
+    lit_h1 = f"\\${saa['h1_2022_realized_rise_b']:.1f}"
+    lit_alt = f"{saa['expected_share_of_realized_cap_shortfall_pct']:.1f}\\%"
     ok = (bool(exp["threshold"]["mechanical_majority_survives"])
+          and bool(saa["threshold_survives"])
           and max_parity <= 0.01
           and claims == 1
-          and lit_proj in tex and lit_e in tex and lit_wedge_share in tex)
+          and lit_proj in tex and lit_e in tex and lit_wedge_share in tex
+          and lit_h1 in tex and lit_alt in tex)
     failures += 0 if ok else 1
     print(
         f"[{'PASS' if ok else 'FAIL'}] cross-check expectation benchmark: "
