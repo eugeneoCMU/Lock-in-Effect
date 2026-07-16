@@ -93,6 +93,8 @@ https://capitalmarkets.fanniemae.com/sites/capmrkt/files/2023-06/crt-file-layout
 
 from __future__ import annotations
 
+import os
+import subprocess
 from pathlib import Path
 from typing import Iterable
 
@@ -416,15 +418,26 @@ def stage_native_file(
         )
         if delete_native_after_scan:
             native_path.unlink()  # last pass over the native just completed
-        # Pass 2: on-disk streaming sort into the final file. The key is
-        # unique per row (one row per loan-month), so the order is total.
-        (
-            pl.scan_csv(tmp_unsorted, separator="|", has_header=False,
-                        new_columns=PERF_COLS, infer_schema_length=0)
-            .with_columns(pl.all().fill_null(""))
-            .sort(["loan_sequence_number", "reporting_period"])
-            .sink_csv(perf_out, separator="|", include_header=False)
+        # Pass 2: EXTERNAL on-disk sort into the final file. polars' sort →
+        # sink buffered the whole 57M-row frame in memory (SIGKILL on the
+        # first 2020Q2 attempt); sort(1) spills to disk by design and is
+        # byte-preserving per row. LC_ALL=C makes the field comparison plain
+        # bytewise, which is exactly polars' utf8 ordering, and the key
+        # (fields 1-2 = loan_sequence_number, reporting_period) is unique per
+        # row, so the order is total and byte-identical to the eager path's
+        # (gated by tests/test_prepare_fannie_low_memory.py).
+        subprocess.run(
+            ["sort", "-t", "|", "-k1,1", "-k2,2", "-S", "1G",
+             "-T", str(dest_dir), "-o", str(perf_out), str(tmp_unsorted)],
+            check=True, env={**os.environ, "LC_ALL": "C"},
         )
+        n_tmp = sum(1 for _ in open(tmp_unsorted, "rb"))
+        n_sorted = sum(1 for _ in open(perf_out, "rb"))
+        if n_tmp != n_sorted:
+            raise RuntimeError(
+                f"{perf_out.name}: external sort row-count mismatch "
+                f"({n_sorted:,} sorted vs {n_tmp:,} unsorted). Refusing."
+            )
         tmp_unsorted.unlink()
         n_rows_staged = int(
             pl.scan_csv(perf_out, separator="|", has_header=False,
