@@ -2118,6 +2118,68 @@ gitignored). Manuscript: V.C's concession paragraph upgraded from
 restated in the same pass as §24.2's edits. Gate arithmetic (mean-pin,
 κ=0 nesting, clip flag) is test-gated in `tests/test_floor_cyclical.py`.
 
+### 24.2 W4 Fannie Mae external replication (spec cbabbd2; amendments a3ef6b7, 81c9fd8, f65976a; artifact d8199eb)
+
+The round-14 W4 item executed end-to-end: Fannie SF LPH acquisition
+quarters 2017Q1–2022Q4 (24 files) pulled, staged into Freddie-coded
+orig/perf pairs, and consumed quarter-at-a-time under the pre-committed
+spec (download → stage → per-quarter cells + Path B pool piece → delete;
+5.5 GiB free-disk guard; ~76 min of processing across relaunches).
+Universe: **17,606,999 loans / 825,814,383 loan-months**; combined panel
+23,443 cohort-month cells (explicit vintage filter 2017–2021 = the Freddie
+universe definition); 75,000-loan stratified sample from a 267,996-loan
+pool (130 strata, production draw design, per-quarter seeds fixed by spec
+index). Late acquisition quarters contribute 0 pool rows by construction
+(no pre-QT rows) — anticipated in the spec.
+
+Gates, all PASS: (i) Freddie scoring parity — the live macro/SOMA frame
+reproduces the committed no-lock-in-null anchors within ±$0.01B/±0.01pp;
+(ii) 2019Q1 staging+ingest determinism — cells equal the probe panel
+exactly on every deterministic column (15 mode_state divergences, each a
+verified modal tie; see the amendment below); (iii) the PRE-REGISTERED
+envelope gate. Results: Path B on the Fannie sample — central $820.99B
+(107.35%), β₁=0 null $754.60B (98.67%), **lock-in marginal +$66.40B
+(+8.68pp of benchmark)** vs Freddie's +$70.35B (+9.20pp): inside the
+[2.11, 13.17]pp envelope, within half a point of the Freddie estimate.
+Path A FE-Poisson (spec v4) on the Fannie panel: rate-gap coefficient
+sign REPLICATES (+2.343 standardized; per-bps ≈3.64× Freddie's), n_train
+10,140 / 293 strata, holdout r² −0.05 — the same no-forward-precision
+character as Freddie's Path A, so it retains aggregate-corroboration
+status; the level difference is exactly what the spec's cross-agency
+caveat pre-registered (sign + envelope-conditional marginal, NOT a
+hazard-level match; ZBC 06/16 censored, worst-case bracket 0.38% of
+removals).
+
+Three production incidents, each root-caused and disclosed BEFORE resuming
+(the run ledger's honest-log convention): (1) the 2019Q1 determinism gate
+as first committed demanded full-frame equality and failed on
+ingest.py:236's mode().first(), which breaks modal ties in nondeterministic
+order — a latent property of the frozen Freddie path; all divergences
+verified exact ties, estimator columns equal, gate amended to
+tie-verification (a3ef6b7). (2) Refi-wave acquisition files are ~5× normal
+size (2020Q2: 17 GB native, 1.24M loans / 57.5M rows; 2020Q4: 1.51M loans
+/ 80M rows) — eager staging OOM'd (SIGKILL) on the 16 GiB machine; staging
+gained a low-memory streaming path (auto ≥5 GiB: streaming sinks, early
+native deletion, byte-identical output; 81c9fd8), whose pass-2 polars sort
+also OOM'd and was externalized to sort(1) with LC_ALL=C on the unique key
+(byte-preserving, disk-spilling; f65976a). (3) The frozen ingest cells
+build needed POLARS_MAX_THREADS=4 on ≥80M-row quarters; the runner also
+gained a staged-pair resume so a completed pair is never re-downloaded.
+2020Q2 was completed manually with the runner's own primitives after the
+sort fix (recorded in the quarter manifest with a note).
+
+License enforcement (ratified posture): the committed artifact
+`hazard/data/fannie_replication_results.json` carries headline statistics
+only; the native files, staged pairs, per-quarter cells/pool pieces,
+combined panel, Fannie loan sample, and the Fannie coefficient artifact
+are all local-only and .gitignore-blocked. Manuscript: V.C gains the
+external-replication paragraph (with both ex-ante scope notes), VIII.A's
+Model paragraph gains the one-line result, the next-steps pair is
+restated as completed with the 2022/pre-2017 vintage residual retained as
+the open item, and `tools/liveness_gates.py` gains a manifest-vs-tex
+cross-check (artifact envelope pass + printed marginal literals must
+agree; 29 gates now, all PASS; PDF rebuilt).
+
 ### 24.3 W6 Danish exact curtailment scaling (spec 81c9fd8, run f-artifact commit)
 
 A third run from the same ratification message (the round-14 parked list's

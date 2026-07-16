@@ -26,6 +26,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parent.parent
 TEX = ROOT / "paper" / "v16" / "revised_paper_v16.tex"
 MANIFEST = ROOT / "abm" / "data" / "runs" / "run-2026-07-04-15yr-foldin" / "manifest.json"
+FANNIE_RESULTS = ROOT / "hazard" / "data" / "fannie_replication_results.json"
 
 ZERO_COUNT = [
     "production specification omits",
@@ -164,6 +165,26 @@ def main() -> int:
         f"manifest apply_settlement_lag_kernel={flag}, "
         f"tex {KERNEL_TEX_PHRASE!r} present={phrase_present} "
         f"(must agree; either side flipping without the other fails)"
+    )
+
+    # Round-14 W4: the manuscript's Fannie replication sentences must agree
+    # with the committed artifact — the envelope gate must actually have
+    # passed, and the printed marginal must be the artifact's, rounded as
+    # printed (+$XX.X billion / +X.XX points). Same manifest-vs-tex contract
+    # as the settlement-lag gate: either side moving without the other fails.
+    fannie = json.loads(FANNIE_RESULTS.read_text())
+    env = fannie["gates"]["gate_envelope"]
+    claims = tex.count("run \\texttt{fannie\\_replication}")
+    marg_b = f"+\\${fannie['path_b']['lockin_marginal_b']:.1f}"
+    marg_pp = f"+{fannie['path_b']['lockin_marginal_share_pp']:.2f}"
+    ok = (bool(env["pass"]) and claims == 1
+          and marg_b in tex and marg_pp in tex)
+    failures += 0 if ok else 1
+    print(
+        f"[{'PASS' if ok else 'FAIL'}] cross-check fannie replication: "
+        f"artifact envelope pass={env['pass']}, tex run-citation count="
+        f"{claims} (want 1), marginal literals {marg_b!r}/{marg_pp!r} "
+        f"present={marg_b in tex}/{marg_pp in tex}"
     )
 
     print(f"\n{'ALL GATES PASS' if failures == 0 else f'{failures} GATE(S) FAILED'}")
