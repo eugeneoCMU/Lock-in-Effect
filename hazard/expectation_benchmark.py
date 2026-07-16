@@ -290,6 +290,27 @@ def main() -> None:
     expected_vs_null_shared_pp = (
         expected_share_of_cap_shortfall_pct - null_shared_share_pct)
 
+    # Amendment (disclosed, post-first-run; supplementary, NOT gated): the
+    # anticipated-share point value rides on the pre-committed uniform-spread
+    # rule for the projection's printed 2022 ANNUAL NET (-$15.9B), which nets
+    # first-half settlement inflows against Jun-Dec runoff. A settlement-aware
+    # allocation instead assigns the first-half rise to Jan-May (proxy: the
+    # REALIZED Jan-May 2022 change in the same SOMA series the benchmark
+    # uses), implying Jun-Dec projected runoff of (annual net + H1 rise).
+    # This bounds the anticipated share from below; the pre-committed rule's
+    # 88.5% is the upper end. Both allocations leave the large-majority
+    # reading and the >50% threshold unchanged.
+    h1_2022_rise_b = float(soma.loc["2022-01":"2022-05"].sum())
+    alt_2022_window_b = float(PROJECTED_RUNOFF_B["2022"]) + h1_2022_rise_b
+    projected_window_alt_b = (projected_window_b
+                              - float(PROJECTED_RUNOFF_B["2022"]) * 7.0 / 12.0
+                              + alt_2022_window_b)
+    wedge_alt_b = cap_target_b - projected_window_alt_b
+    share_alt_pct = wedge_alt_b / cap_benchmark * 100.0
+    e_alt_b = projected_window_alt_b - actual_decline_b
+    null_share_e_alt_pct = (estimators["path_b_null"]["trapped_b"]
+                            / e_alt_b * 100.0)
+
     payload = {
         "mode": "expectation_benchmark",
         "spec": "hazard/expectation_benchmark.py header (committed 88ef11e); "
@@ -361,6 +382,26 @@ def main() -> None:
                 "shared_layer_scoring_results.json. Supplementary, not "
                 "gated."),
         },
+        "settlement_aware_allocation": {
+            "h1_2022_realized_rise_b": h1_2022_rise_b,
+            "implied_jun_dec_2022_projected_runoff_b": alt_2022_window_b,
+            "projected_runoff_window_b": projected_window_alt_b,
+            "projection_implied_cap_shortfall_b": wedge_alt_b,
+            "expected_share_of_realized_cap_shortfall_pct": share_alt_pct,
+            "e_benchmark_b": e_alt_b,
+            "null_share_E_pct": null_share_e_alt_pct,
+            "threshold_survives": null_share_e_alt_pct > 50.0,
+            "note": (
+                "Disclosed post-first-run amendment; supplementary, not "
+                "gated. Lower bound on the anticipated share under an "
+                "allocation that assigns the projection's 2022 first-half "
+                "settlement inflows to Jan-May (proxy: realized H1-2022 "
+                "change in the benchmark's own SOMA series); the "
+                "pre-committed uniform-spread rule's value is the upper "
+                "end. The anticipated share is bounded within roughly "
+                "three-quarters to nine-tenths under any defensible "
+                "intra-2022 allocation."),
+        },
         "runtime_s": round(time.perf_counter() - t0, 1),
         "generated_utc": datetime.now(timezone.utc).isoformat(),
         "git_head": _git_head(),
@@ -388,6 +429,11 @@ def main() -> None:
           f"cap-shortfall, vs null shared-basis "
           f"{null_shared_share_pct:.2f}% (diff "
           f"{expected_vs_null_shared_pp:+.2f}pp)")
+    print(f"Settlement-aware allocation (lower bound): H1-2022 rise "
+          f"{h1_2022_rise_b:.2f}B -> Jun-Dec projected {alt_2022_window_b:.2f}B, "
+          f"window {projected_window_alt_b:.2f}B, anticipated share "
+          f"{share_alt_pct:.2f}%, null share_E {null_share_e_alt_pct:.1f}% "
+          f"(threshold {'survives' if null_share_e_alt_pct > 50 else 'FAILS'})")
     print(f"Results saved to {RESULTS_JSON}")
 
 

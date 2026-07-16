@@ -101,7 +101,18 @@
     "expected_minus_null_shared_pp": -0.22310027388466835,
     "note": "Share of the realized cap-shortfall that the NY Fed's ex-ante (May 2022) projection already anticipated, compared with the beta1=0 null's benchmark-consistent (shared-basis) recovery read from shared_layer_scoring_results.json. Supplementary, not gated."
   },
-  "runtime_s": 3.1,
-  "generated_utc": "2026-07-16T18:20:49.076332+00:00",
-  "git_head": "b8ad13c7cc5b2443f87d9dbc5a1b6d630fb28687"
+  "settlement_aware_allocation": {
+    "h1_2022_realized_rise_b": 92.3215865405,
+    "implied_jun_dec_2022_projected_runoff_b": 108.22158654050008,
+    "projected_runoff_window_b": 839.5299198738333,
+    "projection_implied_cap_shortfall_b": 577.9700801261667,
+    "expected_share_of_realized_cap_shortfall_pct": 75.5765152376043,
+    "e_benchmark_b": 186.77817309653346,
+    "null_share_E_pct": 400.5741204032854,
+    "threshold_survives": true,
+    "note": "Disclosed post-first-run amendment; supplementary, not gated. Lower bound on the anticipated share under an allocation that assigns the projection's 2022 first-half settlement inflows to Jan-May (proxy: realized H1-2022 change in the benchmark's own SOMA series); the pre-committed uniform-spread rule's value is the upper end. The anticipated share is bounded within roughly three-quarters to nine-tenths under any defensible intra-2022 allocation."
+  },
+  "runtime_s": 3.2,
+  "generated_utc": "2026-07-16T19:07:40.064936+00:00",
+  "git_head": "3a653263d29faf2cc1d6e731ae8b91f450100733"
 }
