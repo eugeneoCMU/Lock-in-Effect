@@ -80,9 +80,15 @@ def test_combine_quarter_cells_matches_one_shot_build(tmp_path):
     )
 
     assert combined.columns == one_shot.columns
+    # mode_state is excluded from strict equality: ingest.py's mode().first()
+    # breaks modal TIES in nondeterministic order, so the two builds can
+    # legitimately disagree on tied cells (each path recomputes the per-pair
+    # aggregates here). Tie semantics are covered by the gate tests below;
+    # every estimator-consumed column must match exactly.
+    non_mode = [c for c in one_shot.columns if c != "mode_state"]
     assert_frame_equal(
-        combined.sort(PANEL_KEYS),
-        one_shot.sort(PANEL_KEYS),
+        combined.sort(PANEL_KEYS).select(non_mode),
+        one_shot.sort(PANEL_KEYS).select(non_mode),
     )
 
 
@@ -157,6 +163,88 @@ def test_finalize_fannie_sample_exact_n(tmp_path):
     assert sample["weight"].unique().to_list() == [1.0]
     # Written artifact round-trips.
     assert_frame_equal(pl.read_parquet(tmp_path / "sample.parquet"), sample)
+
+
+def _pad(row, n=32):
+    row = list(row) + [""] * (n - len(row))
+    return "|".join(row[:n])
+
+
+def _tie_pair(tmp_path, n_current=1):
+    """Staged pair with one cohort cell holding 1 Prepaid + n_current Current
+    loans in the same month: a modal tie iff n_current == 1."""
+    orig_rows, perf_rows = [], []
+    for i in range(1 + n_current):
+        seq = f"F20Q1TIE{i:04d}"
+        o = [""] * 32
+        o[0], o[1], o[10], o[11], o[12] = "700", "202006", "100000.00", "80", "3.500"
+        o[15], o[16], o[19], o[21] = "FRM", "CA", seq, "360"
+        orig_rows.append(_pad(o))
+        p = [""] * 32
+        p[0], p[1], p[4] = seq, "202006", "1"
+        if i == 0:
+            p[2], p[3], p[8] = "0.00", "0", "01"      # Prepaid (ZBC 01)
+        else:
+            p[2], p[3], p[8] = "100000.00", "0", ""   # Current
+        perf_rows.append(_pad(p))
+    orig = tmp_path / "orig_TIE.txt"
+    perf = tmp_path / "perf_TIE.txt"
+    orig.write_text("\n".join(orig_rows))
+    perf.write_text("\n".join(perf_rows))
+    return orig, perf
+
+
+def _flip_mode(cells: pl.DataFrame, to_value: str) -> pl.DataFrame:
+    return cells.with_columns(pl.lit(to_value).alias("mode_state"))
+
+
+def test_gate_accepts_tied_mode_state_divergence(tmp_path):
+    from ingest import build_panel_from_files
+    from fannie_replication import gate_2019q1_cells
+
+    pair = _tie_pair(tmp_path, n_current=1)  # Prepaid vs Current: exact tie
+    cells_path = tmp_path / "cells.parquet"
+    cells = build_panel_from_files([pair], output=cells_path)
+    other = "Current" if cells["mode_state"][0] == "Prepaid" else "Prepaid"
+    probe_path = tmp_path / "probe.parquet"
+    _flip_mode(cells, other).write_parquet(probe_path)
+
+    gate = gate_2019q1_cells(cells_path, probe_path, staged_pair=pair)
+    assert gate["pass"]
+    assert gate["mode_state_diffs"] == 1
+    assert gate["mode_diffs_all_ties"]
+
+
+def test_gate_rejects_non_tie_mode_state_divergence(tmp_path):
+    from ingest import build_panel_from_files
+    from fannie_replication import gate_2019q1_cells
+
+    pair = _tie_pair(tmp_path, n_current=2)  # Current wins 2-1: no tie
+    cells_path = tmp_path / "cells.parquet"
+    cells = build_panel_from_files([pair], output=cells_path)
+    assert cells["mode_state"][0] == "Current"
+    probe_path = tmp_path / "probe.parquet"
+    _flip_mode(cells, "Prepaid").write_parquet(probe_path)
+
+    gate = gate_2019q1_cells(cells_path, probe_path, staged_pair=pair)
+    assert not gate["pass"]
+    assert not gate["mode_diffs_all_ties"]
+
+
+def test_gate_rejects_deterministic_column_divergence(tmp_path):
+    from ingest import build_panel_from_files
+    from fannie_replication import gate_2019q1_cells
+
+    pair = _tie_pair(tmp_path, n_current=1)
+    cells_path = tmp_path / "cells.parquet"
+    cells = build_panel_from_files([pair], output=cells_path)
+    probe_path = tmp_path / "probe.parquet"
+    cells.with_columns(
+        (pl.col("exposure_upb") + 1.0).alias("exposure_upb")
+    ).write_parquet(probe_path)
+
+    gate = gate_2019q1_cells(cells_path, probe_path, staged_pair=pair)
+    assert not gate["pass"]
 
 
 def test_envelope_gate_logic():

@@ -70,8 +70,22 @@ GATES (numeric; withdraw-not-reinterpret on failure)
                    must reproduce no_lockin_null_results.json
                    {null,central}×{trapped_b, share_pct} within ±$0.01B /
                    ±0.01pp, else ABORT (scoring environment drifted).
-  gate_2019q1      Production FNMA2019Q1 cells == probe panel (frame
-                   equality), when the probe panel is present locally.
+  gate_2019q1      Production FNMA2019Q1 cells == probe panel on every
+                   deterministic column, when the probe panel is present
+                   locally. AMENDED 2026-07-15 after the first production
+                   attempt (gate as originally committed demanded full-frame
+                   equality and failed): mode_state is excluded from strict
+                   equality because ingest.py's mode().first() breaks modal
+                   ties in nondeterministic order — a latent property of the
+                   frozen Freddie path, surfaced here as 19/9,534 cells, each
+                   verified an exact modal tie of the underlying loan-month
+                   state distribution, with every estimator-relevant column
+                   equal on the first attempt. A mode_state divergence passes
+                   only if verified as a modal tie recomputed from the staged
+                   pair. mode_state feeds only the secondary Markov exhibit,
+                   declined for Fannie ex ante (checklist item 7). Amendment
+                   recorded before the run resumed; the pre-registered
+                   acceptance gate (gate_envelope) is untouched.
   gate_envelope    PRE-REGISTERED ACCEPTANCE: Fannie lockin_marginal_share_pp
                    is (a) positive and (b) inside [min, max] of
                    box_marginals_pp in the committed
@@ -257,18 +271,78 @@ def freddie_parity_gate(empirical) -> dict:
     return out
 
 
-def gate_2019q1_cells(cells_path: Path, probe_panel: Path) -> dict:
+def _verify_mode_ties(
+    diff_cells: pl.DataFrame, orig_path: Path, perf_path: Path
+) -> bool:
+    """Each mode_state divergence must be an exact modal tie of the
+    underlying loan-month servicer-state distribution (recomputed from the
+    staged pair through the same ingest scans)."""
+    from ingest import _scan_orig, _scan_perf
+
+    joined = _scan_perf(perf_path).join(
+        _scan_orig(orig_path), on="loan_sequence_number", how="inner"
+    )
+    dist = (
+        joined.join(diff_cells.select(_PANEL_KEYS).lazy(), on=_PANEL_KEYS, how="inner")
+        .group_by(_PANEL_KEYS + ["servicer_state"])
+        .agg(pl.len().alias("n"))
+        .collect()
+    )
+    for row in diff_cells.iter_rows(named=True):
+        cell = dist
+        for k in _PANEL_KEYS:
+            cell = cell.filter(pl.col(k) == row[k])
+        counts = dict(zip(cell["servicer_state"].to_list(), cell["n"].to_list()))
+        mx = max(counts.values(), default=0)
+        if not (counts.get(row["got_mode"], 0) == mx
+                and counts.get(row["want_mode"], 0) == mx):
+            return False
+    return True
+
+
+def gate_2019q1_cells(
+    cells_path: Path, probe_panel: Path, staged_pair: tuple[Path, Path] | None = None
+) -> dict:
     """Production 2019Q1 cells must equal the probe panel built one-shot from
-    the same native file (end-to-end staging+ingest determinism)."""
+    the same native file (end-to-end staging+ingest determinism), on every
+    deterministic column. mode_state is excluded from strict equality —
+    ingest.py's mode().first() (ingest.py:236) breaks modal TIES in
+    nondeterministic order, a latent property of the frozen Freddie path that
+    the 2026-07-15 production run surfaced (19/9,534 cells, all verified
+    exact ties; every estimator-relevant column matched exactly). A
+    mode_state divergence passes only if it is a verified modal tie
+    recomputed from the staged pair; mode_state feeds only the secondary
+    Markov exhibit, which the spec already declines for Fannie (item 7)."""
     from polars.testing import assert_frame_equal
 
     got = pl.read_parquet(cells_path).sort(_PANEL_KEYS)
     want = pl.read_parquet(probe_panel).sort(_PANEL_KEYS)
+    non_mode = [c for c in got.columns if c != "mode_state"]
     try:
-        assert_frame_equal(got, want)
-        return {"pass": True, "cells": len(got)}
+        # exact: this is a determinism gate, not a numeric-tolerance gate
+        assert_frame_equal(got.select(non_mode), want.select(non_mode),
+                           check_exact=True)
     except AssertionError as e:
-        return {"pass": False, "cells": len(got), "detail": str(e)[:400]}
+        return {"pass": False, "cells": len(got),
+                "mode_state_diffs": None, "mode_diffs_all_ties": None,
+                "detail": str(e)[:400]}
+
+    mask = got["mode_state"] != want["mode_state"]
+    n_diff = int(mask.sum())
+    if n_diff == 0:
+        return {"pass": True, "cells": len(got),
+                "mode_state_diffs": 0, "mode_diffs_all_ties": True}
+
+    diff_cells = (
+        got.filter(mask)
+        .select(_PANEL_KEYS + ["mode_state"]).rename({"mode_state": "got_mode"})
+        .with_columns(want.filter(mask)["mode_state"].alias("want_mode"))
+    )
+    all_ties = (
+        _verify_mode_ties(diff_cells, *staged_pair) if staged_pair else False
+    )
+    return {"pass": bool(all_ties), "cells": len(got),
+            "mode_state_diffs": n_diff, "mode_diffs_all_ties": bool(all_ties)}
 
 
 # ---------------------------------------------------------------------------
@@ -351,7 +425,8 @@ def process_quarter(year: int, quarter: str, spec_index: int, manifest: dict) ->
 
     gate = None
     if tag == "FNMA2019Q1" and FANNIE_PANEL_PATH.exists():
-        gate = gate_2019q1_cells(cells_out, FANNIE_PANEL_PATH)
+        gate = gate_2019q1_cells(cells_out, FANNIE_PANEL_PATH,
+                                 staged_pair=(orig, perf))
         print(f"[{tag}] 2019Q1 determinism gate: "
               f"{'PASS' if gate['pass'] else 'FAIL'}")
         if not gate["pass"]:
