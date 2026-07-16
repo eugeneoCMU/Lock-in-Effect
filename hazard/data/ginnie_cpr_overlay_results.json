@@ -1,0 +1,125 @@
+{
+  "mode": "ginnie_cpr_overlay",
+  "spec": "round-15 Q2; 20.4% share scored by published Ginnie series in both legs",
+  "series_source": {
+    "document": "Ginnie Mae Global Markets Analysis Report, December 2025 issue",
+    "url": "https://www.ginniemae.gov/data_and_reports/reporting/Documents/global_market_analysis_dec25.pdf",
+    "figures": "Figure 12 (CPR), 13 (CDR), 14 (CRR); data: Recursion, as of Nov 2025",
+    "methodology_note": "aggregation revised to weighted-average UPB in the Dec-2025 issue",
+    "extraction": "vector-polyline vertices; slope from gridline-label spacing, offset from printed endpoint labels"
+  },
+  "series_validation": {
+    "cpr_endpoint_residual_pp": {
+      "fannie": -0.0174,
+      "freddie": -0.0075,
+      "ginnie": 0.0249
+    },
+    "cdr_endpoint_residual_pp": {
+      "fannie": 0.0332,
+      "freddie": -0.018,
+      "ginnie": -0.0152
+    },
+    "crr_endpoint_residual_pp": {
+      "fannie": 0.0006,
+      "freddie": -0.0115,
+      "ginnie": 0.011
+    },
+    "cpr_vs_crr_cdr_identity_pp": {
+      "mean_abs": 0.0398,
+      "max_abs": 0.2016
+    }
+  },
+  "committed_anchors": {
+    "central_trapped_b": 818.5300844066606,
+    "null_trapped_b": 748.1850239867648,
+    "netting_b": 69.56220187263008,
+    "benchmark_b": 764.7482532227002
+  },
+  "gates": {
+    "G1_parity": {
+      "central_diff_b": -1.1368683772161603e-13,
+      "null_diff_b": 3.410605131648481e-13,
+      "pass": true
+    },
+    "G3_static_bound": {
+      "primary_central_adjustment_b": 66.27510387196989,
+      "static_bound_b": [
+        20.3,
+        47.3
+      ],
+      "verdict": "bound_revision",
+      "window_mean_ginnie_minus_freddie_pp": 2.1365238095238093,
+      "window_mean_ginnie_minus_gse_mean_pp": 2.107273809523809,
+      "static_bound_snapshot_differentials_pp": [
+        1.2,
+        2.8
+      ],
+      "differential_attribution": {
+        "primary_minus_placebo_b": 38.46377362166024,
+        "share_of_benchmark_pct": 5.029599408638244,
+        "verdict_differential": "inside_static_bound",
+        "linearized_check_b": 36.088450971428564
+      }
+    }
+  },
+  "variants": {
+    "primary": {
+      "central": {
+        "trapped_b": 752.2549805346908,
+        "share_pct": 98.36635485790757,
+        "adjustment_sum_b": 66.27510387196989,
+        "mean_series_minus_model_pp": 3.5735343760808447,
+        "share_shared_pct": 89.27026322520486
+      },
+      "null": {
+        "trapped_b": 696.1602261410826,
+        "share_pct": 91.03129339719534,
+        "adjustment_sum_b": 52.02479784568226,
+        "mean_series_minus_model_pp": 2.7231533170766835,
+        "share_shared_pct": 81.93520176449263
+      },
+      "marginal_b": 56.09475439360824,
+      "marginal_pp": 7.335061460712228,
+      "marginal_sign_positive": true
+    },
+    "crr_only": {
+      "central": {
+        "trapped_b": 771.0677225528665,
+        "share_pct": 100.82634635692669,
+        "adjustment_sum_b": 47.46236185379421,
+        "mean_series_minus_model_pp": 2.5317724713189405,
+        "share_shared_pct": 91.73025472422398
+      },
+      "null": {
+        "trapped_b": 714.9868304695531,
+        "share_pct": 93.49309755943224,
+        "adjustment_sum_b": 33.19819351721175,
+        "mean_series_minus_model_pp": 1.681391412314779,
+        "share_shared_pct": 84.39700592672953
+      },
+      "marginal_b": 56.080892083313415,
+      "marginal_pp": 7.333248797494442,
+      "marginal_sign_positive": true
+    },
+    "gse_placebo": {
+      "central": {
+        "trapped_b": 790.718754156351,
+        "share_pct": 103.3959542665458,
+        "adjustment_sum_b": 27.811330250309656,
+        "mean_series_minus_model_pp": 1.4662605665570356,
+        "share_shared_pct": 94.2998626338431
+      },
+      "null": {
+        "trapped_b": 734.650456916664,
+        "share_pct": 96.06435239581103,
+        "adjustment_sum_b": 13.534567070100927,
+        "mean_series_minus_model_pp": 0.6158795075528742,
+        "share_shared_pct": 86.96826076310832
+      },
+      "marginal_b": 56.06829723968701,
+      "marginal_pp": 7.331601870734776,
+      "marginal_sign_positive": true
+    }
+  },
+  "note": "Published series is full-universe Ginnie collateral; SOMA's Ginnie holdings are seasoned/low-coupon, so the overlay if anything OVERSTATES the correction \u2014 same signed direction as the static bound. Structural Ginnie inclusion remains formally declined (2026-07-15)."
+}

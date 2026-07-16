@@ -203,6 +203,25 @@ def main() -> None:
     print(f"G3: primary adjustment {adj:+.2f}B vs bound {STATIC_BOUND_B} -> {g3['verdict']}; "
           f"window-mean G-FRE diff {g3['window_mean_ginnie_minus_freddie_pp']:.2f}pp")
 
+    # Amendment (disclosed, post-first-run): the static bound is built on
+    # DIFFERENTIALS (Ginnie minus conventional), while the raw primary
+    # adjustment also carries the level component common to the GSE placebo
+    # (full-universe-vs-SOMA composition + model level calibration). The
+    # like-for-like object for the G3 bound comparison is primary minus
+    # placebo; both raw and differential verdicts are reported.
+    diff_adj = adj - results["gse_placebo"]["central"]["adjustment_sum_b"]
+    g3["differential_attribution"] = {
+        "primary_minus_placebo_b": diff_adj,
+        "share_of_benchmark_pct": diff_adj / BENCHMARK_B * 100.0,
+        "verdict_differential": ("inside_static_bound"
+                                 if STATIC_BOUND_B[0] <= diff_adj <= STATIC_BOUND_B[1]
+                                 else "bound_revision"),
+        "linearized_check_b": g3["window_mean_ginnie_minus_freddie_pp"] * GINNIE_SHARE * 82.8,
+    }
+    print(f"G3 differential attribution: {diff_adj:+.2f}B "
+          f"({diff_adj/BENCHMARK_B*100:.1f}% of benchmark) -> "
+          f"{g3['differential_attribution']['verdict_differential']}")
+
     payload = {
         "mode": "ginnie_cpr_overlay",
         "spec": "round-15 Q2; 20.4% share scored by published Ginnie series in both legs",
