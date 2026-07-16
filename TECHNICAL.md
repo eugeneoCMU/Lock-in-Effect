@@ -2312,6 +2312,47 @@ G1/G2+verdict+composition shares; external-gates G1/G2+floor-violation+2
 literals): 32 gates, ALL PASS. The .md/.txt editions remain stale from
 round 14 (pandoc absent — standing item on the author).
 
+### 25.5 Q10 expectations benchmark (spec 88ef11e; amendment ef3e317;
+### transcription b8ad13c; run 24be41b)
+
+Executed 2026-07-16 on the author's go-ahead, closing the last
+pre-committed-but-blocked spec. SOURCE AMENDMENT (committed BEFORE the
+transcription commit so the ordering is git-auditable): the spec pinned
+"OMO During 2022" but its binding clauses (QT-start vintage; full
+Jun-2022–Nov-2025 window) are satisfiable only by the report published
+during 2022 — "OMO During 2021" (May 2022; projections from the
+Feb-28-2022 balance sheet, May-2022 Plans, runoff modeled from June 2022);
+the During-2022 report projects from the Dec-30-2022 balance sheet and has
+no agency-MBS paydown series. The spec's nyfed2022 identification was also
+wrong (that bib key is the Sept-2022 Teller Window post). TRANSCRIPTION:
+five published year-end agency-MBS levels from the NY Fed's own chart-data
+workbook (omo2021-xls.xlsx, sheet 'Chart 34': 2021=2615.5 historical;
+2022=2599.6, 2023=2319.9, 2024=2072.8, 2025=1849.7 projected, $B); runoff
+= first difference; adversarially verified by a 3-agent workflow pass
+before commit (independent workbook re-read with column-swap ruled out
+against known 2010/2021 holdings; chart-render match; printed anchors
+'roughly 68/32 composition', '$5.9T mid-2025 plateau', '$2.61T (32%)'
+YE2021; the workbook cover sheet carries the NY Fed's own 'May 2021'
+release-date typo, noted). Gate (i) disclosed as reducing to a telescoping
+identity for a levels-format source (verification weight on the workbook
+citation + this record). RESULTS: projected window runoff $740.583B
+(spread rule: uniform within printed year, clipped; 7/12 of 2022, 11/12 of
+2025) vs actual $652.752B (SOMA source) → E-benchmark $87.832B (11.5% of
+the cap-relative $764.748B). Parity gate EXACT (0.00pp, all five
+estimators); identity gate machine-precision. Threshold: null share_E
+851.8% > 50% → mechanical-majority SURVIVES. Load-bearing trigger FIRES
+(mechanically, benchmark ratio 8.71×) → manuscript states pp magnitudes
+are cap-basis (III.D canonical paragraph + V.D pointer). HEADLINE (the
+supplementary wedge, computed not hard-coded): the ex-ante projection
+already implied $676.92B = 88.51% of the realized cap-shortfall, vs the
+null's benchmark-consistent 88.74% — 0.22pp apart; the identified marginal
++$70.35B = 80.1% of the expectations-based shortfall. Manuscript: III.D
+expectations-complement paragraph, V.D basis sentence, VI.B cap-rule
+backtest sentence (caps ≈ 2× the Fed's own contemporaneous projection of
+achievable runoff: 1417.5 vs 740.6). Artifact:
+expectation_benchmark_results.json; liveness gate #33 cross-checks
+threshold/parity/literals.
+
 ## Appendix A — File Map
 
 ```

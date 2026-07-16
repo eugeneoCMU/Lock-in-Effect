@@ -30,6 +30,7 @@ FANNIE_RESULTS = ROOT / "hazard" / "data" / "fannie_replication_results.json"
 OVERLAY_RESULTS = ROOT / "hazard" / "data" / "ginnie_cpr_overlay_results.json"
 DECOMP_RESULTS = ROOT / "hazard" / "data" / "marginal_decomposition_results.json"
 ABMEXT_RESULTS = ROOT / "abm" / "data" / "abm_external_gates_results.json"
+EXPECT_RESULTS = ROOT / "hazard" / "data" / "expectation_benchmark_results.json"
 
 ZERO_COUNT = [
     "production specification omits",
@@ -257,6 +258,30 @@ def main() -> int:
         f"G1/G2 pass, floor-violation={ext['floor_diagnostic']['violates_observed_floor']}, "
         f"tex run-citation count={claims} (want 1), literals "
         f"{lit_share!r}/{lit_scale!r} present={lit_share in tex}/{lit_scale in tex}"
+    )
+
+    # Round-15 Q10: the expectations-benchmark sentences must agree with the
+    # committed artifact — the threshold must have survived, parity must be
+    # inside tolerance, and the printed literals must be the artifact's,
+    # rounded as printed.
+    exp = json.loads(EXPECT_RESULTS.read_text())
+    claims = tex.count("run \\texttt{expectation\\_benchmark}")
+    wedge = exp["supplementary_projection_wedge"]
+    lit_proj = f"\\${exp['window']['projected_runoff_window_b']:.1f}"
+    lit_e = f"\\${exp['e_benchmark_b']:.1f}"
+    lit_wedge_share = f"{wedge['expected_share_of_realized_cap_shortfall_pct']:.1f}\\%"
+    max_parity = max(abs(v) for v in exp["gates"]["ii_cap_parity"].values())
+    ok = (bool(exp["threshold"]["mechanical_majority_survives"])
+          and max_parity <= 0.01
+          and claims == 1
+          and lit_proj in tex and lit_e in tex and lit_wedge_share in tex)
+    failures += 0 if ok else 1
+    print(
+        f"[{'PASS' if ok else 'FAIL'}] cross-check expectation benchmark: "
+        f"threshold survives={exp['threshold']['mechanical_majority_survives']}, "
+        f"max parity |diff|={max_parity:.1e}pp, tex run-citation count={claims} "
+        f"(want 1), literals {lit_proj!r}/{lit_e!r}/{lit_wedge_share!r} "
+        f"present={lit_proj in tex}/{lit_e in tex}/{lit_wedge_share in tex}"
     )
 
     print(f"\n{'ALL GATES PASS' if failures == 0 else f'{failures} GATE(S) FAILED'}")
