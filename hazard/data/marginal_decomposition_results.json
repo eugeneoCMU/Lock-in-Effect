@@ -1,0 +1,165 @@
+{
+  "mode": "marginal_decomposition",
+  "spec": "round-15 Q3 group-ablation; grid vintage x coupon {<3.0,3.0-4.0,>=4.0}%",
+  "engine": "production US regime, fractional mode, seed RNG_SEED, committed 75k sample",
+  "basis": "standalone scorer; marginal basis-invariant per manuscript Sec V",
+  "gates": {
+    "G1_central_parity": {
+      "trapped_b": 818.5300844066606,
+      "diff_b": 0.0,
+      "pass": true
+    },
+    "G2_null_parity": {
+      "trapped_b": 748.1850239867648,
+      "diff_b": 0.0,
+      "pass": true
+    },
+    "G3_additivity": {
+      "sum_cells_b": 69.62034818884888,
+      "committed_total_b": 70.34506041989584,
+      "residual_b": 0.7247122310469649,
+      "residual_frac_of_total": 0.010302247616550388,
+      "threshold_frac": 0.1,
+      "verdict": "shares_readable"
+    }
+  },
+  "benchmark_b": 764.7482532227002,
+  "cells": [
+    {
+      "vintage": 2017,
+      "coupon_bucket": "<3.0%",
+      "n_loans": 86,
+      "balance_share_pct": 0.07313331541756554,
+      "marginal_b": 0.07677043253556803,
+      "marginal_pp": 0.010038654186139334,
+      "share_of_sum_pct": 0.1102701071349488
+    },
+    {
+      "vintage": 2017,
+      "coupon_bucket": "3.0-4.0%",
+      "n_loans": 4099,
+      "balance_share_pct": 2.6969876895496756,
+      "marginal_b": 2.172136265644326,
+      "marginal_pp": 0.28403285087488583,
+      "share_of_sum_pct": 3.1199732867642256
+    },
+    {
+      "vintage": 2017,
+      "coupon_bucket": ">=4.0%",
+      "n_loans": 10817,
+      "balance_share_pct": 5.918685543265771,
+      "marginal_b": 4.206770234681358,
+      "marginal_pp": 0.5500856284344223,
+      "share_of_sum_pct": 6.0424435443360185
+    },
+    {
+      "vintage": 2018,
+      "coupon_bucket": "<3.0%",
+      "n_loans": 1,
+      "balance_share_pct": 0.0016592654656659134,
+      "marginal_b": 0.002017113396846071,
+      "marginal_pp": 0.0002637617527527288,
+      "share_of_sum_pct": 0.00289730437913718
+    },
+    {
+      "vintage": 2018,
+      "coupon_bucket": "3.0-4.0%",
+      "n_loans": 854,
+      "balance_share_pct": 0.48878569595111937,
+      "marginal_b": 0.3743451711648049,
+      "marginal_pp": 0.04895011784430881,
+      "share_of_sum_pct": 0.5376950574124879
+    },
+    {
+      "vintage": 2018,
+      "coupon_bucket": ">=4.0%",
+      "n_loans": 14144,
+      "balance_share_pct": 6.339114741131831,
+      "marginal_b": 3.749678963661154,
+      "marginal_pp": 0.49031546628053824,
+      "share_of_sum_pct": 5.385895160262559
+    },
+    {
+      "vintage": 2019,
+      "coupon_bucket": "<3.0%",
+      "n_loans": 105,
+      "balance_share_pct": 0.11668182419826854,
+      "marginal_b": 0.09592267544940114,
+      "marginal_pp": 0.012543039496354071,
+      "share_of_sum_pct": 0.13777965486355484
+    },
+    {
+      "vintage": 2019,
+      "coupon_bucket": "3.0-4.0%",
+      "n_loans": 5739,
+      "balance_share_pct": 5.756357349326596,
+      "marginal_b": 4.8563071920096945,
+      "marginal_pp": 0.6350203706311053,
+      "share_of_sum_pct": 6.975413536911226
+    },
+    {
+      "vintage": 2019,
+      "coupon_bucket": ">=4.0%",
+      "n_loans": 9157,
+      "balance_share_pct": 5.652710538671018,
+      "marginal_b": 3.8536302612695863,
+      "marginal_pp": 0.5039083443512464,
+      "share_of_sum_pct": 5.535206820305481
+    },
+    {
+      "vintage": 2020,
+      "coupon_bucket": "<3.0%",
+      "n_loans": 6123,
+      "balance_share_pct": 15.485796368166177,
+      "marginal_b": 11.827934975085554,
+      "marginal_pp": 1.546644261721664,
+      "share_of_sum_pct": 16.989192503033244
+    },
+    {
+      "vintage": 2020,
+      "coupon_bucket": "3.0-4.0%",
+      "n_loans": 7955,
+      "balance_share_pct": 14.237161468091609,
+      "marginal_b": 12.174367823835382,
+      "marginal_pp": 1.59194450886704,
+      "share_of_sum_pct": 17.486795370244003
+    },
+    {
+      "vintage": 2020,
+      "coupon_bucket": ">=4.0%",
+      "n_loans": 919,
+      "balance_share_pct": 0.9223391516908871,
+      "marginal_b": 0.6613484071021958,
+      "marginal_pp": 0.08647923082076087,
+      "share_of_sum_pct": 0.9499355063669794
+    },
+    {
+      "vintage": 2021,
+      "coupon_bucket": "<3.0%",
+      "n_loans": 8561,
+      "balance_share_pct": 24.657185534243172,
+      "marginal_b": 14.443841483435222,
+      "marginal_pp": 1.8887053906390645,
+      "share_of_sum_pct": 20.746580359316123
+    },
+    {
+      "vintage": 2021,
+      "coupon_bucket": "3.0-4.0%",
+      "n_loans": 6196,
+      "balance_share_pct": 17.186179716326315,
+      "marginal_b": 10.858223464612024,
+      "marginal_pp": 1.4198428592487455,
+      "share_of_sum_pct": 15.596336052727743
+    },
+    {
+      "vintage": 2021,
+      "coupon_bucket": ">=4.0%",
+      "n_loans": 244,
+      "balance_share_pct": 0.4672217985043239,
+      "marginal_b": 0.26705372496576274,
+      "marginal_pp": 0.03492047531202334,
+      "share_of_sum_pct": 0.38358573594226414
+    }
+  ],
+  "runtime_s": 190.2
+}
