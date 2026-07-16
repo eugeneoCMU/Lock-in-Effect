@@ -1,0 +1,207 @@
+{
+  "mode": "floor_cyclical",
+  "spec": "hazard/floor_cyclical.py module docstring (fixed ex ante)",
+  "git_commit": "47e8ea90daab56108b6e8aef79d59d8eeebb50a1",
+  "created_utc": "2026-07-16T06:44:21+00:00",
+  "floor_law": "floor_t = 0.04 * (1 + kappa * z_t), z_t standardized QT-window MORTGAGE30US (ddof=1), clipped >= 0, window-mean pinned at 4%",
+  "kappa_grid": [
+    -0.5,
+    -0.25,
+    -0.1,
+    0.0,
+    0.1,
+    0.25,
+    0.5
+  ],
+  "cells": [
+    {
+      "kappa": -0.5,
+      "null": {
+        "kappa": -0.5,
+        "p_q_shock_pct": 0.0,
+        "beta1": 0.0,
+        "trapped_b": 706.8907415746964,
+        "share_pct": 92.4344369007463,
+        "clip_bound": true
+      },
+      "central": {
+        "kappa": -0.5,
+        "p_q_shock_pct": 6.5,
+        "beta1": -0.06857052676484808,
+        "trapped_b": 774.9690093050675,
+        "share_pct": 101.33648635865416,
+        "clip_bound": true
+      },
+      "lockin_marginal_b": 68.07826773037107,
+      "lockin_marginal_share_pp": 8.90204945790785,
+      "clip_bound": true
+    },
+    {
+      "kappa": -0.25,
+      "null": {
+        "kappa": -0.25,
+        "p_q_shock_pct": 0.0,
+        "beta1": 0.0,
+        "trapped_b": 731.5911014014721,
+        "share_pct": 95.66430499429039,
+        "clip_bound": false
+      },
+      "central": {
+        "kappa": -0.25,
+        "p_q_shock_pct": 6.5,
+        "beta1": -0.06857052676484808,
+        "trapped_b": 802.5195683404571,
+        "share_pct": 104.93905215979062,
+        "clip_bound": false
+      },
+      "lockin_marginal_b": 70.92846693898503,
+      "lockin_marginal_share_pp": 9.27474716550023,
+      "clip_bound": false
+    },
+    {
+      "kappa": -0.1,
+      "null": {
+        "kappa": -0.1,
+        "p_q_shock_pct": 0.0,
+        "beta1": 0.0,
+        "trapped_b": 742.8111569717513,
+        "share_pct": 97.13146173809426,
+        "clip_bound": false
+      },
+      "central": {
+        "kappa": -0.1,
+        "p_q_shock_pct": 6.5,
+        "beta1": -0.06857052676484808,
+        "trapped_b": 814.390224271435,
+        "share_pct": 106.4912826985273,
+        "clip_bound": false
+      },
+      "lockin_marginal_b": 71.57906729968374,
+      "lockin_marginal_share_pp": 9.35982096043304,
+      "clip_bound": false
+    },
+    {
+      "kappa": 0.0,
+      "null": {
+        "kappa": 0.0,
+        "p_q_shock_pct": 0.0,
+        "beta1": 0.0,
+        "trapped_b": 748.1850239867648,
+        "share_pct": 97.83415925879702,
+        "clip_bound": false
+      },
+      "central": {
+        "kappa": 0.0,
+        "p_q_shock_pct": 6.5,
+        "beta1": -0.06857052676484808,
+        "trapped_b": 818.5300844066606,
+        "share_pct": 107.0326190295068,
+        "clip_bound": false
+      },
+      "lockin_marginal_b": 70.34506041989584,
+      "lockin_marginal_share_pp": 9.198459770709789,
+      "clip_bound": false
+    },
+    {
+      "kappa": 0.1,
+      "null": {
+        "kappa": 0.1,
+        "p_q_shock_pct": 0.0,
+        "beta1": 0.0,
+        "trapped_b": 751.3609889238941,
+        "share_pct": 98.24945473985834,
+        "clip_bound": false
+      },
+      "central": {
+        "kappa": 0.1,
+        "p_q_shock_pct": 6.5,
+        "beta1": -0.06857052676484808,
+        "trapped_b": 819.0456236002738,
+        "share_pct": 107.10003195806735,
+        "clip_bound": false
+      },
+      "lockin_marginal_b": 67.68463467637969,
+      "lockin_marginal_share_pp": 8.850577218209011,
+      "clip_bound": false
+    },
+    {
+      "kappa": 0.25,
+      "null": {
+        "kappa": 0.25,
+        "p_q_shock_pct": 0.0,
+        "beta1": 0.0,
+        "trapped_b": 750.4809692594042,
+        "share_pct": 98.13438162124952,
+        "clip_bound": false
+      },
+      "central": {
+        "kappa": 0.25,
+        "p_q_shock_pct": 6.5,
+        "beta1": -0.06857052676484808,
+        "trapped_b": 813.0886676054326,
+        "share_pct": 106.32108856463844,
+        "clip_bound": false
+      },
+      "lockin_marginal_b": 62.60769834602843,
+      "lockin_marginal_share_pp": 8.186706943388927,
+      "clip_bound": false
+    },
+    {
+      "kappa": 0.5,
+      "null": {
+        "kappa": 0.5,
+        "p_q_shock_pct": 0.0,
+        "beta1": 0.0,
+        "trapped_b": 736.7444619065666,
+        "share_pct": 96.33816864594019,
+        "clip_bound": true
+      },
+      "central": {
+        "kappa": 0.5,
+        "p_q_shock_pct": 6.5,
+        "beta1": -0.06857052676484808,
+        "trapped_b": 791.0008954309434,
+        "share_pct": 103.43284761980335,
+        "clip_bound": true
+      },
+      "lockin_marginal_b": 54.2564335243768,
+      "lockin_marginal_share_pp": 7.094678973863168,
+      "clip_bound": true
+    }
+  ],
+  "parity_gate_kappa0": {
+    "central_trapped_b": {
+      "got": 818.5300844066606,
+      "want": 818.5300844066606,
+      "pass": true
+    },
+    "null_trapped_b": {
+      "got": 748.1850239867648,
+      "want": 748.1850239867648,
+      "pass": true
+    },
+    "lockin_marginal_b": {
+      "got": 70.34506041989584,
+      "want": 70.34506041989584,
+      "pass": true
+    },
+    "lockin_marginal_share_pp": {
+      "got": 9.198459770709789,
+      "want": 9.198459770709789,
+      "pass": true
+    }
+  },
+  "parity_gate_pass": true,
+  "level_sweep_envelope_pp": {
+    "min": 5.535532141494471,
+    "max": 10.819044355999424,
+    "source": "floor_sweep_results.json, p_q 6.5, floors 3-5%"
+  },
+  "marginal_range_pp": {
+    "min": 7.094678973863168,
+    "max": 9.35982096043304
+  },
+  "all_cells_inside_level_envelope": true,
+  "verdict": "cyclicality bounded by the reported level sweep; acyclical-floor concession stands as written",
+  "runtime_s": 238.1
+}
