@@ -1,0 +1,136 @@
+{
+  "mode": "fannie_replication",
+  "spec": "hazard/fannie_replication.py module docstring (fixed ex ante)",
+  "git_commit": "506b674b5d780fadb5fe858fa9d67e23167fd861",
+  "created_utc": "2026-07-16T09:40:33+00:00",
+  "acquisition_quarters": [
+    "2017Q1",
+    "2017Q2",
+    "2017Q3",
+    "2017Q4",
+    "2018Q1",
+    "2018Q2",
+    "2018Q3",
+    "2018Q4",
+    "2019Q1",
+    "2019Q2",
+    "2019Q3",
+    "2019Q4",
+    "2020Q1",
+    "2020Q2",
+    "2020Q3",
+    "2020Q4",
+    "2021Q1",
+    "2021Q2",
+    "2021Q3",
+    "2021Q4",
+    "2022Q1",
+    "2022Q2",
+    "2022Q3",
+    "2022Q4"
+  ],
+  "vintage_years": [
+    2017,
+    2018,
+    2019,
+    2020,
+    2021
+  ],
+  "zbc_treatment": {
+    "prepay": [
+      "01"
+    ],
+    "credit_event": [
+      "02",
+      "03",
+      "09",
+      "15"
+    ],
+    "censored_non_credit": [
+      "06",
+      "16"
+    ],
+    "asserted_absent": [
+      "96",
+      "97",
+      "98"
+    ],
+    "bracket_06_16_share_of_removals_2019q1": 0.0038
+  },
+  "level_comparison_caveat": "Replication claim is sign + floor/band-conditional marginal consistency, not a hazard-level match (Freddie ZBC-01 absorption of Fannie 06/16-type exits unresolved; bracket 0.38% of removals).",
+  "universe": {
+    "quarters_processed": 24,
+    "staged_loans_total": 17606999,
+    "staged_rows_total": 825814383,
+    "panel_cells": 23443,
+    "sample_n_loans": 75000,
+    "sample_n_strata": 130,
+    "pool_rows_total": 267996
+  },
+  "path_a": {
+    "fannie_rate_gap_coef_std": 2.342545933144025,
+    "freddie_rate_gap_coef_std": 0.6468566611612588,
+    "fannie_rate_gap_per_bps": 0.010642691157325856,
+    "freddie_rate_gap_per_bps": 0.002927387160876776,
+    "sign_match": true,
+    "per_bps_ratio_fannie_over_freddie": 3.635559826032128,
+    "fannie_n_train": 10140,
+    "fannie_n_holdout": 6925,
+    "fannie_n_strata": 293,
+    "fannie_holdout_r2": -0.051056857498058994,
+    "spec_version": 4,
+    "coef_artifact": "hazard_coefficients_fannie.json (local only, not committed)"
+  },
+  "path_b": {
+    "central_trapped_b": 820.9947103314821,
+    "central_share_pct": 107.35489840895427,
+    "null_trapped_b": 754.5955532897058,
+    "null_share_pct": 98.67241279856341,
+    "lockin_marginal_b": 66.39915704177633,
+    "lockin_marginal_share_pp": 8.682485610390856
+  },
+  "gates": {
+    "parity_freddie": {
+      "null_trapped_b": {
+        "got": 748.1850239867648,
+        "want": 748.1850239867648,
+        "tol": 0.01,
+        "pass": true
+      },
+      "null_share_pct": {
+        "got": 97.83415925879702,
+        "want": 97.83415925879702,
+        "tol": 0.01,
+        "pass": true
+      },
+      "central_trapped_b": {
+        "got": 818.5300844066606,
+        "want": 818.5300844066606,
+        "tol": 0.01,
+        "pass": true
+      },
+      "central_share_pct": {
+        "got": 107.0326190295068,
+        "want": 107.0326190295068,
+        "tol": 0.01,
+        "pass": true
+      },
+      "pass": true
+    },
+    "gate_2019q1": {
+      "pass": true,
+      "cells": 9534,
+      "mode_state_diffs": 15,
+      "mode_diffs_all_ties": true
+    },
+    "gate_envelope": {
+      "marginal_pp": 8.682485610390856,
+      "box_min": 2.113539257759882,
+      "box_max": 13.17046899604594,
+      "positive": true,
+      "in_envelope": true,
+      "pass": true
+    }
+  },
+  "runtime_s": 4589.2
+}
