@@ -27,6 +27,9 @@ ROOT = Path(__file__).resolve().parent.parent
 TEX = ROOT / "paper" / "v16" / "revised_paper_v16.tex"
 MANIFEST = ROOT / "abm" / "data" / "runs" / "run-2026-07-04-15yr-foldin" / "manifest.json"
 FANNIE_RESULTS = ROOT / "hazard" / "data" / "fannie_replication_results.json"
+OVERLAY_RESULTS = ROOT / "hazard" / "data" / "ginnie_cpr_overlay_results.json"
+DECOMP_RESULTS = ROOT / "hazard" / "data" / "marginal_decomposition_results.json"
+ABMEXT_RESULTS = ROOT / "abm" / "data" / "abm_external_gates_results.json"
 
 ZERO_COUNT = [
     "production specification omits",
@@ -185,6 +188,75 @@ def main() -> int:
         f"artifact envelope pass={env['pass']}, tex run-citation count="
         f"{claims} (want 1), marginal literals {marg_b!r}/{marg_pp!r} "
         f"present={marg_b in tex}/{marg_pp in tex}"
+    )
+
+    # Round-15 Q2: the Ginnie CPR overlay sentences must agree with the
+    # committed artifact — G1 parity passed, the differential attribution
+    # verdict is inside_static_bound, and the printed corrected shares and
+    # differential are the artifact's, rounded as printed.
+    ov = json.loads(OVERLAY_RESULTS.read_text())
+    g3d = ov["gates"]["G3_static_bound"]["differential_attribution"]
+    prim = ov["variants"]["primary"]
+    claims = tex.count("run \\texttt{ginnie\\_cpr\\_overlay}")
+    lit_central = f"{prim['central']['share_shared_pct']:.1f}\\%"
+    lit_null = f"{prim['null']['share_shared_pct']:.1f}\\%"
+    lit_diff = f"+\\${g3d['primary_minus_placebo_b']:.1f}"
+    ok = (bool(ov["gates"]["G1_parity"]["pass"])
+          and g3d["verdict_differential"] == "inside_static_bound"
+          and claims == 1
+          and lit_central in tex and lit_null in tex and lit_diff in tex)
+    failures += 0 if ok else 1
+    print(
+        f"[{'PASS' if ok else 'FAIL'}] cross-check ginnie overlay: "
+        f"G1 pass={ov['gates']['G1_parity']['pass']}, differential verdict="
+        f"{g3d['verdict_differential']}, tex run-citation count={claims} "
+        f"(want 1), literals {lit_central!r}/{lit_null!r}/{lit_diff!r} "
+        f"present={lit_central in tex}/{lit_null in tex}/{lit_diff in tex}"
+    )
+
+    # Round-15 Q3: the marginal-decomposition sentences must agree with the
+    # committed artifact — parity gates passed, the additivity verdict is
+    # shares_readable, and the printed composition shares are the artifact's.
+    dec = json.loads(DECOMP_RESULTS.read_text())
+    g3 = dec["gates"]["G3_additivity"]
+    claims = tex.count("run \\texttt{marginal\\_decomposition}")
+    cells = dec["cells"]
+    top = max(c["share_of_sum_pct"] for c in cells)
+    v2021 = sum(c["marginal_b"] for c in cells if c["vintage"] >= 2020)
+    v_share = v2021 / g3["sum_cells_b"] * 100
+    ok = (bool(dec["gates"]["G1_central_parity"]["pass"])
+          and bool(dec["gates"]["G2_null_parity"]["pass"])
+          and g3["verdict"] == "shares_readable"
+          and claims == 1
+          and all(c["marginal_b"] > 0 for c in cells)
+          and abs(v_share - 72) < 1 and abs(top - 21) < 1)
+    failures += 0 if ok else 1
+    print(
+        f"[{'PASS' if ok else 'FAIL'}] cross-check marginal decomposition: "
+        f"G1/G2 pass, verdict={g3['verdict']}, tex run-citation count={claims} "
+        f"(want 1), all-cells-positive={all(c['marginal_b'] > 0 for c in cells)}, "
+        f"2020-21 share {v_share:.1f}% (printed 72%), max cell {top:.1f}% "
+        f"(printed 21%)"
+    )
+
+    # Round-15 Q4: the ABM external-gates sentences must agree with the
+    # committed artifact — both gates passed, and the printed recovery and
+    # mobility scales are the artifact's, rounded as printed.
+    ext = json.loads(ABMEXT_RESULTS.read_text())
+    claims = tex.count("run \\texttt{abm\\_external\\_gates}")
+    lit_share = f"{ext['results']['external']['share_pct']:.1f}\\%"
+    scale_ext = ext["external_parameters"]["mobility_scale_external"]
+    lit_scale = f"{scale_ext:,.0f}".replace(",", "{,}")
+    ok = (bool(ext["gates"]["G1_harness_parity"]["pass"])
+          and bool(ext["gates"]["G2_anchor"]["pass"])
+          and bool(ext["floor_diagnostic"]["violates_observed_floor"])
+          and claims == 1 and lit_share in tex and lit_scale in tex)
+    failures += 0 if ok else 1
+    print(
+        f"[{'PASS' if ok else 'FAIL'}] cross-check abm external gates: "
+        f"G1/G2 pass, floor-violation={ext['floor_diagnostic']['violates_observed_floor']}, "
+        f"tex run-citation count={claims} (want 1), literals "
+        f"{lit_share!r}/{lit_scale!r} present={lit_share in tex}/{lit_scale in tex}"
     )
 
     print(f"\n{'ALL GATES PASS' if failures == 0 else f'{failures} GATE(S) FAILED'}")

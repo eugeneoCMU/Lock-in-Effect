@@ -2211,6 +2211,107 @@ direction at the margin. Artifact:
 upgraded in the same manuscript pass as §24.1's edits (PDF rebuilt, all 28
 liveness gates PASS).
 
+## 25. Referee Round 15 — Coverage, Composition, and Calibration Runs (July 2026)
+
+Round-15 review (8 "Questions for Authors" + positive overall assessment;
+roadmap and response-letter skeleton at
+`paper/v16/revision_roadmap_round15.md`). Author ratified all four
+proposed decisions 2026-07-16 ("approve all"). Three data runs executed,
+each under a spec committed before execution; two new manuscript tables
+(tab:specbox, tab:uncertainty) and seven prose blocks added; three new
+liveness cross-checks (32 gates now, all PASS; PDF rebuilt, 68pp, zero
+undefined).
+
+### 25.1 Q3 marginal heterogeneity decomposition (spec 8d034c5, run d59ed49)
+
+Group-ablation of the +9.20pp Path B lock-in marginal over a vintage ×
+coupon-bucket grid ({2017..2021} × {<3.0, 3.0–4.0, ≥4.0}%): per cell, a
+paired engine run zeroing β₁ ONLY for that cell's loans (per-loan β₁
+vector; engine amendment in competing_risks.monthly_step is a pure
+generalization — a constant vector is elementwise bit-identical to the
+scalar path). Gates: G1/G2 parity BIT-EXACT (diff 0.0 vs committed central
+818.5300844B and null 748.1850240B); G3 additivity residual +0.725B =
++1.0% of the +70.345B total (ex-ante threshold 10%) → shares readable.
+Results: all 15 cells positive; 2020–21 vintages carry 72.2% of the
+marginal on 73.0% of balance; max cell 20.7% (2021 <3.0%); per-balance
+intensity 0.82–1.51×. Reading: the marginal is a book-wide property of
+the gap distribution, not one cohort's nonlinearity. Artifact:
+`hazard/data/marginal_decomposition_results.json`; manuscript sentence in
+V.D (sec:identification).
+
+### 25.2 Q2 Ginnie published-CPR overlay (spec 7ee589f, run 08c676b)
+
+Static $20–47B composition bound upgraded to a time-varying overlay. Data:
+monthly agency CPR/CDR/CRR series (Jun-2017–Nov-2025) extracted from the
+December 2025 GMAR chart VECTOR PATHS (tools/extract_gmar_dec25.py; the
+Dec-2025 issue is the only single-methodology source — its note records
+the aggregation revision to weighted-average UPB, where the 2022–2025
+issues span three chart/aggregation regimes; stitching 42 endpoint labels
+was designed, attempted, and REJECTED for that reason). Extraction
+validation: endpoint residuals ≤0.034pp vs printed labels; independently
+extracted CRR/CDR charts reproduce CPR to 0.04pp mean / 0.20pp max via
+1−(1−CRR)(1−CDR). Construction: 20.4% Ginnie face share scored by the
+observed series in BOTH Path B legs (settled-flow adjustment through the
+production scorer; SMM conversions per each side's own convention).
+Gates: G1 zero-differential parity exact (≤3.4e-13 B); G3 raw-adjustment
+verdict bound_revision (+66.28B > 47.3B) with the disclosed post-first-run
+amendment adding differential attribution: the GSE-mean placebo moves the
+level +27.81B on its own (model level calibration + full-universe-vs-SOMA
+composition, common to any observed-series overlay), so the
+Ginnie-SPECIFIC differential is +38.46B = 5.0% of benchmark — INSIDE the
+committed bound and matching the linearized check (2.14pp window-mean
+differential × 0.204 × 82.8 ≈ 36.1B). Headline sensitivities: central
+97.9→89.3% shared (107.0→98.4% standalone), null 88.7→81.9%, marginal
++7.34pp — sign-positive and variant-invariant (total-CPR/CRR-only/
+placebo: +7.33/+7.34), scaling by the conventional share exactly (0.797
+vs 0.796). Structural Ginnie inclusion remains formally declined
+(2026-07-15, response of record). Artifacts:
+`hazard/data/gmar_dec25_cpr_series.json` (provenance + validation),
+`hazard/data/ginnie_cpr_overlay_results.json`; manuscript paragraph in
+V.C after the static bound, VIII.A next-steps restated.
+
+### 25.3 Q4 ABM external-gates variant (spec 335797a, run aa65eee)
+
+Reviewer hypothesis: recovery rises without the turnover-floor
+recalibration when gates are externally parameterized. Design: DTI 0.43
+(CFPB) and λ=2.25 (K–T) already external, unchanged; wait-and-see freeze
+20%→18.26% (L&R 6.5%/qtr per 100bp compounded at the production 150bp/6mo
+trigger, 1−0.935³); mobility scale anchored to the L&R zero-gap moving
+level (1.5%/qtr = 5.87%/yr annualized, verbatim source quoted in the spec
+header) with NO floor reference. Cross-design harness (real Freddie
+covariates), same pre-registered bands. Gates: G1 harness parity EXACT
+(59.303% vs committed 59.303%, diff 0.0000pp); G2 anchor hit (zero-gap
+CPR 5.85%; scale 4,472 vs recalibrated 36,086 / frozen 43,883). Result:
+recovery rises to 150.6% of benchmark ($1,151.8B) — overshooting by half
+— while mean QT-window CPR collapses to ~0.0% and CPR(8% market) = 0.00%,
+violating the observed 4–5% discount-cohort band AND L&R's own observed
+deep-gap mobility (1.44–1.45%/qtr, 2022–2023). Reading: the exponential
+mobility-desire architecture can match the zero-gap level or the observed
+deep-gap turnover, not both; the floor anchor is the disciplining moment,
+not a suppressing artifact. Incident (disclosed): first launch KeyError'd
+on the committed cross-design JSON's `variants` nesting before any
+variant ran; script corrected, no results affected. Artifact:
+`abm/data/abm_external_gates_results.json` (+ cached external surface
+CSV); manuscript paragraph in VII (sec:robustness-crossdesign).
+
+### 25.4 Manuscript pass and gate-suite extension
+
+Eight assert-unique tex edits (backup .bak-round15): E1 tab:specbox
+(compact two-panel Path A/B specification, end of V.A — Q1); E2
+tab:uncertainty (sampling/seed/calibration on both bases; shared-basis
+CIs [97.9, 98.0]%/[88.7, 88.8]% derived from the committed bootstrap
+percentiles by the exact 9.0961pp netting — ARITHMETIC-FROM-ARTIFACTS)
++ E5 decomposition sentences, both in V.D (Q8/Q3); E3 Danish
+pricing-inertness sentence in V.C (Q6); E4 ex-ante cap-rule arithmetic
+appended to the VI.B speculative-design paragraph (Q7; no new numbers);
+E6 overlay paragraph in V.C (Q2); E7 external-gates paragraph in VII
+(Q4); E8 VIII.A next-steps restatement. Build: 68pp, zero undefined,
+residual overfulls ≤3pt. liveness_gates.py gains three manifest-vs-tex
+cross-checks (overlay G1+differential verdict+3 literals; decomposition
+G1/G2+verdict+composition shares; external-gates G1/G2+floor-violation+2
+literals): 32 gates, ALL PASS. The .md/.txt editions remain stale from
+round 14 (pandoc absent — standing item on the author).
+
 ## Appendix A — File Map
 
 ```
