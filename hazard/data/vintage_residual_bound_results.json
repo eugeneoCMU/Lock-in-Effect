@@ -1,0 +1,205 @@
+{
+  "mode": "vintage_residual_bound",
+  "spec": "round-16 W2; observed Fannie QT-window speeds bound the 2022/pre-2017 vintage extrapolation in the static Ginnie bound template (module docstring, fixed ex ante)",
+  "qt_window": {
+    "start": "2022-06-01",
+    "end_exclusive": "2025-12-01",
+    "months": 42,
+    "source": "common/qt_window.py (half-open, production convention)"
+  },
+  "cpr_convention": "pooled dollar SMM over the window (== exposure-weighted mean monthly SMM), compound-annualized CPR = 1-(1-SMM)^12 \u2014 house convention for observed speeds (ginnie_cpr_overlay.py / GMAR extraction); mean-monthly variant disclosed",
+  "committed_anchors": {
+    "benchmark_b": 764.7482532227002,
+    "sensitivity_b_per_pp": 82.8,
+    "sensitivity_source": "data/ginnie_bound.json trapped_sensitivity_b_per_pp (beta1=0 null vs central: $70.3B per 0.85pp mean CPR; tex 'roughly $83 billion per CPR point')",
+    "static_ginnie_bound_b": [
+      20.3,
+      47.3
+    ],
+    "lockin_marginal_b": 70.34506041989584,
+    "face_shares": {
+      "vintage_2022": 0.231,
+      "pre_2017": 0.106,
+      "source": "hazard/wal_table.py VINTAGE_SHARES (SOMA CUSIP tabulation, Table 6 note; tex sec:robustness-wal)"
+    }
+  },
+  "gates": {
+    "G2_manifest_integrity": {
+      "files_present": 24,
+      "files_expected": 24,
+      "manifest_tags_match_spec": true,
+      "per_file_rows_match_manifest": true,
+      "cells_rows_total": 175383,
+      "staged_loans_total": {
+        "got": 17606999,
+        "want": 17606999
+      },
+      "staged_rows_total": {
+        "got": 825814383,
+        "want": 825814383
+      },
+      "committed_artifact_tie": true,
+      "vintage_range": [
+        2010,
+        2022
+      ],
+      "vintage_range_ok": true,
+      "pass": true
+    },
+    "G1_parity": {
+      "exposure_upb": {
+        "got": 92571970958106.84,
+        "want": 92571970958106.84,
+        "rel_diff": 0.0,
+        "pass": true
+      },
+      "prepaid_upb": {
+        "got": 338652698406.20984,
+        "want": 338652698406.21,
+        "rel_diff": 5.406880547881154e-16,
+        "pass": true
+      },
+      "loan_count": {
+        "got": 393755296,
+        "want": 393755296,
+        "pass": true
+      },
+      "rel_tol": 1e-09,
+      "pass": true
+    },
+    "G4_constants_integrity": {
+      "sensitivity": {
+        "got": 82.8,
+        "want": 82.8,
+        "pass": true
+      },
+      "static_bound": {
+        "got": [
+          20.3,
+          47.3
+        ],
+        "want": [
+          20.3,
+          47.3
+        ],
+        "pass": true
+      },
+      "share_2022": {
+        "got": 0.231,
+        "want": 0.231,
+        "pass": true
+      },
+      "share_pre2017": {
+        "got": 0.106,
+        "want": 0.106,
+        "pass": true
+      },
+      "shares_sum": {
+        "got": 0.999,
+        "want": 0.999,
+        "pass": true
+      },
+      "benchmark": {
+        "got": 764.7482532227002,
+        "want": 764.7482532227002,
+        "pass": true
+      },
+      "pass": true
+    },
+    "G3_sanity": {
+      "expected_qt_months": 42,
+      "segment_coverage": {
+        "sampled_2017_2021": {
+          "months": 42,
+          "exposure_usd_t": 92.57197095810685
+        },
+        "vintage_2022": {
+          "months": 42,
+          "exposure_usd_t": 18.503922390102563
+        },
+        "pre_2017": {
+          "months": 42,
+          "exposure_usd_t": 0.5347301525433498
+        }
+      },
+      "coverage_pass": true,
+      "sampled_cpr_cells_pct": 4.302657826519651,
+      "sampled_cpr_panel_ratecol_pct": 4.302646560124412,
+      "abs_diff_pp": 1.1266395238962446e-05,
+      "tol_pp": 0.01,
+      "cross_construction_pass": true,
+      "pass": true
+    }
+  },
+  "results": {
+    "segments": {
+      "sampled_2017_2021": {
+        "cpr_pct": 4.302657826519651,
+        "mean_monthly_cpr_pct": 4.27875279667458,
+        "qt_months": 42,
+        "qt_loan_months": 393755296,
+        "qt_exposure_usd_t": 92.57197095810685,
+        "exposure_share_of_observed_pct": 82.94189930538512
+      },
+      "vintage_2022": {
+        "cpr_pct": 4.475590534559171,
+        "mean_monthly_cpr_pct": 4.50199037751084,
+        "qt_months": 42,
+        "qt_loan_months": 64762884,
+        "qt_exposure_usd_t": 18.503922390102563,
+        "exposure_share_of_observed_pct": 16.578997419522317,
+        "differential_pp": 0.17293270803951977
+      },
+      "pre_2017": {
+        "cpr_pct": 5.264339724557043,
+        "mean_monthly_cpr_pct": 5.158807679634769,
+        "qt_months": 42,
+        "qt_loan_months": 3445027,
+        "qt_exposure_usd_t": 0.5347301525433498,
+        "exposure_share_of_observed_pct": 0.47910327509257516,
+        "differential_pp": 0.9616818980373925
+      }
+    },
+    "differential_2022_pp": 0.17293270803951977,
+    "differential_pre2017_pp": 0.9616818980373925,
+    "leg_bound_2022_b": 3.3076493201302863,
+    "leg_bound_pre2017_b": 8.440489682694587,
+    "book_cpr_error_pp": 0.14188573674909266,
+    "bound_b": 11.748139002824871,
+    "bound_signed_b": 11.748139002824871,
+    "bound_pct_of_benchmark": 1.536209981953856,
+    "sign_direction": "overstates_trapped",
+    "sign_reading": "Out-of-sample vintages prepaid FASTER than the sampled universe over the QT window; the extrapolation error is signed toward OVERSTATING trapped liquidity \u2014 conservative for the headline, the same direction as the static Ginnie composition bound.",
+    "mean_monthly_variant": {
+      "differential_2022_pp": 0.22323758083625922,
+      "differential_pre2017_pp": 0.8800548829601889,
+      "leg_bound_2022_b": 4.269820561138963,
+      "leg_bound_pre2017_b": 7.724065696764986,
+      "book_cpr_error_pp": 0.1448536987669559,
+      "bound_b": 11.993886257903947,
+      "bound_signed_b": 11.993886257903947,
+      "bound_pct_of_benchmark": 1.5683443809594737
+    },
+    "interpretation": {
+      "verdict": "below_ginnie_bound",
+      "sentence": "The previously unbounded vintage extrapolation is bounded at $11.7B (1.5% of the $764.7B benchmark) \u2014 below the static Ginnie composition bound's lower edge ($20.3B) and 17% of the +$70.3B lock-in marginal.",
+      "thresholds": {
+        "ginnie_bound_b": [
+          20.3,
+          47.3
+        ],
+        "lockin_marginal_b": 70.34506041989584
+      }
+    }
+  },
+  "diagnostics": {
+    "gmar_dec25_fannie_full_universe_window_mean_cpr_pct": 6.2587142857142855,
+    "note": "non-gating context: full-universe published Fannie CPR includes post-2022 high-coupon production, expected to sit above the 2017-2021 acquisition subset"
+  },
+  "caveats": [
+    "Fannie observed speeds proxy the SOMA book (same posture as the GMAR overlay).",
+    "pre-2017 leg is a seasoned/selected acquisition-file tail (3,445,027 QT loan-months), not a random pre-2017 origination draw; the 10.6% face share is applied to it as-is.",
+    "2022 leg covers acquisitions through 2022Q4 while SOMA 2022 face skews to H1-2022 settlements (Q10 settlement-aware amendment).",
+    "face shares span the full book incl. Ginnie (20.4%); this bound and the agency bound overlap on Ginnie's out-of-sample vintages \u2014 one-dimensional bounds, not additive."
+  ]
+}
