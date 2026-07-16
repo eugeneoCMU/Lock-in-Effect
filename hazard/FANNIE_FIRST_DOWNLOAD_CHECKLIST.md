@@ -10,6 +10,12 @@ seasoned tail auto-filtered by VINTAGE_YEARS), reporting 2019-01..2025-12,
 implied average CPR ≈30% (plausible for 2018–19 coupons through the refi wave
 and QT lock-in). Panel at `hazard/data/cohort_month_panel_fannie.parquet`.**
 
+**STATUS 2026-07-16: COMPLETE. Author ratified; the pre-committed spec was
+executed end-to-end (24 quarters, 17.6M loans) — see
+`hazard/fannie_replication.py`, `hazard/data/fannie_replication_results.json`,
+and TECHNICAL.md §24.2 (lock-in marginal +8.68pp, inside the pre-registered
+envelope; license posture: code-only, headline statistics committed).**
+
 Provenance: Fannie's published glossary (108 fields, 2023-06) + public FAQ +
 the real 2019Q1 file itself. The ingestion layer: `common/fannie_key.py`,
 `common/fannie_auth.py`, `common/fannie_lph.py`, `hazard/schema_fannie.py`,

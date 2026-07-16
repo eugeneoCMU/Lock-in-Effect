@@ -2,9 +2,11 @@
 
 > **Currency note (July 2026):** figures in this runbook predate the β₁ units
 > fix and follow-on analyses. Path B is currently **$818.5B / 107.0%** (band
-> 105.9–108.2%), Path A **$915B / 119.7%** (full-book variant 126.1%); the
-> Danish regime now uses the Berger two-channel calibration. See the root
-> [TECHNICAL.md §15–§20](../TECHNICAL.md#15-robustness-fix-program-july-2026).
+> 105.9–108.2%), Path A **$928.9B / 121.5%** (spec v4 calendar-month,
+> `run-2026-07-14-pathA-seasonal`; spec v3 prior $915B / 119.7%, full-book
+> variant 126.1%); the Danish regime now uses the Berger two-channel
+> calibration. See the root
+> [TECHNICAL.md §15–§25](../TECHNICAL.md#15-robustness-fix-program-july-2026).
 
 Complements the archived agent-based pipeline in [`../abm/`](../abm/) with two hazard paths:
 
@@ -158,6 +160,9 @@ python3 simulate.py
 | `data/extension_risk_dashboard.png` | Extension delta + CPR charts |
 | `data/microsim_results.parquet` | Literature microsim QT paths (US + Danish) |
 | `data/loan_sample.parquet` | Stratified 75k loan sample with `stratum_id` |
+| `data/marginal_decomposition_results.json` | Round-15 Q3 marginal decomposition (liveness-gated) |
+| `data/ginnie_cpr_overlay_results.json` | Round-15 Q2 Ginnie overlay + `gmar_dec25_cpr_series.json` provenance (liveness-gated) |
+| `data/expectation_benchmark_results.json` | Q10 expectations benchmark (liveness-gated) |
 
 ## CPR timing and SOMA settlement
 
@@ -167,7 +172,7 @@ Freddie Mac `prepaid_upb` records the **economic prepayment month** (loan-level 
 2. **Hazard path** — voluntary prepay in `simulate.py` and literature `competing_risks.py` settles to SOMA in the **same month** as the hazard draw (no pipeline delay by design).
 3. **ABM path** — tested a `[0.10, 0.60, 0.30]` settlement kernel; **null for timing** ([TECHNICAL.md Appendix B.8](../TECHNICAL.md#b8-settlement-lag-kernel--pre-registered-null)).
 
-### Primary timing diagnostic: peak cross-correlation lag
+### Primary timing diagnostic: peak cross-correlation lag (pre-β₁-fix / spec v3, historical; production values in TECHNICAL.md §12)
 
 | Path | CPR r (lag 0) | Peak lag | Peak r |
 |---|---|---|---|
@@ -180,7 +185,7 @@ The empirical cohort path shows wrong-sign contemporaneous correlation (lag 0). 
 
 `extension_risk.py` writes `lag_interpretation` and `peak_lag_r` to JSON and prints both lag-0 and peak-lag correlations.
 
-## Current results (Freddie Mac 2017–2021, 20 quarters)
+## Pre-β₁-fix results (Freddie Mac 2017–2021, 20 quarters — historical; superseded, see currency note)
 
 | Path | Trapped | Share | β(rate_gap) | β(burnout) | β(friction) |
 |---|---|---|---|---|---|
@@ -189,7 +194,7 @@ The empirical cohort path shows wrong-sign contemporaneous correlation (lag 0). 
 
 All three pre-registered coefficient signs pass on the empirical path after **spec v3** (stratum FE + within-stratum demeaned burnout). Vintage-year FE (spec v2) left burnout positive (+0.76); tightening FE to 295 four-way strata fixed the sign.
 
-**Spec evolution:** v1 (decimal rate gap, unstable β≈40) → v2 (bps scaling + vintage FE) → **v3** (stratum FE + demeaned burnout + mild Ridge α=1e-5–1e-4). Plain IRLS fails with 295 stratum dummies; Ridge is required, not optional.
+**Spec evolution:** v1 (decimal rate gap, unstable β≈40) → v2 (bps scaling + vintage FE) → v3 (stratum FE + demeaned burnout + mild Ridge α=1e-5–1e-4) → **v4** (v3 + eleven calendar-month seasonal dummies; production since the 2026-07-14 freeze — [TECHNICAL.md §22.5](../TECHNICAL.md#225-pre-submission-freeze-execution-2026-07-14-path-a-spec-v4-adoption-and-restatement)). The §"Model specification" formula above describes v3; the ridge is a numerical no-op at production magnitudes (manuscript App. C).
 
 ## Pre-registered expectations
 
@@ -222,3 +227,6 @@ All three pre-registered coefficient signs pass on the empirical path after **sp
 | `competing_risks.py` | Monthly competing-risks step + cohort burnout update |
 | `microsim_engine.py` | Dual-regime QT forward walk |
 | `extension_risk.py` | End-to-end pipeline + scoring (`--mode literature`) |
+| `marginal_decomposition.py` | Round-15 Q3: lock-in marginal decomposed by vintage × coupon cell (group ablation, per-loan β₁ vector) |
+| `ginnie_cpr_overlay.py` | Round-15 Q2: published-CPR Ginnie composition overlay (GMAR Dec-2025 series) |
+| `expectation_benchmark.py` | Q10: NY Fed ex-ante projection benchmark (OMO-2021 Chart 34) |

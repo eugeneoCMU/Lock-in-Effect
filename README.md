@@ -69,22 +69,27 @@ Lock-in-Effect/
 │   ├── README.md
 │   ├── paths.py           # anchored output paths
 │   └── *.py, *.csv, *.png
-└── hazard/                # reduced-form hazard framework
-    ├── README.md
-    ├── extension_risk.py  # end-to-end pipeline entry point
-    ├── ingest.py, hazard_fit.py, stratum.py, simulate.py, macro.py
-    └── data/              # panel, coefficients, results (raw/ gitignored)
+├── hazard/                # reduced-form hazard framework
+│   ├── README.md
+│   ├── extension_risk.py  # end-to-end pipeline entry point
+│   ├── ingest.py, hazard_fit.py, stratum.py, simulate.py, macro.py
+│   └── data/              # panel, coefficients, results (raw/ gitignored)
+├── common/                # shared calibration + Fannie ingestion helpers
+├── figures/               # gated publication figures (artifact-fed)
+├── tools/                 # liveness_gates.py (33 manuscript-vs-artifact
+│                          # gates), timing_sweep.py (+ golden-fixture test)
+└── tests/                 # unit tests + frozen-run golden fixtures
 ```
 
-## Headline results (current, post §15–§20 robustness program)
+## Headline results (current, post §15–§25 robustness and referee-round program)
 
-See [TECHNICAL.md §12](TECHNICAL.md#12-current-headline-numbers) for the full table and [§15–§20](TECHNICAL.md#15-robustness-fix-program-july-2026) for what changed and why.
+See [TECHNICAL.md §12](TECHNICAL.md#12-current-headline-numbers) for the full table and [§15–§25](TECHNICAL.md#15-robustness-fix-program-july-2026) for what changed and why (referee rounds 13–15 and the expectations benchmark are §23–§25).
 
 | Framework | Trapped | Share of $764.7B |
 |---|---|---|
 | **Empirical benchmark** (SOMA) | $764.7B | 100% |
 | **ABM** (native 15yr gate, `run-2026-07-05-berger`) | $84.5B | 11.1% |
 | **Hazard Path B** (literature microsim, post-β₁-fix) | $818.5B | **107.0%** (band 105.9–108.2%) |
-| **Hazard Path A** (empirical cohort GLM, spec v3) | $915B | 119.7% |
+| **Hazard Path A** (empirical cohort GLM, spec v4 calendar-month, `run-2026-07-14-pathA-seasonal`) | $928.9B | 121.5% (spec v3 prior: $915B / 119.7%) |
 
-Key follow-on findings (§16–§20.1): Path B's recovery is a **marginal-distribution result** (permutation p=0.001, effect only 0.27%) and holds at **106.0% on a fully synthetic population** — the survival structure, not the Freddie data, recovers the benchmark; the ABM needs real covariates to reach even 59.3%. The **Danish institutional gap collapses to ≈0** once Berger et al.'s estimated elasticities replace the U.S.-extrapolated mobility function (+$925.5B → −$99.9B, sign not robust). See [TECHNICAL.md §16–§20.1](TECHNICAL.md#16-permutation-test--does-path-b-depend-on-joint-covariate-structure).
+Key follow-on findings (§16–§25): Path B's recovery is a **marginal-distribution result** (permutation p=0.001, effect only 0.27%) and holds at **106.0% on a fully synthetic population** — the survival structure, not the Freddie data, recovers the benchmark; the ABM needs real covariates to reach even 59.3%. The **Danish institutional gap collapses to ≈0** once Berger et al.'s estimated elasticities replace the U.S.-extrapolated mobility function (+$925.5B → −$99.9B, sign not robust). See [TECHNICAL.md §16–§20.1](TECHNICAL.md#16-permutation-test--does-path-b-depend-on-joint-covariate-structure).

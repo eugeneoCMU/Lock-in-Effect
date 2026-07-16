@@ -2309,8 +2309,12 @@ E6 overlay paragraph in V.C (Q2); E7 external-gates paragraph in VII
 residual overfulls ≤3pt. liveness_gates.py gains three manifest-vs-tex
 cross-checks (overlay G1+differential verdict+3 literals; decomposition
 G1/G2+verdict+composition shares; external-gates G1/G2+floor-violation+2
-literals): 32 gates, ALL PASS. The .md/.txt editions remain stale from
-round 14 (pandoc absent — standing item on the author).
+literals): 32 gates, ALL PASS. UPDATE (same day, "update everything" pass):
+the .md/.txt editions were regenerated to the round-15+Q10 generation with
+the preserved custom converters (tex2md.py / md2txt.py, session-scratchpad
+provenance; want-counts bumped to 14 tables; zero unresolved refs), so the
+earlier stale-editions note no longer applies; pypandoc-binary (pandoc 3.9)
+is importable but the custom converters remain the edition path.
 
 ### 25.5 Q10 expectations benchmark (spec 88ef11e; amendment ef3e317;
 ### transcription b8ad13c; run 24be41b)

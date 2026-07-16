@@ -7,7 +7,9 @@
 > **$84.5B / 11.1%** U.S. trapped (`run-2026-07-05-berger`), Danish CPR
 > **3.4%** under the Berger recalibration (the $930.3B institutional gap is
 > superseded — see root [TECHNICAL.md §20](../TECHNICAL.md)), and Monte Carlo
-> mean **$96.7B** [95% CI $89.8–103.6B]. This document remains accurate as
+> mean **$96.7B**, seed-draw std **$24.8B** (headline $84.5B ± $25B, 1σ
+> population-draw; per TECHNICAL.md §12, do not quote the CI of the mean as
+> the uncertainty range). This document remains accurate as
 > the pre-program record.
 
 Extension-risk scoring can use the literature hazard microsim instead of the utility ABM CPR surface:
@@ -72,6 +74,8 @@ Denmark's mortgage system allows borrowers to **buy back** their mortgage at mar
 | `sensitivity_analysis.py` | Script | Sweeps the 3 dynamic-friction parameters (125 scenarios); reports trapped liquidity, share-explained, and CPR goodness-of-fit for each. |
 | `robustness_analysis.py` | Script | Sweeps data source (SOMA vs. WSHOMCB) and QT cap-schedule assumptions (18 scenarios); checks the empirical benchmark isn't an artifact of one data/assumption choice. |
 | `monte_carlo_simulation.py` | Script | Reruns the full ABM→macro pipeline 50 times with different household population seeds; reports the mean, std, and 95% CI of U.S. trapped liquidity. |
+| `abm_external_gates.py` | Script | Round-15 Q4 externally anchored gates variant (L&R zero-gap mobility anchor, no floor recalibration; 150.6% recovery with CPR(8%)=0% — [TECHNICAL.md §25.3](../TECHNICAL.md)). |
+| *(post-program modules)* | Scripts | `freeze_run.py` (tagged manifests), `paths.py`, `refi_sweep.py`, `cross_design_test.py`, `hybrid_pipeline.py`, `freddie_population.py` — see [TECHNICAL.md](../TECHNICAL.md) §§14–25 for each module's run record. |
 | `abm_lockin_results.csv` | Data (output) | CPR vs. market rate for both systems (1D S-curve data). |
 | `abm_cpr_surface.csv` | Data (output) | CPR vs. (market rate × friction) for both systems (2D surface data). |
 | `sensitivity_results.csv` | Data (output) | Full 125-row friction-parameter sweep. |
@@ -361,11 +365,11 @@ Alternatively, from the repo root: `python3 abm/abm_lockin_simulation.py` (same 
 
 - **The S-curve** — As market rates climb from the 2.0% dominant-coupon cohort toward 8%, the U.S. mobility curve **collapses toward its ~4.8% involuntary floor**, while the Danish curve stays high (~20-30%). The shaded gap between them is pure institutional lock-in: identical households, identical rates, different mortgage rules. Reference cohort for calibration and the exported S-curve is the **max-weight 2.0% bucket** (39.7% of SOMA), not the legacy flat 3.0% assumption.
 - **Empirical trapped liquidity**: using the phased QT cap, SOMA roll-off, and the **active QT window only** (June 2022 – November 2025), the Fed's MBS portfolio has trapped **$764.7B** relative to the QT schedule — corrected upward from $672.9B after fixing a post-QT aggregation bug (see [TECHNICAL.md §3](../TECHNICAL.md#3-empirical-benchmark-from-9723b-to-7647b), Error 4).
-- **ABM explains ~13% of the gap (current)**: the production pipeline (multi-cohort surface + dynamic friction + scheduled amortization + curtailment + settlement-lag kernel) predicts **$101.2B** of U.S. trapped liquidity — **13.2%** of the empirical figure. The ABM **over-predicts** aggregate CPR (mean 11.98% vs empirical 5.53%), so the residual ~87% reflects mechanisms outside the household decision function (loan-level heterogeneity, servicer effects, pool replenishment).
+- **ABM explains ~13% of the gap (run-2026-07-04 lineage stage; production is $84.5B / 11.1%, `run-2026-07-05-berger`)**: that pipeline stage (multi-cohort surface + dynamic friction + scheduled amortization + curtailment + settlement-lag kernel) predicts **$101.2B** of U.S. trapped liquidity — **13.2%** of the empirical figure. The ABM **over-predicts** aggregate CPR (mean 11.98% vs empirical 5.53%), so the residual ~87% reflects mechanisms outside the household decision function (loan-level heterogeneity, servicer effects, pool replenishment).
 - **Vintage burnout failed a pre-registered test** (§20): survivor-selection burnout drove CPR to ~0% and trapped liquidity to 147% of empirical — wrong direction. Surface interpolation remains the production default.
 - **Settlement-lag kernel is a null timing fix** (§21): convolving roll-off with UMBS/GNMA remittance weights `[0.10, 0.60, 0.30]` did not shift the cross-correlation peak toward lag 0; headline trapped liquidity moves only -$16.5B (mass-conserving).
 - **Historical falsification tests** (behavioral extensions §15, curtailment §16, multi-cohort §19) are documented with their original $672.9B-era numbers; see [TECHNICAL.md §12](../TECHNICAL.md#12-current-headline-numbers) for the current headline table.
-- **The institutional gap**: under the dynamic-balance Danish counterfactual, the portfolio would have **overshot** the QT cap by **-$829.1B** (shrinking from $2,535B to $428B), versus the U.S. system's $101.2B shortfall. The resulting **institutional gap is $930.3B**.
+- **The institutional gap**: under the dynamic-balance Danish counterfactual, the portfolio would have **overshot** the QT cap by **-$829.1B** (shrinking from $2,535B to $428B), versus the U.S. system's $101.2B shortfall. The resulting **institutional gap is $930.3B** (superseded — the Berger recalibration reverses the sign; see the currency note and [TECHNICAL.md §20](../TECHNICAL.md)).
 - **Monthly CPR fit is weak**: raw r = -0.316 at lag 0; peak cross-correlation remains +0.192 at lag -3. Out-of-sample share explained (32.5%) exceeds in-sample (-11.1%), but both R² values are deeply negative.
 - **Robustness**: empirical benchmark is stable across data sources (SOMA vs. WSHOMCB differ by <0.2%) and ranges $479.6B–$782.2B across 18 QT cap-schedule assumptions. Monte Carlo (50 CPR surface rebuilds): mean **$113.5B**, 95% CI **[$106.6B, $120.4B]** on the pre-program 30yr-only book; **current pipeline: mean $96.7B, 95% CI [$89.8B, $103.6B]**.
 - **Dynamic friction** — During 2022-2025, depressed housing inventory and weak consumer sentiment pushed effective friction to roughly **8-10%** (well above the 7% static baseline).

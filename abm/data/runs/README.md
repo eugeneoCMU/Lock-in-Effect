@@ -4,11 +4,17 @@ Headline dollar and CPR figures cited in `TECHNICAL.md` and the paper must match
 
 ## Current production tag
 
-**`run-2026-07-04`**
+**`run-2026-07-05-berger`** (ABM production; Path A production is
+`run-2026-07-14-pathA-seasonal`)
+
+Lineage: `run-2026-07-04` → `run-2026-07-04-15yr-foldin` →
+`run-2026-07-05-native15yr` → `run-2026-07-05-berger`. The paper's
+Table 2 ABM row quotes the `run-2026-07-04-15yr-foldin` freeze
+(see TECHNICAL.md §12 for which tag carries which headline).
 
 ```bash
 cd abm
-python3 freeze_run.py --tag run-2026-07-04
+python3 freeze_run.py --tag run-2026-07-05-berger
 ```
 
 ## Per-run artifacts
