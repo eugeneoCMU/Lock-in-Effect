@@ -381,8 +381,20 @@ def process_quarter(year: int, quarter: str, spec_index: int, manifest: dict) ->
         )
 
     t0 = time.perf_counter()
+    # 0. a complete staged pair with no surviving native means staging
+    # finished and the native was already cleaned up (the low-memory path
+    # deletes it early) — re-downloading ~20 GB to immediately unlink it
+    # would be pure waste. Jump straight to consumption.
+    pair_orig = FANNIE_RAW_DIR / f"orig_{tag}.txt"
+    pair_perf = FANNIE_RAW_DIR / f"perf_{tag}.txt"
+    native_txt = FANNIE_NATIVE_DIR / f"lph_{tag}.txt"
+    if pair_orig.exists() and pair_perf.exists() and not native_txt.exists():
+        print(f"[{tag}] staged pair present, native cleaned — skipping fetch")
+        _consume_staged_pair(tag, spec_index, manifest, pair_orig, pair_perf, t0)
+        return
+
     # 1. download + extract (skips when the native .txt survives)
-    native_existed = (FANNIE_NATIVE_DIR / f"lph_{tag}.txt").exists()
+    native_existed = native_txt.exists()
     fetched = None
     for attempt in range(1, DOWNLOAD_ATTEMPTS + 1):
         try:
@@ -410,6 +422,18 @@ def process_quarter(year: int, quarter: str, spec_index: int, manifest: dict) ->
     # soon as its last scan completes so the on-disk sort spill fits.
     orig, perf = stage_native_file(native_path, tag, overwrite=native_existed,
                                    delete_native_after_scan=True)
+
+    # 3. native no longer needed (already gone if staging deleted it early)
+    native_path.unlink(missing_ok=True)
+
+    _consume_staged_pair(tag, spec_index, manifest, orig, perf, t0)
+
+
+def _consume_staged_pair(tag, spec_index, manifest, orig, perf, t0) -> None:
+    """Steps 4-6: per-quarter cells, 2019Q1 gate, pool piece, cleanup,
+    manifest entry. Shared by the normal path and the staged-pair resume."""
+    cells_out = FANNIE_QUARTER_DIR / f"cells_{tag}.parquet"
+    pool_out = FANNIE_QUARTER_DIR / f"pool_{tag}.parquet"
     staged_loans = int(
         pl.scan_csv(orig, separator="|", has_header=False, infer_schema_length=0)
         .select(pl.len()).collect().item()
@@ -418,9 +442,6 @@ def process_quarter(year: int, quarter: str, spec_index: int, manifest: dict) ->
         pl.scan_csv(perf, separator="|", has_header=False, infer_schema_length=0)
         .select(pl.len()).collect().item()
     )
-
-    # 3. native no longer needed (already gone if staging deleted it early)
-    native_path.unlink(missing_ok=True)
 
     # 4. per-quarter cohort-month cells (unfiltered; vintage filter at combine)
     FANNIE_QUARTER_DIR.mkdir(parents=True, exist_ok=True)
