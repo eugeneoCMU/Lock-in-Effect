@@ -95,6 +95,13 @@ def monthly_step(
 
     pool.broadcast_burnout()
     active = pool.active_mask
+    # Round-15 Q3 amendment: beta1 may be a per-loan vector (full pool
+    # length, aligned to loan-sample row order) for group-ablation runs.
+    # A constant vector is elementwise bit-identical to the scalar path;
+    # marginal_decomposition.py gates G1/G2 prove exact reproduction of the
+    # committed central and null artifacts before any variant is read.
+    if isinstance(beta1, np.ndarray):
+        beta1 = beta1[active]
     n_active = int(active.sum())
     if n_active == 0:
         return {
