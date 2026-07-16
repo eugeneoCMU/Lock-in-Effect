@@ -2367,6 +2367,144 @@ with "the large majority" (robust to any intra-2022 allocation); III.D
 gains the precision-discipline sentence quoting both bounds; gate #33
 extended to cross-check the $92.3/75.6% literals and the alt-threshold.
 
+## 26. Referee Round 16 — Weakness-List Revision: Vintage Bound, Dynamic-Fit Diagnostics, Flexible-Learner Comparator (July 2026)
+
+Source: an author-supplied five-cluster weakness list (technical limitations,
+experimental gaps, clarity/presentation, missing related work; no verdict, no
+positives block), parsed 2026-07-16 via the revision-coach protocol against
+HEAD 7fc22da into `paper/v16/revision_roadmap_round16.md` (10 items: 4 Major,
+5 Minor-constructive, 1 Editorial). A 12-agent assessment pass found three
+items already answered by committed artifacts (W1 uncertainty, W2's agency
+half, W3's substance), four placement/prose/citation fixes, and three
+feasible new runs. Author go-ahead of record: "can we fix everything here?"
+(2026-07-16). Three runs executed under spec-before-run (spec commit
+725f92f), ~20 tex edits applied (backup `.bak-round16`), five bib entries
+added plus one upgraded, gate suite extended 33→36, PDF rebuilt (74pp, zero
+undefined), md/txt editions regenerated (15-table validation), bundle
+restaged. New decline of record: loan-level deep-learning head-to-head
+(data grounds — raw loan-month universe not shippable; comparator supplied
+at the paper's own unit of analysis instead). Prior declines preserved.
+
+### 26.1 W2 vintage residual bound (spec 725f92f, run e535459)
+
+Reviewer: hazards are Freddie 2017–2021; older vintages' extrapolation "only
+indirectly bounded." The manuscript's standing concession ("no bound of
+either kind", III.D/V.C/VIII.A) was closable from data already on disk: the
+W4 Fannie replication ingest's retained per-quarter cell files
+(`hazard/data/fannie_quarters/`, local-only, gitignored) carry observed
+QT-window prepayment for the 2022 and pre-2017 vintages. Construction:
+pooled dollar SMM compound-annualized per segment over the 42-month window;
+signed differentials vs the sampled 2017–2021 universe; face-share weights
+0.231/0.106 (`wal_table.VINTAGE_SHARES`); dollar bound via the static Ginnie
+bound's 82.8 $B/CPR-pt sensitivity. Gates: G1 parity of the cells against
+the committed combined panel (exposure rel diff 0.0, prepaid 5.4e-16,
+loan_count exact 393,755,296); G2 manifest ties local cells to the committed
+replication universe exactly (17,606,999 loans / 825,814,383 rows); G3
+sampled CPR vs panel rate-column 1.1e-05pp; G4 constants integrity. All
+PASS. **Result: sampled 4.303%, 2022 vintage 4.476% (+0.173pp), pre-2017
+5.264% (+0.962pp); share-weighted book-CPR error +0.1419pp → bound $11.75B,
+1.54% of benchmark, verdict below_ginnie_bound, signed overstates_trapped**
+(out-of-sample vintages prepaid faster — conservative for the headline, the
+same direction as the Ginnie bound). Mean-monthly variant $11.99B disclosed,
+not primary. Caveats carried in artifact and tex: Fannie-proxies-SOMA
+posture; pre-2017 leg is a seasoned acquisition tail (~3.4M QT loan-months);
+2022 leg is a full-year speed applied to an H1-tilted face; overlaps the
+Ginnie bound on Ginnie's out-of-sample vintages (not additive). Artifact
+`hazard/data/vintage_residual_bound_results.json` (headline stats only,
+license posture identical to the replication). Manuscript: V.C bound
+paragraph rewritten, III.D coverage parenthetical updated, VIII.A
+"remains unbounded" retired in favor of the bound + the proxy assumption
+that stays open. Gate #34 added.
+
+### 26.2 W4 Theil dynamic-fit diagnostics (spec 725f92f, run fb6cc24)
+
+Reviewer: detrended co-movement weak; wants Theil decomposition and
+cumulative error profiles. Round-15 Q5's "fit diagnostic (NOT a timing
+credential)" option, now exercised. `figures/make_theil_data.py`
+pattern-copies `make_ccf_data.py` (hazard-side empirical via FRED+SOMA;
+inputs gated to committed references: ABM CCF 1e-9, Path A 1e-3, Path B
+1e-6; terminal cumulative errors reproduce $928.893B/$818.530B exactly,
+diffs 0.0). Nine gates, all PASS. **Result: levels U1 ABM 0.412 / Path A
+0.431 / Path B 0.265; levels MSE shares (bias/var/cov) ABM 68.1/0.4/31.5,
+Path A 26.5/10.6/63.0, Path B 6.7/86.6/6.7; detrended variance share Path B
+93.7; U2 on first differences 1.226/1.010/1.003 — no estimator beats a
+naive no-change forecast.** Reading (pre-committed cells hit exactly): Path
+B's error is variance-dominated with near-zero bias (level accuracy;
+residual is under-dispersion against a seasonal empirical path); the ABM's
+is bias-dominated (level failure); the U2 row restates the
+no-timing-credential concession in forecast-accuracy units. Terminal
+cumulative errors: ABM −$673.8B, Path A +$164.1B, Path B +$53.8B (each =
+trapped aggregate − empirical $764.7B on its own basis). Artifact
+`figures/theil_data.json`. Manuscript: V.C paragraph after the moving-block
+discussion; new appendix section with `tab:theil`; pointer sentence in
+`tab:estimators` notes. Gate #35 added.
+
+### 26.3 W6 flexible-learner comparator (spec 725f92f, run 97674e0)
+
+Reviewer: "no head-to-head predictive comparisons" with survival ML. The
+sadhwani2021-class deep loan-level comparator is declined on data grounds
+(recorded above); the deliverable comparison at the paper's own unit ran
+instead: `hazard/ml_comparator_holdout.py` reuses `pathA_v4_holdout`'s
+panel pipeline, split (2024-01-01), and exact RMSE formulas; parity gates
+reproduce the frozen artifacts first (v4 37.9032/3.0379pp, v3
+37.8295/2.5338pp, diffs ~1e-10 — proving identical split+metric before any
+learner runs); hyperparameters selected train-only (temporal inner split,
+2023 validation year). All gates PASS. **Result: HGB-Poisson (lr 0.05, 15
+leaves, 300 iters) holdout exposure-weighted RMSE 0.926pp vs Path A v4's
+3.038pp (material under the pre-committed 0.80x threshold), unweighted
+37.63pp vs 37.90pp (not material), R2 +0.0029; penalized Poisson GLM
+(alpha 1e-6) 2.610/38.06/−0.0198. Overall verdict (pre-committed):
+flexible_fit_helps_no_headline_change.** Reading: flexibility recalibrates
+the high-exposure cells out-of-sample but gains no cross-cell predictive
+power in the 2024+ regime; Path A remains excluded from headline figures by
+pre-committed spec, so no headline moves and the Section II transparency
+rationale stands with an empirical price tag. Artifact
+`hazard/data/ml_comparator_holdout_results.json`. Manuscript: V.B holdout
+paragraph extended; Section II "rather than implementing them here" clause
+replaced with the comparator pointer. Gate #36 added.
+
+### 26.4 Manuscript pass, citations, and gate-suite extension
+
+Tex edits beyond the three run blocks (backup
+`paper/v16/revised_paper_v16.tex.bak-round16`): E1 intro — bootstrap CI
+[+9.17,+9.23]pp attached at the marginal's first mention (W1; abstract
+deliberately unchanged per the precision-discipline posture); E2 III.C —
+floor-anchor tautology named head-on ("an input, not a finding"; W3), with
+a reinforcing clause in VII.D's external-gates paragraph; E3 III.D — the
+accounting-convention sentences pulled out of the coverage mega-paragraph
+into a titled "Accounting bases." paragraph stating the bit-identical
+cancellation guarantee at first use (W5); E4 anticipated-share framing —
+intro, III.D, V.D now lead with 75.6–88.5% (88.5% labeled the uniform-spread
+central construction), VI.B cap multiple restated as "roughly 1.7 to 1.9
+times" with the allocation dependence disclosed (W8); E5 Section II — deep
+mortgage ML engaged on substance (120M-loan burnout/nonlinearity learning
+vs Path A's explicit burnout regressor and the ABM falsification) and the
+landmarking/drift strand added (W9); E6 conclusion — hedging-side
+literature paragraph (who bears/prices/hedges prepayment risk under each
+payoff rule; behavioral residual only boundable; W10), with the lit-review
+perotti2024 clause extended to name its robust-hedging contribution; E7 —
+W7 trim-and-move: provenance boilerplate deleted at ~10 main-text spots
+(caption tails, '(frozen-run manifest)', duplicated manifest note,
+artifact filenames, four commit hashes, script path) and consolidated into
+a new "Reproducibility conventions." paragraph in the run-ledger appendix;
+fn:manifest slimmed to its load-bearing content. Bibliography: added
+vanhouwelingen2007 (SJS 34(1)), putter2022 (SiM 41(11)), peng2026
+(arXiv:2601.20533 — the "LMISO" reference), gabaix2007 (JF 62(2)),
+malkhozov2016 (RFS 29(5)); perotti2024 upgraded to the published JCAM 477
+(2026) version, key unchanged; all web-verified before insertion; the
+sadhwani2021 key/order stays per the round-14 three-way verification (the
+reviewer's "Sirignano–Sadhwani–Giesecke" is the 2016 working-paper order).
+Gate suite: three manifest-vs-tex cross-checks added (#34 vintage bound,
+#35 Theil, #36 ML comparator), each requiring the in-run gates to have
+passed, the pre-committed verdicts as printed, exactly one lowercase run
+citation, and the printed literals to match the artifact rounded as
+printed. 36 gates ALL PASS at the round-16 head. PDF rebuilt twice with
+Tectonic (74pp, zero undefined references); md/txt editions regenerated
+with the preserved converters (table want-count 14→15 for `tab:theil`);
+`~/Downloads/UPLOAD_ROUND11` restaged (round-15 generation preserved in
+`superseded-2026-07-16-round15/`). Response letter filled in
+`paper/v16/revision_roadmap_round16.md`.
+
 ## Appendix A — File Map
 
 ```

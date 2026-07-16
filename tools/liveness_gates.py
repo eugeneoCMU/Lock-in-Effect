@@ -31,6 +31,9 @@ OVERLAY_RESULTS = ROOT / "hazard" / "data" / "ginnie_cpr_overlay_results.json"
 DECOMP_RESULTS = ROOT / "hazard" / "data" / "marginal_decomposition_results.json"
 ABMEXT_RESULTS = ROOT / "abm" / "data" / "abm_external_gates_results.json"
 EXPECT_RESULTS = ROOT / "hazard" / "data" / "expectation_benchmark_results.json"
+VINTAGE_RESULTS = ROOT / "hazard" / "data" / "vintage_residual_bound_results.json"
+THEIL_RESULTS = ROOT / "figures" / "theil_data.json"
+MLCOMP_RESULTS = ROOT / "hazard" / "data" / "ml_comparator_holdout_results.json"
 
 ZERO_COUNT = [
     "production specification omits",
@@ -287,6 +290,83 @@ def main() -> int:
         f"max parity |diff|={max_parity:.1e}pp, tex run-citation count={claims} "
         f"(want 1), literals {lit_proj!r}/{lit_e!r}/{lit_wedge_share!r} "
         f"present={lit_proj in tex}/{lit_e in tex}/{lit_wedge_share in tex}"
+    )
+
+    # Round-16 W2: the vintage-residual-bound sentences must agree with the
+    # committed artifact — all four in-run gates passed, the pre-committed
+    # verdict/sign are as printed, and the printed segment speeds and dollar
+    # bound are the artifact's, rounded as printed.
+    vin = json.loads(VINTAGE_RESULTS.read_text())
+    vr = vin["results"]
+    claims = tex.count("run \\texttt{vintage\\_residual\\_bound}")
+    lit_bound = f"\\${vr['bound_b']:.1f} billion"
+    lit_2022 = f"{vr['segments']['vintage_2022']['cpr_pct']:.2f}\\%"
+    lit_pre = f"{vr['segments']['pre_2017']['cpr_pct']:.2f}\\%"
+    lit_sampled = f"{vr['segments']['sampled_2017_2021']['cpr_pct']:.2f}\\%"
+    ok = (all(bool(g["pass"]) for g in vin["gates"].values())
+          and vr["interpretation"]["verdict"] == "below_ginnie_bound"
+          and vr["sign_direction"] == "overstates_trapped"
+          and claims == 1
+          and lit_bound in tex and lit_2022 in tex and lit_pre in tex
+          and lit_sampled in tex)
+    failures += 0 if ok else 1
+    print(
+        f"[{'PASS' if ok else 'FAIL'}] cross-check vintage residual bound: "
+        f"in-run gates all pass={all(bool(g['pass']) for g in vin['gates'].values())}, "
+        f"verdict={vr['interpretation']['verdict']}, sign={vr['sign_direction']}, "
+        f"tex run-citation count={claims} (want 1), literals "
+        f"{lit_bound!r}/{lit_sampled!r}/{lit_2022!r}/{lit_pre!r} present="
+        f"{lit_bound in tex}/{lit_sampled in tex}/{lit_2022 in tex}/{lit_pre in tex}"
+    )
+
+    # Round-16 W4: the Theil dynamic-fit sentences and appendix table must
+    # agree with the committed artifact — all nine in-run gates passed and
+    # the printed U statistics and Path B / ABM error shares are the
+    # artifact's, rounded as printed.
+    thl = json.loads(THEIL_RESULTS.read_text())
+    est = thl["estimators"]
+    claims = tex.count("run \\texttt{make\\_theil\\_data}")
+    lit_u1_pathb = f"{est['path_b']['u1_levels']:.3f}"
+    lit_u2_abm = f"{est['abm']['u2_diffs']:.3f}"
+    lit_pathb_var = f"{est['path_b']['decomp']['levels']['var_share']:.1f}\\%"
+    lit_abm_bias_tbl = f"{est['abm']['decomp']['levels']['bias_share']:.1f}"
+    ok = (all(bool(g["pass"]) for g in thl["gates"].values())
+          and claims == 1
+          and lit_u1_pathb in tex and lit_u2_abm in tex
+          and lit_pathb_var in tex and lit_abm_bias_tbl in tex)
+    failures += 0 if ok else 1
+    print(
+        f"[{'PASS' if ok else 'FAIL'}] cross-check theil dynamic fit: "
+        f"in-run gates all pass={all(bool(g['pass']) for g in thl['gates'].values())}, "
+        f"tex run-citation count={claims} (want 1), literals "
+        f"{lit_u1_pathb!r}/{lit_u2_abm!r}/{lit_pathb_var!r}/{lit_abm_bias_tbl!r} "
+        f"present={lit_u1_pathb in tex}/{lit_u2_abm in tex}/"
+        f"{lit_pathb_var in tex}/{lit_abm_bias_tbl in tex}"
+    )
+
+    # Round-16 W6: the flexible-learner comparator sentences must agree with
+    # the committed artifact — parity and sanity gates passed, the
+    # pre-committed overall verdict is as printed, and the printed holdout
+    # RMSEs are the artifact's, rounded as printed.
+    mlc = json.loads(MLCOMP_RESULTS.read_text())
+    hgb = mlc["learners"]["hgb_poisson"]
+    glm = mlc["learners"]["poisson_glm"]
+    claims = tex.count("run \\texttt{ml\\_comparator\\_holdout}")
+    lit_hgb_w = f"{hgb['rmse_weighted_pp']:.1f} points"
+    lit_hgb_u = f"{hgb['rmse_unweighted_pp']:.1f} against 37.9"
+    lit_glm = f"{glm['rmse_weighted_pp']:.1f} and {glm['rmse_unweighted_pp']:.1f} points"
+    ok = (all(bool(g["pass"]) for g in mlc["gates"].values())
+          and mlc["interpretation"]["overall_verdict"]
+              == "flexible_fit_helps_no_headline_change"
+          and claims == 1
+          and lit_hgb_w in tex and lit_hgb_u in tex and lit_glm in tex)
+    failures += 0 if ok else 1
+    print(
+        f"[{'PASS' if ok else 'FAIL'}] cross-check ml comparator holdout: "
+        f"in-run gates all pass={all(bool(g['pass']) for g in mlc['gates'].values())}, "
+        f"verdict={mlc['interpretation']['overall_verdict']}, tex run-citation "
+        f"count={claims} (want 1), literals {lit_hgb_w!r}/{lit_hgb_u!r}/{lit_glm!r} "
+        f"present={lit_hgb_w in tex}/{lit_hgb_u in tex}/{lit_glm in tex}"
     )
 
     print(f"\n{'ALL GATES PASS' if failures == 0 else f'{failures} GATE(S) FAILED'}")
