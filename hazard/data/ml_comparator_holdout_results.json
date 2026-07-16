@@ -1,0 +1,260 @@
+{
+  "mode": "ml_comparator_holdout",
+  "spec": "round-16 W6 flexible-learner ceiling test; identical Path A temporal holdout, target, weighting, and RMSE definitions; train-only temporal hyperparameter selection; thresholds ex ante",
+  "holdout_definition": "cohort-month cells with period >= 2024-01-01 from the production panel pipeline (hazard_fit split; identical to pathA_v4_holdout)",
+  "panel_sha256": "c0feca1da96e97300d840c867494cc80ca8bbe97249c5fdeeb98761a015528e2",
+  "input_sha256": {
+    "spec_v4_coefficients": "f8b9fedce0a02c2d7b89a9a2cb32e22fbb07b66f8df43e152be27cf815aea15a",
+    "spec_v3_coefficients": "80aad3ab4366fa4a4777787506bbabfd2b2002d2e6834afb1ca18194bc83fe8f",
+    "pathA_reference_artifact": "23d301ab355ac584ecd68535f80f4586c6b143a1dbf5480259398d633a8259dc"
+  },
+  "n_train": 10176,
+  "n_holdout": 6077,
+  "pathA_reference": {
+    "rmse_unweighted_pp": 37.903228802264934,
+    "rmse_weighted_pp": 3.037942336998421,
+    "r2_unweighted": -0.011428527641577979,
+    "source": "hazard/data/pathA_v4_holdout_results.json (spec_v4)"
+  },
+  "parity": {
+    "spec_v4": {
+      "artifact": "hazard/data/runs/run-2026-07-14-pathA-seasonal/hazard_coefficients.json",
+      "artifact_sha256": "f8b9fedce0a02c2d7b89a9a2cb32e22fbb07b66f8df43e152be27cf815aea15a",
+      "spec_version": 4,
+      "n_holdout": 6077,
+      "rmse_unweighted_pp": 37.903228802264934,
+      "rmse_exposure_weighted_pp": 3.037942336998421,
+      "holdout_r2_unweighted": -0.011428527641577979,
+      "holdout_obs_cpr_mean_unweighted_pp": 7.041628590244825,
+      "holdout_obs_cpr_mean_exposure_weighted_pp": 4.210290920254706
+    },
+    "spec_v3": {
+      "artifact": "hazard/data/hazard_coefficients_specv3.json",
+      "artifact_sha256": "80aad3ab4366fa4a4777787506bbabfd2b2002d2e6834afb1ca18194bc83fe8f",
+      "spec_version": 3,
+      "n_holdout": 6077,
+      "rmse_unweighted_pp": 37.8295321331,
+      "rmse_exposure_weighted_pp": 2.5338262679523766,
+      "holdout_r2_unweighted": -0.007499234463333337,
+      "holdout_obs_cpr_mean_unweighted_pp": 7.041628590244825,
+      "holdout_obs_cpr_mean_exposure_weighted_pp": 4.210290920254706
+    }
+  },
+  "gates": {
+    "G5_split_integrity": {
+      "n_train_got": 10176,
+      "n_train_want": 10176,
+      "n_holdout_got": 6077,
+      "n_holdout_want": 6077,
+      "frozen_artifacts_agree": true,
+      "pass": true
+    },
+    "G1_v4_parity_unweighted": {
+      "got": 37.903228802264934,
+      "want": 37.903228802264934,
+      "tol": 0.01,
+      "pass": true
+    },
+    "G2_v4_parity_weighted": {
+      "got": 3.037942336998421,
+      "want": 3.037942336998421,
+      "tol": 0.01,
+      "pass": true
+    },
+    "G3_v3_parity_unweighted": {
+      "got": 37.8295321331,
+      "want": 37.8295321331,
+      "tol": 0.01,
+      "pass": true
+    },
+    "G4_v3_parity_weighted": {
+      "got": 2.5338262679523766,
+      "want": 2.5338262679523766,
+      "tol": 0.01,
+      "pass": true
+    },
+    "G6_learner_sanity": {
+      "hgb_pred_min": 4.621082469346946e-05,
+      "hgb_pred_max": 0.03520638586142557,
+      "glm_pred_min": 0.0005580080581954397,
+      "glm_pred_max": 0.039529761276421174,
+      "pass": true
+    }
+  },
+  "learners": {
+    "hgb_poisson": {
+      "rmse_unweighted_pp": 37.63462125993376,
+      "rmse_weighted_pp": 0.9262783347304344,
+      "r2_unweighted": 0.002855990922441931,
+      "features": [
+        "rate_gap_bps",
+        "loan_age",
+        "burnout",
+        "friction",
+        "coupon",
+        "month",
+        "vintage",
+        "fico_bucket",
+        "ltv_bucket"
+      ],
+      "encoding_notes": "raw covariates, no spline/standardization/orthogonalization (tree-invariant); stratum_id enters as vintage/fico_bucket/ltv_bucket categoricals + raw coupon (native categorical cap 255 < 296 strata); month categorical 1-12",
+      "hyperparameters": {
+        "loss": "poisson",
+        "random_state": 42,
+        "early_stopping": false,
+        "categorical_features": "from_dtype",
+        "learning_rate": 0.05,
+        "max_leaf_nodes": 15,
+        "max_iter": 300
+      },
+      "inner_validation": [
+        {
+          "learning_rate": 0.05,
+          "max_leaf_nodes": 15,
+          "max_iter": 100,
+          "inner_val_rmse_weighted_pp": 1.3224652315905774
+        },
+        {
+          "learning_rate": 0.05,
+          "max_leaf_nodes": 15,
+          "max_iter": 300,
+          "inner_val_rmse_weighted_pp": 1.2948935998693472
+        },
+        {
+          "learning_rate": 0.05,
+          "max_leaf_nodes": 31,
+          "max_iter": 100,
+          "inner_val_rmse_weighted_pp": 1.3080540472736073
+        },
+        {
+          "learning_rate": 0.05,
+          "max_leaf_nodes": 31,
+          "max_iter": 300,
+          "inner_val_rmse_weighted_pp": 1.3670916933886195
+        },
+        {
+          "learning_rate": 0.05,
+          "max_leaf_nodes": 63,
+          "max_iter": 100,
+          "inner_val_rmse_weighted_pp": 1.3621051805505686
+        },
+        {
+          "learning_rate": 0.05,
+          "max_leaf_nodes": 63,
+          "max_iter": 300,
+          "inner_val_rmse_weighted_pp": 1.7980558980011185
+        },
+        {
+          "learning_rate": 0.1,
+          "max_leaf_nodes": 15,
+          "max_iter": 100,
+          "inner_val_rmse_weighted_pp": 1.3287153828577911
+        },
+        {
+          "learning_rate": 0.1,
+          "max_leaf_nodes": 15,
+          "max_iter": 300,
+          "inner_val_rmse_weighted_pp": 1.5285353028215072
+        },
+        {
+          "learning_rate": 0.1,
+          "max_leaf_nodes": 31,
+          "max_iter": 100,
+          "inner_val_rmse_weighted_pp": 1.29675685607845
+        },
+        {
+          "learning_rate": 0.1,
+          "max_leaf_nodes": 31,
+          "max_iter": 300,
+          "inner_val_rmse_weighted_pp": 1.6201037238830112
+        },
+        {
+          "learning_rate": 0.1,
+          "max_leaf_nodes": 63,
+          "max_iter": 100,
+          "inner_val_rmse_weighted_pp": 1.390205370007762
+        },
+        {
+          "learning_rate": 0.1,
+          "max_leaf_nodes": 63,
+          "max_iter": 300,
+          "inner_val_rmse_weighted_pp": 2.132464876605788
+        }
+      ]
+    },
+    "poisson_glm": {
+      "rmse_unweighted_pp": 38.05986048381213,
+      "rmse_weighted_pp": 2.6103646500408297,
+      "r2_unweighted": -0.019805074330579542,
+      "features": [
+        "age_linear",
+        "age_spline_12",
+        "age_spline_24",
+        "age_spline_36",
+        "age_spline_60",
+        "age_spline_84",
+        "age_spline_120",
+        "rate_gap_bps(std)",
+        "burnout_orth(std)",
+        "friction(std)",
+        "m_2..m_12",
+        "fe_stratum_* (n=295)"
+      ],
+      "encoding_notes": "exact fit_hazard_glm(seasonal=True) design via hazard_fit helpers; constants train-only; fit_intercept replaces the explicit const column",
+      "hyperparameters": {
+        "alpha": 1e-06,
+        "solver": "newton-cholesky",
+        "max_iter": 5000,
+        "tol": 1e-08,
+        "fit_intercept": true
+      },
+      "inner_validation": [
+        {
+          "alpha": 1e-08,
+          "inner_val_rmse_weighted_pp": 2.7125755871367803
+        },
+        {
+          "alpha": 1e-06,
+          "inner_val_rmse_weighted_pp": 1.688968630006017
+        },
+        {
+          "alpha": 0.0001,
+          "inner_val_rmse_weighted_pp": 2.064471787308353
+        },
+        {
+          "alpha": 0.01,
+          "inner_val_rmse_weighted_pp": 8.87755349071978
+        },
+        {
+          "alpha": 1.0,
+          "inner_val_rmse_weighted_pp": 19.218907221842397
+        }
+      ]
+    }
+  },
+  "hyperparameter_selection": {
+    "inner_train": "period < 2023-01-01",
+    "inner_val": "2023-01-01 <= period < 2024-01-01",
+    "metric": "exposure-weighted RMSE (pp), identical formula",
+    "tie_break": "first config in enumeration order (strict <)"
+  },
+  "interpretation": {
+    "primary_metric": "rmse_weighted_pp",
+    "material_improvement_frac": 0.8,
+    "threshold_weighted_pp": 2.430353869598737,
+    "threshold_unweighted_pp_secondary": 30.32258304181195,
+    "verdicts": {
+      "hgb_poisson": {
+        "primary_weighted": "material_improvement",
+        "secondary_unweighted": "comparable_or_worse"
+      },
+      "poisson_glm": {
+        "primary_weighted": "comparable_or_worse",
+        "secondary_unweighted": "comparable_or_worse"
+      }
+    },
+    "overall_verdict": "flexible_fit_helps_no_headline_change",
+    "reading": "At least one flexible learner materially beats Path A spec v4 on the exposure-weighted holdout RMSE. Flexible fit helps prediction out-of-sample at the cell-panel unit; NO headline moves \u2014 Path A is excluded from headline figures by pre-committed spec (tex line 328) and the calibrated-counterfactual claims do not rest on Path A OOS accuracy."
+  },
+  "declined_scope": "sadhwani2021-class loan-level deep comparator declined on data grounds (no loan-month records in repo; 826M-row ingest external, headline-stats-only license posture); handled in prose"
+}
