@@ -31,3 +31,9 @@ hazard/data/floor_form/
 
 # Phase backups made by the freeze protocol
 *.bak-*
+
+# Fannie Mae SF Loan Performance data — LICENSE prohibits redistribution
+# (repo is public): never commit native downloads or derived panels/cells.
+hazard/data/fannie_native/
+hazard/data/cohort_month_panel_fannie.parquet
+hazard/data/*fannie*.parquet
