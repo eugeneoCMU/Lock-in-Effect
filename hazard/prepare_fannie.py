@@ -120,6 +120,13 @@ DEFAULT_SEPARATOR = "|"
 DEFAULT_HAS_HEADER = False       # FAQ #15: files carry no column headings
 DEFAULT_N_COLS = len(FANNIE_COLS_WIRE)   # 113
 
+# Natives at or above this size are staged via the streaming (low-memory)
+# path: the eager collect() of the 2020Q2 refi-wave file (17 GB native,
+# ~135M rows) is a deterministic OOM kill on a 16 GiB machine. Threshold
+# sits above the largest eager-validated quarter (2017Q1, 3.6 GB) with
+# margin.
+LOW_MEMORY_NATIVE_BYTES = 5 * 2**30
+
 # Quarter -> Fannie API literal
 _Quarters = ("Q1", "Q2", "Q3", "Q4")
 
@@ -292,6 +299,8 @@ def stage_native_file(
     overwrite: bool = False,
     validate_legacy_zbc: bool = True,
     unmask_early_upb: bool = True,
+    low_memory: bool | None = None,
+    delete_native_after_scan: bool = False,
 ) -> tuple[Path, Path]:
     """
     Split one native Fannie SF LPH file into Freddie-shaped orig_<TAG>.txt /
@@ -301,11 +310,26 @@ def stage_native_file(
     per row. loan_sequence_number is synthesized on BOTH so the inner join in
     ingest.build_panel_from_files matches. The perf file is written sorted by
     (loan_sequence_number, reporting_period).
+
+    low_memory (default: auto by native size, LOW_MEMORY_NATIVE_BYTES) stages
+    via streaming sinks instead of eager collect(): perf rows sink UNSORTED to
+    a temp file, then an on-disk streaming sort rewrites them in the same
+    (loan_sequence_number, reporting_period) order — that key is unique per
+    row, so the ordering is total and the perf bytes are identical to the
+    eager path's (gated by tests/test_prepare_fannie_low_memory.py). The orig
+    file's streaming unique does not preserve first-occurrence order, so it is
+    sorted by loan_sequence_number instead (deterministic; values are static
+    per loan and downstream use is key-based, so only row order differs from
+    the eager path). delete_native_after_scan frees the native as soon as the
+    last pass over it completes — for a 17 GB native the sort's disk spill
+    plus output would otherwise not fit alongside it.
     """
     orig_out = dest_dir / f"orig_{tag}.txt"
     perf_out = dest_dir / f"perf_{tag}.txt"
     if orig_out.exists() and perf_out.exists() and not overwrite:
         return orig_out, perf_out
+    if low_memory is None:
+        low_memory = native_path.stat().st_size >= LOW_MEMORY_NATIVE_BYTES
 
     dest_dir.mkdir(parents=True, exist_ok=True)
     # scan_native_lph asserts the physical width == n_cols before naming.
@@ -345,13 +369,24 @@ def stage_native_file(
         "loan_sequence_number": pl.col("loan_sequence_number"),       # synthesized
         "original_loan_term": pl.col("original_loan_term"),           # field 13
     }
-    orig = (
+    orig_lazy = (
         native
         .unique(subset=["loan_identifier"], keep="first")
         .select(_blank_frame_columns(ORIG_COLS, orig_filled))
-        .collect()
     )
-    orig.write_csv(orig_out, separator="|", include_header=False)
+    if low_memory:
+        orig_lazy.sort("loan_sequence_number").sink_csv(
+            orig_out, separator="|", include_header=False
+        )
+        n_loans_staged = int(
+            pl.scan_csv(orig_out, separator="|", has_header=False,
+                        infer_schema_length=0)
+            .select(pl.len()).collect().item()
+        )
+    else:
+        orig = orig_lazy.collect()
+        orig.write_csv(orig_out, separator="|", include_header=False)
+        n_loans_staged = orig.height
 
     # ---- perf_<TAG>.txt : per-row dynamic fields, sorted for shift(1) ----
     perf_filled = {
@@ -369,20 +404,52 @@ def stage_native_file(
         "zero_balance_removal_upb": pl.col("zero_balance_removal_upb"),
         "borrower_assistance": pl.col("borrower_assistance"),         # field 102
     }
-    perf = (
-        native
-        .select(
-            _blank_frame_columns(PERF_COLS, perf_filled)
-            + [pl.col("reporting_period_yyyymm")]
+    if low_memory:
+        # Pass 1: final-shape rows, UNSORTED, streamed to a temp file (the
+        # staged reporting_period column IS the yyyymm sort key, so no helper
+        # column is needed on the rescan).
+        tmp_unsorted = perf_out.with_suffix(".unsorted.tmp")
+        (
+            native
+            .select(_blank_frame_columns(PERF_COLS, perf_filled))
+            .sink_csv(tmp_unsorted, separator="|", include_header=False)
         )
-        .sort(["loan_sequence_number", "reporting_period_yyyymm"])
-        .select(PERF_COLS)  # drop the sort helper; emit exactly 32 cols
-        .collect()
-    )
-    perf.write_csv(perf_out, separator="|", include_header=False)
+        if delete_native_after_scan:
+            native_path.unlink()  # last pass over the native just completed
+        # Pass 2: on-disk streaming sort into the final file. The key is
+        # unique per row (one row per loan-month), so the order is total.
+        (
+            pl.scan_csv(tmp_unsorted, separator="|", has_header=False,
+                        new_columns=PERF_COLS, infer_schema_length=0)
+            .with_columns(pl.all().fill_null(""))
+            .sort(["loan_sequence_number", "reporting_period"])
+            .sink_csv(perf_out, separator="|", include_header=False)
+        )
+        tmp_unsorted.unlink()
+        n_rows_staged = int(
+            pl.scan_csv(perf_out, separator="|", has_header=False,
+                        infer_schema_length=0)
+            .select(pl.len()).collect().item()
+        )
+    else:
+        perf = (
+            native
+            .select(
+                _blank_frame_columns(PERF_COLS, perf_filled)
+                + [pl.col("reporting_period_yyyymm")]
+            )
+            .sort(["loan_sequence_number", "reporting_period_yyyymm"])
+            .select(PERF_COLS)  # drop the sort helper; emit exactly 32 cols
+            .collect()
+        )
+        perf.write_csv(perf_out, separator="|", include_header=False)
+        n_rows_staged = perf.height
+        if delete_native_after_scan:
+            native_path.unlink()
 
-    print(f"  Staged {tag}: {orig_out.name} ({orig.height:,} loans), "
-          f"{perf_out.name} ({perf.height:,} rows)")
+    print(f"  Staged {tag}: {orig_out.name} ({n_loans_staged:,} loans), "
+          f"{perf_out.name} ({n_rows_staged:,} rows)"
+          + ("  [low-memory path]" if low_memory else ""))
     return orig_out, perf_out
 
 

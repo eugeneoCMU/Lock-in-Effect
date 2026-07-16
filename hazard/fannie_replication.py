@@ -405,8 +405,11 @@ def process_quarter(year: int, quarter: str, spec_index: int, manifest: dict) ->
     (FANNIE_NATIVE_DIR / f"lph_{tag}.zip").unlink(missing_ok=True)
 
     # 2. stage; a surviving native means the staged pair's completeness is
-    # unknown (or probe-era) — restage fresh rather than trust it.
-    orig, perf = stage_native_file(native_path, tag, overwrite=native_existed)
+    # unknown (or probe-era) — restage fresh rather than trust it. The
+    # low-memory path (auto for refi-wave-sized natives) frees the native as
+    # soon as its last scan completes so the on-disk sort spill fits.
+    orig, perf = stage_native_file(native_path, tag, overwrite=native_existed,
+                                   delete_native_after_scan=True)
     staged_loans = int(
         pl.scan_csv(orig, separator="|", has_header=False, infer_schema_length=0)
         .select(pl.len()).collect().item()
@@ -416,8 +419,8 @@ def process_quarter(year: int, quarter: str, spec_index: int, manifest: dict) ->
         .select(pl.len()).collect().item()
     )
 
-    # 3. native no longer needed
-    native_path.unlink()
+    # 3. native no longer needed (already gone if staging deleted it early)
+    native_path.unlink(missing_ok=True)
 
     # 4. per-quarter cohort-month cells (unfiltered; vintage filter at combine)
     FANNIE_QUARTER_DIR.mkdir(parents=True, exist_ok=True)
