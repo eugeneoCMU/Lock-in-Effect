@@ -127,12 +127,12 @@ def main() -> None:
 
     # --- G1 harness parity: recalibrated variant, cached surface ----------
     a = run_variant("recalibrated",
-                    committed["recalibrated"]["mobility_scale"],
+                    committed["variants"]["recalibrated"]["mobility_scale"],
                     income, home_value, loans, df0, soma_rolloff)
-    g1_diff = a["share_pct"] - committed["recalibrated"]["share_pct"]
+    g1_diff = a["share_pct"] - committed["variants"]["recalibrated"]["share_pct"]
     g1_pass = abs(g1_diff) <= G1_TOL_PP
     print(f"G1 parity: recalibrated {a['share_pct']:.3f}% vs committed "
-          f"{committed['recalibrated']['share_pct']:.3f}% "
+          f"{committed['variants']['recalibrated']['share_pct']:.3f}% "
           f"(diff {g1_diff:+.4f}pp) {'PASS' if g1_pass else 'FAIL'}")
     if not g1_pass:
         RESULTS_JSON.write_text(json.dumps(
@@ -182,8 +182,8 @@ def main() -> None:
             "zero_gap_anchor_annual": LR_ZERO_GAP_ANNUAL,
             "zero_gap_anchor_source": "L&R 2024: 'quarterly ZIP code mobility hazard ... around 1.5 percent' at zero gap (2021q2)",
             "mobility_scale_external": scale_ext,
-            "mobility_scale_recalibrated_committed": committed["recalibrated"]["mobility_scale"],
-            "mobility_scale_frozen_committed": committed["frozen"]["mobility_scale"],
+            "mobility_scale_recalibrated_committed": committed["variants"]["recalibrated"]["mobility_scale"],
+            "mobility_scale_frozen_committed": committed["variants"]["frozen"]["mobility_scale"],
         },
         "gates": {
             "G1_harness_parity": {"diff_pp": g1_diff, "pass": g1_pass},
@@ -192,7 +192,7 @@ def main() -> None:
         "results": {
             "external": ext,
             "recalibrated_replayed": a,
-            "committed_pair": {k: committed[k]["share_pct"]
+            "committed_pair": {k: committed["variants"][k]["share_pct"]
                                for k in ("recalibrated", "frozen")},
         },
         "floor_diagnostic": {

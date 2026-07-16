@@ -1,0 +1,96 @@
+{
+  "mode": "abm_external_gates",
+  "spec": "round-15 Q4; external gates, no floor recalibration; cross-design harness",
+  "external_parameters": {
+    "dti_max": 0.43,
+    "loss_aversion_lambda": 2.25,
+    "wait_and_see_prob": 0.18259962499999982,
+    "wait_and_see_prob_production": 0.2,
+    "wait_and_see_derivation": "1-(1-0.065)^(1.5x2); L&R 6.5%/qtr per 100bp at the production 150bp/6mo trigger",
+    "zero_gap_anchor_annual": 0.05866344937500001,
+    "zero_gap_anchor_source": "L&R 2024: 'quarterly ZIP code mobility hazard ... around 1.5 percent' at zero gap (2021q2)",
+    "mobility_scale_external": 4472.0458984375,
+    "mobility_scale_recalibrated_committed": 36085.9375,
+    "mobility_scale_frozen_committed": 43882.8125
+  },
+  "gates": {
+    "G1_harness_parity": {
+      "diff_pp": 0.0,
+      "pass": true
+    },
+    "G2_anchor": {
+      "zero_gap_cpr": 0.0585,
+      "band": [
+        0.055,
+        0.063
+      ],
+      "pass": true
+    }
+  },
+  "results": {
+    "external": {
+      "variant": "external",
+      "mobility_scale": 4472.0458984375,
+      "trapped_b": 1151.828436924515,
+      "share_pct": 150.61537336903132,
+      "empirical_trapped_b": 764.7482532227002,
+      "us_cpr_mean_pct": 0.004199840349339417,
+      "empirical_cpr_mean_pct": 5.829007141082971,
+      "cpr_r_lag0": -0.29833466305710676,
+      "cross_correlation": {
+        "-3": 0.17064407818600777,
+        "-2": -0.30913374605152366,
+        "-1": -0.16507202310110267,
+        "0": -0.29833466305710676,
+        "1": -0.20615262973488366,
+        "2": -0.05812351489778093,
+        "3": 0.028367718870441205
+      },
+      "peak_lag": -2,
+      "peak_lag_r": -0.30913374605152366
+    },
+    "recalibrated_replayed": {
+      "variant": "recalibrated",
+      "mobility_scale": 36085.9375,
+      "trapped_b": 453.5186133616682,
+      "share_pct": 59.30299434493775,
+      "empirical_trapped_b": 764.7482532227002,
+      "us_cpr_mean_pct": 8.138241675425641,
+      "empirical_cpr_mean_pct": 5.829007141082971,
+      "cpr_r_lag0": -0.3356865993789185,
+      "cross_correlation": {
+        "-3": 0.17534554994558577,
+        "-2": -0.24044981756772404,
+        "-1": -0.16358760970596234,
+        "0": -0.3356865993789185,
+        "1": -0.21978229168874666,
+        "2": -0.0476839617909883,
+        "3": 0.08846677513891221
+      },
+      "peak_lag": 0,
+      "peak_lag_r": -0.3356865993789185
+    },
+    "committed_pair": {
+      "recalibrated": 59.30299434493775,
+      "frozen": 20.856293209339483
+    }
+  },
+  "floor_diagnostic": {
+    "cpr_at_8pct_market": 0.0,
+    "observed_floor_band": [
+      0.04,
+      0.05
+    ],
+    "violates_observed_floor": true
+  },
+  "preregistration": {
+    "undercuts_paradigm_above_pct": 50.0,
+    "corroborates_band_pct": [
+      10.0,
+      35.0
+    ],
+    "registered_before_results": true
+  },
+  "classification_external": "undercuts_paradigm",
+  "generated_utc": "2026-07-16T17:20:57.391606+00:00"
+}
