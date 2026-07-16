@@ -2118,6 +2118,37 @@ gitignored). Manuscript: V.C's concession paragraph upgraded from
 restated in the same pass as §24.2's edits. Gate arithmetic (mean-pin,
 κ=0 nesting, clip flag) is test-gated in `tests/test_floor_cyclical.py`.
 
+### 24.3 W6 Danish exact curtailment scaling (spec 81c9fd8, run f-artifact commit)
+
+A third run from the same ratification message (the round-14 parked list's
+"Danish exact curtailment scaling"): VII.F's ±25% curtailment stress is
+exactly linear for U.S. legs by construction, but the Danish legs compute
+curtailment on their own compounding counterfactual balances, so the
+manuscript could only assert their differential "stays immaterial (below
+$1 billion)" to first order. Run: the production Danish path re-scored
+through the shared accounting layer with the curtailment rate at
+{0.75×, 1.0×, 1.25×} (rate-only stress; income fraction untouched;
+simulated CPR paths asserted bit-identical across scales — curtailment
+enters only the accounting layer). Implementation note: patching the
+`CURTAILMENT_CPR_HEALTHY` module global alone is a silent no-op (it is
+consumed as a def-time-bound default argument); the operative patch wraps
+`curtailment_series` pinning `healthy_cpr`.
+
+Parity at 1.0×: all four gates PASS (US netting $69.5622B exact; Danish-leg
+curtailment $70.3345B vs the $70.33 anchor; printed shared-layer Danish
+cell $848.8698B vs $848.9 within the danish_discount_bound gate width;
+differential $+0.7723B vs $+0.77). Exact differentials: **+$0.76B (0.75×),
++$0.77B (1.0×), +$0.66B (1.25×)** — max $0.77B, below the $1.0B ex-ante
+threshold, so the manuscript phrase upgrades to exact figures with NO claim
+change. Structural finding: the second-order balance feedback pulls the
+differential DOWN at the high endpoint (a faster Danish drain leaves lower
+counterfactual balances for the higher rate to act on) — the first-order
+intuition that the differential scales up with the rate is wrong in
+direction at the margin. Artifact:
+`hazard/data/curtailment_danish_scaling_results.json`; VII.F sentence
+upgraded in the same manuscript pass as §24.1's edits (PDF rebuilt, all 28
+liveness gates PASS).
+
 ## Appendix A — File Map
 
 ```
