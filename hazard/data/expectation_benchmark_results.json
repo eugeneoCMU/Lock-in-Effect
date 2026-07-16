@@ -1,0 +1,107 @@
+{
+  "mode": "expectation_benchmark",
+  "spec": "hazard/expectation_benchmark.py header (committed 88ef11e); document-name amendment committed pre-transcription (see SPEC AMENDMENT block)",
+  "projection_provenance": "Federal Reserve Bank of New York, 'Open Market Operations During 2021' (report to the FOMC, published May 2022 per the report cover; the workbook's own cover sheet carries a 'Released: May 2021' typo), Chart 34 'Projected SOMA Domestic Securities Holdings by Asset Class', printed p.49 (PDF p.51), baseline scenario (the report's single path: May 2022 Plans caps, no MBS sales, runoff modeled from June 2022; projections start from the February 28, 2022 balance sheet per Appendix 4). Levels from the NY Fed's published chart-data workbook https://www.newyorkfed.org/medialibrary/media/markets/omo/omo2021-xls.xlsx, sheet 'Chart 34', column 'Agency MBS'. Cross-checks: Treasuries+MBS reproduce the report's printed anchors (YE2025 total 5963.9 ~ the printed '$5.9 trillion' mid-2025 plateau; agency share 32.4% at YE2022 vs printed 'roughly 32 percent through 2025'; the report's printed p.31 (PDF p.33) '$2.61 trillion (32 percent)' matches the YE2021 level). Note, direction disclosed: the 2022 printed period nets first-half-2022 settlement inflows against Jun-Dec runoff, so the in-window projected runoff for 2022 is if anything UNDERSTATED, which understates the E-benchmark and overstates every share_E.",
+  "transcription": {
+    "published_ye_agency_mbs_levels_b": {
+      "2021": 2615.5,
+      "2022": 2599.6,
+      "2023": 2319.9,
+      "2024": 2072.8,
+      "2025": 1849.7
+    },
+    "printed_period_runoff_b": {
+      "2022": 15.900000000000091,
+      "2023": 279.6999999999998,
+      "2024": 247.0999999999999,
+      "2025": 223.10000000000014
+    },
+    "transcription_total_b": 765.8,
+    "self_check": "PASS \u2014 reduces to a telescoping identity for a levels-format source; evidentiary weight on the workbook citation and the independent verification in TECHNICAL.md \u00a725.5"
+  },
+  "window": {
+    "months": 42,
+    "spread_rule": "uniform within printed period, clipped to window",
+    "projected_runoff_window_b": 740.5833333333333,
+    "actual_runoff_window_b": 652.7517467772998,
+    "rolloff_source": "SOMA"
+  },
+  "e_benchmark_b": 87.83158655603347,
+  "cap_benchmark_b": 764.7482532227002,
+  "gates": {
+    "i_transcription_self_check": "PASS (telescoping identity; see transcription.self_check)",
+    "ii_cap_parity": {
+      "path_b_central": 0.0,
+      "path_b_null": 0.0,
+      "fannie_central": 0.0,
+      "fannie_null": 0.0,
+      "abm_production": 0.0
+    },
+    "iii_identity": "PASS (machine precision)"
+  },
+  "estimators": {
+    "path_b_central": {
+      "trapped_b": 818.5300844066606,
+      "published_share_cap_pct": 107.0326190295068,
+      "share_cap_pct": 107.0326190295068,
+      "parity_diff_pp": 0.0,
+      "share_E_pct": 931.9313432696188
+    },
+    "path_b_null": {
+      "trapped_b": 748.1850239867648,
+      "published_share_cap_pct": 97.83415925879702,
+      "share_cap_pct": 97.83415925879702,
+      "parity_diff_pp": 0.0,
+      "share_E_pct": 851.8404976203509
+    },
+    "fannie_central": {
+      "trapped_b": 820.9947103314821,
+      "published_share_cap_pct": 107.35489840895427,
+      "share_cap_pct": 107.35489840895427,
+      "parity_diff_pp": 0.0,
+      "share_E_pct": 934.7374247961651
+    },
+    "fannie_null": {
+      "trapped_b": 754.5955532897058,
+      "published_share_cap_pct": 98.67241279856341,
+      "share_cap_pct": 98.67241279856341,
+      "parity_diff_pp": 0.0,
+      "share_E_pct": 859.1391581072037
+    },
+    "abm_production": {
+      "trapped_b": 90.98115583016241,
+      "published_share_cap_pct": 11.896876579549117,
+      "share_cap_pct": 11.896876579549117,
+      "parity_diff_pp": 0.0,
+      "share_E_pct": 103.58591868555126
+    }
+  },
+  "lockin_marginal": {
+    "dollars_b": 70.34506041989584,
+    "pp_of_cap_benchmark": 9.198459770709782,
+    "pp_of_e_benchmark": 80.09084564926783
+  },
+  "threshold": {
+    "rule": "null share_E > 50%",
+    "null_share_E_pct": 851.8404976203509,
+    "mechanical_majority_survives": true
+  },
+  "basis_load_bearing": {
+    "rule": "|E-basis central-null gap - cap-basis gap| > 0.5pp (two-sided, conservative reading of the spec's prose)",
+    "gap_E_pp": 80.09084564926786,
+    "gap_cap_pp": 9.198459770709782,
+    "triggered": true,
+    "reading": "pp magnitudes rescale by the benchmark ratio (8.71x); dollars and rankings are basis-invariant. The manuscript must state that percentage-point magnitudes are cap-basis quantities."
+  },
+  "supplementary_projection_wedge": {
+    "cap_target_window_b": 1417.5,
+    "projection_implied_cap_shortfall_b": 676.9166666666667,
+    "expected_share_of_realized_cap_shortfall_pct": 88.51496735220967,
+    "null_shared_basis_share_pct": 88.73806762609433,
+    "expected_minus_null_shared_pp": -0.22310027388466835,
+    "note": "Share of the realized cap-shortfall that the NY Fed's ex-ante (May 2022) projection already anticipated, compared with the beta1=0 null's benchmark-consistent (shared-basis) recovery read from shared_layer_scoring_results.json. Supplementary, not gated."
+  },
+  "runtime_s": 3.1,
+  "generated_utc": "2026-07-16T18:20:49.076332+00:00",
+  "git_head": "b8ad13c7cc5b2443f87d9dbc5a1b6d630fb28687"
+}
