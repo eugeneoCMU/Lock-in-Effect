@@ -50,6 +50,7 @@ GROUPCAL_RESULTS = ROOT / "hazard" / "data" / "grouped_calibration_results.json"
 FONSECA_RESULTS = ROOT / "hazard" / "data" / "fonseca_band_anchor_results.json"
 V1516_RESULTS = ROOT / "hazard" / "data" / "vintage_1516_subleg_results.json"
 DTI_RESULTS = ROOT / "abm" / "data" / "dti_threshold_sweep_results.json"
+COHORTTIMING_RESULTS = ROOT / "abm" / "data" / "cohort_timing_diagnostic_results.json"
 
 
 def _gates_ok(gates: dict) -> bool:
@@ -739,6 +740,30 @@ def main() -> int:
         f"status={dti['status']}, in-run gates ok={_gates_ok(dti['gates'])}, "
         f"floor in-band all thresholds={floor_in_band}, tex run-citation "
         f"count={claims} (want 1), trapped literals present={lit_36 in tex}/{lit_50 in tex}"
+    )
+
+    # Round-18 R18-L / E3 (gate #55): cohort timing diagnostic — in-run gates,
+    # aggregate parity anchors reproduced, and the printed cohort-range literals.
+    ct = json.loads(COHORTTIMING_RESULTS.read_text())
+    claims = tex.count("run \\texttt{cohort\\_timing\\_diagnostic}")
+    anc = ct["aggregate_anchors_reproduced"]
+    ct_gates = ct["gates"]
+    ct_gates_ok = (all(g.get("pass") for g in ct_gates) if isinstance(ct_gates, list)
+                   else _gates_ok(ct_gates))
+    ok = (ct["status"] == "success" and ct_gates_ok and claims == 1
+          and abs(anc["abm_ccf_lag0"] - (-0.3183375411255578)) < 1e-9
+          and abs(anc["pathb_delta_velocity_lag0"] - (-0.9428012605757549)) < 1e-9
+          and "$-0.05$ to $-0.16$" in tex and "$-0.87$ and $-0.94$" in tex
+          and "reproducing the aggregate $-0.318$" in tex)
+    failures += 0 if ok else 1
+    print(
+        f"[{'PASS' if ok else 'FAIL'}] cross-check cohort timing diagnostic: "
+        f"status={ct['status']}, in-run gates ok={ct_gates_ok}, "
+        f"anchors abm/pathb reproduced="
+        f"{abs(anc['abm_ccf_lag0'] - (-0.3183375411255578)) < 1e-9}/"
+        f"{abs(anc['pathb_delta_velocity_lag0'] - (-0.9428012605757549)) < 1e-9}, "
+        f"tex run-citation count={claims} (want 1), cohort-range literals present="
+        f"{'$-0.05$ to $-0.16$' in tex}/{'$-0.87$ and $-0.94$' in tex}"
     )
 
     print(f"\n{'ALL GATES PASS' if failures == 0 else f'{failures} GATE(S) FAILED'}")

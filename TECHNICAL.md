@@ -2775,7 +2775,7 @@ BUNDLE_NOTES_ROUND17.md). Letter placeholders filled with executed
 values in revision_roadmap_round17.md. Commits local — push awaits
 Eugene.
 
-## 28. Round-18 revision: full referee report — seven runs, basis crosswalk, non-cancellation finding (2026-07-17)
+## 28. Round-18 revision: full referee report — eight runs, basis crosswalk, non-cancellation finding (2026-07-17)
 
 Source: a second complete external referee report on the v16 draft
 (technical/methodological/clarity/related-work weaknesses, detailed
@@ -2794,7 +2794,8 @@ elasticity). Author go-ahead of record: "go" (2026-07-17).
 
 ### 28.1 Runs (per-run artifact commits 060a725..2b86b57; opus subagents, spec-before-run)
 
-Seven runs, all in-run gates PASS at execution:
+Eight runs (seven main + the E3 cohort-timing diagnostic added on author
+approval), all in-run gates PASS at execution:
 
 - `hazard/subgroup_marginals.py` (R18-A, gate #48, commit 2b86b57): the
   review's most-repeated ask (M1+E2+Q3) — group-ablation marginal
@@ -2862,6 +2863,25 @@ Seven runs, all in-run gates PASS at execution:
   one monthly rate) as a fourth profile — wedge 9.299pp/$71.118B netted,
   marginal 9.198459770709775pp (departure 1.42e-14pp from unit);
   unit/seasonal/regime results byte-identical to the committed artifact.
+- `abm/cohort_timing_diagnostic.py` (R18-L / referee E3, gate #55,
+  commit 2ab7582): the E3 cohort-split timing falsification, run after
+  the author approved the initially-optional extension. Parity bit-exact:
+  abm CCF lag-0 −0.3183375411255578, Path B first-difference velocity
+  −0.9428012605757549 (= manuscript −0.94), empirical +0.25496827096410607
+  (= +0.25), band 2/√41 = 0.31234752377721214. Predicted 30-year coupon
+  cohorts 2.0–4.5% all track the contemporaneous rate mechanically
+  (Δ-corr −0.87 to −0.94, phase-locked lag 0); realized cohorts (Freddie
+  2017–21 + Fannie replication) show no rate-velocity response at any lag
+  ±6mo (lag-0 −0.05 to −0.16, all inside ±2/√n; best |r| over all
+  cohorts/lags 0.343). Residual structural not compositional, not a
+  datable phase shift. HONEST LIMIT (carried in §V.C and the letter):
+  realized cohort monthly CPR exists only in the loan-level Freddie/Fannie
+  panels (Path B universe), not the SOMA holdings behind the aggregate
+  empirical CPR — which justifies the estimator-level timing falsification
+  staying at the SOMA aggregate; pooled Freddie realized velocity −0.074
+  vs SOMA +0.25 differ in sign but both deep inside the zero band. 7 gates
+  PASS, deterministic. Note the artifact stores `gates` as a list (the
+  other round-18 runs use dicts); the liveness check #55 handles both.
 - `abm/dti_threshold_sweep.py` (R18-C, gate #49, commit ad83725):
   36/43/50% front-end DTI wall on the frozen berger surface
   (run-2026-07-05-berger, surface sha pinned; the run completed but its
@@ -2898,14 +2918,16 @@ pending the run.
 
 ### 28.3 Gates, editions, letter
 
-Liveness gates 47 → 54 executed (#48–#54 in the round-16/17
+Liveness gates 47 → 55 executed (#48–#55 in the round-16/17
 artifact-vs-tex pattern: in-run gates PASS + exactly-one run citation +
-printed literals derived from the artifact), suite ALL PASS (commits
-c71e9bf + the DTI addition). references.bib unchanged at 59 (no new
-sources needed; fonseca2024 and all round-18 citations already present).
-PDF rebuilt (tectonic, 84pp, zero undefined references); md/txt editions
-regenerated. Letter placeholders filled with executed values in
-revision_roadmap_round18.md. Commits local — push awaits Eugene.
+printed literals derived from the artifact), suite ALL PASS. references.bib
+unchanged at 59 (no new sources needed; fonseca2024 and all round-18
+citations already present). PDF rebuilt (tectonic, 84pp, zero undefined
+references); md/txt editions regenerated (19 tables). Letter placeholders
+filled with executed values in revision_roadmap_round18.md — eight runs
+total (the seven main runs plus the E3 cohort-timing diagnostic added on
+author approval; no blocks remain pending). Commits local — push awaits
+Eugene.
 
 ## Appendix A — File Map
 
