@@ -2870,11 +2870,14 @@ approval), all in-run gates PASS at execution:
   −0.9428012605757549 (= manuscript −0.94), empirical +0.25496827096410607
   (= +0.25), band 2/√41 = 0.31234752377721214. Predicted 30-year coupon
   cohorts 2.0–4.5% all track the contemporaneous rate mechanically
-  (Δ-corr −0.87 to −0.94, phase-locked lag 0); realized cohorts (Freddie
-  2017–21 + Fannie replication) show no rate-velocity response at any lag
-  ±6mo (lag-0 −0.05 to −0.16, all inside ±2/√n; best |r| over all
-  cohorts/lags 0.343). Residual structural not compositional, not a
-  datable phase shift. HONEST LIMIT (carried in §V.C and the letter):
+  (Δ-corr −0.87 to −0.94; five of six cohorts phase-locked at lag 0, the
+  4.5% coupon CCF peaking at lag −6 with r=−0.29 — the frozen artifact
+  verdict string still says "phase-locked at lag 0" for all six and was
+  left untouched); realized cohorts (Freddie 2017–21 + Fannie
+  replication) show no rate-velocity response at any lag ±6mo (Freddie
+  lag-0 −0.05 to −0.16, Fannie −0.03 to −0.14, all inside ±2/√n; best |r|
+  over all cohorts/lags 0.343). Residual structural not compositional,
+  not a datable phase shift. HONEST LIMIT (carried in §V.C and the letter):
   realized cohort monthly CPR exists only in the loan-level Freddie/Fannie
   panels (Path B universe), not the SOMA holdings behind the aggregate
   empirical CPR — which justifies the estimator-level timing falsification
@@ -2914,7 +2917,7 @@ tab:discount +2 rows and the 25–150bp prose span (III.C); servicer-mix
 sentence (VII.F); grouped-calibration paragraph (app:theil, placed per
 the run agent's direction caution — cell-panel CPR object, not the V.B
 dollar split); 2015–16 isolation clause (V.C). DTI sentence (VII.C)
-pending the run.
+executed (gate #49).
 
 ### 28.3 Gates, editions, letter
 
