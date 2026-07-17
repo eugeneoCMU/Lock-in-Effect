@@ -24,6 +24,15 @@ is scorer-invariant by construction: the variant runs produce bit-identical
 Danish paths (asserted below), so every scorer — including the printed
 basis — maps them to the same dollar.
 
+Round-17 amendment (R17-E follow-up, spec-before-run, 2026-07-17): SPREADS
+extended {0, 50, 100}bp → {0, 25, 50, 75, 100}bp at the referee's request
+for a filled grid toward bond-market discounting. No other change; the
+existing baseline-parity and shared-layer-vs-printed-848.9 gates carry
+over unchanged, and the pre-committed expectation is the committed
+structural finding: bit-identical Danish CPR paths, $0.00 deltas at every
+grid point (the production leg's prepayment never consumes the PV
+classification).
+
 Run:  cd hazard && python3 danish_discount_bound.py
       → data/danish_discount_bound.json
 """
@@ -62,7 +71,7 @@ DATA_DIR = Path(__file__).parent / "data"
 OUT = DATA_DIR / "danish_discount_bound.json"
 TMP = DATA_DIR / "_danish_bound_tmp.parquet"
 
-SPREADS = [0.0, 0.005, 0.010]
+SPREADS = [0.0, 0.0025, 0.005, 0.0075, 0.010]  # round-17: 25/75bp fill
 PRINTED_TABLE1_DANISH_B = 848.9   # Table 1 row (c), shared-accounting basis
 FLIPS = {"evaluated": 0, "flipped": 0}
 
