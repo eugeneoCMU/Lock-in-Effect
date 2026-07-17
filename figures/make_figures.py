@@ -674,6 +674,73 @@ def fig11_marginal_decomposition():
     plt.close(fig)
 
 
+def fig12_marginal_timing():
+    """Month x coupon timing companion to fig11: stacked monthly marginal."""
+    d = _j("figures/marginal_monthly_data.json")
+    assert d["gates_all_pass"] is True, "artifact gates must all pass"
+    assert d["additivity_verdict"] == "monthly_shares_readable"
+    months = d["months"]
+    n = len(months)
+    assert n == d["window"]["n_months"]
+    agg = np.asarray(d["aggregate"]["m_t_b"])
+    total = d["aggregate"]["total_b"]
+    assert (agg > 0).all(), "aggregate monthly marginal must be positive"
+    assert abs(agg.sum() - total) <= 1e-9 * abs(total)
+    buckets = d["coupon_buckets"]
+    layers = []
+    for b in buckets.values():
+        m = np.asarray(b["m_t_b"])
+        assert m.shape == (n,)
+        assert abs(m.sum() - b["terminal_b"]) <= 1e-9 * abs(b["terminal_b"])
+        layers.append(m)
+    # Stack vs aggregate: the per-month additivity gap is bounded by the
+    # artifact's own terminal residual (cells-capture engine vs paired run);
+    # both sides of the bound come from the arrays, nothing hardcoded.
+    resid = agg - np.sum(layers, axis=0)
+    term_resid = total - sum(b["terminal_b"] for b in buckets.values())
+    assert np.isclose(resid.sum(), term_resid)
+    assert np.abs(resid).max() <= abs(term_resid)
+    peak = d["aggregate"]["peak"]
+    i_pk = int(np.argmax(agg))
+    assert i_pk == peak["index_1based"] - 1
+    assert months[i_pk] == peak["month"] and np.isclose(agg[i_pk], peak["m_b"])
+    k = n // 3
+    assert 3 * k == n  # third boundaries derived from the window length
+    for j, third_b in enumerate(d["aggregate"]["thirds"]["dollars_b"]):
+        assert abs(agg[j * k:(j + 1) * k].sum() - third_b) <= \
+            1e-9 * abs(third_b)
+
+    x = np.arange(n)
+    fig, ax = plt.subplots(figsize=(8.6, 3.6))
+    # Blues ramp for the coupon buckets, matching fig11's cell colormap.
+    ax.stackplot(x, *layers, labels=list(buckets),
+                 colors=["#c6dbef", "#6baed6", "#2171b5"], lw=0)
+    ax.plot(x, agg, color="#333333", lw=1.4, label="aggregate $m_t$")
+    for xb in (k - 0.5, 2 * k - 0.5):
+        ax.axvline(xb, color=C_GRAY, lw=0.8, ls=":")
+    ax.plot(i_pk, agg[i_pk], marker="o", ms=5, color="#333333", zorder=5)
+    ax.annotate(f"peak {peak['month']} (${peak['m_b']:.2f}B)",
+                xy=(i_pk, agg[i_pk]), xytext=(6, 9),
+                textcoords="offset points", fontsize=8.5, color="#333333")
+    jan = [i for i, mo in enumerate(months) if mo.endswith("-01")]
+    ax.set_xticks(jan, [months[i][:4] for i in jan])
+    ax.set_xlim(0, n - 1)
+    ax.set_ylim(0, float(agg.max()) * 1.18)
+    ax.set_ylabel("Lock-in marginal ($B per month)")
+    ax.set_title("Monthly lock-in marginal by coupon bucket")
+    ax.legend(fontsize=8.6, loc="upper left", frameon=False)
+    fig.text(0.005, 0.01,
+             "All series read from figures/marginal_monthly_data.json "
+             "(monthly capture of the committed group-ablation engine); "
+             "coupon stack vs paired-run aggregate leaves a "
+             f"{abs(term_resid) / total * 100:.1f}% terminal additivity "
+             "residual, asserted in-generator.",
+             fontsize=8, color=C_GRAY)
+    fig.tight_layout(rect=(0, 0.045, 1, 1))
+    fig.savefig(OUT / "fig12_marginal_timing.png", dpi=DPI)
+    plt.close(fig)
+
+
 GENERATORS = {
     "fig1": fig1_recovery_dotplot,
     "fig2": fig2_ccf,
@@ -686,6 +753,7 @@ GENERATORS = {
     "fig9": fig9_benchmark_construction,
     "fig10": fig10_abm_cpr_paths,
     "fig11": fig11_marginal_decomposition,
+    "fig12": fig12_marginal_timing,
 }
 
 if __name__ == "__main__":
