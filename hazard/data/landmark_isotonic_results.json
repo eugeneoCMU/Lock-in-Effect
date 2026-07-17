@@ -1,0 +1,168 @@
+{
+  "mode": "landmark_isotonic_holdout",
+  "spec": "round-17 R17-D LMISO-style isotonic recalibration of the frozen Path A spec v4 holdout predictions; identical temporal holdout, target, weighting, and RMSE definitions; map fit on the 2023 inner-validation year only (train-side); thresholds ex ante; static variant \u2014 the rolling/expanding-window landmark protocol is declined in-spec",
+  "holdout_definition": "cohort-month cells with period >= 2024-01-01 from the production panel pipeline (hazard_fit split; identical to pathA_v4_holdout)",
+  "panel_sha256": "c0feca1da96e97300d840c867494cc80ca8bbe97249c5fdeeb98761a015528e2",
+  "input_sha256": {
+    "spec_v4_coefficients": "f8b9fedce0a02c2d7b89a9a2cb32e22fbb07b66f8df43e152be27cf815aea15a",
+    "spec_v3_coefficients": "80aad3ab4366fa4a4777787506bbabfd2b2002d2e6834afb1ca18194bc83fe8f",
+    "pathA_reference_artifact": "23d301ab355ac584ecd68535f80f4586c6b143a1dbf5480259398d633a8259dc"
+  },
+  "n_train": 10176,
+  "n_holdout": 6077,
+  "n_calibration": 3473,
+  "pathA_reference": {
+    "rmse_unweighted_pp": 37.903228802264934,
+    "rmse_weighted_pp": 3.037942336998421,
+    "r2_unweighted": -0.011428527641577979,
+    "source": "hazard/data/pathA_v4_holdout_results.json (spec_v4)"
+  },
+  "parity": {
+    "spec_v4": {
+      "artifact": "hazard/data/runs/run-2026-07-14-pathA-seasonal/hazard_coefficients.json",
+      "artifact_sha256": "f8b9fedce0a02c2d7b89a9a2cb32e22fbb07b66f8df43e152be27cf815aea15a",
+      "spec_version": 4,
+      "n_holdout": 6077,
+      "rmse_unweighted_pp": 37.903228802264934,
+      "rmse_exposure_weighted_pp": 3.037942336998421,
+      "holdout_r2_unweighted": -0.011428527641577979,
+      "holdout_obs_cpr_mean_unweighted_pp": 7.041628590244825,
+      "holdout_obs_cpr_mean_exposure_weighted_pp": 4.210290920254706
+    },
+    "spec_v3": {
+      "artifact": "hazard/data/hazard_coefficients_specv3.json",
+      "artifact_sha256": "80aad3ab4366fa4a4777787506bbabfd2b2002d2e6834afb1ca18194bc83fe8f",
+      "spec_version": 3,
+      "n_holdout": 6077,
+      "rmse_unweighted_pp": 37.8295321331,
+      "rmse_exposure_weighted_pp": 2.5338262679523766,
+      "holdout_r2_unweighted": -0.007499234463333337,
+      "holdout_obs_cpr_mean_unweighted_pp": 7.041628590244825,
+      "holdout_obs_cpr_mean_exposure_weighted_pp": 4.210290920254706
+    }
+  },
+  "gates": {
+    "G5_split_integrity": {
+      "n_train_got": 10176,
+      "n_train_want": 10176,
+      "n_holdout_got": 6077,
+      "n_holdout_want": 6077,
+      "frozen_artifacts_agree": true,
+      "pass": true
+    },
+    "G1_v4_parity_unweighted": {
+      "got": 37.903228802264934,
+      "want": 37.903228802264934,
+      "tol": 0.01,
+      "pass": true
+    },
+    "G2_v4_parity_weighted": {
+      "got": 3.037942336998421,
+      "want": 3.037942336998421,
+      "tol": 0.01,
+      "pass": true
+    },
+    "G3_v3_parity_unweighted": {
+      "got": 37.8295321331,
+      "want": 37.8295321331,
+      "tol": 0.01,
+      "pass": true
+    },
+    "G4_v3_parity_weighted": {
+      "got": 2.5338262679523766,
+      "want": 2.5338262679523766,
+      "tol": 0.01,
+      "pass": true
+    },
+    "G6_local_prediction_parity": {
+      "checks": {
+        "rmse_unweighted_pp": {
+          "got": 37.903228802264934,
+          "want": 37.903228802264934,
+          "tol": 1e-09,
+          "pass": true
+        },
+        "rmse_weighted_pp": {
+          "got": 3.037942336998421,
+          "want": 3.037942336998421,
+          "tol": 1e-09,
+          "pass": true
+        },
+        "r2_unweighted": {
+          "got": -0.011428527641577979,
+          "want": -0.011428527641577979,
+          "tol": 1e-09,
+          "pass": true
+        }
+      },
+      "pass": true
+    },
+    "G7_calibration_set_integrity": {
+      "n_calibration_got": 3473,
+      "n_calibration_want": 3473,
+      "n_inner_train": 6703,
+      "calibration_years": [
+        2023
+      ],
+      "n_distinct_periods_got": 12,
+      "n_distinct_periods_want": 12,
+      "pass": true
+    },
+    "G8_recalibrated_prediction_sanity": {
+      "pred_min": 0.0,
+      "pred_max": 0.007213675494583025,
+      "all_finite": true,
+      "pass": true
+    }
+  },
+  "isotonic_recalibration": {
+    "rmse_unweighted_pp": 37.82053783345475,
+    "rmse_weighted_pp": 2.534457117640078,
+    "r2_unweighted": -0.0070202080391954524,
+    "protocol": {
+      "estimator": "sklearn.isotonic.IsotonicRegression(increasing=True, out_of_bounds='clip'), sklearn 1.6.1",
+      "fit_set": "train cells with period >= 2023-01-01 (the 2023 inner-validation year of the committed ml_comparator_holdout hyperparameter protocol; no post-2023 information enters the map)",
+      "x": "frozen spec v4 predicted monthly hazard (predict-only)",
+      "y": "observed prepay_rate",
+      "sample_weight": "exposure (UPB dollars)",
+      "units_note": "fit on the monthly-hazard scale; annualized CPR pp is the same fixed positive rescaling (x 1200) of both axes, so this is the predicted-cell-CPR -> observed-cell-CPR map of the roadmap spec in the scorer's native units \u2014 isotonic regression depends on x only through its ordering and the fitted values rescale exactly",
+      "application": "applied once to the frozen spec v4 predictions on the identical pre-committed 2024+ holdout; scored once via the template cell_metrics formulas; out-of-range holdout predictions clip to boundary calibration values"
+    },
+    "calibration_map": {
+      "n_thresholds": 70,
+      "x_min_hazard": 2.061153622438558e-09,
+      "x_max_hazard": 0.023573221389620577,
+      "x_min_cpr_pp": 2.4733843469262696e-06,
+      "x_max_cpr_pp": 28.287865667544693,
+      "y_min_hazard": 0.0,
+      "y_max_hazard": 0.007213675494583025,
+      "y_min_cpr_pp": 0.0,
+      "y_max_cpr_pp": 8.65641059349963
+    },
+    "calibration_fit_diagnostics": {
+      "n_cells": 3473,
+      "in_sample_rmse_weighted_pp_raw": 1.3504932148053463,
+      "in_sample_rmse_weighted_pp_recalibrated": 1.1521630302123278,
+      "note": "in-sample for the map; diagnostic, non-decisive"
+    }
+  },
+  "interpretation": {
+    "primary_metric": "rmse_weighted_pp",
+    "material_improvement_frac": 0.8,
+    "material_degradation_frac": 1.25,
+    "threshold_weighted_pp": 2.430353869598737,
+    "threshold_weighted_hurt_pp": 3.797427921248026,
+    "threshold_unweighted_pp_secondary": 30.32258304181195,
+    "threshold_unweighted_hurt_pp_secondary": 47.37903600283117,
+    "verdicts": {
+      "isotonic_recalibration": {
+        "primary_weighted": "no_material_change",
+        "secondary_unweighted": "no_material_change"
+      }
+    },
+    "overall_verdict": "no_material_change",
+    "reading": "The 2023-fit exposure-weighted isotonic map leaves the frozen spec v4 exposure-weighted holdout RMSE inside the ex-ante [0.80x, 1.25x] no-material-change band: the training-regime calibration level does not transfer usefully across the 2024 boundary, consistent with the regime-drift diagnosis and the Theil U2 > 1 result. Ex ante: NO outcome of this run moves any headline \u2014 Path A is excluded from headline figures by pre-committed spec (tex line 328) and the calibrated-counterfactual (Path B) claims do not rest on Path A OOS accuracy.",
+    "no_headline_ex_ante": "Ex ante: NO outcome of this run moves any headline \u2014 Path A is excluded from headline figures by pre-committed spec (tex line 328) and the calibrated-counterfactual (Path B) claims do not rest on Path A OOS accuracy."
+  },
+  "declined_scope": "rolling/expanding-window landmark variant (monthly refits or re-recalibrations at the 21 holdout landmarks) declined in-spec as a different protocol: post-2024 landmarks would fit on post-2024 information, a rolling-origin design not comparable to the frozen single split. sadhwani2021-class loan-level deep comparator remains declined on data grounds (no loan-month records in repo; 826M-row ingest external, headline-stats-only license posture); handled in prose."
+}
