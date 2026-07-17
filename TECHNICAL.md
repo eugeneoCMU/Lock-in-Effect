@@ -2719,6 +2719,47 @@ investigated and NOT added: the Census CB24-TPS.118 release verifies but
 prints no mover-rate figure in the release text, so the freeze trigger
 keeps its no-external-source concession.
 
+### 27.3-pre Follow-up: the four optional items executed (author-directed, same day)
+
+Author go-ahead: "can you work on everything on the not done?" All four
+items the round left optional were then executed under the same
+discipline (specs ea13e0f/3a73209; runs 8170152/fa0e5e5/bb95a7b/00c79b6):
+
+- `hazard/curtailment_profile_demo.py` (gate #45): unit/seasonal/
+  regime-split profiles wrapped around `fed.curtailment_series`
+  (patch-and-restore; the CURTAILMENT_CPR_HEALTHY global is a documented
+  silent no-op and never touched); unit parity to the committed
+  $69.56220187263008B netting and shares; CPR paths bit-identical;
+  netting equal central-vs-null. The wedge moves (9.16/8.90 vs 9.10pp;
+  netted $70.06/$68.09 vs $69.56B) while the marginal is IDENTICAL at
+  +9.198460pp / $70.3451B to ≤1.4e-14pp — verdict: identity demonstrated.
+  One sentence added to VII.F.
+- `hazard/expectation_spread_variants.py` (gate #46): pure arithmetic on
+  the committed expectations artifact; G1/G2 reproduce 88.514967/75.576515
+  at rel 0.0. Plausible ramps: 2022 back/front 88.05/88.98%; 2025
+  all-front 86.08% (lowers — more in-window projection), 2025 linear
+  back-ramp 90.57%; all-December bracket 115.26% with a degenerate-E flag
+  (projection then exceeds realized). Threshold survives everywhere. NOTE:
+  the roadmap's earlier read-only direction labels were SWAPPED; the run
+  records the correction in prior_reconstruction_check. One sentence added
+  to III.D.
+- `hazard/danish_discount_bound.py` grid fill (gate #47): SPREADS
+  {0,25,50,75,100}bp; flips 0/2,470/7,805/17,493/32,488 of 1,683,082,
+  monotone, with CPR paths bit-identical and $0.00 deltas at every point;
+  tab:discount now prints five rows and the 25--100bp phrasing replaces
+  50--100bp at both mentions.
+- `figures/make_figures.py` fig12_marginal_timing (fig:marginaltiming,
+  §V.D): stacked monthly marginal by coupon bucket with aggregate overlay,
+  peak and thirds annotations, nine in-generator asserts, all series read
+  from marginal_monthly_data.json (zero literal-scan hits); footer split
+  to two lines per the §26.6 clipped-footer precedent; placed [H] at its
+  first mention in the timing paragraph. Figures now 13 (converter
+  want-count updated), tables 18.
+
+Manuscript 82pp, zero undefined references; liveness gates 44 → 47, ALL
+PASS; 39 tests pass; editions and UPLOAD_ROUND11 refreshed
+(BUNDLE_NOTES_ROUND17.md addendum).
+
 ### 27.3 Gates, bib, editions
 
 Liveness gates 37 → 44 (#38–#44 artifact-vs-tex cross-checks in the

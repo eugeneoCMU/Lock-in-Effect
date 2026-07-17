@@ -41,6 +41,9 @@ MARGMONTH_RESULTS = ROOT / "hazard" / "data" / "marginal_monthly_decomposition_r
 INTERP_RESULTS = ROOT / "abm" / "data" / "interp_spot_check_results.json"
 SMD_RESULTS = ROOT / "abm" / "data" / "smd_two_moment_results.json"
 WALTAB_RESULTS = ROOT / "hazard" / "data" / "wal_table_results.json"
+CURTDEMO_RESULTS = ROOT / "hazard" / "data" / "curtailment_profile_demo_results.json"
+SPREADVAR_RESULTS = ROOT / "hazard" / "data" / "expectation_spread_variants_results.json"
+DANBOUND_RESULTS = ROOT / "hazard" / "data" / "danish_discount_bound.json"
 
 
 def _gates_ok(gates: dict) -> bool:
@@ -538,6 +541,71 @@ def main() -> int:
         f"[{'PASS' if ok else 'FAIL'}] cross-check danish wal rows: literals "
         f"{lit_dus!r}/{lit_dlv!r}/{lit_short!r} present="
         f"{lit_dus in tex}/{lit_dlv in tex}/{lit_short in tex}"
+    )
+
+    # Round-17 follow-up R17-I (gate #45): the curtailment-demonstration
+    # sentence must agree with the committed artifact — gates passed, the
+    # identity held, and the printed netted totals/wedges are the artifact's.
+    cpd = json.loads(CURTDEMO_RESULTS.read_text())
+    claims = tex.count("run \\texttt{curtailment\\_profile\\_demo}")
+    seas = cpd["results"]["seasonal"]
+    regi = cpd["results"]["regime_split"]
+    lits = [f"\\${seas['netted_b']:.2f} and \\${regi['netted_b']:.2f} billion",
+            f"{seas['wedge_pp']:.2f} and {regi['wedge_pp']:.2f} points"]
+    ok = (cpd["status"] == "ok" and _gates_ok(cpd["gates"])
+          and bool(cpd["demonstration"]["identity_holds"])
+          and claims == 1 and all(l in tex for l in lits))
+    failures += 0 if ok else 1
+    print(
+        f"[{'PASS' if ok else 'FAIL'}] cross-check curtailment profile demo: "
+        f"status={cpd['status']}, identity_holds="
+        f"{cpd['demonstration']['identity_holds']}, tex run-citation "
+        f"count={claims} (want 1), literals present={[l in tex for l in lits]}"
+    )
+
+    # Round-17 follow-up R17-M (gate #46): the spread-variants sentence must
+    # agree with the committed artifact — parity gates passed, threshold
+    # survives at every variant, and the printed range is the artifact's.
+    spv = json.loads(SPREADVAR_RESULTS.read_text())
+    claims = tex.count("run \\texttt{expectation\\_spread\\_variants}")
+    var = spv["variants"]
+    share = lambda k: var[k]["expected_share_of_realized_cap_shortfall_pct"]
+    lit_2022 = (f"{min(share('v1_2022_linear_back_ramp'), share('v4_2022_linear_front_ramp')):.1f}--"
+                f"{max(share('v1_2022_linear_back_ramp'), share('v4_2022_linear_front_ramp')):.1f}\\%")
+    lit_2025 = (f"{share('v2_2025_all_front'):.1f}--"
+                f"{spv['diagnostic']['d1_2025_linear_back_ramp']['expected_share_of_realized_cap_shortfall_pct']:.1f}\\%")
+    lit_brk = f"{share('v3_2025_all_december'):.1f}\\%"
+    all_survive = (all(bool(v["threshold_survives"]) for v in var.values())
+                   and bool(spv["diagnostic"]["d1_2025_linear_back_ramp"]["threshold_survives"]))
+    g1s = spv["gates"]["g1_uniform_central_parity"]["status"]
+    g2s = spv["gates"]["g2_settlement_aware_parity"]["status"]
+    ok = (g1s == "PASS" and g2s == "PASS"
+          and all_survive and claims == 1
+          and lit_2022 in tex and lit_2025 in tex and lit_brk in tex)
+    failures += 0 if ok else 1
+    print(
+        f"[{'PASS' if ok else 'FAIL'}] cross-check spread variants: "
+        f"parity g1/g2={g1s}/{g2s}, "
+        f"all-survive={all_survive}, tex run-citation count={claims} (want 1), "
+        f"literals {lit_2022!r}/{lit_2025!r}/{lit_brk!r} present="
+        f"{lit_2022 in tex}/{lit_2025 in tex}/{lit_brk in tex}"
+    )
+
+    # Round-17 follow-up R17-E (gate #47): tab:discount's five rows must
+    # agree with the filled-grid artifact — flips as printed, deltas all zero.
+    dbd = json.loads(DANBOUND_RESULTS.read_text())
+    runs = dbd["runs"]
+    ok_flips = all(
+        ("{:,}".format(runs[k]["flipped_loan_months"]).replace(",", "{,}") + " of 1{,}683{,}082") in tex
+        for k in ("spread_25bp", "spread_50bp", "spread_75bp", "spread_100bp")
+    )
+    ok_zero = all(v == 0.0 for v in dbd["deltas_vs_baseline_b"].values())
+    ok = ok_flips and ok_zero
+    failures += 0 if ok else 1
+    print(
+        f"[{'PASS' if ok else 'FAIL'}] cross-check danish grid fill: "
+        f"flip literals present={ok_flips}, all deltas zero={ok_zero} "
+        f"(grid {sorted(dbd['spreads_bp'])})"
     )
 
     print(f"\n{'ALL GATES PASS' if failures == 0 else f'{failures} GATE(S) FAILED'}")
