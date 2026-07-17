@@ -1,0 +1,151 @@
+{
+  "mode": "fonseca_band_anchor",
+  "roadmap_item": "R18-B optional leg (M2/Q5 second literature anchor)",
+  "spec": "delta_fonseca = 0.09 (p_q 9.0), pre-committed single point from the manuscript's own eq:beta1 footnote ('roughly 9% reduction in moving rates per pp of mortgage-rate delta'); fed through the SAME rothstein_beta1 transform and the SAME floor_sweep._run_scored band machinery at the production 4% floor; five legs (null, L&R 5.5/6.5/7.7, Fonseca 9.0) in one macro fetch; corroboration-only, not a change to the headline L&R band. Unit caveats: L&R = proportional quarterly-mobility decline per 100bp rate gap vs Fonseca = proportional moving-rate reduction per pp mortgage-rate delta (manuscript: 'related but distinct'); 9% treated quarterly-equivalent, licensed by transform frequency-invariance (small-P_q beta1 = -ln(1-delta)); mobility-derived delta applied to a prepayment hazard = upper bound on the voluntary contribution.",
+  "delta_fonseca": 0.09,
+  "beta1_fonseca_signed": -0.09619505612358024,
+  "beta1_fonseca_abs": 0.09619505612358024,
+  "beta1_lr_central_abs": 0.06857052676484808,
+  "beta1_lr_band_abs_5.5_to_7.7": [
+    0.05772290851408145,
+    0.08173874960915711
+  ],
+  "legs": {
+    "null": {
+      "label": "null",
+      "p_q_shock_pct": 0.0,
+      "beta1_signed": 0.0,
+      "beta1_abs": 0.0,
+      "trapped_b": 748.1850239867648,
+      "recovery_share_pct": 97.83415925879702,
+      "marginal_b": 0.0,
+      "marginal_pp": 0.0
+    },
+    "lr_low_5.5": {
+      "label": "lr_low_5.5",
+      "p_q_shock_pct": 5.5,
+      "beta1_signed": -0.05772290851408145,
+      "beta1_abs": 0.05772290851408145,
+      "trapped_b": 809.9065834462376,
+      "recovery_share_pct": 105.90499292195008,
+      "marginal_b": 61.721559459472815,
+      "marginal_pp": 8.070833663153067
+    },
+    "lr_central_6.5": {
+      "label": "lr_central_6.5",
+      "p_q_shock_pct": 6.5,
+      "beta1_signed": -0.06857052676484808,
+      "beta1_abs": 0.06857052676484808,
+      "trapped_b": 818.5300844066606,
+      "recovery_share_pct": 107.0326190295068,
+      "marginal_b": 70.34506041989584,
+      "marginal_pp": 9.198459770709789
+    },
+    "lr_high_7.7": {
+      "label": "lr_high_7.7",
+      "p_q_shock_pct": 7.7,
+      "beta1_signed": -0.08173874960915711,
+      "beta1_abs": 0.08173874960915711,
+      "trapped_b": 827.6582704023259,
+      "recovery_share_pct": 108.22623875432453,
+      "marginal_b": 79.4732464155611,
+      "marginal_pp": 10.392079495527511
+    },
+    "fonseca_9.0": {
+      "label": "fonseca_9.0",
+      "p_q_shock_pct": 9.0,
+      "beta1_signed": -0.09619505612358024,
+      "beta1_abs": 0.09619505612358024,
+      "trapped_b": 836.0678776147884,
+      "recovery_share_pct": 109.3258956907116,
+      "marginal_b": 87.88285362802355,
+      "marginal_pp": 11.491736431914589
+    }
+  },
+  "placement": {
+    "fonseca_marginal_b": 87.88285362802355,
+    "fonseca_marginal_pp": 11.491736431914589,
+    "fonseca_recovery_share_pct": 109.3258956907116,
+    "fonseca_trapped_b": 836.0678776147884,
+    "lr_band_marginal_b_5.5_to_7.7": [
+      61.721559459472815,
+      79.4732464155611
+    ],
+    "lr_band_marginal_pp_5.5_to_7.7": [
+      8.070833663153067,
+      10.392079495527511
+    ],
+    "lr_band_trapped_b_5.5_to_7.7": [
+      809.9065834462376,
+      827.6582704023259
+    ],
+    "vs_lr_band": "above_lr_high_edge",
+    "delta_above_lr_high_edge_b": 8.409607212462447,
+    "delta_above_lr_high_edge_pp": 1.0996569363870776,
+    "vs_full_floor_band_box_pp": "inside [2.11, 13.17]",
+    "slope_reading_crosscheck": "Alternative Fonseca reading (0.57-1.20 pp/yr per 100bp, L219) on a ~9-10% annual mover base is a ~6-13% proportional reduction, bracketing the 9% point used here; the point anchor is not knife-edge."
+  },
+  "gates": {
+    "G1_central_parity": {
+      "central_trapped_b_got": 818.5300844066606,
+      "central_trapped_b_want": 818.5300844066606,
+      "null_trapped_b_got": 748.1850239867648,
+      "null_trapped_b_want": 748.1850239867648,
+      "marginal_b_got": 70.34506041989584,
+      "marginal_b_want": 70.34506041989584,
+      "marginal_b_abs_err": 0.0,
+      "bit_identical_to_committed": true,
+      "equals_task_quoted_70.34506041989573_within": 1.1368683772161603e-13,
+      "pass": true
+    },
+    "G2_band_edge_parity": {
+      "low_5.5_got": 809.9065834462376,
+      "low_5.5_want": 809.9065834462376,
+      "high_7.7_got": 827.6582704023259,
+      "high_7.7_want": 827.6582704023259,
+      "pass": true
+    },
+    "G3_transform_ordering": {
+      "beta1_abs_delta_0.055": 0.05772290851408145,
+      "beta1_abs_delta_0.065": 0.06857052676484808,
+      "beta1_abs_delta_0.077": 0.08173874960915711,
+      "beta1_abs_delta_0.090_fonseca": 0.09619505612358024,
+      "strictly_increasing": true,
+      "fonseca_above_lr_high_edge": true,
+      "pass": true
+    },
+    "G4_marginal_ordering": {
+      "marginal_b_sequence": [
+        0.0,
+        61.721559459472815,
+        70.34506041989584,
+        79.4732464155611,
+        87.88285362802355
+      ],
+      "marginal_pp_sequence": [
+        0.0,
+        8.070833663153067,
+        9.198459770709789,
+        10.392079495527511,
+        11.491736431914589
+      ],
+      "strictly_increasing_b": true,
+      "strictly_increasing_pp": true,
+      "fonseca_exceeds_lr_high": true,
+      "pass": true
+    },
+    "G5_placement_in_box": {
+      "fonseca_marginal_pp": 11.491736431914589,
+      "box_lo_pp": 2.113539257759882,
+      "box_hi_pp": 13.17046899604594,
+      "box_endpoints_source": "floor_band_cross_results.json (committed)",
+      "inside_box": true,
+      "pass": true
+    }
+  },
+  "gates_all_pass": true,
+  "committed_central_marginal_b": 70.34506041989584,
+  "benchmark_b": 764.7,
+  "isolated_sweep_dir": "/Users/eugene/somthing/Lock In effect/Lock-in-Effect/hazard/data/fonseca_band_anchor",
+  "runtime_s": 121.7
+}
