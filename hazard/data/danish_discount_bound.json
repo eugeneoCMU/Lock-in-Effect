@@ -1,7 +1,9 @@
 {
   "spreads_bp": [
     0,
+    25,
     50,
+    75,
     100
   ],
   "runs": {
@@ -12,10 +14,26 @@
       "evaluated_loan_months": 0,
       "parity_max_abs_cpr_diff_vs_production_pp": 0.0
     },
+    "spread_25bp": {
+      "danish_trapped_standalone_b": 934.2540552143059,
+      "mean_danish_cpr_pct": 3.385567764608408,
+      "flipped_loan_months": 2470,
+      "evaluated_loan_months": 1683082,
+      "max_abs_cpr_path_diff_vs_baseline_pp": 0.0,
+      "max_abs_rolloff_path_diff_vs_baseline_b": 0.0
+    },
     "spread_50bp": {
       "danish_trapped_standalone_b": 934.2540552143059,
       "mean_danish_cpr_pct": 3.385567764608408,
       "flipped_loan_months": 7805,
+      "evaluated_loan_months": 1683082,
+      "max_abs_cpr_path_diff_vs_baseline_pp": 0.0,
+      "max_abs_rolloff_path_diff_vs_baseline_b": 0.0
+    },
+    "spread_75bp": {
+      "danish_trapped_standalone_b": 934.2540552143059,
+      "mean_danish_cpr_pct": 3.385567764608408,
+      "flipped_loan_months": 17493,
       "evaluated_loan_months": 1683082,
       "max_abs_cpr_path_diff_vs_baseline_pp": 0.0,
       "max_abs_rolloff_path_diff_vs_baseline_b": 0.0
@@ -45,7 +63,9 @@
   },
   "deltas_vs_baseline_b": {
     "spread_0bp": 0.0,
+    "spread_25bp": 0.0,
     "spread_50bp": 0.0,
+    "spread_75bp": 0.0,
     "spread_100bp": 0.0
   },
   "structural_finding": "The deltas are exactly zero because the production Danish leg's prepay hazard is the imported Berger flat-elasticity calibration (competing_risks.monthly_step, DANISH branch, via common.berger_calibration.danish_cpr_annual): rate_gap_danish's PV-vs-par classification is computed into pool.rate_gap but that array is consumed only by the non-Danish prepay branch. The primary/secondary discount wedge therefore cannot reach the Berger-recalibrated production finding by construction, while the classification itself flips 7,803 (50bp) / 32,486 (100bp) of 1,683,124 loan-months \u2014 the exposure a PV-proxy-driven Danish leg (the superseded mechanism-substitution ABM variant) would carry."
