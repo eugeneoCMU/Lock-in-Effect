@@ -1,0 +1,816 @@
+{
+  "mode": "grouped_calibration",
+  "spec": "round-18 R18-J grouped calibration over time \u2014 reliability of the frozen Path A spec v4 predictions by exposure-weighted prediction-CPR quintile bin (edges fit on the training window only) crossed with calendar half-years, scored on the committed cohort-month panel; pure scoring, no refitting or recalibration; identical target/weighting/RMSE definitions as pathA_v4_holdout and landmark_isotonic_holdout; binning, period scheme, and interpretation thresholds all fixed ex ante",
+  "evaluation_universe": "committed Path A panel, calendar 2021-01..2025-09 (period rows kept after the rate_gap_bps dropna); 10,176 train cells (period < 2024-01-01) + 6,077 holdout cells = 16,253 cells; the object the frozen-prediction RMSE gates are defined on",
+  "panel_sha256": "c0feca1da96e97300d840c867494cc80ca8bbe97249c5fdeeb98761a015528e2",
+  "input_sha256": {
+    "spec_v4_coefficients": "f8b9fedce0a02c2d7b89a9a2cb32e22fbb07b66f8df43e152be27cf815aea15a",
+    "spec_v3_coefficients": "80aad3ab4366fa4a4777787506bbabfd2b2002d2e6834afb1ca18194bc83fe8f",
+    "pathA_reference_artifact": "23d301ab355ac584ecd68535f80f4586c6b143a1dbf5480259398d633a8259dc"
+  },
+  "n_train": 10176,
+  "n_holdout": 6077,
+  "n_full": 16253,
+  "pathA_reference": {
+    "rmse_unweighted_pp": 37.903228802264934,
+    "rmse_weighted_pp": 3.037942336998421,
+    "r2_unweighted": -0.011428527641577979,
+    "holdout_obs_cpr_mean_exposure_weighted_pp": 4.210290920254706,
+    "holdout_obs_cpr_mean_unweighted_pp": 7.041628590244825,
+    "source": "hazard/data/pathA_v4_holdout_results.json (spec_v4)"
+  },
+  "parity": {
+    "spec_v4": {
+      "artifact": "hazard/data/runs/run-2026-07-14-pathA-seasonal/hazard_coefficients.json",
+      "artifact_sha256": "f8b9fedce0a02c2d7b89a9a2cb32e22fbb07b66f8df43e152be27cf815aea15a",
+      "spec_version": 4,
+      "n_holdout": 6077,
+      "rmse_unweighted_pp": 37.903228802264934,
+      "rmse_exposure_weighted_pp": 3.037942336998421,
+      "holdout_r2_unweighted": -0.011428527641577979,
+      "holdout_obs_cpr_mean_unweighted_pp": 7.041628590244825,
+      "holdout_obs_cpr_mean_exposure_weighted_pp": 4.210290920254706
+    },
+    "spec_v3": {
+      "artifact": "hazard/data/hazard_coefficients_specv3.json",
+      "artifact_sha256": "80aad3ab4366fa4a4777787506bbabfd2b2002d2e6834afb1ca18194bc83fe8f",
+      "spec_version": 3,
+      "n_holdout": 6077,
+      "rmse_unweighted_pp": 37.8295321331,
+      "rmse_exposure_weighted_pp": 2.5338262679523766,
+      "holdout_r2_unweighted": -0.007499234463333337,
+      "holdout_obs_cpr_mean_unweighted_pp": 7.041628590244825,
+      "holdout_obs_cpr_mean_exposure_weighted_pp": 4.210290920254706
+    }
+  },
+  "gates": {
+    "G5_split_integrity": {
+      "n_train_got": 10176,
+      "n_train_want": 10176,
+      "n_holdout_got": 6077,
+      "n_holdout_want": 6077,
+      "frozen_artifacts_agree": true,
+      "pass": true
+    },
+    "G1_v4_parity_unweighted": {
+      "got": 37.903228802264934,
+      "want": 37.903228802264934,
+      "tol": 0.01,
+      "pass": true
+    },
+    "G2_v4_parity_weighted": {
+      "got": 3.037942336998421,
+      "want": 3.037942336998421,
+      "tol": 0.01,
+      "pass": true
+    },
+    "G3_v3_parity_unweighted": {
+      "got": 37.8295321331,
+      "want": 37.8295321331,
+      "tol": 0.01,
+      "pass": true
+    },
+    "G4_v3_parity_weighted": {
+      "got": 2.5338262679523766,
+      "want": 2.5338262679523766,
+      "tol": 0.01,
+      "pass": true
+    },
+    "G6_local_prediction_parity": {
+      "checks": {
+        "rmse_unweighted_pp": {
+          "got": 37.903228802264934,
+          "want": 37.903228802264934,
+          "tol": 1e-09,
+          "pass": true
+        },
+        "rmse_weighted_pp": {
+          "got": 3.037942336998421,
+          "want": 3.037942336998421,
+          "tol": 1e-09,
+          "pass": true
+        },
+        "r2_unweighted": {
+          "got": -0.011428527641577979,
+          "want": -0.011428527641577979,
+          "tol": 1e-09,
+          "pass": true
+        }
+      },
+      "pass": true
+    },
+    "G7_holdout_realized_cpr_tie": {
+      "checks": {
+        "exposure_weighted_pp": {
+          "got": 4.210290920254706,
+          "want": 4.210290920254706,
+          "tol": 1e-06,
+          "pass": true
+        },
+        "unweighted_pp": {
+          "got": 7.041628590244825,
+          "want": 7.041628590244825,
+          "tol": 1e-06,
+          "pass": true
+        }
+      },
+      "pass": true
+    },
+    "G8_bin_edge_sanity": {
+      "n_edges": 4,
+      "edges_cpr_pp": [
+        3.2936248816645546,
+        4.411416390621979,
+        6.67462848732384,
+        13.424529967926247
+      ],
+      "strictly_increasing_finite": true,
+      "bins_in_range": true,
+      "all_bins_nonempty": true,
+      "pass": true
+    },
+    "G9_partition_completeness": {
+      "table_exposure": 109910705051444.16,
+      "total_exposure": 109910705051444.16,
+      "table_n_cells": 16253,
+      "n_full": 16253,
+      "n_full_expected": 16253,
+      "exposure_match": true,
+      "count_match": true,
+      "pass": true
+    },
+    "G10_reconstruction": {
+      "checks": {
+        "pred_cpr_pp": {
+          "got": 7.859775716488646,
+          "want": 7.859775716488646,
+          "tol": 1e-09,
+          "pass": true
+        },
+        "obs_cpr_pp": {
+          "got": 8.530698362702209,
+          "want": 8.530698362702209,
+          "tol": 1e-09,
+          "pass": true
+        }
+      },
+      "pass": true
+    }
+  },
+  "binning": {
+    "n_bins": 5,
+    "quantile_levels": [
+      0.2,
+      0.4,
+      0.6,
+      0.8
+    ],
+    "edges_cpr_pp": [
+      3.2936248816645546,
+      4.411416390621979,
+      6.67462848732384,
+      13.424529967926247
+    ],
+    "convention": "exposure-weighted Hazen quantiles of frozen spec v4 predicted annualized CPR (pp); edges fit on the training window only, applied unchanged to every cell via numpy.digitize(..., right=False)",
+    "fit_window": "period < 2024-01-01 (train, 10,176 cells)",
+    "predicted_cpr_units": "clip(hazard,0,1) * 1200 (cell_metrics units)"
+  },
+  "period_scheme": {
+    "axis": "calendar half-years (H1=Jan-Jun, H2=Jul-Dec)",
+    "periods": [
+      "2021H1",
+      "2021H2",
+      "2022H1",
+      "2022H2",
+      "2023H1",
+      "2023H2",
+      "2024H1",
+      "2024H2",
+      "2025H1",
+      "2025H2"
+    ],
+    "train_periods": [
+      "2021H1",
+      "2021H2",
+      "2022H1",
+      "2022H2",
+      "2023H1",
+      "2023H2"
+    ],
+    "holdout_periods": [
+      "2024H1",
+      "2024H2",
+      "2025H1",
+      "2025H2"
+    ],
+    "note": "2025H2 is Jul-Sep only (panel ends 2025-09); half-years align exactly with the 2024-01-01 train/holdout cut"
+  },
+  "calibration_table": [
+    {
+      "bin": 0,
+      "period": "2021H1",
+      "n_cells": 53,
+      "exposure_share": 1.5829833942796086e-06,
+      "wmean_pred_cpr_pp": 2.4633825514026526,
+      "wmean_obs_cpr_pp": 2.9036682045313276,
+      "gap_pp": -0.44028565312867496
+    },
+    {
+      "bin": 0,
+      "period": "2021H2",
+      "n_cells": 57,
+      "exposure_share": 6.995187108845662e-07,
+      "wmean_pred_cpr_pp": 0.44813447551298546,
+      "wmean_obs_cpr_pp": 0.0,
+      "gap_pp": 0.44813447551298546
+    },
+    {
+      "bin": 0,
+      "period": "2022H1",
+      "n_cells": 67,
+      "exposure_share": 0.006542673036569346,
+      "wmean_pred_cpr_pp": 3.0907218323634136,
+      "wmean_obs_cpr_pp": 4.255305846133591,
+      "gap_pp": -1.164584013770177
+    },
+    {
+      "bin": 0,
+      "period": "2022H2",
+      "n_cells": 162,
+      "exposure_share": 0.018914489772183154,
+      "wmean_pred_cpr_pp": 2.9947693719388737,
+      "wmean_obs_cpr_pp": 2.674400364636884,
+      "gap_pp": 0.3203690073019896
+    },
+    {
+      "bin": 0,
+      "period": "2023H1",
+      "n_cells": 363,
+      "exposure_share": 0.0307942918828614,
+      "wmean_pred_cpr_pp": 2.842246946164668,
+      "wmean_obs_cpr_pp": 3.0071788686813257,
+      "gap_pp": -0.16493192251665745
+    },
+    {
+      "bin": 0,
+      "period": "2023H2",
+      "n_cells": 629,
+      "exposure_share": 0.0756691498480496,
+      "wmean_pred_cpr_pp": 2.478591178085164,
+      "wmean_obs_cpr_pp": 3.336416236440231,
+      "gap_pp": -0.8578250583550671
+    },
+    {
+      "bin": 0,
+      "period": "2024H1",
+      "n_cells": 762,
+      "exposure_share": 0.08699498348974304,
+      "wmean_pred_cpr_pp": 2.097930145656277,
+      "wmean_obs_cpr_pp": 3.6079819775451667,
+      "gap_pp": -1.5100518318888896
+    },
+    {
+      "bin": 0,
+      "period": "2024H2",
+      "n_cells": 770,
+      "exposure_share": 0.08500737191199291,
+      "wmean_pred_cpr_pp": 1.9462405327267849,
+      "wmean_obs_cpr_pp": 4.05691521457064,
+      "gap_pp": -2.1106746818438555
+    },
+    {
+      "bin": 0,
+      "period": "2025H1",
+      "n_cells": 1089,
+      "exposure_share": 0.08865218229358181,
+      "wmean_pred_cpr_pp": 1.3270647867851373,
+      "wmean_obs_cpr_pp": 3.9975381023730514,
+      "gap_pp": -2.6704733155879143
+    },
+    {
+      "bin": 0,
+      "period": "2025H2",
+      "n_cells": 497,
+      "exposure_share": 0.042418132495398386,
+      "wmean_pred_cpr_pp": 1.2466708535153266,
+      "wmean_obs_cpr_pp": 4.832580978918185,
+      "gap_pp": -3.585910125402858
+    },
+    {
+      "bin": 1,
+      "period": "2021H1",
+      "n_cells": 32,
+      "exposure_share": 0.0035685656486280216,
+      "wmean_pred_cpr_pp": 3.913878980798493,
+      "wmean_obs_cpr_pp": 1.3173535566345167,
+      "gap_pp": 2.5965254241639766
+    },
+    {
+      "bin": 1,
+      "period": "2021H2",
+      "n_cells": 9,
+      "exposure_share": 0.003732678923798783,
+      "wmean_pred_cpr_pp": 4.190407597063017,
+      "wmean_obs_cpr_pp": 3.6402821092372086,
+      "gap_pp": 0.5501254878258086
+    },
+    {
+      "bin": 1,
+      "period": "2022H1",
+      "n_cells": 53,
+      "exposure_share": 0.027095921164525454,
+      "wmean_pred_cpr_pp": 3.8808904630952834,
+      "wmean_obs_cpr_pp": 4.88983146782302,
+      "gap_pp": -1.008941004727737
+    },
+    {
+      "bin": 1,
+      "period": "2022H2",
+      "n_cells": 166,
+      "exposure_share": 0.03637723438746085,
+      "wmean_pred_cpr_pp": 3.9144088914407646,
+      "wmean_obs_cpr_pp": 3.5922560056757886,
+      "gap_pp": 0.322152885764976
+    },
+    {
+      "bin": 1,
+      "period": "2023H1",
+      "n_cells": 234,
+      "exposure_share": 0.04664612647539763,
+      "wmean_pred_cpr_pp": 3.6912118389318884,
+      "wmean_obs_cpr_pp": 3.535129679598416,
+      "gap_pp": 0.15608215933347225
+    },
+    {
+      "bin": 1,
+      "period": "2023H2",
+      "n_cells": 232,
+      "exposure_share": 0.01442514722106032,
+      "wmean_pred_cpr_pp": 3.7478882755471847,
+      "wmean_obs_cpr_pp": 4.471301643077149,
+      "gap_pp": -0.7234133675299645
+    },
+    {
+      "bin": 1,
+      "period": "2024H1",
+      "n_cells": 354,
+      "exposure_share": 0.008647951992255199,
+      "wmean_pred_cpr_pp": 3.841444545029344,
+      "wmean_obs_cpr_pp": 5.208111384206932,
+      "gap_pp": -1.3666668391775878
+    },
+    {
+      "bin": 1,
+      "period": "2024H2",
+      "n_cells": 309,
+      "exposure_share": 0.006665747023635016,
+      "wmean_pred_cpr_pp": 3.746887108786811,
+      "wmean_obs_cpr_pp": 5.8876672181425205,
+      "gap_pp": -2.1407801093557093
+    },
+    {
+      "bin": 1,
+      "period": "2025H1",
+      "n_cells": 211,
+      "exposure_share": 0.0013645114354532057,
+      "wmean_pred_cpr_pp": 3.7126661079302306,
+      "wmean_obs_cpr_pp": 5.652925534752928,
+      "gap_pp": -1.9402594268226974
+    },
+    {
+      "bin": 1,
+      "period": "2025H2",
+      "n_cells": 97,
+      "exposure_share": 0.0007354392480334463,
+      "wmean_pred_cpr_pp": 3.6033988047388985,
+      "wmean_obs_cpr_pp": 6.466096687929711,
+      "gap_pp": -2.8626978831908123
+    },
+    {
+      "bin": 2,
+      "period": "2021H1",
+      "n_cells": 86,
+      "exposure_share": 0.011333014328387602,
+      "wmean_pred_cpr_pp": 5.309782598412149,
+      "wmean_obs_cpr_pp": 2.466138042859284,
+      "gap_pp": 2.8436445555528653
+    },
+    {
+      "bin": 2,
+      "period": "2021H2",
+      "n_cells": 67,
+      "exposure_share": 0.028885787630392554,
+      "wmean_pred_cpr_pp": 5.566903721296893,
+      "wmean_obs_cpr_pp": 5.370936415387402,
+      "gap_pp": 0.19596730590949107
+    },
+    {
+      "bin": 2,
+      "period": "2022H1",
+      "n_cells": 140,
+      "exposure_share": 0.024997985707319134,
+      "wmean_pred_cpr_pp": 5.313114896494183,
+      "wmean_obs_cpr_pp": 6.064819362690493,
+      "gap_pp": -0.7517044661963102
+    },
+    {
+      "bin": 2,
+      "period": "2022H2",
+      "n_cells": 278,
+      "exposure_share": 0.030980410940964837,
+      "wmean_pred_cpr_pp": 5.53203133212501,
+      "wmean_obs_cpr_pp": 5.046388884794019,
+      "gap_pp": 0.48564244733099127
+    },
+    {
+      "bin": 2,
+      "period": "2023H1",
+      "n_cells": 364,
+      "exposure_share": 0.0216302500170351,
+      "wmean_pred_cpr_pp": 5.426694011513367,
+      "wmean_obs_cpr_pp": 4.766235714814077,
+      "gap_pp": 0.6604582966992893
+    },
+    {
+      "bin": 2,
+      "period": "2023H2",
+      "n_cells": 570,
+      "exposure_share": 0.014159199125031649,
+      "wmean_pred_cpr_pp": 5.272312864044774,
+      "wmean_obs_cpr_pp": 5.719104371233642,
+      "gap_pp": -0.44679150718886795
+    },
+    {
+      "bin": 2,
+      "period": "2024H1",
+      "n_cells": 454,
+      "exposure_share": 0.0052354968867268595,
+      "wmean_pred_cpr_pp": 5.249449282163812,
+      "wmean_obs_cpr_pp": 5.639047021431455,
+      "gap_pp": -0.38959773926764374
+    },
+    {
+      "bin": 2,
+      "period": "2024H2",
+      "n_cells": 402,
+      "exposure_share": 0.0035401299224126622,
+      "wmean_pred_cpr_pp": 5.190072494632367,
+      "wmean_obs_cpr_pp": 6.5024343165336065,
+      "gap_pp": -1.3123618219012396
+    },
+    {
+      "bin": 2,
+      "period": "2025H1",
+      "n_cells": 186,
+      "exposure_share": 0.0014758014685872377,
+      "wmean_pred_cpr_pp": 5.4293787838362455,
+      "wmean_obs_cpr_pp": 5.981681369674904,
+      "gap_pp": -0.5523025858386585
+    },
+    {
+      "bin": 2,
+      "period": "2025H2",
+      "n_cells": 81,
+      "exposure_share": 0.0004936966591893137,
+      "wmean_pred_cpr_pp": 5.569719886934141,
+      "wmean_obs_cpr_pp": 7.133984954172278,
+      "gap_pp": -1.5642650672381366
+    },
+    {
+      "bin": 3,
+      "period": "2021H1",
+      "n_cells": 163,
+      "exposure_share": 0.03130177277529597,
+      "wmean_pred_cpr_pp": 10.374550749279647,
+      "wmean_obs_cpr_pp": 9.688234656184193,
+      "gap_pp": 0.6863160930954546
+    },
+    {
+      "bin": 3,
+      "period": "2021H2",
+      "n_cells": 181,
+      "exposure_share": 0.02419995162876204,
+      "wmean_pred_cpr_pp": 9.539352938238931,
+      "wmean_obs_cpr_pp": 9.66199113887447,
+      "gap_pp": -0.12263820063553865
+    },
+    {
+      "bin": 3,
+      "period": "2022H1",
+      "n_cells": 417,
+      "exposure_share": 0.04075782902445388,
+      "wmean_pred_cpr_pp": 9.472768129219359,
+      "wmean_obs_cpr_pp": 8.82919608149311,
+      "gap_pp": 0.6435720477262485
+    },
+    {
+      "bin": 3,
+      "period": "2022H2",
+      "n_cells": 709,
+      "exposure_share": 0.02287237629869265,
+      "wmean_pred_cpr_pp": 9.010434503120619,
+      "wmean_obs_cpr_pp": 7.217686680514044,
+      "gap_pp": 1.7927478226065752
+    },
+    {
+      "bin": 3,
+      "period": "2023H1",
+      "n_cells": 718,
+      "exposure_share": 0.011410097349798977,
+      "wmean_pred_cpr_pp": 8.175220055083786,
+      "wmean_obs_cpr_pp": 6.353116605816039,
+      "gap_pp": 1.8221034492677468
+    },
+    {
+      "bin": 3,
+      "period": "2023H2",
+      "n_cells": 288,
+      "exposure_share": 0.0018782740824493278,
+      "wmean_pred_cpr_pp": 7.2583832399388255,
+      "wmean_obs_cpr_pp": 7.449636204493735,
+      "gap_pp": -0.19125296455490925
+    },
+    {
+      "bin": 3,
+      "period": "2024H1",
+      "n_cells": 147,
+      "exposure_share": 0.0014864785182633427,
+      "wmean_pred_cpr_pp": 7.843818285358952,
+      "wmean_obs_cpr_pp": 5.712472265769371,
+      "gap_pp": 2.1313460195895813
+    },
+    {
+      "bin": 3,
+      "period": "2024H2",
+      "n_cells": 212,
+      "exposure_share": 0.0026281990080258746,
+      "wmean_pred_cpr_pp": 10.120942770723259,
+      "wmean_obs_cpr_pp": 5.887312547291457,
+      "gap_pp": 4.233630223431802
+    },
+    {
+      "bin": 3,
+      "period": "2025H1",
+      "n_cells": 162,
+      "exposure_share": 0.001345982246629999,
+      "wmean_pred_cpr_pp": 9.826757372655987,
+      "wmean_obs_cpr_pp": 5.014798656602727,
+      "gap_pp": 4.81195871605326
+    },
+    {
+      "bin": 3,
+      "period": "2025H2",
+      "n_cells": 95,
+      "exposure_share": 0.0006583397760159238,
+      "wmean_pred_cpr_pp": 8.599634789708036,
+      "wmean_obs_cpr_pp": 6.770894478805169,
+      "gap_pp": 1.8287403109028668
+    },
+    {
+      "bin": 4,
+      "period": "2021H1",
+      "n_cells": 1324,
+      "exposure_share": 0.04778176977796454,
+      "wmean_pred_cpr_pp": 42.48323900718121,
+      "wmean_obs_cpr_pp": 43.95157495271787,
+      "gap_pp": -1.4683359455366585
+    },
+    {
+      "bin": 4,
+      "period": "2021H2",
+      "n_cells": 1365,
+      "exposure_share": 0.056737512331128316,
+      "wmean_pred_cpr_pp": 29.882084659494748,
+      "wmean_obs_cpr_pp": 30.25391256863394,
+      "gap_pp": -0.37182790913919206
+    },
+    {
+      "bin": 4,
+      "period": "2022H1",
+      "n_cells": 996,
+      "exposure_share": 0.021301702938066422,
+      "wmean_pred_cpr_pp": 21.471337333263026,
+      "wmean_obs_cpr_pp": 21.59697639306011,
+      "gap_pp": -0.12563905979708423
+    },
+    {
+      "bin": 4,
+      "period": "2022H2",
+      "n_cells": 378,
+      "exposure_share": 0.005480480103788265,
+      "wmean_pred_cpr_pp": 15.847917052486043,
+      "wmean_obs_cpr_pp": 11.369549526124361,
+      "gap_pp": 4.478367526361682
+    },
+    {
+      "bin": 4,
+      "period": "2023H1",
+      "n_cells": 54,
+      "exposure_share": 1.0546262835612384e-05,
+      "wmean_pred_cpr_pp": 14.880306409588803,
+      "wmean_obs_cpr_pp": 8.38763230664158,
+      "gap_pp": 6.492674102947223
+    },
+    {
+      "bin": 4,
+      "period": "2023H2",
+      "n_cells": 21,
+      "exposure_share": 7.287261080939413e-07,
+      "wmean_pred_cpr_pp": 17.363852408039882,
+      "wmean_obs_cpr_pp": 2.839763818161453,
+      "gap_pp": 14.52408858987843
+    },
+    {
+      "bin": 4,
+      "period": "2024H1",
+      "n_cells": 23,
+      "exposure_share": 5.313998895072376e-07,
+      "wmean_pred_cpr_pp": 17.603819952311433,
+      "wmean_obs_cpr_pp": 0.7641295419857231,
+      "gap_pp": 16.83969041032571
+    },
+    {
+      "bin": 4,
+      "period": "2024H2",
+      "n_cells": 43,
+      "exposure_share": 0.0003155632409727161,
+      "wmean_pred_cpr_pp": 14.306661310146586,
+      "wmean_obs_cpr_pp": 5.471030283691444,
+      "gap_pp": 8.835631026455141
+    },
+    {
+      "bin": 4,
+      "period": "2025H1",
+      "n_cells": 86,
+      "exposure_share": 0.0015314609313722923,
+      "wmean_pred_cpr_pp": 17.336876319658963,
+      "wmean_obs_cpr_pp": 5.79859156462866,
+      "gap_pp": 11.538284755030302
+    },
+    {
+      "bin": 4,
+      "period": "2025H2",
+      "n_cells": 97,
+      "exposure_share": 0.0013137501407066328,
+      "wmean_pred_cpr_pp": 25.518859500903012,
+      "wmean_obs_cpr_pp": 6.168852944747077,
+      "gap_pp": 19.350006556155936
+    }
+  ],
+  "period_marginals": {
+    "2021H1": {
+      "n_cells": 1658,
+      "exposure_share": 0.09398670551367042,
+      "wmean_pred_cpr_pp": 25.84208945759565,
+      "wmean_obs_cpr_pp": 25.91853155338429,
+      "gap_pp": -0.07644209578863936,
+      "pred_over_realized_ratio": 0.9970506779818451
+    },
+    "2021H2": {
+      "n_cells": 1679,
+      "exposure_share": 0.11355663003279257,
+      "wmean_pred_cpr_pp": 18.51704461611895,
+      "wmean_obs_cpr_pp": 18.661025674953077,
+      "gap_pp": -0.14398105883412526,
+      "pred_over_realized_ratio": 0.9922843973668941
+    },
+    "2022H1": {
+      "n_cells": 1673,
+      "exposure_share": 0.12069611187093425,
+      "wmean_pred_cpr_pp": 9.127556397255717,
+      "wmean_obs_cpr_pp": 9.377726032603512,
+      "gap_pp": -0.25016963534779535,
+      "pred_over_realized_ratio": 0.9733229959504008
+    },
+    "2022H2": {
+      "n_cells": 1693,
+      "exposure_share": 0.11462499150308976,
+      "wmean_pred_cpr_pp": 5.787295967130051,
+      "wmean_obs_cpr_pp": 4.929088210010681,
+      "gap_pp": 0.85820775711937,
+      "pred_over_realized_ratio": 1.1741108538849847
+    },
+    "2023H1": {
+      "n_cells": 1733,
+      "exposure_share": 0.11049131198792875,
+      "wmean_pred_cpr_pp": 4.258465615315162,
+      "wmean_obs_cpr_pp": 3.920462608755704,
+      "gap_pp": 0.3380030065594575,
+      "pred_over_realized_ratio": 1.086215082323342
+    },
+    "2023H2": {
+      "n_cells": 1740,
+      "exposure_share": 0.10613249900269903,
+      "wmean_pred_cpr_pp": 3.1085138370780148,
+      "wmean_obs_cpr_pp": 3.8813316761446504,
+      "gap_pp": -0.7728178390666356,
+      "pred_over_realized_ratio": 0.8008884827296491
+    },
+    "2024H1": {
+      "n_cells": 1740,
+      "exposure_share": 0.10236544228687794,
+      "wmean_pred_cpr_pp": 2.4899274415299764,
+      "wmean_obs_cpr_pp": 3.8775870783499724,
+      "gap_pp": -1.387659636819996,
+      "pred_over_realized_ratio": 0.6421332109940685
+    },
+    "2024H2": {
+      "n_cells": 1736,
+      "exposure_share": 0.09815701110703916,
+      "wmean_pred_cpr_pp": 2.4441314052028806,
+      "wmean_obs_cpr_pp": 4.322995813005969,
+      "gap_pp": -1.8788644078030883,
+      "pred_over_realized_ratio": 0.5653790822210787
+    },
+    "2025H1": {
+      "n_cells": 1734,
+      "exposure_share": 0.09436993837562455,
+      "wmean_pred_cpr_pp": 1.8067537458690184,
+      "wmean_obs_cpr_pp": 4.096239600420365,
+      "gap_pp": -2.289485854551346,
+      "pred_over_realized_ratio": 0.44107618745827404
+    },
+    "2025H2": {
+      "n_cells": 867,
+      "exposure_share": 0.04561935831934369,
+      "wmean_pred_cpr_pp": 2.136552835084846,
+      "wmean_obs_cpr_pp": 4.9502753870600875,
+      "gap_pp": -2.8137225519752413,
+      "pred_over_realized_ratio": 0.431602823687294
+    }
+  },
+  "bin_marginals": {
+    "0": {
+      "n_cells": 4449,
+      "exposure_share": 0.43499555723248473,
+      "wmean_pred_cpr_pp": 2.001011308959938,
+      "wmean_obs_cpr_pp": 3.773881953896275,
+      "gap_pp": -1.772870644936337,
+      "pred_over_realized_ratio": 0.5302262586390735
+    },
+    "1": {
+      "n_cells": 1697,
+      "exposure_share": 0.1492593235202479,
+      "wmean_pred_cpr_pp": 3.8142817402699234,
+      "wmean_obs_cpr_pp": 4.070856481014203,
+      "gap_pp": -0.25657474074427933,
+      "pred_over_realized_ratio": 0.9369727864539314
+    },
+    "2": {
+      "n_cells": 2628,
+      "exposure_share": 0.14273177268604695,
+      "wmean_pred_cpr_pp": 5.421595487332083,
+      "wmean_obs_cpr_pp": 5.184586750042263,
+      "gap_pp": 0.23700873728981975,
+      "pred_over_realized_ratio": 1.0457141038845357
+    },
+    "3": {
+      "n_cells": 3092,
+      "exposure_share": 0.13853930070838796,
+      "wmean_pred_cpr_pp": 9.46903981094331,
+      "wmean_obs_cpr_pp": 8.543981058078563,
+      "gap_pp": 0.9250587528647465,
+      "pred_over_realized_ratio": 1.1082702251534229
+    },
+    "4": {
+      "n_cells": 4387,
+      "exposure_share": 0.1344740458528324,
+      "wmean_pred_cpr_pp": 32.23194080969897,
+      "wmean_obs_cpr_pp": 32.40611040268969,
+      "gap_pp": -0.17416959299072232,
+      "pred_over_realized_ratio": 0.9946254088865825
+    }
+  },
+  "train_holdout_split": {
+    "train_2021H1_2023H2": {
+      "n_cells": 10176,
+      "exposure_share": 0.6594882499111148,
+      "wmean_pred_cpr_pp": 10.761394385925191,
+      "wmean_obs_cpr_pp": 10.76144242754813,
+      "gap_pp": -4.8041622939365425e-05,
+      "pred_over_realized_ratio": 0.9999955357636058
+    },
+    "holdout_2024H1_2025H2": {
+      "n_cells": 6077,
+      "exposure_share": 0.34051175008888523,
+      "wmean_pred_cpr_pp": 2.240047710871765,
+      "wmean_obs_cpr_pp": 4.210290920254706,
+      "gap_pp": -1.9702432093829407,
+      "pred_over_realized_ratio": 0.5320410758542669
+    },
+    "note": "CPR-pp analogue of the V.B dollar split (train predicted/empirical 98%, post-training 137%); here on the cohort-month cell panel, the object the RMSE gates cover"
+  },
+  "aggregate": {
+    "wmean_pred_cpr_pp": 7.859775716488646,
+    "wmean_obs_cpr_pp": 8.530698362702209,
+    "pred_over_realized_ratio": 0.9213519670151554
+  },
+  "interpretation": {
+    "verdict": "temporal_drift_post_boundary",
+    "verdict_rule": "temporal_drift_post_boundary iff |R_hold-1| > 1.25 * |R_train-1| with a sign flip across 1, OR |R_hold-1| >= 0.2; else no_material_grouped_drift",
+    "R_train": 0.9999955357636058,
+    "R_hold": 0.5320410758542669,
+    "reading": "The pooled predicted/realized CPR ratio shifts materially across the 2024-01-01 train/holdout boundary (holdout |ratio-1| >= 0.20 or > 1.25x the train departure with a sign flip): the grouped table localizes the regime drift already visible in the aggregate Theil U2 > 1 and the coarse 98%/137% split to prediction level x period. Ex ante: NO outcome of this run moves any headline \u2014 Path A is excluded from headline figures by pre-committed spec (tex line 328) and the calibrated-counterfactual (Path B) claims do not rest on Path A OOS accuracy.",
+    "no_headline_ex_ante": "Ex ante: NO outcome of this run moves any headline \u2014 Path A is excluded from headline figures by pre-committed spec (tex line 328) and the calibrated-counterfactual (Path B) claims do not rest on Path A OOS accuracy."
+  }
+}
