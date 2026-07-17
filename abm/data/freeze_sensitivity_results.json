@@ -1,0 +1,270 @@
+{
+  "mode": "freeze_sensitivity",
+  "spec": "round-17 R17-C (referee T3/Q4); freeze-off ablation + trigger sweep on the committed surface (Part 1) and freeze-share sweep with the floor anchor retained (Part 2); gate #39",
+  "reference_run": {
+    "tag": "run-2026-07-05-berger",
+    "manifest": "abm/data/runs/run-2026-07-05-berger/manifest.json",
+    "surface_sha256": "a828fcbe5c33ce40b75719f64c64ad84c8135da45c00089578c6146889caa2d6",
+    "committed_dollars_b": {
+      "empirical_trapped": 764.7482532227002,
+      "us_trapped": 84.50667328005531,
+      "danish_trapped": 812.9212962858466,
+      "institutional_gap": -728.4146230057912,
+      "share_explained_pct": 11.050260386204029,
+      "avg_actual_rolloff_monthly": -15.541708256602377
+    },
+    "committed_us_cpr_mean_pct": 11.760904343422906,
+    "scope_note": "parity anchors to the latest frozen production accounting; the fold-in paper-headline tag run-2026-07-04-15yr-foldin is not reproducible at HEAD (different surface sha)"
+  },
+  "committed_parameters": {
+    "wait_and_see_rate_threshold": 0.015,
+    "wait_and_see_prob": 0.2,
+    "lr_implied_share": 0.18259962499999982,
+    "lr_source": "abm/data/abm_external_gates_results.json external_parameters.wait_and_see_prob; 1-(1-0.065)^(1.5x2), run aa65eee, TECHNICAL.md sec 25.3"
+  },
+  "gates": {
+    "G0a_latest_tag": {
+      "pass": true,
+      "tag": "run-2026-07-05-berger"
+    },
+    "G0b_surface_sha": {
+      "pass": true,
+      "sha256": "a828fcbe5c33ce40b75719f64c64ad84c8135da45c00089578c6146889caa2d6"
+    },
+    "G0c_constants": {
+      "pass": true
+    },
+    "G0d_lr_share": {
+      "pass": true,
+      "stored": 0.18259962499999982
+    },
+    "G1_two_regime": {
+      "pass": true,
+      "max_within_regime_dev": 0.0,
+      "max_us_regime_gap": 0.19569999999999999
+    },
+    "G2a_cohort_identity": {
+      "pass": true,
+      "n_cohorts": 11
+    },
+    "G2b_production_parity": {
+      "pass": true,
+      "diffs": {
+        "us_trapped_b": 0.02466714696382155,
+        "share_pp": 0.0032255251136383833,
+        "empirical_b": 0.0,
+        "danish_b": -0.0012402662707700074,
+        "us_cpr_mean_pp": -0.00030589063880803735
+      },
+      "tolerances": {
+        "trapped_b": 0.5,
+        "share_pp": 0.1,
+        "cpr_mean_pp": 0.05
+      }
+    },
+    "G3_calibration_parity": {
+      "pass": true,
+      "scale": 43882.8125,
+      "committed": 43882.8125
+    },
+    "G4_surface_rebuild_parity": {
+      "pass": true,
+      "rows_rebuilt": 37180,
+      "rows_committed": 37180,
+      "max_abs_dev_us": 0.0,
+      "max_abs_dev_danish": 8.326672684688674e-17
+    },
+    "G5_rescore_identity": {
+      "pass": true,
+      "abs_diff_b": 7.247535904753022e-13
+    },
+    "G6_floor_invariance": {
+      "pass": true,
+      "share_0.100000": {
+        "scale": 43882.8125,
+        "scale_prod": 43882.8125,
+        "floor_cpr": 0.0483,
+        "floor_cpr_prod": 0.0483
+      },
+      "share_0.182600": {
+        "scale": 43882.8125,
+        "scale_prod": 43882.8125,
+        "floor_cpr": 0.0483,
+        "floor_cpr_prod": 0.0483
+      },
+      "share_0.300000": {
+        "scale": 43882.8125,
+        "scale_prod": 43882.8125,
+        "floor_cpr": 0.0483,
+        "floor_cpr_prod": 0.0483
+      }
+    }
+  },
+  "part1": {
+    "method": "velocity-coordinate re-mapping on the committed surface through the production compute_metrics accounting; realized (rate, friction, velocity) stream from the production fetch path; binary legs map v > trigger to the 0.020 frozen node, else 0.0",
+    "legs": {
+      "production": {
+        "trapped_b": 84.53134042701913,
+        "share_pct": 11.053485911317667,
+        "empirical_trapped_b": 764.7482532227002,
+        "danish_trapped_b": 812.9200560195758,
+        "institutional_gap_b": -728.3887155925567,
+        "us_cpr_mean_pct": 11.760598452784098,
+        "month_counts": {
+          "frozen": 6,
+          "unfrozen": 36,
+          "partial_interp_cell": 4,
+          "n_months": 42
+        }
+      },
+      "freeze_off": {
+        "trapped_b": 44.64936350935455,
+        "share_pct": 5.838439423849502,
+        "empirical_trapped_b": 764.7482532227002,
+        "danish_trapped_b": 812.9200560195758,
+        "institutional_gap_b": -768.2706925102212,
+        "us_cpr_mean_pct": 12.065955328493631,
+        "month_counts": {
+          "frozen": 0,
+          "unfrozen": 42,
+          "partial_interp_cell": 4,
+          "n_months": 42
+        }
+      },
+      "trigger_100bp": {
+        "trapped_b": 105.87550916143928,
+        "share_pct": 13.844491793903787,
+        "empirical_trapped_b": 764.7482532227002,
+        "danish_trapped_b": 812.9200560195758,
+        "institutional_gap_b": -707.0445468581365,
+        "us_cpr_mean_pct": 11.53632237394137,
+        "month_counts": {
+          "frozen": 8,
+          "unfrozen": 34,
+          "partial_interp_cell": 4,
+          "n_months": 42
+        }
+      },
+      "trigger_150bp": {
+        "trapped_b": 99.65068553890643,
+        "share_pct": 13.030521497626413,
+        "empirical_trapped_b": 764.7482532227002,
+        "danish_trapped_b": 812.9200560195758,
+        "institutional_gap_b": -713.2693704806693,
+        "us_cpr_mean_pct": 11.608769977165325,
+        "month_counts": {
+          "frozen": 6,
+          "unfrozen": 36,
+          "partial_interp_cell": 4,
+          "n_months": 42
+        }
+      },
+      "trigger_200bp": {
+        "trapped_b": 70.53896638438343,
+        "share_pct": 9.22381529962671,
+        "empirical_trapped_b": 764.7482532227002,
+        "danish_trapped_b": 812.9200560195758,
+        "institutional_gap_b": -742.3810896351923,
+        "us_cpr_mean_pct": 11.883274251531207,
+        "month_counts": {
+          "frozen": 2,
+          "unfrozen": 40,
+          "partial_interp_cell": 4,
+          "n_months": 42
+        }
+      }
+    },
+    "freeze_contribution": {
+      "trapped_b": 39.88197691766458,
+      "share_pp": 5.215046487468165,
+      "us_cpr_mean_pp": -0.30535687570953307,
+      "danish_trapped_b": 0.0,
+      "basis": "production leg minus freeze_off, run-2026-07-05-berger accounting"
+    }
+  },
+  "part2": {
+    "method": "external-gates harness pattern: override WAIT_AND_SEE_PROB, production calibration re-run per share (floor anchor retained), one multi-cohort surface build per share, scored through the Part 1 production path; calibration inputs pinned to the frozen manifest",
+    "pinned_inputs": {
+      "median_income": 83730.0,
+      "median_home_value": 403200.0,
+      "reference_cohort": [
+        0.02,
+        60
+      ]
+    },
+    "live_medians_recorded_not_used": [
+      83730.0,
+      403200.0
+    ],
+    "legs": {
+      "production_share": {
+        "share": 0.2,
+        "mobility_scale": 43882.8125,
+        "floor_cpr_at_8pct": 0.0483,
+        "leg": {
+          "trapped_b": 84.5313404270184,
+          "share_pct": 11.053485911317573,
+          "empirical_trapped_b": 764.7482532227002,
+          "danish_trapped_b": 812.9200560195754,
+          "institutional_gap_b": -728.388715592557,
+          "us_cpr_mean_pct": 11.760598452784105
+        },
+        "note": "rebuilt-surface rescoring; equals Part 1 production leg per G5"
+      },
+      "share_0.100000": {
+        "share": 0.1,
+        "mobility_scale": 43882.8125,
+        "floor_cpr_at_8pct": 0.0483,
+        "leg": {
+          "trapped_b": 65.06625281357401,
+          "share_pct": 8.508192407028128,
+          "empirical_trapped_b": 764.7482532227002,
+          "danish_trapped_b": 812.9200560195754,
+          "institutional_gap_b": -747.8538032060014,
+          "us_cpr_mean_pct": 11.910203115203869
+        }
+      },
+      "share_0.182600": {
+        "share": 0.18259962499999982,
+        "mobility_scale": 43882.8125,
+        "floor_cpr_at_8pct": 0.0483,
+        "leg": {
+          "trapped_b": 81.54007488622831,
+          "share_pct": 10.662342090042442,
+          "empirical_trapped_b": 764.7482532227002,
+          "danish_trapped_b": 812.9200560195754,
+          "institutional_gap_b": -731.3799811333471,
+          "us_cpr_mean_pct": 11.78347578162749
+        }
+      },
+      "share_0.300000": {
+        "share": 0.3,
+        "mobility_scale": 43882.8125,
+        "floor_cpr_at_8pct": 0.0483,
+        "leg": {
+          "trapped_b": 103.30015229522239,
+          "share_pct": 13.507733016703034,
+          "empirical_trapped_b": 764.7482532227002,
+          "danish_trapped_b": 812.9200560195754,
+          "institutional_gap_b": -709.6199037243531,
+          "us_cpr_mean_pct": 11.615561390467812
+        }
+      }
+    }
+  },
+  "interpretation_precommitted": "Descriptive accounting only: the freeze contribution and the trigger/share recovery numbers are reported as contributions in the run-2026-07-05-berger production accounting. The G6 invariance gate \u2014 the calibrated mobility scale and the zero-velocity floor CPR at 8% market are unchanged across freeze shares because cpr_at(0.08,'US') evaluates at rate_velocity=0.0 where the freeze gate never binds \u2014 is the answer to Q4's 'without compromising the involuntary-turnover floor'. No verdict vocabulary.",
+  "cohort_weights_pct": {
+    "15yr_1.50": 3.4564595532731017,
+    "15yr_2.00": 4.0681419517200705,
+    "15yr_2.50": 0.9098218140094665,
+    "15yr_3.00": 0.6974280472627884,
+    "30yr_1.50": 2.7531084274680975,
+    "30yr_2.00": 36.12078731398665,
+    "30yr_2.50": 26.6270555978975,
+    "30yr_3.00": 10.74683156729313,
+    "30yr_3.50": 7.336576020524956,
+    "30yr_4.00": 4.643756887474026,
+    "30yr_4.50": 2.6400328190902114
+  },
+  "generated_utc": "2026-07-17T14:20:22.415941+00:00"
+}

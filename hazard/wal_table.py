@@ -14,6 +14,18 @@ Adds the referee-requested no-shock row: WAL at 2021 realized speeds
 (22.81% mean empirical CPR), which prices the extension the paper's dollar
 benchmark tracks: 9.4 − 3.4 = 6.0 years.
 
+Round-17 extension (R17-E / referee DC10, spec-before-run): two Danish-leg
+rows reading implied extension per payoff regime through the identical
+calculator. CPRs are the committed window means at printed precision,
+matching the existing convention (path_b 0.0476 from 4.763...): the
+production us_intercept anchor leg at 5.61% (mean_danish_cpr_pct
+5.613626373336359, hazard/data/danish_us_intercept_results.json) and the
+dk_level bracketing leg at 3.39% (mean_danish_cpr_pct 3.385567764608408,
+hazard/data/danish_discount_bound.json, all spread points identical).
+Derived stat rule_only_wal_shortening_years = path_b − danish_us_intercept
+at June 2022. The five V15_PRINTED parity gates are unchanged and must
+still pass; the new rows add no gate literal until the tex prints them.
+
 Run:  cd hazard && python3 wal_table.py   → data/wal_table_results.json
 """
 
@@ -44,6 +56,9 @@ SCENARIOS = {
     "path_a_specv3": 0.0351,  # prior-spec exhibit; stays gated vs printed v15
     "path_b": 0.0476,
     "no_shock_2021_speeds": 0.2281,  # 2021 mean empirical CPR (FRED/SOMA back-out)
+    # Round-17 Danish-leg rows (R17-E/DC10): committed window means, printed precision.
+    "danish_us_intercept": 0.0561,  # production anchor leg, danish_us_intercept_results.json
+    "danish_level": 0.0339,  # dk_level bracketing leg, danish_discount_bound.json
 }
 V15_PRINTED = {
     "scheduled_only": (14.7, 12.6),
@@ -104,11 +119,15 @@ def main() -> None:
     extension = round(
         rows["empirical"]["wal_june_2022"] - rows["no_shock_2021_speeds"]["wal_june_2022"], 1
     )
+    rule_only_shortening = round(
+        rows["path_b"]["wal_june_2022"] - rows["danish_us_intercept"]["wal_june_2022"], 1
+    )
     payload = {
         "mode": "wal_table",
         "ages_june_2022_months": AGES_JUNE_2022,
         "rows": rows,
         "extension_years_vs_no_shock": extension,
+        "rule_only_wal_shortening_years": rule_only_shortening,
         "parity": ("v15 printed values reproduced exactly for the four "
                    "unchanged rows and the spec-v3 Path A exhibit; path_a "
                    "is the spec v4 restatement (freeze item i), mean CPR "

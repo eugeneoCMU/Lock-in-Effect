@@ -97,7 +97,7 @@ def fig1_recovery_dotplot():
          FOLDIN["dollars_b"]["share_explained_pct"],
          FOLDIN["cross_correlation"]["0"], C_CHOICE, None),
     ]
-    fig, ax = plt.subplots(figsize=(10.4, 4.8))
+    fig, ax = plt.subplots(figsize=(10.4, 3.7))
     ys = np.arange(len(rows))[::-1]
     # Fifty-seed ±1 SD band for the production ABM row (headline is the seed
     # mean; the frozen draw is the reproducibility anchor).
@@ -146,7 +146,7 @@ def fig1_recovery_dotplot():
              "positive (detrended r: ABM −0.30, Path A −0.29, Path B −0.20; "
              "§V.C).",
              fontsize=8, color=C_GRAY)
-    fig.tight_layout(rect=(0, 0.055, 1, 1))
+    fig.tight_layout(rect=(0, 0.07, 1, 1))
     fig.savefig(OUT / "fig1_recovery_by_estimator.png", dpi=DPI)
     plt.close(fig)
 
@@ -195,7 +195,7 @@ def fig3_abm_waterfall():
                    FOLDIN["dollars_b"]["share_explained_pct"]))
     stages.append(("Native 15yr gate\n(Berger-run\nvariant)",
                    BERGER["dollars_b"]["share_explained_pct"]))
-    fig, ax = plt.subplots(figsize=(11.0, 5.0))
+    fig, ax = plt.subplots(figsize=(11.0, 3.9))
     xs = np.arange(len(stages))
     prev = None
     for x, (label, val) in zip(xs, stages):
@@ -226,13 +226,16 @@ def fig3_abm_waterfall():
     ax.set_xticklabels([s[0] for s in stages], fontsize=8.0)
     ax.set_ylabel(f"Share of ${BENCH_B:.1f}B benchmark explained (%)")
     ax.set_ylim(0, 112)
-    fig.text(0.005, 0.005,
+    fig.text(0.005, 0.035,
              "Behavioral extensions (stages 2-4) were pre-committed with "
              "expected directions; multi-vintage ran against its expected "
-             "direction (§VII.C). Stages 5-7 are corrections and fold-ins, "
-             "not behavioral extensions.",
+             "direction (§VII.C).",
              fontsize=8, color=C_GRAY)
-    fig.tight_layout(rect=(0, 0.045, 1, 1))
+    fig.text(0.005, 0.005,
+             "Stages 5-7 are corrections and fold-ins, not behavioral "
+             "extensions.",
+             fontsize=8, color=C_GRAY)
+    fig.tight_layout(rect=(0, 0.075, 1, 1))
     fig.savefig(OUT / "fig3_abm_waterfall.png", dpi=DPI)
     plt.close(fig)
 
@@ -341,7 +344,7 @@ def fig6_elasticity_band():
     pts = sorted(((float(k), v["trapped_b"], v["share_pct"])
                   for k, v in d["results"].items()))
     x = [p[0] for p in pts]; y = [p[1] for p in pts]
-    fig, ax = plt.subplots(figsize=(7.2, 4.2))
+    fig, ax = plt.subplots(figsize=(7.2, 3.1))
     ax.fill_between(x, y, min(y) - 12, color="#d6e6f2", alpha=0.7, zorder=0)
     ax.plot(x, y, "o-", color=C_SURV, lw=2)
     ax.scatter([6.5], [dict(zip(x, y))[6.5]], s=170, zorder=4,
@@ -440,6 +443,306 @@ def fig7_architecture():
     plt.close(fig)
 
 
+def fig8_cpr_surface():
+    """Precomputed ABM CPR surface: rate x friction heatmap + rate slices."""
+    import pandas as pd
+
+    surf = pd.read_csv(ROOT / "abm" / "abm_cpr_surface.csv")
+    s = surf[np.isclose(surf.Cohort_Coupon, 0.03) & (surf.Cohort_Term == 360)]
+    months = pd.read_csv(ROOT / "abm" / "data" / "runs" /
+                         "run-2026-07-04-15yr-foldin" / "metrics_monthly.csv")
+
+    # Velocity enters the grid only through the wait-and-see freeze, so the
+    # ten velocity points collapse to two regimes; assert rather than assume.
+    def vel_slice(v):
+        return (s[np.isclose(s.Rate_Velocity, v)]
+                .sort_values(["Friction", "Market_Rate"]))
+    base, frozen = vel_slice(0.0), vel_slice(0.02)
+    for v in np.sort(s.Rate_Velocity.unique()):
+        ref = frozen if v > 0.0151 else base
+        assert np.allclose(vel_slice(v).CPR_US.values, ref.CPR_US.values), \
+            f"velocity {v} breaks the two-regime structure"
+
+    rates = np.sort(s.Market_Rate.unique()) * 100
+    frictions = np.sort(s.Friction.unique()) * 100
+    grid = (base.pivot(index="Friction", columns="Market_Rate",
+                       values="CPR_US").to_numpy() * 100)
+
+    fig, (ax0, ax1) = plt.subplots(
+        1, 2, figsize=(10.2, 3.5), gridspec_kw={"width_ratios": [1.18, 1]})
+
+    # (left) full rate x friction grid, no-freeze regime
+    mesh = ax0.pcolormesh(rates, frictions, grid, cmap="Oranges",
+                          shading="nearest", vmin=0, vmax=grid.max())
+    cs = ax0.contour(rates, frictions, grid, levels=[10, 25, 50, 75],
+                     colors="#555555", linewidths=0.8)
+    ax0.clabel(cs, fmt="%.0f%%", fontsize=8)
+    ax0.axvline(3.0, color="white", ls=":", lw=1.4)
+    ax0.text(3.12, 17.1, "cohort coupon 3.0%", ha="left", va="top",
+             fontsize=8.5, color="white")
+    ax0.plot(months.MORTGAGE30US, months.Dynamic_Friction * 100,
+             ".", color="#1a1a1a", ms=5, zorder=5)
+    ax0.annotate("42 QT-window months\n(realized rate, friction)",
+                 xy=(months.MORTGAGE30US.median(),
+                     months.Dynamic_Friction.median() * 100),
+                 xytext=(4.35, 12.6), fontsize=9, color="#1a1a1a",
+                 arrowprops=dict(arrowstyle="->", color="#1a1a1a", lw=1.0))
+    ax0.set_xlabel("market mortgage rate (%)")
+    ax0.set_ylabel("dynamic friction (% of home value)")
+    ax0.set_title("U.S. par-payoff CPR surface")
+    cbar = fig.colorbar(mesh, ax=ax0, fraction=0.046, pad=0.03)
+    cbar.set_label("annualized CPR (%)", fontsize=9.5)
+
+    # (right) rate slices at the friction grid point nearest the window mean
+    f_near = frictions[np.argmin(np.abs(
+        frictions - months.Dynamic_Friction.mean() * 100))] / 100
+    b0 = base[np.isclose(base.Friction, f_near)].sort_values("Market_Rate")
+    b1 = frozen[np.isclose(frozen.Friction, f_near)].sort_values("Market_Rate")
+    ax1.axvspan(months.MORTGAGE30US.min(), months.MORTGAGE30US.max(),
+                color="#eeeeee", zorder=0)
+    ax1.text(months.MORTGAGE30US.mean(), 6.0, "QT-window rate range",
+             ha="center", fontsize=8.5, color=C_GRAY)
+    ax1.plot(b0.Market_Rate * 100, b0.CPR_US * 100, color=C_CHOICE, lw=2,
+             label="U.S. — no freeze (6-mo rate rise ≤ 150bp)")
+    ax1.plot(b1.Market_Rate * 100, b1.CPR_US * 100, color=C_CHOICE, lw=2,
+             ls="--", label="U.S. — wait-and-see freeze (> 150bp)")
+    ax1.plot(b0.Market_Rate * 100, b0.CPR_Danish * 100, color=C_GRAY, lw=2,
+             ls="-.", label="Danish buyback (Berger-recalibrated)")
+    ax1.axvline(3.0, color=C_GRAY, ls=":", lw=1.2)
+    ax1.set_xlabel("market mortgage rate (%)")
+    ax1.set_ylabel("annualized CPR (%)")
+    ax1.set_title(f"Rate slices at friction {f_near * 100:.1f}%")
+    ax1.set_ylim(0, b0.CPR_US.max() * 100 * 1.12)
+    ax1.legend(fontsize=8.8, loc="upper right", frameon=False)
+
+    fig.tight_layout()
+    fig.savefig(OUT / "fig8_cpr_surface.png", dpi=DPI)
+    plt.close(fig)
+
+
+def _monthly_metrics():
+    import pandas as pd
+    m = pd.read_csv(ROOT / "abm" / "data" / "runs" /
+                    "run-2026-07-04-15yr-foldin" / "metrics_monthly.csv")
+    m["date"] = pd.to_datetime(m.iloc[:, 0])
+    return m
+
+
+def fig9_benchmark_construction():
+    """Benchmark construction: monthly roll-off vs cap + cumulative wedges."""
+    m = _monthly_metrics()
+    exp = _j("hazard/data/expectation_benchmark_results.json")
+    # Both columns store outflows as negative; negate to plot runoff levels.
+    realized = -m["Actual_Monthly_Rolloff_Billions"]
+    cap = -m["QT_Target_Billions"]
+    cum_real, cum_cap = realized.cumsum(), cap.cumsum()
+    # Ex-ante projection path under the artifact's pre-committed spread rule
+    # (uniform within printed period, clipped to window); assert the derived
+    # path reproduces the artifact's window totals before displaying it.
+    annual = exp["transcription"]["printed_period_runoff_b"]
+    cum_proj = np.cumsum([annual[str(d.year)] / 12.0 for d in m["date"]])
+    assert np.isclose(cum_proj[-1], exp["window"]["projected_runoff_window_b"])
+    assert np.isclose(cum_real.iloc[-1], exp["window"]["actual_runoff_window_b"])
+    assert np.isclose(cum_cap.iloc[-1] - cum_real.iloc[-1],
+                      exp["cap_benchmark_b"])
+
+    fig, (ax0, ax1) = plt.subplots(1, 2, figsize=(10.2, 3.3))
+
+    ax0.plot(m["date"], cap, color="#333333", ls="--", lw=1.8,
+             drawstyle="steps-post", label="redemption cap")
+    ax0.plot(m["date"], realized, color="#333333", lw=1.6, marker=".",
+             ms=4.5, label="realized SOMA roll-off")
+    ax0.fill_between(m["date"], realized, cap, step=None, color="#f2d8c8",
+                     zorder=0, label="monthly shortfall")
+    ax0.axhline(0, color=C_GRAY, lw=0.8)
+    inflow = m[realized < 0]
+    ax0.scatter(inflow["date"], -inflow["Actual_Monthly_Rolloff_Billions"],
+                s=42, facecolor="white", edgecolor="#333333", zorder=5)
+    ax0.annotate("net settlement inflows", xy=(inflow["date"].iloc[-1],
+                 float(-inflow["Actual_Monthly_Rolloff_Billions"].iloc[-1])),
+                 xytext=(28, 2), textcoords="offset points", fontsize=8.5,
+                 color="#333333", va="center",
+                 arrowprops=dict(arrowstyle="->", color="#333333", lw=0.9))
+    ax0.set_ylim(top=float(cap.max()) * 1.52)
+    ax0.set_ylabel("agency MBS runoff ($B / month)")
+    ax0.set_title("Monthly roll-off vs the phased cap")
+    ax0.legend(fontsize=8.3, loc="upper left", frameon=False)
+
+    ax1.plot(m["date"], cum_cap, color="#333333", ls="--", lw=1.8,
+             label="cap allowance, cumulative")
+    ax1.plot(m["date"], cum_proj, color="#56B4E9", lw=2,
+             label="NY Fed May 2022 ex-ante projection")
+    ax1.plot(m["date"], cum_real, color="#333333", lw=2,
+             label="realized runoff")
+    x_end = m["date"].iloc[-1]
+    ax1.annotate("", xy=(x_end, cum_cap.iloc[-1]),
+                 xytext=(x_end, cum_real.iloc[-1]),
+                 arrowprops=dict(arrowstyle="<->", color=C_CHOICE, lw=1.4,
+                                 mutation_scale=9))
+    ax1.annotate(f"${exp['cap_benchmark_b']:.1f}B\nvs caps",
+                 xy=(x_end, (cum_cap.iloc[-1] + cum_real.iloc[-1]) / 2),
+                 xytext=(-64, -4), textcoords="offset points", fontsize=8.8,
+                 color=C_CHOICE)
+    ax1.annotate("", xy=(x_end, cum_proj[-1]),
+                 xytext=(x_end, cum_real.iloc[-1]),
+                 arrowprops=dict(arrowstyle="<->", color="#56B4E9", lw=1.4,
+                                 mutation_scale=8))
+    ax1.text(m["date"].iloc[-2], cum_real.iloc[-1] - 150,
+             f"${exp['e_benchmark_b']:.1f}B vs the\nex-ante projection",
+             ha="right", va="top", fontsize=8.8, color="#2f7da8")
+    ax1.set_ylabel("cumulative runoff ($B)")
+    ax1.set_title("Cumulative paths and the two wedges")
+    ax1.legend(fontsize=8.6, loc="upper left", frameon=False)
+
+    for ax in (ax0, ax1):
+        ax.tick_params(axis="x", labelrotation=30, labelsize=8.5)
+    fig.tight_layout()
+    fig.savefig(OUT / "fig9_benchmark_construction.png", dpi=DPI)
+    plt.close(fig)
+
+
+def fig10_abm_cpr_paths():
+    """Production ABM simulated vs empirical CPR paths over the QT window."""
+    m = _monthly_metrics()
+    emp_mean = FOLDIN["cpr_pct"]["empirical"]["mean"]
+    sim_mean = FOLDIN["cpr_pct"]["us_abm"]["mean"]
+    gof = FOLDIN["goodness_of_fit"]["raw"]
+
+    fig, ax = plt.subplots(figsize=(8.6, 4.2))
+    ax.plot(m["date"], m["US_CPR_Pct"], color=C_CHOICE, lw=2,
+            label="ABM simulated CPR (production fold-in run)")
+    ax.plot(m["date"], m["Empirical_CPR_Pct"], color="#333333", lw=1.7,
+            marker=".", ms=5, label="empirical CPR (SOMA back-out)")
+    ax.axhline(sim_mean, color=C_CHOICE, ls=":", lw=1.2)
+    ax.axhline(emp_mean, color="#333333", ls=":", lw=1.2)
+    ax.text(0.015, 0.975,
+            f"simulated mean {sim_mean:.2f}%  ·  empirical mean "
+            f"{emp_mean:.2f}%",
+            transform=ax.transAxes, va="top", fontsize=9, color=C_GRAY)
+    ax.text(0.015, 0.905,
+            f"lag-0 $r$ = {gof['corr']:+.3f}  ·  $R^2$ = {gof['r2']:.3f}",
+            transform=ax.transAxes, va="top", fontsize=9, color=C_GRAY)
+    ax.set_ylabel("annualized CPR (%)")
+    ax.set_ylim(0, float(m["US_CPR_Pct"].max()) * 1.2)
+    ax.tick_params(axis="x", labelrotation=30, labelsize=8.5)
+    ax.legend(fontsize=8.8, loc="upper right", frameon=False)
+    fig.tight_layout()
+    fig.savefig(OUT / "fig10_abm_cpr_paths.png", dpi=DPI)
+    plt.close(fig)
+
+
+def fig11_marginal_decomposition():
+    """Vintage x coupon group-ablation decomposition of the lock-in marginal."""
+    d = _j("hazard/data/marginal_decomposition_results.json")
+    cells = d["cells"]
+    vintages = sorted({c["vintage"] for c in cells})
+    buckets = ["<3.0%", "3.0-4.0%", ">=4.0%"]
+    grid = np.full((len(vintages), len(buckets)), np.nan)
+    share = np.full_like(grid, np.nan)
+    for c in cells:
+        i = vintages.index(c["vintage"])
+        j = buckets.index(c["coupon_bucket"])
+        grid[i, j] = c["marginal_b"]
+        share[i, j] = c["share_of_sum_pct"]
+    assert not np.isnan(grid).any() and (grid > 0).all()
+
+    fig, ax = plt.subplots(figsize=(6.8, 4.6))
+    mesh = ax.imshow(grid, cmap="Blues", aspect="auto", vmin=0)
+    for i in range(len(vintages)):
+        for j in range(len(buckets)):
+            dark = grid[i, j] > 0.6 * np.nanmax(grid)
+            ax.text(j, i, f"${grid[i, j]:.1f}B\n{share[i, j]:.1f}%",
+                    ha="center", va="center", fontsize=9,
+                    color="white" if dark else "#1a1a1a")
+    ax.set_xticks(range(len(buckets)),
+                  ["<3.0%", "3.0–4.0%", "≥4.0%"])
+    ax.set_yticks(range(len(vintages)), [str(v) for v in vintages])
+    ax.set_xlabel("coupon bucket")
+    ax.set_ylabel("origination vintage")
+    ax.set_title("Lock-in marginal by vintage × coupon cell")
+    cbar = fig.colorbar(mesh, ax=ax, fraction=0.046, pad=0.03)
+    cbar.set_label("marginal contribution ($B)", fontsize=9.5)
+    g3 = d["gates"]["G3_additivity"]
+    fig.text(0.005, 0.01,
+             f"Cells sum to \\${g3['sum_cells_b']:.1f}B of the "
+             f"\\${g3['committed_total_b']:.1f}B paired-run marginal "
+             f"(residual {g3['residual_frac_of_total'] * 100:.1f}%); "
+             "cell value and share of cell sum shown.",
+             fontsize=8, color=C_GRAY)
+    fig.tight_layout(rect=(0, 0.045, 1, 1))
+    fig.savefig(OUT / "fig11_marginal_decomposition.png", dpi=DPI)
+    plt.close(fig)
+
+
+def fig12_marginal_timing():
+    """Month x coupon timing companion to fig11: stacked monthly marginal."""
+    d = _j("figures/marginal_monthly_data.json")
+    assert d["gates_all_pass"] is True, "artifact gates must all pass"
+    assert d["additivity_verdict"] == "monthly_shares_readable"
+    months = d["months"]
+    n = len(months)
+    assert n == d["window"]["n_months"]
+    agg = np.asarray(d["aggregate"]["m_t_b"])
+    total = d["aggregate"]["total_b"]
+    assert (agg > 0).all(), "aggregate monthly marginal must be positive"
+    assert abs(agg.sum() - total) <= 1e-9 * abs(total)
+    buckets = d["coupon_buckets"]
+    layers = []
+    for b in buckets.values():
+        m = np.asarray(b["m_t_b"])
+        assert m.shape == (n,)
+        assert abs(m.sum() - b["terminal_b"]) <= 1e-9 * abs(b["terminal_b"])
+        layers.append(m)
+    # Stack vs aggregate: the per-month additivity gap is bounded by the
+    # artifact's own terminal residual (cells-capture engine vs paired run);
+    # both sides of the bound come from the arrays, nothing hardcoded.
+    resid = agg - np.sum(layers, axis=0)
+    term_resid = total - sum(b["terminal_b"] for b in buckets.values())
+    assert np.isclose(resid.sum(), term_resid)
+    assert np.abs(resid).max() <= abs(term_resid)
+    peak = d["aggregate"]["peak"]
+    i_pk = int(np.argmax(agg))
+    assert i_pk == peak["index_1based"] - 1
+    assert months[i_pk] == peak["month"] and np.isclose(agg[i_pk], peak["m_b"])
+    k = n // 3
+    assert 3 * k == n  # third boundaries derived from the window length
+    for j, third_b in enumerate(d["aggregate"]["thirds"]["dollars_b"]):
+        assert abs(agg[j * k:(j + 1) * k].sum() - third_b) <= \
+            1e-9 * abs(third_b)
+
+    x = np.arange(n)
+    fig, ax = plt.subplots(figsize=(8.6, 3.6))
+    # Blues ramp for the coupon buckets, matching fig11's cell colormap.
+    ax.stackplot(x, *layers, labels=list(buckets),
+                 colors=["#c6dbef", "#6baed6", "#2171b5"], lw=0)
+    ax.plot(x, agg, color="#333333", lw=1.4, label="aggregate $m_t$")
+    for xb in (k - 0.5, 2 * k - 0.5):
+        ax.axvline(xb, color=C_GRAY, lw=0.8, ls=":")
+    ax.plot(i_pk, agg[i_pk], marker="o", ms=5, color="#333333", zorder=5)
+    ax.annotate(f"peak {peak['month']} (${peak['m_b']:.2f}B)",
+                xy=(i_pk, agg[i_pk]), xytext=(6, 9),
+                textcoords="offset points", fontsize=8.5, color="#333333")
+    jan = [i for i, mo in enumerate(months) if mo.endswith("-01")]
+    ax.set_xticks(jan, [months[i][:4] for i in jan])
+    ax.set_xlim(0, n - 1)
+    ax.set_ylim(0, float(agg.max()) * 1.18)
+    ax.set_ylabel("Lock-in marginal ($B per month)")
+    ax.set_title("Monthly lock-in marginal by coupon bucket")
+    ax.legend(fontsize=8.6, loc="upper left", frameon=False)
+    fig.text(0.005, 0.035,
+             "All series read from figures/marginal_monthly_data.json "
+             "(monthly capture of the committed group-ablation engine);",
+             fontsize=8, color=C_GRAY)
+    fig.text(0.005, 0.005,
+             "coupon stack vs paired-run aggregate leaves a "
+             f"{abs(term_resid) / total * 100:.1f}% terminal additivity "
+             "residual, asserted in-generator.",
+             fontsize=8, color=C_GRAY)
+    fig.tight_layout(rect=(0, 0.075, 1, 1))
+    fig.savefig(OUT / "fig12_marginal_timing.png", dpi=DPI)
+    plt.close(fig)
+
+
 GENERATORS = {
     "fig1": fig1_recovery_dotplot,
     "fig2": fig2_ccf,
@@ -448,6 +751,11 @@ GENERATORS = {
     "fig5": fig5_cross_design_bars,
     "fig6": fig6_elasticity_band,
     "fig7": fig7_architecture,
+    "fig8": fig8_cpr_surface,
+    "fig9": fig9_benchmark_construction,
+    "fig10": fig10_abm_cpr_paths,
+    "fig11": fig11_marginal_decomposition,
+    "fig12": fig12_marginal_timing,
 }
 
 if __name__ == "__main__":

@@ -1,0 +1,155 @@
+{
+  "mode": "curtailment_profile_demo",
+  "spec": "hazard/curtailment_profile_demo.py module docstring (fixed ex ante)",
+  "framing": "demonstration of a construction-level identity (R17-I / referee Q2 + DC1), not a sensitivity test",
+  "git_commit": "3a73209d32a8a589c224ceb13186cfa2fd5e7f76",
+  "created_utc": "2026-07-17T15:13:29+00:00",
+  "layer": "fed_mbs_extension_risk.compute_metrics(use_hazard_microsim=True) over the committed production caches (data/microsim_results.parquet central; data/microsim_results_pq0.0.parquet null)",
+  "profiles": {
+    "unit": "factor(t) = 1.0 every month (parity leg)",
+    "seasonal": "factor(t) = 1 + 0.25*sin(2*pi*(month_of_year-1)/12) \u2014 mean-one month-of-year multiplier, +/-25% amplitude",
+    "regime_split": "factor(t) = 1.25 for months before 2024-01, 0.75 from 2024-01 on \u2014 income-elasticity regime-break stand-in"
+  },
+  "anchors": {
+    "netted_b_central": 69.56220187263008,
+    "netted_b_null": 69.56220187263008,
+    "share_central_pct": 97.9365273968041,
+    "share_null_pct": 88.73806762609433,
+    "us_trapped_central_b": 748.9678825340305,
+    "us_trapped_null_b": 678.6228221141348,
+    "marginal_pp": 9.19845977070976,
+    "marginal_b": 70.34506041989573,
+    "source": "data/shared_layer_scoring_results.json: results.{path_b_central,no_lockin_null}.{curtailment_netted_b,share_pct,us_trapped_b}"
+  },
+  "status": "ok",
+  "gates": {
+    "G1_unit_parity": {
+      "netted_b_central": {
+        "got": 69.56220187263008,
+        "want": 69.56220187263008,
+        "tol": 0.01,
+        "pass": true
+      },
+      "netted_b_null": {
+        "got": 69.56220187263008,
+        "want": 69.56220187263008,
+        "tol": 0.01,
+        "pass": true
+      },
+      "share_central_pct": {
+        "got": 97.9365273968041,
+        "want": 97.9365273968041,
+        "tol": 0.05,
+        "pass": true
+      },
+      "share_null_pct": {
+        "got": 88.73806762609433,
+        "want": 88.73806762609433,
+        "tol": 0.05,
+        "pass": true
+      }
+    },
+    "G2_cpr_bit_identity": {
+      "unit/central": {
+        "max_abs_us_cpr_diff_pp": 0.0,
+        "max_abs_danish_cpr_diff_pp": 0.0,
+        "pass": true
+      },
+      "unit/null": {
+        "max_abs_us_cpr_diff_pp": 0.0,
+        "max_abs_danish_cpr_diff_pp": 0.0,
+        "pass": true
+      },
+      "seasonal/central": {
+        "max_abs_us_cpr_diff_pp": 0.0,
+        "max_abs_danish_cpr_diff_pp": 0.0,
+        "pass": true
+      },
+      "seasonal/null": {
+        "max_abs_us_cpr_diff_pp": 0.0,
+        "max_abs_danish_cpr_diff_pp": 0.0,
+        "pass": true
+      },
+      "regime_split/central": {
+        "max_abs_us_cpr_diff_pp": 0.0,
+        "max_abs_danish_cpr_diff_pp": 0.0,
+        "pass": true
+      },
+      "regime_split/null": {
+        "max_abs_us_cpr_diff_pp": 0.0,
+        "max_abs_danish_cpr_diff_pp": 0.0,
+        "pass": true
+      }
+    },
+    "G3_netting_central_vs_null": {
+      "unit": {
+        "max_month_abs_netting_diff_b": 0.0,
+        "netting_bit_identical": true,
+        "tol_b": 1e-09,
+        "pass": true
+      },
+      "seasonal": {
+        "max_month_abs_netting_diff_b": 0.0,
+        "netting_bit_identical": true,
+        "tol_b": 1e-09,
+        "pass": true
+      },
+      "regime_split": {
+        "max_month_abs_netting_diff_b": 0.0,
+        "netting_bit_identical": true,
+        "tol_b": 1e-09,
+        "pass": true
+      }
+    },
+    "all_pass": true
+  },
+  "results": {
+    "unit": {
+      "netted_b": 69.56220187263008,
+      "wedge_pp": 9.096091632702699,
+      "central_share": 97.9365273968041,
+      "null_share": 88.73806762609433,
+      "marginal_pp": 9.19845977070976,
+      "marginal_b": 70.34506041989573,
+      "marginal_departure_from_unit_pp": 0.0,
+      "marginal_departure_from_unit_b": 0.0,
+      "max_abs_netting_diff_central_vs_null_b": 0.0,
+      "factor_window_mean": 1.0
+    },
+    "seasonal": {
+      "netted_b": 70.06316511098575,
+      "wedge_pp": 9.161598580413214,
+      "central_share": 97.87102044909356,
+      "null_share": 88.67256067838382,
+      "marginal_pp": 9.198459770709746,
+      "marginal_b": 70.34506041989562,
+      "marginal_departure_from_unit_pp": -1.4210854715202004e-14,
+      "marginal_departure_from_unit_b": -1.1368683772161603e-13,
+      "max_abs_netting_diff_central_vs_null_b": 0.0,
+      "factor_window_mean": 0.9837377928120901
+    },
+    "regime_split": {
+      "netted_b": 68.0861210619195,
+      "wedge_pp": 8.903076375133914,
+      "central_share": 98.12954265437287,
+      "null_share": 88.93108288366311,
+      "marginal_pp": 9.19845977070976,
+      "marginal_b": 70.34506041989562,
+      "marginal_departure_from_unit_pp": 0.0,
+      "marginal_departure_from_unit_b": -1.1368683772161603e-13,
+      "max_abs_netting_diff_central_vs_null_b": 0.0,
+      "factor_window_mean": 0.9761904761904762
+    }
+  },
+  "demonstration": {
+    "unit_marginal_pp": 9.19845977070976,
+    "unit_marginal_b": 70.34506041989573,
+    "committed_marginal_pp": 9.19845977070976,
+    "committed_marginal_b": 70.34506041989573,
+    "invariance_tol_pp": 1e-06,
+    "invariance_tol_b": 1e-06,
+    "identity_holds": true,
+    "verdict": "the lock-in marginal is identical across all curtailment time profiles to float-associativity headroom \u2014 the construction-level identity is demonstrated, no claim change"
+  },
+  "runtime_s": 2.3
+}

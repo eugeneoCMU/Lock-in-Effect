@@ -42,8 +42,19 @@
       "mean_cpr_pct": 22.81,
       "wal_june_2022": 3.4,
       "wal_nov_2025": 3.3
+    },
+    "danish_us_intercept": {
+      "mean_cpr_pct": 5.609999999999999,
+      "wal_june_2022": 9.1,
+      "wal_nov_2025": 8.2
+    },
+    "danish_level": {
+      "mean_cpr_pct": 3.39,
+      "wal_june_2022": 10.8,
+      "wal_nov_2025": 9.6
     }
   },
   "extension_years_vs_no_shock": 6.0,
+  "rule_only_wal_shortening_years": 0.6,
   "parity": "v15 printed values reproduced exactly for the four unchanged rows and the spec-v3 Path A exhibit; path_a is the spec v4 restatement (freeze item i), mean CPR from pathA_seasonal_adoption_results.json"
 }
