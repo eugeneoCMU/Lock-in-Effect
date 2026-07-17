@@ -2530,7 +2530,13 @@ pre-committed threshold vocabulary, not swagger); ledger
 paper/v16/humility_pass_round16.md. Scope discipline throughout: every
 negotiated hedge and verified-precision phrase grep-confirmed to survive
 each pass. Manuscript now 71pp, zero undefined references; abstract 232
-words; 36 gates PASS at every step.
+words; 36 gates PASS at every step. A same-day figure-placement pass
+(author-directed) moved fig:waterfall's block to its first-mention
+paragraph, ordered all eight figure environments by first mention, and
+switched every figure to exact [H] placement (float package added):
+figures no longer drift from their citing text — each renders on its
+first-mention page or the next (verified in the built PDF), at the cost
+of short pages where a figure breaks (73pp).
 
 ## Appendix A — File Map
 
