@@ -2505,6 +2505,33 @@ with the preserved converters (table want-count 14→15 for `tab:theil`);
 `superseded-2026-07-16-round15/`). Response letter filled in
 `paper/v16/revision_roadmap_round16.md`.
 
+### 26.5 Title change and voice/tone passes (author-directed, same day)
+
+Three author-directed manuscript passes followed the round-16 revision, all
+verified under the full gate suite and rebuilt (PDF, md/txt editions,
+Downloads + bundle staging refreshed each time). (a) Single-author voice:
+we/our/ours/us → I/my/mine/me, 137 word-boundary replacements; the
+historical self-quote "sign we cannot identify" kept verbatim. (b)
+Concision: 142 edits from a 13-agent section sweep, each passing a
+mechanical invariant verifier (numbers, refs, cites, texttt, quotes, and
+run citations multiset-equal between old and new; scratchpad
+apply_concision.py), ~5,000 characters of metadiscourse and doublets
+removed; ledger paper/v16/concision_pass_round16.md. (c) Title + register:
+the coined "Securitization Trade-Off" was retired — the phrase collides
+with the existing securitization trade-off literature (author's catch) —
+title now "Mortgage Lock-In and the Federal Reserve's Quantitative
+Tightening Shortfall" (gate #10's exactly-one string updated accordingly);
+the four coinage sites became plain description of the two-sided exchange;
+83 register edits from a second 13-agent sweep dropped rhetorical emphasis
+("precisely", "vindicated"-class verbs, reader-coaching adverbs) under the
+same invariant verifier plus a no-mushy-hedges check, with one proposal
+rejected in review ("materially" in the ML-comparator sentence is
+pre-committed threshold vocabulary, not swagger); ledger
+paper/v16/humility_pass_round16.md. Scope discipline throughout: every
+negotiated hedge and verified-precision phrase grep-confirmed to survive
+each pass. Manuscript now 71pp, zero undefined references; abstract 232
+words; 36 gates PASS at every step.
+
 ## Appendix A — File Map
 
 ```

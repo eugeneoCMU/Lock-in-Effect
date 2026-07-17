@@ -48,7 +48,7 @@ ZERO_COUNT = [
 ]
 
 EXACTLY_ONE = [
-    "\\title{The Securitization Trade-Off",
+    "\\title{Mortgage Lock-In and the Federal Reserve's Quantitative Tightening Shortfall}",
     "frozen manifests say otherwise",
     "9.96\\% of home value",
     "supersede this tag",
