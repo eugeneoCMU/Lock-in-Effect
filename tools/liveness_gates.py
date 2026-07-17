@@ -44,6 +44,11 @@ WALTAB_RESULTS = ROOT / "hazard" / "data" / "wal_table_results.json"
 CURTDEMO_RESULTS = ROOT / "hazard" / "data" / "curtailment_profile_demo_results.json"
 SPREADVAR_RESULTS = ROOT / "hazard" / "data" / "expectation_spread_variants_results.json"
 DANBOUND_RESULTS = ROOT / "hazard" / "data" / "danish_discount_bound.json"
+SUBGROUP_RESULTS = ROOT / "hazard" / "data" / "subgroup_marginals_results.json"
+REGIME_RESULTS = ROOT / "hazard" / "data" / "regime_split_marginal_results.json"
+GROUPCAL_RESULTS = ROOT / "hazard" / "data" / "grouped_calibration_results.json"
+FONSECA_RESULTS = ROOT / "hazard" / "data" / "fonseca_band_anchor_results.json"
+V1516_RESULTS = ROOT / "hazard" / "data" / "vintage_1516_subleg_results.json"
 
 
 def _gates_ok(gates: dict) -> bool:
@@ -606,6 +611,115 @@ def main() -> int:
         f"[{'PASS' if ok else 'FAIL'}] cross-check danish grid fill: "
         f"flip literals present={ok_flips}, all deltas zero={ok_zero} "
         f"(grid {sorted(dbd['spreads_bp'])})"
+    )
+
+    # Round-18 R18-A (gate #48): subgroup marginal decomposition — verdict,
+    # in-run parity/additivity gates, and the printed intensity literals.
+    sg = json.loads(SUBGROUP_RESULTS.read_text())
+    claims = tex.count("run \\texttt{subgroup\\_marginals}")
+    ok = (sg["verdict_overall"] == "broad_based_all_dimensions"
+          and _gates_ok(sg["gates"]) and claims == 1
+          and "0.88--1.26" in tex and "0.93--1.06" in tex)
+    failures += 0 if ok else 1
+    print(
+        f"[{'PASS' if ok else 'FAIL'}] cross-check subgroup marginals: "
+        f"verdict={sg['verdict_overall']}, in-run gates ok={_gates_ok(sg['gates'])}, "
+        f"tex run-citation count={claims} (want 1), intensity literals present="
+        f"{'0.88--1.26' in tex}/{'0.93--1.06' in tex}"
+    )
+
+    # Round-18 R18-G (gate #50): regime-split marginal — bit-exact unit-factor
+    # parity, the printed h0/floor spans, and the non-cancellation framing.
+    rs = json.loads(REGIME_RESULTS.read_text())
+    claims = tex.count("run \\texttt{regime\\_split\\_marginal}")
+    h0lo, h0hi = rs["results"]["h0_span_pp"]
+    fl_lo, fl_hi = min(rs["results"]["floor_marginal_pps"]), max(rs["results"]["floor_marginal_pps"])
+    ok = (_gates_ok(rs["gates"]) and claims == 1
+          and rs["results"]["verdict_h0"] == "material_sensitivity"
+          and f"$+{h0lo:.1f}$ to $+{h0hi:.1f}$ points" in tex
+          and f"$+{fl_lo:.1f}$ through $+{fl_hi:.1f}$ points" in tex
+          and "scales the marginal rather than cancelling" in tex)
+    failures += 0 if ok else 1
+    print(
+        f"[{'PASS' if ok else 'FAIL'}] cross-check regime-split marginal: "
+        f"in-run gates ok={_gates_ok(rs['gates'])}, verdict={rs['results']['verdict_h0']}, "
+        f"tex run-citation count={claims} (want 1), span literals "
+        f"+{h0lo:.1f}/+{h0hi:.1f} and +{fl_lo:.1f}/+{fl_hi:.1f} present="
+        f"{f'$+{h0lo:.1f}$ to $+{h0hi:.1f}$ points' in tex}/"
+        f"{f'$+{fl_lo:.1f}$ through $+{fl_hi:.1f}$ points' in tex}"
+    )
+
+    # Round-18 R18-I (gate #51): danish 125/150bp grid fill — the two new
+    # printed rows agree with the artifact, grid spans 0-150bp, prose updated.
+    ok_new = all(
+        ("{:,}".format(runs[k]["flipped_loan_months"]).replace(",", "{,}") + " of 1{,}683{,}082") in tex
+        for k in ("spread_125bp", "spread_150bp")
+    )
+    ok = (ok_new and sorted(dbd["spreads_bp"]) == [0, 25, 50, 75, 100, 125, 150]
+          and ok_zero and "25--150 basis points" in tex)
+    failures += 0 if ok else 1
+    print(
+        f"[{'PASS' if ok else 'FAIL'}] cross-check danish 125/150bp fill: "
+        f"new-row literals present={ok_new}, grid={sorted(dbd['spreads_bp'])}, "
+        f"all deltas zero={ok_zero}, prose span updated={'25--150 basis points' in tex}"
+    )
+
+    # Round-18 R18-J (gate #52): grouped calibration — in-run gates, verdict,
+    # and the printed holdout ratios/pooled figures are the artifact's.
+    gc = json.loads(GROUPCAL_RESULTS.read_text())
+    claims = tex.count("run \\texttt{grouped\\_calibration}")
+    ths = gc["train_holdout_split"]["holdout_2024H1_2025H2"]
+    lit_pred = "{:.2f}".format(ths["wmean_pred_cpr_pp"])
+    lit_obs = "{:.2f}".format(ths["wmean_obs_cpr_pp"])
+    ok = (_gates_ok(gc["gates"]) and claims == 1
+          and gc["interpretation"]["verdict"] == "temporal_drift_post_boundary"
+          and "0.64, 0.57, 0.44, 0.43" in tex
+          and lit_pred in tex and lit_obs in tex)
+    failures += 0 if ok else 1
+    print(
+        f"[{'PASS' if ok else 'FAIL'}] cross-check grouped calibration: "
+        f"in-run gates ok={_gates_ok(gc['gates'])}, verdict="
+        f"{gc['interpretation']['verdict']}, tex run-citation count={claims} "
+        f"(want 1), holdout literals present={'0.64, 0.57, 0.44, 0.43' in tex}/"
+        f"{lit_pred in tex}/{lit_obs in tex}"
+    )
+
+    # Round-18 R18-B (gate #53): fonseca band anchor — in-run gates, placement
+    # above the L&R high edge, and the printed marginal/edge literals.
+    fb = json.loads(FONSECA_RESULTS.read_text())
+    claims = tex.count("run \\texttt{fonseca\\_band\\_anchor}")
+    pl = fb["placement"]
+    hi_edge_b = pl["lr_band_marginal_b_5.5_to_7.7"][-1]
+    lit_fb_b = "$+\\${:.1f}$ billion".format(pl["fonseca_marginal_b"])
+    lit_fb_pp = "($+{:.1f}$ points)".format(pl["fonseca_marginal_pp"])
+    lit_edge = "$+\\${:.1f}$ billion".format(hi_edge_b)
+    ok = (fb["gates_all_pass"] and claims == 1
+          and pl["vs_lr_band"] == "above_lr_high_edge"
+          and lit_fb_b in tex and lit_fb_pp in tex and lit_edge in tex)
+    failures += 0 if ok else 1
+    print(
+        f"[{'PASS' if ok else 'FAIL'}] cross-check fonseca band anchor: "
+        f"gates_all_pass={fb['gates_all_pass']}, placement={pl['vs_lr_band']}, "
+        f"tex run-citation count={claims} (want 1), literals "
+        f"{pl['fonseca_marginal_b']:.1f}/{pl['fonseca_marginal_pp']:.1f}/{hi_edge_b:.1f} present="
+        f"{lit_fb_b in tex}/{lit_fb_pp in tex}/{lit_edge in tex}"
+    )
+
+    # Round-18 R18-K (gate #54): 2015-16 vintage subleg — in-run parity to the
+    # committed bound and the printed exposure-share literal.
+    vs = json.loads(V1516_RESULTS.read_text())
+    claims = tex.count("run \\texttt{vintage\\_1516\\_subleg}")
+    seg = vs["results"]["vintage_2015_2016_specific"]
+    lit_share = "99.99\\%"
+    ok = (vs["status"] == "PASS" and _gates_ok(vs["gates"]) and claims == 1
+          and "{:.2f}".format(seg["exposure_share_within_pre2017_pct"]) == "99.99"
+          and lit_share in tex)
+    failures += 0 if ok else 1
+    print(
+        f"[{'PASS' if ok else 'FAIL'}] cross-check vintage 2015-16 subleg: "
+        f"status={vs['status']}, in-run gates ok={_gates_ok(vs['gates'])}, "
+        f"tex run-citation count={claims} (want 1), share "
+        f"{seg['exposure_share_within_pre2017_pct']:.2f} printed={lit_share in tex}"
     )
 
     print(f"\n{'ALL GATES PASS' if failures == 0 else f'{failures} GATE(S) FAILED'}")
