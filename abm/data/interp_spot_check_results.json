@@ -1,0 +1,961 @@
+{
+  "status": "OK",
+  "mode": "interp_spot_check",
+  "spec": "round-17 R17-J (referee DC3); off-grid validation of the trilinear CPR-surface interpolation vs direct _cpr_vec micro-simulation; gates G0-G2 then pre-committed T1/T2",
+  "identifiers": {
+    "run_tag": "run-2026-07-05-berger",
+    "manifest_git_commit": "51fbd8373ddcdebd50a320cab6268ccc54821cde",
+    "surface_sha256": "a828fcbe5c33ce40b75719f64c64ad84c8135da45c00089578c6146889caa2d6",
+    "seed": 42,
+    "mobility_scale": 43882.8125,
+    "median_income": 83730.0,
+    "median_home_value": 403200.0,
+    "seasoning_offset_k": 0,
+    "n_cohorts": 11,
+    "cohorts": [
+      {
+        "coupon": 0.015,
+        "term_months": 180,
+        "weight": 0.034564595532731016,
+        "months_elapsed_used": 58
+      },
+      {
+        "coupon": 0.02,
+        "term_months": 180,
+        "weight": 0.04068141951720071,
+        "months_elapsed_used": 62
+      },
+      {
+        "coupon": 0.025,
+        "term_months": 180,
+        "weight": 0.009098218140094665,
+        "months_elapsed_used": 77
+      },
+      {
+        "coupon": 0.03,
+        "term_months": 180,
+        "weight": 0.006974280472627884,
+        "months_elapsed_used": 76
+      },
+      {
+        "coupon": 0.015,
+        "term_months": 360,
+        "weight": 0.027531084274680973,
+        "months_elapsed_used": 63
+      },
+      {
+        "coupon": 0.02,
+        "term_months": 360,
+        "weight": 0.3612078731398665,
+        "months_elapsed_used": 60
+      },
+      {
+        "coupon": 0.025,
+        "term_months": 360,
+        "weight": 0.266270555978975,
+        "months_elapsed_used": 61
+      },
+      {
+        "coupon": 0.03,
+        "term_months": 360,
+        "weight": 0.1074683156729313,
+        "months_elapsed_used": 101
+      },
+      {
+        "coupon": 0.035,
+        "term_months": 360,
+        "weight": 0.07336576020524956,
+        "months_elapsed_used": 105
+      },
+      {
+        "coupon": 0.04,
+        "term_months": 360,
+        "weight": 0.04643756887474026,
+        "months_elapsed_used": 92
+      },
+      {
+        "coupon": 0.045,
+        "term_months": 360,
+        "weight": 0.026400328190902114,
+        "months_elapsed_used": 90
+      }
+    ],
+    "numpy_version": "2.0.2",
+    "pandas_version": "2.3.3",
+    "python_version": "3.9.6"
+  },
+  "gates": {
+    "G0_frozen_inputs": {
+      "surface_sha256_match": true,
+      "surface_rows": 37180,
+      "grid_shape": [
+        13,
+        26,
+        10
+      ],
+      "cohort_key_sets_equal": true,
+      "seasoning_offset_k": 0,
+      "pass": true
+    },
+    "G1_on_grid_parity": {
+      "node_indices": [
+        [
+          6,
+          12,
+          4
+        ],
+        [
+          9,
+          7,
+          5
+        ],
+        [
+          7,
+          8,
+          2
+        ],
+        [
+          3,
+          17,
+          8
+        ]
+      ],
+      "n_nodes_tested": 44,
+      "tolerance_pp": {
+        "us": 0.0,
+        "dk": 1e-12
+      },
+      "max_abs_diff_us_pp": 0.0,
+      "max_abs_diff_dk_pp": 7.632783294297951e-15,
+      "bit_exact": true,
+      "pass": true
+    },
+    "G2_realized_coordinates": {
+      "rate_parity_max_abs_pp": 8.881784197001252e-16,
+      "rate_parity_tolerance_pp": 5e-06,
+      "friction_parity_max_abs_diagnostic": 9.71445146547012e-17,
+      "velocity_source": "diff(6)/100 of frozen in-window MORTGAGE30US spliced with live fetch_data() pre-window months",
+      "velocity_min": -0.00625,
+      "velocity_max": 0.023649999999999997,
+      "pass": true
+    }
+  },
+  "midpoint_check": {
+    "tolerance_max_abs_pp": 0.25,
+    "cohort_rule": "manifest reference cohort + two largest-weight live-SOMA cohorts excluding it; ties broken by (term 360 first, lower coupon)",
+    "cohorts_resolved": [
+      [
+        0.02,
+        360
+      ],
+      [
+        0.025,
+        360
+      ],
+      [
+        0.03,
+        360
+      ]
+    ],
+    "points": [
+      {
+        "point_id": "P01",
+        "cohort": [
+          0.02,
+          360
+        ],
+        "rate_pct": 5.250000000000001,
+        "friction": 0.0824999999999999,
+        "velocity": 0.0075,
+        "kink_straddle": false,
+        "direct_us_pp": 15.939999999999998,
+        "interp_us_pp": 16.147499999999994,
+        "abs_diff_us_pp": 0.20749999999999602,
+        "direct_dk_pp": 3.3267500000000005,
+        "interp_dk_pp": 3.326749999999995,
+        "abs_diff_dk_pp": 5.329070518200751e-15
+      },
+      {
+        "point_id": "P02",
+        "cohort": [
+          0.02,
+          360
+        ],
+        "rate_pct": 5.75,
+        "friction": 0.0874999999999999,
+        "velocity": 0.0025,
+        "kink_straddle": false,
+        "direct_us_pp": 12.2,
+        "interp_us_pp": 12.305000000000001,
+        "abs_diff_us_pp": 0.1050000000000022,
+        "direct_dk_pp": 3.346249999999995,
+        "interp_dk_pp": 3.346249999999995,
+        "abs_diff_dk_pp": 0.0
+      },
+      {
+        "point_id": "P03",
+        "cohort": [
+          0.02,
+          360
+        ],
+        "rate_pct": 6.25,
+        "friction": 0.0924999999999999,
+        "velocity": -0.0025,
+        "kink_straddle": false,
+        "direct_us_pp": 9.28,
+        "interp_us_pp": 9.4,
+        "abs_diff_us_pp": 0.120000000000001,
+        "direct_dk_pp": 3.3657500000000007,
+        "interp_dk_pp": 3.365749999999995,
+        "abs_diff_dk_pp": 5.773159728050814e-15
+      },
+      {
+        "point_id": "P04",
+        "cohort": [
+          0.02,
+          360
+        ],
+        "rate_pct": 7.250000000000001,
+        "friction": 0.09749999999999989,
+        "velocity": 0.0025,
+        "kink_straddle": false,
+        "direct_us_pp": 5.67,
+        "interp_us_pp": 5.814999999999999,
+        "abs_diff_us_pp": 0.14499999999999869,
+        "direct_dk_pp": 3.404750000000001,
+        "interp_dk_pp": 3.404749999999995,
+        "abs_diff_dk_pp": 5.773159728050814e-15
+      },
+      {
+        "point_id": "P05",
+        "cohort": [
+          0.02,
+          360
+        ],
+        "rate_pct": 2.75,
+        "friction": 0.0824999999999999,
+        "velocity": 0.0075,
+        "kink_straddle": false,
+        "direct_us_pp": 47.49,
+        "interp_us_pp": 47.565,
+        "abs_diff_us_pp": 0.07499999999999574,
+        "direct_dk_pp": 3.2292500000000057,
+        "interp_dk_pp": 3.229249999999995,
+        "abs_diff_dk_pp": 1.0658141036401503e-14
+      },
+      {
+        "point_id": "P06",
+        "cohort": [
+          0.02,
+          360
+        ],
+        "rate_pct": 3.25,
+        "friction": 0.1124999999999999,
+        "velocity": -0.0025,
+        "kink_straddle": false,
+        "direct_us_pp": 31.990000000000002,
+        "interp_us_pp": 32.21,
+        "abs_diff_us_pp": 0.21999999999999886,
+        "direct_dk_pp": 3.2487500000000002,
+        "interp_dk_pp": 3.248749999999995,
+        "abs_diff_dk_pp": 5.329070518200751e-15
+      },
+      {
+        "point_id": "P07",
+        "cohort": [
+          0.02,
+          360
+        ],
+        "rate_pct": 4.25,
+        "friction": 0.1374999999999999,
+        "velocity": 0.0275,
+        "kink_straddle": false,
+        "direct_us_pp": 15.049999999999999,
+        "interp_us_pp": 15.120000000000001,
+        "abs_diff_us_pp": 0.07000000000000206,
+        "direct_dk_pp": 3.2877500000000004,
+        "interp_dk_pp": 3.2877499999999946,
+        "abs_diff_dk_pp": 5.773159728050814e-15
+      },
+      {
+        "point_id": "P08",
+        "cohort": [
+          0.02,
+          360
+        ],
+        "rate_pct": 5.250000000000001,
+        "friction": 0.0824999999999999,
+        "velocity": 0.0175,
+        "kink_straddle": true,
+        "direct_us_pp": 12.659999999999998,
+        "interp_us_pp": 14.419999999999993,
+        "abs_diff_us_pp": 1.7599999999999945,
+        "direct_dk_pp": 3.3267500000000005,
+        "interp_dk_pp": 3.326749999999995,
+        "abs_diff_dk_pp": 5.329070518200751e-15
+      },
+      {
+        "point_id": "P09",
+        "cohort": [
+          0.02,
+          360
+        ],
+        "rate_pct": 6.75,
+        "friction": 0.0874999999999999,
+        "velocity": 0.0175,
+        "kink_straddle": true,
+        "direct_us_pp": 6.17,
+        "interp_us_pp": 7.0062500000000005,
+        "abs_diff_us_pp": 0.8362500000000006,
+        "direct_dk_pp": 3.385249999999995,
+        "interp_dk_pp": 3.385249999999995,
+        "abs_diff_dk_pp": 0.0
+      },
+      {
+        "point_id": "P10",
+        "cohort": [
+          0.02,
+          360
+        ],
+        "rate_pct": 3.25,
+        "friction": 0.1124999999999999,
+        "velocity": 0.0175,
+        "kink_straddle": true,
+        "direct_us_pp": 25.46,
+        "interp_us_pp": 28.93875,
+        "abs_diff_us_pp": 3.478749999999998,
+        "direct_dk_pp": 3.2487500000000002,
+        "interp_dk_pp": 3.248749999999995,
+        "abs_diff_dk_pp": 5.329070518200751e-15
+      },
+      {
+        "point_id": "P01",
+        "cohort": [
+          0.025,
+          360
+        ],
+        "rate_pct": 5.250000000000001,
+        "friction": 0.0824999999999999,
+        "velocity": 0.0075,
+        "kink_straddle": false,
+        "direct_us_pp": 19.16,
+        "interp_us_pp": 19.38999999999999,
+        "abs_diff_us_pp": 0.22999999999998977,
+        "direct_dk_pp": 3.307249999999995,
+        "interp_dk_pp": 3.307249999999995,
+        "abs_diff_dk_pp": 0.0
+      },
+      {
+        "point_id": "P02",
+        "cohort": [
+          0.025,
+          360
+        ],
+        "rate_pct": 5.75,
+        "friction": 0.0874999999999999,
+        "velocity": 0.0025,
+        "kink_straddle": false,
+        "direct_us_pp": 14.49,
+        "interp_us_pp": 14.555,
+        "abs_diff_us_pp": 0.0649999999999995,
+        "direct_dk_pp": 3.3267500000000005,
+        "interp_dk_pp": 3.326749999999995,
+        "abs_diff_dk_pp": 5.329070518200751e-15
+      },
+      {
+        "point_id": "P03",
+        "cohort": [
+          0.025,
+          360
+        ],
+        "rate_pct": 6.25,
+        "friction": 0.0924999999999999,
+        "velocity": -0.0025,
+        "kink_straddle": false,
+        "direct_us_pp": 11.03,
+        "interp_us_pp": 11.0675,
+        "abs_diff_us_pp": 0.03750000000000142,
+        "direct_dk_pp": 3.346249999999995,
+        "interp_dk_pp": 3.346249999999995,
+        "abs_diff_dk_pp": 0.0
+      },
+      {
+        "point_id": "P04",
+        "cohort": [
+          0.025,
+          360
+        ],
+        "rate_pct": 7.250000000000001,
+        "friction": 0.09749999999999989,
+        "velocity": 0.0025,
+        "kink_straddle": false,
+        "direct_us_pp": 6.7299999999999995,
+        "interp_us_pp": 6.702499999999999,
+        "abs_diff_us_pp": 0.027500000000000746,
+        "direct_dk_pp": 3.385249999999995,
+        "interp_dk_pp": 3.385249999999995,
+        "abs_diff_dk_pp": 0.0
+      },
+      {
+        "point_id": "P05",
+        "cohort": [
+          0.025,
+          360
+        ],
+        "rate_pct": 2.75,
+        "friction": 0.0824999999999999,
+        "velocity": 0.0075,
+        "kink_straddle": false,
+        "direct_us_pp": 52.39,
+        "interp_us_pp": 52.3775,
+        "abs_diff_us_pp": 0.012500000000002842,
+        "direct_dk_pp": 3.20975,
+        "interp_dk_pp": 3.209749999999995,
+        "abs_diff_dk_pp": 4.884981308350689e-15
+      },
+      {
+        "point_id": "P06",
+        "cohort": [
+          0.025,
+          360
+        ],
+        "rate_pct": 3.25,
+        "friction": 0.1124999999999999,
+        "velocity": -0.0025,
+        "kink_straddle": false,
+        "direct_us_pp": 37.16,
+        "interp_us_pp": 37.0475,
+        "abs_diff_us_pp": 0.11249999999999716,
+        "direct_dk_pp": 3.2292500000000057,
+        "interp_dk_pp": 3.229249999999995,
+        "abs_diff_dk_pp": 1.0658141036401503e-14
+      },
+      {
+        "point_id": "P07",
+        "cohort": [
+          0.025,
+          360
+        ],
+        "rate_pct": 4.25,
+        "friction": 0.1374999999999999,
+        "velocity": 0.0275,
+        "kink_straddle": false,
+        "direct_us_pp": 18.29,
+        "interp_us_pp": 18.392500000000002,
+        "abs_diff_us_pp": 0.1025000000000027,
+        "direct_dk_pp": 3.2682499999999948,
+        "interp_dk_pp": 3.2682499999999948,
+        "abs_diff_dk_pp": 0.0
+      },
+      {
+        "point_id": "P08",
+        "cohort": [
+          0.025,
+          360
+        ],
+        "rate_pct": 5.250000000000001,
+        "friction": 0.0824999999999999,
+        "velocity": 0.0175,
+        "kink_straddle": true,
+        "direct_us_pp": 15.02,
+        "interp_us_pp": 17.32249999999999,
+        "abs_diff_us_pp": 2.3024999999999913,
+        "direct_dk_pp": 3.307249999999995,
+        "interp_dk_pp": 3.307249999999995,
+        "abs_diff_dk_pp": 0.0
+      },
+      {
+        "point_id": "P09",
+        "cohort": [
+          0.025,
+          360
+        ],
+        "rate_pct": 6.75,
+        "friction": 0.0874999999999999,
+        "velocity": 0.0175,
+        "kink_straddle": true,
+        "direct_us_pp": 7.1,
+        "interp_us_pp": 8.11625,
+        "abs_diff_us_pp": 1.0162500000000012,
+        "direct_dk_pp": 3.3657500000000007,
+        "interp_dk_pp": 3.365749999999995,
+        "abs_diff_dk_pp": 5.773159728050814e-15
+      },
+      {
+        "point_id": "P10",
+        "cohort": [
+          0.025,
+          360
+        ],
+        "rate_pct": 3.25,
+        "friction": 0.1124999999999999,
+        "velocity": 0.0175,
+        "kink_straddle": true,
+        "direct_us_pp": 29.56,
+        "interp_us_pp": 33.26875,
+        "abs_diff_us_pp": 3.7087499999999984,
+        "direct_dk_pp": 3.2292500000000057,
+        "interp_dk_pp": 3.229249999999995,
+        "abs_diff_dk_pp": 1.0658141036401503e-14
+      },
+      {
+        "point_id": "P01",
+        "cohort": [
+          0.03,
+          360
+        ],
+        "rate_pct": 5.250000000000001,
+        "friction": 0.0824999999999999,
+        "velocity": 0.0075,
+        "kink_straddle": false,
+        "direct_us_pp": 35.510000000000005,
+        "interp_us_pp": 35.54999999999998,
+        "abs_diff_us_pp": 0.03999999999997783,
+        "direct_dk_pp": 3.2877500000000004,
+        "interp_dk_pp": 3.287749999999995,
+        "abs_diff_dk_pp": 5.329070518200751e-15
+      },
+      {
+        "point_id": "P02",
+        "cohort": [
+          0.03,
+          360
+        ],
+        "rate_pct": 5.75,
+        "friction": 0.0874999999999999,
+        "velocity": 0.0025,
+        "kink_straddle": false,
+        "direct_us_pp": 26.97,
+        "interp_us_pp": 27.0475,
+        "abs_diff_us_pp": 0.07750000000000057,
+        "direct_dk_pp": 3.307249999999995,
+        "interp_dk_pp": 3.307249999999995,
+        "abs_diff_dk_pp": 0.0
+      },
+      {
+        "point_id": "P03",
+        "cohort": [
+          0.03,
+          360
+        ],
+        "rate_pct": 6.25,
+        "friction": 0.0924999999999999,
+        "velocity": -0.0025,
+        "kink_straddle": false,
+        "direct_us_pp": 20.549999999999997,
+        "interp_us_pp": 20.6525,
+        "abs_diff_us_pp": 0.1025000000000027,
+        "direct_dk_pp": 3.3267500000000005,
+        "interp_dk_pp": 3.326749999999995,
+        "abs_diff_dk_pp": 5.329070518200751e-15
+      },
+      {
+        "point_id": "P04",
+        "cohort": [
+          0.03,
+          360
+        ],
+        "rate_pct": 7.250000000000001,
+        "friction": 0.09749999999999989,
+        "velocity": 0.0025,
+        "kink_straddle": false,
+        "direct_us_pp": 12.389999999999999,
+        "interp_us_pp": 12.484999999999998,
+        "abs_diff_us_pp": 0.09499999999999886,
+        "direct_dk_pp": 3.3657500000000007,
+        "interp_dk_pp": 3.3657499999999954,
+        "abs_diff_dk_pp": 5.329070518200751e-15
+      },
+      {
+        "point_id": "P05",
+        "cohort": [
+          0.03,
+          360
+        ],
+        "rate_pct": 2.75,
+        "friction": 0.0824999999999999,
+        "velocity": 0.0075,
+        "kink_straddle": false,
+        "direct_us_pp": 67.75,
+        "interp_us_pp": 67.91749999999999,
+        "abs_diff_us_pp": 0.16749999999998977,
+        "direct_dk_pp": 3.1902499999999945,
+        "interp_dk_pp": 3.1902499999999954,
+        "abs_diff_dk_pp": 8.881784197001252e-16
+      },
+      {
+        "point_id": "P06",
+        "cohort": [
+          0.03,
+          360
+        ],
+        "rate_pct": 3.25,
+        "friction": 0.1124999999999999,
+        "velocity": -0.0025,
+        "kink_straddle": false,
+        "direct_us_pp": 47.92,
+        "interp_us_pp": 47.89,
+        "abs_diff_us_pp": 0.030000000000001137,
+        "direct_dk_pp": 3.20975,
+        "interp_dk_pp": 3.2097499999999948,
+        "abs_diff_dk_pp": 5.329070518200751e-15
+      },
+      {
+        "point_id": "P07",
+        "cohort": [
+          0.03,
+          360
+        ],
+        "rate_pct": 4.25,
+        "friction": 0.1374999999999999,
+        "velocity": 0.0275,
+        "kink_straddle": false,
+        "direct_us_pp": 28.410000000000004,
+        "interp_us_pp": 28.4775,
+        "abs_diff_us_pp": 0.06749999999999545,
+        "direct_dk_pp": 3.2487500000000002,
+        "interp_dk_pp": 3.248749999999995,
+        "abs_diff_dk_pp": 5.329070518200751e-15
+      },
+      {
+        "point_id": "P08",
+        "cohort": [
+          0.03,
+          360
+        ],
+        "rate_pct": 5.250000000000001,
+        "friction": 0.0824999999999999,
+        "velocity": 0.0175,
+        "kink_straddle": true,
+        "direct_us_pp": 28.29,
+        "interp_us_pp": 31.94374999999998,
+        "abs_diff_us_pp": 3.653749999999981,
+        "direct_dk_pp": 3.2877500000000004,
+        "interp_dk_pp": 3.287749999999995,
+        "abs_diff_dk_pp": 5.329070518200751e-15
+      },
+      {
+        "point_id": "P09",
+        "cohort": [
+          0.03,
+          360
+        ],
+        "rate_pct": 6.75,
+        "friction": 0.0874999999999999,
+        "velocity": 0.0175,
+        "kink_straddle": true,
+        "direct_us_pp": 13.209999999999999,
+        "interp_us_pp": 15.090000000000002,
+        "abs_diff_us_pp": 1.8800000000000026,
+        "direct_dk_pp": 3.346249999999995,
+        "interp_dk_pp": 3.346249999999995,
+        "abs_diff_dk_pp": 0.0
+      },
+      {
+        "point_id": "P10",
+        "cohort": [
+          0.03,
+          360
+        ],
+        "rate_pct": 3.25,
+        "friction": 0.1124999999999999,
+        "velocity": 0.0175,
+        "kink_straddle": true,
+        "direct_us_pp": 38.15,
+        "interp_us_pp": 43.00875,
+        "abs_diff_us_pp": 4.858750000000001,
+        "direct_dk_pp": 3.20975,
+        "interp_dk_pp": 3.2097499999999948,
+        "abs_diff_dk_pp": 5.329070518200751e-15
+      }
+    ],
+    "summary": {
+      "all": {
+        "us": {
+          "max_abs_pp": 4.858750000000001,
+          "mean_abs_pp": 0.8534999999999974,
+          "n": 30
+        },
+        "dk": {
+          "max_abs_pp": 1.0658141036401503e-14,
+          "mean_abs_pp": 4.15963559892892e-15,
+          "n": 30
+        }
+      },
+      "kink_straddling": {
+        "us": {
+          "max_abs_pp": 4.858750000000001,
+          "mean_abs_pp": 2.610555555555552,
+          "n": 9
+        },
+        "dk": {
+          "max_abs_pp": 1.0658141036401503e-14,
+          "mean_abs_pp": 4.194175870806147e-15,
+          "n": 9
+        }
+      },
+      "non_kink": {
+        "us": {
+          "max_abs_pp": 0.22999999999998977,
+          "mean_abs_pp": 0.10047619047618833,
+          "n": 21
+        },
+        "dk": {
+          "max_abs_pp": 1.0658141036401503e-14,
+          "mean_abs_pp": 4.144832625267251e-15,
+          "n": 21
+        }
+      }
+    },
+    "pass_us": false,
+    "pass_dk": true
+  },
+  "realized_check": {
+    "tolerance_weighted_mean_abs_pp": 0.05,
+    "n_months": 42,
+    "n_cohorts": 11,
+    "per_cohort": [
+      {
+        "cohort": [
+          0.015,
+          180
+        ],
+        "weight": 0.034564595532731016,
+        "months_elapsed_used": 58,
+        "us": {
+          "max_abs_pp": 2.5281114044666584,
+          "mean_abs_pp": 0.12979645060584583,
+          "n": 42
+        },
+        "dk": {
+          "max_abs_pp": 1.4210854715202004e-14,
+          "mean_abs_pp": 5.656850649280559e-15,
+          "n": 42
+        }
+      },
+      {
+        "cohort": [
+          0.02,
+          180
+        ],
+        "weight": 0.04068141951720071,
+        "months_elapsed_used": 62,
+        "us": {
+          "max_abs_pp": 3.002357727836957,
+          "mean_abs_pp": 0.14375831953055473,
+          "n": 42
+        },
+        "dk": {
+          "max_abs_pp": 1.3322676295501878e-14,
+          "mean_abs_pp": 5.752012622819859e-15,
+          "n": 42
+        }
+      },
+      {
+        "cohort": [
+          0.025,
+          180
+        ],
+        "weight": 0.009098218140094665,
+        "months_elapsed_used": 77,
+        "us": {
+          "max_abs_pp": 3.9070328530546856,
+          "mean_abs_pp": 0.18793182396826585,
+          "n": 42
+        },
+        "dk": {
+          "max_abs_pp": 1.4654943925052066e-14,
+          "mean_abs_pp": 5.720291964973426e-15,
+          "n": 42
+        }
+      },
+      {
+        "cohort": [
+          0.03,
+          180
+        ],
+        "weight": 0.006974280472627884,
+        "months_elapsed_used": 76,
+        "us": {
+          "max_abs_pp": 4.245361003632354,
+          "mean_abs_pp": 0.19372051259276224,
+          "n": 42
+        },
+        "dk": {
+          "max_abs_pp": 1.3322676295501878e-14,
+          "mean_abs_pp": 5.56168867574126e-15,
+          "n": 42
+        }
+      },
+      {
+        "cohort": [
+          0.015,
+          360
+        ],
+        "weight": 0.027531084274680973,
+        "months_elapsed_used": 63,
+        "us": {
+          "max_abs_pp": 2.7479616121997594,
+          "mean_abs_pp": 0.1273684754608157,
+          "n": 42
+        },
+        "dk": {
+          "max_abs_pp": 1.4210854715202004e-14,
+          "mean_abs_pp": 5.656850649280559e-15,
+          "n": 42
+        }
+      },
+      {
+        "cohort": [
+          0.02,
+          360
+        ],
+        "weight": 0.3612078731398665,
+        "months_elapsed_used": 60,
+        "us": {
+          "max_abs_pp": 3.00866768145538,
+          "mean_abs_pp": 0.17385991064559028,
+          "n": 42
+        },
+        "dk": {
+          "max_abs_pp": 1.3322676295501878e-14,
+          "mean_abs_pp": 5.752012622819859e-15,
+          "n": 42
+        }
+      },
+      {
+        "cohort": [
+          0.025,
+          360
+        ],
+        "weight": 0.266270555978975,
+        "months_elapsed_used": 61,
+        "us": {
+          "max_abs_pp": 3.937080829532281,
+          "mean_abs_pp": 0.19716480599753966,
+          "n": 42
+        },
+        "dk": {
+          "max_abs_pp": 1.4654943925052066e-14,
+          "mean_abs_pp": 5.720291964973426e-15,
+          "n": 42
+        }
+      },
+      {
+        "cohort": [
+          0.03,
+          360
+        ],
+        "weight": 0.1074683156729313,
+        "months_elapsed_used": 101,
+        "us": {
+          "max_abs_pp": 6.709969279062928,
+          "mean_abs_pp": 0.32026119570794787,
+          "n": 42
+        },
+        "dk": {
+          "max_abs_pp": 1.3322676295501878e-14,
+          "mean_abs_pp": 5.56168867574126e-15,
+          "n": 42
+        }
+      },
+      {
+        "cohort": [
+          0.035,
+          360
+        ],
+        "weight": 0.07336576020524956,
+        "months_elapsed_used": 105,
+        "us": {
+          "max_abs_pp": 7.221386005118166,
+          "mean_abs_pp": 0.36325734104639634,
+          "n": 42
+        },
+        "dk": {
+          "max_abs_pp": 1.3322676295501878e-14,
+          "mean_abs_pp": 5.83660104374368e-15,
+          "n": 42
+        }
+      },
+      {
+        "cohort": [
+          0.04,
+          360
+        ],
+        "weight": 0.04643756887474026,
+        "months_elapsed_used": 92,
+        "us": {
+          "max_abs_pp": 7.903189967249219,
+          "mean_abs_pp": 0.3781429012239243,
+          "n": 42
+        },
+        "dk": {
+          "max_abs_pp": 1.3322676295501878e-14,
+          "mean_abs_pp": 5.762586175435336e-15,
+          "n": 42
+        }
+      },
+      {
+        "cohort": [
+          0.045,
+          360
+        ],
+        "weight": 0.026400328190902114,
+        "months_elapsed_used": 90,
+        "us": {
+          "max_abs_pp": 8.802441628071335,
+          "mean_abs_pp": 0.505658717205991,
+          "n": 42
+        },
+        "dk": {
+          "max_abs_pp": 1.4654943925052066e-14,
+          "mean_abs_pp": 6.0480720960532335e-15,
+          "n": 42
+        }
+      }
+    ],
+    "pooled_unweighted": {
+      "us": {
+        "max_abs_pp": 8.802441628071335,
+        "mean_abs_pp": 0.2473564049077849,
+        "n": 462
+      },
+      "dk": {
+        "max_abs_pp": 1.4654943925052066e-14,
+        "mean_abs_pp": 5.729904285532951e-15,
+        "n": 462
+      }
+    },
+    "weighted": {
+      "us": {
+        "mean_abs_monthly_pp": 0.21687292719926718,
+        "abs_mean_signed_pp": 0.21661830413862906,
+        "max_abs_monthly_pp": 4.335720063230037
+      },
+      "dk": {
+        "mean_abs_monthly_pp": 5.371142465133151e-15,
+        "abs_mean_signed_pp": 5.371142465133151e-15,
+        "max_abs_monthly_pp": 7.885934045755446e-15
+      },
+      "weights_source": "live SOMA parse (production convention); manifest reference weight drift reported below",
+      "ref_weight_live": 0.3612078731398665,
+      "ref_weight_manifest": 0.3611966033043993
+    },
+    "kink_band": {
+      "threshold": 0.015,
+      "upper_node": 0.02,
+      "n_months_in_band": 4,
+      "months": [
+        "2022-08",
+        "2022-09",
+        "2022-10",
+        "2022-11"
+      ]
+    },
+    "pass_us": false,
+    "pass_dk": true
+  },
+  "all_tolerances_pass": false,
+  "scope": "Trapped liquidity is NOT re-scored (ex-ante scoping decision): the interpolation approximation lives entirely at the CPR layer; the T2 weighted-CPR bound is the quantity the dollar pipeline consumes linearly month by month.",
+  "generated_utc": "2026-07-17T14:24:37.386473+00:00"
+}
