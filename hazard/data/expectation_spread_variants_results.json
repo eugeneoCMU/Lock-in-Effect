@@ -1,0 +1,148 @@
+{
+  "mode": "expectation_spread_variants",
+  "spec": "hazard/expectation_spread_variants.py header (spec committed before execution; round-17 R17-M / referee Q6; supplementary, not gated into the headline \u2014 sensitivity companion to the committed settlement-aware amendment; liveness gate #46 target)",
+  "source_artifact": {
+    "path": "hazard/data/expectation_benchmark_results.json",
+    "git_head": "3a653263d29faf2cc1d6e731ae8b91f450100733",
+    "generated_utc": "2026-07-16T19:07:40.064936+00:00"
+  },
+  "window": {
+    "months": 42,
+    "in_window_months_by_year": {
+      "2022": 7,
+      "2023": 12,
+      "2024": 12,
+      "2025": 11
+    },
+    "note": "Jun-2022..Nov-2025 inclusive; 2023 and 2024 lie wholly inside the window, so only the 2022 clip (Jun-Dec) and the December-2025 clip admit any within-year spread sensitivity"
+  },
+  "committed_anchors": {
+    "cap_target_window_b": 1417.5,
+    "cap_benchmark_b": 764.7482532227002,
+    "actual_runoff_window_b": 652.7517467772998,
+    "uniform_projected_runoff_window_b": 740.5833333333333,
+    "central_anticipated_share_pct": 88.51496735220967,
+    "settlement_aware_share_pct": 75.5765152376043,
+    "null_trapped_b": 748.1850239867648
+  },
+  "gates": {
+    "g1_uniform_central_parity": {
+      "tolerance_share_rel": 1e-06,
+      "tolerance_reconstruction_rel": 1e-09,
+      "window_months": 42,
+      "in_window_months_by_year": {
+        "2022": 7,
+        "2023": 12,
+        "2024": 12,
+        "2025": 11
+      },
+      "printed_runoff_max_rel_diff": 0.0,
+      "reconstructed_uniform_window_b": 740.5833333333333,
+      "stored_uniform_window_b": 740.5833333333333,
+      "uniform_window_rel_diff": 0.0,
+      "cap_identity_rel_diff": 0.0,
+      "reconstructed_central_share_pct": 88.51496735220967,
+      "committed_central_share_pct": 88.51496735220967,
+      "central_share_rel_diff": 0.0,
+      "status": "PASS"
+    },
+    "g2_settlement_aware_parity": {
+      "tolerance_share_rel": 1e-06,
+      "tolerance_reconstruction_rel": 1e-09,
+      "implied_jun_dec_consistency_rel_diff": 0.0,
+      "reconstructed_settlement_window_b": 839.5299198738333,
+      "stored_settlement_window_b": 839.5299198738333,
+      "settlement_window_rel_diff": 0.0,
+      "reconstructed_settlement_share_pct": 75.5765152376043,
+      "committed_settlement_share_pct": 75.5765152376043,
+      "settlement_share_rel_diff": 0.0,
+      "reconstructed_null_share_E_pct": 400.5741204032854,
+      "stored_null_share_E_pct": 400.5741204032854,
+      "null_share_E_rel_diff": 0.0,
+      "status": "PASS"
+    }
+  },
+  "threshold_rule": "mechanical-majority survives iff null_trapped_b > 0.5 \u00d7 e_variant_b (identical to the committed 'null share_E > 50%' whenever e_variant_b > 0; trivially satisfied for e_variant_b <= 0, which is flagged e_benchmark_degenerate \u2014 a negative expectations shortfall is a surplus and cannot un-survive the claim)",
+  "variants": {
+    "v1_2022_linear_back_ramp": {
+      "allocation": "2022 printed annual net spread Jan\u2013Dec with w_m \u221d m (m=1..12); the Jun\u2013Dec window takes 63/78 of the annual net (vs 7/12 uniform); all other years uniform",
+      "in_window_2022_b": 12.842307692307768,
+      "in_window_2025_b": 204.50833333333347,
+      "projected_runoff_window_b": 744.150641025641,
+      "projection_implied_cap_shortfall_b": 673.349358974359,
+      "expected_share_of_realized_cap_shortfall_pct": 88.04849911546968,
+      "e_benchmark_b": 91.39889424834121,
+      "e_benchmark_degenerate": false,
+      "null_share_E_pct": 818.593080517868,
+      "threshold_survives": true
+    },
+    "v2_2025_all_front": {
+      "allocation": "2025 printed annual runoff allocated entirely to Jan\u2013Nov (all in-window; maximal in-window 2025 mass \u2014 any Jan\u2013Nov distribution gives the same window sum); all other years uniform",
+      "in_window_2022_b": 9.275000000000052,
+      "in_window_2025_b": 223.1000000000002,
+      "projected_runoff_window_b": 759.1749999999993,
+      "projection_implied_cap_shortfall_b": 658.3250000000007,
+      "expected_share_of_realized_cap_shortfall_pct": 86.08388410509932,
+      "e_benchmark_b": 106.42325322269949,
+      "e_benchmark_degenerate": false,
+      "null_share_E_pct": 703.0277700881081,
+      "threshold_survives": true
+    },
+    "v3_2025_all_december": {
+      "allocation": "2025 printed annual runoff allocated entirely to December 2025 (clipped out of the window; minimal \u2014 zero \u2014 in-window 2025 mass; implausible extreme, reported as a bracket); all other years uniform",
+      "in_window_2022_b": 9.275000000000052,
+      "in_window_2025_b": 0.0,
+      "projected_runoff_window_b": 536.0749999999996,
+      "projection_implied_cap_shortfall_b": 881.4250000000004,
+      "expected_share_of_realized_cap_shortfall_pct": 115.25688307042437,
+      "e_benchmark_b": -116.6767467773002,
+      "e_benchmark_degenerate": true,
+      "null_share_E_pct": -641.2460448651508,
+      "threshold_survives": true
+    },
+    "v4_2022_linear_front_ramp": {
+      "allocation": "2022 printed annual net spread Jan\u2013Dec with w_m \u221d 13\u2212m; the Jun\u2013Dec window takes 28/78 of the annual net; all other years uniform",
+      "in_window_2022_b": 5.707692307692341,
+      "in_window_2025_b": 204.50833333333347,
+      "projected_runoff_window_b": 737.0160256410255,
+      "projection_implied_cap_shortfall_b": 680.4839743589745,
+      "expected_share_of_realized_cap_shortfall_pct": 88.98143558894964,
+      "e_benchmark_b": 84.26427886372574,
+      "e_benchmark_degenerate": false,
+      "null_share_E_pct": 887.9029573097612,
+      "threshold_survives": true
+    }
+  },
+  "diagnostic": {
+    "d1_2025_linear_back_ramp": {
+      "allocation": "DIAGNOSTIC, not a pre-committed variant: 2025 printed annual runoff spread Jan\u2013Dec with w_m \u221d m; the Jan\u2013Nov window takes 66/78; computed solely to audit the prior read-only session's direction labels",
+      "in_window_2022_b": 9.275000000000052,
+      "in_window_2025_b": 188.77692307692323,
+      "projected_runoff_window_b": 724.8519230769227,
+      "projection_implied_cap_shortfall_b": 692.6480769230773,
+      "expected_share_of_realized_cap_shortfall_pct": 90.57203779207235,
+      "e_benchmark_b": 72.10017629962294,
+      "e_benchmark_degenerate": false,
+      "null_share_E_pct": 1037.7020728459404,
+      "threshold_survives": true
+    }
+  },
+  "range": {
+    "min_anticipated_share_pct": 86.08388410509932,
+    "min_variant": "v2_2025_all_front",
+    "max_anticipated_share_pct": 115.25688307042437,
+    "max_variant": "v3_2025_all_december",
+    "note": "Across the four pre-committed variants the anticipated share spans 86.08%\u2013115.26%; pooled with the committed endpoints (uniform 88.51%, settlement-aware 75.58%) the disclosed span is 75.58%\u2013115.26%. Every allocation leaves the anticipated share far above 50% and the null's mechanical-majority threshold intact."
+  },
+  "direction_note": "Derived direction (arithmetic, not assumption): anticipated share = (cap_target \u2212 projected_window)/cap_benchmark, so any allocation moving projected runoff INTO the Jun-2022\u2013Nov-2025 window LOWERS the anticipated share and any allocation moving it OUT raises it. Intra-2025 the only out-of-window month is December (the Nov-2025 clip): the all-Jan\u2013Nov front-load (V2) is the minimum over intra-2025 allocations at 86.08% and the all-December back-load (V3) the maximum at 115.26% \u2014 back-loading 2025 RAISES the anticipated share, strengthening the mechanical claim. Intra-2022 the in-window months are Jun\u2013Dec (the back of the year): the back-ramp (V1) lowers the share to 88.05% and the front-ramp (V4) raises it to 88.98% \u2014 the same sign logic as the committed settlement-aware allocation, whose $108.2B in-window 2022 mass (vs uniform $9.3B) produces the 75.58% lower bound.",
+  "prior_reconstruction_check": {
+    "v1_2022_linear_back_ramp_pct": 88.04849911546968,
+    "v2_2025_all_front_pct": 86.08388410509932,
+    "d1_2025_linear_back_ramp_pct": 90.57203779207235,
+    "v3_2025_all_december_pct": 115.25688307042437,
+    "label_correction": "The prior read-only session reported '2022 linear back-ramp \u2248 88.05%; 2025 all-front \u2248 90.57% or 86.08% (direction labels possibly swapped)'. Derived here: 2022 linear back-ramp (V1) = 88.05%; 2025 all-front (V2) = 86.08% \u2014 the 86.08 figure is the all-front value and the 'all-front \u2248 90.57' label was WRONG; 90.57 belongs to the 2025 linear back-ramp (D1) = 90.57%. The prior 86.1\u201390.6 pair therefore spans all-front to linear-back-ramp intra-2025 allocations; the implausible all-December extreme (V3) = 115.26% lies outside it."
+  },
+  "runtime_s": 0.0,
+  "generated_utc": "2026-07-17T15:13:31.619826+00:00",
+  "git_head": "3a73209d32a8a589c224ceb13186cfa2fd5e7f76"
+}
