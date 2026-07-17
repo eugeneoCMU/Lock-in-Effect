@@ -1,0 +1,246 @@
+{
+  "mode": "smd_two_moment",
+  "spec": "round-17 R17-K (DC4); two-parameter (mobility scale + forced-move point mass pi0) / two-external-moment SMD; cross-design harness; roadmap gate #43",
+  "structural_family_note": "pi0 EXTENDS the structural family (opt-in wrapper in this script only; production engine untouched on disk and bit-preserved at pi0=0 per G2); diagnostic tests whether the floor anchor's work is recoverable from external moments",
+  "moments": {
+    "M1_zero_gap": {
+      "convention": "cpr_at(WAC, 'US', friction=mean, velocity=0); WAC = mean coupon",
+      "wac": 0.033608263,
+      "band": [
+        0.055,
+        0.063
+      ],
+      "source": "L&R zero-gap anchor (abm_external_gates.ANCHOR_BAND)"
+    },
+    "M2_deep_gap_floor": {
+      "convention": "cpr_at(0.08, 'US', friction=mean, velocity=0)",
+      "band": [
+        0.04,
+        0.05
+      ],
+      "source": "observed involuntary-turnover floor band (paper-cited)"
+    },
+    "freeze_share_note": "both moments at velocity 0 -> wait-and-see gate inert; freeze share has zero gradient and was rejected ex ante as the second parameter"
+  },
+  "distance": {
+    "criterion": "sum of squared relative deviations from nearest band edge (0 inside band)",
+    "reported_alongside": "sum of squared relative deviations from band midpoints",
+    "feasibility_rule": "band membership of BOTH moments at the fitted point (closed intervals)",
+    "fitted_point_rule": "lexicographic (d_edge, d_mid) minimum over grid + Nelder-Mead trace"
+  },
+  "parameters": {
+    "scale_bracket": [
+      1000.0,
+      500000.0
+    ],
+    "pi0_bounds": [
+      0.0,
+      0.1
+    ],
+    "pi0_grid_max": 0.06,
+    "forced_set_seed": 20260717,
+    "pi0_resolution": 0.0001
+  },
+  "gates": {
+    "G1_harness_parity": {
+      "share_replayed": 59.30299434493775,
+      "share_committed": 59.30299434493775,
+      "diff_pp": 0.0,
+      "tol_pp": 0.05,
+      "pass": true
+    },
+    "G2_wrapper_bit_parity": {
+      "n_probes": 96,
+      "max_abs_diff": 0.0,
+      "tol": 0.0,
+      "pass": true,
+      "G2b_liveness": {
+        "m2_at_pi0_0p05": 0.0922,
+        "floor": 0.05,
+        "pass": true
+      }
+    },
+    "G3_moment_convention": {
+      "zero_gap_cpr": 0.0585,
+      "committed": 0.0585,
+      "diff": 0.0,
+      "tol": 0.001,
+      "scale_external": 4472.0458984375,
+      "pass": true
+    }
+  },
+  "search": {
+    "grid": {
+      "n_scales": 25,
+      "n_pi0": 13,
+      "n_points": 325
+    },
+    "nelder_mead": {
+      "maxfev": 150,
+      "xatol": 0.001,
+      "n_fev": 19,
+      "converged": true,
+      "message": "Optimization terminated successfully."
+    },
+    "n_engine_builds": 47,
+    "n_trace_evals": 344
+  },
+  "fitted": {
+    "scale": 1000.0,
+    "pi0_requested": 0.03937890625,
+    "pi0_realized_point_mass": 0.0394,
+    "M1": 0.0644,
+    "M2": 0.0394,
+    "M1_in_band": false,
+    "M2_in_band": false,
+    "d_edge": 0.0007188271604938285,
+    "d_mid": 0.0238633229418253,
+    "recheck_max_moment_diff": 0.0
+  },
+  "frontier_by_pi0": [
+    {
+      "pi0": 0.0,
+      "scale": 4728.708045015879,
+      "M1": 0.0625,
+      "M2": 0.0,
+      "d_edge": 1.0,
+      "d_mid": 1.0035191037058317
+    },
+    {
+      "pi0": 0.005,
+      "scale": 3649.937413658904,
+      "M1": 0.0522,
+      "M2": 0.005,
+      "d_edge": 0.7682167355371903,
+      "d_mid": 0.8034069960029934
+    },
+    {
+      "pi0": 0.01,
+      "scale": 3649.937413658904,
+      "M1": 0.0571,
+      "M2": 0.01,
+      "d_edge": 0.5625,
+      "d_mid": 0.6059753299215138
+    },
+    {
+      "pi0": 0.015,
+      "scale": 3649.937413658904,
+      "M1": 0.0618,
+      "M2": 0.015,
+      "d_edge": 0.390625,
+      "d_mid": 0.4466966708161767
+    },
+    {
+      "pi0": 0.02,
+      "scale": 2817.2691138478394,
+      "M1": 0.058,
+      "M2": 0.02,
+      "d_edge": 0.25,
+      "d_mid": 0.30892924908054664
+    },
+    {
+      "pi0": 0.025,
+      "scale": 2174.559276040982,
+      "M1": 0.0585,
+      "M2": 0.025,
+      "d_edge": 0.140625,
+      "d_mid": 0.197602682640507
+    },
+    {
+      "pi0": 0.03,
+      "scale": 1678.4722559064962,
+      "M1": 0.0599,
+      "M2": 0.03,
+      "d_edge": 0.06250000000000003,
+      "d_mid": 0.11134380286635386
+    },
+    {
+      "pi0": 0.035,
+      "scale": 1000.0,
+      "M1": 0.0601,
+      "M2": 0.035,
+      "d_edge": 0.015624999999999983,
+      "d_mid": 0.04973031731338727
+    },
+    {
+      "pi0": 0.04,
+      "scale": 1000.0,
+      "M1": 0.065,
+      "M2": 0.04,
+      "d_edge": 0.001007810531620057,
+      "d_mid": 0.02268753480091219
+    },
+    {
+      "pi0": 0.045,
+      "scale": 1000.0,
+      "M1": 0.0698,
+      "M2": 0.045,
+      "d_edge": 0.011650289745527842,
+      "d_mid": 0.0335076127549555
+    },
+    {
+      "pi0": 0.05,
+      "scale": 1000.0,
+      "M1": 0.0748,
+      "M2": 0.05,
+      "d_edge": 0.03508188460569416,
+      "d_mid": 0.0840607034306164
+    },
+    {
+      "pi0": 0.055,
+      "scale": 1000.0,
+      "M1": 0.0797,
+      "M2": 0.055,
+      "d_edge": 0.08026706979087925,
+      "d_mid": 0.1724766545727955
+    },
+    {
+      "pi0": 0.06,
+      "scale": 1000.0,
+      "M1": 0.0845,
+      "M2": 0.06,
+      "d_edge": 0.15646510456034265,
+      "d_mid": 0.29791088129209375
+    }
+  ],
+  "verdict": "joint_fit_infeasible",
+  "verdict_reading": "Even one extra structural degree of freedom (a forced-move point mass) does not restore joint admissibility on the two external moments; strengthens the external-gates conclusion that the structural family, not calibration effort, binds.",
+  "scored_at_fit": {
+    "variant": "smd_fitted",
+    "mobility_scale": 1000.0,
+    "trapped_b": 819.2562404180965,
+    "share_pct": 107.1275726313458,
+    "empirical_trapped_b": 764.7482532227002,
+    "us_cpr_mean_pct": 3.94,
+    "empirical_cpr_mean_pct": 5.829007141082971,
+    "cpr_r_lag0": NaN,
+    "cross_correlation": {
+      "-3": NaN,
+      "-2": NaN,
+      "-1": NaN,
+      "0": NaN,
+      "1": NaN,
+      "2": NaN,
+      "3": NaN
+    },
+    "peak_lag": -3,
+    "peak_lag_r": NaN
+  },
+  "recovery_classification": "not_applicable_infeasible",
+  "preregistration": {
+    "undercuts_paradigm_above_pct": 50.0,
+    "corroborates_band_pct": [
+      10.0,
+      35.0
+    ],
+    "registered_before_results": true
+  },
+  "committed_references": {
+    "cross_design_share_recalibrated": 59.30299434493775,
+    "cross_design_scale_recalibrated": 36085.9375,
+    "external_gates_zero_gap_cpr": 0.0585,
+    "external_gates_scale": 4472.0458984375
+  },
+  "invariance": "Hazard-side headline quantities (the 88.7% mechanical null and the +9.2pp lock-in marginal) are not functions of ABM calibration and cannot move under any outcome of this run.",
+  "generated_utc": "2026-07-17T14:24:50.398463+00:00"
+}
