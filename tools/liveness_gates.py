@@ -34,6 +34,24 @@ EXPECT_RESULTS = ROOT / "hazard" / "data" / "expectation_benchmark_results.json"
 VINTAGE_RESULTS = ROOT / "hazard" / "data" / "vintage_residual_bound_results.json"
 THEIL_RESULTS = ROOT / "figures" / "theil_data.json"
 MLCOMP_RESULTS = ROOT / "hazard" / "data" / "ml_comparator_holdout_results.json"
+COMPSHIFT_RESULTS = ROOT / "hazard" / "data" / "composition_shift_results.json"
+FREEZE_RESULTS = ROOT / "abm" / "data" / "freeze_sensitivity_results.json"
+ISOTONIC_RESULTS = ROOT / "hazard" / "data" / "landmark_isotonic_results.json"
+MARGMONTH_RESULTS = ROOT / "hazard" / "data" / "marginal_monthly_decomposition_results.json"
+INTERP_RESULTS = ROOT / "abm" / "data" / "interp_spot_check_results.json"
+SMD_RESULTS = ROOT / "abm" / "data" / "smd_two_moment_results.json"
+WALTAB_RESULTS = ROOT / "hazard" / "data" / "wal_table_results.json"
+
+
+def _gates_ok(gates: dict) -> bool:
+    """True iff every in-run gate entry reports pass (dict with 'pass', bool, or nested)."""
+    def one(v):
+        if isinstance(v, dict):
+            if "pass" in v:
+                return bool(v["pass"])
+            return all(one(x) for x in v.values())
+        return bool(v)
+    return all(one(v) for v in gates.values())
 
 ZERO_COUNT = [
     "production specification omits",
@@ -367,6 +385,159 @@ def main() -> int:
         f"verdict={mlc['interpretation']['overall_verdict']}, tex run-citation "
         f"count={claims} (want 1), literals {lit_hgb_w!r}/{lit_hgb_u!r}/{lit_glm!r} "
         f"present={lit_hgb_w in tex}/{lit_hgb_u in tex}/{lit_glm in tex}"
+    )
+
+    # Round-17 R17-B (gate #38): the composition-shift appendix table must
+    # agree with the committed artifact — all in-run gates passed and the
+    # printed PSI values are the artifact's, rounded as printed.
+    cs = json.loads(COMPSHIFT_RESULTS.read_text())
+    svb = cs["comparisons"]["sample_vs_book"]
+    xag = cs["comparisons"]["freddie_vs_fannie"]
+    claims = tex.count("run \\texttt{composition\\_shift}")
+    lits = [f"{svb['agency']['psi']:.2f}", f"{svb['vintage']['psi']:.2f}",
+            f"{svb['coupon']['psi']:.2f}", f"PSI {xag['state']['psi']:.3f}",
+            f"PSI {xag['fico']['psi']:.3f}"]
+    ok = (_gates_ok(cs["gates"]) and claims == 1
+          and all(l in tex for l in lits))
+    failures += 0 if ok else 1
+    print(
+        f"[{'PASS' if ok else 'FAIL'}] cross-check composition shift: "
+        f"in-run gates all pass={_gates_ok(cs['gates'])}, tex run-citation "
+        f"count={claims} (want 1), PSI literals {lits} present="
+        f"{[l in tex for l in lits]}"
+    )
+
+    # Round-17 R17-C (gate #39): the freeze-sensitivity paragraph must agree
+    # with the committed artifact — all gates passed, the floor invariance
+    # held at every share, and the printed dollars are the artifact's.
+    fz = json.loads(FREEZE_RESULTS.read_text())
+    p1 = fz["part1"]["legs"]
+    p2 = fz["part2"]["legs"]
+    claims = tex.count("run \\texttt{freeze\\_sensitivity}")
+    lits = [f"\\${p1['freeze_off']['trapped_b']:.1f} billion",
+            f"\\${p1['trigger_100bp']['trapped_b']:.1f} to "
+            f"\\${p1['trigger_200bp']['trapped_b']:.1f} billion",
+            f"\\${p2['share_0.100000']['leg']['trapped_b']:.1f} billion",
+            f"\\${p2['share_0.182600']['leg']['trapped_b']:.1f} billion",
+            f"\\${p2['share_0.300000']['leg']['trapped_b']:.1f} billion",
+            f"+\\${fz['part1']['freeze_contribution']['trapped_b']:.1f}"]
+    ok = (_gates_ok(fz["gates"]) and claims == 1
+          and all(l in tex for l in lits))
+    failures += 0 if ok else 1
+    print(
+        f"[{'PASS' if ok else 'FAIL'}] cross-check freeze sensitivity: "
+        f"in-run gates all pass={_gates_ok(fz['gates'])}, tex run-citation "
+        f"count={claims} (want 1), literals present={[l in tex for l in lits]}"
+    )
+
+    # Round-17 R17-D (gate #40): the isotonic-recalibration sentence must
+    # agree with the committed artifact — gates passed, verdict as printed.
+    iso = json.loads(ISOTONIC_RESULTS.read_text())
+    isoc = iso["isotonic_recalibration"]
+    claims = tex.count("run \\texttt{landmark\\_isotonic\\_holdout}")
+    lits = [f"to {isoc['rmse_weighted_pp']:.2f} points",
+            f"RMSE at {isoc['rmse_unweighted_pp']:.1f}",
+            f"$-{abs(isoc['r2_unweighted']):.3f}$"]
+    ok = (_gates_ok(iso["gates"])
+          and iso["interpretation"]["overall_verdict"] == "no_material_change"
+          and claims == 1 and all(l in tex for l in lits))
+    failures += 0 if ok else 1
+    print(
+        f"[{'PASS' if ok else 'FAIL'}] cross-check landmark isotonic: "
+        f"in-run gates all pass={_gates_ok(iso['gates'])}, "
+        f"verdict={iso['interpretation']['overall_verdict']}, tex run-citation "
+        f"count={claims} (want 1), literals present={[l in tex for l in lits]}"
+    )
+
+    # Round-17 R17-L (gate #41): the marginal-timing sentences must agree
+    # with the committed artifact — gates passed, thirds/peak/buckets as
+    # printed, and the app:theil null terminal is the artifact's.
+    mm = json.loads(MARGMONTH_RESULTS.read_text())
+    th = mm["part_a"]["thirds"]["shares_pct"]
+    cb = mm["part_b"]["coupon_buckets"]
+    claims = tex.count("run \\texttt{marginal\\_monthly\\_decomposition}")
+    lit_thirds = f"{th[0]:.1f}\\%/{th[1]:.1f}\\%/{th[2]:.1f}\\%"
+    lit_peak = f"\\${mm['part_a']['peak']['m_b']:.2f} billion"
+    lit_buckets = (f"{cb['<3.0%']['share_of_cells_sum_pct']:.1f}\\%/"
+                   f"{cb['3.0-4.0%']['share_of_cells_sum_pct']:.1f}\\%/"
+                   f"{cb['>=4.0%']['share_of_cells_sum_pct']:.1f}\\%")
+    lit_null = f"-\\${abs(mm['part_a']['null_cumulative_error_b_derived'][-1]):.1f}"
+    ok = (_gates_ok(mm["gates"])
+          and mm["part_b"]["additivity"]["verdict"] == "monthly_shares_readable"
+          and claims == 1
+          and lit_thirds in tex and lit_peak in tex and lit_buckets in tex
+          and lit_null in tex)
+    failures += 0 if ok else 1
+    print(
+        f"[{'PASS' if ok else 'FAIL'}] cross-check marginal monthly: "
+        f"in-run gates all pass={_gates_ok(mm['gates'])}, "
+        f"verdict={mm['part_b']['additivity']['verdict']}, tex run-citation "
+        f"count={claims} (want 1), literals "
+        f"{lit_thirds!r}/{lit_peak!r}/{lit_buckets!r}/{lit_null!r} present="
+        f"{lit_thirds in tex}/{lit_peak in tex}/{lit_buckets in tex}/{lit_null in tex}"
+    )
+
+    # Round-17 R17-J (gate #42): the interpolation spot-check sentence must
+    # agree with the committed artifact — reconstruction gates passed and
+    # the printed non-kink max and weighted mean are the artifact's.
+    isc = json.loads(INTERP_RESULTS.read_text())
+    claims = tex.count("run \\texttt{interp\\_spot\\_check}")
+    nonkink = isc["midpoint_check"]["summary"]["non_kink"]["us"]["max_abs_pp"]
+    wmean = isc["realized_check"]["weighted"]["us"]["mean_abs_monthly_pp"]
+    lit_nk = f"at most {nonkink:.2f} points"
+    lit_wm = f"{wmean:.2f} points of CPR over the window"
+    ok = (_gates_ok(isc["gates"]) and claims == 1
+          and lit_nk in tex and lit_wm in tex
+          and "August--November 2022" in tex)
+    failures += 0 if ok else 1
+    print(
+        f"[{'PASS' if ok else 'FAIL'}] cross-check interp spot check: "
+        f"reconstruction gates all pass={_gates_ok(isc['gates'])}, tex "
+        f"run-citation count={claims} (want 1), literals {lit_nk!r}/{lit_wm!r} "
+        f"present={lit_nk in tex}/{lit_wm in tex}"
+    )
+
+    # Round-17 R17-K (gate #43): the SMD paragraph must agree with the
+    # committed artifact — gates passed, verdict joint_fit_infeasible, and
+    # the printed fitted point and scored recovery are the artifact's.
+    smd = json.loads(SMD_RESULTS.read_text())
+    fit = smd["fitted"]
+    claims = tex.count("run \\texttt{smd\\_two\\_moment}")
+    lit_m1 = f"{fit['M1']:.4f}"
+    lit_m2 = f"{fit['M2']:.4f}"
+    lit_rec = f"{smd['scored_at_fit']['share_pct']:.1f}\\% of benchmark"
+    lit_pi0 = f"{fit['pi0_realized_point_mass'] * 100:.1f}\\%"
+    ok = (_gates_ok(smd["gates"])
+          and smd["verdict"] == "joint_fit_infeasible"
+          and claims == 1
+          and lit_m1 in tex and lit_m2 in tex and lit_rec in tex
+          and lit_pi0 in tex)
+    failures += 0 if ok else 1
+    print(
+        f"[{'PASS' if ok else 'FAIL'}] cross-check smd two-moment: "
+        f"in-run gates all pass={_gates_ok(smd['gates'])}, "
+        f"verdict={smd['verdict']}, tex run-citation count={claims} (want 1), "
+        f"literals {lit_m1!r}/{lit_m2!r}/{lit_rec!r}/{lit_pi0!r} present="
+        f"{lit_m1 in tex}/{lit_m2 in tex}/{lit_rec in tex}/{lit_pi0 in tex}"
+    )
+
+    # Round-17 R17-E (gate #44): the two Danish WAL rows must agree with the
+    # committed artifact rows and the derived rule-only shortening.
+    wt = json.loads(WALTAB_RESULTS.read_text())
+    rows = wt["rows"]
+    dus = rows["danish_us_intercept"]
+    dlv = rows["danish_level"]
+    lit_dus = (f"({dus['mean_cpr_pct']:.2f}\\%) & {dus['wal_june_2022']:.1f} & "
+               f"{dus['wal_nov_2025']:.1f}")
+    lit_dlv = (f"({dlv['mean_cpr_pct']:.2f}\\%) & {dlv['wal_june_2022']:.1f} & "
+               f"{dlv['wal_nov_2025']:.1f}")
+    lit_short = f"{wt['rule_only_wal_shortening_years']:.1f}-year rule-only shortening"
+    ok = lit_dus in tex and lit_dlv in tex and lit_short in tex
+    failures += 0 if ok else 1
+    print(
+        f"[{'PASS' if ok else 'FAIL'}] cross-check danish wal rows: literals "
+        f"{lit_dus!r}/{lit_dlv!r}/{lit_short!r} present="
+        f"{lit_dus in tex}/{lit_dlv in tex}/{lit_short in tex}"
     )
 
     print(f"\n{'ALL GATES PASS' if failures == 0 else f'{failures} GATE(S) FAILED'}")

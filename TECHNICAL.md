@@ -2605,6 +2605,135 @@ under exact placement), the deliberate pre-appendix `\newpage`, and the
 final page. Gates 37/37 PASS; zero undefined references; editions and
 bundle refreshed.
 
+## 27. Round-17 revision: full referee report — seven runs, three tables, identification status (2026-07-17)
+
+Source: a complete external referee report on the v16 draft (strengths /
+3+2+2+2 weaknesses / 10 detailed comments / 7 questions / overall
+assessment "solid potential for a top-tier venue"). Parsed by a 15-agent
+revision-coach assessment against HEAD; roadmap and response letter in
+`paper/v16/revision_roadmap_round17.md`. The parse found the report's
+three "main limitations" to be third-generation recurrences with
+quantified stacks at HEAD, and four reviewer premises factually wrong in
+the paper's favor (production curtailment already monthly income-tied and
+the netting cancellation structural under any time profile; the Danish
+OAS sensitivity already printed as tab:discount with a structural $0.00;
+3 footnotes total; the settlement-aware allocation IS the requested
+back-loaded spread). Author go-ahead of record: "go" (2026-07-17).
+
+### 27.1 Runs (spec commit ef039ca; per-run artifact commits 2ef6fea..08dc288)
+
+Seven pre-committed specs, all executed same-day, all in-run gates PASS:
+
+- `hazard/composition_shift.py` (R17-B/Q1, gate #38): formal
+  covariate-shift table, Freddie sample/universe + Fannie sample/pools vs
+  the SOMA book via the production CUSIP parser, anchor-gated to the
+  committed marginals (WAC 2.490, GNMA 0.2042, terms 0.906/0.091/0.002,
+  vintage max|d| 0.0010). The NY Fed API served the historical June-2022
+  as-of (2022-06-29) — reported as a non-gated secondary block. PSI:
+  coupon 2.29 / vintage 4.33 / agency 2.54 (large, the expected/disclosed
+  outcome, each with its committed bound as consequence); Freddie-vs-Fannie
+  state 0.018 / orig-UPB 0.000 / FICO 0.005 / LTV 0.000 (all negligible)
+  → verdict cross_agency_stable. Geography/size/FICO/LTV for the book:
+  DECLINED (CUSIP-level disclosure), substitute supplied.
+- `abm/freeze_sensitivity.py` (R17-C/Q4, gate #39): scored on the frozen
+  berger-run accounting (production parity +$0.02B). Freeze-off $44.6B →
+  isolated freeze contribution +$39.9B/+5.2pp; triggers 100/150/200bp →
+  $105.9/99.7/70.5B; share sweep with floor RETAINED 10/18.3/30% →
+  $65.1/81.5/103.3B vs production $84.5B (L&R-implied share moves recovery
+  −0.4pp). G6: calibrated scale and floor CPR bit-identical at every share
+  (the floor point is evaluated at zero velocity — freeze cannot bind).
+- `hazard/landmark_isotonic_holdout.py` (R17-D/Q3, gate #40): LMISO-style
+  exposure-weighted isotonic map fit on 2023 only, applied to frozen spec
+  v4 holdout predictions; v4/v3 parity to committed digits first.
+  2.534pp weighted / 37.82 unweighted / R² −0.007 vs frozen
+  3.038/37.90/−0.011; verdict no_material_change (0.80× threshold
+  2.430pp). Rolling-landmark variant declined in-spec (different protocol).
+- `hazard/marginal_monthly_decomposition.py` (R17-L/DC6/Q7, gate #41):
+  monthly marginal path from the two committed legs (sum bit-exact
+  $70.34506041989584B); all 42 months positive, thirds 21.3/41.9/36.8%,
+  peak 2023-11 $2.29B; month × 15-cell retention with terminal cells
+  bit-exact vs the committed decomposition, per-month additivity residual
+  cumulating to the committed +0.725B; coupon buckets 38.0/43.7/18.3% of
+  cells sum. Verdict monthly_shares_readable. Figure data
+  `figures/marginal_monthly_data.json` (theil_data precedent).
+- `abm/interp_spot_check.py` (R17-J/DC3, gate #42): G1 amended at first
+  execution, BEFORE any off-grid number was interpreted — the committed
+  CSV's Danish column serializes one ulp short of round-trip, so Danish
+  tolerance bit-exact → 1e-12 (observed 7.6e-15; US stays bit-exact,
+  observed 0.0). Non-kink off-grid max 0.230pp (inside the pre-committed
+  0.25pp), Danish exact; realized weighted mean 0.217pp breaches the
+  0.05pp tolerance via the pre-registered kink mode: 4 realized months
+  (2022-08..11) sit in the freeze's velocity-ramp band, where the engine's
+  step and the surface's ramp differ by construction — surface semantics
+  the production figures share, priced at the trapped level by the
+  freeze_sensitivity binary-step leg.
+- `abm/smd_two_moment.py` (R17-K/DC4, gate #43): joint 2-parameter fit
+  (mobility scale + forced-move point mass π₀, an explicit structural
+  extension; π₀=0 wrapper bit-identical, G2 96-point probe exact; 59.303%
+  harness replay). Verdict joint_fit_infeasible: at the distance-minimizing
+  point (scale 1,000, π₀ 3.9%) M1 0.0644 vs [0.055,0.063] and M2 0.0394
+  vs [0.040,0.050] — the forced mass lifts both moments together once the
+  scale bottoms out. Near-fit scores 107.1% of benchmark (far above the
+  35/50 bands). QT-window moment-matching declined on discipline grounds.
+- `hazard/wal_table.py` extension (R17-E/DC10, gate #44): two Danish rows
+  through the identical calculator under the unchanged V15 parity gates —
+  danish_us_intercept (5.61%) 9.1/8.2yr, danish_level (3.39%) 10.8/9.6yr;
+  rule-only WAL shortening 0.6yr vs Path B's 9.7.
+
+### 27.2 Manuscript edits (backup .bak-round17)
+
+P1: (i) identification status — new fifth qualification in V.D
+("identifies" = within-model counterfactual decomposition, not causal
+identification; no quasi-experimental variation exploited or claimed;
+β₁'s causal content inherited from liebersohn2024, fonseca2024
+corroborating), VIII.A limitation sentence, abstract "identified
+contribution" → "contribution", the one unqualified causal claim ("the
+paper's causal channel") reworded to "the mechanism the paper
+quantifies"; (ii) tab:headline at the end of Section I (committed values
+only, all \ref); (iii) app:composition + tab:composition + two pointer
+wirings (V.C bounds paragraph, VII full-book-weighting sentence).
+
+P2: freeze-sensitivity paragraph in VII (extensions) + floor-insulation
+sentence in III.C; isotonic sentence in V.B + Section II comparator
+clause updated; timing paragraph in V.D + tab:pathadiag at the end of
+V.B + app:theil null-profile sentence; competing-risks taxonomy paragraph
+in V.C (putter2007/fine1999/meir2025-PyDTS; fractional-prepayment caveat);
+burnout-selection engagement ×3 (II, V.B stratum design, IV.B degenerate
+limit) citing lesniewski2026 (arXiv:2603.12422, web-verified); curtailment
+invariance upgraded to its structural any-monthly-profile form (III.D and
+VII.F); omo2021 citation at the expectations-complement construction + the
+no-public-monthly-path clause; two Danish WAL rows + extension-per-regime
+reading sentences (extension-not-convexity scoping restated). P3: the
+β₁-conversion footnote's derivation detail moved to app:params with a
+one-clause pointer (footnote census now: R² convention, fn:manifest,
+slimmed conversion hedge).
+
+Declines of record this round (new): SOMA-book geography/loan-size/
+FICO-LTV composition (CUSIP-level disclosure; Freddie-vs-Fannie substitute
+supplied); Fed staff internal monthly projection paths (non-public at any
+covering vintage); QT-window CPR moment-matching for the ABM (recovery
+would become a fitted quantity). Preserved: loan-level deep multinomial
+(data grounds); structural Ginnie inclusion; option-model convexity
+(extension quantified instead). The mid-2022 mobility-dip citation was
+investigated and NOT added: the Census CB24-TPS.118 release verifies but
+prints no mover-rate figure in the release text, so the freeze trigger
+keeps its no-external-source concession.
+
+### 27.3 Gates, bib, editions
+
+Liveness gates 37 → 44 (#38–#44 artifact-vs-tex cross-checks in the
+round-16 pattern: in-run gates PASS + exactly-one run citation + printed
+literals derived from the artifact), ALL PASS. references.bib 54 → 59
+(lesniewski2026, putter2007, fine1999, meir2025 JOSS, omo2021 — all
+web-verified; fine1999 volume confirmed 94(446) against Crossref). PDF
+rebuilt (tectonic, 80pp, zero undefined references); md/txt editions
+regenerated (tex2md want-counts now tables=18; converters in
+session-d36a47d9 scratchpad); UPLOAD_ROUND11 restaged
+(round-16 generation → superseded-2026-07-17-round16/,
+BUNDLE_NOTES_ROUND17.md). Letter placeholders filled with executed
+values in revision_roadmap_round17.md. Commits local — push awaits
+Eugene.
+
 ## Appendix A — File Map
 
 ```
