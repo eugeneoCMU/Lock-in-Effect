@@ -49,6 +49,7 @@ REGIME_RESULTS = ROOT / "hazard" / "data" / "regime_split_marginal_results.json"
 GROUPCAL_RESULTS = ROOT / "hazard" / "data" / "grouped_calibration_results.json"
 FONSECA_RESULTS = ROOT / "hazard" / "data" / "fonseca_band_anchor_results.json"
 V1516_RESULTS = ROOT / "hazard" / "data" / "vintage_1516_subleg_results.json"
+DTI_RESULTS = ROOT / "abm" / "data" / "dti_threshold_sweep_results.json"
 
 
 def _gates_ok(gates: dict) -> bool:
@@ -720,6 +721,24 @@ def main() -> int:
         f"status={vs['status']}, in-run gates ok={_gates_ok(vs['gates'])}, "
         f"tex run-citation count={claims} (want 1), share "
         f"{seg['exposure_share_within_pre2017_pct']:.2f} printed={lit_share in tex}"
+    )
+
+    # Round-18 R18-C (gate #49): DTI threshold sweep — in-run gates, floor
+    # re-anchored in band at every threshold, and the printed trapped literals.
+    dti = json.loads(DTI_RESULTS.read_text())
+    claims = tex.count("run \\texttt{dti\\_threshold\\_sweep}")
+    legs = dti["legs"]
+    lit_36 = "\\${:.1f} ".format(legs["dti_0.36"]["trapped_b"])
+    lit_50 = "\\${:.1f} billion".format(legs["dti_0.50"]["trapped_b"])
+    floor_in_band = all(v["in_band"] for v in dti["floor_retention"]["per_dti"].values())
+    ok = (dti["status"] == "OK" and _gates_ok(dti["gates"]) and claims == 1
+          and floor_in_band and lit_36 in tex and lit_50 in tex)
+    failures += 0 if ok else 1
+    print(
+        f"[{'PASS' if ok else 'FAIL'}] cross-check DTI threshold sweep: "
+        f"status={dti['status']}, in-run gates ok={_gates_ok(dti['gates'])}, "
+        f"floor in-band all thresholds={floor_in_band}, tex run-citation "
+        f"count={claims} (want 1), trapped literals present={lit_36 in tex}/{lit_50 in tex}"
     )
 
     print(f"\n{'ALL GATES PASS' if failures == 0 else f'{failures} GATE(S) FAILED'}")

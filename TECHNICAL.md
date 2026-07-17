@@ -2775,6 +2775,138 @@ BUNDLE_NOTES_ROUND17.md). Letter placeholders filled with executed
 values in revision_roadmap_round17.md. Commits local — push awaits
 Eugene.
 
+## 28. Round-18 revision: full referee report — seven runs, basis crosswalk, non-cancellation finding (2026-07-17)
+
+Source: a second complete external referee report on the v16 draft
+(technical/methodological/clarity/related-work weaknesses, detailed
+comments, 10 questions, overall assessment "strong candidate for a
+top-tier field venue" conditional on enhancements). Parsed by an 18-agent
+coverage-and-adversarial-verify pass against HEAD (9 cluster readers + 9
+verifiers; 16 reference-precision corrections applied, zero coverage
+verdicts overturned); roadmap and response letter in
+`paper/v16/revision_roadmap_round18.md`. The parse found 12 of 30 items
+already addressed at HEAD, 18 partial, 0 absent; three requests already
+executed in rounds 15–17 (seasonal curtailment = gate #45's demo run;
+landmark+isotonic = gate #40's run; Danish OAS = tab:discount, short only
+of the reviewer's 150bp endpoint), and one existing object needing only
+reframing (Path A's fitted rate-gap coefficient IS the requested in-sample
+elasticity). Author go-ahead of record: "go" (2026-07-17).
+
+### 28.1 Runs (per-run artifact commits 060a725..2b86b57; opus subagents, spec-before-run)
+
+Seven runs, all in-run gates PASS at execution:
+
+- `hazard/subgroup_marginals.py` (R18-A, gate #48, commit 2b86b57): the
+  review's most-repeated ask (M1+E2+Q3) — group-ablation marginal
+  decomposition extended past vintage × coupon to FICO/LTV/Census-region
+  partitions of the 75k sample (region replicates
+  `agents.MicrosimPool.region_code` including the GU/PR/VI→West
+  fallback). Central/null parity bit-exact (818.5300844066606 /
+  748.1850239867648, diffs 0.0). All nine cells positive; per-balance
+  intensities 0.879–1.261 (tighter than the committed grid's 0.8–1.5);
+  additivity residuals 0.80/0.37/0.54% (all under the committed 1.03%);
+  largest cell 740+ FICO $40.38B at 0.88×. Verdict (pre-committed rule):
+  broad_based_all_dimensions — the generality outcome the referee named.
+- `hazard/regime_split_marginal.py` (R18-G, gate #50, commit bf0a3db):
+  ±20% multiplicative break on h₀(a) from 2023-01 (pre-committed date and
+  grid), applied identically to both legs, nothing fit to the benchmark.
+  **The round's consequential finding: the marginal does NOT cancel under
+  a multiplicative baseline break** — it scales with the baseline level,
+  +4.966pp ($37.97B) at 0.8× to +12.124pp ($92.72B) at 1.2× around the
+  bit-exact +9.198460pp anchor; a floor-only ±20% break moves it
+  oppositely (+6.573 to +10.411pp). Verdict material_sensitivity per the
+  pre-committed envelope rule (outside the cyclical-floor band E2, inside
+  the calibration box E3, sign-positive everywhere). This REFUTED the
+  roadmap's drafted E4 cancellation narrative — cancellation is an
+  additive-layer property (curtailment), not a multiplicative-baseline
+  one — and the planned V.D sentence was replaced with the honest
+  statement before any commit carried the wrong claim. Pre-break marginal
+  identical at 5.330696B across all five legs (wrapper validation).
+- `hazard/danish_discount_bound.py` 125/150bp fill (R18-I, gate #51,
+  commit 7fb4cbb): SPREADS extended to the reviewer's named endpoint;
+  flips 55,210 / 92,495 of 1,683,082 at 125/150bp with deltas exactly
+  $0.00 (trapped standalone 934.2540552143059B identical at every grid
+  point); five prior rows byte-identical; grid now [0,25,50,75,100,125,150].
+- `hazard/grouped_calibration.py` (R18-J, gate #52, commit 8c3e8c9):
+  Q10's grouped exhibit — frozen spec v4 predictions on the committed
+  16,253-cell panel, five exposure-weighted prediction quintiles (edges
+  fit on train only) × ten calendar half-years, pure scoring. Frozen-RMSE
+  parity bit-exact (3.037942336998421 / 37.903228802264934). Train pooled
+  predicted/realized 1.000 (exact by construction of the exposure-offset
+  fit; per-half 0.80–1.17); holdout 0.532 with monotone worsening
+  0.64/0.57/0.44/0.43 across 2024H1–2025H2; upper bins 0.94–1.11 pooled.
+  Verdict temporal_drift_post_boundary — localizes tab:theil's U₂>1 to
+  prediction level × half-year. Path A diagnostic; no headline touched.
+- `hazard/fonseca_band_anchor.py` (R18-B, gate #53, commit 67738ae):
+  fonseca2024's ~9%/100bp moving-rate reduction through the eq:beta1
+  transform (β₁=0.0962) and the production band machinery
+  (`floor_sweep._run_scored` unchanged, parquets isolated): marginal
+  +$87.883B/+11.492pp at the 4% floor — ABOVE the L&R high edge
+  (+$79.47B/+10.39pp), inside the pre-committed box. Committed
+  central/null/marginal and both band edges reproduced bit-identically.
+  Reading: corroboration from the stronger side; the adopted L&R central
+  is the conservative choice. Unit caveat carried in artifact and letter
+  (moving-rate reduction vs quarterly-mobility decline; treated
+  quarterly-equivalent under the transform's near-frequency-invariance).
+- `hazard/vintage_1516_subleg.py` (R18-K, gate #54, commit 060a725): the
+  referee-named 2015–16 cohorts isolated from the pre-2017 tail by
+  re-aggregating the committed Fannie ingest cells (manifest ties
+  d8199eb: 24 cell files, 17,606,999 loans / 825,814,383 rows). They are
+  99.99% of the tail's exposure: observed speed 5.2644% (+0.9617pp),
+  bound with isolation $11.7484B/1.536% vs committed $11.7481B; residual
+  pre-2015 tail degenerate (332 loan-months, 2010–2013; no 2014 vintage
+  in the ingest). The named cohorts sit inside the bound already priced.
+- `hazard/curtailment_profile_demo.py` servicer_mix profile (R18-N,
+  gate #45 artifact extended, commit 7fb4cbb): deterministic 0.60/0.40
+  two-servicer mix (front-loaded and flat group factors aggregating to
+  one monthly rate) as a fourth profile — wedge 9.299pp/$71.118B netted,
+  marginal 9.198459770709775pp (departure 1.42e-14pp from unit);
+  unit/seasonal/regime results byte-identical to the committed artifact.
+- `abm/dti_threshold_sweep.py` (R18-C, gate #49, commit ad83725):
+  36/43/50% front-end DTI wall on the frozen berger surface
+  (run-2026-07-05-berger, surface sha pinned; the run completed but its
+  agent's turn ended before reporting, so the artifact was audited
+  directly). Trapped $153.35B / $84.53B / $119.70B (share 20.05 / 11.05 /
+  15.65%); production 43% reproduced to +$0.025B (G1c). Involuntary floor
+  re-anchored into [4,5]% at every threshold (G6 floor-retention PASS,
+  recal floor_cpr 0.0483 / 0.0442 / 0.0447, all in-band). Isolated DTI
+  contribution production-vs-50% −$35.16B, production-vs-36% −$68.82B.
+  The ABM trapped estimate is materially DTI-sensitive — reinforcing that
+  the headline rests on the hazard marginal, not the ABM gates — while
+  never breaching the floor. 8 gates PASS.
+
+### 28.2 Manuscript edits (backup .bak-round18)
+
+Zero-compute batch: numeric FICO/LTV/coupon bucket edges + "geography is
+not a stratum axis" (V.B, T2/Q2); equity-as-static-original-LTV /
+no-CLTV-dynamics / no-HPA-feed design boundary (V.C, Q1/Q9); in-sample
+triangulation reframing of Path A's rate-gap coefficient + Fannie sign
+replication with unit-comparability caveats (V.C, M2/Q5); functional-form
+immateriality clause in the III.D accounting-bases paragraph (M3);
+one-sided Ginnie bound note (V.C, Q4); tab:crosswalk — basis-and-inputs
+crosswalk for every headline quantity, end of app:ledger, with
+tab:headline's caption pointing to it (C2; ABM basis "shared layer,
+native" verified against the fig. 5 caption before printing). Run-driven
+batch: subgroup-marginals sentence extending the fourth qualification
+(V.D); the corrected non-stationary-baseline passage (V.D — replaces the
+falsified cancellation draft); fonseca second-anchor sentence (V.C);
+tab:discount +2 rows and the 25–150bp prose span (III.C); servicer-mix
+sentence (VII.F); grouped-calibration paragraph (app:theil, placed per
+the run agent's direction caution — cell-panel CPR object, not the V.B
+dollar split); 2015–16 isolation clause (V.C). DTI sentence (VII.C)
+pending the run.
+
+### 28.3 Gates, editions, letter
+
+Liveness gates 47 → 54 executed (#48–#54 in the round-16/17
+artifact-vs-tex pattern: in-run gates PASS + exactly-one run citation +
+printed literals derived from the artifact), suite ALL PASS (commits
+c71e9bf + the DTI addition). references.bib unchanged at 59 (no new
+sources needed; fonseca2024 and all round-18 citations already present).
+PDF rebuilt (tectonic, 84pp, zero undefined references); md/txt editions
+regenerated. Letter placeholders filled with executed values in
+revision_roadmap_round18.md. Commits local — push awaits Eugene.
+
 ## Appendix A — File Map
 
 ```
