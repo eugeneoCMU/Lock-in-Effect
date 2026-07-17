@@ -729,14 +729,16 @@ def fig12_marginal_timing():
     ax.set_ylabel("Lock-in marginal ($B per month)")
     ax.set_title("Monthly lock-in marginal by coupon bucket")
     ax.legend(fontsize=8.6, loc="upper left", frameon=False)
-    fig.text(0.005, 0.01,
+    fig.text(0.005, 0.035,
              "All series read from figures/marginal_monthly_data.json "
-             "(monthly capture of the committed group-ablation engine); "
+             "(monthly capture of the committed group-ablation engine);",
+             fontsize=8, color=C_GRAY)
+    fig.text(0.005, 0.005,
              "coupon stack vs paired-run aggregate leaves a "
              f"{abs(term_resid) / total * 100:.1f}% terminal additivity "
              "residual, asserted in-generator.",
              fontsize=8, color=C_GRAY)
-    fig.tight_layout(rect=(0, 0.045, 1, 1))
+    fig.tight_layout(rect=(0, 0.075, 1, 1))
     fig.savefig(OUT / "fig12_marginal_timing.png", dpi=DPI)
     plt.close(fig)
 
