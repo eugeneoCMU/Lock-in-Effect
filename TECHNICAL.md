@@ -2932,6 +2932,61 @@ total (the seven main runs plus the E3 cohort-timing diagnostic added on
 author approval; no blocks remain pending). Commits local — push awaits
 Eugene.
 
+## 29. Round-19 partial: third-reviewer clarity/citation pass (2026-07-17)
+
+Source: an additional referee note (clarity/presentation + missing-related-work
+bins) supplied in-session. The coverage assessment found most points already
+addressed at HEAD — two suggested citations were already cited (ferreira2010
+L80 rate/equity mobility lock-in; defusco2020 L86 refinancing frictions), and
+the precision-discipline concern (the $[+9.17,+9.23]$ sampling CI ``gives false
+certainty'') is already answered by the explicit subordination of that CI to
+the calibration box at intro L43 and Path B L479. The author directed
+execution of the three genuinely-additive items only (``execute''); the
+presentation/foregrounding asks were left as an open style call.
+
+Three edits (backup .bak-round18 covers round 18+19; no separate .bak taken):
+
+- **QE/QT balance-sheet-supply transmission literature** (reviewer's one real
+  citation gap; the strand at L96 previously carried only micro
+  refinancing-channel cites — berger2021/eichenbaum2022/beraja2019/dimaggio2020).
+  Added two web-verified references and one situating sentence at L96:
+  `krishnamurthy2011` (Brookings Papers on Economic Activity 2011(2):215--287,
+  NBER WP 17555; documents QE's several channels incl. an agency-MBS prepayment
+  channel) and `vayanos2021` (Econometrica 89(1):77--112; preferred-habitat
+  foundation for why held-asset supply moves the term structure). Both verified
+  via WebSearch before insertion; DOIs omitted to match the bib's zero-DOI house
+  style (0/59 prior entries carry a doi field). New sentence frames the lock-in
+  friction as an input to the balance-sheet-supply channel, not a separate
+  phenomenon. references.bib 59 -> 61.
+- **Preprint status made explicit** (reviewer: future-dated 2025/2026 sources
+  need explicit status): peng2026 and lesniewski2026 `howpublished` changed to
+  ``Preprint, arXiv:...''; berger2026 already carried ``Working paper, SSRN''.
+  The other future-dated entries (liebersohn2024 JFE 2025, perotti2024 JCAM
+  2026) are published journal articles, left as-is.
+- **Round-18 E4 regime-split folded into the consolidated uncertainty exhibit**
+  (reviewer: magnitude insufficiently pinned down): tab:uncertainty's lock-in
+  marginal ``Calibration range'' cell extended with ``regime-split baseline
+  break $+5.0$ to $+12.1$'' alongside the box ($+2.1$ to $+13.2$), floor form
+  ($+11.2$), and cyclical floor ($+7.1$ to $+9.4$) — putting the
+  baseline-conditionality dimension into the one table a reader consults for how
+  pinned the magnitude is. The §V.D non-cancellation passage (round 18) already
+  states it in prose; this surfaces it in the summary table.
+
+Liveness suite unchanged at 55 gates, ALL PASS (gate #50's regime-split literals
+now appear in both §V.D and tab:uncertainty; the `in tex` presence checks are
+unaffected). PDF rebuilt (tectonic, 84pp, 0 undefined references; both new
+\cite resolve into the bibliography); md/txt editions regenerated (still 19
+tables). Response-letter blocks (L2, future-dated status, precision/magnitude)
+updated in revision_roadmap_round18.md and response_to_referees_round18.tex.
+Declined without action, with reasons of record: the ``front-load definitions /
+reduce parenthetical density'' restructuring (left to author judgment given the
+deliberately meaning-dense house style); ``foreground non-binding-cap logic /
+Fed-benchmark justification / ABM-hazard reconciliation earlier'' (all already
+present — L169 non-binding-cap + Fed-projection justification; L51/L270/L791 +
+cross-design 59.3% reconciliation — the asks are prominence tweaks, not missing
+content). Paper-dir files on disk only (gitignored). Commits: TECHNICAL.md this
+section, local-unpushed.
+
 ## Appendix A — File Map
 
 ```
