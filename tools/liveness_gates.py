@@ -51,6 +51,7 @@ FONSECA_RESULTS = ROOT / "hazard" / "data" / "fonseca_band_anchor_results.json"
 V1516_RESULTS = ROOT / "hazard" / "data" / "vintage_1516_subleg_results.json"
 DTI_RESULTS = ROOT / "abm" / "data" / "dti_threshold_sweep_results.json"
 COHORTTIMING_RESULTS = ROOT / "abm" / "data" / "cohort_timing_diagnostic_results.json"
+OOWFLOOR_RESULTS = ROOT / "hazard" / "data" / "out_of_window_floor_results.json"
 
 
 def _gates_ok(gates: dict) -> bool:
@@ -764,6 +765,33 @@ def main() -> int:
         f"{abs(anc['pathb_delta_velocity_lag0'] - (-0.9428012605757549)) < 1e-9}, "
         f"tex run-citation count={claims} (want 1), cohort-range literals present="
         f"{'$-0.05$ to $-0.16$' in tex}/{'$-0.87$ and $-0.94$' in tex}"
+    )
+
+    # Panel revision (gate #56): out-of-window involuntary-turnover floor anchor —
+    # the run behind §VII.I's provenance check must agree with the committed
+    # artifact (pre-committed does-not-corroborate verdict, headline CPR and the
+    # in-window validation reproduced), and be cited once in the tex with its
+    # printed literals. The lone floor claim that previously carried no gate.
+    oow = json.loads(OOWFLOOR_RESULTS.read_text())
+    claims = tex.count("run \\texttt{out\\_of\\_window\\_floor}")
+    oow_head = oow["headline_out_of_window_floor_cpr_pct"]
+    inw_deep = oow["in_window_deep_OTM_validation"]["gap<=-0.02_age>=12"]["cpr_pct"]
+    has_61 = "6.1\\%" in tex
+    has_3839 = "3.8--3.9\\%" in tex
+    has_5161 = "5.1--6.1\\%" in tex
+    has_dir = "$+2.1$ to $+2.4$" in tex
+    ok = (oow["gate_verdict"] == "DOES_NOT_CORROBORATE"
+          and abs(oow_head - 6.065) < 1e-3
+          and abs(inw_deep - 3.84) < 1e-3
+          and oow["production_floor_pct"] == 4.0
+          and claims == 1
+          and has_61 and has_3839 and has_5161 and has_dir)
+    failures += 0 if ok else 1
+    print(
+        f"[{'PASS' if ok else 'FAIL'}] cross-check out-of-window floor: "
+        f"verdict={oow['gate_verdict']}, headline={oow_head} (want 6.065), "
+        f"in-window deep-OTM={inw_deep} (want 3.84), tex run-citation count={claims} "
+        f"(want 1), literals present={has_61}/{has_3839}/{has_5161}/{has_dir}"
     )
 
     print(f"\n{'ALL GATES PASS' if failures == 0 else f'{failures} GATE(S) FAILED'}")

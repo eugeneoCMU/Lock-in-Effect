@@ -1,0 +1,84 @@
+{
+  "spec": "out_of_window_floor pre-committed; gap<=0 OTM, exposure-wtd CPR",
+  "grids": {
+    "out_of_window_2017_2019": {
+      "gap<=+0.0000_age>=12": {
+        "cpr_pct": 6.065,
+        "exposure_upb": 2349443878136.6,
+        "n_cohort_months": 528
+      },
+      "gap<=+0.0000_age>=24": {
+        "cpr_pct": 10.995,
+        "exposure_upb": 123800491191.39998,
+        "n_cohort_months": 95
+      },
+      "gap<=-0.0025_age>=12": {
+        "cpr_pct": 5.185,
+        "exposure_upb": 1748162889501.0798,
+        "n_cohort_months": 438
+      },
+      "gap<=-0.0025_age>=24": {
+        "cpr_pct": 8.92,
+        "exposure_upb": 42080075767.81,
+        "n_cohort_months": 65
+      },
+      "gap<=-0.0050_age>=12": {
+        "cpr_pct": 5.073,
+        "exposure_upb": 1120240339414.35,
+        "n_cohort_months": 396
+      },
+      "gap<=-0.0050_age>=24": {
+        "cpr_pct": 8.92,
+        "exposure_upb": 42080075767.81,
+        "n_cohort_months": 65
+      }
+    },
+    "in_window_2023_2024": {
+      "gap<=+0.0000_age>=12": {
+        "cpr_pct": 3.922,
+        "exposure_upb": 45848013531057.83,
+        "n_cohort_months": 6470
+      },
+      "gap<=+0.0000_age>=24": {
+        "cpr_pct": 4.002,
+        "exposure_upb": 38692286061205.24,
+        "n_cohort_months": 5973
+      },
+      "gap<=-0.0025_age>=12": {
+        "cpr_pct": 3.922,
+        "exposure_upb": 45845250879998.33,
+        "n_cohort_months": 6321
+      },
+      "gap<=-0.0025_age>=24": {
+        "cpr_pct": 4.002,
+        "exposure_upb": 38689529546157.91,
+        "n_cohort_months": 5839
+      },
+      "gap<=-0.0050_age>=12": {
+        "cpr_pct": 3.921,
+        "exposure_upb": 45831561126392.95,
+        "n_cohort_months": 6034
+      },
+      "gap<=-0.0050_age>=24": {
+        "cpr_pct": 4.001,
+        "exposure_upb": 38675855231483.5,
+        "n_cohort_months": 5583
+      }
+    }
+  },
+  "in_window_deep_OTM_validation": {
+    "gap<=-0.02_age>=12": {
+      "cpr_pct": 3.84,
+      "exposure_upb": 44557119484831.3,
+      "n_cohort_months": 3984
+    },
+    "gap<=-0.02_age>=24": {
+      "cpr_pct": 3.909,
+      "exposure_upb": 37422383757422.664,
+      "n_cohort_months": 3737
+    }
+  },
+  "headline_out_of_window_floor_cpr_pct": 6.065,
+  "gate_verdict": "DOES_NOT_CORROBORATE",
+  "production_floor_pct": 4.0
+}
