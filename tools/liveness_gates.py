@@ -80,7 +80,7 @@ EXACTLY_ONE = [
     "\\title{Mortgage Lock-In and the Federal Reserve's Quantitative Tightening Shortfall}",
     "frozen manifests say otherwise",
     "9.96\\% of home value",
-    "supersede this tag",
+    "against the fold-in specification's code",
 ]
 
 KERNEL_TEX_PHRASE = "kernel is retained in production"
@@ -203,6 +203,14 @@ def main() -> int:
         f"(must agree; either side flipping without the other fails)"
     )
 
+    # Run-citation convention (re-synced 2026-07-19): each run is cited by its
+    # \texttt{<tag>} identifier. Since the round-19 revision these tags live in
+    # the Appendix run-index / crosswalk tables (tab:runindex, tab:crosswalk)
+    # rather than inline as "run \texttt{<tag>}" (repository identifiers were
+    # deliberately removed from the narrative). The cross-checks below therefore
+    # count \texttt{<tag>} and require >= 1 (a run may be tagged in both a table
+    # and inline, e.g. out_of_window_floor); the printed value literals carry the
+    # anti-drift guarantee that the tex number equals the frozen artifact's.
     # Round-14 W4: the manuscript's Fannie replication sentences must agree
     # with the committed artifact — the envelope gate must actually have
     # passed, and the printed marginal must be the artifact's, rounded as
@@ -210,16 +218,16 @@ def main() -> int:
     # as the settlement-lag gate: either side moving without the other fails.
     fannie = json.loads(FANNIE_RESULTS.read_text())
     env = fannie["gates"]["gate_envelope"]
-    claims = tex.count("run \\texttt{fannie\\_replication}")
+    claims = tex.count("\\texttt{fannie\\_replication}")
     marg_b = f"+\\${fannie['path_b']['lockin_marginal_b']:.1f}"
     marg_pp = f"+{fannie['path_b']['lockin_marginal_share_pp']:.2f}"
-    ok = (bool(env["pass"]) and claims == 1
+    ok = (bool(env["pass"]) and claims >= 1
           and marg_b in tex and marg_pp in tex)
     failures += 0 if ok else 1
     print(
         f"[{'PASS' if ok else 'FAIL'}] cross-check fannie replication: "
         f"artifact envelope pass={env['pass']}, tex run-citation count="
-        f"{claims} (want 1), marginal literals {marg_b!r}/{marg_pp!r} "
+        f"{claims} (want >=1), marginal literals {marg_b!r}/{marg_pp!r} "
         f"present={marg_b in tex}/{marg_pp in tex}"
     )
 
@@ -230,20 +238,20 @@ def main() -> int:
     ov = json.loads(OVERLAY_RESULTS.read_text())
     g3d = ov["gates"]["G3_static_bound"]["differential_attribution"]
     prim = ov["variants"]["primary"]
-    claims = tex.count("run \\texttt{ginnie\\_cpr\\_overlay}")
+    claims = tex.count("\\texttt{ginnie\\_cpr\\_overlay}")
     lit_central = f"{prim['central']['share_shared_pct']:.1f}\\%"
     lit_null = f"{prim['null']['share_shared_pct']:.1f}\\%"
     lit_diff = f"+\\${g3d['primary_minus_placebo_b']:.1f}"
     ok = (bool(ov["gates"]["G1_parity"]["pass"])
           and g3d["verdict_differential"] == "inside_static_bound"
-          and claims == 1
+          and claims >= 1
           and lit_central in tex and lit_null in tex and lit_diff in tex)
     failures += 0 if ok else 1
     print(
         f"[{'PASS' if ok else 'FAIL'}] cross-check ginnie overlay: "
         f"G1 pass={ov['gates']['G1_parity']['pass']}, differential verdict="
         f"{g3d['verdict_differential']}, tex run-citation count={claims} "
-        f"(want 1), literals {lit_central!r}/{lit_null!r}/{lit_diff!r} "
+        f"(want >=1), literals {lit_central!r}/{lit_null!r}/{lit_diff!r} "
         f"present={lit_central in tex}/{lit_null in tex}/{lit_diff in tex}"
     )
 
@@ -252,7 +260,7 @@ def main() -> int:
     # shares_readable, and the printed composition shares are the artifact's.
     dec = json.loads(DECOMP_RESULTS.read_text())
     g3 = dec["gates"]["G3_additivity"]
-    claims = tex.count("run \\texttt{marginal\\_decomposition}")
+    claims = tex.count("\\texttt{marginal\\_decomposition}")
     cells = dec["cells"]
     top = max(c["share_of_sum_pct"] for c in cells)
     v2021 = sum(c["marginal_b"] for c in cells if c["vintage"] >= 2020)
@@ -260,14 +268,14 @@ def main() -> int:
     ok = (bool(dec["gates"]["G1_central_parity"]["pass"])
           and bool(dec["gates"]["G2_null_parity"]["pass"])
           and g3["verdict"] == "shares_readable"
-          and claims == 1
+          and claims >= 1
           and all(c["marginal_b"] > 0 for c in cells)
           and abs(v_share - 72) < 1 and abs(top - 21) < 1)
     failures += 0 if ok else 1
     print(
         f"[{'PASS' if ok else 'FAIL'}] cross-check marginal decomposition: "
         f"G1/G2 pass, verdict={g3['verdict']}, tex run-citation count={claims} "
-        f"(want 1), all-cells-positive={all(c['marginal_b'] > 0 for c in cells)}, "
+        f"(want >=1), all-cells-positive={all(c['marginal_b'] > 0 for c in cells)}, "
         f"2020-21 share {v_share:.1f}% (printed 72%), max cell {top:.1f}% "
         f"(printed 21%)"
     )
@@ -276,19 +284,19 @@ def main() -> int:
     # committed artifact — both gates passed, and the printed recovery and
     # mobility scales are the artifact's, rounded as printed.
     ext = json.loads(ABMEXT_RESULTS.read_text())
-    claims = tex.count("run \\texttt{abm\\_external\\_gates}")
+    claims = tex.count("\\texttt{abm\\_external\\_gates}")
     lit_share = f"{ext['results']['external']['share_pct']:.1f}\\%"
     scale_ext = ext["external_parameters"]["mobility_scale_external"]
     lit_scale = f"{scale_ext:,.0f}".replace(",", "{,}")
     ok = (bool(ext["gates"]["G1_harness_parity"]["pass"])
           and bool(ext["gates"]["G2_anchor"]["pass"])
           and bool(ext["floor_diagnostic"]["violates_observed_floor"])
-          and claims == 1 and lit_share in tex and lit_scale in tex)
+          and claims >= 1 and lit_share in tex and lit_scale in tex)
     failures += 0 if ok else 1
     print(
         f"[{'PASS' if ok else 'FAIL'}] cross-check abm external gates: "
         f"G1/G2 pass, floor-violation={ext['floor_diagnostic']['violates_observed_floor']}, "
-        f"tex run-citation count={claims} (want 1), literals "
+        f"tex run-citation count={claims} (want >=1), literals "
         f"{lit_share!r}/{lit_scale!r} present={lit_share in tex}/{lit_scale in tex}"
     )
 
@@ -297,7 +305,7 @@ def main() -> int:
     # inside tolerance, and the printed literals must be the artifact's,
     # rounded as printed.
     exp = json.loads(EXPECT_RESULTS.read_text())
-    claims = tex.count("run \\texttt{expectation\\_benchmark}")
+    claims = tex.count("\\texttt{expectation\\_benchmark}")
     wedge = exp["supplementary_projection_wedge"]
     lit_proj = f"\\${exp['window']['projected_runoff_window_b']:.1f}"
     lit_e = f"\\${exp['e_benchmark_b']:.1f}"
@@ -309,7 +317,7 @@ def main() -> int:
     ok = (bool(exp["threshold"]["mechanical_majority_survives"])
           and bool(saa["threshold_survives"])
           and max_parity <= 0.01
-          and claims == 1
+          and claims >= 1
           and lit_proj in tex and lit_e in tex and lit_wedge_share in tex
           and lit_h1 in tex and lit_alt in tex)
     failures += 0 if ok else 1
@@ -317,7 +325,7 @@ def main() -> int:
         f"[{'PASS' if ok else 'FAIL'}] cross-check expectation benchmark: "
         f"threshold survives={exp['threshold']['mechanical_majority_survives']}, "
         f"max parity |diff|={max_parity:.1e}pp, tex run-citation count={claims} "
-        f"(want 1), literals {lit_proj!r}/{lit_e!r}/{lit_wedge_share!r} "
+        f"(want >=1), literals {lit_proj!r}/{lit_e!r}/{lit_wedge_share!r} "
         f"present={lit_proj in tex}/{lit_e in tex}/{lit_wedge_share in tex}"
     )
 
@@ -327,7 +335,7 @@ def main() -> int:
     # bound are the artifact's, rounded as printed.
     vin = json.loads(VINTAGE_RESULTS.read_text())
     vr = vin["results"]
-    claims = tex.count("run \\texttt{vintage\\_residual\\_bound}")
+    claims = tex.count("\\texttt{vintage\\_residual\\_bound}")
     lit_bound = f"\\${vr['bound_b']:.1f} billion"
     lit_2022 = f"{vr['segments']['vintage_2022']['cpr_pct']:.2f}\\%"
     lit_pre = f"{vr['segments']['pre_2017']['cpr_pct']:.2f}\\%"
@@ -335,7 +343,7 @@ def main() -> int:
     ok = (all(bool(g["pass"]) for g in vin["gates"].values())
           and vr["interpretation"]["verdict"] == "below_ginnie_bound"
           and vr["sign_direction"] == "overstates_trapped"
-          and claims == 1
+          and claims >= 1
           and lit_bound in tex and lit_2022 in tex and lit_pre in tex
           and lit_sampled in tex)
     failures += 0 if ok else 1
@@ -343,7 +351,7 @@ def main() -> int:
         f"[{'PASS' if ok else 'FAIL'}] cross-check vintage residual bound: "
         f"in-run gates all pass={all(bool(g['pass']) for g in vin['gates'].values())}, "
         f"verdict={vr['interpretation']['verdict']}, sign={vr['sign_direction']}, "
-        f"tex run-citation count={claims} (want 1), literals "
+        f"tex run-citation count={claims} (want >=1), literals "
         f"{lit_bound!r}/{lit_sampled!r}/{lit_2022!r}/{lit_pre!r} present="
         f"{lit_bound in tex}/{lit_sampled in tex}/{lit_2022 in tex}/{lit_pre in tex}"
     )
@@ -354,20 +362,20 @@ def main() -> int:
     # artifact's, rounded as printed.
     thl = json.loads(THEIL_RESULTS.read_text())
     est = thl["estimators"]
-    claims = tex.count("run \\texttt{make\\_theil\\_data}")
+    claims = tex.count("\\texttt{make\\_theil\\_data}")
     lit_u1_pathb = f"{est['path_b']['u1_levels']:.3f}"
     lit_u2_abm = f"{est['abm']['u2_diffs']:.3f}"
     lit_pathb_var = f"{est['path_b']['decomp']['levels']['var_share']:.1f}\\%"
     lit_abm_bias_tbl = f"{est['abm']['decomp']['levels']['bias_share']:.1f}"
     ok = (all(bool(g["pass"]) for g in thl["gates"].values())
-          and claims == 1
+          and claims >= 1
           and lit_u1_pathb in tex and lit_u2_abm in tex
           and lit_pathb_var in tex and lit_abm_bias_tbl in tex)
     failures += 0 if ok else 1
     print(
         f"[{'PASS' if ok else 'FAIL'}] cross-check theil dynamic fit: "
         f"in-run gates all pass={all(bool(g['pass']) for g in thl['gates'].values())}, "
-        f"tex run-citation count={claims} (want 1), literals "
+        f"tex run-citation count={claims} (want >=1), literals "
         f"{lit_u1_pathb!r}/{lit_u2_abm!r}/{lit_pathb_var!r}/{lit_abm_bias_tbl!r} "
         f"present={lit_u1_pathb in tex}/{lit_u2_abm in tex}/"
         f"{lit_pathb_var in tex}/{lit_abm_bias_tbl in tex}"
@@ -380,21 +388,21 @@ def main() -> int:
     mlc = json.loads(MLCOMP_RESULTS.read_text())
     hgb = mlc["learners"]["hgb_poisson"]
     glm = mlc["learners"]["poisson_glm"]
-    claims = tex.count("run \\texttt{ml\\_comparator\\_holdout}")
+    claims = tex.count("\\texttt{ml\\_comparator\\_holdout}")
     lit_hgb_w = f"{hgb['rmse_weighted_pp']:.1f} points"
     lit_hgb_u = f"{hgb['rmse_unweighted_pp']:.1f} against 37.9"
     lit_glm = f"{glm['rmse_weighted_pp']:.1f} and {glm['rmse_unweighted_pp']:.1f} points"
     ok = (all(bool(g["pass"]) for g in mlc["gates"].values())
           and mlc["interpretation"]["overall_verdict"]
               == "flexible_fit_helps_no_headline_change"
-          and claims == 1
+          and claims >= 1
           and lit_hgb_w in tex and lit_hgb_u in tex and lit_glm in tex)
     failures += 0 if ok else 1
     print(
         f"[{'PASS' if ok else 'FAIL'}] cross-check ml comparator holdout: "
         f"in-run gates all pass={all(bool(g['pass']) for g in mlc['gates'].values())}, "
         f"verdict={mlc['interpretation']['overall_verdict']}, tex run-citation "
-        f"count={claims} (want 1), literals {lit_hgb_w!r}/{lit_hgb_u!r}/{lit_glm!r} "
+        f"count={claims} (want >=1), literals {lit_hgb_w!r}/{lit_hgb_u!r}/{lit_glm!r} "
         f"present={lit_hgb_w in tex}/{lit_hgb_u in tex}/{lit_glm in tex}"
     )
 
@@ -404,17 +412,17 @@ def main() -> int:
     cs = json.loads(COMPSHIFT_RESULTS.read_text())
     svb = cs["comparisons"]["sample_vs_book"]
     xag = cs["comparisons"]["freddie_vs_fannie"]
-    claims = tex.count("run \\texttt{composition\\_shift}")
+    claims = tex.count("\\texttt{composition\\_shift}")
     lits = [f"{svb['agency']['psi']:.2f}", f"{svb['vintage']['psi']:.2f}",
             f"{svb['coupon']['psi']:.2f}", f"PSI {xag['state']['psi']:.3f}",
             f"PSI {xag['fico']['psi']:.3f}"]
-    ok = (_gates_ok(cs["gates"]) and claims == 1
+    ok = (_gates_ok(cs["gates"]) and claims >= 1
           and all(l in tex for l in lits))
     failures += 0 if ok else 1
     print(
         f"[{'PASS' if ok else 'FAIL'}] cross-check composition shift: "
         f"in-run gates all pass={_gates_ok(cs['gates'])}, tex run-citation "
-        f"count={claims} (want 1), PSI literals {lits} present="
+        f"count={claims} (want >=1), PSI literals {lits} present="
         f"{[l in tex for l in lits]}"
     )
 
@@ -424,7 +432,7 @@ def main() -> int:
     fz = json.loads(FREEZE_RESULTS.read_text())
     p1 = fz["part1"]["legs"]
     p2 = fz["part2"]["legs"]
-    claims = tex.count("run \\texttt{freeze\\_sensitivity}")
+    claims = tex.count("\\texttt{freeze\\_sensitivity}")
     lits = [f"\\${p1['freeze_off']['trapped_b']:.1f} billion",
             f"\\${p1['trigger_100bp']['trapped_b']:.1f} to "
             f"\\${p1['trigger_200bp']['trapped_b']:.1f} billion",
@@ -432,32 +440,32 @@ def main() -> int:
             f"\\${p2['share_0.182600']['leg']['trapped_b']:.1f} billion",
             f"\\${p2['share_0.300000']['leg']['trapped_b']:.1f} billion",
             f"+\\${fz['part1']['freeze_contribution']['trapped_b']:.1f}"]
-    ok = (_gates_ok(fz["gates"]) and claims == 1
+    ok = (_gates_ok(fz["gates"]) and claims >= 1
           and all(l in tex for l in lits))
     failures += 0 if ok else 1
     print(
         f"[{'PASS' if ok else 'FAIL'}] cross-check freeze sensitivity: "
         f"in-run gates all pass={_gates_ok(fz['gates'])}, tex run-citation "
-        f"count={claims} (want 1), literals present={[l in tex for l in lits]}"
+        f"count={claims} (want >=1), literals present={[l in tex for l in lits]}"
     )
 
     # Round-17 R17-D (gate #40): the isotonic-recalibration sentence must
     # agree with the committed artifact — gates passed, verdict as printed.
     iso = json.loads(ISOTONIC_RESULTS.read_text())
     isoc = iso["isotonic_recalibration"]
-    claims = tex.count("run \\texttt{landmark\\_isotonic\\_holdout}")
+    claims = tex.count("\\texttt{landmark\\_isotonic\\_holdout}")
     lits = [f"to {isoc['rmse_weighted_pp']:.2f} points",
             f"RMSE at {isoc['rmse_unweighted_pp']:.1f}",
             f"$-{abs(isoc['r2_unweighted']):.3f}$"]
     ok = (_gates_ok(iso["gates"])
           and iso["interpretation"]["overall_verdict"] == "no_material_change"
-          and claims == 1 and all(l in tex for l in lits))
+          and claims >= 1 and all(l in tex for l in lits))
     failures += 0 if ok else 1
     print(
         f"[{'PASS' if ok else 'FAIL'}] cross-check landmark isotonic: "
         f"in-run gates all pass={_gates_ok(iso['gates'])}, "
         f"verdict={iso['interpretation']['overall_verdict']}, tex run-citation "
-        f"count={claims} (want 1), literals present={[l in tex for l in lits]}"
+        f"count={claims} (want >=1), literals present={[l in tex for l in lits]}"
     )
 
     # Round-17 R17-L (gate #41): the marginal-timing sentences must agree
@@ -466,7 +474,7 @@ def main() -> int:
     mm = json.loads(MARGMONTH_RESULTS.read_text())
     th = mm["part_a"]["thirds"]["shares_pct"]
     cb = mm["part_b"]["coupon_buckets"]
-    claims = tex.count("run \\texttt{marginal\\_monthly\\_decomposition}")
+    claims = tex.count("\\texttt{marginal\\_monthly\\_decomposition}")
     lit_thirds = f"{th[0]:.1f}\\%/{th[1]:.1f}\\%/{th[2]:.1f}\\%"
     lit_peak = f"\\${mm['part_a']['peak']['m_b']:.2f} billion"
     lit_buckets = (f"{cb['<3.0%']['share_of_cells_sum_pct']:.1f}\\%/"
@@ -475,7 +483,7 @@ def main() -> int:
     lit_null = f"-\\${abs(mm['part_a']['null_cumulative_error_b_derived'][-1]):.1f}"
     ok = (_gates_ok(mm["gates"])
           and mm["part_b"]["additivity"]["verdict"] == "monthly_shares_readable"
-          and claims == 1
+          and claims >= 1
           and lit_thirds in tex and lit_peak in tex and lit_buckets in tex
           and lit_null in tex)
     failures += 0 if ok else 1
@@ -483,7 +491,7 @@ def main() -> int:
         f"[{'PASS' if ok else 'FAIL'}] cross-check marginal monthly: "
         f"in-run gates all pass={_gates_ok(mm['gates'])}, "
         f"verdict={mm['part_b']['additivity']['verdict']}, tex run-citation "
-        f"count={claims} (want 1), literals "
+        f"count={claims} (want >=1), literals "
         f"{lit_thirds!r}/{lit_peak!r}/{lit_buckets!r}/{lit_null!r} present="
         f"{lit_thirds in tex}/{lit_peak in tex}/{lit_buckets in tex}/{lit_null in tex}"
     )
@@ -492,19 +500,19 @@ def main() -> int:
     # agree with the committed artifact — reconstruction gates passed and
     # the printed non-kink max and weighted mean are the artifact's.
     isc = json.loads(INTERP_RESULTS.read_text())
-    claims = tex.count("run \\texttt{interp\\_spot\\_check}")
+    claims = tex.count("\\texttt{interp\\_spot\\_check}")
     nonkink = isc["midpoint_check"]["summary"]["non_kink"]["us"]["max_abs_pp"]
     wmean = isc["realized_check"]["weighted"]["us"]["mean_abs_monthly_pp"]
     lit_nk = f"at most {nonkink:.2f} points"
     lit_wm = f"{wmean:.2f} points of CPR over the window"
-    ok = (_gates_ok(isc["gates"]) and claims == 1
+    ok = (_gates_ok(isc["gates"]) and claims >= 1
           and lit_nk in tex and lit_wm in tex
           and "August--November 2022" in tex)
     failures += 0 if ok else 1
     print(
         f"[{'PASS' if ok else 'FAIL'}] cross-check interp spot check: "
         f"reconstruction gates all pass={_gates_ok(isc['gates'])}, tex "
-        f"run-citation count={claims} (want 1), literals {lit_nk!r}/{lit_wm!r} "
+        f"run-citation count={claims} (want >=1), literals {lit_nk!r}/{lit_wm!r} "
         f"present={lit_nk in tex}/{lit_wm in tex}"
     )
 
@@ -513,21 +521,21 @@ def main() -> int:
     # the printed fitted point and scored recovery are the artifact's.
     smd = json.loads(SMD_RESULTS.read_text())
     fit = smd["fitted"]
-    claims = tex.count("run \\texttt{smd\\_two\\_moment}")
+    claims = tex.count("\\texttt{smd\\_two\\_moment}")
     lit_m1 = f"{fit['M1']:.4f}"
     lit_m2 = f"{fit['M2']:.4f}"
     lit_rec = f"{smd['scored_at_fit']['share_pct']:.1f}\\% of benchmark"
     lit_pi0 = f"{fit['pi0_realized_point_mass'] * 100:.1f}\\%"
     ok = (_gates_ok(smd["gates"])
           and smd["verdict"] == "joint_fit_infeasible"
-          and claims == 1
+          and claims >= 1
           and lit_m1 in tex and lit_m2 in tex and lit_rec in tex
           and lit_pi0 in tex)
     failures += 0 if ok else 1
     print(
         f"[{'PASS' if ok else 'FAIL'}] cross-check smd two-moment: "
         f"in-run gates all pass={_gates_ok(smd['gates'])}, "
-        f"verdict={smd['verdict']}, tex run-citation count={claims} (want 1), "
+        f"verdict={smd['verdict']}, tex run-citation count={claims} (want >=1), "
         f"literals {lit_m1!r}/{lit_m2!r}/{lit_rec!r}/{lit_pi0!r} present="
         f"{lit_m1 in tex}/{lit_m2 in tex}/{lit_rec in tex}/{lit_pi0 in tex}"
     )
@@ -555,27 +563,27 @@ def main() -> int:
     # sentence must agree with the committed artifact — gates passed, the
     # identity held, and the printed netted totals/wedges are the artifact's.
     cpd = json.loads(CURTDEMO_RESULTS.read_text())
-    claims = tex.count("run \\texttt{curtailment\\_profile\\_demo}")
+    claims = tex.count("\\texttt{curtailment\\_profile\\_demo}")
     seas = cpd["results"]["seasonal"]
     regi = cpd["results"]["regime_split"]
     lits = [f"\\${seas['netted_b']:.2f} and \\${regi['netted_b']:.2f} billion",
             f"{seas['wedge_pp']:.2f} and {regi['wedge_pp']:.2f} points"]
     ok = (cpd["status"] == "ok" and _gates_ok(cpd["gates"])
           and bool(cpd["demonstration"]["identity_holds"])
-          and claims == 1 and all(l in tex for l in lits))
+          and claims >= 1 and all(l in tex for l in lits))
     failures += 0 if ok else 1
     print(
         f"[{'PASS' if ok else 'FAIL'}] cross-check curtailment profile demo: "
         f"status={cpd['status']}, identity_holds="
         f"{cpd['demonstration']['identity_holds']}, tex run-citation "
-        f"count={claims} (want 1), literals present={[l in tex for l in lits]}"
+        f"count={claims} (want >=1), literals present={[l in tex for l in lits]}"
     )
 
     # Round-17 follow-up R17-M (gate #46): the spread-variants sentence must
     # agree with the committed artifact — parity gates passed, threshold
     # survives at every variant, and the printed range is the artifact's.
     spv = json.loads(SPREADVAR_RESULTS.read_text())
-    claims = tex.count("run \\texttt{expectation\\_spread\\_variants}")
+    claims = tex.count("\\texttt{expectation\\_spread\\_variants}")
     var = spv["variants"]
     share = lambda k: var[k]["expected_share_of_realized_cap_shortfall_pct"]
     lit_2022 = (f"{min(share('v1_2022_linear_back_ramp'), share('v4_2022_linear_front_ramp')):.1f}--"
@@ -588,13 +596,13 @@ def main() -> int:
     g1s = spv["gates"]["g1_uniform_central_parity"]["status"]
     g2s = spv["gates"]["g2_settlement_aware_parity"]["status"]
     ok = (g1s == "PASS" and g2s == "PASS"
-          and all_survive and claims == 1
+          and all_survive and claims >= 1
           and lit_2022 in tex and lit_2025 in tex and lit_brk in tex)
     failures += 0 if ok else 1
     print(
         f"[{'PASS' if ok else 'FAIL'}] cross-check spread variants: "
         f"parity g1/g2={g1s}/{g2s}, "
-        f"all-survive={all_survive}, tex run-citation count={claims} (want 1), "
+        f"all-survive={all_survive}, tex run-citation count={claims} (want >=1), "
         f"literals {lit_2022!r}/{lit_2025!r}/{lit_brk!r} present="
         f"{lit_2022 in tex}/{lit_2025 in tex}/{lit_brk in tex}"
     )
@@ -619,25 +627,25 @@ def main() -> int:
     # Round-18 R18-A (gate #48): subgroup marginal decomposition — verdict,
     # in-run parity/additivity gates, and the printed intensity literals.
     sg = json.loads(SUBGROUP_RESULTS.read_text())
-    claims = tex.count("run \\texttt{subgroup\\_marginals}")
+    claims = tex.count("\\texttt{subgroup\\_marginals}")
     ok = (sg["verdict_overall"] == "broad_based_all_dimensions"
-          and _gates_ok(sg["gates"]) and claims == 1
+          and _gates_ok(sg["gates"]) and claims >= 1
           and "0.88--1.26" in tex and "0.93--1.06" in tex)
     failures += 0 if ok else 1
     print(
         f"[{'PASS' if ok else 'FAIL'}] cross-check subgroup marginals: "
         f"verdict={sg['verdict_overall']}, in-run gates ok={_gates_ok(sg['gates'])}, "
-        f"tex run-citation count={claims} (want 1), intensity literals present="
+        f"tex run-citation count={claims} (want >=1), intensity literals present="
         f"{'0.88--1.26' in tex}/{'0.93--1.06' in tex}"
     )
 
     # Round-18 R18-G (gate #50): regime-split marginal — bit-exact unit-factor
     # parity, the printed h0/floor spans, and the non-cancellation framing.
     rs = json.loads(REGIME_RESULTS.read_text())
-    claims = tex.count("run \\texttt{regime\\_split\\_marginal}")
+    claims = tex.count("\\texttt{regime\\_split\\_marginal}")
     h0lo, h0hi = rs["results"]["h0_span_pp"]
     fl_lo, fl_hi = min(rs["results"]["floor_marginal_pps"]), max(rs["results"]["floor_marginal_pps"])
-    ok = (_gates_ok(rs["gates"]) and claims == 1
+    ok = (_gates_ok(rs["gates"]) and claims >= 1
           and rs["results"]["verdict_h0"] == "material_sensitivity"
           and f"$+{h0lo:.1f}$ to $+{h0hi:.1f}$ points" in tex
           and f"$+{fl_lo:.1f}$ through $+{fl_hi:.1f}$ points" in tex
@@ -646,7 +654,7 @@ def main() -> int:
     print(
         f"[{'PASS' if ok else 'FAIL'}] cross-check regime-split marginal: "
         f"in-run gates ok={_gates_ok(rs['gates'])}, verdict={rs['results']['verdict_h0']}, "
-        f"tex run-citation count={claims} (want 1), span literals "
+        f"tex run-citation count={claims} (want >=1), span literals "
         f"+{h0lo:.1f}/+{h0hi:.1f} and +{fl_lo:.1f}/+{fl_hi:.1f} present="
         f"{f'$+{h0lo:.1f}$ to $+{h0hi:.1f}$ points' in tex}/"
         f"{f'$+{fl_lo:.1f}$ through $+{fl_hi:.1f}$ points' in tex}"
@@ -659,22 +667,22 @@ def main() -> int:
         for k in ("spread_125bp", "spread_150bp")
     )
     ok = (ok_new and sorted(dbd["spreads_bp"]) == [0, 25, 50, 75, 100, 125, 150]
-          and ok_zero and "25--150 basis points" in tex)
+          and ok_zero and "25--150 bp" in tex)
     failures += 0 if ok else 1
     print(
         f"[{'PASS' if ok else 'FAIL'}] cross-check danish 125/150bp fill: "
         f"new-row literals present={ok_new}, grid={sorted(dbd['spreads_bp'])}, "
-        f"all deltas zero={ok_zero}, prose span updated={'25--150 basis points' in tex}"
+        f"all deltas zero={ok_zero}, prose span updated={'25--150 bp' in tex}"
     )
 
     # Round-18 R18-J (gate #52): grouped calibration — in-run gates, verdict,
     # and the printed holdout ratios/pooled figures are the artifact's.
     gc = json.loads(GROUPCAL_RESULTS.read_text())
-    claims = tex.count("run \\texttt{grouped\\_calibration}")
+    claims = tex.count("\\texttt{grouped\\_calibration}")
     ths = gc["train_holdout_split"]["holdout_2024H1_2025H2"]
     lit_pred = "{:.2f}".format(ths["wmean_pred_cpr_pp"])
     lit_obs = "{:.2f}".format(ths["wmean_obs_cpr_pp"])
-    ok = (_gates_ok(gc["gates"]) and claims == 1
+    ok = (_gates_ok(gc["gates"]) and claims >= 1
           and gc["interpretation"]["verdict"] == "temporal_drift_post_boundary"
           and "0.64, 0.57, 0.44, 0.43" in tex
           and lit_pred in tex and lit_obs in tex)
@@ -683,27 +691,27 @@ def main() -> int:
         f"[{'PASS' if ok else 'FAIL'}] cross-check grouped calibration: "
         f"in-run gates ok={_gates_ok(gc['gates'])}, verdict="
         f"{gc['interpretation']['verdict']}, tex run-citation count={claims} "
-        f"(want 1), holdout literals present={'0.64, 0.57, 0.44, 0.43' in tex}/"
+        f"(want >=1), holdout literals present={'0.64, 0.57, 0.44, 0.43' in tex}/"
         f"{lit_pred in tex}/{lit_obs in tex}"
     )
 
     # Round-18 R18-B (gate #53): fonseca band anchor — in-run gates, placement
     # above the L&R high edge, and the printed marginal/edge literals.
     fb = json.loads(FONSECA_RESULTS.read_text())
-    claims = tex.count("run \\texttt{fonseca\\_band\\_anchor}")
+    claims = tex.count("\\texttt{fonseca\\_band\\_anchor}")
     pl = fb["placement"]
     hi_edge_b = pl["lr_band_marginal_b_5.5_to_7.7"][-1]
     lit_fb_b = "$+\\${:.1f}$ billion".format(pl["fonseca_marginal_b"])
     lit_fb_pp = "($+{:.1f}$ points)".format(pl["fonseca_marginal_pp"])
     lit_edge = "$+\\${:.1f}$ billion".format(hi_edge_b)
-    ok = (fb["gates_all_pass"] and claims == 1
+    ok = (fb["gates_all_pass"] and claims >= 1
           and pl["vs_lr_band"] == "above_lr_high_edge"
           and lit_fb_b in tex and lit_fb_pp in tex and lit_edge in tex)
     failures += 0 if ok else 1
     print(
         f"[{'PASS' if ok else 'FAIL'}] cross-check fonseca band anchor: "
         f"gates_all_pass={fb['gates_all_pass']}, placement={pl['vs_lr_band']}, "
-        f"tex run-citation count={claims} (want 1), literals "
+        f"tex run-citation count={claims} (want >=1), literals "
         f"{pl['fonseca_marginal_b']:.1f}/{pl['fonseca_marginal_pp']:.1f}/{hi_edge_b:.1f} present="
         f"{lit_fb_b in tex}/{lit_fb_pp in tex}/{lit_edge in tex}"
     )
@@ -711,47 +719,47 @@ def main() -> int:
     # Round-18 R18-K (gate #54): 2015-16 vintage subleg — in-run parity to the
     # committed bound and the printed exposure-share literal.
     vs = json.loads(V1516_RESULTS.read_text())
-    claims = tex.count("run \\texttt{vintage\\_1516\\_subleg}")
+    claims = tex.count("\\texttt{vintage\\_1516\\_subleg}")
     seg = vs["results"]["vintage_2015_2016_specific"]
     lit_share = "99.99\\%"
-    ok = (vs["status"] == "PASS" and _gates_ok(vs["gates"]) and claims == 1
+    ok = (vs["status"] == "PASS" and _gates_ok(vs["gates"]) and claims >= 1
           and "{:.2f}".format(seg["exposure_share_within_pre2017_pct"]) == "99.99"
           and lit_share in tex)
     failures += 0 if ok else 1
     print(
         f"[{'PASS' if ok else 'FAIL'}] cross-check vintage 2015-16 subleg: "
         f"status={vs['status']}, in-run gates ok={_gates_ok(vs['gates'])}, "
-        f"tex run-citation count={claims} (want 1), share "
+        f"tex run-citation count={claims} (want >=1), share "
         f"{seg['exposure_share_within_pre2017_pct']:.2f} printed={lit_share in tex}"
     )
 
     # Round-18 R18-C (gate #49): DTI threshold sweep — in-run gates, floor
     # re-anchored in band at every threshold, and the printed trapped literals.
     dti = json.loads(DTI_RESULTS.read_text())
-    claims = tex.count("run \\texttt{dti\\_threshold\\_sweep}")
+    claims = tex.count("\\texttt{dti\\_threshold\\_sweep}")
     legs = dti["legs"]
     lit_36 = "\\${:.1f} ".format(legs["dti_0.36"]["trapped_b"])
     lit_50 = "\\${:.1f} billion".format(legs["dti_0.50"]["trapped_b"])
     floor_in_band = all(v["in_band"] for v in dti["floor_retention"]["per_dti"].values())
-    ok = (dti["status"] == "OK" and _gates_ok(dti["gates"]) and claims == 1
+    ok = (dti["status"] == "OK" and _gates_ok(dti["gates"]) and claims >= 1
           and floor_in_band and lit_36 in tex and lit_50 in tex)
     failures += 0 if ok else 1
     print(
         f"[{'PASS' if ok else 'FAIL'}] cross-check DTI threshold sweep: "
         f"status={dti['status']}, in-run gates ok={_gates_ok(dti['gates'])}, "
         f"floor in-band all thresholds={floor_in_band}, tex run-citation "
-        f"count={claims} (want 1), trapped literals present={lit_36 in tex}/{lit_50 in tex}"
+        f"count={claims} (want >=1), trapped literals present={lit_36 in tex}/{lit_50 in tex}"
     )
 
     # Round-18 R18-L / E3 (gate #55): cohort timing diagnostic — in-run gates,
     # aggregate parity anchors reproduced, and the printed cohort-range literals.
     ct = json.loads(COHORTTIMING_RESULTS.read_text())
-    claims = tex.count("run \\texttt{cohort\\_timing\\_diagnostic}")
+    claims = tex.count("\\texttt{cohort\\_timing\\_diagnostic}")
     anc = ct["aggregate_anchors_reproduced"]
     ct_gates = ct["gates"]
     ct_gates_ok = (all(g.get("pass") for g in ct_gates) if isinstance(ct_gates, list)
                    else _gates_ok(ct_gates))
-    ok = (ct["status"] == "success" and ct_gates_ok and claims == 1
+    ok = (ct["status"] == "success" and ct_gates_ok and claims >= 1
           and abs(anc["abm_ccf_lag0"] - (-0.3183375411255578)) < 1e-9
           and abs(anc["pathb_delta_velocity_lag0"] - (-0.9428012605757549)) < 1e-9
           and "$-0.05$ to $-0.16$" in tex and "$-0.87$ and $-0.94$" in tex
@@ -763,7 +771,7 @@ def main() -> int:
         f"anchors abm/pathb reproduced="
         f"{abs(anc['abm_ccf_lag0'] - (-0.3183375411255578)) < 1e-9}/"
         f"{abs(anc['pathb_delta_velocity_lag0'] - (-0.9428012605757549)) < 1e-9}, "
-        f"tex run-citation count={claims} (want 1), cohort-range literals present="
+        f"tex run-citation count={claims} (want >=1), cohort-range literals present="
         f"{'$-0.05$ to $-0.16$' in tex}/{'$-0.87$ and $-0.94$' in tex}"
     )
 
@@ -773,7 +781,7 @@ def main() -> int:
     # in-window validation reproduced), and be cited once in the tex with its
     # printed literals. The lone floor claim that previously carried no gate.
     oow = json.loads(OOWFLOOR_RESULTS.read_text())
-    claims = tex.count("run \\texttt{out\\_of\\_window\\_floor}")
+    claims = tex.count("\\texttt{out\\_of\\_window\\_floor}")
     oow_head = oow["headline_out_of_window_floor_cpr_pct"]
     inw_deep = oow["in_window_deep_OTM_validation"]["gap<=-0.02_age>=12"]["cpr_pct"]
     has_61 = "6.1\\%" in tex
@@ -784,14 +792,14 @@ def main() -> int:
           and abs(oow_head - 6.065) < 1e-3
           and abs(inw_deep - 3.84) < 1e-3
           and oow["production_floor_pct"] == 4.0
-          and claims == 1
+          and claims >= 1
           and has_61 and has_3839 and has_5161 and has_dir)
     failures += 0 if ok else 1
     print(
         f"[{'PASS' if ok else 'FAIL'}] cross-check out-of-window floor: "
         f"verdict={oow['gate_verdict']}, headline={oow_head} (want 6.065), "
         f"in-window deep-OTM={inw_deep} (want 3.84), tex run-citation count={claims} "
-        f"(want 1), literals present={has_61}/{has_3839}/{has_5161}/{has_dir}"
+        f"(want >=1), literals present={has_61}/{has_3839}/{has_5161}/{has_dir}"
     )
 
     print(f"\n{'ALL GATES PASS' if failures == 0 else f'{failures} GATE(S) FAILED'}")
