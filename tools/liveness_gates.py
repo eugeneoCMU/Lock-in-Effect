@@ -2262,9 +2262,14 @@ def main() -> int:
         "precedent_legs": f"{_rb['central_share_pct']:.1f}\\%" in tex
                           and f"null's {_rb['null_share_pct']:.1f}\\%" in tex,
         # the cross-basis error must be named in the manuscript, not silently
-        # swapped, and the off-window leg must travel with the in-sample one
+        # swapped, and the off-window leg must travel with the in-sample one.
+        # The literal no longer requires the words "an earlier draft": the body
+        # was de-narrativized so that draft history lives only in the run ledger
+        # (Appendix), which catalogues this 18.3-point entry. What this gate
+        # protects is unchanged -- the superseded value and its characterization
+        # as a basis error must still be named in the manuscript.
         "precedent_basis_error_disclosed":
-            f"an earlier draft put that gap at "
+            f"put that gap at "
             f"{_rb['superseded_cross_basis_differential_pp']:.1f} points, which was "
             f"an error of basis rather than of arithmetic" in tex,
         "precedent_both_calibrations":
