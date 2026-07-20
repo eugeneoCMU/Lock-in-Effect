@@ -25,6 +25,7 @@ Run:  python3 tools/liveness_gates.py
 from __future__ import annotations
 
 import json
+import re
 import statistics
 import sys
 from pathlib import Path
@@ -239,6 +240,30 @@ ABSTRACT_HEDGES = {
     "null_mechanical_components": "scheduled amortization and baseline "
                                   "involuntary turnover",
 }
+
+
+def abstract_hedge_check(tex: str) -> tuple[bool, dict]:
+    """Gate #68's rule, as a function so the perturbation battery can exercise
+    THE SHIPPED RULE instead of a copy of it.
+
+    This is not decoration. The first cut of this gate was validated by a
+    prototype that redefined ABSTRACT_HEDGES locally; the prototype reported
+    every adversarial variant caught while the design it encoded still had the
+    seam hole, because a test that mirrors the implementation can only confirm
+    the implementation's own assumptions. Anything checking this gate must
+    import it from here.
+    """
+    tex_nc = re.sub(r"(?<!\\)%.*", "", tex)
+    _i = tex_nc.find(ABSTRACT_BOUNDS[0])
+    _j = tex_nc.find(ABSTRACT_BOUNDS[1], _i + 1)
+    found = _i != -1 and _j != -1
+    abstract = tex_nc[_i + len(ABSTRACT_BOUNDS[0]):_j] if found else ""
+    missing = sorted(k for k, v in ABSTRACT_HEDGES.items() if v not in abstract)
+    words = len(abstract.split())
+    scoped = found and words > 100
+    return (found and scoped and not missing,
+            {"found": found, "words": words, "scoped": scoped,
+             "missing": missing, "total": len(ABSTRACT_HEDGES)})
 
 
 def main() -> int:
@@ -3376,24 +3401,15 @@ def main() -> int:
     # Round-20 (gate #68): the ABSTRACT'S HEDGES. See ABSTRACT_HEDGES above for
     # why this is scoped to the abstract environment and why the spans are
     # contiguous rather than proximity-windowed.
-    # read tex_nc, not tex: a hedge left inside a LaTeX comment in the abstract
-    # environment satisfies a raw-text check while the rendered PDF goes bare.
-    _ab_i = tex_nc.find(ABSTRACT_BOUNDS[0])
-    _ab_j = tex_nc.find(ABSTRACT_BOUNDS[1], _ab_i + 1)
-    ab_found = _ab_i != -1 and _ab_j != -1
-    abstract = tex_nc[_ab_i + len(ABSTRACT_BOUNDS[0]):_ab_j] if ab_found else ""
-    ab_missing = {k: v for k, v in ABSTRACT_HEDGES.items() if v not in abstract}
-    # the spans must be read from the ABSTRACT, so the gate has to fail when the
-    # abstract is emptied even though every phrase survives in the body
-    ab_scoped_ok = ab_found and len(abstract.split()) > 100
-    ab_ok = ab_found and ab_scoped_ok and not ab_missing
+    # the rule lives in abstract_hedge_check() so tests exercise it, not a copy
+    ab_ok, _ab = abstract_hedge_check(tex)
     failures += 0 if ab_ok else 1
     print(
         f"[{'PASS' if ab_ok else 'FAIL'}] abstract-hedge spans: "
-        f"abstract-located={ab_found} ({len(abstract.split())} words, "
-        f"scoped-not-whole-file={ab_scoped_ok}), "
-        f"{len(ABSTRACT_HEDGES) - len(ab_missing)}/{len(ABSTRACT_HEDGES)} spans "
-        f"present, missing={sorted(ab_missing) or 'none'}"
+        f"abstract-located={_ab['found']} ({_ab['words']} words, "
+        f"scoped-not-whole-file={_ab['scoped']}), "
+        f"{_ab['total'] - len(_ab['missing'])}/{_ab['total']} spans "
+        f"present, missing={_ab['missing'] or 'none'}"
     )
 
     print(f"\n{'ALL GATES PASS' if failures == 0 else f'{failures} GATE(S) FAILED'}")
