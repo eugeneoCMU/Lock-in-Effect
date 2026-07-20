@@ -1,0 +1,96 @@
+{
+  "mode": "sign_forcing_stats",
+  "spec": "Exposure-weighted coupon distribution of the closed 2017-2021 cohort panel over the QT window, against the window-minimum 30-year market rate. Promotes the five \u00a7V sign-demotion statistics from in-session computation to a committed artifact. Coupon column is decimal-scaled and thresholds are applied in decimal. Coverage is disclosed, not repaired.",
+  "source": {
+    "panel": "hazard/data/cohort_month_panel.parquet",
+    "market_rate": "MORTGAGE30US, monthly mean, macro.fetch_data()",
+    "coupon_column_scale": {
+      "min": 0.0,
+      "max": 0.075,
+      "distinct": [
+        0.0,
+        0.015,
+        0.02,
+        0.025,
+        0.03,
+        0.035,
+        0.04,
+        0.045,
+        0.05,
+        0.055,
+        0.06,
+        0.065,
+        0.07,
+        0.075
+      ],
+      "reading": "decimal-scaled; a percent-scale threshold query returns a misleading 100.00% of exposure"
+    }
+  },
+  "window": {
+    "start": "2022-06-01",
+    "end_exclusive": "2025-12-01",
+    "window_months": 42,
+    "panel_covered_months": 40,
+    "panel_first_covered": "2022-06-01",
+    "panel_last_covered": "2025-09-01",
+    "uncovered_months": 2,
+    "coverage_note": "the panel ends 2025-09, two months before the window's 2025-11 close; the shares below are shares of the 40 covered months. The book is closed at 2017-2021 originations, so no higher-coupon loan can enter it and the out-of-the-money share can only hold or rise as the low-coupon cohorts season: the two uncovered months cannot overturn the reading, but they are not measured."
+  },
+  "exposure_upb_total": 75989714423956.81,
+  "statistics": {
+    "exposure_weighted_mean_coupon_pct": 3.1341044914613607,
+    "exposure_share_le_4_79_pct": 97.39913925620144,
+    "exposure_share_le_5_09_pct": 99.5297290364208,
+    "window_min_mortgage30us_pct": 5.231111111111111,
+    "covered_window_months": 40
+  },
+  "printed_thresholds_pct": [
+    4.79,
+    5.09
+  ],
+  "supplementary": {
+    "exposure_share_le_window_min_pct": 99.5297290364208,
+    "window_min_month": "2022-08-31",
+    "window_max_mortgage30us_pct": 7.5600000000000005,
+    "note": "the share at or below the window MINIMUM is the economically binding cut: every window month's market rate is at least this, so this share is out of the money in every covered month. The 4.79 / 5.09 thresholds the manuscript prints are strictly tighter and sit between the panel's coupon grid points."
+  },
+  "gates": {
+    "exposure_weighted_mean_coupon_pct": {
+      "got": 3.1341044914613607,
+      "got_at_printing_precision": 3.134,
+      "manuscript_prints": 3.134,
+      "printing_precision_dp": 3,
+      "pass": true
+    },
+    "exposure_share_le_4_79_pct": {
+      "got": 97.39913925620144,
+      "got_at_printing_precision": 97.4,
+      "manuscript_prints": 97.4,
+      "printing_precision_dp": 2,
+      "pass": true
+    },
+    "exposure_share_le_5_09_pct": {
+      "got": 99.5297290364208,
+      "got_at_printing_precision": 99.53,
+      "manuscript_prints": 99.53,
+      "printing_precision_dp": 2,
+      "pass": true
+    },
+    "window_min_mortgage30us_pct": {
+      "got": 5.231111111111111,
+      "got_at_printing_precision": 5.2311,
+      "manuscript_prints": 5.2311,
+      "printing_precision_dp": 4,
+      "pass": true
+    },
+    "covered_window_months": {
+      "got": 40,
+      "got_at_printing_precision": 40,
+      "manuscript_prints": 40,
+      "printing_precision_dp": 0,
+      "pass": true
+    },
+    "all_pass": true
+  },
+  "verdict": "sign-forcing statistics reproduced from committed data"
+}

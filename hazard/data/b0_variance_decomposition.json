@@ -1,0 +1,914 @@
+{
+  "method_prefixed_before_results": "B0 pre-registered variance decomposition of empirical monthly CPR.\n\nMETHOD FIXED BEFORE INSPECTING RESULTS:\n  Y_t   = empirical annual CPR, exposure-weighted, from cohort_month_panel.parquet\n          SMM_t = sum(prepaid_upb_t)/sum(exposure_upb_t); CPR_t = 1-(1-SMM_t)^12\n  SEASONAL block S = 11 month-of-year dummies (Jan omitted)\n  RATE block R     = exposure-weighted mean rate gap g_t = wmean(coupon) - MORTGAGE30US/100\n                     at lags 0,1,2,3  (LAG SET DECLARED BEFORE RUNNING; NO SEARCH)\n  Decomposition of Var(Y) via OLS R^2:\n      R2_S, R2_R, R2_full (S+R together, plus intercept)\n      Sequential Type I ordering A (S then R): seasonal=R2_S, rate=R2_full-R2_S\n      Sequential Type I ordering B (R then S): rate=R2_R, seasonal=R2_full-R2_R\n      SHAPLEY (order-invariant, = LMG with 2 blocks):\n          phi_S = 0.5*(R2_S + (R2_full - R2_R))\n          phi_R = 0.5*(R2_R + (R2_full - R2_S))\n      residual = 1 - R2_full\n  ADJUDICATION: the pre-commitment (rate share >= 0.15) is adjudicated on the\n  SHAPLEY rate share, on the FULL PANEL. QT window reported alongside.\n\nNETWORK DEPENDENCY: the rate block is fetched LIVE from FRED (MORTGAGE30US) using\nthe key resolved by common/fred_key.py from the gitignored .env. There is no\ncommitted cache, so this module cannot be re-run offline; the frozen artifact at\nhazard/data/b0_variance_decomposition.json is the record of the adjudicated run.",
+  "threshold_TIMING_RATE_SHARE_MIN": 0.15,
+  "adjudicated_on": "SHAPLEY rate share, FULL PANEL",
+  "series": [
+    {
+      "period": "2017-01",
+      "cpr_annual": 0.0,
+      "smm": 0.0,
+      "wmean_coupon": 0.04124314467705964,
+      "mortgage30us_pct": 4.15,
+      "gap_decimal": -0.00025685532294036223
+    },
+    {
+      "period": "2017-02",
+      "cpr_annual": 0.003234689708509486,
+      "smm": 0.00026995794033422604,
+      "wmean_coupon": 0.04157635334433011,
+      "mortgage30us_pct": 4.1675,
+      "gap_decimal": -9.864665566989422e-05
+    },
+    {
+      "period": "2017-03",
+      "cpr_annual": 0.01354635372299895,
+      "smm": 0.0011359328963358993,
+      "wmean_coupon": 0.04198198532605832,
+      "mortgage30us_pct": 4.196,
+      "gap_decimal": 2.1985326058321375e-05
+    },
+    {
+      "period": "2017-04",
+      "cpr_annual": 0.015656337795168174,
+      "smm": 0.0013141518032096793,
+      "wmean_coupon": 0.04232423652931229,
+      "mortgage30us_pct": 4.045,
+      "gap_decimal": 0.0018742365293122898
+    },
+    {
+      "period": "2017-05",
+      "cpr_annual": 0.023882213662154594,
+      "smm": 0.002012307349877177,
+      "wmean_coupon": 0.04258729520443431,
+      "mortgage30us_pct": 4.01,
+      "gap_decimal": 0.0024872952044343102
+    },
+    {
+      "period": "2017-06",
+      "cpr_annual": 0.03664020920844391,
+      "smm": 0.0031058603416408673,
+      "wmean_coupon": 0.042516948445499934,
+      "mortgage30us_pct": 3.904,
+      "gap_decimal": 0.003476948445499936
+    },
+    {
+      "period": "2017-07",
+      "cpr_annual": 0.04103730664935845,
+      "smm": 0.0034858358575633745,
+      "wmean_coupon": 0.04236019084759106,
+      "mortgage30us_pct": 3.9675000000000002,
+      "gap_decimal": 0.002685190847591057
+    },
+    {
+      "period": "2017-08",
+      "cpr_annual": 0.04860861292672536,
+      "smm": 0.004143869373855017,
+      "wmean_coupon": 0.04220280402897143,
+      "mortgage30us_pct": 3.88,
+      "gap_decimal": 0.0034028040289714317
+    },
+    {
+      "period": "2017-09",
+      "cpr_annual": 0.05335366841747702,
+      "smm": 0.004558720466512919,
+      "wmean_coupon": 0.04203771884765449,
+      "mortgage30us_pct": 3.8049999999999997,
+      "gap_decimal": 0.0039877188476544895
+    },
+    {
+      "period": "2017-10",
+      "cpr_annual": 0.07150398240020617,
+      "smm": 0.00616336036170434,
+      "wmean_coupon": 0.04186129170079353,
+      "mortgage30us_pct": 3.895,
+      "gap_decimal": 0.0029112917007935307
+    },
+    {
+      "period": "2017-11",
+      "cpr_annual": 0.055797642749672915,
+      "smm": 0.004773136730319617,
+      "wmean_coupon": 0.041699167955752854,
+      "mortgage30us_pct": 3.9219999999999997,
+      "gap_decimal": 0.002479167955752856
+    },
+    {
+      "period": "2017-12",
+      "cpr_annual": 0.05345769379492038,
+      "smm": 0.004567836540026168,
+      "wmean_coupon": 0.041613338215568715,
+      "mortgage30us_pct": 3.95,
+      "gap_decimal": 0.002113338215568715
+    },
+    {
+      "period": "2018-01",
+      "cpr_annual": 0.04856064278646599,
+      "smm": 0.004139685128989243,
+      "wmean_coupon": 0.04158375160682118,
+      "mortgage30us_pct": 4.032500000000001,
+      "gap_decimal": 0.001258751606821172
+    },
+    {
+      "period": "2018-02",
+      "cpr_annual": 0.042506249263107976,
+      "smm": 0.0036131305943118753,
+      "wmean_coupon": 0.041582038919559736,
+      "mortgage30us_pct": 4.33,
+      "gap_decimal": -0.0017179610804402626
+    },
+    {
+      "period": "2018-03",
+      "cpr_annual": 0.046041268644430144,
+      "smm": 0.0039202014530845585,
+      "wmean_coupon": 0.04167630224513221,
+      "mortgage30us_pct": 4.444,
+      "gap_decimal": -0.002763697754867789
+    },
+    {
+      "period": "2018-04",
+      "cpr_annual": 0.04492428613102384,
+      "smm": 0.003823061762260356,
+      "wmean_coupon": 0.04197050521367927,
+      "mortgage30us_pct": 4.4675,
+      "gap_decimal": -0.0027044947863207325
+    },
+    {
+      "period": "2018-05",
+      "cpr_annual": 0.05035173209541077,
+      "smm": 0.0042960460839346765,
+      "wmean_coupon": 0.04229098689979447,
+      "mortgage30us_pct": 4.586,
+      "gap_decimal": -0.003569013100205534
+    },
+    {
+      "period": "2018-06",
+      "cpr_annual": 0.05196835403362443,
+      "smm": 0.0044374084361085775,
+      "wmean_coupon": 0.042628778088473235,
+      "mortgage30us_pct": 4.57,
+      "gap_decimal": -0.0030712219115267697
+    },
+    {
+      "period": "2018-07",
+      "cpr_annual": 0.05257358277058033,
+      "smm": 0.004490388336623443,
+      "wmean_coupon": 0.04297841242024106,
+      "mortgage30us_pct": 4.5275,
+      "gap_decimal": -0.002296587579758938
+    },
+    {
+      "period": "2018-08",
+      "cpr_annual": 0.055948788222697776,
+      "smm": 0.004786413816477991,
+      "wmean_coupon": 0.043284683369574466,
+      "mortgage30us_pct": 4.55,
+      "gap_decimal": -0.002215316630425533
+    },
+    {
+      "period": "2018-09",
+      "cpr_annual": 0.044199315020126306,
+      "smm": 0.0037600695169053944,
+      "wmean_coupon": 0.04356078183455649,
+      "mortgage30us_pct": 4.6274999999999995,
+      "gap_decimal": -0.0027142181654435035
+    },
+    {
+      "period": "2018-10",
+      "cpr_annual": 0.0501170010313754,
+      "smm": 0.004275538826813753,
+      "wmean_coupon": 0.04380197499442562,
+      "mortgage30us_pct": 4.83,
+      "gap_decimal": -0.004498025005574384
+    },
+    {
+      "period": "2018-11",
+      "cpr_annual": 0.04172222374924284,
+      "smm": 0.003545166730293126,
+      "wmean_coupon": 0.0440561744373632,
+      "mortgage30us_pct": 4.866,
+      "gap_decimal": -0.004603825562636797
+    },
+    {
+      "period": "2018-12",
+      "cpr_annual": 0.041934208262644046,
+      "smm": 0.0035635377442522404,
+      "wmean_coupon": 0.04430201445846726,
+      "mortgage30us_pct": 4.6375,
+      "gap_decimal": -0.0020729855415327417
+    },
+    {
+      "period": "2019-01",
+      "cpr_annual": 0.04392931246906595,
+      "smm": 0.0037366203722605422,
+      "wmean_coupon": 0.04451824595204002,
+      "mortgage30us_pct": 4.464,
+      "gap_decimal": -0.0001217540479599849
+    },
+    {
+      "period": "2019-02",
+      "cpr_annual": 0.057012877896030156,
+      "smm": 0.004879941933272969,
+      "wmean_coupon": 0.044656983035530826,
+      "mortgage30us_pct": 4.37,
+      "gap_decimal": 0.0009569830355308229
+    },
+    {
+      "period": "2019-03",
+      "cpr_annual": 0.07263997942533107,
+      "smm": 0.006264745562230363,
+      "wmean_coupon": 0.04474218184706015,
+      "mortgage30us_pct": 4.265,
+      "gap_decimal": 0.0020921818470601566
+    },
+    {
+      "period": "2019-04",
+      "cpr_annual": 0.10920427745071803,
+      "smm": 0.009590394789865462,
+      "wmean_coupon": 0.04479965917856569,
+      "mortgage30us_pct": 4.1425,
+      "gap_decimal": 0.003374659178565685
+    },
+    {
+      "period": "2019-05",
+      "cpr_annual": 0.1324673366396001,
+      "smm": 0.011772004287413061,
+      "wmean_coupon": 0.04475306811373616,
+      "mortgage30us_pct": 4.072,
+      "gap_decimal": 0.00403306811373616
+    },
+    {
+      "period": "2019-06",
+      "cpr_annual": 0.12218493023687127,
+      "smm": 0.010801188210408708,
+      "wmean_coupon": 0.044673909530199056,
+      "mortgage30us_pct": 3.8024999999999998,
+      "gap_decimal": 0.00664890953019906
+    },
+    {
+      "period": "2019-07",
+      "cpr_annual": 0.19074714978293883,
+      "smm": 0.017482367345733246,
+      "wmean_coupon": 0.04452586982383538,
+      "mortgage30us_pct": 3.765,
+      "gap_decimal": 0.006875869823835375
+    },
+    {
+      "period": "2019-08",
+      "cpr_annual": 0.2002278909904862,
+      "smm": 0.01844677446570701,
+      "wmean_coupon": 0.04426692303404653,
+      "mortgage30us_pct": 3.6159999999999997,
+      "gap_decimal": 0.008106923034046531
+    },
+    {
+      "period": "2019-09",
+      "cpr_annual": 0.2372808407036775,
+      "smm": 0.022319271590789502,
+      "wmean_coupon": 0.043960931367845874,
+      "mortgage30us_pct": 3.605,
+      "gap_decimal": 0.007910931367845875
+    },
+    {
+      "period": "2019-10",
+      "cpr_annual": 0.2569067893566699,
+      "smm": 0.024440847411786898,
+      "wmean_coupon": 0.04356195318742682,
+      "mortgage30us_pct": 3.6879999999999997,
+      "gap_decimal": 0.0066819531874268215
+    },
+    {
+      "period": "2019-11",
+      "cpr_annual": 0.192032316897095,
+      "smm": 0.017612489364161547,
+      "wmean_coupon": 0.04316061212078845,
+      "mortgage30us_pct": 3.6950000000000003,
+      "gap_decimal": 0.006210612120788446
+    },
+    {
+      "period": "2019-12",
+      "cpr_annual": 0.18395175129764074,
+      "smm": 0.016797472246132268,
+      "wmean_coupon": 0.04289463069289868,
+      "mortgage30us_pct": 3.72,
+      "gap_decimal": 0.005694630692898675
+    },
+    {
+      "period": "2020-01",
+      "cpr_annual": 0.15376739497634828,
+      "smm": 0.013817073277403714,
+      "wmean_coupon": 0.04266491893317443,
+      "mortgage30us_pct": 3.624,
+      "gap_decimal": 0.006424918933174428
+    },
+    {
+      "period": "2020-02",
+      "cpr_annual": 0.1830720553739016,
+      "smm": 0.016709191905362693,
+      "wmean_coupon": 0.04248259921795418,
+      "mortgage30us_pct": 3.4650000000000003,
+      "gap_decimal": 0.007832599217954178
+    },
+    {
+      "period": "2020-03",
+      "cpr_annual": 0.27441586595650036,
+      "smm": 0.02637739588517041,
+      "wmean_coupon": 0.04220800294263221,
+      "mortgage30us_pct": 3.45,
+      "gap_decimal": 0.007708002942632207
+    },
+    {
+      "period": "2020-04",
+      "cpr_annual": 0.3446396264407171,
+      "smm": 0.03460136257554778,
+      "wmean_coupon": 0.041667901405982234,
+      "mortgage30us_pct": 3.306,
+      "gap_decimal": 0.008607901405982235
+    },
+    {
+      "period": "2020-05",
+      "cpr_annual": 0.31647396835934105,
+      "smm": 0.031210131724401215,
+      "wmean_coupon": 0.04095698941256222,
+      "mortgage30us_pct": 3.2325,
+      "gap_decimal": 0.00863198941256222
+    },
+    {
+      "period": "2020-06",
+      "cpr_annual": 0.3381158273725058,
+      "smm": 0.03380415318816316,
+      "wmean_coupon": 0.040224873379086,
+      "mortgage30us_pct": 3.1625,
+      "gap_decimal": 0.008599873379086
+    },
+    {
+      "period": "2020-07",
+      "cpr_annual": 0.3202873579879657,
+      "smm": 0.03166169386133358,
+      "wmean_coupon": 0.03933384971317704,
+      "mortgage30us_pct": 3.016,
+      "gap_decimal": 0.009173849713177043
+    },
+    {
+      "period": "2020-08",
+      "cpr_annual": 0.30713324525230024,
+      "smm": 0.030113732424194625,
+      "wmean_coupon": 0.03848258261889783,
+      "mortgage30us_pct": 2.935,
+      "gap_decimal": 0.009132582618897829
+    },
+    {
+      "period": "2020-09",
+      "cpr_annual": 0.32063675631055333,
+      "smm": 0.03170318388438911,
+      "wmean_coupon": 0.0375793899510614,
+      "mortgage30us_pct": 2.89,
+      "gap_decimal": 0.008679389951061399
+    },
+    {
+      "period": "2020-10",
+      "cpr_annual": 0.32172030536514784,
+      "smm": 0.031831976651449316,
+      "wmean_coupon": 0.036644389846345236,
+      "mortgage30us_pct": 2.834,
+      "gap_decimal": 0.008304389846345236
+    },
+    {
+      "period": "2020-11",
+      "cpr_annual": 0.27866353536064103,
+      "smm": 0.02685365183368073,
+      "wmean_coupon": 0.03579401517564036,
+      "mortgage30us_pct": 2.765,
+      "gap_decimal": 0.008144015175640361
+    },
+    {
+      "period": "2020-12",
+      "cpr_annual": 0.2984338525029815,
+      "smm": 0.02910472974786587,
+      "wmean_coupon": 0.03510859640319408,
+      "mortgage30us_pct": 2.684,
+      "gap_decimal": 0.008268596403194078
+    },
+    {
+      "period": "2021-01",
+      "cpr_annual": 0.25830862269370136,
+      "smm": 0.024594344891936713,
+      "wmean_coupon": 0.03448439243798708,
+      "mortgage30us_pct": 2.735,
+      "gap_decimal": 0.0071343924379870804
+    },
+    {
+      "period": "2021-02",
+      "cpr_annual": 0.2675540503364696,
+      "smm": 0.02561340971019891,
+      "wmean_coupon": 0.033921168203441876,
+      "mortgage30us_pct": 2.81,
+      "gap_decimal": 0.005821168203441876
+    },
+    {
+      "period": "2021-03",
+      "cpr_annual": 0.29573277653291963,
+      "smm": 0.028793777172637175,
+      "wmean_coupon": 0.0333792632873137,
+      "mortgage30us_pct": 3.0825,
+      "gap_decimal": 0.002554263287313698
+    },
+    {
+      "period": "2021-04",
+      "cpr_annual": 0.2081964530402154,
+      "smm": 0.019265498832805206,
+      "wmean_coupon": 0.032933174957733846,
+      "mortgage30us_pct": 3.06,
+      "gap_decimal": 0.002333174957733844
+    },
+    {
+      "period": "2021-05",
+      "cpr_annual": 0.1727579362026851,
+      "smm": 0.015680586257734816,
+      "wmean_coupon": 0.03270172861280428,
+      "mortgage30us_pct": 2.9625,
+      "gap_decimal": 0.0030767286128042803
+    },
+    {
+      "period": "2021-06",
+      "cpr_annual": 0.18737654330219577,
+      "smm": 0.017141994218089627,
+      "wmean_coupon": 0.03251143034917351,
+      "mortgage30us_pct": 2.975,
+      "gap_decimal": 0.0027614303491735083
+    },
+    {
+      "period": "2021-07",
+      "cpr_annual": 0.16558592437594377,
+      "smm": 0.014972243339968126,
+      "wmean_coupon": 0.03232009524028476,
+      "mortgage30us_pct": 2.868,
+      "gap_decimal": 0.0036400952402847603
+    },
+    {
+      "period": "2021-08",
+      "cpr_annual": 0.20084422715174877,
+      "smm": 0.018509832067343187,
+      "wmean_coupon": 0.03215807097883696,
+      "mortgage30us_pct": 2.8425000000000002,
+      "gap_decimal": 0.0037330709788369575
+    },
+    {
+      "period": "2021-09",
+      "cpr_annual": 0.19785504499106932,
+      "smm": 0.018204422773457907,
+      "wmean_coupon": 0.03196818702754192,
+      "mortgage30us_pct": 2.9,
+      "gap_decimal": 0.002968187027541924
+    },
+    {
+      "period": "2021-10",
+      "cpr_annual": 0.17595329299208295,
+      "smm": 0.015997989707140392,
+      "wmean_coupon": 0.03178764133603508,
+      "mortgage30us_pct": 3.0675,
+      "gap_decimal": 0.0011126413360350827
+    },
+    {
+      "period": "2021-11",
+      "cpr_annual": 0.1534265229948285,
+      "smm": 0.013783975592491515,
+      "wmean_coupon": 0.03163977980278058,
+      "mortgage30us_pct": 3.0675,
+      "gap_decimal": 0.0009647798027805805
+    },
+    {
+      "period": "2021-12",
+      "cpr_annual": 0.13751253455558543,
+      "smm": 0.012252211463809523,
+      "wmean_coupon": 0.031552292761623836,
+      "mortgage30us_pct": 3.098,
+      "gap_decimal": 0.0005722927616238389
+    },
+    {
+      "period": "2022-01",
+      "cpr_annual": 0.10377054843308631,
+      "smm": 0.009088350204749636,
+      "wmean_coupon": 0.031510084082112214,
+      "mortgage30us_pct": 3.4450000000000003,
+      "gap_decimal": -0.002939915917887788
+    },
+    {
+      "period": "2022-02",
+      "cpr_annual": 0.09275826457546399,
+      "smm": 0.008079380139372599,
+      "wmean_coupon": 0.03147791602829437,
+      "mortgage30us_pct": 3.7625,
+      "gap_decimal": -0.00614708397170563
+    },
+    {
+      "period": "2022-03",
+      "cpr_annual": 0.10327240943867866,
+      "smm": 0.009042464817050174,
+      "wmean_coupon": 0.031445736832622063,
+      "mortgage30us_pct": 4.172,
+      "gap_decimal": -0.010274263167377937
+    },
+    {
+      "period": "2022-04",
+      "cpr_annual": 0.08534686129877722,
+      "smm": 0.007406632118946444,
+      "wmean_coupon": 0.03142384122373675,
+      "mortgage30us_pct": 4.9825,
+      "gap_decimal": -0.01840115877626325
+    },
+    {
+      "period": "2022-05",
+      "cpr_annual": 0.07682972531380428,
+      "smm": 0.006639657902838915,
+      "wmean_coupon": 0.031408357387341906,
+      "mortgage30us_pct": 5.2299999999999995,
+      "gap_decimal": -0.020891642612658086
+    },
+    {
+      "period": "2022-06",
+      "cpr_annual": 0.0756879556267358,
+      "smm": 0.006537334209517794,
+      "wmean_coupon": 0.03139649276217847,
+      "mortgage30us_pct": 5.522,
+      "gap_decimal": -0.023823507237821534
+    },
+    {
+      "period": "2022-07",
+      "cpr_annual": 0.06167816756061184,
+      "smm": 0.005291142653725728,
+      "wmean_coupon": 0.03138754873060393,
+      "mortgage30us_pct": 5.4125,
+      "gap_decimal": -0.022737451269396067
+    },
+    {
+      "period": "2022-08",
+      "cpr_annual": 0.062400924907946465,
+      "smm": 0.0053550144020544956,
+      "wmean_coupon": 0.03137933987996554,
+      "mortgage30us_pct": 5.2225,
+      "gap_decimal": -0.020845660120034464
+    },
+    {
+      "period": "2022-09",
+      "cpr_annual": 0.05275859219196466,
+      "smm": 0.004506589695394724,
+      "wmean_coupon": 0.031372891627585886,
+      "mortgage30us_pct": 6.112,
+      "gap_decimal": -0.029747108372414115
+    },
+    {
+      "period": "2022-10",
+      "cpr_annual": 0.043684332806977144,
+      "smm": 0.003715349664046453,
+      "wmean_coupon": 0.03136776514561044,
+      "mortgage30us_pct": 6.9,
+      "gap_decimal": -0.03763223485438957
+    },
+    {
+      "period": "2022-11",
+      "cpr_annual": 0.034704641455050034,
+      "smm": 0.0029391018121278363,
+      "wmean_coupon": 0.03136473049100913,
+      "mortgage30us_pct": 6.805,
+      "gap_decimal": -0.03668526950899087
+    },
+    {
+      "period": "2022-12",
+      "cpr_annual": 0.03271927996044022,
+      "smm": 0.002768371449571188,
+      "wmean_coupon": 0.03136221330118777,
+      "mortgage30us_pct": 6.364,
+      "gap_decimal": -0.03227778669881223
+    },
+    {
+      "period": "2023-01",
+      "cpr_annual": 0.02478799196237136,
+      "smm": 0.0020895128789319645,
+      "wmean_coupon": 0.03136059721085418,
+      "mortgage30us_pct": 6.2725,
+      "gap_decimal": -0.031364402789145825
+    },
+    {
+      "period": "2023-02",
+      "cpr_annual": 0.027981273874212897,
+      "smm": 0.002362222978503349,
+      "wmean_coupon": 0.031358683051760164,
+      "mortgage30us_pct": 6.2575,
+      "gap_decimal": -0.03121631694823984
+    },
+    {
+      "period": "2023-03",
+      "cpr_annual": 0.04039824708851969,
+      "smm": 0.00343051240932703,
+      "wmean_coupon": 0.03135554219404854,
+      "mortgage30us_pct": 6.544,
+      "gap_decimal": -0.03408445780595146
+    },
+    {
+      "period": "2023-04",
+      "cpr_annual": 0.0377796975242608,
+      "smm": 0.0032041764581586104,
+      "wmean_coupon": 0.031352826668146046,
+      "mortgage30us_pct": 6.342499999999999,
+      "gap_decimal": -0.03207217333185395
+    },
+    {
+      "period": "2023-05",
+      "cpr_annual": 0.04823967813008656,
+      "smm": 0.004111693631089887,
+      "wmean_coupon": 0.03134926829092691,
+      "mortgage30us_pct": 6.425,
+      "gap_decimal": -0.032900731709073094
+    },
+    {
+      "period": "2023-06",
+      "cpr_annual": 0.05222682477829799,
+      "smm": 0.004460030392367069,
+      "wmean_coupon": 0.031346324308667205,
+      "mortgage30us_pct": 6.714,
+      "gap_decimal": -0.0357936756913328
+    },
+    {
+      "period": "2023-07",
+      "cpr_annual": 0.045155689180731096,
+      "smm": 0.003843177443569986,
+      "wmean_coupon": 0.03134379347353097,
+      "mortgage30us_pct": 6.84,
+      "gap_decimal": -0.03705620652646903
+    },
+    {
+      "period": "2023-08",
+      "cpr_annual": 0.04785538622768082,
+      "smm": 0.004078190710567137,
+      "wmean_coupon": 0.031340588043452064,
+      "mortgage30us_pct": 7.072,
+      "gap_decimal": -0.03937941195654794
+    },
+    {
+      "period": "2023-09",
+      "cpr_annual": 0.038682512368930055,
+      "smm": 0.003282147973277378,
+      "wmean_coupon": 0.03133873299532231,
+      "mortgage30us_pct": 7.2,
+      "gap_decimal": -0.0406612670046777
+    },
+    {
+      "period": "2023-10",
+      "cpr_annual": 0.03705268778686732,
+      "smm": 0.0031414370630132526,
+      "wmean_coupon": 0.03133646100634197,
+      "mortgage30us_pct": 7.62,
+      "gap_decimal": -0.04486353899365803
+    },
+    {
+      "period": "2023-11",
+      "cpr_annual": 0.03016800412921583,
+      "smm": 0.0025494465120310637,
+      "wmean_coupon": 0.031335345448324496,
+      "mortgage30us_pct": 7.442,
+      "gap_decimal": -0.043084654551675504
+    },
+    {
+      "period": "2023-12",
+      "cpr_annual": 0.029321313786326297,
+      "smm": 0.002476908689839396,
+      "wmean_coupon": 0.031334797675653434,
+      "mortgage30us_pct": 6.815,
+      "gap_decimal": -0.03681520232434657
+    },
+    {
+      "period": "2024-01",
+      "cpr_annual": 0.02590011647730517,
+      "smm": 0.0021843966239381073,
+      "wmean_coupon": 0.03133407019757945,
+      "mortgage30us_pct": 6.6425,
+      "gap_decimal": -0.03509092980242055
+    },
+    {
+      "period": "2024-02",
+      "cpr_annual": 0.029321658120968208,
+      "smm": 0.0024769381779539954,
+      "wmean_coupon": 0.031333248471479856,
+      "mortgage30us_pct": 6.776000000000001,
+      "gap_decimal": -0.036426751528520145
+    },
+    {
+      "period": "2024-03",
+      "cpr_annual": 0.03675657901401974,
+      "smm": 0.003115895948412506,
+      "wmean_coupon": 0.0313314027942887,
+      "mortgage30us_pct": 6.82,
+      "gap_decimal": -0.0368685972057113
+    },
+    {
+      "period": "2024-04",
+      "cpr_annual": 0.04222116225420458,
+      "smm": 0.0035884117040246156,
+      "wmean_coupon": 0.031330183559905085,
+      "mortgage30us_pct": 6.9925,
+      "gap_decimal": -0.038594816440094916
+    },
+    {
+      "period": "2024-05",
+      "cpr_annual": 0.048331311861892434,
+      "smm": 0.004119684174775593,
+      "wmean_coupon": 0.031328801155743415,
+      "mortgage30us_pct": 7.06,
+      "gap_decimal": -0.03927119884425658
+    },
+    {
+      "period": "2024-06",
+      "cpr_annual": 0.04638625638311422,
+      "smm": 0.003950224789605829,
+      "wmean_coupon": 0.03132771611691517,
+      "mortgage30us_pct": 6.9175,
+      "gap_decimal": -0.03784728388308483
+    },
+    {
+      "period": "2024-07",
+      "cpr_annual": 0.04913748146412178,
+      "smm": 0.004190013300378881,
+      "wmean_coupon": 0.0313269604878153,
+      "mortgage30us_pct": 6.8475,
+      "gap_decimal": -0.037148039512184705
+    },
+    {
+      "period": "2024-08",
+      "cpr_annual": 0.046662475650680935,
+      "smm": 0.003974270572783939,
+      "wmean_coupon": 0.031325844621871296,
+      "mortgage30us_pct": 6.5,
+      "gap_decimal": -0.033674155378128706
+    },
+    {
+      "period": "2024-09",
+      "cpr_annual": 0.039579698516476136,
+      "smm": 0.003359699892706614,
+      "wmean_coupon": 0.03132376509767289,
+      "mortgage30us_pct": 6.18,
+      "gap_decimal": -0.030476234902327107
+    },
+    {
+      "period": "2024-10",
+      "cpr_annual": 0.043313757267112174,
+      "smm": 0.00368318340527773,
+      "wmean_coupon": 0.03132228673589568,
+      "mortgage30us_pct": 6.428,
+      "gap_decimal": -0.03295771326410432
+    },
+    {
+      "period": "2024-11",
+      "cpr_annual": 0.03783929176570655,
+      "smm": 0.003209321241283548,
+      "wmean_coupon": 0.031321203075863314,
+      "mortgage30us_pct": 6.805,
+      "gap_decimal": -0.036728796924136685
+    },
+    {
+      "period": "2024-12",
+      "cpr_annual": 0.03743731282295504,
+      "smm": 0.0031746239748505706,
+      "wmean_coupon": 0.03132085245452439,
+      "mortgage30us_pct": 6.715,
+      "gap_decimal": -0.035829147545475615
+    },
+    {
+      "period": "2025-01",
+      "cpr_annual": 0.02931452088572528,
+      "smm": 0.0024763269616828675,
+      "wmean_coupon": 0.03132065011331755,
+      "mortgage30us_pct": 6.958,
+      "gap_decimal": -0.038259349886682455
+    },
+    {
+      "period": "2025-02",
+      "cpr_annual": 0.03039417655270915,
+      "smm": 0.0025688330249179925,
+      "wmean_coupon": 0.03132053699031664,
+      "mortgage30us_pct": 6.842499999999999,
+      "gap_decimal": -0.03710446300968336
+    },
+    {
+      "period": "2025-03",
+      "cpr_annual": 0.03878307893444233,
+      "smm": 0.0032908375493789764,
+      "wmean_coupon": 0.031319544284975465,
+      "mortgage30us_pct": 6.65,
+      "gap_decimal": -0.03518045571502454
+    },
+    {
+      "period": "2025-04",
+      "cpr_annual": 0.043683290916313955,
+      "smm": 0.003715259211072234,
+      "wmean_coupon": 0.03131905046923733,
+      "mortgage30us_pct": 6.725,
+      "gap_decimal": -0.03593094953076266
+    },
+    {
+      "period": "2025-05",
+      "cpr_annual": 0.04849984141077379,
+      "smm": 0.004134381944286463,
+      "wmean_coupon": 0.03131853637619606,
+      "mortgage30us_pct": 6.816,
+      "gap_decimal": -0.03684146362380394
+    },
+    {
+      "period": "2025-06",
+      "cpr_annual": 0.05093087328268553,
+      "smm": 0.004346662580136039,
+      "wmean_coupon": 0.03131884610686522,
+      "mortgage30us_pct": 6.8175,
+      "gap_decimal": -0.03685615389313478
+    },
+    {
+      "period": "2025-07",
+      "cpr_annual": 0.05241407810612764,
+      "smm": 0.004476422768743985,
+      "wmean_coupon": 0.03131880108595215,
+      "mortgage30us_pct": 6.720000000000001,
+      "gap_decimal": -0.03588119891404786
+    },
+    {
+      "period": "2025-08",
+      "cpr_annual": 0.048691169759811914,
+      "smm": 0.004151070931443999,
+      "wmean_coupon": 0.03131861043987697,
+      "mortgage30us_pct": 6.5875,
+      "gap_decimal": -0.03455638956012303
+    },
+    {
+      "period": "2025-09",
+      "cpr_annual": 0.04399987354354917,
+      "smm": 0.003742747864843501,
+      "wmean_coupon": 0.031317104144760737,
+      "mortgage30us_pct": 6.3525,
+      "gap_decimal": -0.03220789585523926
+    }
+  ],
+  "full_panel": {
+    "label": "FULL_PANEL_2017_01..2025_09",
+    "n_months": 102,
+    "first": "2017-04",
+    "last": "2025-09",
+    "n_seasonal_dummies": 11,
+    "lags": [
+      0,
+      1,
+      2,
+      3
+    ],
+    "R2_seasonal_only": 0.010938724996717442,
+    "R2_rate_only": 0.4359266851030741,
+    "R2_full": 0.4463639390193964,
+    "typeI_order_S_then_R": {
+      "seasonal": 0.010938724996717442,
+      "rate": 0.435425214022679,
+      "residual": 0.5536360609806036
+    },
+    "typeI_order_R_then_S": {
+      "rate": 0.4359266851030741,
+      "seasonal": 0.010437253916322331,
+      "residual": 0.5536360609806036
+    },
+    "shapley": {
+      "seasonal": 0.010687989456519886,
+      "rate": 0.43567594956287653,
+      "residual": 0.5536360609806036
+    },
+    "shapley_rate_share": 0.43567594956287653,
+    "verdict_vs_threshold": "PASS"
+  },
+  "qt_window": {
+    "label": "QT_WINDOW_2022_06..2025_11",
+    "n_months": 40,
+    "first": "2022-06",
+    "last": "2025-09",
+    "n_seasonal_dummies": 11,
+    "lags": [
+      0,
+      1,
+      2,
+      3
+    ],
+    "R2_seasonal_only": 0.7554324320006556,
+    "R2_rate_only": 0.42964345801044457,
+    "R2_full": 0.941798887183027,
+    "typeI_order_S_then_R": {
+      "seasonal": 0.7554324320006556,
+      "rate": 0.18636645518237138,
+      "residual": 0.058201112816973044
+    },
+    "typeI_order_R_then_S": {
+      "rate": 0.42964345801044457,
+      "seasonal": 0.5121554291725824,
+      "residual": 0.058201112816973044
+    },
+    "shapley": {
+      "seasonal": 0.6337939305866189,
+      "rate": 0.308004956596408,
+      "residual": 0.058201112816973044
+    },
+    "shapley_rate_share": 0.308004956596408,
+    "verdict_vs_threshold": "PASS"
+  },
+  "final_verdict": "TIMING_FIXABLE"
+}

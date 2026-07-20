@@ -3,7 +3,7 @@
   "spec": "hazard/floor_cyclical.py module docstring (fixed ex ante)",
   "git_commit": "47e8ea90daab56108b6e8aef79d59d8eeebb50a1",
   "created_utc": "2026-07-16T06:44:21+00:00",
-  "floor_law": "floor_t = 0.04 * (1 + kappa * z_t), z_t standardized QT-window MORTGAGE30US (ddof=1), clipped >= 0, window-mean pinned at 4%",
+  "floor_law": "floor_t = 0.04 * (1 + kappa * z_t), z_t standardized QT-window MORTGAGE30US (ddof=1), clipped >= 0, window mean pinned at 4% EXCEPT where the clip binds (|kappa|=0.5: realized 4.000519% at -0.5, 4.082786% at +0.5); kappa=+0.5 sets the grid's low end",
   "kappa_grid": [
     -0.5,
     -0.25,

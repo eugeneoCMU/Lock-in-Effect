@@ -76,7 +76,12 @@ PARITY_TOL = 0.01
 
 
 class CyclicalFloor:
-    """floor_t = 0.04 * (1 + kappa * z_t), window-mean-pinned, clipped >= 0."""
+    """floor_t = 0.04 * (1 + kappa * z_t), clipped >= 0.
+
+    Window-mean-pinned at 4% ONLY where the non-negativity clip does not bind.
+    The clip binds at |kappa| = 0.5, where realized window means are 4.0005%
+    and 4.0828%; those cells set the grid's low end. See TECHNICAL.md 24.1a.
+    """
 
     def __init__(self, window_rates: pd.Series, kappa: float,
                  base: float = PRODUCTION_FLOOR):
@@ -245,9 +250,17 @@ def main() -> None:
         "spec": "hazard/floor_cyclical.py module docstring (fixed ex ante)",
         "git_commit": _git_head(),
         "created_utc": datetime.now(timezone.utc).isoformat(timespec="seconds"),
+        # Corrected 2026-07-19: this string previously asserted "window-mean
+        # pinned at 4%" unqualified, which is false where the non-negativity
+        # clip binds. It describes the spec; it is not a result, nothing reads
+        # it as a value, and no gate keys off it -- so it is corrected rather
+        # than preserved. See TECHNICAL.md 24.1a and
+        # test_clip_breaks_the_window_mean_pin_on_the_real_floor_law.
         "floor_law": "floor_t = 0.04 * (1 + kappa * z_t), z_t standardized "
                      "QT-window MORTGAGE30US (ddof=1), clipped >= 0, "
-                     "window-mean pinned at 4%",
+                     "window mean pinned at 4% EXCEPT where the clip binds "
+                     "(|kappa|=0.5: realized 4.000519% at -0.5, 4.082786% at "
+                     "+0.5); kappa=+0.5 sets the grid's low end",
         "kappa_grid": KAPPA_GRID,
         "cells": cells,
         "parity_gate_kappa0": gate_report,

@@ -1,0 +1,740 @@
+{
+  "mode": "oos_identification",
+  "spec": "OOS involuntary floor (2018 rising-rate leg) + temporal holdout; central 5.5/6.5/7.7 band; null beta1=0; production convention otherwise (committed 75k sample, seed 42, US+Danish tuple, shared macro frame); raw-basis scoring; parity vs no_lockin_null at 4%; no benchmark feedback.",
+  "parity_gates": {
+    "central_trapped_b": {
+      "got": 818.5300844066606,
+      "want": 818.5300844066606,
+      "pass": true
+    },
+    "null_trapped_b": {
+      "got": 748.1850239867648,
+      "want": 748.1850239867648,
+      "pass": true
+    },
+    "lockin_marginal_b": {
+      "got": 70.34506041989584,
+      "want": 70.34506041989584,
+      "pass": true
+    },
+    "lockin_marginal_share_pp": {
+      "got": 9.198459770709789,
+      "want": 9.198459770709789,
+      "pass": true
+    },
+    "bind_instrumentation": {
+      "share_got": 0.36269282595934704,
+      "share_anchor": 0.36,
+      "n_got": 1683124,
+      "n_anchor": 1683124,
+      "pass": true
+    }
+  },
+  "parity_all_pass": true,
+  "instrument1_oow_floor": {
+    "spec": "exposure-weighted annual CPR on 2017-2019 OTM cohorts; gap=coupon-MORTGAGE30US; seasoning + 2018/2019 leg split",
+    "market_rate_by_year_pct": {
+      "2017": {
+        "mean": 3.991,
+        "jan": 4.15,
+        "dec": 3.95
+      },
+      "2018": {
+        "mean": 4.539,
+        "jan": 4.033,
+        "dec": 4.638
+      },
+      "2019": {
+        "mean": 3.934,
+        "jan": 4.464,
+        "dec": 3.72
+      }
+    },
+    "legs": {
+      "pooled_2017_2019": {
+        "rate_regime": "mixed",
+        "anchor_grid": {
+          "gap<=+0.0000_age>=12": {
+            "cpr_pct": 6.065,
+            "exposure_upb": 2349443878136.6,
+            "n_cohort_months": 528
+          },
+          "gap<=+0.0000_age>=24": {
+            "cpr_pct": 10.995,
+            "exposure_upb": 123800491191.39998,
+            "n_cohort_months": 95
+          },
+          "gap<=-0.0025_age>=12": {
+            "cpr_pct": 5.185,
+            "exposure_upb": 1748162889501.0798,
+            "n_cohort_months": 438
+          },
+          "gap<=-0.0025_age>=24": {
+            "cpr_pct": 8.92,
+            "exposure_upb": 42080075767.81,
+            "n_cohort_months": 65
+          },
+          "gap<=-0.0050_age>=12": {
+            "cpr_pct": 5.073,
+            "exposure_upb": 1120240339414.35,
+            "n_cohort_months": 396
+          },
+          "gap<=-0.0050_age>=24": {
+            "cpr_pct": 8.92,
+            "exposure_upb": 42080075767.81,
+            "n_cohort_months": 65
+          }
+        },
+        "seasoning": {
+          "age[0,12)": {
+            "cpr_pct": 3.683,
+            "exposure_upb": 3154248829219.58,
+            "n_cohort_months": 1060
+          },
+          "age[12,24)": {
+            "cpr_pct": 5.783,
+            "exposure_upb": 2225643386945.2,
+            "n_cohort_months": 433
+          },
+          "age[24,36)": {
+            "cpr_pct": 10.995,
+            "exposure_upb": 123800491191.39998,
+            "n_cohort_months": 95
+          },
+          "age[36,60)": {
+            "cpr_pct": null,
+            "exposure_upb": 0.0,
+            "n_cohort_months": 0
+          },
+          "age[60,10000)": {
+            "cpr_pct": null,
+            "exposure_upb": 0.0,
+            "n_cohort_months": 0
+          }
+        },
+        "contamination": {
+          "mature_rise_pp_24_vs_12": 5.212,
+          "mature_test_computable": true,
+          "ramp_rise_pp_12_vs_0": 2.1,
+          "ramp_rise_is_psa_confounded": true,
+          "seasoning_contaminated": true,
+          "regime_contaminated": false,
+          "verdict": "CONTAMINATED"
+        }
+      },
+      "2018_rising_rate": {
+        "rate_regime": "rising (refi-suppressed; clean candidate)",
+        "anchor_grid": {
+          "gap<=+0.0000_age>=12": {
+            "cpr_pct": 5.334,
+            "exposure_upb": 1264479178651.8499,
+            "n_cohort_months": 155
+          },
+          "gap<=+0.0000_age>=24": {
+            "cpr_pct": null,
+            "exposure_upb": 0.0,
+            "n_cohort_months": 0
+          },
+          "gap<=-0.0025_age>=12": {
+            "cpr_pct": 4.991,
+            "exposure_upb": 1058073438192.2499,
+            "n_cohort_months": 137
+          },
+          "gap<=-0.0025_age>=24": {
+            "cpr_pct": null,
+            "exposure_upb": 0.0,
+            "n_cohort_months": 0
+          },
+          "gap<=-0.0050_age>=12": {
+            "cpr_pct": 4.695,
+            "exposure_upb": 921389778258.0299,
+            "n_cohort_months": 125
+          },
+          "gap<=-0.0050_age>=24": {
+            "cpr_pct": null,
+            "exposure_upb": 0.0,
+            "n_cohort_months": 0
+          }
+        },
+        "seasoning": {
+          "age[0,12)": {
+            "cpr_pct": 3.776,
+            "exposure_upb": 2428432556718.17,
+            "n_cohort_months": 505
+          },
+          "age[12,24)": {
+            "cpr_pct": 5.334,
+            "exposure_upb": 1264479178651.8499,
+            "n_cohort_months": 155
+          },
+          "age[24,36)": {
+            "cpr_pct": null,
+            "exposure_upb": 0.0,
+            "n_cohort_months": 0
+          },
+          "age[36,60)": {
+            "cpr_pct": null,
+            "exposure_upb": 0.0,
+            "n_cohort_months": 0
+          },
+          "age[60,10000)": {
+            "cpr_pct": null,
+            "exposure_upb": 0.0,
+            "n_cohort_months": 0
+          }
+        },
+        "contamination": {
+          "mature_rise_pp_24_vs_12": null,
+          "mature_test_computable": false,
+          "ramp_rise_pp_12_vs_0": 1.558,
+          "ramp_rise_is_psa_confounded": true,
+          "seasoning_contaminated": null,
+          "regime_contaminated": false,
+          "verdict": "CLEAN_BY_CONSTRUCTION_MATURE_TEST_NOT_COMPUTABLE"
+        }
+      },
+      "2019_falling_rate": {
+        "rate_regime": "falling (refi wave; regime-contaminated)",
+        "anchor_grid": {
+          "gap<=+0.0000_age>=12": {
+            "cpr_pct": 6.91,
+            "exposure_upb": 1084964699484.75,
+            "n_cohort_months": 373
+          },
+          "gap<=+0.0000_age>=24": {
+            "cpr_pct": 10.995,
+            "exposure_upb": 123800491191.39998,
+            "n_cohort_months": 95
+          },
+          "gap<=-0.0025_age>=12": {
+            "cpr_pct": 5.482,
+            "exposure_upb": 690089451308.83,
+            "n_cohort_months": 301
+          },
+          "gap<=-0.0025_age>=24": {
+            "cpr_pct": 8.92,
+            "exposure_upb": 42080075767.81,
+            "n_cohort_months": 65
+          },
+          "gap<=-0.0050_age>=12": {
+            "cpr_pct": 6.807,
+            "exposure_upb": 198850561156.32,
+            "n_cohort_months": 271
+          },
+          "gap<=-0.0050_age>=24": {
+            "cpr_pct": 8.92,
+            "exposure_upb": 42080075767.81,
+            "n_cohort_months": 65
+          }
+        },
+        "seasoning": {
+          "age[0,12)": {
+            "cpr_pct": 3.864,
+            "exposure_upb": 482901158719.23,
+            "n_cohort_months": 314
+          },
+          "age[12,24)": {
+            "cpr_pct": 6.371,
+            "exposure_upb": 961164208293.3501,
+            "n_cohort_months": 278
+          },
+          "age[24,36)": {
+            "cpr_pct": 10.995,
+            "exposure_upb": 123800491191.39998,
+            "n_cohort_months": 95
+          },
+          "age[36,60)": {
+            "cpr_pct": null,
+            "exposure_upb": 0.0,
+            "n_cohort_months": 0
+          },
+          "age[60,10000)": {
+            "cpr_pct": null,
+            "exposure_upb": 0.0,
+            "n_cohort_months": 0
+          }
+        },
+        "contamination": {
+          "mature_rise_pp_24_vs_12": 4.624,
+          "mature_test_computable": true,
+          "ramp_rise_pp_12_vs_0": 2.507,
+          "ramp_rise_is_psa_confounded": true,
+          "seasoning_contaminated": true,
+          "regime_contaminated": true,
+          "verdict": "CONTAMINATED"
+        }
+      }
+    },
+    "defensible_clean_floor": {
+      "leg": "2018_rising_rate",
+      "age_cut": ">=12",
+      "reads_pct": {
+        "gap<=+0.0000_age>=12": 5.334,
+        "gap<=-0.0025_age>=12": 4.991,
+        "gap<=-0.0050_age>=12": 4.695
+      },
+      "clean_lo_pct": 4.695,
+      "clean_mid_pct": 4.991,
+      "clean_hi_pct": 5.334,
+      "primary_point_selection": "gap<=-0.0025_age>=12",
+      "note": "2018 leg has NO age>=24 OTM cohort-months (OTM-in-2018 loans are all recently-originated low-coupon => young); the age>=24 probe is not computable for the clean leg."
+    },
+    "contaminated_upper_anchors": {
+      "pooled_2017_2019_gap0_age12_pct": 6.065,
+      "2019_falling_gap0_age12_pct": 6.91
+    },
+    "_floor_values": {
+      "clean_lo": 0.046950000000000006,
+      "clean_mid": 0.049909999999999996,
+      "clean_hi": 0.05334,
+      "contaminated_2019": 0.0691,
+      "pooled": 0.06065
+    }
+  },
+  "instrument1_marginal_table": [
+    {
+      "floor_annual_cpr_pct": 3.9719,
+      "floor_monthly_smm": 0.003372,
+      "floor_bind_share": 0.35324135357822717,
+      "floor_bind_loan_months": 1683124,
+      "null_trapped_b": 748.599981980453,
+      "null_share_pct": 97.88841998995129,
+      "band": {
+        "5.5": {
+          "central_trapped_b": 810.7740926627339,
+          "central_share_pct": 106.01843014953975,
+          "marginal_b": 62.17411068228091,
+          "marginal_pp": 8.130010159588466,
+          "marginal_positive": true
+        },
+        "6.5": {
+          "central_trapped_b": 819.526691066363,
+          "central_share_pct": 107.16293729509323,
+          "marginal_b": 70.92670908591003,
+          "marginal_pp": 9.274517305141941,
+          "marginal_positive": true
+        },
+        "7.7": {
+          "central_trapped_b": 828.8173851190342,
+          "central_share_pct": 108.37780689610501,
+          "marginal_b": 80.21740313858118,
+          "marginal_pp": 10.489386906153726,
+          "marginal_positive": true
+        }
+      }
+    },
+    {
+      "floor_annual_cpr_pct": 4.0,
+      "floor_monthly_smm": 0.003396,
+      "floor_bind_share": 0.36269282595934704,
+      "floor_bind_loan_months": 1683124,
+      "null_trapped_b": 748.1850239867648,
+      "null_share_pct": 97.83415925879702,
+      "band": {
+        "5.5": {
+          "central_trapped_b": 809.9065834462376,
+          "central_share_pct": 105.90499292195008,
+          "marginal_b": 61.721559459472815,
+          "marginal_pp": 8.070833663153067,
+          "marginal_positive": true
+        },
+        "6.5": {
+          "central_trapped_b": 818.5300844066606,
+          "central_share_pct": 107.0326190295068,
+          "marginal_b": 70.34506041989584,
+          "marginal_pp": 9.198459770709789,
+          "marginal_positive": true
+        },
+        "7.7": {
+          "central_trapped_b": 827.6582704023259,
+          "central_share_pct": 108.22623875432453,
+          "marginal_b": 79.4732464155611,
+          "marginal_pp": 10.392079495527511,
+          "marginal_positive": true
+        }
+      }
+    },
+    {
+      "floor_annual_cpr_pct": 4.5,
+      "floor_monthly_smm": 0.00383,
+      "floor_bind_share": 0.5351768497151725,
+      "floor_bind_loan_months": 1683124,
+      "null_trapped_b": 738.8687829001886,
+      "null_share_pct": 96.61594907690815,
+      "band": {
+        "5.5": {
+          "central_trapped_b": 790.3375463838762,
+          "central_share_pct": 103.3461067813285,
+          "marginal_b": 51.46876348368755,
+          "marginal_pp": 6.73015770442035,
+          "marginal_positive": true
+        },
+        "6.5": {
+          "central_trapped_b": 796.5103333596571,
+          "central_share_pct": 104.15327266235776,
+          "marginal_b": 57.641550459468476,
+          "marginal_pp": 7.537323585449613,
+          "marginal_positive": true
+        },
+        "7.7": {
+          "central_trapped_b": 802.7535052714493,
+          "central_share_pct": 104.96964221736924,
+          "marginal_b": 63.88472237126064,
+          "marginal_pp": 8.35369314046109,
+          "marginal_positive": true
+        }
+      }
+    },
+    {
+      "floor_annual_cpr_pct": 4.695,
+      "floor_monthly_smm": 0.003999,
+      "floor_bind_share": 0.6000680876750614,
+      "floor_bind_loan_months": 1683124,
+      "null_trapped_b": 734.0068506865199,
+      "null_share_pct": 95.98019316727641,
+      "band": {
+        "5.5": {
+          "central_trapped_b": 780.530816637283,
+          "central_share_pct": 102.06375932838996,
+          "marginal_b": 46.52396595076311,
+          "marginal_pp": 6.083566161113552,
+          "marginal_positive": true
+        },
+        "6.5": {
+          "central_trapped_b": 785.7883567116477,
+          "central_share_pct": 102.7512457073662,
+          "marginal_b": 51.78150602512778,
+          "marginal_pp": 6.771052540089784,
+          "marginal_positive": true
+        },
+        "7.7": {
+          "central_trapped_b": 791.0387351801289,
+          "central_share_pct": 103.43779562053771,
+          "marginal_b": 57.03188449360903,
+          "marginal_pp": 7.457602453261302,
+          "marginal_positive": true
+        }
+      }
+    },
+    {
+      "floor_annual_cpr_pct": 4.991,
+      "floor_monthly_smm": 0.004257,
+      "floor_bind_share": 0.6881875607501289,
+      "floor_bind_loan_months": 1683124,
+      "null_trapped_b": 724.9180585654117,
+      "null_share_pct": 94.79172466371236,
+      "band": {
+        "5.5": {
+          "central_trapped_b": 763.4969115188981,
+          "central_share_pct": 99.83637207427033,
+          "marginal_b": 38.578852953486376,
+          "marginal_pp": 5.044647410557971,
+          "marginal_positive": true
+        },
+        "6.5": {
+          "central_trapped_b": 767.5264524465003,
+          "central_share_pct": 100.36328284662208,
+          "marginal_b": 42.60839388108866,
+          "marginal_pp": 5.571558182909726,
+          "marginal_positive": true
+        },
+        "7.7": {
+          "central_trapped_b": 771.4752588926964,
+          "central_share_pct": 100.87963661788675,
+          "marginal_b": 46.557200327284704,
+          "marginal_pp": 6.087911954174388,
+          "marginal_positive": true
+        }
+      }
+    },
+    {
+      "floor_annual_cpr_pct": 5.0,
+      "floor_monthly_smm": 0.004265,
+      "floor_bind_share": 0.6905759765768892,
+      "floor_bind_loan_months": 1683124,
+      "null_trapped_b": 724.6043821529022,
+      "null_share_pct": 94.7507077132077,
+      "band": {
+        "5.5": {
+          "central_trapped_b": 762.9417265610255,
+          "central_share_pct": 99.7637749868585,
+          "marginal_b": 38.33734440812327,
+          "marginal_pp": 5.01306727365079,
+          "marginal_positive": true
+        },
+        "6.5": {
+          "central_trapped_b": 766.9372675115623,
+          "central_share_pct": 100.28623985470217,
+          "marginal_b": 42.332885358660064,
+          "marginal_pp": 5.535532141494471,
+          "marginal_positive": true
+        },
+        "7.7": {
+          "central_trapped_b": 770.8503124329418,
+          "central_share_pct": 100.79791737797727,
+          "marginal_b": 46.2459302800396,
+          "marginal_pp": 6.047209664769568,
+          "marginal_positive": true
+        }
+      }
+    },
+    {
+      "floor_annual_cpr_pct": 5.334,
+      "floor_monthly_smm": 0.004558,
+      "floor_bind_share": 0.7725532996974673,
+      "floor_bind_loan_months": 1683124,
+      "null_trapped_b": 711.2235461485112,
+      "null_share_pct": 93.00100302960715,
+      "band": {
+        "5.5": {
+          "central_trapped_b": 740.9837807091187,
+          "central_share_pct": 96.89251038973461,
+          "marginal_b": 29.7602345606075,
+          "marginal_pp": 3.891507360127463,
+          "marginal_positive": true
+        },
+        "6.5": {
+          "central_trapped_b": 743.8451864084004,
+          "central_share_pct": 97.26667348029723,
+          "marginal_b": 32.621640259889205,
+          "marginal_pp": 4.265670450690081,
+          "marginal_positive": true
+        },
+        "7.7": {
+          "central_trapped_b": 746.5704226367366,
+          "central_share_pct": 97.62303078047435,
+          "marginal_b": 35.34687648822535,
+          "marginal_pp": 4.622027750867204,
+          "marginal_positive": true
+        }
+      }
+    },
+    {
+      "floor_annual_cpr_pct": 6.0,
+      "floor_monthly_smm": 0.005143,
+      "floor_bind_share": 0.8874622428294053,
+      "floor_bind_loan_months": 1683124,
+      "null_trapped_b": 674.6446335654999,
+      "null_share_pct": 88.21787179277656,
+      "band": {
+        "5.5": {
+          "central_trapped_b": 690.8078881203946,
+          "central_share_pct": 90.33141105053645,
+          "marginal_b": 16.163254554894706,
+          "marginal_pp": 2.113539257759882,
+          "marginal_positive": true
+        },
+        "6.5": {
+          "central_trapped_b": 692.0878877790138,
+          "central_share_pct": 90.4987863473384,
+          "marginal_b": 17.44325421351391,
+          "marginal_pp": 2.280914554561832,
+          "marginal_positive": true
+        },
+        "7.7": {
+          "central_trapped_b": 693.2547707392563,
+          "central_share_pct": 90.65137028006724,
+          "marginal_b": 18.610137173756357,
+          "marginal_pp": 2.4334984872906773,
+          "marginal_positive": true
+        }
+      }
+    },
+    {
+      "floor_annual_cpr_pct": 6.91,
+      "floor_monthly_smm": 0.005949,
+      "floor_bind_share": 0.9645753967027979,
+      "floor_bind_loan_months": 1683124,
+      "null_trapped_b": 608.4069922657899,
+      "null_share_pct": 79.556506301508,
+      "band": {
+        "5.5": {
+          "central_trapped_b": 613.7512556165934,
+          "central_share_pct": 80.25533278830055,
+          "marginal_b": 5.344263350803544,
+          "marginal_pp": 0.6988264867925551,
+          "marginal_positive": true
+        },
+        "6.5": {
+          "central_trapped_b": 614.0932577505894,
+          "central_share_pct": 80.30005366638751,
+          "marginal_b": 5.686265484799492,
+          "marginal_pp": 0.7435473648795181,
+          "marginal_positive": true
+        },
+        "7.7": {
+          "central_trapped_b": 614.3950480708002,
+          "central_share_pct": 80.33951636786333,
+          "marginal_b": 5.988055805010276,
+          "marginal_pp": 0.783010066355331,
+          "marginal_positive": true
+        }
+      }
+    }
+  ],
+  "committed_sweep_crosscheck": {
+    "4.0": {
+      "committed_marginal_b": 70.34506041989584,
+      "fresh_marginal_b": 70.34506041989584,
+      "delta_marginal_b": 0.0,
+      "committed_null_b": 748.1850239867648,
+      "fresh_null_b": 748.1850239867648,
+      "delta_null_b": 0.0,
+      "match_within_0.01B": true
+    },
+    "4.5": {
+      "committed_marginal_b": 57.641550459468476,
+      "fresh_marginal_b": 57.641550459468476,
+      "delta_marginal_b": 0.0,
+      "committed_null_b": 738.8687829001886,
+      "fresh_null_b": 738.8687829001886,
+      "delta_null_b": 0.0,
+      "match_within_0.01B": true
+    },
+    "5.0": {
+      "committed_marginal_b": 42.332885358660064,
+      "fresh_marginal_b": 42.332885358660064,
+      "delta_marginal_b": 0.0,
+      "committed_null_b": 724.6043821529022,
+      "fresh_null_b": 724.6043821529022,
+      "delta_null_b": 0.0,
+      "match_within_0.01B": true
+    },
+    "6.0": {
+      "committed_marginal_b": 17.44325421351391,
+      "fresh_marginal_b": 17.44325421351391,
+      "delta_marginal_b": 0.0,
+      "committed_null_b": 674.6446335654999,
+      "fresh_null_b": 674.6446335654999,
+      "delta_null_b": 0.0,
+      "match_within_0.01B": true
+    }
+  },
+  "instrument2_temporal_holdout": {
+    "calibration_floor": {
+      "window": "202206..202312 (Jun 2022 - Dec 2023)",
+      "reads": {
+        "gap<=-0.02_age>=12": {
+          "cpr_pct": 3.972,
+          "exposure_upb": 34136335241658.965,
+          "n_cohort_months": 2838
+        },
+        "gap<=0_age>=12": {
+          "cpr_pct": 4.305,
+          "exposure_upb": 36379430399721.64,
+          "n_cohort_months": 4740
+        }
+      },
+      "h_cal_pct": 3.972,
+      "_h_cal": 0.039719264231555695,
+      "primary_selection": "gap<=-0.02_age>=12 (deeply-OTM, paper floor def.)"
+    },
+    "heldout_window": "2024-01..2025-11 (strictly held out of floor calibration)",
+    "at_calibrated_floor_h_cal": {
+      "floor_annual_cpr_pct": 3.9719,
+      "heldout_marginal_b": 45.14516067336746,
+      "heldout_marginal_pp_of_heldout_emp": 10.56571993889236,
+      "calibration_window_marginal_b": 25.78154841254247,
+      "full_window_marginal_b": 70.92670908590993,
+      "aggregate_marginal_b_scorecheck": 70.92670908591003,
+      "additivity_ok": true,
+      "heldout_sign_positive": true,
+      "n_heldout_months": 23,
+      "n_calibration_months": 19,
+      "heldout_emp_delta_b": 427.27955060770023
+    },
+    "at_production_floor_4pct": {
+      "floor_annual_cpr_pct": 4.0,
+      "heldout_marginal_b": 44.829469872122296,
+      "heldout_marginal_pp_of_heldout_emp": 10.491836037639382,
+      "calibration_window_marginal_b": 25.5155905477735,
+      "full_window_marginal_b": 70.34506041989579,
+      "aggregate_marginal_b_scorecheck": 70.34506041989584,
+      "additivity_ok": true,
+      "heldout_sign_positive": true,
+      "n_heldout_months": 23,
+      "n_calibration_months": 19,
+      "heldout_emp_delta_b": 427.27955060770023
+    }
+  },
+  "step4_sign_robustness": {
+    "all_floor_x_band_cells_positive": true,
+    "n_cells": 27,
+    "floors_pct": [
+      3.972,
+      4.0,
+      4.5,
+      4.695,
+      4.991,
+      5.0,
+      5.334,
+      6.0,
+      6.91
+    ],
+    "band_pct": [
+      5.5,
+      6.5,
+      7.7
+    ]
+  },
+  "headline_oos_marginal": {
+    "clean_floor_provenance": "2018 rising-rate leg, age>=12, exposure-weighted turnover CPR on OTM cohort-months OUTSIDE the QT window (no in-window locked-in population used).",
+    "clean_floor_band_pct": [
+      4.695,
+      5.334
+    ],
+    "clean_floor_point_pct": 4.991,
+    "clean_marginal_b_point_at_6.5": 42.60839388108866,
+    "clean_marginal_pp_point_at_6.5": 5.571558182909726,
+    "clean_marginal_b_range_at_6.5": [
+      32.621640259889205,
+      51.78150602512778
+    ],
+    "clean_marginal_b_full_band_range": [
+      29.7602345606075,
+      57.03188449360903
+    ],
+    "contaminated_upper_floor_pct": 6.91,
+    "contaminated_marginal_b_at_6.5": 5.686265484799492,
+    "in_sample_production_point_b": 70.34506041989584,
+    "in_sample_production_point_pp": 9.198459770709789,
+    "benchmark_consistent_marginal_b": 16.562976013235243,
+    "reported_range_contains_benchmark_consistent": true
+  },
+  "self_checks_hard_wiring": {
+    "production_4pct_reproduces_70.345B": true,
+    "production_4pct_reproduces_9.198pp": true,
+    "committed_sweep_crosscheck_all_match": true,
+    "holdout_monthly_additivity_ok": true
+  },
+  "self_checks_soft_interpretive": {
+    "floor_6pct_in_2.1_to_2.4pp": true,
+    "floor_6pct_in_16_to_18B": true,
+    "range_contains_benchmark_consistent_16.5B": true,
+    "sign_robust_all_cells_positive": true
+  },
+  "self_checks": {
+    "production_4pct_reproduces_70.345B": true,
+    "production_4pct_reproduces_9.198pp": true,
+    "committed_sweep_crosscheck_all_match": true,
+    "holdout_monthly_additivity_ok": true,
+    "floor_6pct_in_2.1_to_2.4pp": true,
+    "floor_6pct_in_16_to_18B": true,
+    "range_contains_benchmark_consistent_16.5B": true,
+    "sign_robust_all_cells_positive": true
+  },
+  "verdict": {
+    "sign_robust_oos": true,
+    "clean_marginal_b_point": 42.60839388108866,
+    "clean_marginal_b_range": [
+      32.621640259889205,
+      51.78150602512778
+    ],
+    "contaminated_marginal_b": 5.686265484799492,
+    "in_sample_point_b": 70.34506041989584,
+    "single_floor_identifiable": false,
+    "single_floor_reason": "only a range: no deep-OTM mature 2017-2019 cohorts; pooled/2019 refi-contaminated; residual seasoning in the clean 2018 leg.",
+    "one_paragraph": "The lock-in marginal is SIGN-ROBUST out of sample: it stays strictly positive at every floor x elasticity cell (confirmed), and the temporal holdout \u2014 floor calibrated on Jun2022-Dec2023, marginal summed over the strictly held-out Jan2024-Nov2025 months \u2014 is +$45.1B (vs +$44.8B at the production 4% floor over the same months), so the positive sign is not an artifact of the floor touching the evaluation months. On MAGNITUDE: anchored on the CLEAN out-of-window involuntary floor (the 2018 rising-rate leg, ~5.0% CPR, age>=12, refi-suppressed), the central (6.5) marginal is ~$43B (range $33-$52B across the clean floor band), materially BELOW the $70B in-sample production point but NOT collapsed to the benchmark-consistent ~$16.6B. The collapse to ~$6B occurs ONLY if the contaminated, refi-inflated pooled/2019 floor (~6.9%) is used \u2014 and that read is disqualified as a pure involuntary floor because its turnover rises with loan age (seasoning contamination) and sits in a falling-rate refi wave (regime contamination). A SINGLE OOS floor is NOT cleanly identifiable \u2014 only a range \u2014 because (a) 2017-2019 lacks deep-OTM MATURE cohorts (the clean 2018 leg has NO age>=24 OTM cohort-months at all), (b) the pooled and 2019 reads are refi-contaminated, and (c) consequently the decisive mature-age seasoning test is NOT COMPUTABLE on the clean leg \u2014 2018 is clean by rate-regime construction, not clean by test, and its one computable age contrast ([0,12)->[12,24)) is confounded by PSA-ramp immaturity. The reported OOS range DOES contain the $16.6B benchmark-consistent figure at its contaminated-floor edge."
+  },
+  "runtime_s": 774.8
+}

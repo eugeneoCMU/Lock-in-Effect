@@ -1,0 +1,580 @@
+{
+  "mode": "subgroup_marginals_placebo",
+  "null_for": "subgroup_marginals.py (gate #48) / data/subgroup_marginals_results.json",
+  "spec": "12 random 3-way partitions of the committed 75k sample at seed 20260720, each scored through the imported committed group-ablation engine (marginal_decomposition.run_leg) and the imported committed verdict rule (sign homogeneity AND intensity in [0.5, 2.0])",
+  "engine": "production US regime, fractional mode, seed RNG_SEED, committed 75k sample; run_leg + anchors imported from marginal_decomposition.py, verdict band imported from subgroup_marginals.py",
+  "seed": 20260720,
+  "n_placebo": 12,
+  "n_cells": 3,
+  "committed_anchors": {
+    "central_trapped_b": 818.5300844066606,
+    "null_trapped_b": 748.1850239867648,
+    "total_marginal_b": 70.34506041989584,
+    "total_marginal_pp": 9.198459770709789
+  },
+  "gates": {
+    "G1_central_parity": {
+      "trapped_b": 818.5300844066606,
+      "diff_b": 0.0,
+      "pass": true
+    },
+    "G2_null_parity": {
+      "trapped_b": 748.1850239867648,
+      "diff_b": 0.0,
+      "pass": true
+    },
+    "G3_committed_fico_cell_reproduction": {
+      "rule": "exact float equality against data/subgroup_marginals_results.json",
+      "cells": [
+        {
+          "cell": "<680",
+          "got_marginal_b": 5.966384513387425,
+          "committed_marginal_b": 5.966384513387425,
+          "abs_diff_b": 0.0,
+          "bit_exact": true
+        },
+        {
+          "cell": "680-740",
+          "got_marginal_b": 23.441675966324624,
+          "committed_marginal_b": 23.441675966324624,
+          "abs_diff_b": 0.0,
+          "bit_exact": true
+        },
+        {
+          "cell": "740+",
+          "got_marginal_b": 40.37556410489333,
+          "committed_marginal_b": 40.37556410489333,
+          "abs_diff_b": 0.0,
+          "bit_exact": true
+        }
+      ],
+      "pass": true
+    }
+  },
+  "benchmark_b": 764.7482532227002,
+  "placebo_partitions": [
+    {
+      "cells": [
+        {
+          "cell": "random_0",
+          "n_loans": 25124,
+          "balance_share_pct": 33.467028496495416,
+          "marginal_b": 23.471864588698395,
+          "marginal_pp": 3.0692276170342843,
+          "share_of_sum_pct": 33.531265553505996,
+          "intensity": 1.001919413222399
+        },
+        {
+          "cell": "random_1",
+          "n_loans": 24875,
+          "balance_share_pct": 33.108348549972604,
+          "marginal_b": 23.15889285707135,
+          "marginal_pp": 3.0283028120009727,
+          "share_of_sum_pct": 33.08416267404494,
+          "intensity": 0.9992694931343024
+        },
+        {
+          "cell": "random_2",
+          "n_loans": 25001,
+          "balance_share_pct": 33.42462295353197,
+          "marginal_b": 23.36917903513711,
+          "marginal_pp": 3.0558002501683172,
+          "share_of_sum_pct": 33.384571772449064,
+          "intensity": 0.9988017462115103
+        }
+      ],
+      "sum_cells_b": 69.99993648090685,
+      "residual_b": 0.34512393898899063,
+      "residual_frac_of_total": 0.004906157403645907,
+      "additivity_verdict": "shares_readable",
+      "sign_homogeneous": true,
+      "intensity_band_ok": true,
+      "intensity_min": 0.9988017462115103,
+      "intensity_max": 1.001919413222399,
+      "intensity_band_width": 0.0031176670108886695,
+      "verdict": "broad_based",
+      "partition_index": 0
+    },
+    {
+      "cells": [
+        {
+          "cell": "random_0",
+          "n_loans": 25231,
+          "balance_share_pct": 34.072636540943925,
+          "marginal_b": 23.855437272235008,
+          "marginal_pp": 3.119384342717568,
+          "share_of_sum_pct": 34.079242873802244,
+          "intensity": 1.0001938896877083
+        },
+        {
+          "cell": "random_1",
+          "n_loans": 25024,
+          "balance_share_pct": 33.1156550784791,
+          "marginal_b": 23.10385564642536,
+          "marginal_pp": 3.0211060370604534,
+          "share_of_sum_pct": 33.005553363391755,
+          "intensity": 0.996675236687107
+        },
+        {
+          "cell": "random_2",
+          "n_loans": 24745,
+          "balance_share_pct": 32.811708380576974,
+          "marginal_b": 23.04061101281286,
+          "marginal_pp": 3.0128360431969847,
+          "share_of_sum_pct": 32.915203762806,
+          "intensity": 1.0031542210795183
+        }
+      ],
+      "sum_cells_b": 69.99990393147323,
+      "residual_b": 0.34515648842261726,
+      "residual_frac_of_total": 0.004906620114651233,
+      "additivity_verdict": "shares_readable",
+      "sign_homogeneous": true,
+      "intensity_band_ok": true,
+      "intensity_min": 0.996675236687107,
+      "intensity_max": 1.0031542210795183,
+      "intensity_band_width": 0.006478984392411347,
+      "verdict": "broad_based",
+      "partition_index": 1
+    },
+    {
+      "cells": [
+        {
+          "cell": "random_0",
+          "n_loans": 24917,
+          "balance_share_pct": 33.68001175307896,
+          "marginal_b": 23.584968240632065,
+          "marginal_pp": 3.0840172751285713,
+          "share_of_sum_pct": 33.692851133603426,
+          "intensity": 1.0003812166283848
+        },
+        {
+          "cell": "random_1",
+          "n_loans": 24982,
+          "balance_share_pct": 33.18278207182504,
+          "marginal_b": 23.156689135475858,
+          "marginal_pp": 3.0280146489896542,
+          "share_of_sum_pct": 33.08102312576235,
+          "intensity": 0.9969333811178813
+        },
+        {
+          "cell": "random_2",
+          "n_loans": 25101,
+          "balance_share_pct": 33.137206175096,
+          "marginal_b": 23.258260847226097,
+          "marginal_pp": 3.0412963676888745,
+          "share_of_sum_pct": 33.22612574063423,
+          "intensity": 1.002683375450193
+        }
+      ],
+      "sum_cells_b": 69.99991822333402,
+      "residual_b": 0.34514219656182377,
+      "residual_frac_of_total": 0.004906416946714377,
+      "additivity_verdict": "shares_readable",
+      "sign_homogeneous": true,
+      "intensity_band_ok": true,
+      "intensity_min": 0.9969333811178813,
+      "intensity_max": 1.002683375450193,
+      "intensity_band_width": 0.005749994332311603,
+      "verdict": "broad_based",
+      "partition_index": 2
+    },
+    {
+      "cells": [
+        {
+          "cell": "random_0",
+          "n_loans": 25188,
+          "balance_share_pct": 33.4314950076903,
+          "marginal_b": 23.45900696056185,
+          "marginal_pp": 3.0675463280503132,
+          "share_of_sum_pct": 33.512911775957946,
+          "intensity": 1.0024353313619063
+        },
+        {
+          "cell": "random_1",
+          "n_loans": 24929,
+          "balance_share_pct": 33.60798875089028,
+          "marginal_b": 23.47724756882269,
+          "marginal_pp": 3.0699315062032504,
+          "share_of_sum_pct": 33.538969822507525,
+          "intensity": 0.9979463535026051
+        },
+        {
+          "cell": "random_2",
+          "n_loans": 24883,
+          "balance_share_pct": 32.96051624141941,
+          "marginal_b": 23.063652125671524,
+          "marginal_pp": 3.0158489448625416,
+          "share_of_sum_pct": 32.94811840153453,
+          "intensity": 0.9996238578366287
+        }
+      ],
+      "sum_cells_b": 69.99990665505607,
+      "residual_b": 0.3451537648397789,
+      "residual_frac_of_total": 0.004906581397180211,
+      "additivity_verdict": "shares_readable",
+      "sign_homogeneous": true,
+      "intensity_band_ok": true,
+      "intensity_min": 0.9979463535026051,
+      "intensity_max": 1.0024353313619063,
+      "intensity_band_width": 0.004488977859301246,
+      "verdict": "broad_based",
+      "partition_index": 3
+    },
+    {
+      "cells": [
+        {
+          "cell": "random_0",
+          "n_loans": 24975,
+          "balance_share_pct": 33.39899707102119,
+          "marginal_b": 23.466814747105104,
+          "marginal_pp": 3.068567289721079,
+          "share_of_sum_pct": 33.52399423141623,
+          "intensity": 1.0037425423323114
+        },
+        {
+          "cell": "random_1",
+          "n_loans": 24900,
+          "balance_share_pct": 32.75435681928955,
+          "marginal_b": 22.91220259089789,
+          "marginal_pp": 2.9960451029923036,
+          "share_of_sum_pct": 32.73169178535642,
+          "intensity": 0.9993080299497812
+        },
+        {
+          "cell": "random_2",
+          "n_loans": 25125,
+          "balance_share_pct": 33.84664610968925,
+          "marginal_b": 23.62103869682869,
+          "marginal_pp": 3.0887339195987775,
+          "share_of_sum_pct": 33.74431398322735,
+          "intensity": 0.9969765947819389
+        }
+      ],
+      "sum_cells_b": 70.00005603483169,
+      "residual_b": 0.34500438506415776,
+      "residual_frac_of_total": 0.004904457868182873,
+      "additivity_verdict": "shares_readable",
+      "sign_homogeneous": true,
+      "intensity_band_ok": true,
+      "intensity_min": 0.9969765947819389,
+      "intensity_max": 1.0037425423323114,
+      "intensity_band_width": 0.00676594755037252,
+      "verdict": "broad_based",
+      "partition_index": 4
+    },
+    {
+      "cells": [
+        {
+          "cell": "random_0",
+          "n_loans": 24832,
+          "balance_share_pct": 33.1022694970695,
+          "marginal_b": 23.108343857122804,
+          "marginal_pp": 3.021692924402599,
+          "share_of_sum_pct": 33.0119502034794,
+          "intensity": 0.9972715075140666
+        },
+        {
+          "cell": "random_1",
+          "n_loans": 25158,
+          "balance_share_pct": 33.71242810406648,
+          "marginal_b": 23.702317489352254,
+          "marginal_pp": 3.099362095888301,
+          "share_of_sum_pct": 33.8604847453996,
+          "intensity": 1.0043917525274682
+        },
+        {
+          "cell": "random_2",
+          "n_loans": 25010,
+          "balance_share_pct": 33.18530239886401,
+          "marginal_b": 23.189274175926244,
+          "marginal_pp": 3.0322755335765845,
+          "share_of_sum_pct": 33.127565051120996,
+          "intensity": 0.9982601530325368
+        }
+      ],
+      "sum_cells_b": 69.9999355224013,
+      "residual_b": 0.3451248974945429,
+      "residual_frac_of_total": 0.00490617102941503,
+      "additivity_verdict": "shares_readable",
+      "sign_homogeneous": true,
+      "intensity_band_ok": true,
+      "intensity_min": 0.9972715075140666,
+      "intensity_max": 1.0043917525274682,
+      "intensity_band_width": 0.007120245013401583,
+      "verdict": "broad_based",
+      "partition_index": 5
+    },
+    {
+      "cells": [
+        {
+          "cell": "random_0",
+          "n_loans": 24981,
+          "balance_share_pct": 33.36729162650969,
+          "marginal_b": 23.36790152629021,
+          "marginal_pp": 3.0556332005750013,
+          "share_of_sum_pct": 33.382709037670274,
+          "intensity": 1.000462051620286
+        },
+        {
+          "cell": "random_1",
+          "n_loans": 24998,
+          "balance_share_pct": 33.21251916184385,
+          "marginal_b": 23.236136685564702,
+          "marginal_pp": 3.03840336838248,
+          "share_of_sum_pct": 33.19447359280648,
+          "intensity": 0.9994566636469389
+        },
+        {
+          "cell": "random_2",
+          "n_loans": 25021,
+          "balance_share_pct": 33.42018921164647,
+          "marginal_b": 23.395977364834835,
+          "marginal_pp": 3.0593044529677083,
+          "share_of_sum_pct": 33.42281736952324,
+          "intensity": 1.0000786398263672
+        }
+      ],
+      "sum_cells_b": 70.00001557668975,
+      "residual_b": 0.34504484320609663,
+      "residual_frac_of_total": 0.00490503300653228,
+      "additivity_verdict": "shares_readable",
+      "sign_homogeneous": true,
+      "intensity_band_ok": true,
+      "intensity_min": 0.9994566636469389,
+      "intensity_max": 1.000462051620286,
+      "intensity_band_width": 0.0010053879733471494,
+      "verdict": "broad_based",
+      "partition_index": 6
+    },
+    {
+      "cells": [
+        {
+          "cell": "random_0",
+          "n_loans": 24852,
+          "balance_share_pct": 33.09069017260482,
+          "marginal_b": 23.246389307256322,
+          "marginal_pp": 3.0397440215514693,
+          "share_of_sum_pct": 33.20919666715652,
+          "intensity": 1.0035812639124042
+        },
+        {
+          "cell": "random_1",
+          "n_loans": 25116,
+          "balance_share_pct": 33.25483914170846,
+          "marginal_b": 23.267533136995098,
+          "marginal_pp": 3.042508830709212,
+          "share_of_sum_pct": 33.239402201048726,
+          "intensity": 0.9995357986669564
+        },
+        {
+          "cell": "random_2",
+          "n_loans": 25032,
+          "balance_share_pct": 33.65447068568672,
+          "marginal_b": 23.485931934179575,
+          "marginal_pp": 3.071067091060135,
+          "share_of_sum_pct": 33.55140113179475,
+          "intensity": 0.996937418661117
+        }
+      ],
+      "sum_cells_b": 69.999854378431,
+      "residual_b": 0.34520604146484857,
+      "residual_frac_of_total": 0.00490732454282196,
+      "additivity_verdict": "shares_readable",
+      "sign_homogeneous": true,
+      "intensity_band_ok": true,
+      "intensity_min": 0.996937418661117,
+      "intensity_max": 1.0035812639124042,
+      "intensity_band_width": 0.00664384525128725,
+      "verdict": "broad_based",
+      "partition_index": 7
+    },
+    {
+      "cells": [
+        {
+          "cell": "random_0",
+          "n_loans": 25017,
+          "balance_share_pct": 32.97762541673299,
+          "marginal_b": 23.184891244615415,
+          "marginal_pp": 3.031702412776065,
+          "share_of_sum_pct": 33.12135997384447,
+          "intensity": 1.0043585478121948
+        },
+        {
+          "cell": "random_1",
+          "n_loans": 24897,
+          "balance_share_pct": 33.14011863127308,
+          "marginal_b": 23.189286706321923,
+          "marginal_pp": 3.0322771720760024,
+          "share_of_sum_pct": 33.12763922130337,
+          "intensity": 0.9996234349638707
+        },
+        {
+          "cell": "random_2",
+          "n_loans": 25086,
+          "balance_share_pct": 33.882255951993926,
+          "marginal_b": 23.625638671702063,
+          "marginal_pp": 3.089335421446475,
+          "share_of_sum_pct": 33.75100080485217,
+          "intensity": 0.9961261390821282
+        }
+      ],
+      "sum_cells_b": 69.9998166226394,
+      "residual_b": 0.34524379725644394,
+      "residual_frac_of_total": 0.004907861265533832,
+      "additivity_verdict": "shares_readable",
+      "sign_homogeneous": true,
+      "intensity_band_ok": true,
+      "intensity_min": 0.9961261390821282,
+      "intensity_max": 1.0043585478121948,
+      "intensity_band_width": 0.008232408730066587,
+      "verdict": "broad_based",
+      "partition_index": 8
+    },
+    {
+      "cells": [
+        {
+          "cell": "random_0",
+          "n_loans": 24747,
+          "balance_share_pct": 32.65341825746617,
+          "marginal_b": 22.769459667127194,
+          "marginal_pp": 2.977379754863796,
+          "share_of_sum_pct": 32.527830189402614,
+          "intensity": 0.9961539074692481
+        },
+        {
+          "cell": "random_1",
+          "n_loans": 25128,
+          "balance_share_pct": 33.77155367692546,
+          "marginal_b": 23.67640905142116,
+          "marginal_pp": 3.095974257103196,
+          "share_of_sum_pct": 33.823473388406086,
+          "intensity": 1.0015373800085514
+        },
+        {
+          "cell": "random_2",
+          "n_loans": 25125,
+          "balance_share_pct": 33.575028065608365,
+          "marginal_b": 23.554065290407948,
+          "marginal_pp": 3.07997634399942,
+          "share_of_sum_pct": 33.6486964221913,
+          "intensity": 1.002194141325481
+        }
+      ],
+      "sum_cells_b": 69.9999340089563,
+      "residual_b": 0.34512641093954244,
+      "residual_frac_of_total": 0.004906192544003127,
+      "additivity_verdict": "shares_readable",
+      "sign_homogeneous": true,
+      "intensity_band_ok": true,
+      "intensity_min": 0.9961539074692481,
+      "intensity_max": 1.002194141325481,
+      "intensity_band_width": 0.006040233856232757,
+      "verdict": "broad_based",
+      "partition_index": 9
+    },
+    {
+      "cells": [
+        {
+          "cell": "random_0",
+          "n_loans": 24711,
+          "balance_share_pct": 32.904812932707706,
+          "marginal_b": 22.92038697243254,
+          "marginal_pp": 2.997115308971874,
+          "share_of_sum_pct": 32.74338052598702,
+          "intensity": 0.9950939576210075
+        },
+        {
+          "cell": "random_1",
+          "n_loans": 25301,
+          "balance_share_pct": 33.942929968428054,
+          "marginal_b": 23.91550819839665,
+          "marginal_pp": 3.1272393362933624,
+          "share_of_sum_pct": 34.16498099941793,
+          "intensity": 1.0065418934427999
+        },
+        {
+          "cell": "random_2",
+          "n_loans": 24988,
+          "balance_share_pct": 33.15225709886423,
+          "marginal_b": 23.164167755604467,
+          "marginal_pp": 3.0289925682064807,
+          "share_of_sum_pct": 33.09163847459505,
+          "intensity": 0.9981715083806086
+        }
+      ],
+      "sum_cells_b": 70.00006292643366,
+      "residual_b": 0.3449974934621878,
+      "residual_frac_of_total": 0.004904359899655604,
+      "additivity_verdict": "shares_readable",
+      "sign_homogeneous": true,
+      "intensity_band_ok": true,
+      "intensity_min": 0.9950939576210075,
+      "intensity_max": 1.0065418934427999,
+      "intensity_band_width": 0.011447935821792377,
+      "verdict": "broad_based",
+      "partition_index": 10
+    },
+    {
+      "cells": [
+        {
+          "cell": "random_0",
+          "n_loans": 25022,
+          "balance_share_pct": 33.534881058581476,
+          "marginal_b": 23.526059115675594,
+          "marginal_pp": 3.0763142009851228,
+          "share_of_sum_pct": 33.60870468999632,
+          "intensity": 1.002201398337626
+        },
+        {
+          "cell": "random_1",
+          "n_loans": 25021,
+          "balance_share_pct": 33.27798769774049,
+          "marginal_b": 23.21037597567431,
+          "marginal_pp": 3.035034846809291,
+          "share_of_sum_pct": 33.15772812074829,
+          "intensity": 0.9963862124692002
+        },
+        {
+          "cell": "random_2",
+          "n_loans": 24957,
+          "balance_share_pct": 33.18713124367803,
+          "marginal_b": 23.263463246529682,
+          "marginal_pp": 3.0419766437511813,
+          "share_of_sum_pct": 33.23356718925539,
+          "intensity": 1.0013992154138422
+        }
+      ],
+      "sum_cells_b": 69.99989833787959,
+      "residual_b": 0.34516208201625886,
+      "residual_frac_of_total": 0.004906699631160398,
+      "additivity_verdict": "shares_readable",
+      "sign_homogeneous": true,
+      "intensity_band_ok": true,
+      "intensity_min": 0.9963862124692002,
+      "intensity_max": 1.002201398337626,
+      "intensity_band_width": 0.005815185868425665,
+      "verdict": "broad_based",
+      "partition_index": 11
+    }
+  ],
+  "summary": {
+    "n_broad_based": 12,
+    "n_partitions": 12,
+    "placebo_intensity_min": 0.9950939576210075,
+    "placebo_intensity_max": 1.0065418934427999,
+    "placebo_band_width_min": 0.0010053879733471494,
+    "placebo_band_width_median": 0.006259609124322052,
+    "placebo_band_width_max": 0.011447935821792377,
+    "placebo_abs_residual_frac_min": 0.004904359899655604,
+    "placebo_abs_residual_frac_max": 0.004907861265533832,
+    "committed_intensity_min": 0.8792234112930807,
+    "committed_intensity_max": 1.260671020258831,
+    "committed_band_width": 0.38144760896575025,
+    "committed_abs_residual_frac_min": 0.003675369390473511,
+    "committed_abs_residual_frac_max": 0.007981169280958855
+  },
+  "verdict_discrimination": "verdict_does_not_discriminate",
+  "verdict_direction": "committed_disperses_more_than_chance",
+  "runtime_s": 512.5
+}

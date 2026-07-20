@@ -26,6 +26,11 @@ hazard/data/floor_sweep/
 hazard/data/floor_form/
 # Cyclical-floor per-run parquets (regenerable via hazard/floor_cyclical.py)
 hazard/data/floor_cyclical/
+# OOS-identification per-run parquets + console log (regenerable via
+# hazard/oos_identification.py; the frozen artifact is
+# hazard/data/oos_identification_results.json)
+hazard/data/oos_identification/
+hazard/data/oos_identification_run.log
 
 # Editor/agent workspaces (stale worktree copies pollute repo greps)
 .claude/
@@ -41,3 +46,7 @@ hazard/data/cohort_month_panel_fannie.parquet
 hazard/data/*fannie*.parquet
 hazard/data/fannie_quarters/
 hazard/data/hazard_coefficients_fannie.json
+# Seasonal-floor-timing per-run parquets (regenerable via
+# hazard/seasonal_floor_timing.py; the frozen artifact is
+# hazard/data/seasonal_floor_timing_results.json)
+hazard/data/seasonal_floor_timing/

@@ -1,0 +1,2505 @@
+{
+  "mode": "b3_timing_rescore",
+  "spec": "hazard/b3_timing_rescore.py module docstring (fixed ex ante)",
+  "created_utc": "2026-07-20T01:24:29.029487+00:00",
+  "verdict": "CONCEDE_LEVELS_ONLY",
+  "verdict_reason": "The frozen rule (U2<1 AND detrended lag-0 r>0) is MET AS WRITTEN by both seasonal legs (shape_only, prereg_4.5), but the pass is NOT REAL and no monthly-timing claim is earned. Reasons, each computed and recorded in this artifact: (d) the p_q=0 (beta1=0) null clears the rule: legs ['flat_4.0', 'flat_4.5'] | (b) wrong-month calendar rotations clear the rule: shape_only 1/11, and a wrong-month rotation BEATS the true profile on U2; prereg_4.5 1/11 | (c) 3 of 14 scrambled calendar orders clear the rule | (a) benchmark artifacts carry the pass: the 4 exact-zero months carry 0.8130 of RMS(d_emp)^2 and repairing them flips 2 leg(s) to CONCEDE | (f) leave-one-out asymmetry: shape_only flips on 5/42; prereg_4.5 flips on 0/42 | (e) the detrended correlations are statistically indistinguishable from zero on n=42 | (g) frequency-band mismatch: the seasonal legs concentrate simulated detrended variance in the 12-month harmonic, where the benchmark carries only 0.8% of its own | (h) the CCF peak for the seasonal legs sits on the window boundary and/or is negative, so it is non-interpretable. Every claim is therefore restricted to LEVELS. Separately, and independently of timing: the marginal movement attributed to the 'shape effect' is NOT seasonality \u2014 see permutation_null (calendar order is nearly irrelevant) and jensen_equivalent_flat (level leakage vs floor dispersion). It is a FLOOR-DISPERSION / functional-form result driven by FLOOR_MODE='max', and must be reported as such.",
+  "frozen_rule_met_as_written": true,
+  "frozen_rule_has_discriminating_power": false,
+  "frozen_rule_defeated_by": [
+    "(d) the p_q=0 (beta1=0) null clears the rule: legs ['flat_4.0', 'flat_4.5']",
+    "(b) wrong-month calendar rotations clear the rule: shape_only 1/11, and a wrong-month rotation BEATS the true profile on U2; prereg_4.5 1/11",
+    "(c) 3 of 14 scrambled calendar orders clear the rule",
+    "(a) benchmark artifacts carry the pass: the 4 exact-zero months carry 0.8130 of RMS(d_emp)^2 and repairing them flips 2 leg(s) to CONCEDE",
+    "(f) leave-one-out asymmetry: shape_only flips on 5/42; prereg_4.5 flips on 0/42",
+    "(e) the detrended correlations are statistically indistinguishable from zero on n=42",
+    "(g) frequency-band mismatch: the seasonal legs concentrate simulated detrended variance in the 12-month harmonic, where the benchmark carries only 0.8% of its own",
+    "(h) the CCF peak for the seasonal legs sits on the window boundary and/or is negative, so it is non-interpretable"
+  ],
+  "adjudication_note": "frozen_rule_met_as_written and verdict answer DIFFERENT questions. The first is whether the pre-committed inequality holds; it does. The second is whether holding it is EVIDENCE; it is not, because placebo rotations, scrambled calendars and a beta1=0 null satisfy the same inequality. The rule was frozen ex ante and is reported as met; the diagnostics that strip it of power were computed afterwards and are reported in full rather than used to reopen the rule.",
+  "b1_provenance": {
+    "basis_of_the_12_vector": "full_panel",
+    "correction": "An earlier docstring in this file described B1's 12-cell profile as estimated 'in-window'. That was WRONG. The committed 12-vector reproduces on the FULL cohort-month panel, not on the QT window. Both bases are carried in the B2 artifact under b1_profile.bases and are mirrored here.",
+    "bases": {
+      "full_panel": {
+        "n_cohort_months": 7756,
+        "exposure_usd": 74208498932120.1,
+        "pooled_annual_cpr": 0.04187014726690219,
+        "pooled_annual_cpr_definition": "annualization of sum(prepaid_upb)/sum(exposure_upb) over the whole basis; THIS is the 4.187% (full_panel) / 4.1132% (qt_window) anchor",
+        "exposure_weighted_mean_annual_cpr": 0.04183241760565233,
+        "exposure_weighted_mean_annual_cpr_definition": "exposure-weighted mean of the twelve ALREADY annualized calendar-month CPRs; differs from the pooled figure by Jensen and is NOT the anchor",
+        "smm_by_month_jan_dec": [
+          0.00220854750482912,
+          0.0024346687909714347,
+          0.0033285544530211215,
+          0.0037559887294947992,
+          0.0044082901184758745,
+          0.004705698498136271,
+          0.004295062480342016,
+          0.0042057371858045265,
+          0.003672664309045519,
+          0.0034844677681086,
+          0.0028790106720699136,
+          0.0027555067064558183
+        ],
+        "peak_to_trough": 2.1306756987780355,
+        "peak_month": 6,
+        "trough_month": 1
+      },
+      "qt_window": {
+        "n_cohort_months": 7452,
+        "exposure_usd": 72494158039361.23,
+        "pooled_annual_cpr": 0.041131995880880234,
+        "pooled_annual_cpr_definition": "annualization of sum(prepaid_upb)/sum(exposure_upb) over the whole basis; THIS is the 4.187% (full_panel) / 4.1132% (qt_window) anchor",
+        "exposure_weighted_mean_annual_cpr": 0.04109622060329407,
+        "exposure_weighted_mean_annual_cpr_definition": "exposure-weighted mean of the twelve ALREADY annualized calendar-month CPRs; differs from the pooled figure by Jensen and is NOT the anchor",
+        "smm_by_month_jan_dec": [
+          0.0022085425851901736,
+          0.0024268505222965957,
+          0.00326420931072189,
+          0.003452115448477055,
+          0.004084950290024169,
+          0.004705700233060152,
+          0.00429506497332951,
+          0.004206165306543269,
+          0.0036726826072836596,
+          0.003484581276077589,
+          0.0028776105638709075,
+          0.002753788110017247
+        ],
+        "peak_to_trough": 2.1306812305160747,
+        "peak_month": 6,
+        "trough_month": 1
+      }
+    },
+    "calendar_cells_differing_between_bases_at_5dp": [
+      3,
+      4,
+      5,
+      12
+    ],
+    "which_basis_drives_the_runs": "full_panel drives every H_MONTH normalization and every run; qt_window is disclosure only and drives nothing"
+  },
+  "permutation_null": {
+    "seed": 20260719,
+    "n_permutations": 14,
+    "design": "the SAME twelve shape_only floor values assigned to SCRAMBLED calendar months; the multiset of values is preserved exactly, only the calendar assignment changes",
+    "true_shape_effect_b": -4.896712362771268,
+    "shape_only_u2_diffs": 0.9946858751508445,
+    "by_permutation": {
+      "perm00": {
+        "order_month_to_source_slot": [
+          1,
+          4,
+          3,
+          10,
+          11,
+          7,
+          5,
+          6,
+          9,
+          0,
+          2,
+          8
+        ],
+        "values_multiset_preserved": true,
+        "lockin_marginal_b": 65.88089234593758,
+        "lockin_marginal_share_pp": 8.614716289747776,
+        "effect_vs_flat40_b": -4.4641680739582625,
+        "share_of_true_shape_effect_retained": 0.9116663882278334,
+        "u2_diffs": 1.0276643731309993,
+        "detrended_lag0_r": -0.2300112931509251,
+        "verdict": "CONCEDE"
+      },
+      "perm01": {
+        "order_month_to_source_slot": [
+          9,
+          11,
+          1,
+          4,
+          2,
+          10,
+          7,
+          8,
+          0,
+          6,
+          3,
+          5
+        ],
+        "values_multiset_preserved": true,
+        "lockin_marginal_b": 65.86182901288078,
+        "lockin_marginal_share_pp": 8.612223530466991,
+        "effect_vs_flat40_b": -4.483231407015069,
+        "share_of_true_shape_effect_retained": 0.9155594764152755,
+        "u2_diffs": 1.011989155112103,
+        "detrended_lag0_r": 0.05643299366896738,
+        "verdict": "CONCEDE"
+      },
+      "perm02": {
+        "order_month_to_source_slot": [
+          6,
+          3,
+          0,
+          4,
+          11,
+          7,
+          8,
+          9,
+          2,
+          5,
+          1,
+          10
+        ],
+        "values_multiset_preserved": true,
+        "lockin_marginal_b": 65.75812658263499,
+        "lockin_marginal_share_pp": 8.598663194786738,
+        "effect_vs_flat40_b": -4.586933837260858,
+        "share_of_true_shape_effect_retained": 0.9367374469724636,
+        "u2_diffs": 1.0183611520927434,
+        "detrended_lag0_r": -0.07997239066490573,
+        "verdict": "CONCEDE"
+      },
+      "perm03": {
+        "order_month_to_source_slot": [
+          5,
+          10,
+          1,
+          4,
+          3,
+          7,
+          6,
+          11,
+          8,
+          9,
+          2,
+          0
+        ],
+        "values_multiset_preserved": true,
+        "lockin_marginal_b": 66.02671528202939,
+        "lockin_marginal_share_pp": 8.633784386402766,
+        "effect_vs_flat40_b": -4.318345137866459,
+        "share_of_true_shape_effect_retained": 0.8818866247276396,
+        "u2_diffs": 1.0228427901496224,
+        "detrended_lag0_r": -0.1211651872581829,
+        "verdict": "CONCEDE"
+      },
+      "perm04": {
+        "order_month_to_source_slot": [
+          8,
+          3,
+          6,
+          2,
+          0,
+          11,
+          1,
+          10,
+          4,
+          9,
+          7,
+          5
+        ],
+        "values_multiset_preserved": true,
+        "lockin_marginal_b": 66.12241567355966,
+        "lockin_marginal_share_pp": 8.646298359612516,
+        "effect_vs_flat40_b": -4.2226447463361865,
+        "share_of_true_shape_effect_retained": 0.8623428197335249,
+        "u2_diffs": 1.0196943900373983,
+        "detrended_lag0_r": -0.023533937850466556,
+        "verdict": "CONCEDE"
+      },
+      "perm05": {
+        "order_month_to_source_slot": [
+          2,
+          6,
+          9,
+          7,
+          1,
+          10,
+          3,
+          0,
+          11,
+          4,
+          5,
+          8
+        ],
+        "values_multiset_preserved": true,
+        "lockin_marginal_b": 65.31086521282896,
+        "lockin_marginal_share_pp": 8.540178410032922,
+        "effect_vs_flat40_b": -5.034195207066887,
+        "share_of_true_shape_effect_retained": 1.0280765611925409,
+        "u2_diffs": 1.0195299421561166,
+        "detrended_lag0_r": 0.04727054674710197,
+        "verdict": "CONCEDE"
+      },
+      "perm06": {
+        "order_month_to_source_slot": [
+          4,
+          6,
+          3,
+          2,
+          11,
+          1,
+          10,
+          7,
+          9,
+          5,
+          8,
+          0
+        ],
+        "values_multiset_preserved": true,
+        "lockin_marginal_b": 65.82677278158747,
+        "lockin_marginal_share_pp": 8.60763950805891,
+        "effect_vs_flat40_b": -4.518287638308379,
+        "share_of_true_shape_effect_retained": 0.9227186127288226,
+        "u2_diffs": 0.9874766636825757,
+        "detrended_lag0_r": 0.0625145306111289,
+        "verdict": "PASS"
+      },
+      "perm07": {
+        "order_month_to_source_slot": [
+          1,
+          7,
+          4,
+          8,
+          10,
+          11,
+          9,
+          3,
+          2,
+          0,
+          5,
+          6
+        ],
+        "values_multiset_preserved": true,
+        "lockin_marginal_b": 66.11753312242843,
+        "lockin_marginal_share_pp": 8.645659907532277,
+        "effect_vs_flat40_b": -4.227527297467418,
+        "share_of_true_shape_effect_retained": 0.8633399277459033,
+        "u2_diffs": 1.0249543820221938,
+        "detrended_lag0_r": -0.07687353649890626,
+        "verdict": "CONCEDE"
+      },
+      "perm08": {
+        "order_month_to_source_slot": [
+          3,
+          7,
+          2,
+          10,
+          1,
+          9,
+          11,
+          4,
+          6,
+          0,
+          8,
+          5
+        ],
+        "values_multiset_preserved": true,
+        "lockin_marginal_b": 66.35697000961773,
+        "lockin_marginal_share_pp": 8.676969150303393,
+        "effect_vs_flat40_b": -3.9880904102781187,
+        "share_of_true_shape_effect_retained": 0.8144424493051253,
+        "u2_diffs": 1.042750660079753,
+        "detrended_lag0_r": -0.24937791994299363,
+        "verdict": "CONCEDE"
+      },
+      "perm09": {
+        "order_month_to_source_slot": [
+          7,
+          4,
+          5,
+          0,
+          6,
+          10,
+          2,
+          9,
+          1,
+          8,
+          11,
+          3
+        ],
+        "values_multiset_preserved": true,
+        "lockin_marginal_b": 66.92402045996198,
+        "lockin_marginal_share_pp": 8.751117793069767,
+        "effect_vs_flat40_b": -3.4210399599338643,
+        "share_of_true_shape_effect_retained": 0.6986401704832311,
+        "u2_diffs": 0.9752574845259063,
+        "detrended_lag0_r": 0.05593565100016235,
+        "verdict": "PASS"
+      },
+      "perm10": {
+        "order_month_to_source_slot": [
+          1,
+          3,
+          8,
+          2,
+          6,
+          5,
+          4,
+          9,
+          10,
+          11,
+          7,
+          0
+        ],
+        "values_multiset_preserved": true,
+        "lockin_marginal_b": 65.4010720691391,
+        "lockin_marginal_share_pp": 8.551974037669865,
+        "effect_vs_flat40_b": -4.94398835075674,
+        "share_of_true_shape_effect_retained": 1.009654638558087,
+        "u2_diffs": 1.0081584042294338,
+        "detrended_lag0_r": -0.006142257905102192,
+        "verdict": "CONCEDE"
+      },
+      "perm11": {
+        "order_month_to_source_slot": [
+          11,
+          8,
+          4,
+          3,
+          0,
+          5,
+          7,
+          2,
+          6,
+          9,
+          1,
+          10
+        ],
+        "values_multiset_preserved": true,
+        "lockin_marginal_b": 65.70838249861117,
+        "lockin_marginal_share_pp": 8.592158559592875,
+        "effect_vs_flat40_b": -4.636677921284672,
+        "share_of_true_shape_effect_retained": 0.946896116777537,
+        "u2_diffs": 1.0232197067458562,
+        "detrended_lag0_r": -0.16606967439307868,
+        "verdict": "CONCEDE"
+      },
+      "perm12": {
+        "order_month_to_source_slot": [
+          4,
+          0,
+          1,
+          3,
+          11,
+          9,
+          5,
+          10,
+          6,
+          2,
+          8,
+          7
+        ],
+        "values_multiset_preserved": true,
+        "lockin_marginal_b": 65.77856578935018,
+        "lockin_marginal_share_pp": 8.601335866038909,
+        "effect_vs_flat40_b": -4.566494630545662,
+        "share_of_true_shape_effect_retained": 0.932563379720609,
+        "u2_diffs": 1.0253235271300867,
+        "detrended_lag0_r": -0.1152773814896504,
+        "verdict": "CONCEDE"
+      },
+      "perm13": {
+        "order_month_to_source_slot": [
+          3,
+          7,
+          6,
+          10,
+          11,
+          0,
+          2,
+          8,
+          9,
+          4,
+          1,
+          5
+        ],
+        "values_multiset_preserved": true,
+        "lockin_marginal_b": 66.59660145104488,
+        "lockin_marginal_share_pp": 8.708303833372938,
+        "effect_vs_flat40_b": -3.7484589688509686,
+        "share_of_true_shape_effect_retained": 0.7655052392600713,
+        "u2_diffs": 0.9913973104717254,
+        "detrended_lag0_r": 0.047543460320139654,
+        "verdict": "PASS"
+      }
+    },
+    "share_of_effect_retained_mean": 0.8921449894177618,
+    "share_of_effect_retained_min": 0.6986401704832311,
+    "share_of_effect_retained_max": 1.0280765611925409,
+    "n_clearing_frozen_rule": 3,
+    "permutations_clearing_frozen_rule": [
+      "perm06",
+      "perm09",
+      "perm13"
+    ],
+    "best_permutation_u2": 0.9752574845259063,
+    "n_permutations_beating_shape_only_u2": 3,
+    "interpretation": "Calendar ORDER is nearly irrelevant to the marginal: scrambling the months retains most of the effect. What moves the marginal is DISPERSION in the floor interacting with FLOOR_MODE='max' (hazard/config.py) \u2014 max(h_floor, h_vol) truncates the floor away in low months and lets it bind in high ones, a Jensen-type one-sided effect. The finding is FLOOR DISPERSION / functional form, NOT seasonality."
+  },
+  "rotation_placebo": {
+    "design": "h_rot_k[m] = h[(m-k) mod 12] \u2014 the true calendar profile moved to the WRONG months, amplitude and dispersion held exactly; k=0 is the identity and is an internal reproduction check",
+    "by_base_leg": {
+      "shape_only": {
+        "true_profile_u2_diffs": 0.9946858751508445,
+        "true_profile_detrended_lag0_r": 0.015857803757087355,
+        "identity_rot00_reproduces_true_leg": true,
+        "n_rotations": 12,
+        "n_wrong_month_rotations": 11,
+        "n_passing_frozen_rule_incl_identity": 2,
+        "rotations_passing_incl_identity": [
+          "rot00",
+          "rot05"
+        ],
+        "n_wrong_month_rotations_passing": 1,
+        "wrong_month_rotations_passing": [
+          "rot05"
+        ],
+        "placebo_pass_rate_wrong_month_only": 0.09090909090909091,
+        "wrong_month_rotations_beating_true_u2": {
+          "rot05": 0.9934488102524287
+        },
+        "any_wrong_rotation_beats_true_u2": true,
+        "count_note": "rot00 is the identity, i.e. the true profile itself; excluded from the placebo pass rate.",
+        "by_rotation": {
+          "rot00": {
+            "shift_months": 0,
+            "u2_diffs": 0.9946858751508445,
+            "detrended_lag0_r": 0.015857803757087355,
+            "verdict": "PASS",
+            "beats_true_profile_on_u2": false
+          },
+          "rot01": {
+            "shift_months": 1,
+            "u2_diffs": 1.0088751931406161,
+            "detrended_lag0_r": -0.07939754264365574,
+            "verdict": "CONCEDE",
+            "beats_true_profile_on_u2": false
+          },
+          "rot02": {
+            "shift_months": 2,
+            "u2_diffs": 1.0009638287087261,
+            "detrended_lag0_r": -0.056846982467029517,
+            "verdict": "CONCEDE",
+            "beats_true_profile_on_u2": false
+          },
+          "rot03": {
+            "shift_months": 3,
+            "u2_diffs": 1.010248951521719,
+            "detrended_lag0_r": -0.06793372553226018,
+            "verdict": "CONCEDE",
+            "beats_true_profile_on_u2": false
+          },
+          "rot04": {
+            "shift_months": 4,
+            "u2_diffs": 1.0006477445914588,
+            "detrended_lag0_r": 0.07201084383565895,
+            "verdict": "CONCEDE",
+            "beats_true_profile_on_u2": false
+          },
+          "rot05": {
+            "shift_months": 5,
+            "u2_diffs": 0.9934488102524287,
+            "detrended_lag0_r": 0.1459924803219399,
+            "verdict": "PASS",
+            "beats_true_profile_on_u2": true
+          },
+          "rot06": {
+            "shift_months": 6,
+            "u2_diffs": 1.0113173971703475,
+            "detrended_lag0_r": 0.024180914266390026,
+            "verdict": "CONCEDE",
+            "beats_true_profile_on_u2": false
+          },
+          "rot07": {
+            "shift_months": 7,
+            "u2_diffs": 0.9983989780115554,
+            "detrended_lag0_r": -0.0002590057470346012,
+            "verdict": "CONCEDE",
+            "beats_true_profile_on_u2": false
+          },
+          "rot08": {
+            "shift_months": 8,
+            "u2_diffs": 1.0190350031871167,
+            "detrended_lag0_r": -0.15888741229488595,
+            "verdict": "CONCEDE",
+            "beats_true_profile_on_u2": false
+          },
+          "rot09": {
+            "shift_months": 9,
+            "u2_diffs": 1.0035570997134537,
+            "detrended_lag0_r": -0.10151877839061434,
+            "verdict": "CONCEDE",
+            "beats_true_profile_on_u2": false
+          },
+          "rot10": {
+            "shift_months": 10,
+            "u2_diffs": 1.009480711469809,
+            "detrended_lag0_r": -0.09682074315121107,
+            "verdict": "CONCEDE",
+            "beats_true_profile_on_u2": false
+          },
+          "rot11": {
+            "shift_months": 11,
+            "u2_diffs": 1.0045403256796195,
+            "detrended_lag0_r": -0.022491286866648915,
+            "verdict": "CONCEDE",
+            "beats_true_profile_on_u2": false
+          }
+        }
+      },
+      "prereg_4.5": {
+        "true_profile_u2_diffs": 0.9896295758254481,
+        "true_profile_detrended_lag0_r": 0.06976848223345397,
+        "identity_rot00_reproduces_true_leg": true,
+        "n_rotations": 12,
+        "n_wrong_month_rotations": 11,
+        "n_passing_frozen_rule_incl_identity": 2,
+        "rotations_passing_incl_identity": [
+          "rot00",
+          "rot05"
+        ],
+        "n_wrong_month_rotations_passing": 1,
+        "wrong_month_rotations_passing": [
+          "rot05"
+        ],
+        "placebo_pass_rate_wrong_month_only": 0.09090909090909091,
+        "wrong_month_rotations_beating_true_u2": {},
+        "any_wrong_rotation_beats_true_u2": false,
+        "count_note": "rot00 is the identity, i.e. the true profile itself; excluded from the placebo pass rate.",
+        "by_rotation": {
+          "rot00": {
+            "shift_months": 0,
+            "u2_diffs": 0.9896295758254481,
+            "detrended_lag0_r": 0.06976848223345397,
+            "verdict": "PASS",
+            "beats_true_profile_on_u2": false
+          },
+          "rot01": {
+            "shift_months": 1,
+            "u2_diffs": 1.0118066062048094,
+            "detrended_lag0_r": -0.020853130171258633,
+            "verdict": "CONCEDE",
+            "beats_true_profile_on_u2": false
+          },
+          "rot02": {
+            "shift_months": 2,
+            "u2_diffs": 0.9988032620591059,
+            "detrended_lag0_r": -0.0023303084017551475,
+            "verdict": "CONCEDE",
+            "beats_true_profile_on_u2": false
+          },
+          "rot03": {
+            "shift_months": 3,
+            "u2_diffs": 1.0138933580978755,
+            "detrended_lag0_r": -0.04164196504117829,
+            "verdict": "CONCEDE",
+            "beats_true_profile_on_u2": false
+          },
+          "rot04": {
+            "shift_months": 4,
+            "u2_diffs": 1.0023746982988553,
+            "detrended_lag0_r": 0.05417975200027173,
+            "verdict": "CONCEDE",
+            "beats_true_profile_on_u2": false
+          },
+          "rot05": {
+            "shift_months": 5,
+            "u2_diffs": 0.9903027208464535,
+            "detrended_lag0_r": 0.11200114814370854,
+            "verdict": "PASS",
+            "beats_true_profile_on_u2": false
+          },
+          "rot06": {
+            "shift_months": 6,
+            "u2_diffs": 1.01767101227953,
+            "detrended_lag0_r": -0.016231025026840575,
+            "verdict": "CONCEDE",
+            "beats_true_profile_on_u2": false
+          },
+          "rot07": {
+            "shift_months": 7,
+            "u2_diffs": 0.9967260133018788,
+            "detrended_lag0_r": -0.02892982566635052,
+            "verdict": "CONCEDE",
+            "beats_true_profile_on_u2": false
+          },
+          "rot08": {
+            "shift_months": 8,
+            "u2_diffs": 1.0267078387818749,
+            "detrended_lag0_r": -0.1761644543619203,
+            "verdict": "CONCEDE",
+            "beats_true_profile_on_u2": false
+          },
+          "rot09": {
+            "shift_months": 9,
+            "u2_diffs": 1.0047455133187424,
+            "detrended_lag0_r": -0.10403895771595592,
+            "verdict": "CONCEDE",
+            "beats_true_profile_on_u2": false
+          },
+          "rot10": {
+            "shift_months": 10,
+            "u2_diffs": 1.0112858681402546,
+            "detrended_lag0_r": -0.07727217347641102,
+            "verdict": "CONCEDE",
+            "beats_true_profile_on_u2": false
+          },
+          "rot11": {
+            "shift_months": 11,
+            "u2_diffs": 1.0074462874959187,
+            "detrended_lag0_r": 0.003219417850368381,
+            "verdict": "CONCEDE",
+            "beats_true_profile_on_u2": false
+          }
+        }
+      }
+    },
+    "interpretation": "A timing rule that wrong-month rotations clear has no power to detect timing. The pass rate across rotations is the placebo size of the frozen rule."
+  },
+  "artifact_concentration": {
+    "exact_zero_months": [
+      "2022-06",
+      "2023-02",
+      "2024-04",
+      "2025-09"
+    ],
+    "n_exact_zero_months": 4,
+    "first_differences_touched": [
+      "2022-06->2022-07",
+      "2023-01->2023-02",
+      "2023-02->2023-03",
+      "2024-03->2024-04",
+      "2024-04->2024-05",
+      "2025-08->2025-09",
+      "2025-09->2025-10"
+    ],
+    "n_first_differences_touched": 7,
+    "n_first_differences_total": 41,
+    "share_of_rms_d_emp_squared": 0.8130167455155803,
+    "share_of_u2_numerator_by_leg": {
+      "flat_4.0": 0.8104967899410301,
+      "flat_4.5": 0.8111051210284684,
+      "shape_only": 0.7987660694493981,
+      "prereg_4.5": 0.7959535558458928
+    },
+    "repair_rule": "each exact-zero month and the month after it are both set to their mean, i.e. the post-zero spike is reallocated evenly across the pair; total CPR over the pair is conserved",
+    "repaired_pairs": [
+      {
+        "zero_month": "2022-06",
+        "spike_month": "2022-07",
+        "zero_value": 0.0,
+        "spike_value": 1.0932381616273066,
+        "each_after_repair": 0.5466190808136533
+      },
+      {
+        "zero_month": "2023-02",
+        "spike_month": "2023-03",
+        "zero_value": 0.0,
+        "spike_value": 9.342478583946003,
+        "each_after_repair": 4.671239291973001
+      },
+      {
+        "zero_month": "2024-04",
+        "spike_month": "2024-05",
+        "zero_value": 0.0,
+        "spike_value": 12.59355465302083,
+        "each_after_repair": 6.296777326510415
+      },
+      {
+        "zero_month": "2025-09",
+        "spike_month": "2025-10",
+        "zero_value": 0.0,
+        "spike_value": 14.005913983829673,
+        "each_after_repair": 7.002956991914837
+      }
+    ],
+    "repaired_benchmark_values": [
+      0.5466190808136533,
+      0.5466190808136533,
+      1.0732651600470684,
+      2.4151829154348365,
+      6.266043112093158,
+      6.38276592844141,
+      5.340261832459936,
+      5.062474615951806,
+      4.671239291973001,
+      4.671239291973001,
+      6.126745169504493,
+      5.633431491015696,
+      6.902044449058731,
+      7.194797125863311,
+      6.352270454037592,
+      6.611816285221598,
+      5.538432453020424,
+      5.120739201908467,
+      4.8463558294668125,
+      4.576853808727289,
+      4.258982349543943,
+      4.7288990431187585,
+      6.296777326510415,
+      6.296777326510415,
+      6.836279437136626,
+      6.4644245114437116,
+      6.833066009472372,
+      6.539478794144066,
+      5.746598445140603,
+      6.244489280761338,
+      5.586953272819292,
+      5.6663019513902055,
+      4.924361910351149,
+      4.994119641222616,
+      5.993444572070469,
+      6.463952545691669,
+      7.008709728542575,
+      7.18028690699343,
+      7.253896104429174,
+      7.002956991914837,
+      7.002956991914837,
+      6.556828661037247
+    ],
+    "rescore_on_repaired_benchmark": {
+      "flat_4.0": {
+        "u2_diffs_original": 1.0029223469568262,
+        "u2_diffs_repaired": 1.0205743811215122,
+        "detrended_lag0_r_original": -0.20293995357874087,
+        "detrended_lag0_r_repaired": -0.3337054506351137,
+        "verdict_original": "CONCEDE",
+        "verdict_repaired": "CONCEDE",
+        "flips_to_concede": false
+      },
+      "flat_4.5": {
+        "u2_diffs_original": 1.0022873903577438,
+        "u2_diffs_repaired": 1.0170838510320432,
+        "detrended_lag0_r_original": -0.25472685905898723,
+        "detrended_lag0_r_repaired": -0.43982694674792516,
+        "verdict_original": "CONCEDE",
+        "verdict_repaired": "CONCEDE",
+        "flips_to_concede": false
+      },
+      "shape_only": {
+        "u2_diffs_original": 0.9946858751508445,
+        "u2_diffs_repaired": 1.0436290941289872,
+        "detrended_lag0_r_original": 0.015857803757087355,
+        "detrended_lag0_r_repaired": -0.13350385300638398,
+        "verdict_original": "PASS",
+        "verdict_repaired": "CONCEDE",
+        "flips_to_concede": true
+      },
+      "prereg_4.5": {
+        "u2_diffs_original": 0.9896295758254481,
+        "u2_diffs_repaired": 1.0548819055482015,
+        "detrended_lag0_r_original": 0.06976848223345397,
+        "detrended_lag0_r_repaired": -0.029725265708055143,
+        "verdict_original": "PASS",
+        "verdict_repaired": "CONCEDE",
+        "flips_to_concede": true
+      }
+    },
+    "n_legs_flipping_to_concede": 2
+  },
+  "leave_one_out": {
+    "flat_4.0": {
+      "verdict_full_sample": "CONCEDE",
+      "n_deletions": 42,
+      "n_flips_to_concede": 0,
+      "months_whose_deletion_flips_to_concede": [],
+      "by_deleted_month": {
+        "2022-06": {
+          "u2_diffs": 1.0029577135630816,
+          "detrended_lag0_r": -0.18391261847705678,
+          "verdict": "CONCEDE"
+        },
+        "2022-07": {
+          "u2_diffs": 1.0028385591094817,
+          "detrended_lag0_r": -0.18090672933634186,
+          "verdict": "CONCEDE"
+        },
+        "2022-08": {
+          "u2_diffs": 1.002806649720435,
+          "detrended_lag0_r": -0.16250212550778695,
+          "verdict": "CONCEDE"
+        },
+        "2022-09": {
+          "u2_diffs": 1.003606720585453,
+          "detrended_lag0_r": -0.19665615313580284,
+          "verdict": "CONCEDE"
+        },
+        "2022-10": {
+          "u2_diffs": 1.002859629301603,
+          "detrended_lag0_r": -0.17050057989546236,
+          "verdict": "CONCEDE"
+        },
+        "2022-11": {
+          "u2_diffs": 1.0029298090830172,
+          "detrended_lag0_r": -0.17164578639721062,
+          "verdict": "CONCEDE"
+        },
+        "2022-12": {
+          "u2_diffs": 1.0029975956937354,
+          "detrended_lag0_r": -0.19304186761508285,
+          "verdict": "CONCEDE"
+        },
+        "2023-01": {
+          "u2_diffs": 1.003115048140986,
+          "detrended_lag0_r": -0.1959105172697038,
+          "verdict": "CONCEDE"
+        },
+        "2023-02": {
+          "u2_diffs": 1.0024814541992677,
+          "detrended_lag0_r": -0.18641757756819075,
+          "verdict": "CONCEDE"
+        },
+        "2023-03": {
+          "u2_diffs": 1.0020961727115087,
+          "detrended_lag0_r": -0.1866649215661957,
+          "verdict": "CONCEDE"
+        },
+        "2023-04": {
+          "u2_diffs": 1.0029619829211542,
+          "detrended_lag0_r": -0.20423378153054406,
+          "verdict": "CONCEDE"
+        },
+        "2023-05": {
+          "u2_diffs": 1.0028978601575411,
+          "detrended_lag0_r": -0.2026584674783292,
+          "verdict": "CONCEDE"
+        },
+        "2023-06": {
+          "u2_diffs": 1.0029410804620371,
+          "detrended_lag0_r": -0.1967430543282788,
+          "verdict": "CONCEDE"
+        },
+        "2023-07": {
+          "u2_diffs": 1.0029296082301098,
+          "detrended_lag0_r": -0.19512405066371946,
+          "verdict": "CONCEDE"
+        },
+        "2023-08": {
+          "u2_diffs": 1.002919120517334,
+          "detrended_lag0_r": -0.19541079230476527,
+          "verdict": "CONCEDE"
+        },
+        "2023-09": {
+          "u2_diffs": 1.0029285852412753,
+          "detrended_lag0_r": -0.19169791899134206,
+          "verdict": "CONCEDE"
+        },
+        "2023-10": {
+          "u2_diffs": 1.0029247180101082,
+          "detrended_lag0_r": -0.20706986482045683,
+          "verdict": "CONCEDE"
+        },
+        "2023-11": {
+          "u2_diffs": 1.003027170057359,
+          "detrended_lag0_r": -0.21147258553896722,
+          "verdict": "CONCEDE"
+        },
+        "2023-12": {
+          "u2_diffs": 1.0030289129365293,
+          "detrended_lag0_r": -0.19947509132551686,
+          "verdict": "CONCEDE"
+        },
+        "2024-01": {
+          "u2_diffs": 1.0029541365143697,
+          "detrended_lag0_r": -0.19476231777184874,
+          "verdict": "CONCEDE"
+        },
+        "2024-02": {
+          "u2_diffs": 1.0029288564654208,
+          "detrended_lag0_r": -0.19273583246568063,
+          "verdict": "CONCEDE"
+        },
+        "2024-03": {
+          "u2_diffs": 1.002928562677302,
+          "detrended_lag0_r": -0.19601009810877898,
+          "verdict": "CONCEDE"
+        },
+        "2024-04": {
+          "u2_diffs": 1.003654570989878,
+          "detrended_lag0_r": -0.18734376038494324,
+          "verdict": "CONCEDE"
+        },
+        "2024-05": {
+          "u2_diffs": 1.002530368211378,
+          "detrended_lag0_r": -0.21578045976760246,
+          "verdict": "CONCEDE"
+        },
+        "2024-06": {
+          "u2_diffs": 1.0031564470105798,
+          "detrended_lag0_r": -0.20782249618560922,
+          "verdict": "CONCEDE"
+        },
+        "2024-07": {
+          "u2_diffs": 1.002960474835718,
+          "detrended_lag0_r": -0.20952439507080398,
+          "verdict": "CONCEDE"
+        },
+        "2024-08": {
+          "u2_diffs": 1.002927901195656,
+          "detrended_lag0_r": -0.23121068123350447,
+          "verdict": "CONCEDE"
+        },
+        "2024-09": {
+          "u2_diffs": 1.0029880506833115,
+          "detrended_lag0_r": -0.24981246036052723,
+          "verdict": "CONCEDE"
+        },
+        "2024-10": {
+          "u2_diffs": 1.0028303618109242,
+          "detrended_lag0_r": -0.21850450339675534,
+          "verdict": "CONCEDE"
+        },
+        "2024-11": {
+          "u2_diffs": 1.002796147821331,
+          "detrended_lag0_r": -0.2162459289203679,
+          "verdict": "CONCEDE"
+        },
+        "2024-12": {
+          "u2_diffs": 1.0028566019550107,
+          "detrended_lag0_r": -0.21415278294634646,
+          "verdict": "CONCEDE"
+        },
+        "2025-01": {
+          "u2_diffs": 1.0028484422399864,
+          "detrended_lag0_r": -0.22140571032537362,
+          "verdict": "CONCEDE"
+        },
+        "2025-02": {
+          "u2_diffs": 1.0029739401845408,
+          "detrended_lag0_r": -0.22329221478041683,
+          "verdict": "CONCEDE"
+        },
+        "2025-03": {
+          "u2_diffs": 1.0028527632070436,
+          "detrended_lag0_r": -0.21173371675001468,
+          "verdict": "CONCEDE"
+        },
+        "2025-04": {
+          "u2_diffs": 1.002972044154242,
+          "detrended_lag0_r": -0.21184933350458213,
+          "verdict": "CONCEDE"
+        },
+        "2025-05": {
+          "u2_diffs": 1.0029496152978072,
+          "detrended_lag0_r": -0.21183854019294354,
+          "verdict": "CONCEDE"
+        },
+        "2025-06": {
+          "u2_diffs": 1.0029057433500006,
+          "detrended_lag0_r": -0.2071689775524941,
+          "verdict": "CONCEDE"
+        },
+        "2025-07": {
+          "u2_diffs": 1.0029141364378418,
+          "detrended_lag0_r": -0.2043346440145577,
+          "verdict": "CONCEDE"
+        },
+        "2025-08": {
+          "u2_diffs": 1.0031986557089791,
+          "detrended_lag0_r": -0.20314775662194945,
+          "verdict": "CONCEDE"
+        },
+        "2025-09": {
+          "u2_diffs": 1.003011754951843,
+          "detrended_lag0_r": -0.2245225079345749,
+          "verdict": "CONCEDE"
+        },
+        "2025-10": {
+          "u2_diffs": 1.0044826293190137,
+          "detrended_lag0_r": -0.23643568477888657,
+          "verdict": "CONCEDE"
+        },
+        "2025-11": {
+          "u2_diffs": 1.0031070034303702,
+          "detrended_lag0_r": -0.20214793251827715,
+          "verdict": "CONCEDE"
+        }
+      }
+    },
+    "flat_4.5": {
+      "verdict_full_sample": "CONCEDE",
+      "n_deletions": 42,
+      "n_flips_to_concede": 0,
+      "months_whose_deletion_flips_to_concede": [],
+      "by_deleted_month": {
+        "2022-06": {
+          "u2_diffs": 1.00231044439929,
+          "detrended_lag0_r": -0.22205543988782236,
+          "verdict": "CONCEDE"
+        },
+        "2022-07": {
+          "u2_diffs": 1.0022218411139683,
+          "detrended_lag0_r": -0.22602977743758534,
+          "verdict": "CONCEDE"
+        },
+        "2022-08": {
+          "u2_diffs": 1.0021977124910753,
+          "detrended_lag0_r": -0.21007439312840404,
+          "verdict": "CONCEDE"
+        },
+        "2022-09": {
+          "u2_diffs": 1.0029080692400383,
+          "detrended_lag0_r": -0.2500362050427227,
+          "verdict": "CONCEDE"
+        },
+        "2022-10": {
+          "u2_diffs": 1.0022616994798657,
+          "detrended_lag0_r": -0.23255073245656027,
+          "verdict": "CONCEDE"
+        },
+        "2022-11": {
+          "u2_diffs": 1.0022872088151478,
+          "detrended_lag0_r": -0.23281715675079157,
+          "verdict": "CONCEDE"
+        },
+        "2022-12": {
+          "u2_diffs": 1.002337107214332,
+          "detrended_lag0_r": -0.25204640937866124,
+          "verdict": "CONCEDE"
+        },
+        "2023-01": {
+          "u2_diffs": 1.002401810498365,
+          "detrended_lag0_r": -0.2541768748440709,
+          "verdict": "CONCEDE"
+        },
+        "2023-02": {
+          "u2_diffs": 1.0019683274545432,
+          "detrended_lag0_r": -0.2405385971273941,
+          "verdict": "CONCEDE"
+        },
+        "2023-03": {
+          "u2_diffs": 1.0017065261128253,
+          "detrended_lag0_r": -0.2497571694214882,
+          "verdict": "CONCEDE"
+        },
+        "2023-04": {
+          "u2_diffs": 1.0022834786842818,
+          "detrended_lag0_r": -0.2618515419853008,
+          "verdict": "CONCEDE"
+        },
+        "2023-05": {
+          "u2_diffs": 1.0022770533578742,
+          "detrended_lag0_r": -0.2586082887093117,
+          "verdict": "CONCEDE"
+        },
+        "2023-06": {
+          "u2_diffs": 1.002313554070448,
+          "detrended_lag0_r": -0.2508119291883782,
+          "verdict": "CONCEDE"
+        },
+        "2023-07": {
+          "u2_diffs": 1.0022886064742789,
+          "detrended_lag0_r": -0.24729686322257016,
+          "verdict": "CONCEDE"
+        },
+        "2023-08": {
+          "u2_diffs": 1.0022817224971838,
+          "detrended_lag0_r": -0.24830953844133039,
+          "verdict": "CONCEDE"
+        },
+        "2023-09": {
+          "u2_diffs": 1.0022860419261215,
+          "detrended_lag0_r": -0.24406294163852577,
+          "verdict": "CONCEDE"
+        },
+        "2023-10": {
+          "u2_diffs": 1.0022805196691067,
+          "detrended_lag0_r": -0.26475422341744304,
+          "verdict": "CONCEDE"
+        },
+        "2023-11": {
+          "u2_diffs": 1.0023545740997784,
+          "detrended_lag0_r": -0.2697839503010133,
+          "verdict": "CONCEDE"
+        },
+        "2023-12": {
+          "u2_diffs": 1.002355534041351,
+          "detrended_lag0_r": -0.253430514919092,
+          "verdict": "CONCEDE"
+        },
+        "2024-01": {
+          "u2_diffs": 1.0023075622137254,
+          "detrended_lag0_r": -0.2482739467858529,
+          "verdict": "CONCEDE"
+        },
+        "2024-02": {
+          "u2_diffs": 1.0022931387459906,
+          "detrended_lag0_r": -0.24809921682866912,
+          "verdict": "CONCEDE"
+        },
+        "2024-03": {
+          "u2_diffs": 1.0022772958883497,
+          "detrended_lag0_r": -0.24979346633184574,
+          "verdict": "CONCEDE"
+        },
+        "2024-04": {
+          "u2_diffs": 1.0028860593385311,
+          "detrended_lag0_r": -0.26493601704384606,
+          "verdict": "CONCEDE"
+        },
+        "2024-05": {
+          "u2_diffs": 1.0020697487108807,
+          "detrended_lag0_r": -0.2468110963417801,
+          "verdict": "CONCEDE"
+        },
+        "2024-06": {
+          "u2_diffs": 1.0024519106246694,
+          "detrended_lag0_r": -0.2532553948678087,
+          "verdict": "CONCEDE"
+        },
+        "2024-07": {
+          "u2_diffs": 1.0023152127972939,
+          "detrended_lag0_r": -0.2553773755046949,
+          "verdict": "CONCEDE"
+        },
+        "2024-08": {
+          "u2_diffs": 1.0022887231428,
+          "detrended_lag0_r": -0.27494432103237443,
+          "verdict": "CONCEDE"
+        },
+        "2024-09": {
+          "u2_diffs": 1.0023383139154391,
+          "detrended_lag0_r": -0.2952321126585283,
+          "verdict": "CONCEDE"
+        },
+        "2024-10": {
+          "u2_diffs": 1.0022184037862758,
+          "detrended_lag0_r": -0.2648706369035782,
+          "verdict": "CONCEDE"
+        },
+        "2024-11": {
+          "u2_diffs": 1.0021944607292814,
+          "detrended_lag0_r": -0.2614688366682998,
+          "verdict": "CONCEDE"
+        },
+        "2024-12": {
+          "u2_diffs": 1.0022401847572477,
+          "detrended_lag0_r": -0.25996255535692436,
+          "verdict": "CONCEDE"
+        },
+        "2025-01": {
+          "u2_diffs": 1.0022343434257064,
+          "detrended_lag0_r": -0.26725520205103664,
+          "verdict": "CONCEDE"
+        },
+        "2025-02": {
+          "u2_diffs": 1.0023247202535388,
+          "detrended_lag0_r": -0.2690552693143778,
+          "verdict": "CONCEDE"
+        },
+        "2025-03": {
+          "u2_diffs": 1.0022370004764891,
+          "detrended_lag0_r": -0.2579365350427985,
+          "verdict": "CONCEDE"
+        },
+        "2025-04": {
+          "u2_diffs": 1.0023228311492596,
+          "detrended_lag0_r": -0.2587239566318421,
+          "verdict": "CONCEDE"
+        },
+        "2025-05": {
+          "u2_diffs": 1.0023067384318216,
+          "detrended_lag0_r": -0.25920611182925707,
+          "verdict": "CONCEDE"
+        },
+        "2025-06": {
+          "u2_diffs": 1.002275340214607,
+          "detrended_lag0_r": -0.25570638648589544,
+          "verdict": "CONCEDE"
+        },
+        "2025-07": {
+          "u2_diffs": 1.0022812361977937,
+          "detrended_lag0_r": -0.25355463091336544,
+          "verdict": "CONCEDE"
+        },
+        "2025-08": {
+          "u2_diffs": 1.0024888049787344,
+          "detrended_lag0_r": -0.2529780878906422,
+          "verdict": "CONCEDE"
+        },
+        "2025-09": {
+          "u2_diffs": 1.0024147652568571,
+          "detrended_lag0_r": -0.25370423162633715,
+          "verdict": "CONCEDE"
+        },
+        "2025-10": {
+          "u2_diffs": 1.0034984963907336,
+          "detrended_lag0_r": -0.32711369923305017,
+          "verdict": "CONCEDE"
+        },
+        "2025-11": {
+          "u2_diffs": 1.0024333695758618,
+          "detrended_lag0_r": -0.25192075994704877,
+          "verdict": "CONCEDE"
+        }
+      }
+    },
+    "shape_only": {
+      "verdict_full_sample": "PASS",
+      "n_deletions": 42,
+      "n_flips_to_concede": 5,
+      "months_whose_deletion_flips_to_concede": [
+        "2023-02",
+        "2023-06",
+        "2023-07",
+        "2024-05",
+        "2025-09"
+      ],
+      "by_deleted_month": {
+        "2022-06": {
+          "u2_diffs": 0.9939750129146403,
+          "detrended_lag0_r": 0.11430726372477464,
+          "verdict": "PASS"
+        },
+        "2022-07": {
+          "u2_diffs": 0.9947631530944144,
+          "detrended_lag0_r": 0.05474373227821776,
+          "verdict": "PASS"
+        },
+        "2022-08": {
+          "u2_diffs": 0.9947827410551809,
+          "detrended_lag0_r": 0.051797071050690986,
+          "verdict": "PASS"
+        },
+        "2022-09": {
+          "u2_diffs": 0.9983203959704738,
+          "detrended_lag0_r": 0.012935385307422342,
+          "verdict": "PASS"
+        },
+        "2022-10": {
+          "u2_diffs": 0.9970709192961312,
+          "detrended_lag0_r": 0.029004747213256247,
+          "verdict": "PASS"
+        },
+        "2022-11": {
+          "u2_diffs": 0.9940375536075455,
+          "detrended_lag0_r": 0.05219854501532702,
+          "verdict": "PASS"
+        },
+        "2022-12": {
+          "u2_diffs": 0.9944971705499509,
+          "detrended_lag0_r": 0.03217587708794143,
+          "verdict": "PASS"
+        },
+        "2023-01": {
+          "u2_diffs": 0.9937377774887926,
+          "detrended_lag0_r": 0.03068343465593562,
+          "verdict": "PASS"
+        },
+        "2023-02": {
+          "u2_diffs": 0.9944555967037786,
+          "detrended_lag0_r": -0.05100598549862321,
+          "verdict": "CONCEDE"
+        },
+        "2023-03": {
+          "u2_diffs": 0.9912372874980879,
+          "detrended_lag0_r": 0.05483061666758587,
+          "verdict": "PASS"
+        },
+        "2023-04": {
+          "u2_diffs": 0.9975221853822245,
+          "detrended_lag0_r": 0.018426334194507166,
+          "verdict": "PASS"
+        },
+        "2023-05": {
+          "u2_diffs": 0.9941042080256006,
+          "detrended_lag0_r": 0.007607519961995399,
+          "verdict": "PASS"
+        },
+        "2023-06": {
+          "u2_diffs": 0.9951607710308389,
+          "detrended_lag0_r": -0.021376450419250986,
+          "verdict": "CONCEDE"
+        },
+        "2023-07": {
+          "u2_diffs": 0.9942991474678665,
+          "detrended_lag0_r": -0.004461767754748775,
+          "verdict": "CONCEDE"
+        },
+        "2023-08": {
+          "u2_diffs": 0.9942755551604631,
+          "detrended_lag0_r": 0.005943715019702359,
+          "verdict": "PASS"
+        },
+        "2023-09": {
+          "u2_diffs": 0.9942019406541734,
+          "detrended_lag0_r": 0.019422443756867976,
+          "verdict": "PASS"
+        },
+        "2023-10": {
+          "u2_diffs": 0.9943630798821022,
+          "detrended_lag0_r": 0.017402952283266177,
+          "verdict": "PASS"
+        },
+        "2023-11": {
+          "u2_diffs": 0.9946908503770869,
+          "detrended_lag0_r": 0.014230233874430447,
+          "verdict": "PASS"
+        },
+        "2023-12": {
+          "u2_diffs": 0.9948365730226968,
+          "detrended_lag0_r": 0.012768617903752201,
+          "verdict": "PASS"
+        },
+        "2024-01": {
+          "u2_diffs": 0.9947352525854188,
+          "detrended_lag0_r": 0.012626984292714102,
+          "verdict": "PASS"
+        },
+        "2024-02": {
+          "u2_diffs": 0.9947227004079521,
+          "detrended_lag0_r": 0.011030401258118789,
+          "verdict": "PASS"
+        },
+        "2024-03": {
+          "u2_diffs": 0.9951505237684511,
+          "detrended_lag0_r": 0.01494792501296817,
+          "verdict": "PASS"
+        },
+        "2024-04": {
+          "u2_diffs": 0.9940266144244471,
+          "detrended_lag0_r": 0.017662741354548716,
+          "verdict": "PASS"
+        },
+        "2024-05": {
+          "u2_diffs": 0.9914296614816442,
+          "detrended_lag0_r": -0.049921013478172814,
+          "verdict": "CONCEDE"
+        },
+        "2024-06": {
+          "u2_diffs": 0.9919500189246182,
+          "detrended_lag0_r": 0.000533228855782239,
+          "verdict": "PASS"
+        },
+        "2024-07": {
+          "u2_diffs": 0.9948626203670808,
+          "detrended_lag0_r": 0.010933601980564018,
+          "verdict": "PASS"
+        },
+        "2024-08": {
+          "u2_diffs": 0.9947874327435006,
+          "detrended_lag0_r": 0.008342382722545076,
+          "verdict": "PASS"
+        },
+        "2024-09": {
+          "u2_diffs": 0.9944495033398882,
+          "detrended_lag0_r": 0.012637837137015646,
+          "verdict": "PASS"
+        },
+        "2024-10": {
+          "u2_diffs": 0.9945292677262715,
+          "detrended_lag0_r": 0.01365839043338266,
+          "verdict": "PASS"
+        },
+        "2024-11": {
+          "u2_diffs": 0.9944554887431019,
+          "detrended_lag0_r": 0.01397303088736412,
+          "verdict": "PASS"
+        },
+        "2024-12": {
+          "u2_diffs": 0.9945956298818336,
+          "detrended_lag0_r": 0.010636447804356665,
+          "verdict": "PASS"
+        },
+        "2025-01": {
+          "u2_diffs": 0.9945827154201716,
+          "detrended_lag0_r": 0.009611217966805596,
+          "verdict": "PASS"
+        },
+        "2025-02": {
+          "u2_diffs": 0.9948215439751795,
+          "detrended_lag0_r": 0.004717695353647754,
+          "verdict": "PASS"
+        },
+        "2025-03": {
+          "u2_diffs": 0.9945143455443795,
+          "detrended_lag0_r": 0.009736318088423984,
+          "verdict": "PASS"
+        },
+        "2025-04": {
+          "u2_diffs": 0.9940915565911868,
+          "detrended_lag0_r": 0.0160042797652489,
+          "verdict": "PASS"
+        },
+        "2025-05": {
+          "u2_diffs": 0.9943398996660179,
+          "detrended_lag0_r": 0.01923685386475838,
+          "verdict": "PASS"
+        },
+        "2025-06": {
+          "u2_diffs": 0.9947695015497335,
+          "detrended_lag0_r": 0.013966483172096866,
+          "verdict": "PASS"
+        },
+        "2025-07": {
+          "u2_diffs": 0.9947588680673857,
+          "detrended_lag0_r": 0.014020321095933992,
+          "verdict": "PASS"
+        },
+        "2025-08": {
+          "u2_diffs": 0.9941924002607329,
+          "detrended_lag0_r": 0.014008436576371595,
+          "verdict": "PASS"
+        },
+        "2025-09": {
+          "u2_diffs": 0.9991070274806598,
+          "detrended_lag0_r": -0.0008934012326348339,
+          "verdict": "CONCEDE"
+        },
+        "2025-10": {
+          "u2_diffs": 0.9938926050907135,
+          "detrended_lag0_r": 0.04248539984965034,
+          "verdict": "PASS"
+        },
+        "2025-11": {
+          "u2_diffs": 0.9950398887710982,
+          "detrended_lag0_r": 0.01223957323373202,
+          "verdict": "PASS"
+        }
+      }
+    },
+    "prereg_4.5": {
+      "verdict_full_sample": "PASS",
+      "n_deletions": 42,
+      "n_flips_to_concede": 0,
+      "months_whose_deletion_flips_to_concede": [],
+      "by_deleted_month": {
+        "2022-06": {
+          "u2_diffs": 0.9886989308270432,
+          "detrended_lag0_r": 0.1584913272291689,
+          "verdict": "PASS"
+        },
+        "2022-07": {
+          "u2_diffs": 0.989780907278536,
+          "detrended_lag0_r": 0.105215453232256,
+          "verdict": "PASS"
+        },
+        "2022-08": {
+          "u2_diffs": 0.9898190614408142,
+          "detrended_lag0_r": 0.10141342444851172,
+          "verdict": "PASS"
+        },
+        "2022-09": {
+          "u2_diffs": 0.994006638010101,
+          "detrended_lag0_r": 0.06742959135160358,
+          "verdict": "PASS"
+        },
+        "2022-10": {
+          "u2_diffs": 0.9928127997066443,
+          "detrended_lag0_r": 0.07773540732456426,
+          "verdict": "PASS"
+        },
+        "2022-11": {
+          "u2_diffs": 0.9888124757685728,
+          "detrended_lag0_r": 0.09942198794749946,
+          "verdict": "PASS"
+        },
+        "2022-12": {
+          "u2_diffs": 0.989270569441989,
+          "detrended_lag0_r": 0.08420936471871975,
+          "verdict": "PASS"
+        },
+        "2023-01": {
+          "u2_diffs": 0.9878958278647321,
+          "detrended_lag0_r": 0.08478185172771827,
+          "verdict": "PASS"
+        },
+        "2023-02": {
+          "u2_diffs": 0.9897990788374543,
+          "detrended_lag0_r": 0.008345352596488987,
+          "verdict": "PASS"
+        },
+        "2023-03": {
+          "u2_diffs": 0.9853653750409058,
+          "detrended_lag0_r": 0.10467027906469172,
+          "verdict": "PASS"
+        },
+        "2023-04": {
+          "u2_diffs": 0.9935594111223077,
+          "detrended_lag0_r": 0.07116991283221996,
+          "verdict": "PASS"
+        },
+        "2023-05": {
+          "u2_diffs": 0.9889149210227667,
+          "detrended_lag0_r": 0.06214694431790119,
+          "verdict": "PASS"
+        },
+        "2023-06": {
+          "u2_diffs": 0.9901741755333265,
+          "detrended_lag0_r": 0.03622771234999754,
+          "verdict": "PASS"
+        },
+        "2023-07": {
+          "u2_diffs": 0.9891427170803215,
+          "detrended_lag0_r": 0.04911894140823217,
+          "verdict": "PASS"
+        },
+        "2023-08": {
+          "u2_diffs": 0.9890598343309984,
+          "detrended_lag0_r": 0.05898668547277625,
+          "verdict": "PASS"
+        },
+        "2023-09": {
+          "u2_diffs": 0.9889805864492716,
+          "detrended_lag0_r": 0.07140609949990752,
+          "verdict": "PASS"
+        },
+        "2023-10": {
+          "u2_diffs": 0.9890465664436402,
+          "detrended_lag0_r": 0.07076650345695087,
+          "verdict": "PASS"
+        },
+        "2023-11": {
+          "u2_diffs": 0.989498283376104,
+          "detrended_lag0_r": 0.06913994718012414,
+          "verdict": "PASS"
+        },
+        "2023-12": {
+          "u2_diffs": 0.9897251474354394,
+          "detrended_lag0_r": 0.06650020451290194,
+          "verdict": "PASS"
+        },
+        "2024-01": {
+          "u2_diffs": 0.9896613719194792,
+          "detrended_lag0_r": 0.06462320248587662,
+          "verdict": "PASS"
+        },
+        "2024-02": {
+          "u2_diffs": 0.98973093207763,
+          "detrended_lag0_r": 0.06212154612937497,
+          "verdict": "PASS"
+        },
+        "2024-03": {
+          "u2_diffs": 0.9910655668224888,
+          "detrended_lag0_r": 0.06839220211048593,
+          "verdict": "PASS"
+        },
+        "2024-04": {
+          "u2_diffs": 0.9866465280672587,
+          "detrended_lag0_r": 0.07644479065901698,
+          "verdict": "PASS"
+        },
+        "2024-05": {
+          "u2_diffs": 0.9857117212287602,
+          "detrended_lag0_r": 0.0016101710301469957,
+          "verdict": "PASS"
+        },
+        "2024-06": {
+          "u2_diffs": 0.9857185148045914,
+          "detrended_lag0_r": 0.05648755657202712,
+          "verdict": "PASS"
+        },
+        "2024-07": {
+          "u2_diffs": 0.9898859009374672,
+          "detrended_lag0_r": 0.06544873054771945,
+          "verdict": "PASS"
+        },
+        "2024-08": {
+          "u2_diffs": 0.9898566256975353,
+          "detrended_lag0_r": 0.06312955965398855,
+          "verdict": "PASS"
+        },
+        "2024-09": {
+          "u2_diffs": 0.9891846492033,
+          "detrended_lag0_r": 0.06807201101122169,
+          "verdict": "PASS"
+        },
+        "2024-10": {
+          "u2_diffs": 0.9894034768245054,
+          "detrended_lag0_r": 0.06773757429923942,
+          "verdict": "PASS"
+        },
+        "2024-11": {
+          "u2_diffs": 0.9892923664746677,
+          "detrended_lag0_r": 0.06932937882455567,
+          "verdict": "PASS"
+        },
+        "2024-12": {
+          "u2_diffs": 0.9895195511597793,
+          "detrended_lag0_r": 0.06445985383080874,
+          "verdict": "PASS"
+        },
+        "2025-01": {
+          "u2_diffs": 0.9894974285422535,
+          "detrended_lag0_r": 0.06402866421649897,
+          "verdict": "PASS"
+        },
+        "2025-02": {
+          "u2_diffs": 0.9899169897954343,
+          "detrended_lag0_r": 0.05769427318696909,
+          "verdict": "PASS"
+        },
+        "2025-03": {
+          "u2_diffs": 0.9893248268435005,
+          "detrended_lag0_r": 0.06437960264086398,
+          "verdict": "PASS"
+        },
+        "2025-04": {
+          "u2_diffs": 0.9887692560840952,
+          "detrended_lag0_r": 0.07164196037791679,
+          "verdict": "PASS"
+        },
+        "2025-05": {
+          "u2_diffs": 0.9892041292640127,
+          "detrended_lag0_r": 0.07528169060861963,
+          "verdict": "PASS"
+        },
+        "2025-06": {
+          "u2_diffs": 0.989687038384525,
+          "detrended_lag0_r": 0.06992854393120589,
+          "verdict": "PASS"
+        },
+        "2025-07": {
+          "u2_diffs": 0.9897607320346388,
+          "detrended_lag0_r": 0.0680127826800478,
+          "verdict": "PASS"
+        },
+        "2025-08": {
+          "u2_diffs": 0.9887942768796971,
+          "detrended_lag0_r": 0.06772107962718768,
+          "verdict": "PASS"
+        },
+        "2025-09": {
+          "u2_diffs": 0.9969207189900402,
+          "detrended_lag0_r": 0.06545016212027076,
+          "verdict": "PASS"
+        },
+        "2025-10": {
+          "u2_diffs": 0.9896086417164085,
+          "detrended_lag0_r": 0.10103938763877586,
+          "verdict": "PASS"
+        },
+        "2025-11": {
+          "u2_diffs": 0.9911641344590717,
+          "detrended_lag0_r": 0.06545696953601328,
+          "verdict": "PASS"
+        }
+      }
+    }
+  },
+  "null_leg_scores": {
+    "by_leg": {
+      "flat_4.0": {
+        "p_q_shock_pct": 0.0,
+        "beta1": 0.0,
+        "u2_diffs": 0.9996906953295555,
+        "detrended_lag0_r": 0.11491905190190911,
+        "detrended_lag0_t": 0.7316592464112857,
+        "detrended_lag0_p_two_sided": 0.4686416516742441,
+        "u1_levels": 0.2298378669529907,
+        "verdict": "PASS"
+      },
+      "flat_4.5": {
+        "p_q_shock_pct": 0.0,
+        "beta1": 0.0,
+        "u2_diffs": 0.9997777327009546,
+        "detrended_lag0_r": 0.10031479554191183,
+        "detrended_lag0_t": 0.6376630063260023,
+        "detrended_lag0_p_two_sided": 0.5273266257437002,
+        "u1_levels": 0.23086101220632382,
+        "verdict": "PASS"
+      },
+      "shape_only": {
+        "p_q_shock_pct": 0.0,
+        "beta1": 0.0,
+        "u2_diffs": 0.9988114169860934,
+        "detrended_lag0_r": -0.03758283849375516,
+        "detrended_lag0_t": -0.23786278750601608,
+        "detrended_lag0_p_two_sided": 0.813201759427733,
+        "u1_levels": 0.2329066858529626,
+        "verdict": "CONCEDE"
+      },
+      "prereg_4.5": {
+        "p_q_shock_pct": 0.0,
+        "beta1": 0.0,
+        "u2_diffs": 0.9955062665155512,
+        "detrended_lag0_r": -0.002733444380114373,
+        "detrended_lag0_t": -0.017287884782319116,
+        "detrended_lag0_p_two_sided": 0.9862928965765514,
+        "u1_levels": 0.23281864387948592,
+        "verdict": "CONCEDE"
+      }
+    },
+    "legs_clearing_frozen_rule": [
+      "flat_4.0",
+      "flat_4.5"
+    ],
+    "n_clearing": 2,
+    "beta1_is_zero_on_every_null_leg": true,
+    "interpretation": "A beta1 = 0 null clearing the frozen rule is decisive: the rule cannot evidence the lock-in mechanism, because a specification with the mechanism removed satisfies it."
+  },
+  "level_shape_interaction": {
+    "basis": "all deltas vs the flat_4.0 production control",
+    "marginal_b": {
+      "level": -12.703509960427368,
+      "shape": -4.896712362771268,
+      "total": -16.040468284749295,
+      "interaction": 1.5597540384493414
+    },
+    "marginal_share_pp": {
+      "level": -1.661136185260176,
+      "shape": -0.6403038309844078,
+      "total": -2.0974834812833762,
+      "interaction": 0.20395653496120758
+    },
+    "detrended_lag0_r": {
+      "level": -0.051786905480246365,
+      "shape": 0.21879775733582824,
+      "total": 0.27270843581219484,
+      "interaction": 0.10569758395661294
+    },
+    "path_wise_monthly_cpr_pp": {
+      "mean_abs_interaction_residual": 0.1644800474049835,
+      "mean_abs_total_movement": 0.5330800184364435,
+      "interaction_share_of_total_movement": 0.30854663787139053,
+      "max_abs_interaction_residual": 0.3794822580903956
+    },
+    "note": "LEVEL and SHAPE do not separate. Any additive level/shape decomposition of this floor MUST carry its interaction residual; quoting LEVEL and SHAPE without it misstates both."
+  },
+  "jensen_equivalent_flat": {
+    "definition": "the flat annual CPR whose monthly hazard equals the QT-calendar-frequency-weighted mean of the twelve seasonal monthly hazards; reproduces the convexity of cpr_annual_to_monthly_hazard with ZERO dispersion",
+    "flat_annual_cpr": 0.040089566887574146,
+    "flat_annual_cpr_pct": 4.008956688757415,
+    "alt_exposure_weighted_flat_annual_cpr_pct": 4.003443306983112,
+    "alt_uniform_weighted_flat_annual_cpr_pct": 3.9517878433909304,
+    "production_flat_annual_cpr_pct": 4.0,
+    "measured_marginal_b": 70.15638311039083,
+    "measured_marginal_share_pp": 9.173787951099854,
+    "flat40_marginal_b": 70.34506041989584,
+    "true_shape_effect_b": -4.896712362771268,
+    "level_leakage_b": -0.18867730950501027,
+    "level_leakage_share_of_shape_effect": 0.03853142588882418,
+    "floor_dispersion_share_of_shape_effect": 0.9614685741111758,
+    "u2_diffs": 1.0029118171543696,
+    "detrended_lag0_r": -0.20401007608349075,
+    "interpretation": "The convexity-matched flat level accounts for only a small part of the shape effect. The remainder is FLOOR DISPERSION under the max() rule, not calendar timing."
+  },
+  "frequency_band_summary": {
+    "empirical_detrended_variance_share_in_12m_harmonic": 0.007819751905647893,
+    "simulated_detrended_variance_share_in_12m_harmonic": {
+      "flat_4.0": 0.006443968355603238,
+      "flat_4.5": 0.012575845665613353,
+      "shape_only": 0.7969497225582738,
+      "prereg_4.5": 0.8935017029652463
+    },
+    "harmonic_r_by_leg": {
+      "flat_4.0": 0.10806571915971207,
+      "flat_4.5": 0.7273237330275352,
+      "shape_only": 0.533706706406393,
+      "prereg_4.5": 0.5560341944754844
+    },
+    "residual_r_by_leg": {
+      "flat_4.0": -0.20517036498178295,
+      "flat_4.5": -0.26463896656204616,
+      "shape_only": -0.05853780318787231,
+      "prereg_4.5": 0.07164986169907109
+    },
+    "interpretation": "The seasonal legs push the large majority of SIMULATED detrended variance into the 12-month calendar harmonic, while the primary empirical benchmark carries a very small share of its own detrended variance there. The model manufactures calendar structure the benchmark does not have and cannot adjudicate."
+  },
+  "b2_runtime_s": 1519.9,
+  "b2_source_artifact": "/Users/eugene/somthing/Lock In effect/Lock-in-Effect/hazard/data/seasonal_floor_timing_results.json",
+  "window": {
+    "first": "2022-06",
+    "last": "2025-11",
+    "n": 42,
+    "n_diffs": 41
+  },
+  "scorers_reused": {
+    "theil_u1": "figures/make_theil_data.py:231",
+    "theil_u2_diffs": "figures/make_theil_data.py:237",
+    "detrend": "figures/make_theil_data.py:261",
+    "estimator_block": "figures/make_theil_data.py:267",
+    "parity_target_read_from": "/Users/eugene/somthing/Lock In effect/Lock-in-Effect/figures/theil_data.json:estimators.path_b (READ, not a hardcoded literal)",
+    "cpr_cross_correlation": "hazard/macro.py:131 (max_lag=6)",
+    "new_math_written": "none (Pearson r on committed detrend output)"
+  },
+  "empirical_primary": {
+    "definition": "SOMA back-out Empirical_CPR_Pct (qt_active_frame), the series figures/theil_data.json is scored on",
+    "source": "/Users/eugene/somthing/Lock In effect/Lock-in-Effect/hazard/data/seasonal_floor_timing_results.json",
+    "values_annual_pct": [
+      0.0,
+      1.0932381616273066,
+      1.0732651600470684,
+      2.4151829154348365,
+      6.266043112093158,
+      6.38276592844141,
+      5.340261832459936,
+      5.062474615951806,
+      0.0,
+      9.342478583946003,
+      6.126745169504493,
+      5.633431491015696,
+      6.902044449058731,
+      7.194797125863311,
+      6.352270454037592,
+      6.611816285221598,
+      5.538432453020424,
+      5.120739201908467,
+      4.8463558294668125,
+      4.576853808727289,
+      4.258982349543943,
+      4.7288990431187585,
+      0.0,
+      12.59355465302083,
+      6.836279437136626,
+      6.4644245114437116,
+      6.833066009472372,
+      6.539478794144066,
+      5.746598445140603,
+      6.244489280761338,
+      5.586953272819292,
+      5.6663019513902055,
+      4.924361910351149,
+      4.994119641222616,
+      5.993444572070469,
+      6.463952545691669,
+      7.008709728542575,
+      7.18028690699343,
+      7.253896104429174,
+      0.0,
+      14.005913983829673,
+      6.556828661037247
+    ],
+    "mean": 5.518089009047279,
+    "sd": 2.830873710114416
+  },
+  "empirical_secondary": {
+    "definition": "B0 panel-derived cpr_annual x100; DIFFERENT object (cohort-panel prepayment back-out, not SOMA rolloff), robustness only, NOT adjudicated",
+    "source": "/private/tmp/claude-501/-Users-eugene-somthing-Lock-In-effect-Lock-in-Effect/dc42b60e-9f6a-4d3c-9fcb-f964562227af/scratchpad/b0_variance_decomposition.json",
+    "window_first": "2022-06",
+    "window_last": "2025-09",
+    "n": 40,
+    "months_missing_from_qt_window": [
+      "2025-10",
+      "2025-11"
+    ],
+    "values_annual_pct": [
+      7.56879556267358,
+      6.167816756061184,
+      6.2400924907946465,
+      5.275859219196466,
+      4.368433280697714,
+      3.4704641455050034,
+      3.2719279960440217,
+      2.478799196237136,
+      2.7981273874212897,
+      4.0398247088519685,
+      3.7779697524260802,
+      4.823967813008656,
+      5.222682477829799,
+      4.515568918073109,
+      4.785538622768081,
+      3.8682512368930055,
+      3.705268778686732,
+      3.016800412921583,
+      2.9321313786326297,
+      2.590011647730517,
+      2.932165812096821,
+      3.675657901401974,
+      4.222116225420458,
+      4.833131186189243,
+      4.638625638311423,
+      4.913748146412178,
+      4.666247565068094,
+      3.9579698516476136,
+      4.331375726711217,
+      3.783929176570655,
+      3.743731282295504,
+      2.931452088572528,
+      3.039417655270915,
+      3.8783078934442328,
+      4.368329091631395,
+      4.849984141077379,
+      5.0930873282685525,
+      5.241407810612763,
+      4.869116975981191,
+      4.399987354354917
+    ],
+    "mean": 4.232203015844806,
+    "sd": 1.0538600524422188
+  },
+  "parity_gate": {
+    "u1_levels": {
+      "got": 0.265315104696536,
+      "want": 0.265315104696536,
+      "want_source": "theil_data.json:estimators.path_b.u1_levels",
+      "want_rounded_4dp": 0.2653,
+      "abs_diff": 0.0,
+      "pass": true,
+      "pass_at_legacy_4dp_tol": true
+    },
+    "u2_diffs": {
+      "got": 1.0029223469568262,
+      "want": 1.0029223469568262,
+      "want_source": "theil_data.json:estimators.path_b.u2_diffs",
+      "want_rounded_4dp": 1.0029,
+      "abs_diff": 0.0,
+      "pass": true,
+      "pass_at_legacy_4dp_tol": true
+    },
+    "u1_detrended": {
+      "got": 0.9797114319696317,
+      "want": 0.9797114319696317,
+      "want_source": "theil_data.json:estimators.path_b.u1_detrended",
+      "want_rounded_4dp": 0.9797,
+      "abs_diff": 0.0,
+      "pass": true,
+      "pass_at_legacy_4dp_tol": true
+    }
+  },
+  "parity_gate_pass": true,
+  "scores_primary": {
+    "flat_4.0": {
+      "n": 42,
+      "n_diffs": 41,
+      "u1_levels": 0.265315104696536,
+      "u2_diffs": 1.0029223469568262,
+      "u1_detrended": 0.9797114319696317,
+      "detrended_lag0_r": -0.20293995357874087,
+      "detrended_lag0_t": -1.3107807584544735,
+      "detrended_lag0_p_two_sided": 0.19740793517963667,
+      "raw_lag0_r": 0.19000395255236566,
+      "ccf_lags_minus6_to_plus6": {
+        "-6": 0.19080706106405387,
+        "-5": 0.28706846044939277,
+        "-4": 0.41442867287589363,
+        "-3": 0.40436496933191357,
+        "-2": 0.21233407814928984,
+        "-1": 0.26727820845070605,
+        "0": 0.19000395255236566,
+        "1": 0.2024740482319247,
+        "2": 0.20579650285045425,
+        "3": 0.21098813910611228,
+        "4": 0.17601685870682465,
+        "5": 0.12661115042635424,
+        "6": 0.03338461205192503
+      },
+      "ccf_peak_lag": -4,
+      "ccf_peak_r": 0.41442867287589363,
+      "u2_lt_1": false,
+      "detrended_r_positive": false,
+      "verdict": "CONCEDE",
+      "mse_decomp": {
+        "levels": {
+          "bias_share": 6.731128471454453,
+          "var_share": 86.56732361679774,
+          "cov_share": 6.701547911747812,
+          "mse": 8.465917762660371,
+          "_identity_rel_err": 2.0982448556670592e-16
+        },
+        "diffs": {
+          "bias_share": 0.14151819109963984,
+          "var_share": 96.72686616660916,
+          "cov_share": 3.1316156422912087,
+          "mse": 16.410838571477413,
+          "_identity_rel_err": 0.0
+        },
+        "detrended": {
+          "bias_share": 2.3600437576885732e-29,
+          "var_share": 93.68446939082534,
+          "cov_share": 6.31553060917466,
+          "mse": 7.050849868919601,
+          "_identity_rel_err": 1.2596756933022324e-16
+        }
+      }
+    },
+    "flat_4.5": {
+      "n": 42,
+      "n_diffs": 41,
+      "u1_levels": 0.255929650414744,
+      "u2_diffs": 1.0022873903577438,
+      "u1_detrended": 0.9857695643037744,
+      "detrended_lag0_r": -0.25472685905898723,
+      "detrended_lag0_t": -1.6659900522370543,
+      "detrended_lag0_p_two_sided": 0.10352905802920576,
+      "raw_lag0_r": 0.05188818756125466,
+      "ccf_lags_minus6_to_plus6": {
+        "-6": 0.07060498470052465,
+        "-5": 0.1992408643613853,
+        "-4": 0.37370388903960844,
+        "-3": 0.3542187296771594,
+        "-2": 0.11158777780628136,
+        "-1": 0.16885996694351746,
+        "0": 0.05188818756125466,
+        "1": 0.10551132834127849,
+        "2": 0.1500905411074467,
+        "3": 0.2033773093834096,
+        "4": 0.1849721474246148,
+        "5": 0.09779372594321414,
+        "6": -0.037797230614125585
+      },
+      "ccf_peak_lag": -4,
+      "ccf_peak_r": 0.37370388903960844,
+      "u2_lt_1": false,
+      "detrended_r_positive": false,
+      "verdict": "CONCEDE",
+      "mse_decomp": {
+        "levels": {
+          "bias_share": 3.020613432713228,
+          "var_share": 92.54003157480257,
+          "cov_share": 4.439354992484205,
+          "mse": 8.247588011913233,
+          "_identity_rel_err": 2.1537894919513326e-16
+        },
+        "diffs": {
+          "bias_share": 0.15019307789286004,
+          "var_share": 97.45626116871225,
+          "cov_share": 2.393545753394895,
+          "mse": 16.390065534082073,
+          "_identity_rel_err": 2.167601875302368e-16
+        },
+        "detrended": {
+          "bias_share": 3.1110546582523815e-29,
+          "var_share": 95.1041290501401,
+          "cov_share": 4.895870949859912,
+          "mse": 7.043528748259051,
+          "_identity_rel_err": 0.0
+        }
+      }
+    },
+    "shape_only": {
+      "n": 42,
+      "n_diffs": 41,
+      "u1_levels": 0.2599274508835153,
+      "u2_diffs": 0.9946858751508445,
+      "u1_detrended": 0.8782767593660964,
+      "detrended_lag0_r": 0.015857803757087355,
+      "detrended_lag0_t": 0.10030616990699107,
+      "detrended_lag0_p_two_sided": 0.9206023313185885,
+      "raw_lag0_r": 0.10575131848227438,
+      "ccf_lags_minus6_to_plus6": {
+        "-6": 0.1627784511585595,
+        "-5": 0.19316313501373644,
+        "-4": 0.08224352356557293,
+        "-3": 0.14493832667044684,
+        "-2": 0.0980979123519901,
+        "-1": 0.12732300562433246,
+        "0": 0.10575131848227438,
+        "1": 0.07870971688197533,
+        "2": 0.08978203341718372,
+        "3": 0.05628951550113194,
+        "4": 0.07625685658726572,
+        "5": 0.005711036238869994,
+        "6": -0.24411883317638436
+      },
+      "ccf_peak_lag": 6,
+      "ccf_peak_r": -0.24411883317638436,
+      "u2_lt_1": true,
+      "detrended_r_positive": true,
+      "verdict": "PASS",
+      "mse_decomp": {
+        "levels": {
+          "bias_share": 4.774476802962994,
+          "var_share": 70.61509302018243,
+          "cov_share": 24.61043017685458,
+          "mse": 8.333266155542919,
+          "_identity_rel_err": 4.2632907823751596e-16
+        },
+        "diffs": {
+          "bias_share": 0.1978840432938449,
+          "var_share": 89.09890085757976,
+          "cov_share": 10.703215099126393,
+          "mse": 16.142398287290725,
+          "_identity_rel_err": 2.200858642917783e-16
+        },
+        "detrended": {
+          "bias_share": 2.915944547157442e-29,
+          "var_share": 71.28589783432358,
+          "cov_share": 28.71410216567641,
+          "mse": 7.091537724313885,
+          "_identity_rel_err": 1.2524482759993463e-16
+        }
+      }
+    },
+    "prereg_4.5": {
+      "n": 42,
+      "n_diffs": 41,
+      "u1_levels": 0.2499924430545916,
+      "u2_diffs": 0.9896295758254481,
+      "u1_detrended": 0.8303153971856129,
+      "detrended_lag0_r": 0.06976848223345397,
+      "detrended_lag0_t": 0.4423324966973387,
+      "detrended_lag0_p_two_sided": 0.6606312250280966,
+      "raw_lag0_r": 0.10106320949032625,
+      "ccf_lags_minus6_to_plus6": {
+        "-6": 0.054912280380910915,
+        "-5": 0.07998791498845748,
+        "-4": -0.04064702498770496,
+        "-3": 0.04041793958357197,
+        "-2": 0.06482655028138824,
+        "-1": 0.08091687144232923,
+        "0": 0.10106320949032624,
+        "1": 0.0787200176146456,
+        "2": 0.09411099458668892,
+        "3": 0.04053890313654324,
+        "4": 0.04407217424067357,
+        "5": -0.025007159832335694,
+        "6": -0.26936893003092677
+      },
+      "ccf_peak_lag": 6,
+      "ccf_peak_r": -0.26936893003092677,
+      "u2_lt_1": true,
+      "detrended_r_positive": true,
+      "verdict": "PASS",
+      "mse_decomp": {
+        "levels": {
+          "bias_share": 1.4651017418813945,
+          "var_share": 63.0012703166323,
+          "cov_share": 35.5336279414863,
+          "mse": 8.130377263569113,
+          "_identity_rel_err": 2.1848393768390234e-16
+        },
+        "diffs": {
+          "bias_share": 0.23225552345689723,
+          "var_share": 85.23686582341887,
+          "cov_share": 14.530878653124235,
+          "mse": 15.978701692041104,
+          "_identity_rel_err": 2.2234057229881737e-16
+        },
+        "detrended": {
+          "bias_share": 4.890236328374671e-29,
+          "var_share": 60.82730618351285,
+          "cov_share": 39.17269381648716,
+          "mse": 7.081697139724197,
+          "_identity_rel_err": 0.0
+        }
+      }
+    }
+  },
+  "scores_secondary": {
+    "flat_4.0": {
+      "n": 40,
+      "n_diffs": 39,
+      "u1_levels": 0.1301357282972343,
+      "u2_diffs": 1.005361552709867,
+      "u1_detrended": 0.9291829266344195,
+      "detrended_lag0_r": 0.13309332948119534,
+      "detrended_lag0_t": 0.827806961094881,
+      "detrended_lag0_p_two_sided": 0.41294862467704785,
+      "raw_lag0_r": -0.04042512268210113,
+      "ccf_lags_minus6_to_plus6": {
+        "-6": -0.30190555496235505,
+        "-5": -0.3387706355715977,
+        "-4": -0.3461332166790318,
+        "-3": -0.3083259127923545,
+        "-2": -0.18068766319226082,
+        "-1": -0.11682189469458,
+        "0": -0.04042512268210113,
+        "1": 0.12879946825455338,
+        "2": 0.2383805233781758,
+        "3": 0.3239273597055427,
+        "4": 0.2830928805204637,
+        "5": 0.17458809084415614,
+        "6": 0.12448671156841472
+      },
+      "ccf_peak_lag": -4,
+      "ccf_peak_r": -0.3461332166790318,
+      "u2_lt_1": false,
+      "detrended_r_positive": true,
+      "verdict": "CONCEDE",
+      "mse_decomp": {
+        "levels": {
+          "bias_share": 19.35765197846522,
+          "var_share": 61.96566217142791,
+          "cov_share": 18.67668585010687,
+          "mse": 1.4077099962947428,
+          "_identity_rel_err": 6.30938490198915e-16
+        },
+        "diffs": {
+          "bias_share": 2.01293908485989,
+          "var_share": 81.13509307267735,
+          "cov_share": 16.85196784246276,
+          "mse": 0.3873651595646545,
+          "_identity_rel_err": 2.8660890046820304e-16
+        },
+        "detrended": {
+          "bias_share": 1.3670343878442035e-28,
+          "var_share": 87.89358369468982,
+          "cov_share": 12.106416305310184,
+          "mse": 1.0712578468068807,
+          "_identity_rel_err": 0.0
+        }
+      }
+    },
+    "flat_4.5": {
+      "n": 40,
+      "n_diffs": 39,
+      "u1_levels": 0.13944284484543742,
+      "u2_diffs": 1.0018108043484246,
+      "u1_detrended": 0.9404263304426664,
+      "detrended_lag0_r": 0.2611503503776058,
+      "detrended_lag0_t": 1.6677115742839728,
+      "detrended_lag0_p_two_sided": 0.10359460924577238,
+      "raw_lag0_r": 0.1190898476071467,
+      "ccf_lags_minus6_to_plus6": {
+        "-6": -0.18938517416772108,
+        "-5": -0.25105611945835793,
+        "-4": -0.2812393634710563,
+        "-3": -0.2408395812828557,
+        "-2": -0.06398786399701727,
+        "-1": 0.016256698061277303,
+        "0": 0.1190898476071467,
+        "1": 0.26738212283874746,
+        "2": 0.34043484778063926,
+        "3": 0.35971411520149854,
+        "4": 0.2360349192699705,
+        "5": 0.05709666556906838,
+        "6": -0.0009725697878173127
+      },
+      "ccf_peak_lag": 3,
+      "ccf_peak_r": 0.35971411520149854,
+      "u2_lt_1": false,
+      "detrended_r_positive": true,
+      "verdict": "CONCEDE",
+      "mse_decomp": {
+        "levels": {
+          "bias_share": 35.73143118211511,
+          "var_share": 57.14538982072737,
+          "cov_share": 7.123178997157517,
+          "mse": 1.7091739683973635,
+          "_identity_rel_err": 1.6888742266137242e-15
+        },
+        "diffs": {
+          "bias_share": 1.8250112896302864,
+          "var_share": 85.47972945981067,
+          "cov_share": 12.695259250559031,
+          "mse": 0.38463378932157066,
+          "_identity_rel_err": 5.772883482667518e-16
+        },
+        "detrended": {
+          "bias_share": 1.1173669884238735e-29,
+          "var_share": 92.34242678699795,
+          "cov_share": 7.6575732130020535,
+          "mse": 1.0601028715433773,
+          "_identity_rel_err": 0.0
+        }
+      }
+    },
+    "shape_only": {
+      "n": 40,
+      "n_diffs": 39,
+      "u1_levels": 0.10951598986573473,
+      "u2_diffs": 0.7619757480524326,
+      "u1_detrended": 0.503883476034948,
+      "detrended_lag0_r": 0.8629194132220521,
+      "detrended_lag0_t": 10.526331094890747,
+      "detrended_lag0_p_two_sided": 8.050087507171332e-13,
+      "raw_lag0_r": 0.7800585735163179,
+      "ccf_lags_minus6_to_plus6": {
+        "-6": -0.8491888487262711,
+        "-5": -0.8629829302069286,
+        "-4": -0.6641361175299707,
+        "-3": -0.28732263827486126,
+        "-2": 0.1794314289704171,
+        "-1": 0.5176112616627822,
+        "0": 0.7800585735163178,
+        "1": 0.7819928189109537,
+        "2": 0.6456661082522491,
+        "3": 0.267868891739195,
+        "4": -0.1779830483265824,
+        "5": -0.5519928105797017,
+        "6": -0.732913620191869
+      },
+      "ccf_peak_lag": -5,
+      "ccf_peak_r": -0.8629829302069286,
+      "u2_lt_1": true,
+      "detrended_r_positive": true,
+      "verdict": "PASS",
+      "mse_decomp": {
+        "levels": {
+          "bias_share": 41.68920655021404,
+          "var_share": 39.63061745153818,
+          "cov_share": 18.68017599824778,
+          "mse": 1.0298744630682426,
+          "_identity_rel_err": 1.0780178210434856e-15
+        },
+        "diffs": {
+          "bias_share": 1.8415967987651793,
+          "var_share": 59.57054906741246,
+          "cov_share": 38.587854133822354,
+          "mse": 0.22251449607851626,
+          "_identity_rel_err": 4.989441336142901e-16
+        },
+        "detrended": {
+          "bias_share": 1.9654011758902407e-29,
+          "var_share": 78.37682153836737,
+          "cov_share": 21.62317846163262,
+          "mse": 0.5274305042569476,
+          "_identity_rel_err": 0.0
+        }
+      }
+    },
+    "prereg_4.5": {
+      "n": 40,
+      "n_diffs": 39,
+      "u1_levels": 0.12012187510606114,
+      "u2_diffs": 0.6796573551350973,
+      "u1_detrended": 0.3728875660783126,
+      "detrended_lag0_r": 0.8798533358065707,
+      "detrended_lag0_t": 11.412590668740414,
+      "detrended_lag0_p_two_sided": 7.665565929666785e-14,
+      "raw_lag0_r": 0.8406435563367273,
+      "ccf_lags_minus6_to_plus6": {
+        "-6": -0.8320430765193453,
+        "-5": -0.8345814751747442,
+        "-4": -0.6148546646158637,
+        "-3": -0.2133756374088944,
+        "-2": 0.25997673250664693,
+        "-1": 0.6005425829937182,
+        "0": 0.8406435563367273,
+        "1": 0.8121486082287998,
+        "2": 0.6334704439117393,
+        "3": 0.20906237364738414,
+        "4": -0.27123345110152974,
+        "5": -0.654261859372886,
+        "6": -0.8279405366680711
+      },
+      "ccf_peak_lag": 0,
+      "ccf_peak_r": 0.8406435563367273,
+      "u2_lt_1": true,
+      "detrended_r_positive": true,
+      "verdict": "PASS",
+      "mse_decomp": {
+        "levels": {
+          "bias_share": 68.28485759631374,
+          "var_share": 17.00757452757252,
+          "cov_share": 14.707567876113734,
+          "mse": 1.3233048752345795,
+          "_identity_rel_err": 8.389775065465165e-16
+        },
+        "diffs": {
+          "bias_share": 1.6884602511939715,
+          "var_share": 38.38774221608882,
+          "cov_share": 59.9237975327172,
+          "mse": 0.1770337437005778,
+          "_identity_rel_err": 1.5678127251589224e-16
+        },
+        "detrended": {
+          "bias_share": 3.0640849684139854e-28,
+          "var_share": 60.425783139963734,
+          "cov_share": 39.574216860036266,
+          "mse": 0.3630503551126624,
+          "_identity_rel_err": 9.174124269460887e-16
+        }
+      }
+    }
+  },
+  "secondary_verdicts": {
+    "flat_4.0": "CONCEDE",
+    "flat_4.5": "CONCEDE",
+    "shape_only": "PASS",
+    "prereg_4.5": "PASS"
+  },
+  "secondary_circularity_warning": "The secondary benchmark is NOT independent corroboration and must not be quoted as such. B1's 12-cell calendar profile was ESTIMATED off the same cohort-month panel that produces this CPR series, so scoring the seasonalized floor against it scores the profile against its own estimation sample. The large apparent improvement (U2 0.995 -> 0.762, r_det +0.016 -> +0.863 for shape_only) is the expected signature of that circularity, not evidence of timing skill. It is reported only to show that the thin primary pass is not a sign error.",
+  "frequency_band_secondary": {
+    "flat_4.0": {
+      "harmonic_12m_r": 0.7393067000653432,
+      "residual_r": 0.143429768998844,
+      "detrended_total_r": 0.13309332948119534,
+      "sim_var_share_in_12m_harmonic": 0.009040955865976029,
+      "emp_var_share_in_12m_harmonic": 0.741825650079664
+    },
+    "flat_4.5": {
+      "harmonic_12m_r": 0.9574642908208083,
+      "residual_r": 0.2845775724334375,
+      "detrended_total_r": 0.2611503503776058,
+      "sim_var_share_in_12m_harmonic": 0.02048962232074234,
+      "emp_var_share_in_12m_harmonic": 0.741825650079664
+    },
+    "shape_only": {
+      "harmonic_12m_r": 0.9793038600829639,
+      "residual_r": 0.4787678047458086,
+      "detrended_total_r": 0.8629194132220521,
+      "sim_var_share_in_12m_harmonic": 0.7985378029537964,
+      "emp_var_share_in_12m_harmonic": 0.741825650079664
+    },
+    "prereg_4.5": {
+      "harmonic_12m_r": 0.9849486841455534,
+      "residual_r": 0.4705410457988577,
+      "detrended_total_r": 0.8798533358065707,
+      "sim_var_share_in_12m_harmonic": 0.8928348585094488,
+      "emp_var_share_in_12m_harmonic": 0.741825650079664
+    }
+  },
+  "frozen_rule": "U2(first diffs) < 1 AND detrended lag-0 r > 0",
+  "seasonal_legs_passing": [
+    "shape_only",
+    "prereg_4.5"
+  ],
+  "margin_disclosure": {
+    "shape_only": {
+      "u2_margin_below_1": 0.005314124849155499,
+      "detrended_lag0_r": 0.015857803757087355,
+      "detrended_lag0_p_two_sided": 0.9206023313185885,
+      "r_distinguishable_from_zero_at_5pct": false
+    },
+    "prereg_4.5": {
+      "u2_margin_below_1": 0.010370424174551918,
+      "detrended_lag0_r": 0.06976848223345397,
+      "detrended_lag0_p_two_sided": 0.6606312250280966,
+      "r_distinguishable_from_zero_at_5pct": false
+    }
+  },
+  "direction_of_movement": {
+    "detrended_lag0_r_flat40": -0.20293995357874087,
+    "detrended_lag0_r_flat45": -0.25472685905898723,
+    "detrended_lag0_r_shape_only": 0.015857803757087355,
+    "detrended_lag0_r_prereg45": 0.06976848223345397,
+    "u1_detrended_flat40": 0.9797114319696317,
+    "u1_detrended_flat45": 0.9857695643037744,
+    "u1_detrended_shape_only": 0.8782767593660964,
+    "u1_detrended_prereg45": 0.8303153971856129
+  },
+  "frequency_band": {
+    "flat_4.0": {
+      "harmonic_12m_r": 0.10806571915971207,
+      "residual_r": -0.20517036498178295,
+      "detrended_total_r": -0.20293995357874087,
+      "sim_var_share_in_12m_harmonic": 0.006443968355603238,
+      "emp_var_share_in_12m_harmonic": 0.007819751905647893
+    },
+    "flat_4.5": {
+      "harmonic_12m_r": 0.7273237330275352,
+      "residual_r": -0.26463896656204616,
+      "detrended_total_r": -0.25472685905898723,
+      "sim_var_share_in_12m_harmonic": 0.012575845665613353,
+      "emp_var_share_in_12m_harmonic": 0.007819751905647893
+    },
+    "shape_only": {
+      "harmonic_12m_r": 0.533706706406393,
+      "residual_r": -0.05853780318787231,
+      "detrended_total_r": 0.015857803757087355,
+      "sim_var_share_in_12m_harmonic": 0.7969497225582738,
+      "emp_var_share_in_12m_harmonic": 0.007819751905647893
+    },
+    "prereg_4.5": {
+      "harmonic_12m_r": 0.5560341944754844,
+      "residual_r": 0.07164986169907109,
+      "detrended_total_r": 0.06976848223345397,
+      "sim_var_share_in_12m_harmonic": 0.8935017029652463,
+      "emp_var_share_in_12m_harmonic": 0.007819751905647893
+    }
+  },
+  "b4_settlement_lag_kernel": {
+    "authorized_condition": "a SEASONAL leg NEARLY clears: |U2-1| <= 0.02 with r_det > 0, or U2 < 1 with r_det just barely negative",
+    "legs_that_cleared_outright": [
+      "shape_only",
+      "prereg_4.5"
+    ],
+    "legs_that_near_missed": [],
+    "triggered": false,
+    "run": false,
+    "note": "B4 not run. The seasonal legs cleared the rule outright, so the near-miss trigger is not met; a kernel run would be a spec search, not a pre-registered test. The hardening pass strengthens this: the rule has been shown to have no discriminating power, so fitting a settlement-lag kernel to improve a statistic that placebos already satisfy would be meaningless as well as unauthorized."
+  },
+  "surviving_claim_frequency_band": "NO monthly-timing claim survives; see verdict_reason. The band diagnostic is retained because it is one of the reasons: the seasonal legs push the large majority of SIMULATED detrended variance into the 12-month calendar harmonic while the PRIMARY empirical benchmark carries only a small share of its own detrended variance there. The model gained calendar structure the benchmark can neither confirm nor refute. Exact shares are in frequency_band_summary, computed, not quoted.",
+  "carried_caveats": [
+    "B1 is CIRCULAR: gap<=-150bp captures 98.2% of QT exposure, so the deep-OOM filter is near the identity map and the floor is NOT identified off a lock-in-free population",
+    "the clean 2017-2019 out-of-window leg cannot rescue it: 335 cohort-months / $86.2B, with ZERO prepaid_upb in Feb and Apr, so no 12-cell profile is estimable there",
+    "the seasonal share INVERTS between windows (full-panel R2 0.0109 vs QT 0.7554); B1 inherits that instability",
+    "the committed Path A VOLUNTARY seasonality (hazard/seasonality_concave_gap.py) peaks Mar/Oct/Sep while this INVOLUNTARY profile peaks Jun; different objects, but the tension must be stated wherever the seasonal floor is quoted",
+    "SOMA back-out benchmark is lumpy (four exact-0.000 months, three >9%); see artifact_concentration for what those months carry",
+    "the 12-vector is FULL-PANEL, not in-window; see b1_provenance",
+    "the marginal movement is FLOOR DISPERSION under FLOOR_MODE='max', not seasonality; see permutation_null and jensen_equivalent_flat"
+  ]
+}
