@@ -3,7 +3,7 @@
 Liveness gates: manuscript-vs-artifact checks as a runnable script
 (pre-submission freeze item (iii) mechanized; see TECHNICAL.md §22).
 
-Exit 0 iff ALL gates pass; each gate prints PASS/FAIL. Three gate classes:
+Exit 0 iff ALL gates pass; each gate prints PASS/FAIL. Four gate classes:
 
 1. Zero-count greps — phrases that must be ABSENT from the manuscript
    (retired claims, superseded numbers, and stale framing; each phrase's
@@ -14,6 +14,11 @@ Exit 0 iff ALL gates pass; each gate prints PASS/FAIL. Three gate classes:
    a frozen run manifest must agree; failing when either side flips
    without the other (the defect class a review round caught in the
    Danish counterfactual's description).
+4. Abstract-scoped hedge spans — contiguous hedge-to-claim spans that must
+   be PRESENT inside the abstract environment specifically, since the same
+   phrases recur in the body and would satisfy a whole-file count on their
+   own (the defect class that let three misattributed-projection abstracts
+   pass this suite).
 
 Run:  python3 tools/liveness_gates.py
 """
@@ -181,6 +186,58 @@ HARDCODED_XREF = {
     "Section roman literal": r"Section[~ ][IVX]+(?:\.[A-Z])?(?![a-zA-Z}])",
     "Appendix letter literal": r"Appendix[~ ][AB](?![a-zA-Z}])",
     "Equation (N) literal": r"[Ee]quation[~ ]\(\d\)",
+}
+
+# --- Round-20 (gate #68): ABSTRACT-SCOPED HEDGE SPANS -----------------------
+# The abstract is the only part of the paper most readers will read, and it was
+# the only part with no literal gate on its hedges. Four candidate abstracts were
+# drafted this round; three of them misattributed the ex-ante projection (to the
+# author, or to a generic "consensus") or dropped the "large majority" qualifier,
+# and the suite passed all three.
+#
+# Two design points, both load-bearing:
+#
+# (i) SCOPED TO THE ABSTRACT, not the file. These phrases occur 1-26 times in the
+#     body ("recalibrated" alone appears 26 times), so a whole-file count gate is
+#     satisfied by body prose even when the abstract has dropped the hedge
+#     entirely. The gate reads the abstract environment and nothing else.
+#
+# (ii) CONTIGUOUS SPANS, not proximity windows. A hedge can be relocated into a
+#      neighbouring decoy sentence and still sit inside any tolerable +/-N-char
+#      window while the claim it was hedging goes bare -- "...anticipated the
+#      realized shortfall. The large majority of the book is fixed-rate." passes
+#      a proximity gate and says the opposite thing. Binding the minimal span
+#      that joins hedge to claim is what makes the hedge non-relocatable.
+ABSTRACT_BOUNDS = ("\\begin{abstract}", "\\end{abstract}")
+ABSTRACT_HEDGES = {
+    # the projection is the FED'S, and it anticipated MOST -- not all -- of the
+    # shortfall. Dropping either half is the misattribution this gate exists for.
+    # ONE span, not two: an earlier cut of this gate checked the attribution
+    # ("The Federal Reserve's own ex-ante projection") and the hedge
+    # ("anticipated the large majority...") as INDEPENDENT entries, which let an
+    # adversary open a sentence boundary at the seam and reattribute the verb --
+    # "...projection is described in the appendix. My model anticipated the large
+    # majority of the realized shortfall." -- with both fragments still present.
+    # That is the exact defect this gate was written to kill, and it passed.
+    "fed_projection_attributed_and_hedged":
+        "The Federal Reserve's own ex-ante projection anticipated the large "
+        "majority of the realized shortfall",
+    # the denominator switch, and the allocation the half-share is conditional on
+    "surprise_denominator": "Measured against that projection rather than the "
+                            "never-binding cap",
+    "surprise_share_allocated": "roughly half the genuine surprise under the "
+                                "central allocation",
+    # the ABM number is a seed mean, not a single run
+    "abm_seed_averaged": "averaged across seeds",
+    # the cross-design variant was refit, so it is not a clean out-of-sample read
+    "crossdesign_recalibrated": "cross-design variant recalibrated on real loan "
+                                "covariates",
+    # "small" scopes to the institutional cash-flow cost only; the mobility cost
+    # is real, and the abstract must not let the two be read as one
+    "cost_scoped_institutional": "The institutional cash-flow cost is small",
+    # the null's recovery rests on amortization AND baseline involuntary turnover
+    "null_mechanical_components": "scheduled amortization and baseline "
+                                  "involuntary turnover",
 }
 
 
@@ -3314,6 +3371,29 @@ def main() -> int:
         f"width disclosed at {fn_sites} sites "
         f"(want >=3), literals="
         f"{ {k: v for k, v in fn_lits.items() if not v} or 'all present'}"
+    )
+
+    # Round-20 (gate #68): the ABSTRACT'S HEDGES. See ABSTRACT_HEDGES above for
+    # why this is scoped to the abstract environment and why the spans are
+    # contiguous rather than proximity-windowed.
+    # read tex_nc, not tex: a hedge left inside a LaTeX comment in the abstract
+    # environment satisfies a raw-text check while the rendered PDF goes bare.
+    _ab_i = tex_nc.find(ABSTRACT_BOUNDS[0])
+    _ab_j = tex_nc.find(ABSTRACT_BOUNDS[1], _ab_i + 1)
+    ab_found = _ab_i != -1 and _ab_j != -1
+    abstract = tex_nc[_ab_i + len(ABSTRACT_BOUNDS[0]):_ab_j] if ab_found else ""
+    ab_missing = {k: v for k, v in ABSTRACT_HEDGES.items() if v not in abstract}
+    # the spans must be read from the ABSTRACT, so the gate has to fail when the
+    # abstract is emptied even though every phrase survives in the body
+    ab_scoped_ok = ab_found and len(abstract.split()) > 100
+    ab_ok = ab_found and ab_scoped_ok and not ab_missing
+    failures += 0 if ab_ok else 1
+    print(
+        f"[{'PASS' if ab_ok else 'FAIL'}] abstract-hedge spans: "
+        f"abstract-located={ab_found} ({len(abstract.split())} words, "
+        f"scoped-not-whole-file={ab_scoped_ok}), "
+        f"{len(ABSTRACT_HEDGES) - len(ab_missing)}/{len(ABSTRACT_HEDGES)} spans "
+        f"present, missing={sorted(ab_missing) or 'none'}"
     )
 
     print(f"\n{'ALL GATES PASS' if failures == 0 else f'{failures} GATE(S) FAILED'}")
