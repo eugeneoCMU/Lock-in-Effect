@@ -17,8 +17,18 @@ venv/
 *-service-account*.json
 service-account*.json
 
-# Manuscript editions — kept local-only, not published with the repo
-paper/
+# Manuscript: LaTeX source and bibliography are tracked so the drafts have
+# history and a rollback path (the v18 pre-edit source was lost once because
+# neither existed). Everything derived — PDFs, figures, .md/.txt editions,
+# build artifacts — and the ad-hoc .bak-<pass> copies stay untracked; git
+# history replaces the .bak convention.
+# NOTE: this repo is PUBLIC. Pushing a branch that carries these commits
+# publishes the working manuscript. Confirm that is intended before pushing.
+paper/**
+!paper/**/
+!paper/**/*.tex
+!paper/**/*.bib
+paper/**/snapshots/
 
 # Floor-sweep per-run parquets (regenerable via hazard/floor_sweep.py)
 hazard/data/floor_sweep/
