@@ -133,11 +133,19 @@ ZERO_COUNT = [
     # The Danish rule-only gap is 44% larger than the headline marginal, not
     # equal to it; the bare equality held only against the demoted in-sample point.
     "equal in size to the lock-in marginal",
+    # Round-21 (panel minor, copyedit p21): the kernel sentence's "say
+    # otherwise" attached to the wrong clause and read as the manifests
+    # contradicting "not kernel-free". Sentence rewritten; ambiguous phrase
+    # retired. The kernel-applied fact stays pinned via KERNEL_TEX_PHRASE and
+    # the EXACTLY_ONE replacement below.
+    "frozen manifests say otherwise",
 ]
 
 EXACTLY_ONE = [
     "\\title{Mortgage Lock-In and the Federal Reserve's Quantitative Tightening Shortfall}",
-    "frozen manifests say otherwise",
+    # Round-21 rewrite of the kernel sentence (replaces the retired
+    # "frozen manifests say otherwise" pin above).
+    "not kernel-free, and every figure reported here is the kernel-applied",
     "9.96\\% of home value",
     "against the fold-in specification's code",
 ]
