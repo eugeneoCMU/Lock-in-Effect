@@ -139,6 +139,10 @@ ZERO_COUNT = [
     # retired. The kernel-applied fact stays pinned via KERNEL_TEX_PHRASE and
     # the EXACTLY_ONE replacement below.
     "frozen manifests say otherwise",
+    # Round-21 T3 (patha_sign_test): the bias-respecting test does not reject
+    # H0: beta_g <= 0 under any construction, so the triangulation claim is
+    # retired; the fits are "directionally consistent", nothing stronger.
+    "sign-triangulated by two in-sample estimates",
 ]
 
 EXACTLY_ONE = [
@@ -3545,6 +3549,31 @@ def main() -> int:
           f"[{fu_mf4['sampling_ci95_pp'][0]:.3f}, {fu_mf4['sampling_ci95_pp'][1]:.3f}]pp, "
           f"age-std {fu_pb['adjusted_floor_pct']:.3f}%), tex CI-count={fu_count} "
           f"(want >=2), literals={'ok' if fu_tex_ok else 'MISSING'}")
+
+
+    # Round-21 (gate #74): PATH A SIGN TEST. patha_sign_test ran the
+    # bias-respecting H0: beta_g <= 0 test the Table 6 note had deferred.
+    # Verdict T3: no rejection under any construction (BCa 0.093/0.412,
+    # permutation 0.241) -> the manuscript must not claim an in-sample sign,
+    # "sign-triangulated" is retired, and the elasticity's evidential basis
+    # is the external literature alone.
+    pst = json.loads((HAZ_DATA / "patha_sign_test_results.json").read_text())
+    pst_ok = (pst["parity_gates_all_pass"]
+              and pst["verdict"]["branch"] == "T3"
+              and abs(pst["verdict"]["p_bootstrap_stratum"] - 0.09281663473114488) < 1e-12
+              and abs(pst["verdict"]["p_bootstrap_temporal"] - 0.41183595966445363) < 1e-12
+              and abs(pst["verdict"]["p_permutation_primary"] - 0.24120603015075376) < 1e-12)
+    pst_runtag = "patha\\_sign\\_test" in tex
+    pst_tex_ok = (pst_runtag and tex.count("$p = 0.093$") >= 1
+                  and "not statistically distinguishable from zero under bias-respecting" in tex
+                  and "evidential basis is the external literature alone" in tex)
+    pst_retired = "sign-triangulated by two in-sample estimates" not in tex
+    ok = pst_ok and pst_tex_ok and pst_retired
+    failures += 0 if ok else 1
+    print(f"[{'PASS' if ok else 'FAIL'}] cross-check Path A sign test: "
+          f"artifact parity+T3={pst_ok} (p 0.093/0.412/0.241), tex literals="
+          f"{'ok' if pst_tex_ok else 'MISSING'}, "
+          f"'sign-triangulated' retired={pst_retired}")
 
 
     print(f"\n{'ALL GATES PASS' if failures == 0 else f'{failures} GATE(S) FAILED'}")
