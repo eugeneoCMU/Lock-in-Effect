@@ -1,0 +1,57 @@
+{
+ "mode": "danish_offwindow_floor",
+ "spec": "us_intercept anchor; floors {4.0 parity, 4.991}; refi 0; two-regime microsim; standalone + shared-layer scoring; gates G1 (committed us_intercept point) and G2 (U.S. leg reproduces committed oos central at 4.991)",
+ "parity_run_at_4": {
+  "floor_annual_cpr_pct": 4.0,
+  "us_trapped_standalone_b": 818.5300844066606,
+  "danish_trapped_standalone_b": 748.1810597333473,
+  "us_trapped_shared_b": 748.9678825340305,
+  "us_share_shared_pct": 97.9365273968041,
+  "danish_trapped_shared_b": 687.7795451639257,
+  "institutional_gap_shared_b": 61.18833737010482,
+  "mean_us_cpr_pct": 4.763203719157251,
+  "mean_danish_cpr_pct": 5.613626373336359
+ },
+ "offwindow_run_at_4991": {
+  "floor_annual_cpr_pct": 4.9910000000000005,
+  "us_trapped_standalone_b": 767.5264524465003,
+  "danish_trapped_standalone_b": 724.9141212847769,
+  "us_trapped_shared_b": 697.9642505738702,
+  "us_share_shared_pct": 91.26719121391939,
+  "danish_trapped_shared_b": 669.7595630336906,
+  "institutional_gap_shared_b": 28.204687540179634,
+  "mean_us_cpr_pct": 5.3591856812637735,
+  "mean_danish_cpr_pct": 5.87394318086361
+ },
+ "parity_gates": {
+  "G1_us_shared_b": {
+   "got": 748.9678825340305,
+   "want": 748.9678825340305,
+   "tol": 0.01,
+   "pass": true
+  },
+  "G1_danish_shared_b": {
+   "got": 687.7795451639257,
+   "want": 687.7795451639257,
+   "tol": 0.01,
+   "pass": true
+  },
+  "G1_gap_b": {
+   "got": 61.18833737010482,
+   "want": 61.18833737010482,
+   "tol": 0.01,
+   "pass": true
+  },
+  "G2_us_standalone_b@4.991": {
+   "got": 767.5264524465003,
+   "want": 767.5264524465003,
+   "tol": 0.01,
+   "pass": true
+  }
+ },
+ "parity_gates_all_pass": true,
+ "rule_only_gap_offwindow_shared_b": 28.204687540179634,
+ "offwindow_marginal_b_committed": 42.60839388108866,
+ "gap_over_offwindow_marginal": 0.6619514365853162,
+ "runtime_s": 45.199425375
+}
