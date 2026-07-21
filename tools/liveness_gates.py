@@ -3576,6 +3576,64 @@ def main() -> int:
           f"'sign-triangulated' retired={pst_retired}")
 
 
+    # Round-21 (gate #75): EPISODE CONFRONTATION. episode_confrontation ran
+    # the cumulative cross-cohort gap-gradient test + power analysis. Verdict
+    # T5 (ex-ante residual branch): realized gradient +4.198pp, CI
+    # [+3.585, +4.656], permutation p 0.005 -- signed, significant, but
+    # ~4.5x the model-implied +0.937pp, so a confound signature, not
+    # corroboration; no abstract verb change. The tex must report the
+    # exhibit with the confound reading and leave the timing nulls standing.
+    ec = json.loads((HAZ_DATA / "episode_confrontation_results.json").read_text())
+    ec_pa = ec["part_a"]["primary_age_matched"]
+    ec_ok = (ec["parity_gates_all_pass"]
+             and ec["verdict"]["branch"] == "T5"
+             and abs(ec_pa["realized_gradient_pp"] - 4.198179219676357) < 1e-9
+             and abs(ec_pa["gradient_bootstrap"]["ci95_pp"][0] - 3.5852591750975797) < 1e-9
+             and abs(ec_pa["implied_gradient_pp"]["mid"] - 0.9371125522400376) < 1e-9
+             and abs(ec["part_b"]["permutation"]["p_value_one_sided"] - 0.004975124378109453) < 1e-12
+             and abs(ec["part_b"]["power_at_named_betas"]["mid"]["power_injected"] - 0.675) < 1e-9)
+    ec_tex_ok = ("episode\\_confrontation" in tex
+                 and "$+4.20$ CPR points" in tex
+                 and "$[+3.59, +4.66]$" in tex
+                 and "$+0.94$ points at the central" in tex
+                 and "unusable as a measurement of its size" in tex
+                 and "monthly-timing nulls above stand unchanged" in tex)
+    ok = ec_ok and ec_tex_ok
+    failures += 0 if ok else 1
+    print(f"[{'PASS' if ok else 'FAIL'}] cross-check episode confrontation: "
+          f"artifact parity+T5={ec_ok} (gradient +{ec_pa['realized_gradient_pp']:.3f}pp, "
+          f"implied +{ec_pa['implied_gradient_pp']['mid']:.3f}, perm p "
+          f"{ec['part_b']['permutation']['p_value_one_sided']:.4f}, power "
+          f"{ec['part_b']['power_at_named_betas']['mid']['power_injected']:.3f}), "
+          f"tex literals={'ok' if ec_tex_ok else 'MISSING'}")
+
+    # Round-21 (gate #76): CROSS-DESIGN COMPOSITION REWEIGHT. Verdict T1:
+    # reweighting to the SOMA composition RAISES the recalibrated variant
+    # (59.30 -> 76.34; re-draw 70.64) and lowers the frozen (20.86 -> 12.56;
+    # re-draw 36.04): the mismatch understated the recovery, the undercut
+    # verdict survives. The tex must quantify the component beside every
+    # headline 59.3% and the "isolates" sentence must be gone.
+    cdr = json.loads((ROOT / "abm" / "data" / "cross_design_reweight_results.json").read_text())
+    cv = cdr["variants"]
+    cdr_ok = (cdr["interpretive_threshold"]["band"] == "T1"
+              and abs(cv["v1_recalibrated"]["share_pct"] - 59.30299434493775) < 1e-9
+              and abs(cv["v3_reweighted_recalibrated"]["share_pct"] - 76.34415260068252) < 1e-6
+              and abs(cv["v2_reweighted_frozen"]["share_pct"] - 12.561542534955805) < 1e-6
+              and abs(cdr["v3_recalibrated_scale"] - 32187.5) < 1e-9)
+    cdr_count = tex.count("76.3\\%")
+    cdr_tex_ok = (cdr_count >= 4
+                  and "cross\\_design\\_reweight" in tex
+                  and "understated rather than manufactured" in tex
+                  and "isolates the effect of real structural heterogeneity" not in tex)
+    ok = cdr_ok and cdr_tex_ok
+    failures += 0 if ok else 1
+    print(f"[{'PASS' if ok else 'FAIL'}] cross-check cross-design reweight: "
+          f"artifact T1={cdr_ok} (V3 {cv['v3_reweighted_recalibrated']['share_pct']:.2f}%, "
+          f"V2 {cv['v2_reweighted_frozen']['share_pct']:.2f}%, scale "
+          f"{cdr['v3_recalibrated_scale']:.1f}), tex 76.3-count={cdr_count} "
+          f"(want >=4), literals={'ok' if cdr_tex_ok else 'MISSING'}")
+
+
     print(f"\n{'ALL GATES PASS' if failures == 0 else f'{failures} GATE(S) FAILED'}")
     return 0 if failures == 0 else 1
 
