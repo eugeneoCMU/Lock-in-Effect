@@ -1,0 +1,82 @@
+{
+ "mode": "ginnie_overlay_offwindow",
+ "spec": "committed overlay machinery on the fresh max-form 4.991% legs; variants primary/crr_only/gse_placebo; gates G1 (own-series identity vs committed oos values, 1e-9) and G2 (committed in-sample overlay marginal +7.3pp)",
+ "floor_annual_cpr_pct": 4.991,
+ "parity_gates": {
+  "G1_central": {
+   "diff_b": 1.1368683772161603e-13,
+   "pass": 1.0
+  },
+  "G1_null": {
+   "diff_b": 0.0,
+   "pass": 1.0
+  },
+  "G2_committed_insample_marginal": {
+   "got_pp": 7.335061460712225,
+   "pass": 1.0
+  }
+ },
+ "conventional_offwindow": {
+  "central_shared_pct": 91.26719121391939,
+  "null_shared_pct": 85.69563303100965,
+  "marginal_pp": 5.57155818290974
+ },
+ "overlay_offwindow": {
+  "primary": {
+   "central": {
+    "trapped_b": 711.5895017434016,
+    "share_pct": 93.0488561098003,
+    "adjustment_sum_b": 55.93695070309884,
+    "mean_series_minus_model_pp": 2.9775524139743217,
+    "share_pct_shared": 83.9527644770976
+   },
+   "null": {
+    "trapped_b": 677.6085313015942,
+    "share_pct": 88.60543694557086,
+    "adjustment_sum_b": 47.30952726381761,
+    "mean_series_minus_model_pp": 2.462836996377609,
+    "share_pct_shared": 79.50934531286816
+   },
+   "marginal_b": 33.98097044180736,
+   "marginal_pp": 4.443419164229439
+  },
+  "crr_only": {
+   "central": {
+    "trapped_b": 730.4112907884444,
+    "share_pct": 95.51003061601546,
+    "adjustment_sum_b": 37.11516165805597,
+    "mean_series_minus_model_pp": 1.9357905092124175,
+    "share_pct_shared": 86.41393898331276
+   },
+   "null": {
+    "trapped_b": 696.4387433573357,
+    "share_pct": 91.06771286138887,
+    "adjustment_sum_b": 28.479315208076244,
+    "mean_series_minus_model_pp": 1.4210750916157044,
+    "share_pct_shared": 81.97162122868617
+   },
+   "marginal_b": 33.97254743110864,
+   "marginal_pp": 4.442317754626586
+  },
+  "gse_placebo": {
+   "central": {
+    "trapped_b": 750.0719876491831,
+    "share_pct": 98.08090237386351,
+    "adjustment_sum_b": 17.454464797317158,
+    "mean_series_minus_model_pp": 0.8702786044505124,
+    "share_pct_shared": 88.98481074116081
+   },
+   "null": {
+    "trapped_b": 716.1071972462576,
+    "share_pct": 93.63959894364375,
+    "adjustment_sum_b": 8.810861319154215,
+    "mean_series_minus_model_pp": 0.35556318685379973,
+    "share_pct_shared": 84.54350731094104
+   },
+   "marginal_b": 33.96479040292559,
+   "marginal_pp": 4.441303430219776
+  }
+ },
+ "ginnie_specific_marginal_component_pp": 0.0021157340096635835,
+ "marginal_scale_vs_conventional": 0.7975182199226121
+}
