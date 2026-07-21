@@ -234,8 +234,13 @@ ABSTRACT_HEDGES = {
     # the denominator switch, and the allocation the half-share is conditional on
     "surprise_denominator": "Measured against that projection rather than the "
                             "never-binding cap",
-    "surprise_share_allocated": "roughly half the genuine surprise under the "
-                                "central allocation",
+    # Round-21 upgrade: the abstract now states the RANGE across both
+    # disclosed intra-2022 allocations (the settlement-aware quarter and the
+    # uniform-spread half), retiring the half-only presentation the panel
+    # flagged as using the allocation III.D judges less faithful.
+    "surprise_share_allocated": "between roughly a quarter and half of the "
+                                "genuine surprise, depending on a disclosed "
+                                "intra-2022 allocation choice",
     # the ABM number is a seed mean, not a single run
     "abm_seed_averaged": "averaged across seeds",
     # the cross-design variant was refit, so it is not a clean out-of-sample read
@@ -3424,6 +3429,87 @@ def main() -> int:
         f"{_ab['total'] - len(_ab['missing'])}/{_ab['total']} spans "
         f"present, missing={_ab['missing'] or 'none'}"
     )
+
+    # ------------------------------------------------------------------
+    # Round-21 (gate #69): FORM-CONDITIONAL HEADLINE. floor_form_offwindow ran
+    # the additive floor form at the committed off-window clean-band anchors;
+    # its T1 verdict (additive marginal within 0.06pp of its production-floor
+    # value) means the +9.2->+5.6 demotion is max-form censoring mechanics, so
+    # the manuscript must carry the form-conditional hull wherever the
+    # headline marginal is quoted. This gate pins the artifact (parity pass +
+    # T1 + the hull endpoints) and requires the tex literals.
+    HAZ_DATA = ROOT / "hazard" / "data"
+    ffo = json.loads((HAZ_DATA / "floor_form_offwindow_results.json").read_text())
+    ffo_ok = (ffo["parity_gates_all_pass"] and ffo["t1_form_conditional_demotion"]
+              and abs(ffo["designated_interval_pp"][0] - 3.891507360127463) < 1e-9
+              and abs(ffo["designated_interval_pp"][1] - 13.09774126267503) < 1e-9)
+    ffo_tex_ok = (tex.count("$+3.9$ to $+13.1$") >= 3
+                  and "floor\\_form\\_offwindow" in tex
+                  and tex.count("form-conditional") >= 3)
+    ok = ffo_ok and ffo_tex_ok
+    failures += 0 if ok else 1
+    print(f"[{'PASS' if ok else 'FAIL'}] cross-check form-conditional headline: "
+          f"artifact parity+T1={ffo_ok} (hull [{ffo['designated_interval_pp'][0]:.4f}, "
+          f"{ffo['designated_interval_pp'][1]:.4f}]pp), tex hull-count="
+          f"{tex.count('$+3.9$ to $+13.1$')} (want >=3), run-tag={'floor_form_offwindow' if ffo_tex_ok else 'MISSING'}")
+
+    # Round-21 (gate #70): CONCAVE MARGINAL. concave_marginal ran the paired
+    # legs under the concave transform (never run before); T1 verdict: the
+    # transform moves the marginal past the +/-1pp materiality convention, so
+    # "not load-bearing" must stay scoped to the level in the tex.
+    cm = json.loads((HAZ_DATA / "concave_marginal_results.json").read_text())
+    cm_ok = (cm["parity_gates_all_pass"] and cm["t1_load_bearing"]
+             and abs(cm["concave_marginal_pp_at_4"] - 7.8741354244354085) < 1e-9
+             and abs(cm["concave_marginal_pp_at_offwindow_point"] - 5.056147332383432) < 1e-9)
+    cm_tex_ok = ("not load-bearing for the level" in tex
+                 and "$+7.87$" in tex and "$+5.06$" in tex
+                 and "concave\\_marginal" in tex)
+    ok = cm_ok and cm_tex_ok
+    failures += 0 if ok else 1
+    print(f"[{'PASS' if ok else 'FAIL'}] cross-check concave marginal: "
+          f"artifact parity+T1={cm_ok} (+{cm['concave_marginal_pp_at_4']:.4f}pp @4%, "
+          f"+{cm['concave_marginal_pp_at_offwindow_point']:.4f}pp @4.991%), "
+          f"tex literals={'ok' if cm_tex_ok else 'MISSING'}")
+
+    # Round-21 (gate #71): DANISH GAP AT THE HEADLINE FLOOR. The rule-only
+    # (us_intercept) gap now exists at the off-window floor: +$28.20B, 0.662x
+    # the off-window marginal. The tex must quote it beside the in-sample
+    # +$61.2B wherever the Danish figure appears at headline level, and the
+    # abstract's Danish sentence must carry both calibration labels.
+    dof = json.loads((HAZ_DATA / "danish_offwindow_floor_results.json").read_text())
+    dof_ok = (dof["parity_gates_all_pass"]
+              and abs(dof["rule_only_gap_offwindow_shared_b"] - 28.204687540179634) < 1e-6
+              and abs(dof["gap_over_offwindow_marginal"] - 0.6619514365853162) < 1e-9)
+    dof_count_282 = tex.count("$+\\$28.2$ billion")
+    dof_abs_label = "$+\\$28$ billion at the off-window calibration" in tex
+    dof_runtag = "danish\\_offwindow\\_floor" in tex
+    dof_tex_ok = dof_count_282 >= 2 and dof_runtag and dof_abs_label
+    ok = dof_ok and dof_tex_ok
+    failures += 0 if ok else 1
+    print(f"[{'PASS' if ok else 'FAIL'}] cross-check danish offwindow gap: "
+          f"artifact parity={dof_ok} (gap ${dof['rule_only_gap_offwindow_shared_b']:.2f}B, "
+          f"ratio {dof['gap_over_offwindow_marginal']:.3f}), tex 28.2-count="
+          f"{dof_count_282} (want >=2), abstract label="
+          f"{'ok' if dof_abs_label else 'MISSING'}")
+
+    # Round-21 (gate #72): GINNIE OVERLAY AT THE HEADLINE FLOOR. The overlay x
+    # off-window cell exists; the marginal correction is pure conventional-
+    # share scaling (0.7975x), series-independent. The tex must carry the
+    # overlay pair beside the headline marginal.
+    gof = json.loads((HAZ_DATA / "ginnie_overlay_offwindow_results.json").read_text())
+    gof_ok = (abs(gof["overlay_offwindow"]["primary"]["marginal_pp"] - 4.443419164229439) < 1e-9
+              and abs(gof["marginal_scale_vs_conventional"] - 0.7975182199226121) < 1e-9
+              and all(v["pass"] for v in gof["parity_gates"].values()))
+    gof_tex_ok = ("ginnie\\_overlay\\_offwindow" in tex
+                  and "$+4.4$-point marginal" in tex
+                  and "overlay-scored member" in tex)
+    ok = gof_ok and gof_tex_ok
+    failures += 0 if ok else 1
+    print(f"[{'PASS' if ok else 'FAIL'}] cross-check ginnie overlay offwindow: "
+          f"artifact={gof_ok} (marginal +{gof['overlay_offwindow']['primary']['marginal_pp']:.4f}pp, "
+          f"scale {gof['marginal_scale_vs_conventional']:.4f}), tex literals="
+          f"{'ok' if gof_tex_ok else 'MISSING'}")
+
 
     print(f"\n{'ALL GATES PASS' if failures == 0 else f'{failures} GATE(S) FAILED'}")
     return 0 if failures == 0 else 1
