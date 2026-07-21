@@ -128,7 +128,7 @@ The decision to relocate is governed by comparing the utility of moving against 
 \begin{equation}\label{eq:annuity}
 M = P\,\frac{r\,(1+r)^{n}}{(1+r)^{n}-1},
 \end{equation}
-where $P$ is the outstanding principal, $r$ is the monthly interest rate, and $n$ is the remaining term in months. The mobility penalty evaluates \eqref{eq:annuity} twice on the same principal and term: once at the borrower's locked-in note rate, which gives the current payment, and once at the prevailing market rate, which gives the payment the borrower would take on by refinancing, so the penalty scales with the difference between the two. Here $r$ is expressed in decimal monthly terms (the annual note rate divided by twelve; a 3.0\% coupon gives $r = 0.0025$), a rate \emph{level} distinct in both role and units from the annualized rate \emph{gaps} $g_{i,t}$ (in 100 bp units) and $\tilde g_{i,t} = g_{i,t}/100$ (decimal) that drive the hazard framework of Section~\ref{sec:pathb}; no rate symbol is reused across the two. Across a three-dimensional grid of market rate, dynamic friction, and rate velocity (and, in the multi-vintage specification, across seven coupon cohorts), the population's move/stay decisions are evaluated household-by-household at each grid point and aggregated to a pool-level annualized Conditional Prepayment Rate (CPR) surface (CPR is a pool-level convention; the household-level object is the monthly move probability), which is precomputed once and interpolated month-by-month against the live population of simulated market conditions, rather than re-solved via per-month household loops. This reduces the cost of the full grid by roughly two orders of magnitude and makes fifty-seed Monte Carlo estimation feasible. The surface stores each node's direct household-by-household evaluation, so interpolation reproduces the micro-simulation exactly at grid points; the operative approximation is the trilinear segment between 50 bp-spaced nodes, and a spot-check validates it directly: after an on-grid parity gate reproduced the committed surface values, direct micro-simulation versus interpolation at worst-case off-grid midpoints differs by at most 0.23 points of CPR away from the freeze threshold, with the Danish column exact. The one systematic difference is the wait-and-see freeze itself: the engine applies it as a step at the 150 bp trigger while the surface renders it as a ramp across the adjacent velocity nodes, which binds in four realized months (August--November 2022; SOMA-weighted mean absolute difference 0.22 points of CPR over the window): surface semantics the production figures share, and whose trapped-liquidity consequence the binary-step leg of Section~\ref{sec:robustness-extensions}'s freeze sweep prices directly. Figure~\ref{fig:cprsurface} renders one slice of that surface---the 3.0\% cohort of the expository variant---with the realized QT window located on it.
+where $P$ is the outstanding principal, $r$ is the monthly interest rate, and $n$ is the remaining term in months. The mobility penalty evaluates \eqref{eq:annuity} twice: once at the borrower's locked-in note rate on the original principal and term, which gives the current payment (by the amortization identity, equal to the payment on the outstanding balance at the note rate over the remaining term), and once at the prevailing market rate on the outstanding balance over a fresh full original term---the replacement loan re-amortizes, a term-preference persistence the code implements deliberately---which gives the payment the borrower would take on by refinancing, so the penalty scales with the difference between the two; a native short-term variant of the penalty, active only for terms at or below 240 months, floors payment decreases at zero and is specified with the full decision rule in Appendix~\ref{app:abmspec}. Here $r$ is expressed in decimal monthly terms (the annual note rate divided by twelve; a 3.0\% coupon gives $r = 0.0025$), a rate \emph{level} distinct in both role and units from the annualized rate \emph{gaps} $g_{i,t}$ (in 100 bp units) and $\tilde g_{i,t} = g_{i,t}/100$ (decimal) that drive the hazard framework of Section~\ref{sec:pathb}; no rate symbol is reused across the two. Across a three-dimensional grid of market rate, dynamic friction, and rate velocity (and, in the multi-vintage specification, across seven coupon cohorts), the population's move/stay decisions are evaluated household-by-household at each grid point and aggregated to a pool-level annualized Conditional Prepayment Rate (CPR) surface (CPR is a pool-level convention; the household-level object is an annualized move intensity, consumed by the accounting layer at one-twelfth per month, Appendix~\ref{app:abmspec}), which is precomputed once and interpolated month-by-month against the live population of simulated market conditions, rather than re-solved via per-month household loops. This reduces the cost of the full grid by roughly two orders of magnitude and makes fifty-seed Monte Carlo estimation feasible. The surface stores each node's direct household-by-household evaluation, so interpolation reproduces the micro-simulation exactly at grid points; the operative approximation is the trilinear segment between 50 bp-spaced nodes, and a spot-check validates it directly: after an on-grid parity gate reproduced the committed surface values, direct micro-simulation versus interpolation at worst-case off-grid midpoints differs by at most 0.23 points of CPR away from the freeze threshold, with the Danish column exact. The one systematic difference is the wait-and-see freeze itself: the engine applies it as a step at the 150 bp trigger while the surface renders it as a ramp across the adjacent velocity nodes, which binds in four realized months (August--November 2022; SOMA-weighted mean absolute difference 0.22 points of CPR over the window): surface semantics the production figures share, and whose trapped-liquidity consequence the binary-step leg of Section~\ref{sec:robustness-extensions}'s freeze sweep prices directly. Figure~\ref{fig:cprsurface} renders one slice of that surface---the 3.0\% cohort of the expository variant---with the realized QT window located on it.
 
 \begin{figure}[H]
 \centering
@@ -1012,6 +1012,86 @@ Run tag & Produces \\
 \end{tabular}
 \end{threeparttable}
 \end{table}
+
+\section{ABM Decision Rule and Parameter Provenance}\label{app:abmspec}
+% Sources: abm/abm_lockin_simulation.py ("S:"), abm/fed_mbs_extension_risk.py ("F:"),
+% abm/cross_design_test.py, abm/abm_external_gates.py. Line pins refer to the committed code.
+
+This appendix specifies the ABM's move decision and every behavioral parameter at the level needed to reimplement the model without consulting the code; each equation and value is pinned to its source line in the replication package.
+
+\paragraph{The move decision.}
+Let $A(P,r,n) = P\,(r/12)\big/\big(1-(1+r/12)^{-n}\big)$ be the monthly payment on principal $P$ at annual rate $r$ over $n$ months. % S:130-136
+Household $i$ carries gross income $y_i$ (\$/year), home value $H_i$ (\$), original principal $P_i = 0.8\,H_i$ (a fixed 80\% origination LTV in the synthetic population), note rate $c_i$, original term $n_i$ months, and outstanding balance $K_i$ (closed form at the cohort's seasoning; the U.S. par payoff). % S:141-155, S:314
+The replacement-loan payment is $M^{\mathrm{new}}_{i,t} = A(K_i, m_t, n_i)$: the par payoff financed at the market rate $m_t$ over a fresh \emph{full original term}, not the remaining term (term-preference persistence). % S:222-225, S:366-381
+With $\Delta_{i,t} = M^{\mathrm{new}}_{i,t} - A(P_i, c_i, n_i)$, whose second term is the current payment (by the amortization identity, equal to the payment on $K_i$ at $c_i$ over the remaining term), the loss-aversion-scaled penalty, in \$/month, is term-dependent:
+\begin{equation}\label{eq:abmpenalty}
+\pi_{i,t} =
+\begin{cases}
+\lambda\,[\Delta_{i,t}]_{+} + [\Delta_{i,t}]_{-} & n_i > 240 \text{ (30-year book)},\\
+\lambda\,\big[M^{\mathrm{new}}_{i,t} - A(K_i, c_i, n_i)\big]_{+} & n_i \le 240 \text{ (native short-term gate)},
+\end{cases}
+\end{equation}
+% S:383-409; the 240-month switch is S:408
+with $\lambda = 2.25$, $[x]_{+} = \max(x,0)$, $[x]_{-} = \min(x,0)$: payment increases are scaled by $\lambda$; on the 30-year book decreases pass through unscaled as gains, while the short-term gate floors them at zero to isolate the pure rate-lock cost. The frozen production headline draws 15-year voluntary CPR from the same-coupon 30-year surface, so the short-term branch is operative only in the Berger-run calibration stage (Section~\ref{sec:abm-danish}).
+The effective transaction rate is $\tau_{i,t} = \mathrm{clip}\big(\phi_t + (\tau_i - 0.07),\,0.02,\,0.12\big)$: the agent's idiosyncratic draw enters as an offset around the 7\% base mean and is re-clipped after the macro friction $\phi_t$ shifts it. % S:241-243, S:459-461
+Household $i$ moves in month $t$ iff
+\begin{equation}\label{eq:abmmove}
+\underbrace{\frac{M^{\mathrm{new}}_{i,t}}{y_i/12} \le 0.43}_{\text{DTI veto}}
+\;\wedge\;
+\underbrace{D_i > S\,\pi_{i,t} + \tau_{i,t} H_i}_{\text{cost--benefit}}
+\;\wedge\;
+\underbrace{\neg\big(v_t > 0.015 \,\wedge\, u_i < 0.20\big)}_{\text{wait-and-see freeze}},
+\end{equation}
+% Gates: DTI S:455-457, cost-benefit S:458-463, freeze S:464-467, conjunction S:468
+where $D_i \sim \mathrm{Exponential}(\theta)$ is the mobility-desire draw in dollars, $S = 60$ months is the expected-stay horizon converting the monthly penalty into a dollar stock, $v_t$ is the trailing six-month mortgage-rate change (decimal), and $u_i \sim U[0,1]$ is a fixed per-agent trait (the code's ``patience'' draw, consumed only by the freeze gate; it is not a time-preference parameter). % S:48, S:192, S:302-309
+All inequalities are as coded: the DTI gate passes at exactly 43\%, the cost--benefit gate requires strict exceedance, and the freeze binds only strictly above 150 bp. The share of a pool passing \eqref{eq:abmmove} at an evaluation point is read as that point's annualized CPR (the calibration anchor is an annual floor) and consumed by the macro accounting layer at $\mathrm{CPR}/12$ per month. % F:957
+
+\paragraph{Parameter provenance.}
+Table~\ref{tab:abmparams} collects every behavioral parameter. None is tuned to the \$764.7 billion benchmark; the mobility-desire scale $\theta$ is the one parameter re-derived under the floor rule, and only ever that one.
+
+\begin{table}[H]
+\centering
+\footnotesize
+\begin{threeparttable}
+\caption{ABM behavioral parameters: value, units, distribution, and provenance.}
+\label{tab:abmparams}
+\begin{tabular}{@{}p{3.3cm}p{5.9cm}p{1.6cm}p{4.0cm}@{}}
+\toprule
+Parameter & Value / distribution & Units & Provenance \\
+\midrule
+Population & $N = 10{,}000$; engine seed 42 & households & author choice \\
+Income $y_i$ & log-normal, $\sigma = 0.45$, median from FRED MEHOINUSA672N & \$/year & FRED-calibrated draw \\
+Home value $H_i$ & log-normal, $\sigma = 0.35$, median from FRED MSPUS & \$ & FRED-calibrated draw \\
+Origination LTV & 0.80, fixed & --- & author choice \\
+Mobility desire $D_i$ & exponential, scale $\theta$ & \$ & floor recalibration (last row) \\
+\quad $\theta$, production (frozen) & 43{,}883 & \$ & floor anchor, synthetic population \\
+\quad $\theta$, cross-design recalibrated & 36{,}086 & \$ & floor anchor, real Freddie covariates (Section~\ref{sec:robustness-crossdesign}) \\
+\quad $\theta$, external variant & 4{,}472 & \$ & \citepos{liebersohn2024} zero-gap 5.9\%/yr moving level, no floor (Section~\ref{sec:robustness-crossdesign}) \\
+Expected-stay horizon $S$ & 60 & months & author calibration \\
+Loss aversion $\lambda$ & 2.25 & --- & \citet{tversky1992} \\
+DTI wall & 0.43, front-end & --- & 12 C.F.R. \S{} 1026.43(e)(2)(vi), behavioral anchor \\
+Freeze share; trigger & 0.20 of agents; $v_t > 0.015$ over six months & ---; decimal & author calibration \\
+Patience trait $u_i$ & uniform $[0,1]$, fixed per agent & --- & implementation device (freeze membership) \\
+Transaction-cost draw $\tau_i$ & normal$(0.07,\,0.015)$, clipped $[0.02, 0.12]$ & share of $H_i$ & author calibration \\
+Dynamic friction $\phi_t$ & $0.07$ base $+$ search penalty (listing shortfall vs.\ 2017--19 baseline, proportional, cap $+0.02$) $+$ sentiment penalty (5 bp per UMCSENT point below 85, cap $+0.015$); realized 8.23--9.96\% over the 42 QT months & share of $H_i$ & FRED ACTLISCOUUS, UMCSENT; mappings and base level are author calibrations \\
+Curtailment & linear in real-income YoY growth: 0 at $-2\%$ to 1.2\% CPR at $+4\%$; $/12$ monthly, additive, macro layer only & annualized CPR & GSE daily-prepayment report estimates; FRED DSPIC96 (Section~\ref{sec:method-frictions}) \\
+Involuntary floor & binary search $\theta \in [10^{3}, 5\times10^{5}]$, at most 30 iterations, until CPR at an 8\% market rate under the U.S. rule, base friction, zero velocity lands in $[4\%, 5\%]$, evaluated on the dominant-weight 30-year SOMA cohort & annual CPR & 2023--24 discount-cohort turnover (Section~\ref{sec:method-frictions}) \\
+\bottomrule
+\end{tabular}
+\begin{tablenotes}
+\footnotesize
+\item Committed artifacts carry the unrounded binary-search scales (43{,}882.8125; 36{,}085.9375; 4{,}472.05). The module default $\theta = 12{,}500$ is a placeholder overwritten by calibration at every run. Code pins: draws \texttt{abm\_lockin\_simulation.py} 296--309; constants 38--69; floor search 649--685; friction \texttt{fed\_mbs\_extension\_risk.py} 66--70, 294--334; curtailment 85--87, 141--155; variant scales \texttt{cross\_design\_test.py} 81--111 and \texttt{abm\_external\_gates.py} 88--89.
+\end{tablenotes}
+\end{threeparttable}
+\end{table}
+
+\paragraph{Order of operations.}
+Within a simulated month the three gates of \eqref{eq:abmmove} are evaluated on the surviving population and combined conjunctively; they are side-effect-free, so their order cannot change the result, and the code evaluates them vectorized in the order DTI, cost--benefit, freeze. % S:449-468
+In cohort-path (burnout) mode, movers are removed permanently before the next month's evaluation, so the involuntary tail sets a natural floor on the depleted pool. % S:470-518
+Two named components are not in-month gates. The 4--5\% floor enters once, before simulation, through the desire-scale search of Table~\ref{tab:abmparams}, re-run, for that parameter only, whenever a specification change alters the penalty or covariate structure facing every household; because the anchor is evaluated at zero velocity, no freeze parameterization can move it (Section~\ref{sec:method-frictions}). % S:649-685, S:520-524
+Curtailment never touches the household decision: it is an additive term in the macro layer's simulated roll-off. In production the rule is also not re-solved monthly: the CPR surface is precomputed on the rate $\times$ friction $\times$ velocity grid with all gates applied at each node and interpolated month-by-month, with the freeze's step-versus-ramp semantics disclosed in Section~\ref{sec:method-abm}. % F:873-895, S:526-548
+
+The correction of this paper's earlier ``log-normal'' description of the mobility-desire distribution---it is exponential, on a dollar scale---is recorded in the run ledger (Appendix~\ref{app:ledger}).
 
 \section{Path B Parameterization and Delinquency Transitions}\label{app:params}
 
