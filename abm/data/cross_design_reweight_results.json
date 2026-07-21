@@ -1,0 +1,518 @@
+{
+  "mode": "cross_design_reweight",
+  "created_at_utc": "2026-07-21T08:10:04.237583+00:00",
+  "spec": "MF-12 composition component of the cross-design 59.3%: post-stratification of the real-covariate ABM population to the pinned SOMA 30yr coupon(0.5pp) x vintage-group mix (composition_shift_results.json soma_book.latest joint cells); V1 parity +/-0.01pp to committed 59.30299/20.85629; V2 frozen scale + importance weights; V3 III.C-recalibrated scale on the weighted population; re-draw sensitivity iff ESS<30%N; primary = importance weights ex ante; thresholds T1/T2/T3 on V3 keyed to the committed VII.D bands (>50 undercut / <35 corroborate); same $764.7B benchmark (sched-invariant by construction); no new behavioral modeling; no committed artifact modified",
+  "pinned": {
+    "target_shares": {
+      "source": "hazard/data/composition_shift_results.json -> soma_book.latest.joint_cells_min_share_0p1pct",
+      "book_as_of": "2026-07-15",
+      "table_mass_of_parsed_face": 0.9917876470055357,
+      "mass_30yr_of_table": 0.9029057717871807,
+      "n_cells_30yr": 25,
+      "target_wac_30yr_pct_bucket_labels": 2.539337477872777,
+      "artifact_committed_book_wac_pct": 2.49,
+      "artifact_committed_sample_wac_pct": 3.864892813333334
+    },
+    "committed_cross_design": {
+      "recalibrated": {
+        "mobility_scale": 36085.9375,
+        "trapped_b": 453.5186133616682,
+        "share_pct": 59.30299434493775
+      },
+      "frozen": {
+        "mobility_scale": 43882.8125,
+        "trapped_b": 159.49813800542833,
+        "share_pct": 20.856293209339483
+      },
+      "empirical_trapped_b": 764.7482532227002
+    },
+    "committed_prereg_bands": {
+      "undercuts_paradigm_above_pct": 50.0,
+      "corroborates_band_pct": [
+        10.0,
+        35.0
+      ]
+    },
+    "reference_run_tag": "run-2026-07-05-berger",
+    "manifest_medians": {
+      "income": 83730.0,
+      "home_value": 403200.0
+    },
+    "live_fred_medians_reported_only": [
+      83730.0,
+      403200.0
+    ],
+    "soma_30yr_wac_anchor_pct": 2.55
+  },
+  "target_shares_30yr": {
+    "1.5|2021": 0.03016600282480097,
+    "2.0|2020": 0.049343342932143514,
+    "2.0|2021": 0.2819228925540259,
+    "2.0|2022": 0.06877686794841473,
+    "2.5|2017-19": 0.0011814540343909703,
+    "2.5|2020": 0.08249042233777293,
+    "2.5|2021": 0.12251008382027542,
+    "2.5|2022": 0.08763556775496796,
+    "3.0|2017-19": 0.022372304391302465,
+    "3.0|2020": 0.02849311116585253,
+    "3.0|2021": 0.0033381743170455,
+    "3.0|2022": 0.01697811936077884,
+    "3.0|pre2017": 0.04778441299838921,
+    "3.5|2017-19": 0.016227226041763625,
+    "3.5|2020": 0.002067624528353282,
+    "3.5|2022": 0.01779095214898705,
+    "3.5|pre2017": 0.04491179688378082,
+    "4.0|2017-19": 0.018094752441323615,
+    "4.0|2021": 0.0013857742434443328,
+    "4.0|2022": 0.017853925487923736,
+    "4.0|pre2017": 0.013665996797079572,
+    "4.5|2022": 0.01316937936751239,
+    "4.5|pre2017": 0.006789199087114832,
+    "5.0|2022": 0.002589876024340455,
+    "5.0|pre2017": 0.002460740508215443
+  },
+  "importance_weights": {
+    "ess": 1332.2106240615678,
+    "ess_fraction_of_n": 0.13322106240615678,
+    "n_agents": 10000,
+    "n_zero_weight_agents": 388,
+    "max_normalized_weight": 14.21140907937468,
+    "weighted_wac_pct": 2.6258720229686072,
+    "weighted_mean_loan_age_mo": 16.487906563398788,
+    "unweighted_wac_pct": 3.3608263,
+    "unweighted_mean_loan_age_mo": 22.2711,
+    "fold_log_10k_support": [
+      {
+        "from": [
+          1.5,
+          "2021"
+        ],
+        "to": [
+          2.0,
+          "2021"
+        ],
+        "mass_pct": 3.016600282480097
+      },
+      {
+        "from": [
+          2.0,
+          "2022"
+        ],
+        "to": [
+          2.0,
+          "2021"
+        ],
+        "mass_pct": 6.877686794841472
+      },
+      {
+        "from": [
+          2.5,
+          "2022"
+        ],
+        "to": [
+          2.5,
+          "2021"
+        ],
+        "mass_pct": 8.763556775496797
+      },
+      {
+        "from": [
+          3.0,
+          "pre2017"
+        ],
+        "to": [
+          3.0,
+          "2017-19"
+        ],
+        "mass_pct": 4.778441299838921
+      },
+      {
+        "from": [
+          3.0,
+          "2022"
+        ],
+        "to": [
+          3.0,
+          "2021"
+        ],
+        "mass_pct": 1.697811936077884
+      },
+      {
+        "from": [
+          3.5,
+          "pre2017"
+        ],
+        "to": [
+          3.5,
+          "2017-19"
+        ],
+        "mass_pct": 4.491179688378082
+      },
+      {
+        "from": [
+          3.5,
+          "2022"
+        ],
+        "to": [
+          3.5,
+          "2021"
+        ],
+        "mass_pct": 1.7790952148987051
+      },
+      {
+        "from": [
+          4.0,
+          "pre2017"
+        ],
+        "to": [
+          4.0,
+          "2017-19"
+        ],
+        "mass_pct": 1.3665996797079571
+      },
+      {
+        "from": [
+          4.0,
+          "2022"
+        ],
+        "to": [
+          4.0,
+          "2021"
+        ],
+        "mass_pct": 1.7853925487923736
+      },
+      {
+        "from": [
+          4.5,
+          "pre2017"
+        ],
+        "to": [
+          4.5,
+          "2017-19"
+        ],
+        "mass_pct": 0.6789199087114832
+      },
+      {
+        "from": [
+          4.5,
+          "2022"
+        ],
+        "to": [
+          4.5,
+          "2021"
+        ],
+        "mass_pct": 1.316937936751239
+      },
+      {
+        "from": [
+          5.0,
+          "pre2017"
+        ],
+        "to": [
+          5.0,
+          "2017-19"
+        ],
+        "mass_pct": 0.24607405082154432
+      },
+      {
+        "from": [
+          5.0,
+          "2022"
+        ],
+        "to": [
+          5.0,
+          "2021"
+        ],
+        "mass_pct": 0.2589876024340455
+      }
+    ],
+    "ess_trigger_fired": true,
+    "ess_min_fraction": 0.3
+  },
+  "primary_variant": "importance_weights",
+  "variants": {
+    "v1_recalibrated": {
+      "variant": "v1_recalibrated",
+      "mobility_scale": 36085.9375,
+      "weighted": false,
+      "trapped_b": 453.5186133616682,
+      "share_pct": 59.30299434493775,
+      "empirical_trapped_b": 764.7482532227002,
+      "us_cpr_mean_pct": 8.138241675425641,
+      "empirical_cpr_mean_pct": 5.829007141082971,
+      "sched_wac_pct": 3.3608263,
+      "sched_mean_age_mo": 22.2711,
+      "cpr_r_lag0": -0.3356865993789185,
+      "peak_lag": 0,
+      "peak_lag_r": -0.3356865993789185
+    },
+    "v1_frozen": {
+      "variant": "v1_frozen",
+      "mobility_scale": 43882.8125,
+      "weighted": false,
+      "trapped_b": 159.49813800542833,
+      "share_pct": 20.856293209339483,
+      "empirical_trapped_b": 764.7482532227002,
+      "us_cpr_mean_pct": 11.63025197700384,
+      "empirical_cpr_mean_pct": 5.829007141082971,
+      "sched_wac_pct": 3.3608263,
+      "sched_mean_age_mo": 22.2711,
+      "cpr_r_lag0": -0.31092896473983167,
+      "peak_lag": 0,
+      "peak_lag_r": -0.31092896473983167
+    },
+    "v2_reweighted_frozen": {
+      "variant": "v2_reweighted_frozen",
+      "mobility_scale": 43882.8125,
+      "weighted": true,
+      "trapped_b": 96.06417711390101,
+      "share_pct": 12.561542534955805,
+      "empirical_trapped_b": 764.7482532227002,
+      "us_cpr_mean_pct": 12.28579352836453,
+      "empirical_cpr_mean_pct": 5.644629967368196,
+      "sched_wac_pct": 2.6258720229686072,
+      "sched_mean_age_mo": 16.487906563398788,
+      "cpr_r_lag0": -0.1956620035395399,
+      "peak_lag": -3,
+      "peak_lag_r": 0.2507587419225436
+    },
+    "v3_reweighted_recalibrated": {
+      "variant": "v3_reweighted_recalibrated",
+      "mobility_scale": 32187.5,
+      "weighted": true,
+      "trapped_b": 583.8405734513923,
+      "share_pct": 76.34415260068252,
+      "empirical_trapped_b": 764.7482532227002,
+      "us_cpr_mean_pct": 6.447541599152343,
+      "empirical_cpr_mean_pct": 5.644629967368196,
+      "sched_wac_pct": 2.6258720229686072,
+      "sched_mean_age_mo": 16.487906563398788,
+      "cpr_r_lag0": -0.3000421238262213,
+      "peak_lag": 0,
+      "peak_lag_r": -0.3000421238262213,
+      "floor_cpr_at_8pct": 0.04288328612371688
+    },
+    "v2r_redraw_frozen": {
+      "variant": "v2r_redraw_frozen",
+      "mobility_scale": 43882.8125,
+      "weighted": false,
+      "trapped_b": 275.6484296724732,
+      "share_pct": 36.044335964269585,
+      "empirical_trapped_b": 764.7482532227002,
+      "us_cpr_mean_pct": 10.086487914693029,
+      "empirical_cpr_mean_pct": 5.635509671116121,
+      "sched_wac_pct": 2.6285827,
+      "sched_mean_age_mo": 16.5166,
+      "cpr_r_lag0": -0.2823033348477679,
+      "peak_lag": 0,
+      "peak_lag_r": -0.2823033348477679
+    },
+    "v3r_redraw_recalibrated": {
+      "variant": "v3r_redraw_recalibrated",
+      "mobility_scale": 36085.9375,
+      "weighted": false,
+      "trapped_b": 540.237779890794,
+      "share_pct": 70.64256474129832,
+      "empirical_trapped_b": 764.7482532227002,
+      "us_cpr_mean_pct": 6.956136989827899,
+      "empirical_cpr_mean_pct": 5.635509671116121,
+      "sched_wac_pct": 2.6285827,
+      "sched_mean_age_mo": 16.5166,
+      "cpr_r_lag0": -0.31126029253137144,
+      "peak_lag": 0,
+      "peak_lag_r": -0.31126029253137144,
+      "floor_cpr_at_8pct": 0.0454
+    }
+  },
+  "redraw_population": {
+    "seed": 42,
+    "n_agents": 10000,
+    "n_target_cells": 17,
+    "wac_pct": 2.6285827,
+    "mean_loan_age_mo": 16.5166,
+    "fold_log_75k_support": [
+      {
+        "from": [
+          1.5,
+          "2021"
+        ],
+        "to": [
+          2.0,
+          "2021"
+        ],
+        "mass_pct": 3.016600282480097
+      },
+      {
+        "from": [
+          2.0,
+          "2022"
+        ],
+        "to": [
+          2.0,
+          "2021"
+        ],
+        "mass_pct": 6.877686794841472
+      },
+      {
+        "from": [
+          2.5,
+          "2022"
+        ],
+        "to": [
+          2.5,
+          "2021"
+        ],
+        "mass_pct": 8.763556775496797
+      },
+      {
+        "from": [
+          3.0,
+          "pre2017"
+        ],
+        "to": [
+          3.0,
+          "2017-19"
+        ],
+        "mass_pct": 4.778441299838921
+      },
+      {
+        "from": [
+          3.0,
+          "2022"
+        ],
+        "to": [
+          3.0,
+          "2021"
+        ],
+        "mass_pct": 1.697811936077884
+      },
+      {
+        "from": [
+          3.5,
+          "pre2017"
+        ],
+        "to": [
+          3.5,
+          "2017-19"
+        ],
+        "mass_pct": 4.491179688378082
+      },
+      {
+        "from": [
+          3.5,
+          "2022"
+        ],
+        "to": [
+          3.5,
+          "2021"
+        ],
+        "mass_pct": 1.7790952148987051
+      },
+      {
+        "from": [
+          4.0,
+          "pre2017"
+        ],
+        "to": [
+          4.0,
+          "2017-19"
+        ],
+        "mass_pct": 1.3665996797079571
+      },
+      {
+        "from": [
+          4.0,
+          "2022"
+        ],
+        "to": [
+          4.0,
+          "2021"
+        ],
+        "mass_pct": 1.7853925487923736
+      },
+      {
+        "from": [
+          4.5,
+          "pre2017"
+        ],
+        "to": [
+          4.5,
+          "2017-19"
+        ],
+        "mass_pct": 0.6789199087114832
+      },
+      {
+        "from": [
+          4.5,
+          "2022"
+        ],
+        "to": [
+          4.5,
+          "2021"
+        ],
+        "mass_pct": 1.316937936751239
+      },
+      {
+        "from": [
+          5.0,
+          "pre2017"
+        ],
+        "to": [
+          5.0,
+          "2017-19"
+        ],
+        "mass_pct": 0.24607405082154432
+      },
+      {
+        "from": [
+          5.0,
+          "2022"
+        ],
+        "to": [
+          5.0,
+          "2021"
+        ],
+        "mass_pct": 0.2589876024340455
+      }
+    ],
+    "allocation": {
+      "2.0|2020": 493,
+      "2.0|2021": 3809,
+      "2.5|2017-19": 12,
+      "2.5|2020": 825,
+      "2.5|2021": 2101,
+      "3.0|2017-19": 701,
+      "3.0|2020": 285,
+      "3.0|2021": 203,
+      "3.5|2017-19": 611,
+      "3.5|2020": 21,
+      "3.5|2021": 178,
+      "4.0|2017-19": 318,
+      "4.0|2021": 192,
+      "4.5|2017-19": 68,
+      "4.5|2021": 132,
+      "5.0|2017-19": 25,
+      "5.0|2021": 26
+    }
+  },
+  "v3_recalibrated_scale": 32187.5,
+  "composition_components_pp": {
+    "c_frozen": -8.294750674383678,
+    "c_recal": 17.04115825574477
+  },
+  "composition_adjusted_pair_pct": {
+    "frozen": 12.561542534955805,
+    "recalibrated": 76.34415260068252
+  },
+  "interpretive_threshold": {
+    "applied_to": "v3_reweighted_recalibrated.share_pct",
+    "band": "T1",
+    "verdict": "V3 >= 50% -> the undercut verdict survives composition adjustment; manuscript quantifies the composition component and keeps VII.D's reading, replacing the 'isolates real structural heterogeneity' sentence with the quantified statement.",
+    "thresholds": {
+      "T1": "V3 >= 50% -> the undercut verdict survives composition adjustment; manuscript quantifies the composition component and keeps VII.D's reading, replacing the 'isolates real structural heterogeneity' sentence with the quantified statement.",
+      "T2": "35% <= V3 < 50% -> the undercut verdict was partly composition: VII.D's verdict moves to the pre-committed 'ambiguous' band; the abstract's 59.3% must carry the composition-adjusted value beside it.",
+      "T3": "V3 < 35% -> the undercut was primarily composition; VII.D's conclusion reverts to corroborating the paradigm reading, and every site quoting 59.3% must requalify."
+    }
+  },
+  "runtime_s": 15.553569583
+}
