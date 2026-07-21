@@ -240,7 +240,11 @@ ABSTRACT_HEDGES = {
     # flagged as using the allocation III.D judges less faithful.
     "surprise_share_allocated": "between roughly a quarter and half of the "
                                 "genuine surprise, depending on a disclosed "
-                                "intra-2022 allocation choice",
+                                "intra-2022 allocation choice: the "
+                                "settlement-aware allocation matching the "
+                                "realized settlement pattern gives the "
+                                "quarter, the pre-committed uniform-spread "
+                                "central allocation the half",
     # the ABM number is a seed mean, not a single run
     "abm_seed_averaged": "averaged across seeds",
     # the cross-design variant was refit, so it is not a clean out-of-sample read

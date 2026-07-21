@@ -123,10 +123,11 @@ def _mutations(abstract: str) -> dict[str, str]:
             "anticipated the large majority of the realized shortfall",
             "anticipated the realized shortfall"),
         "drops_central_allocation": abstract.replace(
-            " under the central allocation", ""),
+            "the pre-committed uniform-spread central allocation the half",
+            "the pre-committed uniform-spread construction the half"),
         "drops_genuine_surprise": abstract.replace(
-            "roughly half the genuine surprise under the central allocation",
-            "roughly half the shortfall under the central allocation"),
+            "a quarter and half of the genuine surprise",
+            "a quarter and half of the shortfall"),
         "drops_denominator_switch": abstract.replace(
             "Measured against that projection rather than the never-binding cap, "
             "the", "The"),
@@ -140,9 +141,8 @@ def _mutations(abstract: str) -> dict[str, str]:
             "scheduled amortization undershoots"),
         # --- relocation (what proximity windows cannot catch) -------------
         "relocates_central_allocation": abstract.replace(
-            "accounts for roughly half the genuine surprise under the central "
-            "allocation.",
-            "accounts for roughly half the genuine surprise. The central "
+            "the pre-committed uniform-spread central allocation the half.",
+            "the pre-committed uniform-spread rule the half. The central "
             "allocation is described below."),
         # --- scoping ------------------------------------------------------
         # the body keeps every phrase; only the abstract is gutted. A
