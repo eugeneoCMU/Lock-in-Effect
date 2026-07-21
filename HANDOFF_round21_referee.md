@@ -2,8 +2,8 @@
 
 Repo: `/Users/eugene/somthing/Lock In effect/Lock-in-Effect`
 Branch: `panel-revision-2026-07-18` — all round-21 work committed locally, **UNPUSHED** (public repo; push is Eugene's call).
-Manuscript: `paper/v18/revised_paper_v18.tex` (102pp; grew from 99 — compression is still open, see below).
-Gates: `python3 tools/liveness_gates.py` → **77 gates ALL PASS** (72 + new #69–#73).
+Manuscript: `paper/v18/revised_paper_v18.tex` (105pp; grew from 99 — compression is still open, see below).
+Gates: `python3 tools/liveness_gates.py` → **78 gates ALL PASS** (72 + new #69–#74).
 Tests: `python3 -m pytest tests/` → **295 pass** (hedge-gate mutation tests re-keyed to the new abstract sentence).
 Build: `~/Downloads/texbuild/tectonic -X compile revised_paper_v18.tex --outdir build_r21 --keep-logs` → 0 undefined refs/cites.
 
@@ -22,7 +22,7 @@ precedes result commit; parity gates replay committed artifacts bit-exactly).
 | `danish_offwindow_floor.py` | Rule-only gap at headline floor: **+$28.20B** (vs +$61.19B in-sample); ratio to marginal 0.662 | abstract dual-label; VI.C; conclusion (gate #71) |
 | `ginnie_overlay_offwindow.py` | Overlay pair at headline floor: **83.95/79.51/+4.44pp**; marginal correction = pure conventional-share scaling (0.7975×), series-independent | V.B; Tables 1/8 (gate #72) |
 | `floor_uncertainty.py` | Floor-read cluster bootstrap: off-window marginal 95% CI **[+2.97, +8.02]pp** — the BINDING layer (31 clusters!, n=137). Age-standardized floor **5.51%** (84% imputed) → band **open below +4.3** | VII.I sampling paragraph; Table 8 sampling cell corrected; abstract (gate #73) |
-| `patha_sign_test.py` | **RUNNING at handoff time** (background; BCa/BC + 200-perm test of H0: β_g≤0). BC-only p-values from committed draws: stratum 0.091, temporal 0.404 — expect T2/T3 | on completion: downgrade "sign stability"/"sign-triangulated" per its ex-ante T-branches; add gate #74 |
+| `patha_sign_test.py` | **T3**: H0: β_g≤0 not rejected under any bias-respecting construction — BCa p **0.093** (stratum, 296-refit jackknife) / **0.412** (temporal); permutation p **0.241**. In-sample sign claim withdrawn; elasticity's evidential basis = external literature alone | V.B/V.D/V.F/Table 6 note rewritten; "sign-triangulated" retired to ZERO_COUNT (gate #74) |
 
 ## Tex work landed (commits `440e2e1..`)
 
@@ -44,13 +44,13 @@ precedes result commit; parity gates replay committed artifacts bit-exactly).
 
 ## Open items (in priority order)
 
-1. **R8 verdict** (`patha_sign_test.py`, running): apply its ex-ante T-branch to the tex
-   ("sign-triangulated by two in-sample estimates" p.33-equivalent and "sign stability" Table 6
-   note / V.F), then pin gate #74. Check `hazard/data/patha_sign_test_results.json`.
-2. **ABM spec appendix** (MF-10): a drafting agent was producing `app:abmspec` LaTeX (decision
-   equation, parameter table w/ units, order of operations) — verify its file:line claims
-   against `abm/abm_lockin_simulation.py` before inserting; add its discrepancy list to the
-   ledger if any.
+1. ~~R8 verdict~~ DONE (T3 applied, gate #74, commit `74774f6`).
+2. ~~ABM spec appendix~~ DONE (`app:abmspec` inserted with code-line pins; three III.B
+   code-vs-manuscript discrepancies fixed: full-term replacement loan, 240-month penalty
+   switch referenced, annualized-intensity parenthetical; commit `63a009a`). Residual from its
+   discrepancy list: the "nearly tripling" phrase at the loss-aversion recalibration (III.C)
+   compares against the historical ~12,500 anchor, not the frozen 43,883 — verify the base
+   before that phrase survives another round.
 3. **R7** (cross-design composition): rerun/reweight VII.D variants to the SOMA coupon/vintage
    mix (the VII.F analogue) or quantify the composition share of 11.9→59.3; fix the "isolates"
    sentence (currently only hedged, not quantified).
