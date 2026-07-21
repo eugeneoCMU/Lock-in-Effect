@@ -3511,6 +3511,38 @@ def main() -> int:
           f"{'ok' if gof_tex_ok else 'MISSING'}")
 
 
+    # Round-21 (gate #73): FLOOR UNCERTAINTY. floor_uncertainty bootstrapped
+    # every floor read (cluster = 4-way strata) and age-standardized the
+    # off-window floor. Verdicts: the BINDING uncertainty on the off-window
+    # marginal is the floor's sampling error (95% CI [+2.97, +8.02]pp, wider
+    # than the depth-cut band), and the age-standardized floor (5.508%, 84.0%
+    # imputed weight) sits above the clean band top, so the band is open
+    # below +4.3. The tex must carry the sampling CI, the binding-layer
+    # relabel of Table 8, and the open-below statement.
+    fu = json.loads((HAZ_DATA / "floor_uncertainty_results.json").read_text())
+    fu_mf4 = fu["part_a_sampling_uncertainty"]["mf4_binding_uncertainty"]
+    fu_pb = fu["part_b_age_standardization"]
+    fu_ok = (fu["parity_gates_all_pass"]
+             and fu_mf4["binding_uncertainty"] == "sampling"
+             and abs(fu_mf4["sampling_ci95_pp"][0] - 2.974329560125351) < 1e-9
+             and abs(fu_mf4["sampling_ci95_pp"][1] - 8.01850965353176) < 1e-9
+             and abs(fu_pb["adjusted_floor_pct"] - 5.507748455937158) < 1e-9
+             and abs(fu_pb["imputed_weight_share"] - 0.8398743947117693) < 1e-9)
+    fu_tex_ok = (tex.count("$+3.0$ to $+8.0$") >= 2
+                 and "floor\\_uncertainty" in tex
+                 and "open below $+4.3$" in tex
+                 and "binding layer" in tex
+                 and "84.0\\% of weight imputed" in tex)
+    ok = fu_ok and fu_tex_ok
+    failures += 0 if ok else 1
+    fu_count = tex.count("$+3.0$ to $+8.0$")
+    print(f"[{'PASS' if ok else 'FAIL'}] cross-check floor uncertainty: "
+          f"artifact={fu_ok} (binding={fu_mf4['binding_uncertainty']}, CI "
+          f"[{fu_mf4['sampling_ci95_pp'][0]:.3f}, {fu_mf4['sampling_ci95_pp'][1]:.3f}]pp, "
+          f"age-std {fu_pb['adjusted_floor_pct']:.3f}%), tex CI-count={fu_count} "
+          f"(want >=2), literals={'ok' if fu_tex_ok else 'MISSING'}")
+
+
     print(f"\n{'ALL GATES PASS' if failures == 0 else f'{failures} GATE(S) FAILED'}")
     return 0 if failures == 0 else 1
 
