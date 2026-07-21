@@ -1,0 +1,257 @@
+{
+ "mode": "patha_sign_test",
+ "finding": "round-21 MF-5",
+ "seed": 42,
+ "ridge_alpha": 0.0001,
+ "alpha_level": 0.05,
+ "spec": "H0: beta_g <= 0 tested two ways on the committed spec-v3 Path A fit: (1) BCa/BC p by CI inversion on the committed replicate draws (z0 from draws; acceleration from delete-one-stratum [296 refits, <=5s/refit budget] and delete-one-month [36 refits, <=45s/refit budget] jackknives, warm-started, BC fallback labeled); (2) month->market-rate permutation test, 200 perms, seed 42, p = (1+#{|beta*|>=beta_hat})/(1+M). Parity gates G1-G6 block. Ex-ante thresholds: T1 both legs p<=0.05; T2 exactly one; T3 neither. Bootstrap leg passes if EITHER scheme's p <= 0.05 (fixed ex ante from the mandate wording; both-scheme indicator disclosed).",
+ "manuscript_anchor": {
+  "table": "tab:bootstrap (revised_paper_v18.tex:405-422)",
+  "sign_sentence": "positive in 197 of 198 converged replications (revised_paper_v18.tex:397)",
+  "vb_phrase": "sign-triangulated by two in-sample estimates (revised_paper_v18.tex:349)",
+  "deferred_bca": "revised_paper_v18.tex:422"
+ },
+ "parity_gates": {
+  "G1_rate_gap_bps": {
+   "got": 0.6733519352905115,
+   "want": 0.673,
+   "tol": 0.001,
+   "pass": true
+  },
+  "G1_burnout_orth": {
+   "got": -0.13009048732147674,
+   "want": -0.13,
+   "tol": 0.001,
+   "pass": true
+  },
+  "G1_friction": {
+   "got": -0.037066025306261775,
+   "want": -0.037,
+   "tol": 0.001,
+   "pass": true
+  },
+  "G3_pctl_lo_stratum": {
+   "got": 0.6038694206026911,
+   "want": 0.6038694206026911,
+   "tol": 1e-06,
+   "pass": true
+  },
+  "G3_pctl_hi_stratum": {
+   "got": 4.108538287772931,
+   "want": 4.108538287772931,
+   "tol": 1e-06,
+   "pass": true
+  },
+  "G4_basic_lo_stratum": {
+   "got": -2.761834417191908,
+   "want": -2.76,
+   "tol": 0.01,
+   "pass": true
+  },
+  "G4_basic_hi_stratum": {
+   "got": 0.7428344499783319,
+   "want": 0.74,
+   "tol": 0.01,
+   "pass": true
+  },
+  "G5_bias_stratum": {
+   "got": 0.8180977144003805,
+   "want": 0.82,
+   "tol": 0.01,
+   "pass": true
+  },
+  "G6_n_le0_stratum": {
+   "got": 1.0,
+   "want": 1.0,
+   "tol": 0.5,
+   "pass": true
+  },
+  "G3_pctl_lo_temporal": {
+   "got": 0.43721075528103864,
+   "want": 0.4372107552810387,
+   "tol": 1e-06,
+   "pass": true
+  },
+  "G3_pctl_hi_temporal": {
+   "got": 12.184273332972582,
+   "want": 12.184273332972582,
+   "tol": 1e-06,
+   "pass": true
+  },
+  "G4_basic_lo_temporal": {
+   "got": -10.83756946239156,
+   "want": -10.84,
+   "tol": 0.01,
+   "pass": true
+  },
+  "G4_basic_hi_temporal": {
+   "got": 0.9094931152999843,
+   "want": 0.91,
+   "tol": 0.01,
+   "pass": true
+  },
+  "G5_bias_temporal": {
+   "got": 2.639292939537161,
+   "want": 2.64,
+   "tol": 0.01,
+   "pass": true
+  },
+  "G6_n_le0_temporal": {
+   "got": 1.0,
+   "want": 1.0,
+   "tol": 0.5,
+   "pass": true
+  },
+  "G2_rate_gap_bps": {
+   "got": 0.6733519352905115,
+   "want": 0.6733519352905115,
+   "tol": 0.001,
+   "pass": true
+  },
+  "G2_burnout_orth": {
+   "got": -0.13009048732147674,
+   "want": -0.13009048732147674,
+   "tol": 0.001,
+   "pass": true
+  },
+  "G2_friction": {
+   "got": -0.037066025306261775,
+   "want": -0.037066025306261775,
+   "tol": 0.001,
+   "pass": true
+  },
+  "G2b_rate_gap_bps": {
+   "got": 0.6733519352898418,
+   "want": 0.6733519352905115,
+   "tol": 0.001,
+   "pass": true
+  },
+  "G2b_burnout_orth": {
+   "got": -0.13009048732164039,
+   "want": -0.13009048732147674,
+   "tol": 0.001,
+   "pass": true
+  },
+  "G2b_friction": {
+   "got": -0.03706602530617037,
+   "want": -0.037066025306261775,
+   "tol": 0.001,
+   "pass": true
+  }
+ },
+ "soft_checks": {
+  "z0_stratum": {
+   "got": -0.619854573565494,
+   "want": -0.6199,
+   "tol": 0.001,
+   "consistent": true
+  },
+  "p_bc_stratum": {
+   "got": 0.09132449940219434,
+   "want": 0.09132,
+   "tol": 0.001,
+   "consistent": true
+  },
+  "z0_temporal": {
+   "got": -1.1628312902007805,
+   "want": -1.1628,
+   "tol": 0.001,
+   "consistent": true
+  },
+  "p_bc_temporal": {
+   "got": 0.40393563395929527,
+   "want": 0.40394,
+   "tol": 0.001,
+   "consistent": true
+  }
+ },
+ "timing": {
+  "t_cold_refit_s": 3.0689565829999994,
+  "t_warm_refit_s": 2.6116772920000004,
+  "n_planned_refits": 532,
+  "estimated_total_s": 1389.4123193440003,
+  "stratum_jackknife_enabled": true,
+  "month_jackknife_enabled": true
+ },
+ "schemes": {
+  "stratum": {
+   "B": 198,
+   "n_lt_point": 53,
+   "n_le_zero": 1,
+   "z0": -0.619854573565494,
+   "q": -2.5723521109428895,
+   "acceleration": -0.002381003951197406,
+   "percentile_p": 0.005050505050505051,
+   "breakdown": false,
+   "p": 0.09281663473114488,
+   "jackknife": {
+    "scheme": "stratum",
+    "unit": "stratum_id",
+    "n_units": 296,
+    "n_failed": 2,
+    "fail_share": 0.006756756756756757,
+    "valid": true,
+    "acceleration": -0.002381003951197406,
+    "csv": "patha_sign_test_jackknife_stratum.csv",
+    "runtime_s": 989.854311792
+   },
+   "p_kind": "BCa",
+   "limitation": null
+  },
+  "temporal": {
+   "B": 196,
+   "n_lt_point": 24,
+   "n_le_zero": 1,
+   "z0": -1.1628312902007805,
+   "q": -2.5688357277383953,
+   "acceleration": -0.010444520118912622,
+   "percentile_p": 0.00510204081632653,
+   "breakdown": false,
+   "p": 0.41183595966445363,
+   "jackknife": {
+    "scheme": "temporal",
+    "unit": "period",
+    "n_units": 36,
+    "n_failed": 0,
+    "fail_share": 0.0,
+    "valid": true,
+    "acceleration": -0.010444520118912622,
+    "csv": "patha_sign_test_jackknife_month.csv",
+    "runtime_s": 115.76694079100002
+   },
+   "p_kind": "BCa",
+   "limitation": null
+  }
+ },
+ "permutation": {
+  "n_perm": 200,
+  "n_converged": 198,
+  "n_failed": 2,
+  "valid": true,
+  "beta_hat": 0.6733519352905115,
+  "n_abs_ge_observed": 47,
+  "n_ge_observed": 47,
+  "p_primary_abs": 0.24120603015075376,
+  "p_secondary_onesided": 0.24120603015075376,
+  "raw_share_abs": 0.23737373737373738,
+  "raw_share_onesided": 0.23737373737373738,
+  "perm_gap_mean": 0.4478972899006737,
+  "perm_gap_sd": 1.4465322846382445,
+  "draws_csv": "patha_sign_test_permutation_draws.csv",
+  "runtime_s": 632.3308037500001
+ },
+ "verdict": {
+  "branch": "T3",
+  "p_bootstrap_stratum": 0.09281663473114488,
+  "p_bootstrap_stratum_kind": "BCa",
+  "p_bootstrap_temporal": 0.41183595966445363,
+  "p_bootstrap_temporal_kind": "BCa",
+  "p_permutation_primary": 0.24120603015075376,
+  "bootstrap_leg_pass_either_scheme": false,
+  "bootstrap_leg_pass_both_schemes_disclosure": false,
+  "permutation_leg_pass": false,
+  "manuscript_action": "state the in-sample estimate is not statistically distinguishable from zero under bias-respecting constructions; the elasticity's evidential basis is the external literature alone; drop 'sign-triangulated by two in-sample estimates'"
+ },
+ "runtime_s": 1745.47696175,
+ "parity_gates_all_pass": true
+}
