@@ -2,8 +2,8 @@
 
 Repo: `/Users/eugene/somthing/Lock In effect/Lock-in-Effect`
 Branch: `panel-revision-2026-07-18` — all round-21 work committed locally, **UNPUSHED** (public repo; push is Eugene's call).
-Manuscript: `paper/v18/revised_paper_v18.tex` (105pp; grew from 99 — compression is still open, see below).
-Gates: `python3 tools/liveness_gates.py` → **78 gates ALL PASS** (72 + new #69–#74).
+Manuscript: `paper/v18/revised_paper_v18.tex` (106pp; grew from 99 — compression is optional, per Eugene).
+Gates: `python3 tools/liveness_gates.py` → **80 gates ALL PASS** (72 + new #69–#76).
 Tests: `python3 -m pytest tests/` → **295 pass** (hedge-gate mutation tests re-keyed to the new abstract sentence).
 Build: `~/Downloads/texbuild/tectonic -X compile revised_paper_v18.tex --outdir build_r21 --keep-logs` → 0 undefined refs/cites.
 
@@ -51,12 +51,14 @@ precedes result commit; parity gates replay committed artifacts bit-exactly).
    discrepancy list: the "nearly tripling" phrase at the loss-aversion recalibration (III.C)
    compares against the historical ~12,500 anchor, not the frozen 43,883 — verify the base
    before that phrase survives another round.
-3. **R7** (cross-design composition): rerun/reweight VII.D variants to the SOMA coupon/vintage
-   mix (the VII.F analogue) or quantify the composition share of 11.9→59.3; fix the "isolates"
-   sentence (currently only hedged, not quantified).
-4. **R9** (episode confrontation): cumulative cross-cohort gap-gradient test vs realized speeds
-   + power analysis of β₁=0.069 detectability; decides whether the abstract's re-anchored verb
-   can strengthen back from "Re-anchoring…puts".
+3. ~~R7~~ DONE (T1: reweighting to SOMA composition RAISES the recalibrated variant
+   59.3→76.3% (re-draw 70.6), lowers frozen 20.9→12.6 (re-draw 36.0); undercut verdict
+   survives strengthened; gate #76; commits `abb..`/`39ecb1b`).
+4. ~~R9~~ DONE (T5 residual branch: realized cumulative gap gradient +4.20pp, CI
+   [+3.59,+4.66], perm p 0.005 — signed and significant but 4.5× the implied +0.94, so
+   confound-signature, not corroboration; power 0.68; no verb change; gate #75).
+   Diagnosis of the excess gradient (credit/refi decomposition of the shallow buckets) is
+   a natural future run if anyone presses on it.
 5. **R10 small batch**: per-seed floor CPR disclosure (seed-loop position of the recalibration);
    β_B interaction bound; settlement-months benchmark variant; DTI non-monotonicity
    decomposition; production-spec scale rerun (or soften VIII.A "resolves").
@@ -75,3 +77,5 @@ precedes result commit; parity gates replay committed artifacts bit-exactly).
   artifacts must reproduce (all are deterministic, seed 42).
 - The four commit-hash pre-commitment citations in the manuscript are untouched.
 - `paper/**/*.tex`/`*.bib` tracked; derived files ignored. Repo is PUBLIC — no pushes.
+
+Also removed this session (post-handoff): all nine reviewer-reactive framings (zero 'referee' mentions remain; commit `1c9d629`).
