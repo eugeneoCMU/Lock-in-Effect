@@ -613,7 +613,7 @@ def main() -> None:
                  # ROUND-22 REVIEW FIX: dti_threshold_sweep gates this;
                  # fetch_soma_mbs_monthly returns None on failure and a
                  # silent None would score the arms on a degraded frame
-                 and soma_rolloff_available),
+                 and soma_rolloff is not None),
           {"n_cohorts_live": len(cohorts),
            "n_cohorts_committed": committed["n_cohorts"],
            "reference_live": [ref["coupon"], ref["months_elapsed"]],
