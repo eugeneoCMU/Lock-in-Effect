@@ -9,7 +9,8 @@ State: `panel-revision-2026-07-18`, 37 local commits unpushed. **90 gates PASS, 
 > the failed tolerance was never widened. §3b venue — resolved, short abstract now canonical
 > at 424 words. §3e Berger locators — **verified against the source; one was wrong and is fixed**.
 > §6 bookkeeping — done, both PDFs rebuilt. §6e response letter — drafted, 5pp.
-> **Open: §3c the push only.** 45 commits, 91 gates, 297 tests, 113pp, clean tree.
+> **§3c the push — DONE** (2026-07-26, 46 commits to `origin/panel-revision-2026-07-18`; `main` untouched).
+> **Nothing outstanding.** 91 gates, 297 tests, 113pp, clean tree.
 
 **DECISION RECORDED: page compression is abandoned.** The 55–65pp target from
 `HANDOFF_round21_referee.md:65` is withdrawn at Eugene's instruction. Nothing below
