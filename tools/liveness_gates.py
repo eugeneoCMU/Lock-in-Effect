@@ -32,6 +32,14 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
 TEX = ROOT / "paper" / "v18" / "revised_paper_v18.tex"
+# ROUND 22 (C4): every manuscript variant on disk, not just the canonical one.
+# paper/v18/revised_paper_v18_simple_abstract.tex was byte-identical to the
+# canonical file except for its abstract, was UNTRACKED, and was therefore
+# entirely ungated -- run against gate #68's shipped rule it failed with 5 of 8
+# spans missing, silently reversing round 20's calibration-label discipline and
+# round 21's Danish dual label. A variant that ships is a variant that must be
+# checked, so the abstract gate is applied to all of them.
+TEX_VARIANTS = sorted((ROOT / "paper" / "v18").glob("revised_paper_v18*.tex"))
 MANIFEST = ROOT / "abm" / "data" / "runs" / "run-2026-07-04-15yr-foldin" / "manifest.json"
 FANNIE_RESULTS = ROOT / "hazard" / "data" / "fannie_replication_results.json"
 OVERLAY_RESULTS = ROOT / "hazard" / "data" / "ginnie_cpr_overlay_results.json"
@@ -270,6 +278,21 @@ ABSTRACT_HEDGES = {
     # the null's recovery rests on amortization AND baseline involuntary turnover
     "null_mechanical_components": "scheduled amortization and baseline "
                                   "involuntary turnover",
+    # ROUND 22 (A12): the nineteen-month floor check is an INPUT-stability check,
+    # not an outcome holdout, and no outcome holdout exists anywhere in the
+    # design. This entry exists because an uncommitted working-tree edit silently
+    # DELETED the relabel from the abstract, taking round 21's four disclosure
+    # sites to three, and nothing in the suite noticed: the relabel was prose
+    # round 21 had added by hand and never pinned.
+    "holdout_relabelled": "an input-stability check rather than an outcome "
+                          "holdout: no outcome-holdout months exist anywhere "
+                          "in this design",
+    # ROUND 22 (3d): the ABM-vs-hazard contrast must not be attributed to
+    # modeling paradigm in the abstract. This is the hedge the concision handoff
+    # named as the highest-value ungated abstract hedge; pinning it BEFORE any
+    # compression pass touches the abstract is the point.
+    "paradigm_attribution_hedged": "The contrast cannot be cleanly attributed "
+                                   "to modeling paradigm",
 }
 
 
@@ -3463,6 +3486,25 @@ def main() -> int:
         f"scoped-not-whole-file={_ab['scoped']}), "
         f"{_ab['total'] - len(_ab['missing'])}/{_ab['total']} spans "
         f"present, missing={_ab['missing'] or 'none'}"
+    )
+
+    # ROUND 22 (C4): the same rule, applied to EVERY manuscript variant on disk.
+    # See TEX_VARIANTS. A variant that is not the canonical file is still a
+    # variant someone can compile and submit, and the short-abstract variant that
+    # motivated this failed 5 of 8 spans while the suite reported ALL GATES PASS.
+    var_bad = []
+    for _p in TEX_VARIANTS:
+        if _p == TEX:
+            continue
+        _v_ok, _v = abstract_hedge_check(_p.read_text())
+        if not _v_ok:
+            var_bad.append(f"{_p.name}: {_v['missing'] or 'unscoped'}")
+    var_ok = not var_bad
+    failures += 0 if var_ok else 1
+    print(
+        f"[{'PASS' if var_ok else 'FAIL'}] abstract-hedge spans, non-canonical "
+        f"variants: {len(TEX_VARIANTS) - 1} checked, "
+        f"failing={var_bad or 'none'}"
     )
 
     # ------------------------------------------------------------------

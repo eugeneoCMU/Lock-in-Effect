@@ -144,6 +144,18 @@ def _mutations(abstract: str) -> dict[str, str]:
             "the pre-committed uniform-spread central allocation the half.",
             "the pre-committed uniform-spread rule the half. The central "
             "allocation is described below."),
+        # --- round 22 -----------------------------------------------------
+        # The exact regression that motivated the entry: an edit that deletes the
+        # relabel and leaves the nineteen-month check reading as a real holdout.
+        "drops_holdout_relabel": abstract.replace(
+            "an input-stability check rather than an outcome holdout: no "
+            "outcome-holdout months exist anywhere in this design",
+            "an out-of-sample holdout"),
+        # Attributing the ABM-vs-hazard contrast to paradigm is the claim VII.D
+        # says the test cannot cleanly support.
+        "drops_paradigm_hedge": abstract.replace(
+            "The contrast cannot be cleanly attributed to modeling paradigm.",
+            "The contrast is attributable to modeling paradigm."),
         # --- scoping ------------------------------------------------------
         # the body keeps every phrase; only the abstract is gutted. A
         # whole-file count gate would pass this.
@@ -169,6 +181,8 @@ MUTATION_NAMES = [
     "drops_institutional_scope",
     "drops_involuntary_turnover",
     "relocates_central_allocation",
+    "drops_holdout_relabel",
+    "drops_paradigm_hedge",
     "abstract_emptied_body_intact",
     "abstract_reduced_to_stub",
 ]
