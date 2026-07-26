@@ -1010,6 +1010,19 @@ Run tag & Produces \\
 \texttt{oos\_identification} & Out-of-sample identification of the lock-in marginal: contamination-split off-window floor, marginal re-run across the floor $\times$ band grid, and the early-window/held-out-months temporal holdout (Section~\ref{sec:robustness-floor}; Table~\ref{tab:oosfloor}) \\
 \texttt{matched\_depth\_reconciliation} & Window-versus-depth decomposition of the floor demotion at matched discount depth, with the ex-ante 10\% exposure-support rule, the extended 2018 depth ladder, and the matched-depth leg comparison (Section~\ref{sec:robustness-floor}) \\
 \texttt{seasonal\_floor\_timing} & Calendar profile on the involuntary floor: four floor legs, the permutation and rotation placebo families, the convexity-matched flat control, and the frozen timing rule's placebo scoring (Section~\ref{sec:robustness-seasonalfloor}; Table~\ref{tab:seasonalfloor}) \\
+\texttt{floor\_form\_offwindow} & Additive competing-risks floor form at the three off-window anchors; source of the form-conditional hull (Section~\ref{sec:robustness-floor}) \\
+\texttt{concave\_marginal} & Concave gap-transform rerun of the paired legs at both floors (Sections~\ref{sec:pathb} and~\ref{sec:robustness-floor}) \\
+\texttt{concave\_additive\_marginal} & Joint concave $\times$ additive cell: hull membership and the form/transform interaction (Section~\ref{sec:robustness-floor}; Table~\ref{tab:uncertainty}) \\
+\texttt{floor\_uncertainty} & Cluster bootstrap of the off-window floor reads, propagated to the marginal; age-standardized floor variant (Section~\ref{sec:robustness-floor}) \\
+\texttt{bootstrap\_pathb\_cluster} & Stratum-cluster bootstrap of the Path~B legs at the headline floor, against the within-stratum scheme (Section~\ref{sec:pathb}) \\
+\texttt{burnout\_ablation} & $\beta_B = 0$ ablation of Path~B at both floors, with the marginal re-differenced (Section~\ref{sec:pathb}) \\
+\texttt{danish\_offwindow\_floor} & Rule-only Danish gap re-run at the off-window floor (Section~\ref{sec:abm-danish}) \\
+\texttt{ginnie\_overlay\_offwindow} & Ginnie-speed overlay composed with the off-window calibration (Section~\ref{sec:pathb}) \\
+\texttt{patha\_sign\_test} & Bias-respecting test of the Path~A rate-gap coefficient's sign: BCa, temporal and permutation constructions (Section~\ref{sec:patha}) \\
+\texttt{cross\_design\_reweight} & Cross-design population post-stratified to the SOMA coupon $\times$ vintage composition (Section~\ref{sec:robustness-crossdesign}) \\
+\texttt{cross\_design\_seeds} & Fifty-seed sweep of both cross-design variants over both randomization layers, with per-seed floor reads (Section~\ref{sec:robustness-crossdesign}) \\
+\texttt{episode\_confrontation} & Realized cumulative prepayment gradient by window-mean gap depth, against the model-implied gradient (Section~\ref{sec:robustness-floor}) \\
+\texttt{production\_scale\_test} & Production-specification scale comparison; halted at its pre-committed parity tier on upstream data revision, reported as a halt (Section~\ref{sec:robustness-scale}) \\
 \bottomrule
 \end{tabular}
 \end{threeparttable}

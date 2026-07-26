@@ -3477,3 +3477,84 @@ on the same fresh frame, so arm A could be re-anchored to a fresh baseline rathe
 than to the committed CSV, with the uniform offset disclosed. That is defensible
 but is a post-hoc change to a pre-committed acceptance rule, so it is left as an
 amendment for Eugene to make explicitly rather than applied silently.
+
+## 30. Round-22 runs (2026-07-26)
+
+Four new pre-committed runs. Each has a spec commit preceding its result commit,
+per the standing convention.
+
+### 30.1 `concave_additive_marginal` — the joint form × transform cell
+
+The designated hull `[3.891507360127463, 13.09774126267503]` was a hull over floor
+FORMS at the log-linear transform only; `concave_marginal` ran the concave transform
+under `FLOOR_MODE='max'` alone. The joint cell had never been measured, and
+`tab:uncertainty` listed the two adjustments side by side, which presumes they add.
+
+All 24 parity gates bit-exact (diff `0.000e+00`). Runtime 90s.
+
+- **T1, hull stands.** Concave × additive marginal `+9.2546pp` at 4.0% and `+9.2219pp`
+  at 4.991%, both inside the hull. The five `$+3.9$ to $+13.1$` tex literals and
+  gate #69 are untouched.
+- **S2, separability refuted.** Interaction `−0.6695pp` at the production floor,
+  `−1.4697pp` at the headline anchor — past the ±1.0pp convention. The concave
+  transform costs `−0.5154pp` under the max form (which absorbs it into the floor)
+  against `−1.9852pp` under the additive form (which never censors).
+- Scope: run at the central elasticity only; the {5.5, 7.7} band ends are unrun, so
+  the hull is *not contradicted* rather than *shown complete*.
+
+Gate #81 pins the refutation, including `s1_separable is False` (not `None`).
+
+### 30.2 `burnout_ablation` — the β_B = 0 run the manuscript had quoted but never performed
+
+The four burnout sites cited `$6.6B / 0.9pp / 106.2% / peak lag −3` with no artifact,
+no script and no gate. All four reproduce the **minimum** over 100 replicates of
+`permutation_test_ablate_orig`, an origination-time permutation experiment:
+`818.5300844066606 − 811.911646619444 = 6.6184`; `107.0326190295068 − 106.16717896353396
+= 0.8654`; that run's `peak_lag_distribution` is `{-3: 100}`. Not its mean
+(812.8957 / 106.2959). Gate G0e asserts the identification bit-exactly.
+
+Real result, 8 legs, 46s: **−$6.5824B / −0.8607pp** at the 4.0% floor. The claim was
+right *by coincidence*, within $0.02B of an object it was not computed from.
+
+Two facts the manuscript did not have:
+- **The ablation halves at the headline floor**: `−$3.4773B / −0.4547pp` at 4.991%,
+  because the floor's bind share rises 36.3% → 68.8% and burnout is inert wherever
+  the hard maximum binds. Three interpretive sites had been pairing an in-sample
+  ablation with off-window levels.
+- **The marginal is not burnout-invariant**: `+9.20 → +9.94pp` at 4.0%, `+5.57 → +6.51pp`
+  at 4.991%. Both inside the ±1pp convention, the second barely.
+
+Gate #82 pins both floors, the T1 verdict and the forensic provenance record.
+
+### 30.3 `cross_design_seeds` — 50 seeds on an N=1 test
+
+Every cross-design number was a single seed-42 draw, and the paper crosses its own
+pre-committed 50% band with it. Both randomization layers varied. Runtime 306s.
+
+- **T1**: recalibrated mean **60.208%**, sd 3.309pp, 95% band [55.097, 66.046]; the
+  committed 59.303% draw sits at the **48th percentile**; **all 50 seeds** classify as
+  undercutting. Frozen mean 22.000%.
+- **S1**: `tab:headline`'s "calibration, not seed noise" is **not** falsified — band
+  10.948pp against a 19.223pp calibration swing. It previously rested on a 50-seed run
+  that never varied the calibration.
+- **S1b**: the band must be reported (10.948pp > the 7.689pp threshold fixed ex ante).
+- **Admissibility separates the variants**: recalibrated deep-gap floor 4.09–4.98% (in
+  band on all 50 seeds), frozen 6.31–7.63% (out on all 50). Applied consistently, the
+  paper's own admissibility test disqualifies the *frozen* leg.
+- The "frozen" anchor is itself seed-variable: mean 43,493, sd 1,181, min 39,984
+  against the committed 43,882.8125, which sits at the top of its range.
+
+Gate #83 pins n, mean, sd, both band edges and the `mean >= 50` condition.
+
+### 30.4 `production_scale_test` — halted
+
+See §29. Halted at its pre-committed $0.05B parity tier on a uniform $0.136B offset
+from FRED revision. Recorded, not worked around.
+
+### 30.5 `bootstrap_pathb_cluster` — spec committed
+
+Stratum-cluster bootstrap of the Path B legs at the headline floor. Two facts were
+established before the script was written: pool size is normalised away twice
+(`agents.py:205`, then `microsim_engine.py:57-58`), so variable loan count under
+cluster resampling is safe and composition variance survives; and the effective
+cluster count is **25.8, not 130** (largest stratum 9.77% of balance, top five 35.3%).
