@@ -3567,6 +3567,34 @@ def main() -> int:
           f"+{cm['concave_marginal_pp_at_offwindow_point']:.4f}pp @4.991%), "
           f"tex literals={'ok' if cm_tex_ok else 'MISSING'}")
 
+    # ROUND-22 (gate #85): PRODUCTION-SPEC SCALE TEST. VII.A's original check ran
+    # the household mechanic in isolation at 15.616% mean CPR against the
+    # production ABM's 11.761 -- 3.9 points hot -- with no script, artifact or
+    # gate anywhere in the repo. The rerun carries the full production spec. Its
+    # FIRST execution halted at the committed-CSV parity tier on uniform FRED
+    # drift; rather than widen that tolerance (the move round-22 C1 retracts
+    # elsewhere) a second pre-commitment gates the per-seed SPREAD of the drift
+    # while only reporting its level. This gate pins that distinction, because
+    # the tempting simplification is to drop it and quietly re-point parity.
+    pst = json.loads((ROOT / "abm" / "data"
+                      / "production_scale_test_results.json").read_text())
+    pst_g = pst["gates"]
+    pst_ok = (pst.get("status") == "OK"
+              and pst.get("verdict_tier") == "T1"
+              and bool(pst_g["G2b_fresh_baseline_drift_uniform"]["pass"])
+              and bool(pst_g["G0e_benchmark_bitexact"]["pass"])
+              and bool(pst_g["G1b_intra_run_determinism"]["pass"])
+              and bool(pst_g["G3_floor_retention"]["pass"]))
+    pst_tex_ok = ("production\\_scale\\_test" in tex
+                  and "12.66\\%" in tex and "12.18\\%" in tex
+                  and "15.6\\%" in tex)
+    ok = pst_ok and pst_tex_ok
+    failures += 0 if ok else 1
+    print(f"[{'PASS' if ok else 'FAIL'}] cross-check production scale test: "
+          f"artifact={pst_ok} (status {pst.get('status')}, "
+          f"{pst.get('verdict_tier')}, fresh-baseline drift uniform), "
+          f"tex literals={'ok' if pst_tex_ok else 'MISSING'}")
+
     # ROUND-22 (gate #84): PATH B STRATUM-CLUSTER BOOTSTRAP. The committed
     # within-stratum scheme holds the 130 strata fixed, so between-stratum
     # composition variance was never drawn and the paper reported that the loan
