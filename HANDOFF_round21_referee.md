@@ -2,8 +2,10 @@
 
 Repo: `/Users/eugene/somthing/Lock In effect/Lock-in-Effect`
 Branch: `panel-revision-2026-07-18` — all round-21 work committed locally, **UNPUSHED** (public repo; push is Eugene's call).
-Manuscript: `paper/v18/revised_paper_v18.tex` (106pp; grew from 99 — compression is optional, per Eugene).
-Gates: `python3 tools/liveness_gates.py` → **80 gates ALL PASS** (72 + new #69–#76).
+Manuscript: `paper/v18/revised_paper_v18.tex` (106pp at round-21 close; **112pp after round 22**).
+**SUPERSEDED BY ROUND 22** — see `revision_roadmap_round22.md` and `PLAN_remaining_work.md`.
+Compression has since been **abandoned** at Eugene's instruction; the 55–65pp target in item 6 below is withdrawn.
+Gates: `python3 tools/liveness_gates.py` → 80 gates at round-21 close; **89 after round 22** (new #81–#83 plus the abstract-variant check). Tests 295 → 297.
 Tests: `python3 -m pytest tests/` → **295 pass** (hedge-gate mutation tests re-keyed to the new abstract sentence).
 Build: `~/Downloads/texbuild/tectonic -X compile revised_paper_v18.tex --outdir build_r21 --keep-logs` → 0 undefined refs/cites.
 

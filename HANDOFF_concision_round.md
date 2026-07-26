@@ -1,5 +1,11 @@
 # Handoff — v18 concision + draft-history round (2026-07-20)
 
+> **STATUS: the page-compression goal is ABANDONED** (Eugene, 2026-07-26). Retained for the
+> hard constraints in "Hard constraints" below — the gate-pinned-phrase list, the zero-slack
+> counts, and the finding that ~40% of that round's compression rewrites strengthened a claim
+> past its evidence while passing all gates. Those still apply to any edit. The word and page
+> targets do not. Current state is in `PLAN_remaining_work.md`.
+
 Repo: `/Users/eugene/somthing/Lock In effect/Lock-in-Effect`
 Branch: `panel-revision-2026-07-18` — **2 local commits, UNPUSHED**
 Manuscript: `paper/v18/revised_paper_v18.tex`
