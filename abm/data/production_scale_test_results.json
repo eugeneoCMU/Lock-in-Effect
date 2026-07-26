@@ -1,309 +1,1329 @@
 {
-  "mode": "production_scale_test",
-  "status": "GATE_FAILURE",
-  "gate": "G2b_committed_replay_binding",
-  "detail": {
-    "csv": "/Users/eugene/somthing/Lock In effect/Lock-in-Effect/abm/monte_carlo_results.csv",
-    "n_seeds_compared": 50,
-    "committed_mean_b": 96.6791545521707,
-    "committed_sd_b": 24.834907519213886,
-    "arm_a_mean_b": 96.81525194824529,
-    "mean_abs_diff_b": 0.13609739607458948,
-    "max_per_seed_abs_diff_b": 0.14539070640266516,
-    "per_seed_diff_b": {
-      "0": 0.13181605435346455,
-      "1": 0.13885707235458256,
-      "2": 0.13480745819306605,
-      "3": 0.14146248214085233,
-      "4": 0.14187628605057512,
-      "5": 0.13661595633249135,
-      "6": 0.13706796925907838,
-      "7": 0.14539070640266516,
-      "8": 0.12807112831919198,
-      "9": 0.13582866466194332,
-      "10": 0.13674269432758024,
-      "11": 0.13149047527306834,
-      "12": 0.13722178075602187,
-      "13": 0.13566449071782927,
-      "14": 0.12940551057033645,
-      "15": 0.13062848379267678,
-      "16": 0.13843712961632093,
-      "17": 0.1378916677683435,
-      "18": 0.13714104215478073,
-      "19": 0.13547228193728245,
-      "20": 0.13620142008747393,
-      "21": 0.13052424110117045,
-      "22": 0.13553833326707831,
-      "23": 0.1399874323697361,
-      "24": 0.1357269446777991,
-      "25": 0.1310856006285519,
-      "26": 0.1398406976559201,
-      "27": 0.1371625330402111,
-      "28": 0.14040791290616284,
-      "29": 0.1372193738277474,
-      "30": 0.13593575741559505,
-      "31": 0.13165926688338914,
-      "32": 0.13408539888882842,
-      "33": 0.1330053577332535,
-      "34": 0.14091009585159497,
-      "35": 0.13217718144474588,
-      "36": 0.12878292492790422,
-      "37": 0.13477613754400863,
-      "38": 0.1390126273064567,
-      "39": 0.13117424973071934,
-      "40": 0.13797069084338887,
-      "41": 0.14056041147310339,
-      "42": 0.13413525440361695,
-      "43": 0.13702444525307556,
-      "44": 0.1341706985080009,
-      "45": 0.13680965348989105,
-      "46": 0.1394280314842149,
-      "47": 0.14133543611806942,
-      "48": 0.13783101608945003,
-      "49": 0.1385013437962357
-    },
-    "strict_bitexact_pass": false,
-    "binding_tol_b": 0.05,
-    "outer_tol_b": 0.5
+ "mode": "production_scale_test",
+ "status": "OK",
+ "spec": "population-scale comparison on the FULL PRODUCTION SPEC (native-15yr behavioral gate = HEAD = run-2026-07-05-berger basis): two arms N=10,000 and N=75,000, seeds [0,50) each, one shared macro frame / SOMA cohort set / restricted grid / mobility scale; production accounting via fed.compute_metrics with the 11-cohort weighting, 15yr-30yr term split, DTI wall, wait-and-see freeze, curtailment and the settlement-lag kernel; verdict statistic = share of benchmark; gates G0/G1/G2/G3; ex-ante T1/T2/T3 at 1 and 2 arm-A seed SDs",
+ "spec_deviation": null,
+ "reference_run": {
+  "tag": "run-2026-07-05-berger",
+  "manifest": "/Users/eugene/somthing/Lock In effect/Lock-in-Effect/abm/data/latest_run_manifest.json",
+  "committed": {
+   "run_tag": "run-2026-07-05-berger",
+   "mobility_scale": 43882.8125,
+   "median_income": 83730.0,
+   "median_home_value": 403200.0,
+   "n_cohorts": 11,
+   "reference_cohort": {
+    "coupon": 0.02,
+    "weight": 0.3611966033043993,
+    "origin_date": "2021-07-04T00:00:00",
+    "months_elapsed": 60,
+    "term_months": 360
+   },
+   "empirical_trapped_b": 764.7482532227002,
+   "us_trapped_b": 84.50667328005531,
+   "share_explained_pct": 11.050260386204029,
+   "us_cpr_mean_pct": 11.760904343422906,
+   "qt_n_months": 42
+  }
+ },
+ "pinned_inputs": {
+  "median_income": 83730.0,
+  "median_home_value": 403200.0,
+  "mobility_scale": 43882.8125,
+  "reference_cohort": [
+   0.02,
+   60
+  ],
+  "n_cohorts": 11
+ },
+ "live_medians_recorded_not_used": [
+  83730.0,
+  410700.0
+ ],
+ "benchmark_b": 764.7482532227002,
+ "grid": {
+  "n_rates": 12,
+  "n_frictions": 6,
+  "n_velocities": 8,
+  "n_points": 576
+ },
+ "gates": {
+  "G0a_reference_tag": {
+   "tag": "run-2026-07-05-berger",
+   "expected": "run-2026-07-05-berger",
+   "pass": true
   },
-  "gates_so_far": {
-    "G0a_reference_tag": {
-      "tag": "run-2026-07-05-berger",
-      "expected": "run-2026-07-05-berger",
-      "pass": true
+  "G0b_constants": {
+   "rng_seed": 42,
+   "n_households": 10000,
+   "dti_max": 0.43,
+   "wait_and_see_prob": 0.2,
+   "wait_and_see_threshold": 0.015,
+   "loss_aversion_lambda": 2.25,
+   "mc_n_runs": 50,
+   "pass": true
+  },
+  "G0_live_medians_recorded_not_used": {
+   "live": [
+    83730.0,
+    410700.0
+   ],
+   "pinned": [
+    83730.0,
+    403200.0
+   ],
+   "diverged": true
+  },
+  "G0c_cohort_identity": {
+   "n_cohorts_live": 11,
+   "n_cohorts_committed": 11,
+   "reference_live": [
+    0.02,
+    60
+   ],
+   "reference_committed": [
+    0.02,
+    60
+   ],
+   "soma_rolloff_available": true,
+   "pass": true
+  },
+  "G0_grid_shape": {
+   "n_rates": 12,
+   "n_frictions": 6,
+   "n_velocities": 8,
+   "n_points": 576
+  },
+  "G0d_calibration_bitexact": {
+   "got": 43882.8125,
+   "committed": 43882.8125,
+   "abs_diff": 0.0,
+   "tol": 1e-09,
+   "pass": true
+  },
+  "G0e_benchmark_bitexact": {
+   "got": 764.7482532227002,
+   "committed": 764.7482532227002,
+   "abs_diff": 0.0,
+   "tol": 1e-09,
+   "qt_n_months": 42,
+   "qt_n_months_committed": 42,
+   "pass": true
+  },
+  "G3_floor_retention": {
+   "floor_cpr_at_8pct": {
+    "10000": 0.0483,
+    "75000": 0.04645333333333333
+   },
+   "band": [
+    0.04,
+    0.05
+   ],
+   "mobility_scale_held": 43882.8125,
+   "pass": true
+  },
+  "G1_harness_identity_bitexact": {
+   "per_seed": {
+    "0": {
+     "threaded": 97.85626588152795,
+     "committed_harness": 97.85626588152795,
+     "abs_diff": 0.0
     },
-    "G0b_constants": {
-      "rng_seed": 42,
-      "n_households": 10000,
-      "dti_max": 0.43,
-      "wait_and_see_prob": 0.2,
-      "wait_and_see_threshold": 0.015,
-      "loss_aversion_lambda": 2.25,
-      "mc_n_runs": 50,
-      "pass": true
+    "42": {
+     "threaded": 84.6408085344583,
+     "committed_harness": 84.6408085344583,
+     "abs_diff": 0.0
     },
-    "G0_live_medians_recorded_not_used": {
-      "live": [
-        83730.0,
-        410700.0
-      ],
-      "pinned": [
-        83730.0,
-        403200.0
-      ],
-      "diverged": true
-    },
-    "G0c_cohort_identity": {
-      "n_cohorts_live": 11,
-      "n_cohorts_committed": 11,
-      "reference_live": [
-        0.02,
-        60
-      ],
-      "reference_committed": [
-        0.02,
-        60
-      ],
-      "soma_rolloff_available": true,
-      "pass": true
-    },
-    "G0_grid_shape": {
-      "n_rates": 12,
-      "n_frictions": 6,
-      "n_velocities": 8,
-      "n_points": 576
-    },
-    "G0d_calibration_bitexact": {
-      "got": 43882.8125,
-      "committed": 43882.8125,
-      "abs_diff": 0.0,
-      "tol": 1e-09,
-      "pass": true
-    },
-    "G0e_benchmark_bitexact": {
-      "got": 764.7482532227002,
-      "committed": 764.7482532227002,
-      "abs_diff": 0.0,
-      "tol": 1e-09,
-      "qt_n_months": 42,
-      "qt_n_months_committed": 42,
-      "pass": true
-    },
-    "G3_floor_retention": {
-      "floor_cpr_at_8pct": {
-        "10000": 0.0483,
-        "75000": 0.04645333333333333
-      },
-      "band": [
-        0.04,
-        0.05
-      ],
-      "mobility_scale_held": 43882.8125,
-      "pass": true
-    },
-    "G1_harness_identity_bitexact": {
-      "per_seed": {
-        "0": {
-          "threaded": 97.85626588152795,
-          "committed_harness": 97.85626588152795,
-          "abs_diff": 0.0
-        },
-        "42": {
-          "threaded": 84.6408085344583,
-          "committed_harness": 84.6408085344583,
-          "abs_diff": 0.0
-        },
-        "49": {
-          "threaded": 122.52640042894538,
-          "committed_harness": 122.52640042894538,
-          "abs_diff": 0.0
-        }
-      },
-      "max_abs_diff": 0.0,
-      "tol": 0.0,
-      "oracle": "monte_carlo_simulation.run_single_iteration (unmodified)",
-      "pass": true
-    },
-    "G1b_intra_run_determinism": {
-      "per_seed_abs_diff": {
-        "0": 0.0,
-        "42": 0.0,
-        "49": 0.0
-      },
-      "max_abs_diff": 0.0,
-      "tol": 0.0,
-      "pass": true
-    },
-    "G2a_committed_replay_strict": {
-      "csv": "/Users/eugene/somthing/Lock In effect/Lock-in-Effect/abm/monte_carlo_results.csv",
-      "n_seeds_compared": 50,
-      "committed_mean_b": 96.6791545521707,
-      "committed_sd_b": 24.834907519213886,
-      "arm_a_mean_b": 96.81525194824529,
-      "mean_abs_diff_b": 0.13609739607458948,
-      "max_per_seed_abs_diff_b": 0.14539070640266516,
-      "per_seed_diff_b": {
-        "0": 0.13181605435346455,
-        "1": 0.13885707235458256,
-        "2": 0.13480745819306605,
-        "3": 0.14146248214085233,
-        "4": 0.14187628605057512,
-        "5": 0.13661595633249135,
-        "6": 0.13706796925907838,
-        "7": 0.14539070640266516,
-        "8": 0.12807112831919198,
-        "9": 0.13582866466194332,
-        "10": 0.13674269432758024,
-        "11": 0.13149047527306834,
-        "12": 0.13722178075602187,
-        "13": 0.13566449071782927,
-        "14": 0.12940551057033645,
-        "15": 0.13062848379267678,
-        "16": 0.13843712961632093,
-        "17": 0.1378916677683435,
-        "18": 0.13714104215478073,
-        "19": 0.13547228193728245,
-        "20": 0.13620142008747393,
-        "21": 0.13052424110117045,
-        "22": 0.13553833326707831,
-        "23": 0.1399874323697361,
-        "24": 0.1357269446777991,
-        "25": 0.1310856006285519,
-        "26": 0.1398406976559201,
-        "27": 0.1371625330402111,
-        "28": 0.14040791290616284,
-        "29": 0.1372193738277474,
-        "30": 0.13593575741559505,
-        "31": 0.13165926688338914,
-        "32": 0.13408539888882842,
-        "33": 0.1330053577332535,
-        "34": 0.14091009585159497,
-        "35": 0.13217718144474588,
-        "36": 0.12878292492790422,
-        "37": 0.13477613754400863,
-        "38": 0.1390126273064567,
-        "39": 0.13117424973071934,
-        "40": 0.13797069084338887,
-        "41": 0.14056041147310339,
-        "42": 0.13413525440361695,
-        "43": 0.13702444525307556,
-        "44": 0.1341706985080009,
-        "45": 0.13680965348989105,
-        "46": 0.1394280314842149,
-        "47": 0.14133543611806942,
-        "48": 0.13783101608945003,
-        "49": 0.1385013437962357
-      },
-      "strict_bitexact_pass": false,
-      "binding_tol_b": 0.05,
-      "outer_tol_b": 0.5,
-      "tol": 1e-09
-    },
-    "G2b_committed_replay_binding": {
-      "csv": "/Users/eugene/somthing/Lock In effect/Lock-in-Effect/abm/monte_carlo_results.csv",
-      "n_seeds_compared": 50,
-      "committed_mean_b": 96.6791545521707,
-      "committed_sd_b": 24.834907519213886,
-      "arm_a_mean_b": 96.81525194824529,
-      "mean_abs_diff_b": 0.13609739607458948,
-      "max_per_seed_abs_diff_b": 0.14539070640266516,
-      "per_seed_diff_b": {
-        "0": 0.13181605435346455,
-        "1": 0.13885707235458256,
-        "2": 0.13480745819306605,
-        "3": 0.14146248214085233,
-        "4": 0.14187628605057512,
-        "5": 0.13661595633249135,
-        "6": 0.13706796925907838,
-        "7": 0.14539070640266516,
-        "8": 0.12807112831919198,
-        "9": 0.13582866466194332,
-        "10": 0.13674269432758024,
-        "11": 0.13149047527306834,
-        "12": 0.13722178075602187,
-        "13": 0.13566449071782927,
-        "14": 0.12940551057033645,
-        "15": 0.13062848379267678,
-        "16": 0.13843712961632093,
-        "17": 0.1378916677683435,
-        "18": 0.13714104215478073,
-        "19": 0.13547228193728245,
-        "20": 0.13620142008747393,
-        "21": 0.13052424110117045,
-        "22": 0.13553833326707831,
-        "23": 0.1399874323697361,
-        "24": 0.1357269446777991,
-        "25": 0.1310856006285519,
-        "26": 0.1398406976559201,
-        "27": 0.1371625330402111,
-        "28": 0.14040791290616284,
-        "29": 0.1372193738277474,
-        "30": 0.13593575741559505,
-        "31": 0.13165926688338914,
-        "32": 0.13408539888882842,
-        "33": 0.1330053577332535,
-        "34": 0.14091009585159497,
-        "35": 0.13217718144474588,
-        "36": 0.12878292492790422,
-        "37": 0.13477613754400863,
-        "38": 0.1390126273064567,
-        "39": 0.13117424973071934,
-        "40": 0.13797069084338887,
-        "41": 0.14056041147310339,
-        "42": 0.13413525440361695,
-        "43": 0.13702444525307556,
-        "44": 0.1341706985080009,
-        "45": 0.13680965348989105,
-        "46": 0.1394280314842149,
-        "47": 0.14133543611806942,
-        "48": 0.13783101608945003,
-        "49": 0.1385013437962357
-      },
-      "strict_bitexact_pass": false,
-      "binding_tol_b": 0.05,
-      "outer_tol_b": 0.5,
-      "pass": false
+    "49": {
+     "threaded": 122.52640042894538,
+     "committed_harness": 122.52640042894538,
+     "abs_diff": 0.0
     }
+   },
+   "max_abs_diff": 0.0,
+   "tol": 0.0,
+   "oracle": "monte_carlo_simulation.run_single_iteration (unmodified)",
+   "pass": true
   },
-  "generated_utc": "2026-07-26T08:11:42.347915+00:00"
+  "G1b_intra_run_determinism": {
+   "per_seed_abs_diff": {
+    "0": 0.0,
+    "42": 0.0,
+    "49": 0.0
+   },
+   "max_abs_diff": 0.0,
+   "tol": 0.0,
+   "pass": true
+  },
+  "G2a_committed_replay_strict": {
+   "csv": "/Users/eugene/somthing/Lock In effect/Lock-in-Effect/abm/monte_carlo_results.csv",
+   "n_seeds_compared": 50,
+   "committed_mean_b": 96.6791545521707,
+   "committed_sd_b": 24.834907519213886,
+   "arm_a_mean_b": 96.81525194824529,
+   "mean_abs_diff_b": 0.13609739607458948,
+   "max_per_seed_abs_diff_b": 0.14539070640266516,
+   "per_seed_diff_b": {
+    "0": 0.13181605435346455,
+    "1": 0.13885707235458256,
+    "2": 0.13480745819306605,
+    "3": 0.14146248214085233,
+    "4": 0.14187628605057512,
+    "5": 0.13661595633249135,
+    "6": 0.13706796925907838,
+    "7": 0.14539070640266516,
+    "8": 0.12807112831919198,
+    "9": 0.13582866466194332,
+    "10": 0.13674269432758024,
+    "11": 0.13149047527306834,
+    "12": 0.13722178075602187,
+    "13": 0.13566449071782927,
+    "14": 0.12940551057033645,
+    "15": 0.13062848379267678,
+    "16": 0.13843712961632093,
+    "17": 0.1378916677683435,
+    "18": 0.13714104215478073,
+    "19": 0.13547228193728245,
+    "20": 0.13620142008747393,
+    "21": 0.13052424110117045,
+    "22": 0.13553833326707831,
+    "23": 0.1399874323697361,
+    "24": 0.1357269446777991,
+    "25": 0.1310856006285519,
+    "26": 0.1398406976559201,
+    "27": 0.1371625330402111,
+    "28": 0.14040791290616284,
+    "29": 0.1372193738277474,
+    "30": 0.13593575741559505,
+    "31": 0.13165926688338914,
+    "32": 0.13408539888882842,
+    "33": 0.1330053577332535,
+    "34": 0.14091009585159497,
+    "35": 0.13217718144474588,
+    "36": 0.12878292492790422,
+    "37": 0.13477613754400863,
+    "38": 0.1390126273064567,
+    "39": 0.13117424973071934,
+    "40": 0.13797069084338887,
+    "41": 0.14056041147310339,
+    "42": 0.13413525440361695,
+    "43": 0.13702444525307556,
+    "44": 0.1341706985080009,
+    "45": 0.13680965348989105,
+    "46": 0.1394280314842149,
+    "47": 0.14133543611806942,
+    "48": 0.13783101608945003,
+    "49": 0.1385013437962357
+   },
+   "strict_bitexact_pass": false,
+   "binding_tol_b": 0.05,
+   "outer_tol_b": 0.5,
+   "tol": 1e-09
+  },
+  "G2b_fresh_baseline_drift_uniform": {
+   "csv": "/Users/eugene/somthing/Lock In effect/Lock-in-Effect/abm/monte_carlo_results.csv",
+   "n_seeds_compared": 50,
+   "committed_mean_b": 96.6791545521707,
+   "committed_sd_b": 24.834907519213886,
+   "arm_a_mean_b": 96.81525194824529,
+   "mean_abs_diff_b": 0.13609739607458948,
+   "max_per_seed_abs_diff_b": 0.14539070640266516,
+   "per_seed_diff_b": {
+    "0": 0.13181605435346455,
+    "1": 0.13885707235458256,
+    "2": 0.13480745819306605,
+    "3": 0.14146248214085233,
+    "4": 0.14187628605057512,
+    "5": 0.13661595633249135,
+    "6": 0.13706796925907838,
+    "7": 0.14539070640266516,
+    "8": 0.12807112831919198,
+    "9": 0.13582866466194332,
+    "10": 0.13674269432758024,
+    "11": 0.13149047527306834,
+    "12": 0.13722178075602187,
+    "13": 0.13566449071782927,
+    "14": 0.12940551057033645,
+    "15": 0.13062848379267678,
+    "16": 0.13843712961632093,
+    "17": 0.1378916677683435,
+    "18": 0.13714104215478073,
+    "19": 0.13547228193728245,
+    "20": 0.13620142008747393,
+    "21": 0.13052424110117045,
+    "22": 0.13553833326707831,
+    "23": 0.1399874323697361,
+    "24": 0.1357269446777991,
+    "25": 0.1310856006285519,
+    "26": 0.1398406976559201,
+    "27": 0.1371625330402111,
+    "28": 0.14040791290616284,
+    "29": 0.1372193738277474,
+    "30": 0.13593575741559505,
+    "31": 0.13165926688338914,
+    "32": 0.13408539888882842,
+    "33": 0.1330053577332535,
+    "34": 0.14091009585159497,
+    "35": 0.13217718144474588,
+    "36": 0.12878292492790422,
+    "37": 0.13477613754400863,
+    "38": 0.1390126273064567,
+    "39": 0.13117424973071934,
+    "40": 0.13797069084338887,
+    "41": 0.14056041147310339,
+    "42": 0.13413525440361695,
+    "43": 0.13702444525307556,
+    "44": 0.1341706985080009,
+    "45": 0.13680965348989105,
+    "46": 0.1394280314842149,
+    "47": 0.14133543611806942,
+    "48": 0.13783101608945003,
+    "49": 0.1385013437962357
+   },
+   "strict_bitexact_pass": false,
+   "binding_tol_b": 0.05,
+   "outer_tol_b": 0.5,
+   "drift_spread_b": 0.017319578083473175,
+   "drift_spread_tol_b": 0.02,
+   "baseline_mode": "fresh",
+   "pass": true
+  }
+ },
+ "gates_all_pass": true,
+ "committed_replay": "drift_within_documented_channel",
+ "arms": {
+  "A_production_N": {
+   "n_households": 10000,
+   "summary": {
+    "n_seeds": 50,
+    "benchmark_b": 764.7482532227002,
+    "dollars_b": {
+     "mean": 96.81525194824529,
+     "sd": 24.833367785068006,
+     "sem": 3.511968552104228,
+     "ci95_mean": [
+      89.931793586121,
+      103.69871031036958
+     ],
+     "ci95_width": 13.766916724248574,
+     "min": 38.5965053887436,
+     "max": 144.69741611700044
+    },
+    "share_pct": {
+     "mean": 12.659754571554672,
+     "sd": 3.2472604782578496,
+     "sem": 0.45923198089103934,
+     "ci95_mean": [
+      11.759659889008235,
+      13.559849254101108
+     ],
+     "ci95_width": 1.8001893650928742,
+     "min": 5.046955678041153,
+     "max": 18.920921428357094
+    },
+    "us_cpr_mean_pct": {
+     "mean": 11.60019972699029,
+     "sd": 0.29621286371743216,
+     "min": 11.033485858577519,
+     "max": 12.279054938501263
+    }
+   },
+   "seeds": [
+    {
+     "seed": 0,
+     "n_households": 10000,
+     "trapped_us_b": 97.85626588152795,
+     "share_pct": 12.79587962040516,
+     "us_cpr_mean_pct": 11.598792114882087,
+     "arm": "A_production_N",
+     "elapsed_sec": 3.136201374999999
+    },
+    {
+     "seed": 1,
+     "n_households": 10000,
+     "trapped_us_b": 104.67629566175191,
+     "share_pct": 13.687680255644782,
+     "us_cpr_mean_pct": 11.500141982871488,
+     "arm": "A_production_N",
+     "elapsed_sec": 3.0971471669999993
+    },
+    {
+     "seed": 2,
+     "n_households": 10000,
+     "trapped_us_b": 78.2863736861488,
+     "share_pct": 10.2368816608923,
+     "us_cpr_mean_pct": 11.838933359248902,
+     "arm": "A_production_N",
+     "elapsed_sec": 3.121616375000002
+    },
+    {
+     "seed": 3,
+     "n_households": 10000,
+     "trapped_us_b": 75.11254025286915,
+     "share_pct": 9.821864899506458,
+     "us_cpr_mean_pct": 11.87553705307677,
+     "arm": "A_production_N",
+     "elapsed_sec": 3.093617457999997
+    },
+    {
+     "seed": 4,
+     "n_households": 10000,
+     "trapped_us_b": 81.45301167060092,
+     "share_pct": 10.65095753110288,
+     "us_cpr_mean_pct": 11.784005333612745,
+     "arm": "A_production_N",
+     "elapsed_sec": 3.1167749580000006
+    },
+    {
+     "seed": 5,
+     "n_households": 10000,
+     "trapped_us_b": 84.82258365068893,
+     "share_pct": 11.091569453508509,
+     "us_cpr_mean_pct": 11.737735974891171,
+     "arm": "A_production_N",
+     "elapsed_sec": 3.1405234160000006
+    },
+    {
+     "seed": 6,
+     "n_households": 10000,
+     "trapped_us_b": 83.32619182886168,
+     "share_pct": 10.895898287798572,
+     "us_cpr_mean_pct": 11.758045639526479,
+     "arm": "A_production_N",
+     "elapsed_sec": 3.1213448749999984
+    },
+    {
+     "seed": 7,
+     "n_households": 10000,
+     "trapped_us_b": 81.85163659797875,
+     "share_pct": 10.70308251807709,
+     "us_cpr_mean_pct": 11.76815166368035,
+     "arm": "A_production_N",
+     "elapsed_sec": 3.1669838749999997
+    },
+    {
+     "seed": 8,
+     "n_households": 10000,
+     "trapped_us_b": 102.90231114349436,
+     "share_pct": 13.455710517788976,
+     "us_cpr_mean_pct": 11.539123857164402,
+     "arm": "A_production_N",
+     "elapsed_sec": 3.182218667000001
+    },
+    {
+     "seed": 9,
+     "n_households": 10000,
+     "trapped_us_b": 86.96064534659101,
+     "share_pct": 11.3711466459888,
+     "us_cpr_mean_pct": 11.714775863094065,
+     "arm": "A_production_N",
+     "elapsed_sec": 3.256124957999994
+    },
+    {
+     "seed": 10,
+     "n_households": 10000,
+     "trapped_us_b": 97.69228606393554,
+     "share_pct": 12.774437293874646,
+     "us_cpr_mean_pct": 11.590116615662723,
+     "arm": "A_production_N",
+     "elapsed_sec": 4.132620500000002
+    },
+    {
+     "seed": 11,
+     "n_households": 10000,
+     "trapped_us_b": 101.01836251710247,
+     "share_pct": 13.209361654819654,
+     "us_cpr_mean_pct": 11.56738986588039,
+     "arm": "A_production_N",
+     "elapsed_sec": 3.144668000000003
+    },
+    {
+     "seed": 12,
+     "n_households": 10000,
+     "trapped_us_b": 84.01399427486743,
+     "share_pct": 10.98583670127089,
+     "us_cpr_mean_pct": 11.750085166078886,
+     "arm": "A_production_N",
+     "elapsed_sec": 3.124069666000004
+    },
+    {
+     "seed": 13,
+     "n_households": 10000,
+     "trapped_us_b": 77.96260506459708,
+     "share_pct": 10.1945450330952,
+     "us_cpr_mean_pct": 11.81974558987712,
+     "arm": "A_production_N",
+     "elapsed_sec": 3.1584022079999983
+    },
+    {
+     "seed": 14,
+     "n_households": 10000,
+     "trapped_us_b": 111.5970970395837,
+     "share_pct": 14.592657985069737,
+     "us_cpr_mean_pct": 11.42603882220364,
+     "arm": "A_production_N",
+     "elapsed_sec": 3.088985459
+    },
+    {
+     "seed": 15,
+     "n_households": 10000,
+     "trapped_us_b": 112.09573526848055,
+     "share_pct": 14.657860909927109,
+     "us_cpr_mean_pct": 11.423959607744674,
+     "arm": "A_production_N",
+     "elapsed_sec": 3.1572589999999963
+    },
+    {
+     "seed": 16,
+     "n_households": 10000,
+     "trapped_us_b": 97.71138613162778,
+     "share_pct": 12.77693485664929,
+     "us_cpr_mean_pct": 11.576741123492614,
+     "arm": "A_production_N",
+     "elapsed_sec": 3.115272625000003
+    },
+    {
+     "seed": 17,
+     "n_households": 10000,
+     "trapped_us_b": 80.20298863644967,
+     "share_pct": 10.48750203723499,
+     "us_cpr_mean_pct": 11.799997208351394,
+     "arm": "A_production_N",
+     "elapsed_sec": 3.162887749999996
+    },
+    {
+     "seed": 18,
+     "n_households": 10000,
+     "trapped_us_b": 85.88891839157155,
+     "share_pct": 11.231005501435265,
+     "us_cpr_mean_pct": 11.739799926995811,
+     "arm": "A_production_N",
+     "elapsed_sec": 3.1212897909999953
+    },
+    {
+     "seed": 19,
+     "n_households": 10000,
+     "trapped_us_b": 121.040937520802,
+     "share_pct": 15.827553317150764,
+     "us_cpr_mean_pct": 11.302067677279792,
+     "arm": "A_production_N",
+     "elapsed_sec": 3.1129238330000106
+    },
+    {
+     "seed": 20,
+     "n_households": 10000,
+     "trapped_us_b": 80.24712959952149,
+     "share_pct": 10.493273997208195,
+     "us_cpr_mean_pct": 11.810333217005368,
+     "arm": "A_production_N",
+     "elapsed_sec": 3.119035832999998
+    },
+    {
+     "seed": 21,
+     "n_households": 10000,
+     "trapped_us_b": 118.02202685272349,
+     "share_pct": 15.432794564141961,
+     "us_cpr_mean_pct": 11.351392913178499,
+     "arm": "A_production_N",
+     "elapsed_sec": 3.1035742500000083
+    },
+    {
+     "seed": 22,
+     "n_households": 10000,
+     "trapped_us_b": 144.43352800418776,
+     "share_pct": 18.886414894775534,
+     "us_cpr_mean_pct": 11.033649687491113,
+     "arm": "A_production_N",
+     "elapsed_sec": 3.1205447080000113
+    },
+    {
+     "seed": 23,
+     "n_households": 10000,
+     "trapped_us_b": 88.03835669606606,
+     "share_pct": 11.512070321843371,
+     "us_cpr_mean_pct": 11.6976471966158,
+     "arm": "A_production_N",
+     "elapsed_sec": 3.1261460829999947
+    },
+    {
+     "seed": 24,
+     "n_households": 10000,
+     "trapped_us_b": 111.20584298249862,
+     "share_pct": 14.54149682772988,
+     "us_cpr_mean_pct": 11.42779274712922,
+     "arm": "A_production_N",
+     "elapsed_sec": 3.135737167000002
+    },
+    {
+     "seed": 25,
+     "n_households": 10000,
+     "trapped_us_b": 144.69741611700044,
+     "share_pct": 18.920921428357094,
+     "us_cpr_mean_pct": 11.040646238019756,
+     "arm": "A_production_N",
+     "elapsed_sec": 3.1405787079999925
+    },
+    {
+     "seed": 26,
+     "n_households": 10000,
+     "trapped_us_b": 41.95790586458857,
+     "share_pct": 5.48649907832743,
+     "us_cpr_mean_pct": 12.253204573481334,
+     "arm": "A_production_N",
+     "elapsed_sec": 3.1216353749999968
+    },
+    {
+     "seed": 27,
+     "n_households": 10000,
+     "trapped_us_b": 105.25187491194305,
+     "share_pct": 13.762944141213088,
+     "us_cpr_mean_pct": 11.506816015117167,
+     "arm": "A_production_N",
+     "elapsed_sec": 3.2033149999999893
+    },
+    {
+     "seed": 28,
+     "n_households": 10000,
+     "trapped_us_b": 38.5965053887436,
+     "share_pct": 5.046955678041153,
+     "us_cpr_mean_pct": 12.279054938501263,
+     "arm": "A_production_N",
+     "elapsed_sec": 3.1808937910000026
+    },
+    {
+     "seed": 29,
+     "n_households": 10000,
+     "trapped_us_b": 94.66409248043598,
+     "share_pct": 12.378464688414152,
+     "us_cpr_mean_pct": 11.613414938781677,
+     "arm": "A_production_N",
+     "elapsed_sec": 3.133817417000003
+    },
+    {
+     "seed": 30,
+     "n_households": 10000,
+     "trapped_us_b": 114.67611932041471,
+     "share_pct": 14.995277051913735,
+     "us_cpr_mean_pct": 11.375280895886398,
+     "arm": "A_production_N",
+     "elapsed_sec": 3.1429719589999934
+    },
+    {
+     "seed": 31,
+     "n_households": 10000,
+     "trapped_us_b": 134.0472349794896,
+     "share_pct": 17.52828259686839,
+     "us_cpr_mean_pct": 11.160878746220371,
+     "arm": "A_production_N",
+     "elapsed_sec": 3.1287972089999982
+    },
+    {
+     "seed": 32,
+     "n_households": 10000,
+     "trapped_us_b": 102.2302209768913,
+     "share_pct": 13.367826673168107,
+     "us_cpr_mean_pct": 11.544295836765158,
+     "arm": "A_production_N",
+     "elapsed_sec": 3.17435070800002
+    },
+    {
+     "seed": 33,
+     "n_households": 10000,
+     "trapped_us_b": 80.75488768313988,
+     "share_pct": 10.559669452376438,
+     "us_cpr_mean_pct": 11.794918472881088,
+     "arm": "A_production_N",
+     "elapsed_sec": 3.147909917000021
+    },
+    {
+     "seed": 34,
+     "n_households": 10000,
+     "trapped_us_b": 50.10171324042711,
+     "share_pct": 6.551399500331664,
+     "us_cpr_mean_pct": 12.147458035658682,
+     "arm": "A_production_N",
+     "elapsed_sec": 3.1257638750000183
+    },
+    {
+     "seed": 35,
+     "n_households": 10000,
+     "trapped_us_b": 96.38545955455052,
+     "share_pct": 12.603554064801816,
+     "us_cpr_mean_pct": 11.603242133032387,
+     "arm": "A_production_N",
+     "elapsed_sec": 3.164417541000006
+    },
+    {
+     "seed": 36,
+     "n_households": 10000,
+     "trapped_us_b": 116.6290021995955,
+     "share_pct": 15.250639894646781,
+     "us_cpr_mean_pct": 11.36729807448092,
+     "arm": "A_production_N",
+     "elapsed_sec": 3.1092122499999846
+    },
+    {
+     "seed": 37,
+     "n_households": 10000,
+     "trapped_us_b": 142.08221324736826,
+     "share_pct": 18.578952308635465,
+     "us_cpr_mean_pct": 11.069498197186089,
+     "arm": "A_production_N",
+     "elapsed_sec": 3.1956594579999944
+    },
+    {
+     "seed": 38,
+     "n_households": 10000,
+     "trapped_us_b": 54.382126543891495,
+     "share_pct": 7.111114842658559,
+     "us_cpr_mean_pct": 12.105665642181101,
+     "arm": "A_production_N",
+     "elapsed_sec": 3.1114914999999996
+    },
+    {
+     "seed": 39,
+     "n_households": 10000,
+     "trapped_us_b": 76.5718891514083,
+     "share_pct": 10.012692259018474,
+     "us_cpr_mean_pct": 11.846908026987965,
+     "arm": "A_production_N",
+     "elapsed_sec": 3.1568927499999972
+    },
+    {
+     "seed": 40,
+     "n_households": 10000,
+     "trapped_us_b": 122.27336130439045,
+     "share_pct": 15.98870749807173,
+     "us_cpr_mean_pct": 11.286552681800611,
+     "arm": "A_production_N",
+     "elapsed_sec": 3.1163682499999936
+    },
+    {
+     "seed": 41,
+     "n_households": 10000,
+     "trapped_us_b": 75.32098187104688,
+     "share_pct": 9.849121139360467,
+     "us_cpr_mean_pct": 11.852795266251428,
+     "arm": "A_production_N",
+     "elapsed_sec": 3.2022486249999815
+    },
+    {
+     "seed": 42,
+     "n_households": 10000,
+     "trapped_us_b": 84.6408085344583,
+     "share_pct": 11.067800178395476,
+     "us_cpr_mean_pct": 11.758464901417803,
+     "arm": "A_production_N",
+     "elapsed_sec": 3.151547041999976
+    },
+    {
+     "seed": 43,
+     "n_households": 10000,
+     "trapped_us_b": 143.05805558415693,
+     "share_pct": 18.706555390130116,
+     "us_cpr_mean_pct": 11.033485858577519,
+     "arm": "A_production_N",
+     "elapsed_sec": 3.134115041000001
+    },
+    {
+     "seed": 44,
+     "n_households": 10000,
+     "trapped_us_b": 101.59673212244923,
+     "share_pct": 13.28499041276836,
+     "us_cpr_mean_pct": 11.543473890976772,
+     "arm": "A_production_N",
+     "elapsed_sec": 3.0982036249999965
+    },
+    {
+     "seed": 45,
+     "n_households": 10000,
+     "trapped_us_b": 83.39389745179423,
+     "share_pct": 10.90475160948283,
+     "us_cpr_mean_pct": 11.763970027202628,
+     "arm": "A_production_N",
+     "elapsed_sec": 3.144239083000002
+    },
+    {
+     "seed": 46,
+     "n_households": 10000,
+     "trapped_us_b": 86.01853954692643,
+     "share_pct": 11.247955021072432,
+     "us_cpr_mean_pct": 11.727444654815402,
+     "arm": "A_production_N",
+     "elapsed_sec": 3.1247163750000198
+    },
+    {
+     "seed": 47,
+     "n_households": 10000,
+     "trapped_us_b": 127.427037727758,
+     "share_pct": 16.662612459822164,
+     "us_cpr_mean_pct": 11.218464735264824,
+     "arm": "A_production_N",
+     "elapsed_sec": 3.1667071250000163
+    },
+    {
+     "seed": 48,
+     "n_households": 10000,
+     "trapped_us_b": 113.05907041592185,
+     "share_pct": 14.783828526509657,
+     "us_cpr_mean_pct": 11.399821302478557,
+     "arm": "A_production_N",
+     "elapsed_sec": 3.160131583000009
+    },
+    {
+     "seed": 49,
+     "n_households": 10000,
+     "trapped_us_b": 122.52640042894538,
+     "share_pct": 16.021795396408027,
+     "us_cpr_mean_pct": 11.284932058512144,
+     "arm": "A_production_N",
+     "elapsed_sec": 3.118271541000013
+    }
+   ]
+  },
+  "B_scale_N": {
+   "n_households": 75000,
+   "summary": {
+    "n_seeds": 50,
+    "benchmark_b": 764.7482532227002,
+    "dollars_b": {
+     "mean": 93.16788708819853,
+     "sd": 8.005876002106179,
+     "sem": 1.132201842085585,
+     "ci95_mean": [
+      90.94877147771078,
+      95.38700269868627
+     ],
+     "ci95_width": 4.438231220975493,
+     "min": 74.94764208863643,
+     "max": 111.73927056939934
+    },
+    "share_pct": {
+     "mean": 12.182817900607532,
+     "sd": 1.0468642417120777,
+     "sem": 0.1480489608592646,
+     "ci95_mean": [
+      11.892641937323374,
+      12.47299386389169
+     ],
+     "ci95_width": 0.5803519265683172,
+     "min": 9.800302488145878,
+     "max": 14.61124887811415
+    },
+    "us_cpr_mean_pct": {
+     "mean": 11.643840600037823,
+     "sd": 0.09497103654562877,
+     "min": 11.426318254712479,
+     "max": 11.864013060966045
+    }
+   },
+   "seeds": [
+    {
+     "seed": 0,
+     "n_households": 75000,
+     "trapped_us_b": 88.60852939798052,
+     "share_pct": 11.58662723642431,
+     "us_cpr_mean_pct": 11.697849400330249,
+     "arm": "B_scale_N",
+     "elapsed_sec": 18.583784915999985
+    },
+    {
+     "seed": 1,
+     "n_households": 75000,
+     "trapped_us_b": 87.75791473118056,
+     "share_pct": 11.475399173697076,
+     "us_cpr_mean_pct": 11.703908370006932,
+     "arm": "B_scale_N",
+     "elapsed_sec": 18.938399625000017
+    },
+    {
+     "seed": 2,
+     "n_households": 75000,
+     "trapped_us_b": 74.94764208863643,
+     "share_pct": 9.800302488145878,
+     "us_cpr_mean_pct": 11.864013060966045,
+     "arm": "B_scale_N",
+     "elapsed_sec": 18.60061679200001
+    },
+    {
+     "seed": 3,
+     "n_households": 75000,
+     "trapped_us_b": 84.09343758243031,
+     "share_pct": 10.996224865902596,
+     "us_cpr_mean_pct": 11.75061867647709,
+     "arm": "B_scale_N",
+     "elapsed_sec": 18.469743666
+    },
+    {
+     "seed": 4,
+     "n_households": 75000,
+     "trapped_us_b": 94.9986565880108,
+     "share_pct": 12.422212955398084,
+     "us_cpr_mean_pct": 11.624175552215863,
+     "arm": "B_scale_N",
+     "elapsed_sec": 18.60078787499998
+    },
+    {
+     "seed": 5,
+     "n_households": 75000,
+     "trapped_us_b": 83.16333142986542,
+     "share_pct": 10.874602338666298,
+     "us_cpr_mean_pct": 11.766010034725463,
+     "arm": "B_scale_N",
+     "elapsed_sec": 18.573344125000006
+    },
+    {
+     "seed": 6,
+     "n_households": 75000,
+     "trapped_us_b": 86.48860923282984,
+     "share_pct": 11.309422266525104,
+     "us_cpr_mean_pct": 11.72218139237456,
+     "arm": "B_scale_N",
+     "elapsed_sec": 18.515238915999987
+    },
+    {
+     "seed": 7,
+     "n_households": 75000,
+     "trapped_us_b": 91.8757460376253,
+     "share_pct": 12.013854971286927,
+     "us_cpr_mean_pct": 11.663173209117605,
+     "arm": "B_scale_N",
+     "elapsed_sec": 18.528351832999988
+    },
+    {
+     "seed": 8,
+     "n_households": 75000,
+     "trapped_us_b": 96.34525310866948,
+     "share_pct": 12.598296590108463,
+     "us_cpr_mean_pct": 11.608072468977813,
+     "arm": "B_scale_N",
+     "elapsed_sec": 18.610461084000008
+    },
+    {
+     "seed": 9,
+     "n_households": 75000,
+     "trapped_us_b": 111.73927056939934,
+     "share_pct": 14.61124887811415,
+     "us_cpr_mean_pct": 11.426318254712479,
+     "arm": "B_scale_N",
+     "elapsed_sec": 18.614056791999985
+    },
+    {
+     "seed": 10,
+     "n_households": 75000,
+     "trapped_us_b": 87.91976595754853,
+     "share_pct": 11.49656316141276,
+     "us_cpr_mean_pct": 11.701304850553612,
+     "arm": "B_scale_N",
+     "elapsed_sec": 18.58221262500001
+    },
+    {
+     "seed": 11,
+     "n_households": 75000,
+     "trapped_us_b": 98.18509012006149,
+     "share_pct": 12.83887733071674,
+     "us_cpr_mean_pct": 11.580363058603137,
+     "arm": "B_scale_N",
+     "elapsed_sec": 18.611017875000016
+    },
+    {
+     "seed": 12,
+     "n_households": 75000,
+     "trapped_us_b": 97.46930749595337,
+     "share_pct": 12.745280173601078,
+     "us_cpr_mean_pct": 11.595031499368632,
+     "arm": "B_scale_N",
+     "elapsed_sec": 18.486411834000023
+    },
+    {
+     "seed": 13,
+     "n_households": 75000,
+     "trapped_us_b": 96.97333424505706,
+     "share_pct": 12.680425726558376,
+     "us_cpr_mean_pct": 11.602773082131854,
+     "arm": "B_scale_N",
+     "elapsed_sec": 21.337765083000022
+    },
+    {
+     "seed": 14,
+     "n_households": 75000,
+     "trapped_us_b": 83.71820449320442,
+     "share_pct": 10.947158642129658,
+     "us_cpr_mean_pct": 11.753126975956613,
+     "arm": "B_scale_N",
+     "elapsed_sec": 18.632099832999984
+    },
+    {
+     "seed": 15,
+     "n_households": 75000,
+     "trapped_us_b": 87.51969837454298,
+     "share_pct": 11.444249529924276,
+     "us_cpr_mean_pct": 11.708553804232501,
+     "arm": "B_scale_N",
+     "elapsed_sec": 18.671771917
+    },
+    {
+     "seed": 16,
+     "n_households": 75000,
+     "trapped_us_b": 107.68151068382545,
+     "share_pct": 14.08064813878925,
+     "us_cpr_mean_pct": 11.466414683814133,
+     "arm": "B_scale_N",
+     "elapsed_sec": 18.618326249999996
+    },
+    {
+     "seed": 17,
+     "n_households": 75000,
+     "trapped_us_b": 105.27047001578202,
+     "share_pct": 13.765375673911674,
+     "us_cpr_mean_pct": 11.501403624368809,
+     "arm": "B_scale_N",
+     "elapsed_sec": 19.840340999999967
+    },
+    {
+     "seed": 18,
+     "n_households": 75000,
+     "trapped_us_b": 91.51674923313671,
+     "share_pct": 11.9669118363434,
+     "us_cpr_mean_pct": 11.66855859552959,
+     "arm": "B_scale_N",
+     "elapsed_sec": 19.44428849999997
+    },
+    {
+     "seed": 19,
+     "n_households": 75000,
+     "trapped_us_b": 102.49593211974846,
+     "share_pct": 13.402571589777912,
+     "us_cpr_mean_pct": 11.53425436424752,
+     "arm": "B_scale_N",
+     "elapsed_sec": 19.29400741699999
+    },
+    {
+     "seed": 20,
+     "n_households": 75000,
+     "trapped_us_b": 102.69334843434923,
+     "share_pct": 13.428386139045445,
+     "us_cpr_mean_pct": 11.526860879410112,
+     "arm": "B_scale_N",
+     "elapsed_sec": 20.34307212500005
+    },
+    {
+     "seed": 21,
+     "n_households": 75000,
+     "trapped_us_b": 80.4839743718288,
+     "share_pct": 10.524244289890685,
+     "us_cpr_mean_pct": 11.794697363650565,
+     "arm": "B_scale_N",
+     "elapsed_sec": 18.812711082999954
+    },
+    {
+     "seed": 22,
+     "n_households": 75000,
+     "trapped_us_b": 97.18483117909783,
+     "share_pct": 12.70808148558097,
+     "us_cpr_mean_pct": 11.604497527627725,
+     "arm": "B_scale_N",
+     "elapsed_sec": 18.68553099999997
+    },
+    {
+     "seed": 23,
+     "n_households": 75000,
+     "trapped_us_b": 88.62864100654377,
+     "share_pct": 11.589257070291662,
+     "us_cpr_mean_pct": 11.697147157995039,
+     "arm": "B_scale_N",
+     "elapsed_sec": 18.73418991599999
+    },
+    {
+     "seed": 24,
+     "n_households": 75000,
+     "trapped_us_b": 96.2290861188659,
+     "share_pct": 12.583106363872046,
+     "us_cpr_mean_pct": 11.607431108450722,
+     "arm": "B_scale_N",
+     "elapsed_sec": 20.101879374999953
+    },
+    {
+     "seed": 25,
+     "n_households": 75000,
+     "trapped_us_b": 98.29835975953696,
+     "share_pct": 12.853688693671558,
+     "us_cpr_mean_pct": 11.585207184147755,
+     "arm": "B_scale_N",
+     "elapsed_sec": 19.553996374999997
+    },
+    {
+     "seed": 26,
+     "n_households": 75000,
+     "trapped_us_b": 102.41864373398579,
+     "share_pct": 13.392465206999399,
+     "us_cpr_mean_pct": 11.535214587687241,
+     "arm": "B_scale_N",
+     "elapsed_sec": 19.063095999999973
+    },
+    {
+     "seed": 27,
+     "n_households": 75000,
+     "trapped_us_b": 93.4759462009368,
+     "share_pct": 12.223100321840935,
+     "us_cpr_mean_pct": 11.637433392442762,
+     "arm": "B_scale_N",
+     "elapsed_sec": 19.360465875000045
+    },
+    {
+     "seed": 28,
+     "n_households": 75000,
+     "trapped_us_b": 97.27877084863923,
+     "share_pct": 12.72036522328753,
+     "us_cpr_mean_pct": 11.59291039430618,
+     "arm": "B_scale_N",
+     "elapsed_sec": 20.201565209000023
+    },
+    {
+     "seed": 29,
+     "n_households": 75000,
+     "trapped_us_b": 94.12324024450155,
+     "share_pct": 12.307741776180583,
+     "us_cpr_mean_pct": 11.630210525890034,
+     "arm": "B_scale_N",
+     "elapsed_sec": 19.612571000000003
+    },
+    {
+     "seed": 30,
+     "n_households": 75000,
+     "trapped_us_b": 80.97851843866127,
+     "share_pct": 10.588911853987556,
+     "us_cpr_mean_pct": 11.790245126161297,
+     "arm": "B_scale_N",
+     "elapsed_sec": 19.16718379200006
+    },
+    {
+     "seed": 31,
+     "n_households": 75000,
+     "trapped_us_b": 87.19022884779714,
+     "share_pct": 11.401167440444839,
+     "us_cpr_mean_pct": 11.712369179540682,
+     "arm": "B_scale_N",
+     "elapsed_sec": 18.98792800000001
+    },
+    {
+     "seed": 32,
+     "n_households": 75000,
+     "trapped_us_b": 82.90365014564571,
+     "share_pct": 10.840645898344219,
+     "us_cpr_mean_pct": 11.767426712755688,
+     "arm": "B_scale_N",
+     "elapsed_sec": 19.5375016669999
+    },
+    {
+     "seed": 33,
+     "n_households": 75000,
+     "trapped_us_b": 101.05366403711717,
+     "share_pct": 13.213977751667988,
+     "us_cpr_mean_pct": 11.555810495337415,
+     "arm": "B_scale_N",
+     "elapsed_sec": 18.87248708300001
+    },
+    {
+     "seed": 34,
+     "n_households": 75000,
+     "trapped_us_b": 102.92563154271929,
+     "share_pct": 13.45875993949431,
+     "us_cpr_mean_pct": 11.526783260446324,
+     "arm": "B_scale_N",
+     "elapsed_sec": 19.431262041999958
+    },
+    {
+     "seed": 35,
+     "n_households": 75000,
+     "trapped_us_b": 99.60820759744271,
+     "share_pct": 13.024966997660611,
+     "us_cpr_mean_pct": 11.569718021443087,
+     "arm": "B_scale_N",
+     "elapsed_sec": 19.14377191699998
+    },
+    {
+     "seed": 36,
+     "n_households": 75000,
+     "trapped_us_b": 85.29017627862812,
+     "share_pct": 11.152712793943579,
+     "us_cpr_mean_pct": 11.741259188034812,
+     "arm": "B_scale_N",
+     "elapsed_sec": 19.29182554199997
+    },
+    {
+     "seed": 37,
+     "n_households": 75000,
+     "trapped_us_b": 84.40754135871383,
+     "share_pct": 11.037297699342865,
+     "us_cpr_mean_pct": 11.748599563320195,
+     "arm": "B_scale_N",
+     "elapsed_sec": 18.78440858299996
+    },
+    {
+     "seed": 38,
+     "n_households": 75000,
+     "trapped_us_b": 101.75950170480127,
+     "share_pct": 13.30627448653592,
+     "us_cpr_mean_pct": 11.538006003322758,
+     "arm": "B_scale_N",
+     "elapsed_sec": 18.959956166999973
+    },
+    {
+     "seed": 39,
+     "n_households": 75000,
+     "trapped_us_b": 94.56401814546672,
+     "share_pct": 12.365378769675855,
+     "us_cpr_mean_pct": 11.62731942695801,
+     "arm": "B_scale_N",
+     "elapsed_sec": 18.99369200000001
+    },
+    {
+     "seed": 40,
+     "n_households": 75000,
+     "trapped_us_b": 92.0990824103142,
+     "share_pct": 12.043058878814369,
+     "us_cpr_mean_pct": 11.653385399648947,
+     "arm": "B_scale_N",
+     "elapsed_sec": 19.325225542
+    },
+    {
+     "seed": 41,
+     "n_households": 75000,
+     "trapped_us_b": 90.05896755570564,
+     "share_pct": 11.776289409775195,
+     "us_cpr_mean_pct": 11.679605935551029,
+     "arm": "B_scale_N",
+     "elapsed_sec": 18.91854975000001
+    },
+    {
+     "seed": 42,
+     "n_households": 75000,
+     "trapped_us_b": 97.48925243728745,
+     "share_pct": 12.747888213730626,
+     "us_cpr_mean_pct": 11.591320536114187,
+     "arm": "B_scale_N",
+     "elapsed_sec": 19.11884574999999
+    },
+    {
+     "seed": 43,
+     "n_households": 75000,
+     "trapped_us_b": 86.66465834005879,
+     "share_pct": 11.33244279733208,
+     "us_cpr_mean_pct": 11.71433303677718,
+     "arm": "B_scale_N",
+     "elapsed_sec": 18.98029787500002
+    },
+    {
+     "seed": 44,
+     "n_households": 75000,
+     "trapped_us_b": 94.10349824658466,
+     "share_pct": 12.30516027333521,
+     "us_cpr_mean_pct": 11.630238213227752,
+     "arm": "B_scale_N",
+     "elapsed_sec": 19.082461082999885
+    },
+    {
+     "seed": 45,
+     "n_households": 75000,
+     "trapped_us_b": 90.1914002708881,
+     "share_pct": 11.793606574557773,
+     "us_cpr_mean_pct": 11.685965647961869,
+     "arm": "B_scale_N",
+     "elapsed_sec": 19.390585832999932
+    },
+    {
+     "seed": 46,
+     "n_households": 75000,
+     "trapped_us_b": 108.93873258632777,
+     "share_pct": 14.245044970976092,
+     "us_cpr_mean_pct": 11.457614069182696,
+     "arm": "B_scale_N",
+     "elapsed_sec": 18.992257332999998
+    },
+    {
+     "seed": 47,
+     "n_households": 75000,
+     "trapped_us_b": 91.75095815789487,
+     "share_pct": 11.997537460366885,
+     "us_cpr_mean_pct": 11.660733382656884,
+     "arm": "B_scale_N",
+     "elapsed_sec": 18.95235783300018
+    },
+    {
+     "seed": 48,
+     "n_households": 75000,
+     "trapped_us_b": 86.21090286668804,
+     "share_pct": 11.27310883070207,
+     "us_cpr_mean_pct": 11.721184539583756,
+     "arm": "B_scale_N",
+     "elapsed_sec": 19.82952979200013
+    },
+    {
+     "seed": 49,
+     "n_households": 75000,
+     "trapped_us_b": 90.62246803740962,
+     "share_pct": 11.84997385159371,
+     "us_cpr_mean_pct": 11.670397183547957,
+     "arm": "B_scale_N",
+     "elapsed_sec": 19.08883604100015
+    }
+   ]
+  }
+ },
+ "verdict_inputs": {
+  "delta_share_pp": -0.4769366709471399,
+  "sd_ref_share_pp": 3.2472604782578496,
+  "one_sd_threshold_pp": 3.2472604782578496,
+  "two_sd_threshold_pp": 6.494520956515699,
+  "delta_in_sd_units": 0.14687354899321647
+ },
+ "verdict_tier": "T1",
+ "interpretive_verdict": "T1: the share-of-benchmark means at the two population sizes differ by -0.4769pp, inside one 50-seed SD (3.2473pp) \u2014 population size is NOT the driver. The manuscript claim STANDS, now resting on a committed production-spec artifact; cite this run at and at the five downstream sites, add it to tab:runindex/tab:crosswalk, and replace the 15.616% CPR sentence per R2.",
+ "D1_welch": {
+  "delta_share_pp": -0.4769366709471399,
+  "se_of_difference_pp": 0.48250648398194196,
+  "t": -0.9884565011669137,
+  "df_welch": 59.07642740920892,
+  "abs_t_gt_1p96": false,
+  "disclosure_required": false
+ },
+ "R1_precision": {
+  "ci95_width_share_pp": {
+   "10000": 1.8001893650928742,
+   "75000": 0.5803519265683172
+  },
+  "narrowing_ratio": 3.1018926321785227,
+  "sqrt_n_reference": 2.7386127875258306,
+  "note": "replaces the unsourced narrowing ratio and shortfall percentage at"
+ },
+ "R2_cpr": {
+  "mean_us_cpr_pct": {
+   "10000": 11.60019972699029,
+   "75000": 11.643840600037823
+  },
+  "delta_pp": 0.043640873047532835,
+  "frozen_manifest_us_cpr_mean_pct": 11.760904343422906,
+  "arm_minus_frozen_pp": {
+   "10000": -0.16070461643261602,
+   "75000": -0.11706374338508319
+  },
+  "note": "unconditional follow-up: the CPR sentence must be replaced by these production-spec figures; the retired literal has no committed provenance at any spec"
+ },
+ "R3_cross_spec_reference": {
+  "spec": "structural-only 15yr fold-in (TECHNICAL sec 15 Fix 2)",
+  "provenance": {
+   "code_commit": "5cf33a3 (Fold 15-year MBS into SOMA cohorts, structural-only in production)",
+   "soma_as_of": "2026-07-08",
+   "mobility_scale": 43882.8125,
+   "note": "monte_carlo_simulation.py surface_df_to_surfaces backported from 5c96de4 to key surfaces by (coupon, term); model code unchanged. Seed 42 reproduces the frozen headline $90.98B exactly, confirming SOMA as-of drift since the 2026-07-04 freeze is immaterial.",
+   "supersedes": "mean $113.5B, CI [$106.6B, $120.4B] computed on the 30yr-only spec"
+  },
+  "mean_b": 103.68,
+  "mean_share_pct": 13.55740265676784,
+  "production_seed_draw_b": 90.98,
+  "label": "NOT-HEAD-REPRODUCIBLE \u2014 run at code commit 5cf33a3; reported only to expose the native-gate/fold-in level offset, never mixed with the arms above"
+ },
+ "runtime_s": 1137.194127792,
+ "generated_utc": "2026-07-26T16:25:42.577300+00:00"
 }
