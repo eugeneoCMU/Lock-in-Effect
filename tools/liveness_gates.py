@@ -3548,6 +3548,37 @@ def main() -> int:
           f"+{cm['concave_marginal_pp_at_offwindow_point']:.4f}pp @4.991%), "
           f"tex literals={'ok' if cm_tex_ok else 'MISSING'}")
 
+    # ROUND-22 (gate #81): CONCAVE x ADDITIVE JOINT CELL. The hull was a hull
+    # over floor FORMS at the log-linear transform only, and tab:uncertainty
+    # listed "additive form +11.2" and "concave transform +5.1" as parallel
+    # entries -- which presumes they add. The joint cell says they do not: the
+    # interaction is -1.47pp at the headline anchor, past the project's own
+    # +/-1.0pp convention. The hull itself survives (T1), so this gate pins the
+    # SEPARABILITY REFUTATION, which is the part a compression pass would lose:
+    # the two entries could easily be re-separated by an editor who reads them
+    # as independent, and nothing else in the suite would notice.
+    caj = json.loads((HAZ_DATA / "concave_additive_marginal_results.json").read_text())
+    caj_ok = (caj["parity_gates_all_pass"]
+              and caj["t1_hull_stands"]
+              # separability must remain REFUTED-as-measured, not None (T3) and
+              # not silently flipped to True by a re-run on different inputs
+              and caj["s1_separable"] is False
+              and abs(caj["interaction"]["4991"]["interaction_pp"]
+                      - (-1.4697431160061782)) < 1e-9
+              and caj["interaction"]["4991"]["material"] is True)
+    caj_tex_ok = ("concave\\_additive\\_marginal" in tex
+                  and "$+9.25$" in tex and "$+9.22$" in tex
+                  and "an interaction of $-1.47$ points" in tex
+                  and "do not add" in tex)
+    ok = caj_ok and caj_tex_ok
+    failures += 0 if ok else 1
+    print(f"[{'PASS' if ok else 'FAIL'}] cross-check concave x additive joint cell: "
+          f"artifact={caj_ok} (T1 hull stands, +"
+          f"{caj['interaction']['4']['interaction_pp']:+.4f}/"
+          f"{caj['interaction']['4991']['interaction_pp']:+.4f}pp interaction, "
+          f"separable={caj['s1_separable']}), tex literals="
+          f"{'ok' if caj_tex_ok else 'MISSING'}")
+
     # Round-21 (gate #71): DANISH GAP AT THE HEADLINE FLOOR. The rule-only
     # (us_intercept) gap now exists at the off-window floor: +$28.20B, 0.662x
     # the off-window marginal. The tex must quote it beside the in-sample
