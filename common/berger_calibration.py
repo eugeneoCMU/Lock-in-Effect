@@ -14,9 +14,17 @@ elasticities used to recalibrate BOTH frameworks' Danish counterfactual, so we
 stop extrapolating a U.S.-calibrated response function to a Danish rate gap and
 instead import estimated elasticities for this exact counterfactual.
 
-All numbers below are transcribed from the paper as supplied (Table 3 structural
-parameters; §3.3.1 and §4.9.1 empirical elasticities and tax parameters). None
-are invented here. Two prepayment channels are modeled separately:
+All numbers below are transcribed from the paper (VERIFIED 2026-07-26 against the
+January 27 2026 draft): Table 3 "Model parameters" for the structural pairs;
+§4.6 "Calibration" for the 3.2%/yr Danish unconditional moving rate and the
+moving-hazard slope; §3.3.1 "Who buys back his/her mortgage?" for the buyback
+elasticities; §4.9.1 "Introducing repurchase-at-market option in the U.S." for the
+U.S. tax parameters (22% marginal, 15% capital gains) and the ~1 bps equilibrium
+rate result. None are invented here. NOTE: earlier drafts of this header cited
+§3.3.1 for the 3.2% moving rate; that was wrong -- 3.3.1 is the buyback
+subsection and the moving level is a calibration target in §4.6.
+
+Two prepayment channels are modeled separately:
 
   * MOVING channel — households that sell/move. Danish moving is essentially
     insensitive to the coupon gap (no lock-in on the moving margin).
@@ -36,7 +44,7 @@ LAMBDA = {"DK": 0.33, "US": 0.30}        # refinancing opportunity hazard
 KAPPA_LAMBDA = {"DK": 0.008, "US": 0.02}  # mean refinancing cost (frac of balance)
 SIGMA_LAMBDA = {"DK": 0.005, "US": 0.02}  # sd of refinancing cost
 
-# --- §3.3.1: realized moving elasticities ------------------------------------
+# --- §4.6 calibration targets: realized moving elasticities ------------------------------------
 DK_UNCOND_MOVE_ANNUAL = 0.032            # 3.2%/yr Danish unconditional moving rate
 # Danish moving-hazard slope, %/yr per 100bp of (negative) coupon gap: the CI
 # spans zero (−0.198 .. +0.12), i.e. statistically flat / no lock-in.
