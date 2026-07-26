@@ -3548,6 +3548,38 @@ def main() -> int:
           f"+{cm['concave_marginal_pp_at_offwindow_point']:.4f}pp @4.991%), "
           f"tex literals={'ok' if cm_tex_ok else 'MISSING'}")
 
+    # ROUND-22 (gate #83): CROSS-DESIGN SEED SWEEP. Every cross-design number in
+    # the paper was a single seed-42 draw, and the paper crosses its own
+    # pre-committed 50% threshold with it. The 50-seed sweep VINDICATES the
+    # reading (mean 60.2%, all 50 seeds undercutting, committed draw at the 48th
+    # percentile), so what this gate protects is the DISCLOSURE: the band is wide
+    # enough that S1b required reporting it, and a compression pass that drops
+    # "60.2" or the band would put the paper back to asserting a threshold
+    # crossing from one draw.
+    cds = json.loads((ROOT / "abm" / "data" / "cross_design_seeds_results.json").read_text())
+    cds_rec = cds["distributions"]["A_joint.recalibrated"]
+    cds_ok = (cds["parity_gates_all_pass"]
+              and cds_rec["n"] == 50
+              and abs(cds_rec["mean_pct"] - 60.20801984127922) < 1e-9
+              and abs(cds_rec["sd_pct"] - 3.30918815316194) < 1e-9
+              and abs(cds_rec["percentiles_pct"]["p2.5"] - 55.09710819371802) < 1e-9
+              and abs(cds_rec["percentiles_pct"]["p97.5"] - 66.04559875123523) < 1e-9
+              # the whole point: the verdict must not depend on the seed
+              and cds_rec["mean_pct"] >= 50.0)
+    cds_602_count = tex.count("60.2\\%")
+    cds_tex_ok = ("cross\\_design\\_seeds" in tex
+                  and cds_602_count >= 3
+                  and "55.1--66.0\\%" in tex)
+    ok = cds_ok and cds_tex_ok
+    failures += 0 if ok else 1
+    print(f"[{'PASS' if ok else 'FAIL'}] cross-check cross-design seed sweep: "
+          f"artifact={cds_ok} (n={cds_rec['n']}, mean {cds_rec['mean_pct']:.3f}%, "
+          f"sd {cds_rec['sd_pct']:.3f}pp, band "
+          f"{cds_rec['percentiles_pct']['p2.5']:.1f}-"
+          f"{cds_rec['percentiles_pct']['p97.5']:.1f}%), tex 60.2-count="
+          f"{cds_602_count} (want >=3), literals="
+          f"{'ok' if cds_tex_ok else 'MISSING'}")
+
     # ROUND-22 (gate #82): BURNOUT ABLATION. The manuscript quoted this ablation
     # at four sites with NO artifact, NO script and NO gate; the three printed
     # literals reproduced the MINIMUM over 100 replicates of
