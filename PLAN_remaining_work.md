@@ -120,11 +120,29 @@ I would do them only after §1 and §2.
 
 ---
 
+## 6. BOOKKEEPING GAPS FOUND ON A SECOND PASS — none of this is analysis, all of it is visible to a referee
+
+| # | Gap | Why it matters |
+|---|---|---|
+| **6a** | **`tab:runindex` is missing 12 runs.** It lists 23 and omits every round-21 run (`floor_form_offwindow`, `concave_marginal`, `danish_offwindow_floor`, `ginnie_overlay_offwindow`, `floor_uncertainty`, `patha_sign_test`, `episode_confrontation`, `cross_design_reweight`) and every round-22 run (`concave_additive_marginal`, `burnout_ablation`, `cross_design_seeds`, `production_scale_test`). Its caption claims completeness: "Each row names a committed run cited in the main text by its result; tags are collected here rather than in the narrative." | This is the reproducibility ledger a referee opens to check the pre-commitment architecture. Four of the twelve are mine. **Largest item in this section.** |
+| **6b** | **`TECHNICAL.md` has no record for 3 of the 4 round-22 runs** (only `production_scale_test`, via §29 on the halt). The convention is one record per run, and TECHNICAL.md carries the 75 commit-hash citations that make the pre-commitment claim checkable. | Same architecture, same referee. |
+| **6c** | **The canonical PDF is stale.** `paper/v18/revised_paper_v18.pdf` is dated Jul 20 at 106pp; round 22 built to `build_r22/` at 112pp. `revised_paper_v18_simple_abstract.pdf` is staler still — I rewrote that abstract and never rebuilt it. | Anyone opening the repo reads the pre-round-22 paper. |
+| **6d** | **Stale counts in the handoffs.** `HANDOFF_round21_referee.md` still says 80 gates / 106pp. `HANDOFF_concision_round.md` says 72 gates, is untracked, and is now moot. | Cheap; misleads the next session. |
+| **6e** | **No response-to-referees letter.** Rounds 18 and 19 each produced one (`paper/v16/response_to_referees_roundNN.tex`). None exists for this round. | Much easier to write now than later — especially the awkward parts, where the critique's premises were **stale or wrong** (items 1a/1b, 5d, 10, 12b/12c, 15) and need answering without sounding dismissive. |
+| **6f** | **Eleven untracked paths** need a deliberate track-or-ignore call: eight run subdirectories of intermediate parquets, three `patha_sign_test_*.csv`, and `HANDOFF_concision_round.md`. The standing rule is that derived files stay ignored, but they are currently just dangling rather than ignored. | Low risk, but "paper/ was gitignored until today" is how the 101pp source was lost once. |
+
+**Also, not a gap but a likely blocker:** the canonical abstract is **573 words**. Most
+journals cap at 100–250. That is a submission requirement rather than a style question,
+so it survives the decision to abandon compression — the gate-clean 324-word variant
+exists precisely for this, and it is still short of a 250-word cap.
+
 ## Suggested order
 
 1. **§1 step 1** — the WSHOMCB question. It decides whether the gap is closable at all, costs 20 minutes, and needs no run.
 2. **§2** — all four free wins, one commit, no runs. Highest value per minute in this plan.
-3. **§1 steps 3–7** — the cluster bootstrap.
-4. **§4 survivors**, if you want them.
+3. **§6a + §6b + §6c** — run index, TECHNICAL records, rebuild both PDFs. Mechanical, ~1h total, and 6a is the one a referee actually opens.
+4. **§1 steps 3–7** — the cluster bootstrap.
+5. **§6e** — the response letter, while the reasoning is still fresh.
+6. **§4 survivors** and **§6d/§6f**, if you want them.
 
-§2 does not depend on §1, so if the WSHOMCB answer is bad, §2 still lands.
+§2 and §6 do not depend on §1, so if the WSHOMCB answer is bad, both still land.
