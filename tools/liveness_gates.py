@@ -3492,13 +3492,32 @@ def main() -> int:
     # See TEX_VARIANTS. A variant that is not the canonical file is still a
     # variant someone can compile and submit, and the short-abstract variant that
     # motivated this failed 5 of 8 spans while the suite reported ALL GATES PASS.
+    # ROUND-22, second pass: checking the variant's ABSTRACT was not enough. The
+    # short-abstract file was a Jul-23 copy whose BODY then went stale by 291
+    # lines while round 22 corrected the canonical manuscript -- so it passed
+    # this gate while still carrying the false fig:gapsweep caption, the
+    # mislabelled discount table and every other defect the round repaired. A
+    # variant must therefore differ from the canonical file in the ABSTRACT LINE
+    # ONLY; anything else means it has drifted and must be regenerated.
+    _canon_lines = TEX.read_text().split("\n")
     var_bad = []
     for _p in TEX_VARIANTS:
         if _p == TEX:
             continue
-        _v_ok, _v = abstract_hedge_check(_p.read_text())
+        _txt = _p.read_text()
+        _v_ok, _v = abstract_hedge_check(_txt)
         if not _v_ok:
-            var_bad.append(f"{_p.name}: {_v['missing'] or 'unscoped'}")
+            var_bad.append(f"{_p.name}: hedges {_v['missing'] or 'unscoped'}")
+        _vl = _txt.split("\n")
+        if len(_vl) != len(_canon_lines):
+            var_bad.append(f"{_p.name}: body drift ({len(_vl)} lines vs "
+                           f"{len(_canon_lines)} canonical)")
+        else:
+            _diff = [i + 1 for i in range(len(_vl)) if _vl[i] != _canon_lines[i]]
+            _non_abstract = [n for n in _diff if _canon_lines[n - 1].strip()[:9] != "\\noindent"]
+            if _non_abstract:
+                var_bad.append(f"{_p.name}: body drift at lines "
+                               f"{_non_abstract[:8]}{'…' if len(_non_abstract) > 8 else ''}")
     var_ok = not var_bad
     failures += 0 if var_ok else 1
     print(
