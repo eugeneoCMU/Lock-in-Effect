@@ -12,8 +12,8 @@ still bind). Companion documents: `PLAN_remaining_work.md` (the open-items ledge
 | | |
 |---|---|
 | Repo | `/Users/eugene/somthing/Lock In effect/Lock-in-Effect` (**public** on GitHub, `eugeneoCMU/Lock-in-Effect`) |
-| Branch | `panel-revision-2026-07-18`, **pushed** through round 22. `main` untouched at `e1592f3`. |
-| Manuscript | `paper/v18/revised_paper_v18.tex` — **113pp**, ~52k words, one paragraph per line (lines are LONG) |
+| Branch | `panel-revision-2026-07-18`, **pushed** through round 22. `main` untouched at `e1592f3`. **Round 23 sits on `claude/handoff-round22-edits-701fb2` (2 commits, unpushed, branched off the round-22 tip) — see §8.** |
+| Manuscript | `paper/v18/revised_paper_v18.tex` — **114pp** (was 113pp before round 23), ~52k words, one paragraph per line (lines are LONG) |
 | Archived variant | `paper/v18/revised_paper_v18_long_abstract.tex` — identical body, the old 574-word abstract |
 | Build | `~/Downloads/texbuild/tectonic -X compile revised_paper_v18.tex --outdir build_r22 --keep-logs` (no `tectonic`/`pdflatex` on PATH) |
 | Gates | `python3 tools/liveness_gates.py` → **93 ALL PASS** |
@@ -130,30 +130,44 @@ Full detail in `revision_roadmap_round22.md` and `TECHNICAL.md` §§29–30.
 the post-round-22 standing review, plus older leftovers. Ordered by how a hostile discussant
 would raise them.
 
+> **STATUS 2026-07-26, round 23 (branch `claude/handoff-round22-edits-701fb2`, 2 commits,
+> unpushed).** Everything in §6.1 and §6.2 that could be closed **without a run** is closed.
+> 93 gates PASS, 297 tests, **114pp**, 0 undefined refs/citations, both `.tex` body-identical.
+> **B, C, D, E, F, G, H, I and all four §6.2 items: DONE.** **A is the only §6.1 item left,
+> and it needs a run.** Two defects found while doing them are recorded in §8.
+> Several §6 entries below were **wrong as written** — read §8 before trusting this list.
+
 ### 6.1 Substantive — likely to change what the paper says
 
-| # | Item |
-|---|---|
-| **A** | **No ABM counterpart to the β₁ = 0 null.** The paper insists throughout that levels do not identify and only the central-minus-null differential does — then conducts the entire ABM comparison on levels. Every null in the source is Path B or Path A. A behavioural-gate-off ABM null would make the ABM contrast an apples-to-apples differential. Needs a run. |
-| **B** | **"Structurally independent" overstates, and it is in the Section V title.** Path B's floor is "anchored to the same empirical observation as the ABM's mobility calibration" (L312) — 2023–24 deep-discount turnover, inside the evaluation window. The two estimators share their dominant level-setter. Prose, but it touches a section title and four other sites. |
-| **C** | **68.8% censoring at the headline calibration.** At the off-window floor the hazard is censored at the constant floor in more than two-thirds of evaluated loan-months (36.3% in-sample). Disclosed only as an aside inside the burnout qualification. The implication — that the elasticity is inert in most of the sample *at the calibration the paper headlines* — is never drawn. |
-| **D** | **Expectations-basis circularity.** The "quarter to half of the genuine surprise" rests on \$87.8B being a lock-in-free residual. Nothing asks what prepayment model underlies the NY Fed's May 2022 baseline; if it already priced lock-in, the attribution double-counts. L173 invokes this exact circularity to justify keeping the cap as headline, then the projection-basis ratio goes in the abstract without it. |
-| **E** | **Two same-signed corrections never composed.** The age-standardised floor (→ ~+3.8) and the Ginnie overlay (0.797× → +4.4) both point down and are only ever reported in isolation. Composing them gives roughly **+3.0**, which roughly halves the headline. |
-| **F** | **Small-G inference.** 31 clusters on the floor read, 25.8 effective on the loan/stratum bootstrap. Percentile cluster bootstraps under-cover badly at that G. No wild-cluster bootstrap, no t(G−1) critical values, no acknowledgement. |
-| **G** | **Estimand transport untested.** β₁ is a quarterly ZIP-code *mobility* semi-elasticity applied multiplicatively to a *total prepayment* hazard whose floor the paper concedes "includes discretionary life-cycle moves and cash-out refinancings". |
-| **H** | **Three independent readings suggest the imported elasticity is several-fold too small** for this book (Path A's own coefficient, the episode gap gradient at 4.5× the implied, and the cross-design result). The paper declines each individually and never confronts them together. |
-| **I** | **The hull's upper end is disqualified and retained.** +13.1pp comes from a cell recovering 61.2% of the benchmark, which the paper says "should not be read as an equally credentialed member" — then publishes the range anyway. |
+| # | Item | Status |
+|---|---|---|
+| **A** | **No ABM counterpart to the β₁ = 0 null.** The paper insists throughout that levels do not identify and only the central-minus-null differential does — then conducts the entire ABM comparison on levels. Every null in the source is Path B or Path A. A behavioural-gate-off ABM null would make the ABM contrast an apples-to-apples differential. | **OPEN — needs a run.** Checked: there is **no behavioural-gate-off flag** anywhere in `abm/`, so this is a specification job, not a switch. Spec-before-run applies. |
+| **B** | "Structurally independent" overstates, and it is in the Section V title. | **DONE.** All 4 sites → "structurally distinct"; L229's "two independent paths" → "two paths"; L899's "do not depend on each other" replaced by what is actually true — both anchor to a floor read off discount-cohort turnover, and at the in-sample point to the same 2023–24 read. |
+| **C** | 68.8% censoring at the headline calibration. | **DONE.** Now in `sec:identification` with the in-sample counterpart and the 60.0–77.3% range. **The item's own framing was wrong**: see §8.2. |
+| **D** | Expectations-basis circularity. | **DONE.** The ratios are now stated as **upper bounds** at both the construction site (L171) and the abstract. |
+| **E** | Two same-signed corrections never composed. | **DONE as disclosure, not as an estimate.** Both cut the same way, no joint cell exists, and carrying the 0.797 scale to the higher floor — which the overlay run does **not** establish — lands near +3.0. Stated at L794; explicitly not reported as an estimate. |
+| **F** | Small-G inference. | **DONE.** `tab:uncertainty` now says both intervals are lower bounds on sampling uncertainty rather than calibrated 95% coverage. A wild-cluster-t re-run would still be an improvement. |
+| **G** | Estimand transport untested. | **DONE as disclosure.** Stated at the point the transform is applied, error direction explicitly not signed. Closing it properly needs a move/refi split of realized terminations, which **this design does not have and cannot build from the ingested columns**. |
+| **H** | Three readings suggest the imported elasticity is several-fold too small. | **DONE.** A sixth qualification in `sec:identification` puts all three side by side and concedes the common direction. |
+| **I** | The hull's upper end is disqualified and retained. | **DONE.** The disqualification now travels to the abstract, the first main-text statement, and `tab:headline`. The hull itself is unchanged (zero-slack gate). |
 
-### 6.2 Presentational
+### 6.2 Presentational — ALL DONE
 
-- **"Cash-flow" is the wrong noun**, used four times (L30, L606, L901, L905). The computed
-  quantity is balance retirement, not cash flow.
-- **The ABM's headline sits outside its own stated uncertainty**: `tab:headline` gives 13.6%
-  with operative range "20.9–59.3%", which does not contain the point.
-- **`tab:oosfloor`'s "defensible range" is a depth-cut convention**, not an uncertainty: all
-  three rows are the same 2018 leg at different gap thresholds.
-- **Two uncited load-bearing claims** at L173 (market participants' early understanding; the
-  cap-as-authorised-maximum characterisation, which mischaracterises a reinvestment *ceiling*).
+- ~~**"Cash-flow" is the wrong noun**, four times (L30, L606, L901, L905)~~ — **the premise was
+  half wrong.** All 21 uses were inspected. For the U.S. leg principal cash flow and balance
+  retirement are *the same number* (agency principal pays at par), so the noun is correct
+  there. The two diverge only on the **Danish** leg. L606 has no match; the real outlier was
+  **L608** ("institutional cash-flow gap", against eight plain "institutional gap" sites), and
+  it is fixed. **L30 must not be touched — `liveness_gates.py:277` pins that abstract phrase.**
+- ~~ABM headline outside its own stated uncertainty~~ — **DONE.** `tab:headline`'s ABM row now
+  labels 20.9–59.3% as a span across two calibration choices on the *cross-design*, which does
+  not contain this row's 13.6%.
+- ~~`tab:oosfloor`'s "defensible range" is a depth-cut convention~~ — **NOT A DEFECT.** L792 and
+  L794 already say the rows are one leg at three depth cuts and that the depth spread is not
+  the binding uncertainty. No edit made.
+- ~~Two uncited load-bearing claims at L173~~ — **DONE.** The market-participants claim is
+  replaced by the sourced claim it was standing in for (`nyfed2022`, already cited at L96); the
+  cap is now described as what the schedule *allowed* rather than what the FOMC "authorized".
 
 ### 6.3 Older leftovers (round-21 R10, never started)
 
@@ -184,3 +198,68 @@ Two regressions of my own, found by the standing review and fixed:
    *not* corroborate. Both retracted.
 
 Neither was caught by the gates: the required literals existed elsewhere in the file.
+
+---
+
+## 8. Round 23 (2026-07-26, later the same day) — §6.1/§6.2 closed except item A
+
+Branch `claude/handoff-round22-edits-701fb2`, 2 commits, **unpushed**. No runs. Every number
+landed was read from an already-committed artifact. 93 gates PASS, 297 tests, 114pp.
+
+### 8.1 Two accuracy defects found while doing the list — neither was on it
+
+1. **L906 quoted the wrong leg.** "switching the elasticity off … raises the hazard by nothing
+   at all in the **36%** of loan-months where the floor binds" used the **central** leg's bind
+   share. The claim needs the **null** leg's: where the β₁ = 0 leg is pinned, `h_vol⁰ < floor`,
+   so the excess of the null hazard over the floor is zero and the switch cannot raise the
+   hazard at all. That share is **14.3%** in sample (`burnout_ablation` → `legs/
+   production_null_4/floor_bind_share = 0.143407`), not 36%. Corrected.
+2. **A broken sentence case in the canonical abstract** ("…either alone. **the** design
+   identifies"), left over from the round-22 short-abstract surgery, plus a double space at
+   L398. Fixing only the canonical file tripped the archived-variant **body-drift gate** —
+   which is the gate working exactly as intended. Both files now match again.
+
+### 8.2 The censoring item's own framing was wrong — do not restate it the old way
+
+§6.1 C said the implication is "the elasticity is inert in most of the sample." That reading
+does **not** follow, for two independent reasons, and the manuscript deliberately avoids it:
+
+- A **central-leg bind does not zero that loan-month's contribution to the marginal.** The null
+  leg has β₁ = 0, so its voluntary hazard is higher; a month where the central leg is pinned can
+  still have the null above the floor and contribute. The contribution is **truncated**, not
+  absent.
+- The bind share is an **unweighted count of loan-months** (`floor_sweep.py:82-117`:
+  `tally.bound += int((h_vol < h_floor).sum())`), while the marginal is a balance-weighted
+  dollar. No balance-weighted counterpart exists for this sample. "The estimate rests on 31% of
+  the data" would be **false on both counts**.
+
+### 8.3 Method note, and what it caught
+
+Eight parallel read-only mappers, each paired with an adversarial verifier told to default to
+rejecting. **The verifiers rejected or repaired six of the eight proposals.** The catches are
+the argument for the second pass:
+
+- "the least accurate cell in that sweep" — a phrase lifted from L785 — is **false** once
+  detached from its sentence. `floor_form_offwindow_results.json`: the additive cells at 5.5%
+  recover 50.4/54.3/57.7%, all *below* the 61.2% endpoint, which is in fact the
+  **highest**-recovery additive cell. It would have gone into the abstract.
+- The `nyfed2022` post was about to be cited for a **single-month** figure it does not give.
+- The cross-design reweight was quoted one-sidedly; the same reweight moves the **frozen**
+  variant *down*, 20.9% → 12.6%.
+- A "+0.29 per 100 bp against β₁ = 0.069" juxtaposition contradicted **L270**, which says the
+  two are on different scales and are compared on sign, not magnitude.
+- The (G) and (H) drafts **contradicted each other** on whether the import's error direction is
+  signed.
+- "should not be read as an equally credentialed member" (a reading instruction) had been
+  hardened into "is not an equally credentialed member" (a verdict).
+
+Same lesson as round 22, one level up: a green gate suite does not check a *fix*, and a fix
+written by whoever found the problem inherits their reading of it.
+
+### 8.4 Repo gotcha
+
+The worktree at `.claude/worktrees/agency-mbs-runoff-qt-424945` was stale at round-18b and had
+no `paper/`; it is now fast-forwarded onto the round-22 tip. The figure PNGs in `paper/v18/` are
+**gitignored**, so a worktree build fails on `fig7_architecture` until they are symlinked in
+from the main checkout. `tectonic` needs its `--outdir` to exist first. The "TeX rerun seems
+needed" warning is **pre-existing** (round 22's `build_r22` log has it too), not a regression.
