@@ -3446,3 +3446,34 @@ cohort 2.00% at 39.7% weight; dynamic friction 8.23–9.96% (mean 8.95%).
 ---
 
 *Last updated: July 2026. Hazard spec v3: stratum FE (295 pools), burnout sign fixed (−0.13). Post robustness-fix program (§15): Path B at 107.0% trapped (band 105.9%–108.2%) after the β₁ units fix; ABM at 11.1% after the native 15-year gate (§19); cross-design test with real Freddie covariates recovers 59.3% (recalibrated) / 20.9% (frozen). Follow-on analyses: permutation test (§16, n=999, exact p=0.001) — Path B's recovery is a marginal-distribution result, moved only 0.27% ($2.2B) by scrambling joint structure, interaction-dominated across axes with the CPR-path signal localized to origination-time; Path A's fitted coefficients are far more structure-dependent (β can flip sign). Cross-foundation (§17): the institutional gap collapses $925.5B→$61.2B under a shared accounting layer; full-book SOMA weighting lifts Path B to 109.1%, Path A to 126.1%. Symmetric companion (§18): Path B recovers 106.0% on a fully synthetic population (zero Freddie data) — the hazard survival structure recovers the benchmark independent of data source, while the ABM needs real covariates to reach 59.3%. Berger recalibration (§20): importing estimated Danish elasticities (3.2% flat moving + tax-attenuated refi, ≈0 under U.S. taxes) collapses the institutional gap from +$925.5B to −$99.9B (Path B hybrid) — the large gap was an artifact of extrapolating a U.S.-calibrated mobility function to a Danish rate gap. Sweeping the refi channel (§20.1) shows the gap's *magnitude* stays small across [0, 18%] but its *sign* is not robust in Path B under that anchor (breakeven at just 1.4% refi vs 12.6% for the ABM). Referee round 13 (§23) then established that §20's 3.2% import is Denmark's descriptive LEVEL (rule+country bundle; Danish CPR below the 4% involuntary floor) and restated production to the U.S.-intercept anchor — Berger's flatness fact at the U.S. zero-gap hazard — which reproduces the §17 hybrid leg for leg: gap **+$61.2B (8.0%)**, signed positive at every refi sweep point, the counterfactual image of the +9.2pp lock-in marginal; the dk_level rows are retained as a labeled bracketing case. Round 13 also added the floor functional-form test (additive marginal +11.25pp at 4%, nearly floor-invariant — the floor sweep's failed ±2pp gate was max-form censoring, not elasticity instability) and the Path B stratified loan-level bootstrap (200 reps: central 95% [106.96, 107.10]%, paired marginal [+9.17, +9.23]pp — sampling noise negligible; uncertainty is calibration). July 2026 verification round (§21): Path A coefficients now carry stratum-bootstrap CIs (rate-gap sign-stable in 99.5% of replications; burnout/friction not distinguishable from zero), the fold-in-spec Monte Carlo (mean $103.7B; seed 42 = $90.98B exactly) and the β₁=0 no-lock-in null ($748.2B / 97.8%) are committed artifacts, and manuscript v14 aligns the paper with all of the above. Referee rounds 2–12 (§22) took the manuscript to v15r5 on the shared accounting basis; on 2026-07-11 the former `abm/TECHNICAL.md` and `REVISION_VERIFICATION.md` were consolidated into this file (Appendix B, §22).*
+
+## 29. Round-22 reproducibility observation: ABM Monte Carlo re-run drift (2026-07-26)
+
+`abm/production_scale_test.py` (round-22 B4) attempted a production-spec scale
+comparison and **halted at its pre-committed parity tier**. Recorded here because
+the halt is itself a reproducibility fact about the ABM leg.
+
+| | |
+|---|---|
+| Committed 50-seed mean (`abm/monte_carlo_results.csv`) | $96.6791545521707B |
+| Fresh arm-A 50-seed mean, same seeds, 2026-07-26 | $96.81525194824529B |
+| mean \|diff\| / max per-seed \|diff\| | $0.136B / $0.145B |
+| Binding tolerance (pre-committed) | $0.05B |
+
+The offset is **uniform across all fifty seeds** ($0.132–0.145B each), which
+distinguishes a changed input from code drift or sampling noise. `G1b` confirms
+intra-run determinism is exact (same seed twice, max |diff| 0.000e+00). FRED's
+median home value moved 403,200 → 410,700 since the freeze; the script pins the
+medians, so the residual comes from revision in the FRED macro frame feeding the
+friction index.
+
+**Scope.** Frozen artifacts are unaffected and no manuscript quantity moves. What
+this says is that a *fresh* re-run of the ABM Monte Carlo on today's data lands
+0.14% from the frozen mean. Any future run wanting bit-parity against the frozen
+ABM artifacts must either pin the full FRED frame or accept a ~0.14% offset.
+
+**Open decision (Eugene).** The scale test compares two arms, and both arms sit
+on the same fresh frame, so arm A could be re-anchored to a fresh baseline rather
+than to the committed CSV, with the uniform offset disclosed. That is defensible
+but is a post-hoc change to a pre-committed acceptance rule, so it is left as an
+amendment for Eugene to make explicitly rather than applied silently.
