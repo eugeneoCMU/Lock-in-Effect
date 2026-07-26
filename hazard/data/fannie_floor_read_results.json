@@ -1,0 +1,198 @@
+{
+ "mode": "fannie_floor_read",
+ "spec": "independent-agency read of the involuntary-turnover floor: the committed out_of_window_floor selection rule applied to the Fannie cohort-month panel, with the Freddie panel replayed through the same code path as parity",
+ "headline_cell": "gap<=-0.0025_age>=12",
+ "books": {
+  "freddie": {
+   "panel": "/Users/eugene/somthing/Lock In effect/Lock-in-Effect/hazard/data/cohort_month_panel.parquet",
+   "rows_after_filter": 22649,
+   "out_of_window_2017_2019": {
+    "gap<=+0.0000_age>=12": {
+     "cpr_pct": 6.065,
+     "exposure_upb": 2349443878136.6,
+     "n_cohort_months": 528
+    },
+    "gap<=+0.0000_age>=24": {
+     "cpr_pct": 10.995,
+     "exposure_upb": 123800491191.39998,
+     "n_cohort_months": 95
+    },
+    "gap<=-0.0025_age>=12": {
+     "cpr_pct": 5.185,
+     "exposure_upb": 1748162889501.0798,
+     "n_cohort_months": 438
+    },
+    "gap<=-0.0025_age>=24": {
+     "cpr_pct": 8.92,
+     "exposure_upb": 42080075767.81,
+     "n_cohort_months": 65
+    },
+    "gap<=-0.0050_age>=12": {
+     "cpr_pct": 5.073,
+     "exposure_upb": 1120240339414.35,
+     "n_cohort_months": 396
+    },
+    "gap<=-0.0050_age>=24": {
+     "cpr_pct": 8.92,
+     "exposure_upb": 42080075767.81,
+     "n_cohort_months": 65
+    }
+   },
+   "in_window_2023_2024": {
+    "gap<=+0.0000_age>=12": {
+     "cpr_pct": 3.922,
+     "exposure_upb": 45848013531057.83,
+     "n_cohort_months": 6470
+    },
+    "gap<=+0.0000_age>=24": {
+     "cpr_pct": 4.002,
+     "exposure_upb": 38692286061205.24,
+     "n_cohort_months": 5973
+    },
+    "gap<=-0.0025_age>=12": {
+     "cpr_pct": 3.922,
+     "exposure_upb": 45845250879998.33,
+     "n_cohort_months": 6321
+    },
+    "gap<=-0.0025_age>=24": {
+     "cpr_pct": 4.002,
+     "exposure_upb": 38689529546157.91,
+     "n_cohort_months": 5839
+    },
+    "gap<=-0.0050_age>=12": {
+     "cpr_pct": 3.921,
+     "exposure_upb": 45831561126392.95,
+     "n_cohort_months": 6034
+    },
+    "gap<=-0.0050_age>=24": {
+     "cpr_pct": 4.001,
+     "exposure_upb": 38675855231483.5,
+     "n_cohort_months": 5583
+    }
+   },
+   "in_window_deep_OTM_validation": {
+    "gap<=-0.02_age>=12": {
+     "cpr_pct": 3.84,
+     "exposure_upb": 44557119484831.3,
+     "n_cohort_months": 3984
+    },
+    "gap<=-0.02_age>=24": {
+     "cpr_pct": 3.909,
+     "exposure_upb": 37422383757422.664,
+     "n_cohort_months": 3737
+    }
+   }
+  },
+  "fannie": {
+   "panel": "/Users/eugene/somthing/Lock In effect/Lock-in-Effect/hazard/data/cohort_month_panel_fannie.parquet",
+   "rows_after_filter": 22859,
+   "out_of_window_2017_2019": {
+    "gap<=+0.0000_age>=12": {
+     "cpr_pct": 6.403,
+     "exposure_upb": 3066137934377.6694,
+     "n_cohort_months": 501
+    },
+    "gap<=+0.0000_age>=24": {
+     "cpr_pct": 11.895,
+     "exposure_upb": 98499219043.6,
+     "n_cohort_months": 89
+    },
+    "gap<=-0.0025_age>=12": {
+     "cpr_pct": 5.522,
+     "exposure_upb": 2317864654424.1094,
+     "n_cohort_months": 421
+    },
+    "gap<=-0.0025_age>=24": {
+     "cpr_pct": 10.136,
+     "exposure_upb": 27522487459.69,
+     "n_cohort_months": 71
+    },
+    "gap<=-0.0050_age>=12": {
+     "cpr_pct": 5.373,
+     "exposure_upb": 1429742652360.28,
+     "n_cohort_months": 378
+    },
+    "gap<=-0.0050_age>=24": {
+     "cpr_pct": 10.136,
+     "exposure_upb": 27522487459.69,
+     "n_cohort_months": 71
+    }
+   },
+   "in_window_2023_2024": {
+    "gap<=+0.0000_age>=12": {
+     "cpr_pct": 3.963,
+     "exposure_upb": 53543199674054.55,
+     "n_cohort_months": 6463
+    },
+    "gap<=+0.0000_age>=24": {
+     "cpr_pct": 4.151,
+     "exposure_upb": 39953875238900.016,
+     "n_cohort_months": 5815
+    },
+    "gap<=-0.0025_age>=12": {
+     "cpr_pct": 3.962,
+     "exposure_upb": 53537572461388.375,
+     "n_cohort_months": 6322
+    },
+    "gap<=-0.0025_age>=24": {
+     "cpr_pct": 4.151,
+     "exposure_upb": 39948260650495.766,
+     "n_cohort_months": 5685
+    },
+    "gap<=-0.0050_age>=12": {
+     "cpr_pct": 3.961,
+     "exposure_upb": 53510957085399.586,
+     "n_cohort_months": 6040
+    },
+    "gap<=-0.0050_age>=24": {
+     "cpr_pct": 4.149,
+     "exposure_upb": 39921685524345.266,
+     "n_cohort_months": 5434
+    }
+   },
+   "in_window_deep_OTM_validation": {
+    "gap<=-0.02_age>=12": {
+     "cpr_pct": 3.864,
+     "exposure_upb": 51715104425808.73,
+     "n_cohort_months": 3984
+    },
+    "gap<=-0.02_age>=24": {
+     "cpr_pct": 4.029,
+     "exposure_upb": 38156033157215.25,
+     "n_cohort_months": 3586
+    }
+   }
+  }
+ },
+ "comparison": {
+  "freddie_headline_cpr_pct": 5.185,
+  "fannie_headline_cpr_pct": 5.522,
+  "difference_pp": 0.337,
+  "clean_band_pct": [
+   4.695,
+   5.334
+  ],
+  "fannie_inside_clean_band": false,
+  "freddie_headline_n": 438,
+  "fannie_headline_n": 421,
+  "R1_fannie_mature_cell": {
+   "cpr_pct": 10.136,
+   "exposure_upb": 27522487459.69,
+   "n_cohort_months": 71
+  },
+  "R1_freddie_mature_cell": {
+   "cpr_pct": 8.92,
+   "exposure_upb": 42080075767.81,
+   "n_cohort_months": 65
+  }
+ },
+ "parity_gates": {
+  "G1_freddie_parity": {
+   "pass": true,
+   "n_mismatches": 0
+  }
+ },
+ "parity_gates_all_pass": true,
+ "verdict": "T2",
+ "runtime_s": 0.6352034160000001
+}
