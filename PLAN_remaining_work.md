@@ -157,3 +157,22 @@ exists precisely for this, and it is still short of a 250-word cap.
 6. **§4 survivors** and **§6d/§6f**, if you want them.
 
 §2 and §6 do not depend on §1, so if the WSHOMCB answer is bad, both still land.
+
+---
+
+## 7. FINDINGS FROM THE POST-ROUND-22 STANDING REVIEW (2026-07-26)
+
+A fresh adversarial read of the whole manuscript, run after round 22 closed. One
+item was fixed immediately; the rest are open and are listed in the order a
+hostile discussant would raise them.
+
+| # | Finding | Status |
+|---|---|---|
+| **7a** | **Abstract dropped the binding sampling layer.** L473 requires the hull and the `[+3.0, +8.0]` sampling interval be quoted together; the short-abstract swap kept only the hull. My regression, introduced the same day. | **FIXED** (commit `0eef701`) |
+| **7b** | **The anchor defect generalises.** Only 2 of 18 scripts touching a Danish leg call `set_danish_moving_anchor`; the rest run at the `dk_level` default. Most are engine modules where the caller sets it — correct design. But `curtailment_danish_scaling.py` produces a committed artifact behind the manuscript's "+\$0.77 billion, immaterial" curtailment-differential claim (L727, L731), and it ran the **bracketing** leg. Direction almost certainly flips: under `dk_level` the Danish leg is *slower* (3.39% vs 4.76%) so retains higher balances and higher curtailment; under production `us_intercept` it is *faster* (5.61%), so the differential should be negative. **This is the same defect class as round-22 A2 (`tab:discount`) — I found one instance and did not generalise.** | **OPEN — needs a re-run under `us_intercept`** |
+| **7c** | **The par-crediting disclosure sits in one section only.** Round 22 established that the Danish leg credits ~\$470B of retired balance at par against a 32–34% discount, an un-priced channel larger than the gap and signed against it. It appears in V.B. It does **not** appear in VII.D, `tab:danish`, `fig:gapsweep`, `tab:headline`, the limitations, or the conclusion — and the abstract still says the institutional cash-flow cost is "small" without it. | **OPEN — prose propagation, no run** |
+| **7d** | **The floor was never re-read on Fannie data.** The binding parameter rests on 31 Freddie clusters of 2018 turnover, with the mature-age seasoning test not computable and an age-standardised read above the clean band (84% imputed weight). 826M Fannie loan-months spanning 2017Q1–2022Q4 are already staged in the identical layout, and the replication holds the floor **fixed**. The manuscript never raises re-reading it there. The reviewer's likely opener, and there is no feasibility defence. | **OPEN — one run on staged data** |
+| **7e** | **Recovery percentages cannot compound error.** The engine renormalises the pool to actual WSHOMCB holdings monthly, so every recovery figure is effectively a window-mean-CPR statement, not a balance-path fit. Disclosed only as a parenthetical at L351. Round-22 B6 made the affine relation explicit; this is the sharper version of the same point and belongs beside it. | **OPEN — one sentence** |
+| **7f** | **The calibration box carries no statistical content.** The 5.5–7.7% band is Liebersohn–Rothstein's *specification* range and 6.5% is an adopted midpoint, not a published point estimate; their standard error is propagated nowhere. The box is nonetheless set against the bootstrap CI and called "the operative uncertainty", which invites reading it as an interval. Disclosed in a footnote, over-read in the tables. | **OPEN — framing** |
+
+**7b and 7d are the two that need runs. 7c, 7e and 7f are prose.**
