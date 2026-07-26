@@ -1,0 +1,471 @@
+{
+ "mode": "concave_additive_marginal",
+ "spec": "full 2x2x2 factorial transform {loglinear, concave} x form {max, additive} x floor {4.0, 4.991}% annual CPR, central (p_q 6.5) + null (p_q 0) at every cell = 16 US-regime legs; concave transform = seasonality_concave_gap kink 2.0pp / slope2 0.5 patched onto competing_risks.prepay_hazard; form = literature_hazard.FLOOR_MODE, read at call time so the two mechanisms compose without new plumbing; production convention otherwise (75k sample, seed 42, shared macro frame, raw-basis scoring); parity gates G0-G5 at abs diff < 1e-9; ex-ante partition T1/T2/T3 on membership in the committed hull [3.891507360127463, 13.09774126267503] plus an orthogonal separability partition S1/S2 on the difference-in-differences interaction at the +/-1.0pp materiality convention",
+ "legs": {
+  "loglinear_max_4_central": {
+   "transform": "loglinear",
+   "form": "max",
+   "floor_annual_cpr_pct": 4.0,
+   "p_q_shock_pct": 6.5,
+   "beta1": -0.06857052676484808,
+   "trapped_b": 818.5300844066606,
+   "share_pct": 107.0326190295068,
+   "r_lag0": 0.19000395255236566,
+   "peak_lag": -3
+  },
+  "loglinear_max_4_null": {
+   "transform": "loglinear",
+   "form": "max",
+   "floor_annual_cpr_pct": 4.0,
+   "p_q_shock_pct": 0.0,
+   "beta1": 0.0,
+   "trapped_b": 748.1850239867648,
+   "share_pct": 97.83415925879702,
+   "r_lag0": 0.3669902953388254,
+   "peak_lag": -3
+  },
+  "loglinear_max_4991_central": {
+   "transform": "loglinear",
+   "form": "max",
+   "floor_annual_cpr_pct": 4.9910000000000005,
+   "p_q_shock_pct": 6.5,
+   "beta1": -0.06857052676484808,
+   "trapped_b": 767.5264524465003,
+   "share_pct": 100.36328284662208,
+   "r_lag0": -0.13792245738381698,
+   "peak_lag": -3
+  },
+  "loglinear_max_4991_null": {
+   "transform": "loglinear",
+   "form": "max",
+   "floor_annual_cpr_pct": 4.9910000000000005,
+   "p_q_shock_pct": 0.0,
+   "beta1": 0.0,
+   "trapped_b": 724.9180585654117,
+   "share_pct": 94.79172466371236,
+   "r_lag0": 0.35389036550042563,
+   "peak_lag": -3
+  },
+  "loglinear_additive_4_central": {
+   "transform": "loglinear",
+   "form": "additive",
+   "floor_annual_cpr_pct": 4.0,
+   "p_q_shock_pct": 6.5,
+   "beta1": -0.06857052676484808,
+   "trapped_b": 513.7265922748531,
+   "share_pct": 67.17590921064219,
+   "r_lag0": 0.3676940481281684,
+   "peak_lag": -3
+  },
+  "loglinear_additive_4_null": {
+   "transform": "loglinear",
+   "form": "additive",
+   "floor_annual_cpr_pct": 4.0,
+   "p_q_shock_pct": 0.0,
+   "beta1": 0.0,
+   "trapped_b": 427.7040999885527,
+   "share_pct": 55.92743732152105,
+   "r_lag0": 0.413265745774163,
+   "peak_lag": -3
+  },
+  "loglinear_additive_4991_central": {
+   "transform": "loglinear",
+   "form": "additive",
+   "floor_annual_cpr_pct": 4.9910000000000005,
+   "p_q_shock_pct": 6.5,
+   "beta1": -0.06857052676484808,
+   "trapped_b": 427.54488764725437,
+   "share_pct": 55.90661839965657,
+   "r_lag0": 0.36698365374563197,
+   "peak_lag": -3
+  },
+  "loglinear_additive_4991_null": {
+   "transform": "loglinear",
+   "form": "additive",
+   "floor_annual_cpr_pct": 4.9910000000000005,
+   "p_q_shock_pct": 0.0,
+   "beta1": 0.0,
+   "trapped_b": 341.83938974816874,
+   "share_pct": 44.69959732600039,
+   "r_lag0": 0.41328650543103707,
+   "peak_lag": -3
+  },
+  "concave_max_4_central": {
+   "transform": "concave",
+   "form": "max",
+   "floor_annual_cpr_pct": 4.0,
+   "p_q_shock_pct": 6.5,
+   "beta1": -0.06857052676484808,
+   "trapped_b": 808.4023371015244,
+   "share_pct": 105.70829468323242,
+   "r_lag0": 0.2806514840546485,
+   "peak_lag": -3
+  },
+  "concave_max_4_null": {
+   "transform": "concave",
+   "form": "max",
+   "floor_annual_cpr_pct": 4.0,
+   "p_q_shock_pct": 0.0,
+   "beta1": 0.0,
+   "trapped_b": 748.1850239867648,
+   "share_pct": 97.83415925879702,
+   "r_lag0": 0.3669902953388254,
+   "peak_lag": -3
+  },
+  "concave_max_4991_central": {
+   "transform": "concave",
+   "form": "max",
+   "floor_annual_cpr_pct": 4.9910000000000005,
+   "p_q_shock_pct": 6.5,
+   "beta1": -0.06857052676484808,
+   "trapped_b": 763.5848569701802,
+   "share_pct": 99.84787199609579,
+   "r_lag0": 0.0715578166633771,
+   "peak_lag": -3
+  },
+  "concave_max_4991_null": {
+   "transform": "concave",
+   "form": "max",
+   "floor_annual_cpr_pct": 4.9910000000000005,
+   "p_q_shock_pct": 0.0,
+   "beta1": 0.0,
+   "trapped_b": 724.9180585654117,
+   "share_pct": 94.79172466371236,
+   "r_lag0": 0.35389036550042563,
+   "peak_lag": -3
+  },
+  "concave_additive_4_central": {
+   "transform": "concave",
+   "form": "additive",
+   "floor_annual_cpr_pct": 4.0,
+   "p_q_shock_pct": 6.5,
+   "beta1": -0.06857052676484808,
+   "trapped_b": 498.4786821679662,
+   "share_pct": 65.18206221032133,
+   "r_lag0": 0.3890780187163148,
+   "peak_lag": -3
+  },
+  "concave_additive_4_null": {
+   "transform": "concave",
+   "form": "additive",
+   "floor_annual_cpr_pct": 4.0,
+   "p_q_shock_pct": 0.0,
+   "beta1": 0.0,
+   "trapped_b": 427.7040999885527,
+   "share_pct": 55.92743732152105,
+   "r_lag0": 0.413265745774163,
+   "peak_lag": -3
+  },
+  "concave_additive_4991_central": {
+   "transform": "concave",
+   "form": "additive",
+   "floor_annual_cpr_pct": 4.9910000000000005,
+   "p_q_shock_pct": 6.5,
+   "beta1": -0.06857052676484808,
+   "trapped_b": 412.3634573644161,
+   "share_pct": 53.9214644331241,
+   "r_lag0": 0.3888086529480899,
+   "peak_lag": -3
+  },
+  "concave_additive_4991_null": {
+   "transform": "concave",
+   "form": "additive",
+   "floor_annual_cpr_pct": 4.9910000000000005,
+   "p_q_shock_pct": 0.0,
+   "beta1": 0.0,
+   "trapped_b": 341.83938974816874,
+   "share_pct": 44.69959732600039,
+   "r_lag0": 0.41328650543103707,
+   "peak_lag": -3
+  }
+ },
+ "parity_gates": {
+  "G0_loglin_max_4_central_b": {
+   "got": 818.5300844066606,
+   "want": 818.5300844066606,
+   "diff": 0.0,
+   "tol": 1e-09,
+   "bit_exact": true,
+   "pass": true
+  },
+  "G0_loglin_max_4_null_b": {
+   "got": 748.1850239867648,
+   "want": 748.1850239867648,
+   "diff": 0.0,
+   "tol": 1e-09,
+   "bit_exact": true,
+   "pass": true
+  },
+  "G0_loglin_max_4_marginal_pp": {
+   "got": 9.198459770709789,
+   "want": 9.198459770709789,
+   "diff": 0.0,
+   "tol": 1e-09,
+   "bit_exact": true,
+   "pass": true
+  },
+  "G0_loglin_max_4991_central_b": {
+   "got": 767.5264524465003,
+   "want": 767.5264524465003,
+   "diff": 0.0,
+   "tol": 1e-09,
+   "bit_exact": true,
+   "pass": true
+  },
+  "G0_loglin_max_4991_null_b": {
+   "got": 724.9180585654117,
+   "want": 724.9180585654117,
+   "diff": 0.0,
+   "tol": 1e-09,
+   "bit_exact": true,
+   "pass": true
+  },
+  "G0_loglin_max_4991_marginal_pp": {
+   "got": 5.571558182909726,
+   "want": 5.571558182909726,
+   "diff": 0.0,
+   "tol": 1e-09,
+   "bit_exact": true,
+   "pass": true
+  },
+  "G1_concave_max_4_central_b": {
+   "got": 808.4023371015244,
+   "want": 808.4023371015244,
+   "diff": 0.0,
+   "tol": 1e-09,
+   "bit_exact": true,
+   "pass": true
+  },
+  "G1_concave_max_4_null_b": {
+   "got": 748.1850239867648,
+   "want": 748.1850239867648,
+   "diff": 0.0,
+   "tol": 1e-09,
+   "bit_exact": true,
+   "pass": true
+  },
+  "G1_concave_max_4_marginal_pp": {
+   "got": 7.8741354244354085,
+   "want": 7.8741354244354085,
+   "diff": 0.0,
+   "tol": 1e-09,
+   "bit_exact": true,
+   "pass": true
+  },
+  "G2_concave_max_4991_central_b": {
+   "got": 763.5848569701802,
+   "want": 763.5848569701802,
+   "diff": 0.0,
+   "tol": 1e-09,
+   "bit_exact": true,
+   "pass": true
+  },
+  "G2_concave_max_4991_null_b": {
+   "got": 724.9180585654117,
+   "want": 724.9180585654117,
+   "diff": 0.0,
+   "tol": 1e-09,
+   "bit_exact": true,
+   "pass": true
+  },
+  "G2_concave_max_4991_marginal_pp": {
+   "got": 5.056147332383432,
+   "want": 5.056147332383432,
+   "diff": 0.0,
+   "tol": 1e-09,
+   "bit_exact": true,
+   "pass": true
+  },
+  "G3_loglin_add_4_central_b": {
+   "got": 513.7265922748531,
+   "want": 513.7265922748531,
+   "diff": 0.0,
+   "tol": 1e-09,
+   "bit_exact": true,
+   "pass": true
+  },
+  "G3_loglin_add_4_null_b": {
+   "got": 427.7040999885527,
+   "want": 427.7040999885527,
+   "diff": 0.0,
+   "tol": 1e-09,
+   "bit_exact": true,
+   "pass": true
+  },
+  "G3_loglin_add_4_marginal_pp": {
+   "got": 11.248471889121141,
+   "want": 11.248471889121141,
+   "diff": 0.0,
+   "tol": 1e-09,
+   "bit_exact": true,
+   "pass": true
+  },
+  "G4_loglin_add_4991_central_b": {
+   "got": 427.54488764725437,
+   "want": 427.54488764725437,
+   "diff": 0.0,
+   "tol": 1e-09,
+   "bit_exact": true,
+   "pass": true
+  },
+  "G4_loglin_add_4991_null_b": {
+   "got": 341.83938974816874,
+   "want": 341.83938974816874,
+   "diff": 0.0,
+   "tol": 1e-09,
+   "bit_exact": true,
+   "pass": true
+  },
+  "G4_loglin_add_4991_marginal_pp": {
+   "got": 11.207021073656186,
+   "want": 11.207021073656186,
+   "diff": 0.0,
+   "tol": 1e-09,
+   "bit_exact": true,
+   "pass": true
+  },
+  "G4_loglin_add_4991_central_share_pct": {
+   "got": 55.90661839965657,
+   "want": 55.90661839965657,
+   "diff": 0.0,
+   "tol": 1e-09,
+   "bit_exact": true,
+   "pass": true
+  },
+  "G4_loglin_add_4991_null_share_pct": {
+   "got": 44.69959732600039,
+   "want": 44.69959732600039,
+   "diff": 0.0,
+   "tol": 1e-09,
+   "bit_exact": true,
+   "pass": true
+  },
+  "G5_null_transform_invariance_max_4": {
+   "got": 748.1850239867648,
+   "want": 748.1850239867648,
+   "diff": 0.0,
+   "tol": 1e-09,
+   "bit_exact": true,
+   "pass": true
+  },
+  "G5_null_transform_invariance_max_4991": {
+   "got": 724.9180585654117,
+   "want": 724.9180585654117,
+   "diff": 0.0,
+   "tol": 1e-09,
+   "bit_exact": true,
+   "pass": true
+  },
+  "G5_null_transform_invariance_additive_4": {
+   "got": 427.7040999885527,
+   "want": 427.7040999885527,
+   "diff": 0.0,
+   "tol": 1e-09,
+   "bit_exact": true,
+   "pass": true
+  },
+  "G5_null_transform_invariance_additive_4991": {
+   "got": 341.83938974816874,
+   "want": 341.83938974816874,
+   "diff": 0.0,
+   "tol": 1e-09,
+   "bit_exact": true,
+   "pass": true
+  }
+ },
+ "parity_gates_all_pass": true,
+ "parity_gates_all_bit_exact": true,
+ "committed_hull_pp": [
+  3.891507360127463,
+  13.09774126267503
+ ],
+ "concave_additive_cells": {
+  "4": {
+   "floor_annual_cpr_pct": 4.0,
+   "null_trapped_b": 427.7040999885527,
+   "null_share_pct": 55.92743732152105,
+   "central_trapped_b": 498.4786821679662,
+   "central_share_pct": 65.18206221032133,
+   "marginal_b": 70.77458217941353,
+   "marginal_pp": 9.254624888800286
+  },
+  "4991": {
+   "floor_annual_cpr_pct": 4.9910000000000005,
+   "null_trapped_b": 341.83938974816874,
+   "null_share_pct": 44.69959732600039,
+   "central_trapped_b": 412.3634573644161,
+   "central_share_pct": 53.9214644331241,
+   "marginal_b": 70.52406761624735,
+   "marginal_pp": 9.221867107123714
+  }
+ },
+ "concave_additive_marginal_pp_at_4": 9.254624888800286,
+ "concave_additive_marginal_b_at_4": 70.77458217941353,
+ "concave_additive_marginal_pp_at_offwindow_point": 9.221867107123714,
+ "concave_additive_marginal_b_at_offwindow_point": 70.52406761624735,
+ "concave_additive_central_share_pct_at_offwindow_point": 53.9214644331241,
+ "concave_additive_null_share_pct_at_offwindow_point": 44.69959732600039,
+ "hull_membership": {
+  "4": {
+   "marginal_pp": 9.254624888800286,
+   "inside_committed_hull": true,
+   "distance_below_lo_pp": 0.0,
+   "distance_above_hi_pp": 0.0,
+   "distance_to_nearer_edge_pp": 3.843116373874743
+  },
+  "4991": {
+   "marginal_pp": 9.221867107123714,
+   "inside_committed_hull": true,
+   "distance_below_lo_pp": 0.0,
+   "distance_above_hi_pp": 0.0,
+   "distance_to_nearer_edge_pp": 3.8758741555513154
+  }
+ },
+ "implied_hull_pp": [
+  3.891507360127463,
+  13.09774126267503
+ ],
+ "implied_hull_is_lower_bound_only": true,
+ "interaction": {
+  "4": {
+   "floor_annual_cpr_pct": 4.0,
+   "form_effect_under_loglinear_pp": 2.0500121184113524,
+   "form_effect_under_concave_pp": 1.380489464364878,
+   "transform_effect_under_max_pp": -1.3243243462743806,
+   "transform_effect_under_additive_pp": -1.993847000320855,
+   "interaction_pp": -0.6695226540464745,
+   "material": false
+  },
+  "4991": {
+   "floor_annual_cpr_pct": 4.9910000000000005,
+   "form_effect_under_loglinear_pp": 5.63546289074646,
+   "form_effect_under_concave_pp": 4.165719774740282,
+   "transform_effect_under_max_pp": -0.515410850526294,
+   "transform_effect_under_additive_pp": -1.9851539665324722,
+   "interaction_pp": -1.4697431160061782,
+   "material": true
+  }
+ },
+ "max_abs_interaction_pp": 1.4697431160061782,
+ "t1_hull_stands": true,
+ "t2_hull_must_be_rederived": false,
+ "t3_degenerate": false,
+ "s1_separable": false,
+ "interpretive_verdict": "T1: HULL STANDS \u2014 the concave x additive marginal at central elasticity lies inside the committed hull [3.8915, 13.0977]pp at both floors (+9.2546pp @4.0%, +9.2219pp @4.991%). The five '$+3.9$ to $+13.1$' tex literals and gate #69 stand unchanged; report the cell as a completeness check scoped, explicitly, to the CENTRAL elasticity at the headline off-window anchor \u2014 the {5.5, 7.7} band ends of this cell are unrun, so the hull is not shown complete over {form x transform}.",
+ "separability_verdict": "S2: |interaction| > 1.0pp at a floor \u2014 the form and transform effects are NOT separable; tab:uncertainty line 509 must replace its two independent entries ('additive form $+11.2$' and 'concave transform $+5.1$') with the measured joint cell, and disclose the interaction term with its sign",
+ "degeneracy_detail": {
+  "failed_gates": [],
+  "nonfinite_legs": [],
+  "inert_cells": []
+ },
+ "committed_additive_offwindow_levels_pct": {
+  "note": "the additive off-window recovery levels; already committed in floor_form_offwindow_results.json AND already disclosed in the .tex at line 784 (contrary to the audit brief that commissioned this run), read here for one-place verification and not recomputed",
+  "central_at_4991_pct": 55.90661839965657,
+  "central_at_4991_field": "rows[3].band['6.5'].central_share_pct (form=additive, floor=4.991)",
+  "null_at_4991_pct": 44.69959732600039,
+  "null_at_4991_field": "rows[3].null_share_pct (form=additive, floor=4.991)",
+  "central_at_hull_max_pct": 61.16497790030112,
+  "central_at_hull_max_field": "rows[1].band['7.7'].central_share_pct (form=additive, floor=4.695, p_q 7.7 \u2014 the cell carrying the hull maximum marginal_pp 13.09774126267503)"
+ },
+ "runtime_s": 90.43665066700001
+}
