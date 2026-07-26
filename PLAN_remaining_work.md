@@ -1,6 +1,13 @@
 # Plan — remaining work after round 22 — 2026-07-26
 
-State: `panel-revision-2026-07-18`, 24 local commits unpushed. **89 gates PASS, 297 tests, 112pp, 0 undefined refs.**
+State: `panel-revision-2026-07-18`, 37 local commits unpushed. **90 gates PASS, 297 tests, 113pp, 0 undefined refs.**
+
+> **STATUS 2026-07-26 (second pass): §1, §2 and §6 are EXECUTED. THE GAP IS CLOSED.**
+> `bootstrap_pathb_cluster` ran at the headline floor: marginal **[+4.63, +6.92]pp**, verdict **T1** —
+> the floor read stays the binding layer, but the committed within-stratum scheme had understated
+> loan-sample uncertainty by **~37×**, and "the single stratified draw contributes essentially no
+> uncertainty" is retracted. Both PDFs rebuilt. The run index is complete (36 rows). The prose pass
+> is done. **Remaining: §3 (Eugene's four decisions) and §6e (the response letter); §4 survivors optional.**
 
 **DECISION RECORDED: page compression is abandoned.** The 55–65pp target from
 `HANDOFF_round21_referee.md:65` is withdrawn at Eugene's instruction. Nothing below
