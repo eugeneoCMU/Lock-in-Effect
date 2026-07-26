@@ -143,6 +143,16 @@ ZERO_COUNT = [
     # H0: beta_g <= 0 under any construction, so the triangulation claim is
     # retired; the fits are "directionally consistent", nothing stronger.
     "sign-triangulated by two in-sample estimates",
+    # Round-22 C1: the externally anchored variant's 150.6% WAS pre-committed to
+    # the 50% band -- spec commit 335797a says it "is evaluated against the SAME
+    # pre-registered bands", contains no admissibility precondition anywhere, and
+    # pre-registered the floor diagnostic as reported "whichever direction it
+    # moves"; the artifact records classification_external "undercuts_paradigm".
+    # The exclusion formulation contradicted both and must not return. The
+    # qualification may be kept, but only labelled as post hoc (enforced in the
+    # external-gates cross-check above).
+    "is not scored against the 50\\% undercutting band",
+    "that band presupposed an empirically admissible turnover level",
 ]
 
 EXACTLY_ONE = [
@@ -444,16 +454,33 @@ def main() -> int:
     lit_share = f"{ext['results']['external']['share_pct']:.1f}\\%"
     scale_ext = ext["external_parameters"]["mobility_scale_external"]
     lit_scale = f"{scale_ext:,.0f}".replace(",", "{,}")
+    # ROUND 22: the artifact's own PRE-COMMITTED classification must be stated,
+    # and the admissibility qualification that sets it aside must be labelled
+    # post hoc. The spec commit (335797a) pre-registered the floor diagnostic as
+    # "reported alongside whatever the recovery number is, whichever direction it
+    # moves" and contains ZERO occurrences of "admissib"; the artifact records
+    # classification_external == "undercuts_paradigm" with
+    # registered_before_results True. The manuscript previously wrote that the
+    # 150.6% "is not scored against the 50% undercutting band", contradicting
+    # both. The old gate passed through that contradiction because it never read
+    # classification_external — which is why it is read here.
+    ext_class_ok = (ext["classification_external"] == "undercuts_paradigm"
+                    and bool(ext["preregistration"]["registered_before_results"]))
+    ext_posthoc_ok = ("formulated after the result was seen" in tex
+                      and "labelled post-run qualification" in tex)
     ok = (bool(ext["gates"]["G1_harness_parity"]["pass"])
           and bool(ext["gates"]["G2_anchor"]["pass"])
           and bool(ext["floor_diagnostic"]["violates_observed_floor"])
-          and claims >= 1 and lit_share in tex and lit_scale in tex)
+          and claims >= 1 and lit_share in tex and lit_scale in tex
+          and ext_class_ok and ext_posthoc_ok)
     failures += 0 if ok else 1
     print(
         f"[{'PASS' if ok else 'FAIL'}] cross-check abm external gates: "
         f"G1/G2 pass, floor-violation={ext['floor_diagnostic']['violates_observed_floor']}, "
         f"tex run-citation count={claims} (want >=1), literals "
-        f"{lit_share!r}/{lit_scale!r} present={lit_share in tex}/{lit_scale in tex}"
+        f"{lit_share!r}/{lit_scale!r} present={lit_share in tex}/{lit_scale in tex}, "
+        f"precommitted-classification={ext['classification_external']} "
+        f"stated-and-labelled-posthoc={ext_posthoc_ok}"
     )
 
     # Round-15 Q10: the expectations-benchmark sentences must agree with the
