@@ -3567,6 +3567,54 @@ def main() -> int:
           f"+{cm['concave_marginal_pp_at_offwindow_point']:.4f}pp @4.991%), "
           f"tex literals={'ok' if cm_tex_ok else 'MISSING'}")
 
+    # ITEM 7d (gate #86): OUT-OF-AGENCY FLOOR READ. The floor is the binding
+    # parameter and was read off one agency. The Fannie read lands at 5.52% --
+    # ABOVE the clean band's 5.334% top and 0.01pp from the age-standardised
+    # Freddie read of 5.508%. This gate pins the T2 verdict and the Freddie
+    # parity that makes it meaningful, because the tempting later edit is to
+    # present 5.52% as "close to" the band rather than outside it.
+    ffr = json.loads((HAZ_DATA / "fannie_floor_read_results.json").read_text())
+    ffr_c = ffr["comparison"]
+    ffr_ok = (ffr["parity_gates_all_pass"]
+              and ffr["verdict"] == "T2"
+              and ffr_c["fannie_inside_clean_band"] is False
+              and abs(ffr_c["fannie_headline_cpr_pct"] - 5.522) < 1e-6
+              and abs(ffr_c["freddie_headline_cpr_pct"] - 5.185) < 1e-6
+              and ffr_c["fannie_headline_n"] >= 30)
+    ffr_tex_ok = ("fannie\\_floor\\_read" in tex
+                  and "5.52\\%" in tex
+                  and "above the clean band" in tex)
+    ok = ffr_ok and ffr_tex_ok
+    failures += 0 if ok else 1
+    print(f"[{'PASS' if ok else 'FAIL'}] cross-check out-of-agency floor read: "
+          f"artifact={ffr_ok} (fannie {ffr_c['fannie_headline_cpr_pct']}% vs "
+          f"freddie {ffr_c['freddie_headline_cpr_pct']}%, inside clean band="
+          f"{ffr_c['fannie_inside_clean_band']}, {ffr['verdict']}), "
+          f"tex literals={'ok' if ffr_tex_ok else 'MISSING'}")
+
+    # ITEM 7b (gate #87): CURTAILMENT DIFFERENTIAL ON THE PRODUCTION LEG. The
+    # committed +$0.77B was measured on the dk_level BRACKETING cache. On the
+    # production us_intercept leg it reverses to -$1.68B and crosses the $1B
+    # materiality threshold, so the "immaterial throughout" claim is withdrawn.
+    # Pinned because the withdrawal is the fragile part: the +$0.77B figure is
+    # still in the paper (correctly attributed) and could easily be re-promoted.
+    cds = json.loads((HAZ_DATA
+                      / "curtailment_danish_scaling_us_intercept_results.json").read_text())
+    cds_runs = {r["scale"]: r for r in cds["runs"]} if "runs" in cds else {}
+    cds_unit = cds_runs.get(1.0, {})
+    cds_ok = (abs(cds_unit.get("curtailment_differential_b", 0.0)
+                  - (-1.6801)) < 5e-3)
+    cds_tex_ok = ("$-\\$1.68$" in tex
+                  and "Danish-level bracketing} leg" in tex
+                  and "withdraw the claim that the curtailment differential is immaterial" in tex)
+    ok = cds_ok and cds_tex_ok
+    failures += 0 if ok else 1
+    print(f"[{'PASS' if ok else 'FAIL'}] cross-check curtailment differential on "
+          f"production leg: artifact={cds_ok} "
+          f"(unit-scale differential "
+          f"{cds_unit.get('curtailment_differential_b', float('nan')):+.4f}B), "
+          f"tex literals={'ok' if cds_tex_ok else 'MISSING'}")
+
     # ROUND-22 (gate #85): PRODUCTION-SPEC SCALE TEST. VII.A's original check ran
     # the household mechanic in isolation at 15.616% mean CPR against the
     # production ABM's 11.761 -- 3.9 points hot -- with no script, artifact or

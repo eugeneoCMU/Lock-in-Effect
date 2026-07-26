@@ -1,8 +1,8 @@
 {
   "mode": "curtailment_danish_scaling",
   "spec": "hazard/curtailment_danish_scaling.py module docstring (fixed ex ante)",
-  "git_commit": "801a3826e0102d3cdb6a85500108017f50e260a8",
-  "created_utc": "2026-07-26T20:34:47+00:00",
+  "git_commit": "bdc61059d8d08a8fc20607e862e6e03316c76c81",
+  "created_utc": "2026-07-26T20:35:16+00:00",
   "layer": "fed_mbs_extension_risk.compute_metrics(use_hazard_microsim=True) over the committed production microsim cache (data/microsim_results.parquet)",
   "scales": [
     0.75,
@@ -16,54 +16,54 @@
       "curtailment_cpr_healthy": 0.009000000000000001,
       "curtailment_smm_mean_annualized_pct": 0.6276249800185014,
       "us_netting_b": 52.17165140447258,
-      "danish_leg_curtailment_b": 52.933460941093806,
-      "curtailment_differential_b": 0.7618095366212287,
+      "danish_leg_curtailment_b": 51.08596470910617,
+      "curtailment_differential_b": -1.0856866953664053,
       "us_trapped_b": 766.3584330021879,
-      "danish_trapped_b": 864.6402185330435,
-      "institutional_gap_b": -98.28178553085559,
+      "danish_trapped_b": 702.3877605214702,
+      "institutional_gap_b": 63.97067248071767,
       "share_explained_pct": 100.21055030497973,
       "empirical_trapped_b": 764.7482532227002,
       "max_abs_danish_cpr_diff_vs_baseline_pp": 0.0,
       "max_abs_us_cpr_diff_vs_baseline_pp": 0.0,
       "us_netting_linear_departure_b": 1.4210854715202004e-14,
-      "danish_linear_departure_b": 0.18260420529322374,
-      "differential_first_order_b": 0.5792053313280192
+      "danish_linear_departure_b": 0.17442273262957286,
+      "differential_first_order_b": -1.2601094279959604
     },
     {
       "scale": 1.0,
       "curtailment_cpr_healthy": 0.012,
       "curtailment_smm_mean_annualized_pct": 0.8368333066913352,
       "us_netting_b": 69.56220187263008,
-      "danish_leg_curtailment_b": 70.33447564773411,
-      "curtailment_differential_b": 0.7722737751040256,
+      "danish_leg_curtailment_b": 67.88205596863547,
+      "curtailment_differential_b": -1.6801459039946138,
       "us_trapped_b": 748.9678825340305,
-      "danish_trapped_b": 848.8697561693841,
-      "institutional_gap_b": -99.90187363535358,
+      "danish_trapped_b": 687.7795451639257,
+      "institutional_gap_b": 61.18833737010482,
       "share_explained_pct": 97.9365273968041,
       "empirical_trapped_b": 764.7482532227002,
       "max_abs_danish_cpr_diff_vs_baseline_pp": 0.0,
       "max_abs_us_cpr_diff_vs_baseline_pp": 0.0,
       "us_netting_linear_departure_b": 0.0,
       "danish_linear_departure_b": 0.0,
-      "differential_first_order_b": 0.7722737751040256
+      "differential_first_order_b": -1.6801459039946138
     },
     {
       "scale": 1.25,
       "curtailment_cpr_healthy": 0.015,
       "curtailment_smm_mean_annualized_pct": 1.0460416333641687,
       "us_netting_b": 86.95275234078761,
-      "danish_leg_curtailment_b": 87.61513336579239,
-      "curtailment_differential_b": 0.6623810250047768,
+      "danish_leg_curtailment_b": 84.56317626767051,
+      "curtailment_differential_b": -2.389576073117098,
       "us_trapped_b": 731.5773320658731,
-      "danish_trapped_b": 833.2116980674274,
-      "institutional_gap_b": -101.63436600155433,
+      "danish_trapped_b": 673.2756516075011,
+      "institutional_gap_b": 58.30168045837195,
       "share_explained_pct": 95.66250448862843,
       "empirical_trapped_b": 764.7482532227002,
       "max_abs_danish_cpr_diff_vs_baseline_pp": 0.0,
       "max_abs_us_cpr_diff_vs_baseline_pp": 0.0,
       "us_netting_linear_departure_b": 0.0,
-      "danish_linear_departure_b": -0.3029611938752481,
-      "differential_first_order_b": 0.965342218880032
+      "danish_linear_departure_b": -0.28939369312382723,
+      "differential_first_order_b": -2.1001823799932673
     }
   ],
   "anchors": {
@@ -86,32 +86,32 @@
       "pass": true
     },
     "danish_leg_curtailment_b": {
-      "got": 70.33447564773411,
+      "got": 67.88205596863547,
       "want": 70.33,
       "tol": 0.01,
-      "pass": true
+      "pass": false
     },
     "danish_trapped_printed_cell_b": {
-      "got": 848.8697561693841,
+      "got": 687.7795451639257,
       "want": 848.9,
       "tol": 1.0,
-      "pass": true
+      "pass": false
     },
     "curtailment_differential_b": {
-      "got": 0.7722737751040256,
+      "got": -1.6801459039946138,
       "want": 0.77,
       "tol": 0.01,
-      "pass": true
+      "pass": false
     }
   },
-  "parity_gates_all_pass": true,
+  "parity_gates_all_pass": false,
   "endpoint_differentials_b": {
-    "0.75x": 0.7618095366212287,
-    "1.25x": 0.6623810250047768
+    "0.75x": -1.0856866953664053,
+    "1.25x": -2.389576073117098
   },
-  "max_abs_differential_b": 0.7722737751040256,
+  "max_abs_differential_b": 2.389576073117098,
   "materiality_threshold_b": 1.0,
-  "ex_ante_verdict": "Danish curtailment differential stays below $1.0B at both +/-25% endpoints \u2014 the manuscript's 'stays immaterial (below $1 billion)' phrase is upgraded to the exact figures, no claim change",
+  "ex_ante_verdict": "Danish curtailment differential reaches $1.0B \u2014 restate the manuscript sentence with the exact value",
   "manuscript_sentence": "paper/v16/revised_paper_v16.tex, sec:robustness-hybrid: 'The Danish legs, which compute curtailment on their own counterfactual balances, scale only to first order, and their differential stays immaterial (below $1 billion) across the same range.'",
-  "runtime_s": 2.0
+  "runtime_s": 2.1
 }
