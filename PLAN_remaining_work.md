@@ -2,12 +2,14 @@
 
 State: `panel-revision-2026-07-18`, 37 local commits unpushed. **90 gates PASS, 297 tests, 113pp, 0 undefined refs.**
 
-> **STATUS 2026-07-26 (second pass): §1, §2 and §6 are EXECUTED. THE GAP IS CLOSED.**
-> `bootstrap_pathb_cluster` ran at the headline floor: marginal **[+4.63, +6.92]pp**, verdict **T1** —
-> the floor read stays the binding layer, but the committed within-stratum scheme had understated
-> loan-sample uncertainty by **~37×**, and "the single stratified draw contributes essentially no
-> uncertainty" is retracted. Both PDFs rebuilt. The run index is complete (36 rows). The prose pass
-> is done. **Remaining: §3 (Eugene's four decisions) and §6e (the response letter); §4 survivors optional.**
+> **STATUS 2026-07-26 (final): EVERYTHING EXECUTED EXCEPT THE PUSH.**
+> §1 the gap — closed (`bootstrap_pathb_cluster`, T1, [+4.63,+6.92]pp; the committed
+> within-stratum scheme had understated loan sampling ~37×). §2 four free wins — landed.
+> §3a B4 — executed under a **second** pre-commitment (T1, production spec, 12.66% vs 12.18%);
+> the failed tolerance was never widened. §3b venue — resolved, short abstract now canonical
+> at 424 words. §3e Berger locators — **verified against the source; one was wrong and is fixed**.
+> §6 bookkeeping — done, both PDFs rebuilt. §6e response letter — drafted, 5pp.
+> **Open: §3c the push only.** 45 commits, 91 gates, 297 tests, 113pp, clean tree.
 
 **DECISION RECORDED: page compression is abandoned.** The 55–65pp target from
 `HANDOFF_round21_referee.md:65` is withdrawn at Eugene's instruction. Nothing below
