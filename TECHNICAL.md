@@ -1337,8 +1337,9 @@ Path B: NPV-reset-to-baseline heuristic → ~6%). That calibrates against a
 and it conflates two channels that behave differently under a U.S. transplant.
 
 **Fix.** [`common/berger_calibration.py`](common/berger_calibration.py) imports
-Berger, Milbradt, Tourre & Vavra's estimated elasticities directly (Table 3
-structural parameters; §3.3.1 / §4.9.1) and models **two separate channels**:
+Berger, Jeong, Marx, Olesen & Tourre's estimated elasticities directly (`berger2026`,
+"A Danish fix for U.S. mortgage lock-in?"; Table 3 structural parameters;
+§3.3.1 / §4.9.1) and models **two separate channels**:
 
 - **Moving channel** — anchored to the Danish unconditional moving rate of
   **3.2%/yr**, with the (statistically flat) Danish moving-hazard slope

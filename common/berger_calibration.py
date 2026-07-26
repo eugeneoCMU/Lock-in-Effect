@@ -1,5 +1,13 @@
 """
-Berger, Milbradt, Tourre & Vavra — Danish-counterfactual calibration.
+Berger, Jeong, Marx, Olesen & Tourre — Danish-counterfactual calibration.
+
+Source: "A Danish fix for U.S. mortgage lock-in?" (SSRN abstract 6150766, draft
+January 2026), cited as berger2026 in the manuscript. NOTE: this header
+previously read "Berger, Milbradt, Tourre & Vavra", which is the author list of
+Berger, Milbradt, Tourre & Vavra (2021 AER, "Mortgage prepayment and
+path-dependent effects of monetary policy") — a different, non-Danish paper. The
+transcribed parameters below are Danish (DK/US structural pairs, Danish tax
+shield), so the attribution, not the manuscript citation, was the error.
 
 Single source of truth for the Danish (and U.S.-transplant) prepayment
 elasticities used to recalibrate BOTH frameworks' Danish counterfactual, so we

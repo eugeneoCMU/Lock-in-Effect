@@ -32,7 +32,9 @@ from common import berger_calibration as bc
 
 
 # ---------------------------------------------------------------------------
-# Transcribed literals — Berger, Milbradt, Tourre & Vavra
+# Transcribed literals — Berger, Jeong, Marx, Olesen & Tourre (berger2026,
+# "A Danish fix for U.S. mortgage lock-in?"). Not Berger, Milbradt, Tourre &
+# Vavra (2021 AER), which is a different, non-Danish paper.
 # ---------------------------------------------------------------------------
 def test_table3_structural_parameters_are_the_transcribed_values():
     """Table 3: moving opportunity hazard, refi opportunity hazard, cost draws."""
