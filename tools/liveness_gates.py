@@ -3548,6 +3548,36 @@ def main() -> int:
           f"+{cm['concave_marginal_pp_at_offwindow_point']:.4f}pp @4.991%), "
           f"tex literals={'ok' if cm_tex_ok else 'MISSING'}")
 
+    # ROUND-22 (gate #82): BURNOUT ABLATION. The manuscript quoted this ablation
+    # at four sites with NO artifact, NO script and NO gate; the three printed
+    # literals reproduced the MINIMUM over 100 replicates of
+    # permutation_test_ablate_orig, an experiment that permutes origination time.
+    # The real run lands within 0.02B of the claim -- the number was right by
+    # coincidence -- so the gate pins the ARTIFACT and the two facts the run
+    # added, not merely the surviving literal.
+    ba = json.loads((HAZ_DATA / "burnout_ablation_results.json").read_text())
+    ba_prod = ba["ablation_at_production_floor"]
+    ba_off = ba["ablation_at_offwindow_floor"]
+    ba_ok = (ba["parity_gates_all_pass"]
+             and ba["t1_manuscript_literal_stands"]
+             # the forensic identification must stay in the artifact: this is the
+             # only record of WHERE the original number came from
+             and abs(ba["provenance_audit"]["perm_min_trapped_b"]
+                     - 811.911646619444) < 1e-9
+             and abs(ba_prod["delta_pp"] - (-0.8607272887573743)) < 1e-9
+             and abs(ba_off["delta_pp"] - (-0.4547025015657056)) < 1e-9)
+    ba_tex_ok = ("burnout\\_ablation" in tex
+                 and "$-0.86$pp" in tex and "$-0.45$pp" in tex
+                 # the calibration mismatch the run exposed must stay disclosed
+                 and "68.8\\%" in tex)
+    ok = ba_ok and ba_tex_ok
+    failures += 0 if ok else 1
+    print(f"[{'PASS' if ok else 'FAIL'}] cross-check burnout ablation: "
+          f"artifact={ba_ok} ({ba_prod['delta_pp']:+.4f}pp @4.0%, "
+          f"{ba_off['delta_pp']:+.4f}pp @4.991%, T1="
+          f"{ba['t1_manuscript_literal_stands']}), tex literals="
+          f"{'ok' if ba_tex_ok else 'MISSING'}")
+
     # ROUND-22 (gate #81): CONCAVE x ADDITIVE JOINT CELL. The hull was a hull
     # over floor FORMS at the log-linear transform only, and tab:uncertainty
     # listed "additive form +11.2" and "concave transform +5.1" as parallel
