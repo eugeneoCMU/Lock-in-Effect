@@ -60,3 +60,16 @@ hazard/data/hazard_coefficients_fannie.json
 # hazard/seasonal_floor_timing.py; the frozen artifact is
 # hazard/data/seasonal_floor_timing_results.json)
 hazard/data/seasonal_floor_timing/
+
+# Round-21/22 per-run intermediate parquets and checkpoints. Each is
+# regenerable by its own script; the frozen artifact in each case is the
+# sibling *_results.json, which IS tracked and IS what the liveness gates read.
+hazard/data/concave_marginal/
+hazard/data/concave_additive_marginal/
+hazard/data/floor_form_offwindow/
+hazard/data/danish_offwindow_floor/
+hazard/data/burnout_ablation/
+hazard/data/_bootstrap_pathb_cluster_tmp.parquet
+abm/data/cross_design_reweight/
+abm/data/cross_design_seeds/
+abm/data/production_scale_test/
