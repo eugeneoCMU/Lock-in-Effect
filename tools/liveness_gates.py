@@ -3548,6 +3548,41 @@ def main() -> int:
           f"+{cm['concave_marginal_pp_at_offwindow_point']:.4f}pp @4.991%), "
           f"tex literals={'ok' if cm_tex_ok else 'MISSING'}")
 
+    # ROUND-22 (gate #84): PATH B STRATUM-CLUSTER BOOTSTRAP. The committed
+    # within-stratum scheme holds the 130 strata fixed, so between-stratum
+    # composition variance was never drawn and the paper reported that the loan
+    # draw "contributes essentially no uncertainty". Drawing the strata widens
+    # the marginal interval by 36.9x. The verdict is still T1 -- the floor read
+    # remains the binding layer -- so what this gate protects is the RETRACTION:
+    # the 37x understatement and the effective-cluster caveat are the parts an
+    # editor would most plausibly trim as technical detail.
+    bpc = json.loads((HAZ_DATA / "bootstrap_pathb_cluster_results.json").read_text())
+    bpc_m = bpc["marginal_pp"]
+    bpc_c = bpc["comparison"]
+    bpc_ok = (bpc["parity_gates_all_pass"]
+              and bpc["verdict"] == "T1"
+              and bpc["n_reps"] == 200
+              and abs(bpc_m["p2_5"] - 4.630919609903703) < 1e-6
+              and abs(bpc_m["p97_5"] - 6.924433300615744) < 1e-6
+              # the floor read must remain the binding layer (ratio < 0.5)
+              and bpc_c["width_ratio_vs_floor_read"] < 0.5
+              # the understatement is the finding; guard its order of magnitude
+              and bpc_c["R1_width_ratio_vs_within_stratum"] > 20.0
+              and bpc_c["R2_committed_point_inside"] is True
+              and abs(bpc["cluster_structure"]["effective_n_clusters"]
+                      - 25.77710660741266) < 1e-6)
+    bpc_tex_ok = ("bootstrap\\_pathb\\_cluster" in tex
+                  and "$[+4.63, +6.92]$" in tex
+                  and "factor of $37$" in tex
+                  and "25.8" in tex)
+    ok = bpc_ok and bpc_tex_ok
+    failures += 0 if ok else 1
+    print(f"[{'PASS' if ok else 'FAIL'}] cross-check Path B cluster bootstrap: "
+          f"artifact={bpc_ok} (marginal [{bpc_m['p2_5']:+.4f}, {bpc_m['p97_5']:+.4f}]pp, "
+          f"width ratio vs floor-read {bpc_c['width_ratio_vs_floor_read']:.3f}, "
+          f"vs within-stratum {bpc_c['R1_width_ratio_vs_within_stratum']:.1f}x, "
+          f"{bpc['verdict']}), tex literals={'ok' if bpc_tex_ok else 'MISSING'}")
+
     # ROUND-22 (gate #83): CROSS-DESIGN SEED SWEEP. Every cross-design number in
     # the paper was a single seed-42 draw, and the paper crosses its own
     # pre-committed 50% threshold with it. The 50-seed sweep VINDICATES the
