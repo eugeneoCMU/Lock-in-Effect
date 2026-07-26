@@ -101,7 +101,8 @@ caption that was already wrong once.
 | **3a** | **B4 re-anchoring.** `production_scale_test` halted at its pre-committed \$0.05B parity tier: uniform \$0.136B offset across all 50 seeds from FRED revision (median home value 403,200→410,700). The scale test compares two *arms* on the same fresh frame, so arm A could be re-anchored to a fresh baseline with the offset disclosed. Defensible — but it is a post-hoc change to a pre-committed acceptance rule, which is exactly what round-22 C1 retracts elsewhere. **I will not make this call.** Diagnosed in TECHNICAL.md §29. | If yes: ~30 min run |
 | **3b** | **Venue.** Still open from round 17. It determines whether the 573-word abstract is acceptable. A gate-clean 324-word variant now exists and passes all nine hedge spans (`revised_paper_v18_simple_abstract.tex`). Not a compression question — a submission-requirement question. | — |
 | **3c** | **Push.** 24 commits sit local on a public repo. Nothing has been pushed. | — |
-| **3d** | **FRED key rotation** — outstanding since round 14, and round 22 used the key in `.env`. | — |
+| ~~3d~~ | ~~FRED key rotation~~ **CLOSED 2026-07-10**, not open — TECHNICAL.md:1562-1566 records the rotation: the key hard-coded in early public history was rotated and the old one is issuer-deactivated (FRED returns 400), so historical copies are inert; the replacement appears in zero tracked files and zero commits and lives only in the untracked, gitignored `.env`. Verified this session: `.env` was never committed. | none |
+| **3e** | **Confirm the Berger section locators.** Round 22 promoted `\S3.3.1`, `\S4.9.1` and `tab.~3` into the manuscript from the replication package's own code comments (`common/berger_calibration.py:9-10`, `TECHNICAL.md:1340`). I cannot open the SSRN draft, so if those numbers are wrong they are now wrong in the paper. Not a decision — a two-minute check only you can do. | 2 min |
 
 ---
 
