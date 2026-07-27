@@ -366,7 +366,7 @@ ASSEMBLY_SPANS = {
     "ladder_insample": "in-sample calibration returns $+9.2$ points",
     "ladder_headline": "outside the window returns the headline $+5.6$",
     "ladder_overlay": "overlay at that same floor returns $+4.4$",
-    "ladder_agestd": "floor read of 5.51\\% implies near $+3.8$",
+    "ladder_agestd": "floor read of 5.51\\% implies a marginal near $+3.8$",
     "ladder_fannie": "5.52\\%, brackets the marginal below the $+4.3$ edge",
     "ladder_composed": "would put the marginal near $+3.0$",
     # (b) the posture, bound to the interval it is a posture about
