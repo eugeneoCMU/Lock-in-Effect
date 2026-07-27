@@ -219,10 +219,21 @@ def _body_mutations(tex: str) -> dict[str, str]:
             "the nineteen-month floor variant reported later is an "
             "input-stability check rather than an outcome holdout",
             "the nineteen-month floor variant reported later is a holdout", 1),
+        # ROUND-24c: this span now occurs TWICE in the body. Section IV's lead
+        # was rewritten to open with the cross-design result and repeats the
+        # paradigm hedge verbatim, which is the right thing for the manuscript
+        # to do -- a hedge should travel with the claim it scopes, and the claim
+        # is now made in two places. The consequence for this gate is real and
+        # is recorded rather than hidden: RELOCATED_TO_BODY is a whole-body
+        # PRESENCE rule, so deleting either occurrence alone no longer trips it,
+        # and the mutation below must therefore remove every occurrence to test
+        # what the rule actually promises ("pinned somewhere a reader meets it").
+        # If a future round needs per-site protection, that is a new gate, not a
+        # tighter mutation here.
         "body_drops_paradigm_hedge": tex.replace(
             "be cleanly attributed to modeling paradigm rather than to "
             "calibration and data source",
-            "be attributed to modeling paradigm", 1),
+            "be attributed to modeling paradigm"),
         "body_drops_allocation_naming": tex.replace(
             "they require the uniform-spread allocation, because the "
             "settlement-aware allocation puts the anticipated share at 75.6\\%",

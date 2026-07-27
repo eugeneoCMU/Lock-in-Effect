@@ -443,6 +443,69 @@ def abstract_posture_check(tex: str) -> tuple[bool, dict]:
              "i_range": i_range, "i_point": i_point})
 
 
+# --- Round-24c (gate #100): SECTION IV LEADS WITH THE CROSS-DESIGN ---------
+# Section IV used to open with the production 13.6% and mention the cross-design
+# leg as a qualifier three sections later, so it read as if 13.6% were the
+# result. It is not: the same rule on real structural covariates recovers 60.2%
+# over fifty seeds, above the 50% threshold fixed BEFORE that run at which this
+# section's paradigm reading is undercut, and undercutting on all fifty. The
+# section now leads with that and frames the production estimate as the
+# synthetic-population special case.
+#
+# This whole reframing was, before this gate, entirely unpinned prose -- the
+# case HANDOFF_round22 §4.2 warns about, where a green suite says nothing
+# because no literal moved. Paragraph-scoped for gate #98's reason.
+#
+# THE THREE BOUNDS ARE THE POINT. Round 23 caught the reweight being quoted
+# one-sidedly (the same reweight moves the FROZEN leg down to 12.6%), and the
+# behavioral layer stays synthetic in both legs. A lead that keeps 76.3% and
+# drops either bound is exactly the overclaim this gate exists to prevent, and
+# it is the cheapest edit anyone would make to this paragraph.
+#
+# The ORDERING assert carries the "leads with" half: every span below survives a
+# paragraph that states the falsification verdict first and the cross-design
+# afterwards, which is the arrangement round 24c removed.
+ABM_LEAD_OPENER = "This section is a falsification test"
+ABM_LEAD_SPANS = {
+    "leads_with_scope": "the first thing to report about it is what its own cross-design leg "
+                        "establishes about its scope",
+    "crossdesign_level": "60.2\\% averaged over fifty seeds",
+    "threshold_precommitted": "above the 50\\% threshold fixed before that run",
+    "reweighted": "76.3\\% once the sample is reweighted to the SOMA book's own coupon "
+                  "composition",
+    # bound 1: the reweight cuts both ways (round-23 catch)
+    "bound_frozen_leg": "the same reweight moves the frozen-calibration leg the other way, "
+                        "down to 12.6\\%",
+    # bound 2: this is not a real population
+    "bound_behavioral_synthetic": "no leg here replaces a synthetic behavioral population "
+                                  "with a real one",
+    # bound 3: the verdict is "cannot attribute", not "is not a paradigm effect"
+    "bound_verdict_wording": "cannot, on that test alone, be cleanly attributed to modeling "
+                             "paradigm",
+    # and the verdict the section actually delivers, confined
+    "verdict_confined": "What this section falsifies is therefore a \\emph{synthetic-population} "
+                        "household-choice specification",
+}
+
+
+def abm_lead_check(tex: str) -> tuple[bool, dict]:
+    """Gate #100's rule, as a function so the battery exercises the shipped rule."""
+    tex_nc = re.sub(r"(?<!\\)%.*", "", tex)
+    paras = [ln for ln in tex_nc.split("\n") if ln.startswith(ABM_LEAD_OPENER)]
+    line = paras[0] if len(paras) == 1 else ""
+    missing = sorted(k for k, v in ABM_LEAD_SPANS.items() if v not in line)
+    # the cross-design must be stated BEFORE the falsification verdict it scopes
+    i_cross = line.find("60.2\\%")
+    i_verdict = line.find("no specification tested here explains")
+    ordered = i_cross != -1 and i_verdict != -1 and i_cross < i_verdict
+    # and Section V.E must still DECLINE the same number, or the consistency
+    # paragraph below the lead is talking about something that is not there
+    ve_declines = "the third is a recovery level, which this design does not identify" in tex_nc
+    return (len(paras) == 1 and not missing and ordered and ve_declines,
+            {"paragraphs": len(paras), "missing": missing, "ordered": ordered,
+             "ve_declines": ve_declines})
+
+
 def assembly_check(tex: str) -> tuple[bool, dict]:
     """Gate #98's rule, as a function so the perturbation battery exercises THE
     SHIPPED RULE rather than a copy of it (gate #68's header explains why that
@@ -4340,6 +4403,13 @@ def main() -> int:
           f"present, range-before-point={_post['ordered']} "
           f"(idx {_post['i_range']} vs {_post['i_point']}), "
           f"missing={_post['missing'] or 'none'}")
+
+    abml_ok, _abml = abm_lead_check(tex)
+    failures += 0 if abml_ok else 1
+    print(f"[{'PASS' if abml_ok else 'FAIL'}] Section IV leads with the cross-design (gate "
+          f"#100): {len(ABM_LEAD_SPANS) - len(_abml['missing'])}/{len(ABM_LEAD_SPANS)} spans "
+          f"present, cross-design-before-verdict={_abml['ordered']}, "
+          f"V.E-still-declines={_abml['ve_declines']}, missing={_abml['missing'] or 'none'}")
 
     print(f"\n{'ALL GATES PASS' if failures == 0 else f'{failures} GATE(S) FAILED'}")
     return 0 if failures == 0 else 1
