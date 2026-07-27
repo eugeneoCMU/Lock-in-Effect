@@ -3925,6 +3925,52 @@ def main() -> int:
           f"{cdr['v3_recalibrated_scale']:.1f}), tex 76.3-count={cdr_count} "
           f"(want >=4), literals={'ok' if cdr_tex_ok else 'MISSING'}")
 
+    # ROUND-23 (gate #94): NO ABM COUNTERPART TO THE beta_1 = 0 NULL.
+    # The paper compares the ABM with Path B on LEVELS while insisting elsewhere
+    # that levels do not identify. The reason is structural and must stay stated:
+    # the ABM's involuntary floor is not a term in its move rule, it is PRODUCED by
+    # calibrating theta against the penalty-bearing rule, so zeroing the penalty
+    # removes the floor with the channel. This gate pins the artifact's NON-EXISTENCE
+    # conclusion and the two anchoring conventions that disagree in SIGN -- the sign
+    # disagreement is the whole finding, so it is asserted, not just the magnitudes.
+    # It also pins the honesty label: the probe carries no pre-committed threshold
+    # (the candidates were executed while scoping), and the tex says so.
+    anf = json.loads((ROOT / "abm" / "data"
+                      / "abm_null_feasibility_results.json").read_text())
+    anf_anchor = anf["floor_anchor_cpr_at_8pct"]
+    anf_imp = anf["implied_marginal"]
+    anf_ok = (anf["gates_all_pass"]
+              and anf["conclusion"] == "NOT_FEASIBLE"
+              # never let this be re-labelled as a pre-committed estimate
+              and anf["pre_committed"] is False
+              and anf["mode"] == "feasibility_probe"
+              # central sits in the 4-5% floor band; the frozen null blows through it
+              and 0.04 <= anf_anchor["central"] <= 0.05
+              and anf_anchor["null_frozen"] > 0.30
+              and 0.04 <= anf_anchor["null_reanchored"] <= 0.05
+              # the finding: the two defensible conventions differ in SIGN
+              and anf_imp["null_frozen"]["marginal_pp"] > 0
+              > anf_imp["null_reanchored"]["marginal_pp"]
+              # and neither is anywhere near an interpretable recovery level
+              and anf["legs"]["null_frozen"]["share_explained_pct"] < -100.0
+              and anf["legs"]["null_reanchored"]["share_explained_pct"] > 100.0)
+    anf_tex_ok = ("abm\\_null\\_feasibility" in tex
+                  and "$-259.4$\\%" in tex and "$+116.3$\\%" in tex
+                  and "$+270.4$ and $-105.3$ points" in tex
+                  # the structural reason, not just the numbers
+                  and "admits no counterpart to the $\\beta_1 = 0$ null" in tex
+                  and "they disagree in sign, and neither is interpretable" in tex
+                  # the honesty label must travel with the citation
+                  and "a feasibility probe, not a pre-committed estimate" in tex)
+    ok = anf_ok and anf_tex_ok
+    failures += 0 if ok else 1
+    print(f"[{'PASS' if ok else 'FAIL'}] cross-check ABM null feasibility: "
+          f"artifact={anf_ok} ({anf['conclusion']}, anchor "
+          f"{anf_anchor['central']:.4f}/{anf_anchor['null_frozen']:.4f}/"
+          f"{anf_anchor['null_reanchored']:.4f}, implied "
+          f"{anf_imp['null_frozen']['marginal_pp']:+.1f}pp vs "
+          f"{anf_imp['null_reanchored']['marginal_pp']:+.1f}pp), tex literals="
+          f"{'ok' if anf_tex_ok else 'MISSING'}")
 
     print(f"\n{'ALL GATES PASS' if failures == 0 else f'{failures} GATE(S) FAILED'}")
     return 0 if failures == 0 else 1

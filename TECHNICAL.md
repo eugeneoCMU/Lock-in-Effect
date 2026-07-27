@@ -3569,3 +3569,84 @@ established before the script was written: pool size is normalised away twice
 (`agents.py:205`, then `microsim_engine.py:57-58`), so variable loan count under
 cluster resampling is safe and composition variance survives; and the effective
 cluster count is **25.8, not 130** (largest stratum 9.77% of balance, top five 35.3%).
+
+---
+
+## 31. Round-23: no ABM counterpart to the β₁ = 0 null — NOT_FEASIBLE (2026-07-26)
+
+`HANDOFF_round22.md` §6.1 item A. Script `abm/abm_null_feasibility.py`, artifact
+`abm/data/abm_null_feasibility_results.json`, liveness gate #94, manuscript
+`sec:abm-interp`.
+
+**Status of this record.** This is a **feasibility probe, not a pre-committed run**, and
+the artifact carries `"pre_committed": false` / `"mode": "feasibility_probe"` so it cannot
+be quietly re-labelled later (gate #94 asserts both). The candidate nulls were executed
+while the item was being scoped, i.e. **before** any spec existed. That ordering is
+recorded rather than smoothed over, and it is the reason this run carries no threshold and
+no verdict code. It is admissible on those terms because the conclusion is a
+**non-existence** claim that no acceptance rule could have adjudicated, and because every
+candidate misses an interpretable range by one to three orders of magnitude. Had any
+candidate produced a usable differential, the correct course under round-22 C1 would have
+been to discard the numbers and re-run under a committed spec.
+
+### The question
+
+The manuscript identifies a differential, not a level (`sec:identification`: "The design
+does not identify the aggregate recovery level"). Path B therefore reports central − null
+= +5.6 points. The ABM has no null, so the estimator contrast (Path B 91.3% vs ABM 13.6%)
+is a contrast of the very levels the paper says do not identify.
+
+### Why Path B has a null and the ABM cannot
+
+Path B, `eq:pathB`: `h = max(h_floor, h₀(a)·exp(β₁·g + …))`. The elasticity is a
+**separable** term over a floor that is measured independently and **survives its
+removal**, so the β₁ = 0 leg stays anchored to observed involuntary turnover and lands at
+85.7% of benchmark.
+
+The ABM's move rule (`abm/abm_lockin_simulation.py:449-468`) contains no floor term. The
+4–5% involuntary floor is **produced** by `calibrate_mobility_scale`
+(`abm_lockin_simulation.py:649-685`), which binary-searches θ until the *penalty-bearing*
+rule returns 4–5% CPR at an 8% market rate on the reference cohort. The lock-in penalty is
+therefore simultaneously the behavioural mechanism and the level-setter. Zeroing it
+(`_mobility_penalty → 0`, the single line at `:458`) removes the floor along with the
+channel.
+
+### The three legs (live FRED/SOMA frame, 2026-07-26; 39 s)
+
+| leg | θ | anchor CPR @ 8% | window mean CPR | trapped $B | share of benchmark |
+|---|---|---|---|---|---|
+| central (production rule) | 43,882.8125 | **4.83%** (in the 4–5% band) | 11.758% | +84.64 | **11.068%** |
+| null A — penalty = 0, θ frozen | 43,882.8125 | **40.65%** (band destroyed) | 36.784% | −1,983.55 | **−259.373%** |
+| null B — penalty = 0, θ re-derived | 7,822.2656 | **4.73%** (band restored) | 2.419% | +889.73 | **+116.343%** |
+
+Implied "ABM marginal": **+270.44 pp** (vs null A) and **−105.28 pp** (vs null B).
+
+**The two defensible anchoring conventions disagree in sign.** They do not bracket a
+magnitude. Null A is uninterpretable because it is a model with no friction left (40.65%
+turnover at the calibration point, over-retiring the book by ~$2.0T against the caps);
+null B is uninterpretable because restoring the floor means re-fitting θ to the very
+turnover level the differential is supposed to measure. Gate #94 asserts the sign
+disagreement directly, since that — not either magnitude — is the finding.
+
+### Gotcha found in my own diagnostic
+
+The 8% anchor must be read **after** `attach_cohort(ref["coupon"], ref["months_elapsed"])`.
+Reading `cpr_at(0.08, "US")` off a freshly constructed engine measures the module-default
+3.0% cohort (`ORIGINAL_RATE`), not the 2.0% reference cohort the calibration targets, and
+returns 6.47% for the central leg — which looks like a miscalibration against the 4–5%
+band and is not. The committed script does the attach explicitly and says why.
+
+### Verified invariances (gates G3, G5)
+
+Under the production `dk_level` Danish anchor, `_cpr_vec` never calls `_mobility_penalty`
+(`abm_lockin_simulation.py:412-445`), so `danish_trapped` is bit-identical across legs
+(|Δ| < 1e-9). The curtailment layer is identical across all three legs
+($69.56220187263008B), so it cancels from any difference — the same property that makes
+Path B's marginal basis-invariant.
+
+### What this closes
+
+Item A is closed as **NOT_FEASIBLE**, not as done. The manuscript now states the asymmetry
+explicitly in `sec:abm-interp` rather than leaving a reader to notice that the ABM is
+compared on levels. This is the same disposition as the round-19 IV/RD identification
+finding: a negative result, reported as one.

@@ -1,0 +1,141 @@
+{
+ "mode": "feasibility_probe",
+ "pre_committed": false,
+ "question": "Does an interpretable ABM counterpart to Path B's beta_1 = 0 null exist?",
+ "conclusion": "NOT_FEASIBLE",
+ "conclusion_detail": "The ABM's lock-in penalty is not a separable term over a surviving floor: the 4-5% involuntary-turnover floor is produced BY calibrating theta against the penalty-bearing rule. Zeroing the penalty either destroys the floor (theta frozen) or requires re-fitting theta to restore it, which re-fits the null to the quantity the differential is meant to measure. The two defensible conventions return marginals of opposite sign, so no ABM differential is identified and the ABM contrast stays a contrast of levels.",
+ "floor_anchor_cpr_at_8pct": {
+  "central": 0.0483,
+  "null_frozen": 0.4065,
+  "null_reanchored": 0.0473,
+  "target_band": [
+   0.04,
+   0.05
+  ],
+  "reference_cohort": {
+   "coupon": 0.02,
+   "months_elapsed": 60,
+   "term_months": 360
+  }
+ },
+ "mobility_scale": {
+  "production": 43882.8125,
+  "reanchored_under_null": 7822.265625
+ },
+ "legs": {
+  "central": {
+   "label": "CENTRAL (production rule)",
+   "penalty_off": false,
+   "mobility_scale": 43882.8125,
+   "us_trapped_b": 84.6408085344583,
+   "share_explained_pct": 11.067800178395476,
+   "empirical_trapped_b": 764.7482532227002,
+   "mean_cpr_pct": 11.758464901417803,
+   "curtailment_b": 69.56220187263008,
+   "danish_trapped_b": 812.8579727620476
+  },
+  "null_frozen": {
+   "label": "NULL A (penalty=0, theta frozen)",
+   "penalty_off": true,
+   "mobility_scale": 43882.8125,
+   "us_trapped_b": -1983.5531512219939,
+   "share_explained_pct": -259.3733484010154,
+   "empirical_trapped_b": 764.7482532227002,
+   "mean_cpr_pct": 36.78389534019899,
+   "curtailment_b": 69.56220187263008,
+   "danish_trapped_b": 812.8579727620476
+  },
+  "null_reanchored": {
+   "label": "NULL B (penalty=0, theta re-derived)",
+   "penalty_off": true,
+   "mobility_scale": 7822.265625,
+   "us_trapped_b": 889.7312320664155,
+   "share_explained_pct": 116.34302246746282,
+   "empirical_trapped_b": 764.7482532227002,
+   "mean_cpr_pct": 2.419186065252433,
+   "curtailment_b": 69.56220187263008,
+   "danish_trapped_b": 812.8579727620476
+  }
+ },
+ "implied_marginal": {
+  "null_frozen": {
+   "marginal_b": 2068.1939597564524,
+   "marginal_pp": 270.44114857941094
+  },
+  "null_reanchored": {
+   "marginal_b": -805.0904235319572,
+   "marginal_pp": -105.27522228906734
+  }
+ },
+ "benchmark_b": 764.7482532227002,
+ "pathb_comparison": {
+  "pathb_marginal_pp_headline": 5.6,
+  "note": "Path B's null recovers 85.7% of benchmark because its floor survives beta_1 = 0. Neither ABM null lands anywhere near a comparable level."
+ },
+ "gates": {
+  "G0_manifest_inputs": {
+   "pass": true,
+   "detail": {
+    "run_tag": "run-2026-07-05-berger",
+    "mobility_scale": 43882.8125,
+    "median_income": 83730.0,
+    "median_home_value": 403200.0
+   }
+  },
+  "G1_central_anchor_in_floor_band": {
+   "pass": true,
+   "detail": {
+    "anchor_cpr_at_8pct": 0.0483,
+    "band": [
+     0.04,
+     0.05
+    ],
+    "reference_cohort": {
+     "coupon": 0.02,
+     "months_elapsed": 60
+    }
+   }
+  },
+  "G2_null_frozen_breaks_floor_anchor": {
+   "pass": true,
+   "detail": {
+    "anchor_cpr_at_8pct": 0.4065,
+    "central": 0.0483,
+    "multiple_of_central": 8.41614906832298
+   }
+  },
+  "G4_null_reanchored_restores_floor": {
+   "pass": true,
+   "detail": {
+    "anchor_cpr_at_8pct": 0.0473,
+    "mobility_scale": 7822.265625
+   }
+  },
+  "G3_danish_leg_invariant": {
+   "pass": true,
+   "detail": {
+    "central": 812.8579727620476,
+    "null_frozen": 812.8579727620476,
+    "null_reanchored": 812.8579727620476
+   }
+  },
+  "G5_common_layers_cancel": {
+   "pass": true,
+   "detail": {
+    "central": 69.56220187263008,
+    "null_frozen": 69.56220187263008,
+    "null_reanchored": 69.56220187263008
+   }
+  },
+  "G6_candidate_nulls_disagree_in_sign": {
+   "pass": true,
+   "detail": {
+    "null_frozen": 270.44114857941094,
+    "null_reanchored": -105.27522228906734
+   }
+  }
+ },
+ "gates_all_pass": true,
+ "runtime_s": 39.33081793785095,
+ "generated_utc": "2026-07-26T23:59:41.279208+00:00"
+}

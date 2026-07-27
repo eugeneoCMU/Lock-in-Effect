@@ -12,11 +12,11 @@ still bind). Companion documents: `PLAN_remaining_work.md` (the open-items ledge
 | | |
 |---|---|
 | Repo | `/Users/eugene/somthing/Lock In effect/Lock-in-Effect` (**public** on GitHub, `eugeneoCMU/Lock-in-Effect`) |
-| Branch | `panel-revision-2026-07-18`, **pushed** through round 22. `main` untouched at `e1592f3`. **Round 23 sits on `claude/handoff-round22-edits-701fb2` (2 commits, unpushed, branched off the round-22 tip) — see §8.** |
-| Manuscript | `paper/v18/revised_paper_v18.tex` — **114pp** (was 113pp before round 23), ~52k words, one paragraph per line (lines are LONG) |
+| Branch | `panel-revision-2026-07-18`, **pushed** through round 22. `main` untouched at `e1592f3`. **Round 23 sits on `claude/handoff-round22-edits-701fb2` (unpushed, branched off the round-22 tip) — see §8 and §9.** |
+| Manuscript | `paper/v18/revised_paper_v18.tex` — **115pp** (was 113pp before round 23), ~52k words, one paragraph per line (lines are LONG) |
 | Archived variant | `paper/v18/revised_paper_v18_long_abstract.tex` — identical body, the old 574-word abstract |
 | Build | `~/Downloads/texbuild/tectonic -X compile revised_paper_v18.tex --outdir build_r22 --keep-logs` (no `tectonic`/`pdflatex` on PATH) |
-| Gates | `python3 tools/liveness_gates.py` → **93 ALL PASS** |
+| Gates | `python3 tools/liveness_gates.py` → **94 ALL PASS** |
 | Tests | `python3 -m pytest tests/` → **297 pass** |
 | Response letter | `paper/v18/response_to_referees_round22.tex` (5pp, drafted, **not sent**) |
 
@@ -132,7 +132,8 @@ would raise them.
 
 > **STATUS 2026-07-26, round 23 (branch `claude/handoff-round22-edits-701fb2`, 2 commits,
 > unpushed).** Everything in §6.1 and §6.2 that could be closed **without a run** is closed.
-> 93 gates PASS, 297 tests, **114pp**, 0 undefined refs/citations, both `.tex` body-identical.
+> 94 gates PASS, 297 tests, **115pp**, 0 undefined refs/citations, both `.tex` body-identical.
+> **Item A is now closed too, as NOT_FEASIBLE — see §9. §6.1 has nothing open.**
 > **B, C, D, E, F, G, H, I and all four §6.2 items: DONE.** **A is the only §6.1 item left,
 > and it needs a run.** Two defects found while doing them are recorded in §8.
 > Several §6 entries below were **wrong as written** — read §8 before trusting this list.
@@ -141,7 +142,7 @@ would raise them.
 
 | # | Item | Status |
 |---|---|---|
-| **A** | **No ABM counterpart to the β₁ = 0 null.** The paper insists throughout that levels do not identify and only the central-minus-null differential does — then conducts the entire ABM comparison on levels. Every null in the source is Path B or Path A. A behavioural-gate-off ABM null would make the ABM contrast an apples-to-apples differential. | **OPEN — needs a run.** Checked: there is **no behavioural-gate-off flag** anywhere in `abm/`, so this is a specification job, not a switch. Spec-before-run applies. |
+| **A** | **No ABM counterpart to the β₁ = 0 null.** The paper insists throughout that levels do not identify and only the central-minus-null differential does — then conducts the entire ABM comparison on levels. | **CLOSED — NOT_FEASIBLE, and that is now a stated result.** No such null exists: the ABM's 4–5% floor is not a term in its move rule, it is *produced* by calibrating θ against the penalty-bearing rule, so zeroing the penalty removes the floor with the channel. Frozen θ → 40.65% CPR at the anchor and −259.4% recovery; re-derived θ → floor restored but +116.3% recovery. The two conventions imply **+270.4pp and −105.3pp** — opposite signs. Landed in `sec:abm-interp`, TECHNICAL §31, gate #94 (mutation-tested ×3). See §9. |
 | **B** | "Structurally independent" overstates, and it is in the Section V title. | **DONE.** All 4 sites → "structurally distinct"; L229's "two independent paths" → "two paths"; L899's "do not depend on each other" replaced by what is actually true — both anchor to a floor read off discount-cohort turnover, and at the in-sample point to the same 2023–24 read. |
 | **C** | 68.8% censoring at the headline calibration. | **DONE.** Now in `sec:identification` with the in-sample counterpart and the 60.0–77.3% range. **The item's own framing was wrong**: see §8.2. |
 | **D** | Expectations-basis circularity. | **DONE.** The ratios are now stated as **upper bounds** at both the construction site (L171) and the abstract. |
@@ -263,3 +264,59 @@ no `paper/`; it is now fast-forwarded onto the round-22 tip. The figure PNGs in 
 **gitignored**, so a worktree build fails on `fig7_architecture` until they are symlinked in
 from the main checkout. `tectonic` needs its `--outdir` to exist first. The "TeX rerun seems
 needed" warning is **pre-existing** (round 22's `build_r22` log has it too), not a regression.
+
+---
+
+## 9. Item A closed as NOT_FEASIBLE (2026-07-26, round 23 cont.)
+
+**94 gates PASS, 297 tests, 115pp, 0 undefined refs.** `abm/abm_null_feasibility.py` →
+`abm/data/abm_null_feasibility_results.json`, gate #94, `sec:abm-interp`, TECHNICAL §31.
+
+**§6.1 is now fully worked. Nothing in it is open.** What remains anywhere is §6.3
+(settlement-months variant, DTI non-monotonicity, concave × additive band ends) and §6.4.
+
+### The finding
+
+There is no ABM counterpart to the β₁ = 0 null, and the reason is structural rather than
+a missing feature. Path B's elasticity is a **separable** term over a floor that survives
+its removal (`h = max(h_floor, h₀·exp(β₁g))`), which is why its null lands at a sane
+85.7%. The ABM's move rule has no floor term at all — the 4–5% involuntary floor is
+*produced* by binary-searching θ until the **penalty-bearing** rule returns 4–5% CPR at
+8%. So the lock-in penalty is both the mechanism and the level-setter, and zeroing it
+gives a choice between two uninterpretable legs:
+
+| leg | θ | anchor CPR @8% | share of benchmark | implied "marginal" |
+|---|---|---|---|---|
+| central | 43,882.8 | 4.83% ✓ | +11.07% | — |
+| null A (θ frozen) | 43,882.8 | **40.65%** ✗ | **−259.37%** | **+270.44pp** |
+| null B (θ re-derived) | 7,822.3 | 4.73% ✓ | **+116.34%** | **−105.28pp** |
+
+They disagree in **sign**. Gate #94 asserts the sign disagreement, not the magnitudes,
+because that is the finding.
+
+### Two process notes worth keeping
+
+1. **The candidates were run before any spec existed** (while scoping the item). The
+   artifact is therefore stamped `"pre_committed": false` / `"mode":
+   "feasibility_probe"`, gate #94 asserts both, and the tex citation carries "a
+   feasibility probe, not a pre-committed estimate". This is admissible only because the
+   conclusion is a *non-existence* claim with no acceptance rule to bend and every
+   candidate misses by one to three orders of magnitude. **If a future candidate ever
+   lands in an interpretable range, the round-22 C1 rule applies: throw the numbers away
+   and re-run under a committed spec.**
+2. **Read the 8% anchor only after `attach_cohort(ref[...])`.** Off a freshly constructed
+   engine you measure the module-default 3.0% cohort, not the 2.0% reference cohort, and
+   get 6.47% for the *central* leg — which reads as a broken calibration and is not. This
+   bit me; the committed script attaches explicitly and says why.
+
+### Repo facts established while doing this
+
+- **The committed `abm/abm_cpr_surface.csv` is reproducible bit-exactly at HEAD** with the
+  manifest's pinned medians (income 83,730.0 / home value 403,200.0) and θ = 43,882.8125.
+- **All four historical surfaces are recoverable**, and the manuscript's 11.9% ABM frozen
+  draw belongs to `ae6eb1b7…` at commit **`5cf33a3`** — *not* to the currently committed
+  `a828fcbe…` (berger, 11.05%). `latest_run_manifest.json` points at berger, so the
+  manifest alone will mislead you. The four: `68332a61`@`af692e8`, `ae6eb1b7`@`5cf33a3`,
+  `fe319b7b`@`bc07d32`, `a828fcbe`@`d3e21f6`.
+- **The worktree needs `.env` symlinked** from the main checkout or every FRED call dies
+  (`ln -sf "<main>/.env" .env`; it is gitignored in both).
