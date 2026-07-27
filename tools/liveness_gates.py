@@ -4063,6 +4063,44 @@ def main() -> int:
           f"{smb_prod['shift_pct_of_committed']:+.3f}%, all mechanical), "
           f"tex literals={'ok' if smb_tex_ok else 'MISSING'}")
 
+    # ROUND-23 (gate #97): THE DTI NON-MONOTONICITY IS A RE-CALIBRATION ARTIFACT.
+    # dti_threshold_sweep put production 43% at the MINIMUM of its own sweep, which
+    # reads badly. Decomposition shows why: the floor-retention rule re-calibrates
+    # the mobility scale only where the fixed-scale floor leaves [4,5]%, and across
+    # these thresholds that fires exactly once, at 50%. Hold the scale still and the
+    # sweep is monotone. This gate pins the monotone frozen row, the size of the
+    # re-calibration channel, and -- most important -- the no-op identity at 36/43%
+    # that is what identifies the channel at all. It also pins that no headline moved.
+    dnd = json.loads((ROOT / "abm" / "data"
+                      / "dti_nonmonotonicity_decomposition_results.json").read_text())
+    dnd_frozen = dnd["frozen_row_trapped_b"]
+    dnd_chan = dnd["recalibration_channel_b"]
+    dnd_ok = (dnd["gates_all_pass"]
+              and dnd["pre_committed"] is True
+              and dnd["t1_artifact"] is True
+              and dnd["frozen_row_monotone"] is True
+              and dnd["headline_untouched"] is True
+              # monotone strictly decreasing as the wall loosens
+              and dnd_frozen["0.36"] > dnd_frozen["0.43"] > dnd_frozen["0.5"]
+              and abs(dnd_frozen["0.5"] - 46.372) < 0.05
+              # the no-op identity: frozen == recalibrated where the rule did not fire
+              and abs(dnd_chan["0.36"]) < 1e-9 and abs(dnd_chan["0.43"]) < 1e-9
+              # and the whole rebound is the re-calibration
+              and dnd_chan["0.5"] < -70.0
+              # drift was a uniform level shift, else the differences do not cancel
+              and dnd["upstream_drift_spread_b"] < 1.0)
+    dnd_tex_ok = ("dti\\_nonmonotonicity\\_decomposition" in tex
+                  and "$-\\$73.4$ billion" in tex
+                  and "bit-identical at 36 and 43\\%" in tex
+                  and "5.09\\%" in tex)
+    ok = dnd_ok and dnd_tex_ok
+    failures += 0 if ok else 1
+    print(f"[{'PASS' if ok else 'FAIL'}] cross-check DTI non-monotonicity: "
+          f"artifact={dnd_ok} (T1 artifact, frozen row "
+          f"{dnd_frozen['0.36']:.1f}/{dnd_frozen['0.43']:.1f}/{dnd_frozen['0.5']:.1f}B "
+          f"monotone, recal channel @50% {dnd_chan['0.5']:+.2f}B), tex literals="
+          f"{'ok' if dnd_tex_ok else 'MISSING'}")
+
     print(f"\n{'ALL GATES PASS' if failures == 0 else f'{failures} GATE(S) FAILED'}")
     return 0 if failures == 0 else 1
 

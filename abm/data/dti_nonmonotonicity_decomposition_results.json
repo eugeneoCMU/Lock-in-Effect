@@ -1,0 +1,127 @@
+{
+ "mode": "dti_nonmonotonicity_decomposition",
+ "pre_committed": true,
+ "question": "Is the DTI sweep's non-monotonicity a mechanism, or an artifact of re-calibration firing at only one threshold?",
+ "legs": {
+  "dti0.36_recalibrated": {
+   "us_trapped_b": 153.44785438055953,
+   "share_explained_pct": 20.065146109706042,
+   "mean_cpr_pct": 10.94124427473587,
+   "dti_max": 0.36,
+   "scale_mode": "recalibrated",
+   "mobility_scale": 43882.8125,
+   "floor_cpr_at_8pct": 0.0442
+  },
+  "dti0.36_frozen": {
+   "us_trapped_b": 153.44785438055953,
+   "share_explained_pct": 20.065146109706042,
+   "mean_cpr_pct": 10.94124427473587,
+   "dti_max": 0.36,
+   "scale_mode": "frozen",
+   "mobility_scale": 43882.8125,
+   "floor_cpr_at_8pct": 0.0442
+  },
+  "dti0.43_recalibrated": {
+   "us_trapped_b": 84.6408085344583,
+   "share_explained_pct": 11.067800178395476,
+   "mean_cpr_pct": 11.758464901417803,
+   "dti_max": 0.43,
+   "scale_mode": "recalibrated",
+   "mobility_scale": 43882.8125,
+   "floor_cpr_at_8pct": 0.0483
+  },
+  "dti0.43_frozen": {
+   "us_trapped_b": 84.6408085344583,
+   "share_explained_pct": 11.067800178395476,
+   "mean_cpr_pct": 11.758464901417803,
+   "dti_max": 0.43,
+   "scale_mode": "frozen",
+   "mobility_scale": 43882.8125,
+   "floor_cpr_at_8pct": 0.0483
+  },
+  "dti0.5_recalibrated": {
+   "us_trapped_b": 119.80453026187581,
+   "share_explained_pct": 15.665878249085438,
+   "mean_cpr_pct": 11.341927230667991,
+   "dti_max": 0.5,
+   "scale_mode": "recalibrated",
+   "mobility_scale": 41933.59375,
+   "floor_cpr_at_8pct": 0.0447
+  },
+  "dti0.5_frozen": {
+   "us_trapped_b": 46.372293237680175,
+   "share_explained_pct": 6.063733136004461,
+   "mean_cpr_pct": 12.21280221878985,
+   "dti_max": 0.5,
+   "scale_mode": "frozen",
+   "mobility_scale": 43882.8125,
+   "floor_cpr_at_8pct": 0.0509
+  }
+ },
+ "frozen_row_trapped_b": {
+  "0.36": 153.44785438055953,
+  "0.43": 84.6408085344583,
+  "0.5": 46.372293237680175
+ },
+ "frozen_row_monotone": true,
+ "recalibration_channel_b": {
+  "0.36": 0.0,
+  "0.43": 0.0,
+  "0.5": -73.43223702419564
+ },
+ "committed_sweep_trapped_b": {
+  "0.36": 153.34957263571803,
+  "0.43": 84.5313404270184,
+  "0.5": 119.69627136839641
+ },
+ "upstream_drift_offsets_b": {
+  "dti_0.36": 0.09828174484150054,
+  "dti_0.43": 0.10946810743989488,
+  "dti_0.50": 0.10825889347940176
+ },
+ "upstream_drift_spread_b": 0.01118636259839434,
+ "headline_untouched": true,
+ "headline_note": "The ABM is a falsification device and the +5.6pp hazard marginal carries no DTI gate; neither branch moves a headline quantity.",
+ "t1_artifact": true,
+ "t2_mechanism": false,
+ "interpretive_verdict": "T1: ARTIFACT \u2014 with the mobility scale held at the production value the sweep is monotone in the DTI wall; the published non-monotonicity is produced by the floor-retention re-calibration, which fires only at 50%",
+ "gates": {
+  "G0_production_constants": {
+   "pass": true,
+   "detail": {
+    "DTI_MAX": 0.43,
+    "scale": 43882.8125
+   }
+  },
+  "G1_committed_legs_replay_within_drift": {
+   "pass": true,
+   "detail": {
+    "offsets_b": {
+     "dti_0.36": 0.09828174484150054,
+     "dti_0.43": 0.10946810743989488,
+     "dti_0.50": 0.10825889347940176
+    },
+    "spread_b": 0.01118636259839434,
+    "tol_b": 1.0,
+    "note": "disclosed drift tolerance, not a bit-exact parity claim"
+   }
+  },
+  "G2_frozen_matches_recal_where_noop": {
+   "pass": true,
+   "detail": {
+    "dti_0.36_diff_b": 0.0,
+    "dti_0.43_diff_b": 0.0,
+    "dti_0.50_diff_b": -73.43223702419564
+   }
+  },
+  "G3_no_overwrite": {
+   "pass": true,
+   "detail": {
+    "n": 2
+   }
+  }
+ },
+ "gates_all_pass": true,
+ "runtime_s": 110.632418,
+ "generated_utc": "2026-07-27T06:52:17.465479+00:00"
+}

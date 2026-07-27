@@ -3806,3 +3806,73 @@ silently fixed.
 Month-**alignment** only. Does not revisit the cap schedule, the SOMA series, the window
 bounds, or the reinvestment-ceiling reading of the cap. A T1 would have licensed "the
 benchmark is insensitive to the netting convention", never "the benchmark is correct".
+
+---
+
+## 34. Round-23: the DTI non-monotonicity is a re-calibration artifact (2026-07-26)
+
+`HANDOFF_round22.md` §6.3 (round-21 R10 leftover, never started). Spec commit `945bd27`,
+script `abm/dti_nonmonotonicity_decomposition.py`, artifact
+`abm/data/dti_nonmonotonicity_decomposition_results.json`, liveness gate #97, manuscript
+`sec:robustness-extensions`.
+
+### The awkward fact
+
+`dti_threshold_sweep` (round 18, gate #49) reported trapped liquidity against the
+front-end DTI wall: 36% → $153.350B, 43% → $84.531B, 50% → $119.696B. **Production sits
+at 43%, the minimum of the sweep.** The sweep measured the non-monotonicity; it never
+decomposed it.
+
+### The mechanism, read off the committed artifact before the spec was written
+
+`floor_retention.per_dti` records the re-calibrated scale *and* the floor the production
+scale would have produced:
+
+| DTI | recal. scale | recal. floor | fixed-scale floor | |
+|---|---|---|---|---|
+| 0.36 | 43,882.8125 | 0.0442 | 0.0442 | no-op |
+| 0.43 | 43,882.8125 | 0.0483 | 0.0483 | no-op |
+| 0.50 | 41,933.59375 | 0.0447 | **0.0509** | **fired** |
+
+Only the 50% leg was re-calibrated. Loosening the wall lets more households clear the DTI
+gate, lifting the fixed-scale floor to 5.09% — outside the [4,5]% retention band — so the
+binary search cut the scale to 41,933.59. Lower desire scale → fewer movers → less
+prepayment → **more** trapped liquidity.
+
+### Result — T1, ARTIFACT
+
+| DTI | re-calibrated (published) | **frozen scale** | re-calibration channel |
+|---|---|---|---|
+| 36% | $153.448B | $153.448B | 0.000 |
+| 43% | $84.641B | $84.641B | 0.000 |
+| 50% | $119.805B | **$46.372B** | **−$73.432B** |
+
+Held at the production scale the sweep is **strictly monotone**. The 50% leg's entire
+rebound is the re-calibration. The frozen and re-calibrated legs are **bit-identical**
+(diff exactly 0.0) at 36% and 43%, where the artifact records the rule as a no-op — that
+identity is what isolates the channel, and gate #97 pins it rather than the magnitudes
+alone.
+
+So production 43% is not "the minimum of the mechanism". It is a point on a monotone curve
+whose 50% end was displaced by the floor-retention rule — the free parameter absorbing the
+floor constraint. This is the same class of finding V.A already names for a behavioural
+extension: "a mechanical recalibration artifact rather than … a mechanism."
+
+**No headline moves**, pre-committed under both branches: the ABM is a falsification device
+and the +5.6pp hazard marginal carries no DTI gate.
+
+### Upstream drift, handled ex ante rather than excused
+
+The committed sweep is on `run-2026-07-05-berger` accounting; this run scored on a live
+frame. G1 was therefore set *before* the run to a disclosed $1.0B tolerance with a
+**uniformity** requirement, on the argument that every reported quantity is a within-frame
+difference and common drift cancels. Realised offsets: +$0.098B, +$0.109B, +$0.108B —
+spread **$0.011B**, so the drift is a common level shift and the cancellation holds. Had
+the spread exceeded $1.0B the run would have halted at T3 rather than the tolerance being
+widened (round-22 C1).
+
+### Gotcha, caught before the run rather than by it
+
+The committed sweep's leg key is `trapped_b`, not `us_trapped_b`. G1 would have died on a
+`KeyError`. Caught by reading the artifact's schema instead of assuming it matched this
+script's own field names — the same habit that caught the retyped constant in §32.
