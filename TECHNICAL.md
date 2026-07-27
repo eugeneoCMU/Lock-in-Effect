@@ -4116,3 +4116,62 @@ declines it, so the two uses cannot drift apart without a gate failing.
 features (fixed rate, par repayment, non-portability). That is the only compressible material
 left, and the honest saving is 13 words rather than the 20-odd first estimated. Anything further
 means dropping a disclosure.
+
+## 38. Round-24d: the response letter, and the gate that reads it (2026-07-27)
+
+`paper/v18/response_to_referees_round22.tex` was drafted on 26 July and never sent. Within a
+day it was wrong in two places, and nothing caught it — **every gate in the suite reads the
+manuscript and no gate read the letter.** A wrong number in the manuscript meets a hundred
+checks; a wrong number in the letter meets a referee.
+
+### 38.1 What was stale
+
+| claim | was | is |
+|---|---|---|
+| form-conditional hull | `+3.9` to `+13.1` | `+3.5` to `+13.1` (round 23's `concave_hull_band_ends`) |
+| abstract length | "now stands at 424 words" | 263 after the round-23 cut, **328** now |
+
+The hull one mattered most: the manuscript's own zero-slack rule requires `$+3.9$ to $+13.1$` to
+appear **zero** times, and the letter was about to send it to a referee. It now appears once, in
+a sentence that marks it historical, with §7 explaining the widening.
+
+The abstract one changed the *substance* of a response. Item 9 had been **declined**, on the
+ground that cutting further meant deleting a disclosure. Half of that was wrong — a hedge only
+has to travel with the claim it scopes — and it is now answered as implemented, with the trail
+(424 → 263 → 328) rather than an endpoint.
+
+### 38.2 The new §7
+
+Six subsections, with the three that move **against** the paper placed first: the hull widened;
+there is no ABM counterpart to the β₁ = 0 null and the reason is structural (+270.4 against
+−105.3, opposite signs); and every floor-or-basis correction to the headline points down, which
+the paper now assembles in one place and commits a posture on. Then the censoring share with
+what does *not* follow from it, the §IV and Path A demotions, and the two null-result runs.
+
+All 28 numeric literals in §7 were checked to exist in the manuscript before the commit.
+
+### 38.3 Gate #101 is three narrow rules, not one broad one
+
+The letter is **partly historical** — §§1–6 legitimately describe the state at the time the
+report was answered — so "every literal must match the manuscript" would be the wrong rule and
+would fire on correct prose. Instead, each rule is aimed at a way the letter actually rotted or
+could:
+
+1. the retired hull literal may appear **only** inside the sentence marking it historical;
+2. the stated abstract word count must equal the **recomputed** one (`abstract_hedge_check` is
+   reused rather than a number being trusted);
+3. every present-tense figure in §7 must still exist in the manuscript — §7 is the section that
+   speaks in the present tense, so it is the section that must track.
+
+The battery mutates a **scratch copy** of the letter via `monkeypatch`, because this rule reads
+from disk rather than taking text as an argument, and a mutation left behind in a shipped file
+is exactly the accident `HANDOFF_round22.md` §4.3 records. A final test asserts the real letter
+is untouched.
+
+### 38.4 The counts rotted inside the same session
+
+The letter's §7 originally stated "100 checks and 372 tests". Adding gate #101 and its battery
+made that wrong within the hour. The counts were removed rather than corrected: they live in the
+manuscript, where something checks them, and **a count quoted in a letter is a number with
+nothing behind it.** That is the same lesson as the rest of this section, arriving fast enough
+to be instructive.

@@ -2,7 +2,7 @@
 
 **Read this first.** It supersedes `HANDOFF_round24.md`, whose items **1, 3, 4 and 6 are
 closed**, and whose **§2 (the ABM) is now closed too** — see §1 below. `HANDOFF_round22.md` **§3 hard constraints and §4 gotchas still bind** — read them
-before editing anything. Companions: `TECHNICAL.md` §§35–37 (this round), §§31–34 (round 23).
+before editing anything. Companions: `TECHNICAL.md` §§35–38 (this round), §§31–34 (round 23).
 
 ---
 
@@ -13,8 +13,8 @@ before editing anything. Companions: `TECHNICAL.md` §§35–37 (this round), §
 | Repo | `/Users/eugene/somthing/Lock In effect/Lock-in-Effect` (**public**, `eugeneoCMU/Lock-in-Effect`) |
 | Branch | `claude/handoff-rounds-22-24-59c228`, **pushed** (2026-07-27, Eugene authorised). It carries round 23's unpushed `00d938d` plus round 24. `claude/handoff-round22-edits-701fb2` is a strict ancestor and fast-forwards onto it — consolidating the two on origin is a pure fast-forward whenever you want it. `panel-revision-2026-07-18` and `main` untouched. |
 | Manuscript | `paper/v18/revised_paper_v18.tex` — **116pp**, abstract **328 words**, one paragraph per line |
-| Gates | `python3 tools/liveness_gates.py` → **100 ALL PASS** |
-| Tests | `python3 -m pytest tests/` → **372 pass** |
+| Gates | `python3 tools/liveness_gates.py` → **101 ALL PASS** |
+| Tests | `python3 -m pytest tests/` → **398 pass** |
 | Build | `~/Downloads/texbuild/tectonic -X compile revised_paper_v18.tex --outdir build_r24 --keep-logs` → 116pp, **0 undefined refs** |
 
 Round 24 ran **no runs at all**. Every number it landed was read out of a committed artifact.
@@ -23,7 +23,7 @@ Round 24 ran **no runs at all**. Every number it landed was read out of a commit
 
 ## 1. What round 24 closed
 
-Detail in `TECHNICAL.md` §§35–37. In one line each:
+Detail in `TECHNICAL.md` §§35–38. In one line each:
 
 - **§1 + §4 — the assembly.** A seventh qualification in `sec:identification` lines up the
   downward corrections ($+9.2 \to +5.6 \to +4.4 \to +3.8$, Fannie's 5.52% bracketing below
@@ -59,6 +59,17 @@ Detail in `TECHNICAL.md` §§35–37. In one line each:
   "is not a paradigm effect"), and §IV states its own consistency with §V.E rather than leaving
   it to a referee. Pinned by **gate #100**, which asserts the order *and* that V.E still
   declines the same number. `TECHNICAL.md` §37.
+
+- **Round 24d — the response letter refreshed, and gate #101 now reads it.** The 5pp round-22
+  letter was drafted 26 July and never sent; within a day it quoted the **superseded hull**
+  (`+3.9 to +13.1`, a literal the manuscript requires to appear ZERO times) and an abstract
+  length off by 96 words. Nothing caught it, because every gate read the manuscript and none
+  read the letter. Now 8pp with a new §7, "Changes since this response was drafted", leading
+  with the three developments that move *against* the paper. Item 9 flipped from declined to
+  implemented. Gate #101 is three narrow rules — the retired hull literal confined to its
+  historical sentence, the stated abstract word count recomputed, and every present-tense figure
+  in §7 checked against the manuscript. **The letter is still UNSENT; sending is Eugene's.**
+  `TECHNICAL.md` §38.
 
 **Correction to the critique that prompted this:** the mechanical null already led in the
 abstract, intro and conclusion. The defect was narrower than I first described — it was the
@@ -115,7 +126,7 @@ added a page rather than removing one, which is the right trade for the paper's 
 exposure but is worth stating plainly.
 
 **My recommendation: do nothing about length, and split the methods note only if you want to
-publish it.** The apparatus (spec-before-run, 100 gates, parity replay, the perturbation
+publish it.** The apparatus (spec-before-run, 101 gates, parity replay, the perturbation
 batteries) is a genuine contribution and it is crowding the finding — but "crowding" is an
 argument for a *second paper*, not for deleting the apparatus from this one. A conference
 venue does not force the issue. Note that §2.1 was taken in its **option 1** form, which changes
