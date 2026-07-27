@@ -3876,3 +3876,108 @@ widened (round-22 C1).
 The committed sweep's leg key is `trapped_b`, not `us_trapped_b`. G1 would have died on a
 `KeyError`. Caught by reading the artifact's schema instead of assuming it matched this
 script's own field names — the same habit that caught the retyped constant in §32.
+
+## 35. Round-24: the assembly (2026-07-27) — no runs
+
+Four items from `HANDOFF_round24.md`, none needing a run. Every number landed was read out of
+an already-committed artifact; nothing was retyped from console output. Gates 97 → 98, tests
+298 → 337, pages 115 → 116, 0 undefined refs.
+
+### 35.1 The assembly (§1 + §4) — `sec:identification`, gate #98
+
+The paper disclosed every downward correction to the headline marginal in the section that
+produced it and nowhere together, so a referee performed the assembly and the paper did not.
+A seventh qualification now performs it, placed immediately after the sixth so the two
+confrontations sit next to each other.
+
+| reading | marginal | source |
+|---|---|---|
+| in-sample calibration | $+9.2$pp | `tab:oosfloor` production row |
+| off-window headline | $+5.6$pp | `ginnie_overlay_offwindow_results.json` → `conventional_offwindow.marginal_pp` = 5.57156 |
+| Ginnie overlay, same floor | $+4.4$pp | same artifact → `overlay_offwindow.primary.marginal_pp` = 4.44342 |
+| age-standardised floor 5.51% | $+3.8$pp | `floor_uncertainty_results.json` → `part_b.adjusted_floor_pct` = 5.50775 |
+| Fannie read 5.52% | brackets below $+4.3$ | `fannie_floor_read_results.json` → `comparison.fannie_headline_cpr_pct` = 5.522 |
+| overlay × age-standardised | ~$+3.0$ | naive, not published |
+
+The overlay's `0.797` is the *ratio* of the overlay marginal to the conventional one
+(4.44342 / 5.57156 = 0.79752), not an input scale — worth stating because it reads like a
+parameter and is not one.
+
+**Posture committed.** Within the production max form the binding layer is the floor reads'
+own cluster-bootstrap sampling error, $[+2.974, +8.019]$pp. Its midpoint is $+5.50$; the
+headline is $+5.57$, so it sits *just above* the midpoint while all four corrections above
+fall in the lower half and the uncomposed pair falls at the bottom. Hence: $+5.6$ is an
+upper-middle member of that interval, not its centre. This is **not** a retraction — the
+interval excludes zero, the sign is rate-configuration-forced, and the form-conditional hull
+$+3.5$ to $+13.1$ remains the wider statement, since the form dimension is not a floor
+correction and this list does not discipline it.
+
+**Two things the assembly is careful about, both of which are easy to get wrong.**
+
+1. *The corrections are not independent.* The floor-level corrections and the censoring share
+   are one mechanism read twice: raising the floor is what crowds the elasticity out, so a
+   higher floor lowers the marginal and raises the bind share by the same act. The Ginnie
+   overlay is the one that moves a different lever (it confines the marginal to the
+   conventional face share at a fixed 4.991% floor), which is why the naive composition is
+   arithmetically available at all — and it is still not published, because the only joint
+   cell this paper has run for two adjustments returned an interaction of $-1.47$pp.
+2. *The censoring share is not a data-sufficiency statement.* `HANDOFF_round22.md` §8.2 stands
+   verbatim: a central-leg bind **truncates** a loan-month's contribution rather than zeroing
+   it (the null leg is pinned in only 35.8% at the same floor, so the legs still separate
+   wherever the null clears it), and 68.8% is an **unweighted loan-month count**, not a
+   balance-weighted share. "The estimate rests on a third of the data" is false on both counts
+   and does not appear.
+
+### 35.2 Gate #98 is paragraph-scoped, and why
+
+Each literal in that paragraph already occurs elsewhere in the manuscript, so a whole-file
+count gate would be satisfied by the exact scattering the paragraph exists to end. The
+manuscript is one paragraph per line, so the paragraph *is* a line and the gate binds the
+line — which also kills the relocation attack, since a paragraph split moves half the spans
+off it. Fifteen spans in four groups: the ladder, the posture, the censoring share **and** its
+framing (pinned separately: the share without the framing is the false reading, the framing
+without the share is a disclaimer about nothing), and the counterweight.
+
+Refactored into `assembly_check()` / `ASSEMBLY_SPANS` so the battery exercises the shipped
+rule, per gate #68's header. Mutation-tested nine ways by hand (8 adversarial FAIL, 1 benign
+PASS, file restored) and 34 ways in `tests/test_assembled_corrections_gate.py`. **The coverage
+test found a real hole on its first run:** the 68.8% share itself — the whole of item §4 — was
+not pinned by any span and could have been deleted while the gate stayed green. Added as
+`censor_share`. That is the third round running in which a test written against a gate's
+*intent* caught something the gate's *implementation* missed.
+
+### 35.3 Path A's prominence (§3) — presentational, no result touched
+
+Path A held three of the first seven tables while its refit-and-resimulate interval spans zero
+and its sign claim was withdrawn in round 22. `tab:panel` and `tab:bootstrap` moved verbatim
+into `app:ridge` (retitled *Path A Estimation Panel, Coefficient Uncertainty, and Ridge
+Device*); `tab:pathadiag` stays in the body as Path A's single exhibit, now table 5 of 7. Both
+`\ref` sites resolve unchanged and no cell, note, or caveat was edited — in particular the
+round-22 disclosure of the $598.9B / 78.3% bootstrap **mean** travels with its table.
+
+### 35.4 The abstract's orphaned Section IV (§6)
+
+Round 23's cut left the ABM occupying Section IV and Appendix A while the 263-word abstract did
+not mention it at all — an inconsistency that round introduced. Two sentences close it (263 →
+307 words), carrying both the production 13.6% seed mean **and** the cross-design counterweight,
+because round-22 §7 records that reporting one without the other was a regression it had to
+undo.
+
+Four new `ABSTRACT_HEDGES` spans travel with the returned claim; the five `RELOCATED_TO_BODY`
+pins stay, because the body still makes the claim and neither dict substitutes for the other.
+The wording is constrained rather than chosen: gate C4 applies `ABSTRACT_HEDGES` to every
+manuscript on disk, and the archived long-abstract variant's abstract must not be rewritten to
+suit a new pin, so every span is the widest hedge-to-claim binding that occurs **verbatim in
+both abstracts**.
+
+**A known seam, recorded rather than left to be found.** The recalibration hedge and the two
+recovery numbers cannot be joined into one span, because the archived variant carries a
+frozen-seed clause between them. A sentence boundary opened at that seam reattributes the
+60.2/76.3 recoveries and stays green. `test_known_seam_between_recalibration_and_the_numbers_is_not_caught`
+asserts the hole is open and **fails the moment anyone closes it**, so closing it is a
+deliberate act with the test updated, not a silent one. Closing it would require either
+rewriting an archive or per-file span scoping, which reopens the ungated-variant hole C4
+exists to close; neither is obviously right.
+
+This does not decide `HANDOFF_round24.md` §2. If Section IV is demoted the sentence shrinks with
+it; if it leads with the cross-design result, the sentence already carries that result.

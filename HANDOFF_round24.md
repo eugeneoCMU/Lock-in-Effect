@@ -1,5 +1,10 @@
 # Handoff — round 24 — the standing critique
 
+> **SUPERSEDED as the entry point by `HANDOFF_round25.md` (2026-07-27).** Items **1, 3,
+> 4 and 6 below are CLOSED** — see `TECHNICAL.md` §35. Items **2 and 5 remain open** and
+> are Eugene's scope calls; round 25's §2 records a recommendation on each. §7's
+> constraints and §8's habit still bind.
+
 **Read this first.** It supersedes `HANDOFF_round22.md` as the entry point, but that file's
 **§3 hard constraints and §4 gotchas still bind**, and its §8–§9 record what round 23 did.
 Companion: `TECHNICAL.md` §§31–34 (the round-23 runs), `PLAN_remaining_work.md` (older ledger,
