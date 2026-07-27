@@ -273,6 +273,33 @@ ABSTRACT_HEDGES = {
     # modeling paradigm in the abstract. This is the hedge the concision handoff
     # named as the highest-value ungated abstract hedge; pinning it BEFORE any
     # compression pass touches the abstract is the point.
+    #
+    # ROUND-24: the ABM RETURNED to the abstract. Round 23's cut left the model
+    # occupying Section IV and Appendix A while the abstract did not mention it
+    # at all, which HANDOFF_round24 §6 records as an inconsistency that round
+    # introduced. The claim is back, so by this gate's own scoping argument its
+    # hedges come back with it -- the body pins below stay, because the body
+    # still makes the claim too, and neither dict is a substitute for the other.
+    #
+    # Every span here must hold in the ARCHIVED long-abstract variant as well,
+    # since gate C4 applies this dict to every manuscript on disk and that
+    # variant's abstract is an archive that must not be rewritten to suit a new
+    # pin. That is what fixes the wording below: it is the widest binding of
+    # hedge to claim that occurs verbatim in both abstracts.
+    #
+    # KNOWN SEAM, measured rather than assumed: the recalibration hedge and the
+    # two recovery numbers cannot be joined into one span, because the long
+    # abstract carries a frozen-seed clause between them. An adversary can
+    # therefore open a sentence boundary at that seam. The seam mutation in
+    # tests/test_abstract_hedge_gate.py exists so this is a known, tested limit
+    # and not a discovery for a later round.
+    "abm_seed_averaged": "recovers 13.6\\% averaged across seeds",
+    "crossdesign_recalibrated": "cross-design variant recalibrated on real loan "
+                                "covariates recovers",
+    "crossdesign_seed_and_reweight": "60.2\\% averaged over fifty seeds (76.3\\% "
+                                     "reweighted to the book's composition)",
+    "paradigm_attribution_hedged": "contrast cannot be cleanly attributed to "
+                                   "modeling paradigm",
 }
 
 # ROUND-23: the abstract was cut from 574 to 263 words and five claims LEFT it

@@ -149,6 +149,21 @@ def _mutations(abstract: str) -> dict[str, str]:
         "abstract_emptied_body_intact": " ",
         "abstract_reduced_to_stub": " Lock-in raised the Federal Reserve's QT "
                                     "shortfall. ",
+        # --- ROUND-24: the ABM returned to the abstract -------------------
+        # Its three hedges came back with it. Each must bite in the abstract,
+        # independently of the body pins that already cover the same claims.
+        "abm_drops_seed_averaging": abstract.replace(
+            "recovers 13.6\\% averaged across seeds", "recovers 13.6\\%"),
+        "abm_drops_recalibration": abstract.replace(
+            "cross-design variant recalibrated on real loan covariates recovers",
+            "cross-design variant recovers"),
+        "abm_drops_reweighting": abstract.replace(
+            "60.2\\% averaged over fifty seeds (76.3\\% reweighted to the "
+            "book's composition)",
+            "60.2\\% averaged over fifty seeds, and 76.3\\%"),
+        "abm_asserts_paradigm_effect": abstract.replace(
+            "the contrast cannot be cleanly attributed to modeling paradigm",
+            "the contrast is a modeling-paradigm effect"),
     }
 
 
@@ -165,6 +180,10 @@ MUTATION_NAMES = [
     "drops_involuntary_turnover",
     "abstract_emptied_body_intact",
     "abstract_reduced_to_stub",
+    "abm_drops_seed_averaging",
+    "abm_drops_recalibration",
+    "abm_drops_reweighting",
+    "abm_asserts_paradigm_effect",
 ]
 
 
@@ -252,3 +271,35 @@ def test_benign_rewrite_still_passes(name: str, tex: str, abstract: str) -> None
     assert old in abstract, f"benign fixture {old!r} no longer in the abstract"
     ok, info = abstract_hedge_check(_swap(tex, abstract, abstract.replace(old, new)))
     assert ok, f"gate #68 false-alarmed on benign rewrite {name!r}: {info}"
+
+
+# ROUND-24: a KNOWN, MEASURED HOLE, recorded here rather than discovered later.
+#
+# The recalibration hedge and the two recovery numbers cannot be joined into one
+# span, because the archived long-abstract variant carries a frozen-seed clause
+# between them and gate C4 applies ABSTRACT_HEDGES to every manuscript on disk.
+# The widest binding available in BOTH abstracts therefore leaves a seam, and an
+# adversary can open a sentence boundary at it: both fragments survive, and the
+# 60.2/76.3 recoveries get reattributed to the production ABM.
+#
+# This test asserts the hole is still there. It is not an endorsement -- it
+# fails the moment someone widens the span, which is the point: closing it
+# should be a deliberate act with this test updated, not a silent one. Closing
+# it requires either rewriting the archived variant's abstract (which would
+# destroy an archive) or per-file span scoping (which reopens exactly the
+# ungated-variant hole C4 was written to close). Neither is obviously right, so
+# the seam stays open and stays measured.
+def test_known_seam_between_recalibration_and_the_numbers_is_not_caught(
+        tex: str, abstract: str) -> None:
+    mutated = abstract.replace(
+        "A cross-design variant recalibrated on real loan covariates recovers "
+        "60.2\\% averaged over fifty seeds (76.3\\% reweighted to the book's "
+        "composition)",
+        "A cross-design variant recalibrated on real loan covariates recovers "
+        "little more. The production model reaches 60.2\\% averaged over fifty "
+        "seeds (76.3\\% reweighted to the book's composition)")
+    assert mutated != abstract, "seam fixture is stale -- the abstract changed"
+    ok, info = abstract_hedge_check(_swap(tex, abstract, mutated))
+    assert ok, (
+        "the recalibration/number seam is now CAUGHT. That is an improvement, "
+        "not a failure -- delete this test and record the change. info=" + str(info))
