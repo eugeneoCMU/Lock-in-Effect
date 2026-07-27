@@ -254,45 +254,56 @@ ABSTRACT_HEDGES = {
         "The Federal Reserve's own ex-ante projection anticipated the large "
         "majority of the realized shortfall",
     # the denominator switch, and the allocation the half-share is conditional on
+    # ROUND-23: extended. The old surprise_share_allocated span carried
+    # "genuine surprise" and moved to the body with the allocation detail, which
+    # left the denominator switch pinned but the OBJECT it switches to unpinned
+    # -- an abstract could have said "...rather than the never-binding cap,
+    # lock-in accounts for roughly a quarter to a half of the shortfall" and
+    # passed. The span now runs to the object.
     "surprise_denominator": "Measured against that projection rather than the "
-                            "never-binding cap",
-    # Round-21 upgrade: the abstract now states the RANGE across both
-    # disclosed intra-2022 allocations (the settlement-aware quarter and the
-    # uniform-spread half), retiring the half-only presentation the panel
-    # flagged as using the allocation III.D judges less faithful.
-    "surprise_share_allocated": "between roughly a quarter and half of the "
-                                "genuine surprise, depending on a disclosed "
-                                "intra-2022 allocation choice: the "
-                                "settlement-aware allocation matching the "
-                                "realized settlement pattern gives the "
-                                "quarter, the pre-committed uniform-spread "
-                                "central allocation the half",
-    # the ABM number is a seed mean, not a single run
-    "abm_seed_averaged": "averaged across seeds",
-    # the cross-design variant was refit, so it is not a clean out-of-sample read
-    "crossdesign_recalibrated": "cross-design variant recalibrated on real loan "
-                                "covariates",
+                            "never-binding cap, lock-in accounts for roughly a "
+                            "quarter to a half of the genuine surprise",
     # "small" scopes to the institutional cash-flow cost only; the mobility cost
     # is real, and the abstract must not let the two be read as one
     "cost_scoped_institutional": "The institutional cash-flow cost is small",
     # the null's recovery rests on amortization AND baseline involuntary turnover
     "null_mechanical_components": "scheduled amortization and baseline "
                                   "involuntary turnover",
-    # ROUND 22 (A12): the nineteen-month floor check is an INPUT-stability check,
-    # not an outcome holdout, and no outcome holdout exists anywhere in the
-    # design. This entry exists because an uncommitted working-tree edit silently
-    # DELETED the relabel from the abstract, taking round 21's four disclosure
-    # sites to three, and nothing in the suite noticed: the relabel was prose
-    # round 21 had added by hand and never pinned.
-    "holdout_relabelled": "an input-stability check rather than an outcome "
-                          "holdout: no outcome-holdout months exist anywhere "
-                          "in this design",
     # ROUND 22 (3d): the ABM-vs-hazard contrast must not be attributed to
     # modeling paradigm in the abstract. This is the hedge the concision handoff
     # named as the highest-value ungated abstract hedge; pinning it BEFORE any
     # compression pass touches the abstract is the point.
-    "paradigm_attribution_hedged": "The contrast cannot be cleanly attributed "
-                                   "to modeling paradigm",
+}
+
+# ROUND-23: the abstract was cut from 574 to 263 words and five claims LEFT it
+# (the ABM level, the cross-design variant, the nineteen-month floor check, the
+# paradigm attribution, and the named intra-2022 allocations). Their hedges left
+# WITH them -- a hedge only has to travel with the claim it scopes, and the
+# abstract no longer makes those claims. But the hedges must still be pinned
+# somewhere a reader meets them, or this was a deletion of five protections
+# rather than a relocation. These are checked against the BODY (the file with
+# the abstract environment removed), which is the mirror image of the scoping
+# argument at the top of this block: whole-file counts are too weak for an
+# abstract claim, and abstract scoping is simply wrong for a body claim.
+RELOCATED_TO_BODY = {
+    # the ABM number is a seed mean, not a single run  (was abm_seed_averaged)
+    "abm_seed_averaged_body": "13.6\\% on the fifty-seed mean",
+    # the cross-design variant was refit, so it is not a clean out-of-sample read
+    "crossdesign_recalibrated_body": "A cross-design variant of the ABM "
+                                     "recalibrated on real loan covariates",
+    # the nineteen-month check is INPUT stability, not an outcome holdout
+    "holdout_relabelled_body": "the nineteen-month floor variant reported later "
+                               "is an input-stability check rather than an "
+                               "outcome holdout",
+    # the ABM-vs-hazard contrast is not cleanly a paradigm effect
+    "paradigm_attribution_hedged_body": "be cleanly attributed to modeling "
+                                        "paradigm rather than to calibration "
+                                        "and data source",
+    # the quarter/half split is allocation-conditional, and both are named
+    "surprise_share_allocated_body": "they require the uniform-spread "
+                                     "allocation, because the settlement-aware "
+                                     "allocation puts the anticipated share at "
+                                     "75.6\\%",
 }
 
 
@@ -313,11 +324,22 @@ def abstract_hedge_check(tex: str) -> tuple[bool, dict]:
     found = _i != -1 and _j != -1
     abstract = tex_nc[_i + len(ABSTRACT_BOUNDS[0]):_j] if found else ""
     missing = sorted(k for k, v in ABSTRACT_HEDGES.items() if v not in abstract)
+    # ROUND-23: the five spans that left the abstract with their claims are
+    # enforced against the BODY. Checking them against the whole file would be
+    # the exact weakness this gate's header rejects for abstract claims, only
+    # inverted: the abstract is a subset of the file, so a whole-file count
+    # would be satisfiable by an abstract that still carried them. Removing the
+    # abstract environment makes the body check independent of the abstract.
+    body = (tex_nc[:_i] + tex_nc[_j:]) if found else tex_nc
+    missing_body = sorted(k for k, v in RELOCATED_TO_BODY.items() if v not in body)
     words = len(abstract.split())
-    scoped = found and words > 100
-    return (found and scoped and not missing,
+    # the 263-word abstract is deliberate (round 23); 150 still catches a
+    # truncated or mis-located environment, which is what this guard is for.
+    scoped = found and words > 150
+    return (found and scoped and not missing and not missing_body,
             {"found": found, "words": words, "scoped": scoped,
-             "missing": missing, "total": len(ABSTRACT_HEDGES)})
+             "missing": missing, "total": len(ABSTRACT_HEDGES),
+             "missing_body": missing_body, "total_body": len(RELOCATED_TO_BODY)})
 
 
 def main() -> int:
@@ -2778,16 +2800,22 @@ def main() -> int:
     _s5 = _rs["S5_intensity_range"]
     _s6 = _rs["S6_additivity_residual"]
     cr_lits = {
-        "abstract_central":
-            f"recovers {_h['central_shared_share_pct']:.1f}\\% of that shortfall" in tex,
-        "abstract_band":
-            f"{_lo:.1f}--{_hi:.1f}\\% across that calibration's "
-            f"defensible range" in tex,
-        "abstract_insample":
-            f"it recovers {_prod['shared']['central_share_pct']:.1f}\\%" in tex,
-        "abstract_null_both":
-            f"still recovers {_h['null_shared_share_pct']:.1f}\\% at the headline "
-            f"calibration ({_prod['shared']['null_share_pct']:.1f}\\% in-sample)" in tex,
+        # ROUND-23: these four were abstract phrasings. The 263-word abstract
+        # keeps the two headline levels (null and central) and drops the range
+        # and the in-sample point, so the checks now bind the BODY sentences
+        # that carry all four -- V.C's paired statement and the Discussion
+        # opener. The numbers are still derived from the artifact, not typed.
+        "body_central":
+            f"recovers {_h['central_shared_share_pct']:.1f}\\% of the benchmark "
+            f"on the shared basis at the off-window floor" in tex,
+        "body_band":
+            f"({_lo:.1f}--{_hi:.1f}\\% across its range)" in tex,
+        "body_insample":
+            f"against {_prod['shared']['central_share_pct']:.1f}\\% at the "
+            f"in-window calibration" in tex,
+        "abstract_null_and_central_kept":
+            f"still accounts for {_h['null_shared_share_pct']:.1f}\\% of it" in tex
+            and f"accounts for {_h['central_shared_share_pct']:.1f}\\%." in tex,
         "miss_both_calibrations":
             f"the miss is {_h['miss_vs_benchmark_pp']:.1f} points on the headline "
             f"calibration and {_prod['miss_vs_benchmark_pp']:.1f} points on the "
@@ -3345,12 +3373,24 @@ def main() -> int:
         "vs_headline": f"{(dn_gap_b / _oos_point - 1) * 100:.0f}\\% larger" in tex,
         "forcedness_stated": "could not have come out otherwise" in tex,
         "magnitude_is_the_content": "What is not forced is the magnitude" in tex,
-        # the abstract must LEAD with the flip, not with the forced positive
-        "abstract_leads_with_flip": (
-            0 <= tex.find("importing Denmark's baseline mobility along with its "
-                          "payoff rule yields roughly $-\\$100$ billion")
-            < tex.find("while a transplant changing only the payoff rule yields "
-                       "$+\\$61$ billion")),
+        # ROUND-23: was an ORDERING check on the abstract (the flip had to be
+        # stated before the forced positive). The Danish counterfactual left the
+        # 263-word abstract, so the protection moves to the first place a reader
+        # now meets the gap: the introduction. Ordering alone would be the wrong
+        # relocation -- the intro's paragraph is long and a reader does not skim
+        # it the way they skim an abstract -- so this binds the stronger
+        # property instead: the paragraph that first states the positive gap must
+        # ALSO carry the forcedness statement and the sign flip. It cannot be
+        # satisfied by disclosing them a section later.
+        "intro_para_carries_forcedness_and_flip": any(
+            ("$+\\$61.2$ billion" in _para
+             and "forced rather than found" in _para
+             and "$-\\$99.9$ billion" in _para)
+            for _para in tex.split("\n")
+            if "$+\\$61.2$ billion" in _para) and (
+            # and the first mention anywhere is that same paragraph
+            next(_p for _p in tex.split("\n") if "$+\\$61.2$ billion" in _p)
+            .find("forced rather than found") > 0),
         # and Table 1, where a reader meets the number, must carry it too
         "table1_disclosed": (
             "positivity is forced by the zero-gap anchor, so the refinancing "
@@ -3372,7 +3412,13 @@ def main() -> int:
         if not any(m in _win for m in _forced_markers):
             dn_unqualified.append(_i)
         _s = _i + 1
-    dn_context_ok = not dn_unqualified and tex.count("positive at every") >= 7
+    # ROUND-23: was >= 7. The abstract's instance left with the claim it
+    # qualified -- the 263-word abstract no longer says the margin is positive at
+    # every combination, so it no longer needs to say that check is forced. The
+    # REAL protection here is dn_unqualified (no unqualified instance anywhere),
+    # which is untouched; this count is a completeness proxy and 6 is the new
+    # complete set.
+    dn_context_ok = not dn_unqualified and tex.count("positive at every") >= 6
     dn_claims = tex.count("\\texttt{danish\\_us\\_intercept}")
     dn_ok = (dn_forced_ok and dn_premise_ok and dn_flip_ok and dn_context_ok
              and dn_claims >= 1 and all(dn_lits.values()))
@@ -3484,8 +3530,11 @@ def main() -> int:
         f"[{'PASS' if ab_ok else 'FAIL'}] abstract-hedge spans: "
         f"abstract-located={_ab['found']} ({_ab['words']} words, "
         f"scoped-not-whole-file={_ab['scoped']}), "
-        f"{_ab['total'] - len(_ab['missing'])}/{_ab['total']} spans "
-        f"present, missing={_ab['missing'] or 'none'}"
+        f"{_ab['total'] - len(_ab['missing'])}/{_ab['total']} abstract spans "
+        f"present, missing={_ab['missing'] or 'none'}; "
+        f"{_ab['total_body'] - len(_ab['missing_body'])}/{_ab['total_body']} "
+        f"relocated body spans present, "
+        f"missing_body={_ab['missing_body'] or 'none'}"
     )
 
     # ROUND 22 (C4): the same rule, applied to EVERY manuscript variant on disk.
@@ -3793,7 +3842,12 @@ def main() -> int:
               and abs(dof["rule_only_gap_offwindow_shared_b"] - 28.204687540179634) < 1e-6
               and abs(dof["gap_over_offwindow_marginal"] - 0.6619514365853162) < 1e-9)
     dof_count_282 = tex.count("$+\\$28.2$ billion")
-    dof_abs_label = "$+\\$28$ billion at the off-window calibration" in tex
+    # ROUND-23: was the abstract's "$+\\$28$ billion at the off-window
+    # calibration". The Danish counterfactual left the abstract, so the label is
+    # bound to the body sentence that states the same gap against the same
+    # marginal (VII.F and the Conclusion both carry it).
+    dof_abs_label = ("the rule-only gap is $+\\$28.2$ billion, 34\\% below "
+                     "that marginal") in tex
     dof_runtag = "danish\\_offwindow\\_floor" in tex
     dof_tex_ok = dof_count_282 >= 2 and dof_runtag and dof_abs_label
     ok = dof_ok and dof_tex_ok

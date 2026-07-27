@@ -34,20 +34,31 @@ sys.path.insert(0, str(ROOT / "tools"))
 from liveness_gates import (  # noqa: E402
     ABSTRACT_BOUNDS,
     ABSTRACT_HEDGES,
+    RELOCATED_TO_BODY,
     TEX,
     abstract_hedge_check,
 )
+
+# ROUND-23: the abstract was cut 574 -> 263 words and five claims left it. Their
+# hedges left with them and are now pinned against the BODY. A hedge only has to
+# travel with the claim it scopes -- but it does have to travel, so this file
+# checks BOTH halves and the coverage test below unions the two dicts. If a
+# future round moves a span back into the abstract, the union keeps passing and
+# the per-dict mutation tests are what notice.
+ALL_SPANS = {**ABSTRACT_HEDGES, **RELOCATED_TO_BODY}
 
 # Every hedge the round's handoff named. Each must be covered by some span, or
 # the gate silently stopped protecting one of them.
 HANDOFF_PHRASES = [
     "genuine surprise",
     "large majority",
-    "averaged across seeds",
-    "recalibrated",
+    "fifty-seed mean",
+    "recalibrated on real loan covariates",
     "institutional cash-flow",
     "baseline involuntary turnover",
-    "central allocation",
+    "uniform-spread",
+    "input-stability check",
+    "modeling paradigm",
 ]
 
 
@@ -81,8 +92,10 @@ def test_control_passes(tex: str) -> None:
 @pytest.mark.parametrize("phrase", HANDOFF_PHRASES)
 def test_every_handoff_phrase_is_covered_by_a_span(phrase: str) -> None:
     """Each named hedge must appear inside at least one gated span."""
-    covering = [k for k, v in ABSTRACT_HEDGES.items() if phrase in v]
-    assert covering, f"{phrase!r} is named in the handoff but no span covers it"
+    covering = [k for k, v in ALL_SPANS.items() if phrase in v]
+    assert covering, (
+        f"{phrase!r} is named in the handoff but no span covers it, in either "
+        f"the abstract-scoped or the body-scoped dict")
 
 
 def _mutations(abstract: str) -> dict[str, str]:
@@ -122,40 +135,14 @@ def _mutations(abstract: str) -> dict[str, str]:
         "drops_large_majority": abstract.replace(
             "anticipated the large majority of the realized shortfall",
             "anticipated the realized shortfall"),
-        "drops_central_allocation": abstract.replace(
-            "the pre-committed uniform-spread central allocation the half",
-            "the pre-committed uniform-spread construction the half"),
-        "drops_genuine_surprise": abstract.replace(
-            "a quarter and half of the genuine surprise",
-            "a quarter and half of the shortfall"),
         "drops_denominator_switch": abstract.replace(
             "Measured against that projection rather than the never-binding cap, "
-            "the", "The"),
-        "drops_seed_averaging": abstract.replace(" averaged across seeds", ""),
-        "drops_recalibrated": abstract.replace(
-            "recalibrated on real loan covariates", "on real loan covariates"),
+            "lock-in", "Lock-in"),
         "drops_institutional_scope": abstract.replace(
             "The institutional cash-flow cost is small", "The cost is small"),
         "drops_involuntary_turnover": abstract.replace(
-            "scheduled amortization and baseline involuntary turnover undershoot",
-            "scheduled amortization undershoots"),
-        # --- relocation (what proximity windows cannot catch) -------------
-        "relocates_central_allocation": abstract.replace(
-            "the pre-committed uniform-spread central allocation the half.",
-            "the pre-committed uniform-spread rule the half. The central "
-            "allocation is described below."),
-        # --- round 22 -----------------------------------------------------
-        # The exact regression that motivated the entry: an edit that deletes the
-        # relabel and leaves the nineteen-month check reading as a real holdout.
-        "drops_holdout_relabel": abstract.replace(
-            "an input-stability check rather than an outcome holdout: no "
-            "outcome-holdout months exist anywhere in this design",
-            "an out-of-sample holdout"),
-        # Attributing the ABM-vs-hazard contrast to paradigm is the claim VII.D
-        # says the test cannot cleanly support.
-        "drops_paradigm_hedge": abstract.replace(
-            "The contrast cannot be cleanly attributed to modeling paradigm.",
-            "The contrast is attributable to modeling paradigm."),
+            "scheduled amortization and baseline involuntary turnover fall short",
+            "scheduled amortization falls short"),
         # --- scoping ------------------------------------------------------
         # the body keeps every phrase; only the abstract is gutted. A
         # whole-file count gate would pass this.
@@ -173,16 +160,9 @@ MUTATION_NAMES = [
     "projection_claimed_by_author",
     "projection_attributed_to_consensus",
     "drops_large_majority",
-    "drops_central_allocation",
-    "drops_genuine_surprise",
     "drops_denominator_switch",
-    "drops_seed_averaging",
-    "drops_recalibrated",
     "drops_institutional_scope",
     "drops_involuntary_turnover",
-    "relocates_central_allocation",
-    "drops_holdout_relabel",
-    "drops_paradigm_hedge",
     "abstract_emptied_body_intact",
     "abstract_reduced_to_stub",
 ]
@@ -204,13 +184,64 @@ def test_mutation_flips_gate_to_fail(name: str, tex: str, abstract: str) -> None
     )
 
 
+# ROUND-23: the five relocated spans need their own mutation set. Deleting the
+# abstract mutations when the claims moved would have left them protected on
+# paper and untested in practice -- coverage that exists only in a dict is the
+# hole this whole file was written to close.
+def _body_mutations(tex: str) -> dict[str, str]:
+    """Each entry mutates the BODY and must flip the gate to FAIL."""
+    return {
+        "body_drops_seed_averaging": tex.replace(
+            "13.6\\% on the fifty-seed mean", "13.6\\%", 1),
+        "body_drops_recalibrated": tex.replace(
+            "A cross-design variant of the ABM recalibrated on real loan "
+            "covariates", "A cross-design variant of the ABM", 1),
+        "body_drops_holdout_relabel": tex.replace(
+            "the nineteen-month floor variant reported later is an "
+            "input-stability check rather than an outcome holdout",
+            "the nineteen-month floor variant reported later is a holdout", 1),
+        "body_drops_paradigm_hedge": tex.replace(
+            "be cleanly attributed to modeling paradigm rather than to "
+            "calibration and data source",
+            "be attributed to modeling paradigm", 1),
+        "body_drops_allocation_naming": tex.replace(
+            "they require the uniform-spread allocation, because the "
+            "settlement-aware allocation puts the anticipated share at 75.6\\%",
+            "they require one of the two disclosed allocations", 1),
+    }
+
+
+BODY_MUTATION_NAMES = [
+    "body_drops_seed_averaging",
+    "body_drops_recalibrated",
+    "body_drops_holdout_relabel",
+    "body_drops_paradigm_hedge",
+    "body_drops_allocation_naming",
+]
+
+
+def test_body_mutation_list_matches_definitions(tex: str) -> None:
+    assert sorted(_body_mutations(tex)) == sorted(BODY_MUTATION_NAMES)
+
+
+@pytest.mark.parametrize("name", BODY_MUTATION_NAMES)
+def test_body_mutation_flips_gate_to_fail(name: str, tex: str) -> None:
+    """A relocated hedge deleted from the body must still fail the gate."""
+    mutated = _body_mutations(tex)[name]
+    assert mutated != tex, f"body mutation {name!r} was a no-op -- test vacuous"
+    ok, info = abstract_hedge_check(mutated)
+    assert not ok, (
+        f"gate #68 PASSED the {name!r} body mutation -- the relocated span is "
+        f"not actually protected. info={info}")
+
+
 BENIGN = {
     "reword_unrelated_sentence": (
-        "The mobility cost is real.",
-        "The mobility cost is real and borne by households."),
+        "The cost to households who could not move is real.",
+        "The cost to households who could not move is real and large."),
     "reword_unrelated_lead": (
-        "It cost less than the shortfall suggests.",
-        "The cost is smaller than the shortfall suggests."),
+        "It cost less than that gap suggests",
+        "The cost is smaller than that gap suggests"),
 }
 
 

@@ -13,11 +13,11 @@ still bind). Companion documents: `PLAN_remaining_work.md` (the open-items ledge
 |---|---|
 | Repo | `/Users/eugene/somthing/Lock In effect/Lock-in-Effect` (**public** on GitHub, `eugeneoCMU/Lock-in-Effect`) |
 | Branch | `panel-revision-2026-07-18`, **pushed** through round 22. `main` untouched at `e1592f3`. **Round 23 sits on `claude/handoff-round22-edits-701fb2` (unpushed, branched off the round-22 tip) — see §8 and §9.** |
-| Manuscript | `paper/v18/revised_paper_v18.tex` — **115pp** (was 113pp before round 23), ~52k words, one paragraph per line (lines are LONG) |
-| Archived variant | `paper/v18/revised_paper_v18_long_abstract.tex` — identical body, the old 574-word abstract |
+| Manuscript | `paper/v18/revised_paper_v18.tex` — **115pp** (was 113pp before round 23), abstract **263 words** (was 574), ~52k words, one paragraph per line (lines are LONG) |
+| Archived variant | `paper/v18/revised_paper_v18_long_abstract.tex` — identical body, the pre-round-23 **571-word** abstract (canonical is now **263**) |
 | Build | `~/Downloads/texbuild/tectonic -X compile revised_paper_v18.tex --outdir build_r22 --keep-logs` (no `tectonic`/`pdflatex` on PATH) |
 | Gates | `python3 tools/liveness_gates.py` → **97 ALL PASS** |
-| Tests | `python3 -m pytest tests/` → **297 pass** |
+| Tests | `python3 -m pytest tests/` → **298 pass** |
 | Response letter | `paper/v18/response_to_referees_round22.tex` (5pp, drafted, **not sent**) |
 
 ---
