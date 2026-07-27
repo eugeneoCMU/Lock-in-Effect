@@ -11,7 +11,7 @@ before editing anything. Companions: `TECHNICAL.md` §35 (this round), §§31–
 | | |
 |---|---|
 | Repo | `/Users/eugene/somthing/Lock In effect/Lock-in-Effect` (**public**, `eugeneoCMU/Lock-in-Effect`) |
-| Branch | `claude/handoff-rounds-22-24-59c228`, **local, unpushed**, four commits on top of `00d938d`. `claude/handoff-round22-edits-701fb2` fast-forwards onto it. `panel-revision-2026-07-18` and `main` untouched. |
+| Branch | `claude/handoff-rounds-22-24-59c228`, **pushed** (2026-07-27, Eugene authorised). It carries round 23's unpushed `00d938d` plus round 24. `claude/handoff-round22-edits-701fb2` is a strict ancestor and fast-forwards onto it — consolidating the two on origin is a pure fast-forward whenever you want it. `panel-revision-2026-07-18` and `main` untouched. |
 | Manuscript | `paper/v18/revised_paper_v18.tex` — **116pp**, abstract **307 words**, one paragraph per line |
 | Gates | `python3 tools/liveness_gates.py` → **98 ALL PASS** |
 | Tests | `python3 -m pytest tests/` → **337 pass** |
