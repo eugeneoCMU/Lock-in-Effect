@@ -4051,3 +4051,68 @@ was chosen deliberately and each is reversible, but the cumulative drift against
 deliberate 263 is worth stating rather than discovering later. The compressible material is the
 two opening setup sentences (~42 words of framing before the first number); nothing else can go
 without dropping a pinned disclosure.
+
+## 37. Round-24c: Section IV leads with the cross-design result (2026-07-27) — no runs
+
+The recommendation of `HANDOFF_round25.md` §2.1, taken. Section IV opened with the production
+13.6% and treated the cross-design leg as a qualifier three sections later, so it read as if
+13.6% were the result. It is not: the same decision rule on real Freddie structural covariates
+recovers 59.3% on the committed draw and **60.2% over fifty seeds**, above the **50% threshold
+fixed before that run** at which the section's own paradigm reading is undercut, and
+undercutting on **all fifty** seeds. Emphasis changed; no number moved.
+
+### 37.1 What moved
+
+- **§IV title** → *Agent-Based Model Results: A Synthetic-Population Falsification Test*.
+- **§IV lead** opens with the cross-design leg and what bounds it, then names the production
+  estimate as the synthetic-population special case.
+- **§IV.A title** → *The Synthetic-Population Estimate: Baseline, Production, and Behavioral
+  Extensions*.
+- **§IV.C** now says the cross-design bears on the missing-mechanism versus missing-population
+  either-or and **narrows it without settling it**, because the behavioral layer stays synthetic
+  in both legs.
+
+### 37.2 Three bounds travel with the lead, and they are the point
+
+A lead that keeps 76.3% and drops any of these is an overclaim that leaves every number in
+place — the cheapest possible edit to that paragraph, and the one gate #100 exists to stop.
+
+1. The same reweight that lifts the recalibrated leg to 76.3% moves the **frozen** leg *down*
+   to 12.6%. Round 23 caught exactly this being quoted one-sidedly.
+2. The covariates swapped in are **structural only**; the loan records hold no analogue for
+   mobility desire or loss aversion, so no leg replaces a synthetic behavioral population with
+   a real one.
+3. The verdict is "**cannot**, on that test alone, be cleanly attributed to modeling paradigm"
+   — a limit on what the test resolves, not the verdict "is not a paradigm effect".
+
+### 37.3 The consistency point is stated in §IV, not left for a referee
+
+Section V.E **declines** this same cross-design number as evidence that the imported elasticity
+is too small, on the ground that a recovery level is not what that design identifies. Section IV
+now uses it as a **scope limit on its own verdict**, which is a narrower claim and survives that
+objection: it bounds the population over which a household-choice specification was shown to
+fail and says nothing about the size of the elasticity. Gate #100 asserts that V.E still
+declines it, so the two uses cannot drift apart without a gate failing.
+
+### 37.4 Two test defects, both mine, both found by the batteries
+
+1. **Repeating the paradigm hedge verbatim in §IV made it occur twice**, so
+   `RELOCATED_TO_BODY`'s single-site deletion mutation stopped biting. Repeating the hedge is
+   correct for the manuscript — a hedge should travel with the claim it scopes, and the claim is
+   now made in two places — so the fix is in the mutation, which now removes *every* occurrence.
+   That is what a whole-body PRESENCE rule actually promises. Recorded in the test file rather
+   than quietly patched.
+2. **The new battery reported a gate hole that did not exist.** `60.2\% averaged over fifty
+   seeds` occurs four times and the first is in the **abstract**, so `tex.replace(span, "", 1)`
+   deleted the abstract's copy and left the lead untouched. Both paragraph-scoped batteries now
+   mutate *inside* their target paragraph. The assembly battery had been working by luck; the
+   luck is removed. **A test that mutates the wrong text proves nothing in either direction** —
+   this is the round-22 §4.5 lesson ("when a check disagrees with an artifact, suspect the
+   check") in its testing form.
+
+### 37.5 Abstract
+
+341 → **328 words**: the two opening setup sentences compressed, keeping all three contract
+features (fixed rate, par repayment, non-portability). That is the only compressible material
+left, and the honest saving is 13 words rather than the 20-odd first estimated. Anything further
+means dropping a disclosure.

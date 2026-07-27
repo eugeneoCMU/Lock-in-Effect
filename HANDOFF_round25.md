@@ -1,8 +1,8 @@
 # Handoff — round 25 — two scope calls, and nothing else open
 
 **Read this first.** It supersedes `HANDOFF_round24.md`, whose items **1, 3, 4 and 6 are
-closed**. `HANDOFF_round22.md` **§3 hard constraints and §4 gotchas still bind** — read them
-before editing anything. Companions: `TECHNICAL.md` §§35–36 (this round), §§31–34 (round 23).
+closed**, and whose **§2 (the ABM) is now closed too** — see §1 below. `HANDOFF_round22.md` **§3 hard constraints and §4 gotchas still bind** — read them
+before editing anything. Companions: `TECHNICAL.md` §§35–37 (this round), §§31–34 (round 23).
 
 ---
 
@@ -12,9 +12,9 @@ before editing anything. Companions: `TECHNICAL.md` §§35–36 (this round), §
 |---|---|
 | Repo | `/Users/eugene/somthing/Lock In effect/Lock-in-Effect` (**public**, `eugeneoCMU/Lock-in-Effect`) |
 | Branch | `claude/handoff-rounds-22-24-59c228`, **pushed** (2026-07-27, Eugene authorised). It carries round 23's unpushed `00d938d` plus round 24. `claude/handoff-round22-edits-701fb2` is a strict ancestor and fast-forwards onto it — consolidating the two on origin is a pure fast-forward whenever you want it. `panel-revision-2026-07-18` and `main` untouched. |
-| Manuscript | `paper/v18/revised_paper_v18.tex` — **116pp**, abstract **341 words**, one paragraph per line |
-| Gates | `python3 tools/liveness_gates.py` → **99 ALL PASS** |
-| Tests | `python3 -m pytest tests/` → **349 pass** |
+| Manuscript | `paper/v18/revised_paper_v18.tex` — **116pp**, abstract **328 words**, one paragraph per line |
+| Gates | `python3 tools/liveness_gates.py` → **100 ALL PASS** |
+| Tests | `python3 -m pytest tests/` → **372 pass** |
 | Build | `~/Downloads/texbuild/tectonic -X compile revised_paper_v18.tex --outdir build_r24 --keep-logs` → 116pp, **0 undefined refs** |
 
 Round 24 ran **no runs at all**. Every number it landed was read out of a committed artifact.
@@ -23,7 +23,7 @@ Round 24 ran **no runs at all**. Every number it landed was read out of a commit
 
 ## 1. What round 24 closed
 
-Detail in `TECHNICAL.md` §35. In one line each:
+Detail in `TECHNICAL.md` §§35–37. In one line each:
 
 - **§1 + §4 — the assembly.** A seventh qualification in `sec:identification` lines up the
   downward corrections ($+9.2 \to +5.6 \to +4.4 \to +3.8$, Fannie's 5.52% bracketing below
@@ -49,24 +49,38 @@ Detail in `TECHNICAL.md` §35. In one line each:
   binding layer at all**. Both fixed. Pinned by **gate #99**, whose ordering assert is the
   load-bearing half: every span survives a point-first abstract. `TECHNICAL.md` §36.
 
+- **Round 24c — Section IV leads with the cross-design result.** `HANDOFF_round24.md` §2 taken
+  on the recommendation below: §IV opened with the production 13.6% and treated the cross-design
+  leg as a qualifier three sections later. It now opens with the leg that recovers **60.2% over
+  fifty seeds**, above the **50% threshold fixed before that run**, undercutting on all fifty —
+  with the production estimate named as the synthetic-population special case. Emphasis changed;
+  no number moved. Three bounds travel with the lead (the reweight moves the **frozen** leg
+  *down* to 12.6%; the covariates are structural only; the verdict is "cannot attribute", not
+  "is not a paradigm effect"), and §IV states its own consistency with §V.E rather than leaving
+  it to a referee. Pinned by **gate #100**, which asserts the order *and* that V.E still
+  declines the same number. `TECHNICAL.md` §37.
+
 **Correction to the critique that prompted this:** the mechanical null already led in the
 abstract, intro and conclusion. The defect was narrower than I first described — it was the
 marginal's own presentation that was inverted, not the null's placement.
 
 **Watch the abstract's length.** 263 after round 23's deliberate cut → 307 (ABM sentences) →
-**341** (this). Each addition was chosen and each is reversible, but the drift is real. The only
-compressible material left is the two opening setup sentences, ~42 words before the first
-number; everything else is a pinned disclosure.
+341 (the range reframing) → **328** after compressing the two opening setup sentences. That
+compression was the only slack there was, and it yielded 13 words. Anything further means
+dropping a disclosure, so treat 328 as the floor unless a claim comes out.
 
 ---
 
-## 2. WHAT IS OPEN: two scope calls, both Eugene's
+## 2. WHAT IS OPEN: one scope call, plus the record of one now closed
 
-Neither is a defect. Both are judgement calls about what the paper is, and a session should
-not make them. My recommendation is recorded so it can be argued with, not so it can be
-executed on sight.
+Neither was a defect. Both are judgement calls about what the paper is, and a session should not
+make them unasked. **§2.1 was decided on 2026-07-27 and is executed; §2.2 stands open.** The
+reasoning is kept for both, so the closed one can still be argued with.
 
-### 2.1 `HANDOFF_round24.md` §2 — the ABM
+### 2.1 ~~`HANDOFF_round24.md` §2 — the ABM~~ — **CLOSED 2026-07-27, option 1 taken**
+
+What follows is the reasoning as it stood when the call was made; the execution is §1 above and
+`TECHNICAL.md` §37.
 
 The production ABM recovers **13.6%**; its own cross-design variant reaches **76.3%** at book
 composition, and round 23 established (`abm_null_feasibility`, NOT_FEASIBLE, TECHNICAL §31)
@@ -101,11 +115,12 @@ added a page rather than removing one, which is the right trade for the paper's 
 exposure but is worth stating plainly.
 
 **My recommendation: do nothing about length, and split the methods note only if you want to
-publish it.** The apparatus (spec-before-run, 99 gates, parity replay, the perturbation
+publish it.** The apparatus (spec-before-run, 100 gates, parity replay, the perturbation
 batteries) is a genuine contribution and it is crowding the finding — but "crowding" is an
 argument for a *second paper*, not for deleting the apparatus from this one. A conference
-venue does not force the issue. If §2.1 is taken, ~15–20pp leave as a byproduct and the
-question may answer itself.
+venue does not force the issue. Note that §2.1 was taken in its **option 1** form, which changes
+emphasis rather than length — the ~15–20pp byproduct belonged to option 2 and did not
+materialize. The paper is still 116pp.
 
 **What I would not do:** reopen compression as an exercise. The concision handoff records that
 ~40% of that round's rewrites strengthened a claim past its evidence while passing every gate.
@@ -120,16 +135,26 @@ All of `HANDOFF_round22.md` §3 still binds. Specifically:
   The variant gate requires an **identical line count** and difference on the abstract line
   **only**. The reliable move is to regenerate it: canonical with line 30 swapped for the
   archived abstract line. Doing this by hand will drift.
-- **Zero-slack literals, recounted after the round-24b reframe:** `positive at every` **6** ·
-  `$+3.0$ to $+8.0$` **7** · `11.06` **4** · `76.3\%` **7** · `$+3.5$ to $+13.1$` **6** ·
-  `$+3.9$ to $+13.1$` **0 (must stay 0)** · `60.2\%` **8** · `13.6\%` **10**.
-  Gate minima are lower than these counts; check the gate, not this table, before deleting.
+- **Zero-slack literals, recounted after round 24c:** `positive at every` **6** ·
+  `$+3.0$ to $+8.0$` **7** · `11.06` **4** · `76.3\%` **8** · `$+3.5$ to $+13.1$` **6** ·
+  `$+3.9$ to $+13.1$` **0 (must stay 0)** · `60.2\%` **10** · `13.6\%` **11**.
 - **Gate #98 is paragraph-scoped.** Splitting the seventh qualification into two paragraphs
   fails it even though every literal survives in the file. That is intentional.
-- **Gate #99 asserts ORDER, not just presence.** The abstract must state `+3.0 to +8.0` before
-  `+5.6`. It is also the one abstract check that is **canonical-scoped** rather than applied to
-  every variant — the archived long abstract makes the same commitment in different words, and
-  rewriting an archive to suit a new pin was the worse option. Reasoning is in the gate header.
+- **Gates #99 and #100 assert ORDER, not just presence** — the abstract must state
+  `+3.0 to +8.0` before `+5.6`, and §IV's lead must state the cross-design before the
+  falsification verdict. In both cases every span survives the reverted arrangement, so
+  presence-checking alone would not notice a reversion.
+- **Paragraph-scoped batteries must mutate inside their paragraph.** `tex.replace(span, "", 1)`
+  is vacuous for any span that occurs earlier in the file — it deleted the abstract's copy of
+  `60.2\%` and reported a gate hole that did not exist. Both batteries now use a
+  `_mutate_para` helper.
+- **Gate #99 is canonical-scoped**, the one abstract check not applied to every variant on disk.
+  The archived long abstract makes the same commitment in different words, and rewriting an
+  archive to suit a new pin was the worse option. Reasoning is in the gate header.
+- **A repeated hedge changes what a whole-body presence gate can detect.** §IV now repeats the
+  paradigm hedge verbatim, which is right for the manuscript, but it means deleting either
+  occurrence alone no longer trips `RELOCATED_TO_BODY`. Per-site protection would be a new gate,
+  not a tighter mutation.
 - **The figure PNGs and `.env` are gitignored**, so a fresh worktree build needs both symlinked
   in from the main checkout before `tectonic` will run.
 
