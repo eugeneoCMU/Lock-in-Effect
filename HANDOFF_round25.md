@@ -12,9 +12,9 @@ before editing anything. Companions: `TECHNICAL.md` §35 (this round), §§31–
 |---|---|
 | Repo | `/Users/eugene/somthing/Lock In effect/Lock-in-Effect` (**public**, `eugeneoCMU/Lock-in-Effect`) |
 | Branch | `claude/handoff-rounds-22-24-59c228`, **pushed** (2026-07-27, Eugene authorised). It carries round 23's unpushed `00d938d` plus round 24. `claude/handoff-round22-edits-701fb2` is a strict ancestor and fast-forwards onto it — consolidating the two on origin is a pure fast-forward whenever you want it. `panel-revision-2026-07-18` and `main` untouched. |
-| Manuscript | `paper/v18/revised_paper_v18.tex` — **116pp**, abstract **307 words**, one paragraph per line |
-| Gates | `python3 tools/liveness_gates.py` → **98 ALL PASS** |
-| Tests | `python3 -m pytest tests/` → **337 pass** |
+| Manuscript | `paper/v18/revised_paper_v18.tex` — **116pp**, abstract **341 words**, one paragraph per line |
+| Gates | `python3 tools/liveness_gates.py` → **99 ALL PASS** |
+| Tests | `python3 -m pytest tests/` → **349 pass** |
 | Build | `~/Downloads/texbuild/tectonic -X compile revised_paper_v18.tex --outdir build_r24 --keep-logs` → 116pp, **0 undefined refs** |
 
 Round 24 ran **no runs at all**. Every number it landed was read out of a committed artifact.
@@ -39,6 +39,24 @@ Detail in `TECHNICAL.md` §35. In one line each:
 - **§6 — the orphaned Section IV.** Two sentences returned the ABM to the abstract, with both
   the 13.6% seed mean and the cross-design counterweight, and four new abstract-scoped hedge
   spans travelling with them.
+
+- **Round 24b — the front of the paper now leads with the range.** V.E's posture was landed in
+  §35 and the front matter was left arguing the opposite: abstract, introduction, `tab:headline`,
+  the §II comparison and both §VIII sites all led with `+5.6` and carried the range afterwards.
+  All five reframed to *range leads, point named inside* (Eugene's call). Two things surfaced
+  that were not on any list: the **introduction quoted only the depth-cut band `[+4.3,+6.8]`**
+  as its uncertainty — the narrower, non-binding layer — and **`tab:headline` did not carry the
+  binding layer at all**. Both fixed. Pinned by **gate #99**, whose ordering assert is the
+  load-bearing half: every span survives a point-first abstract. `TECHNICAL.md` §36.
+
+**Correction to the critique that prompted this:** the mechanical null already led in the
+abstract, intro and conclusion. The defect was narrower than I first described — it was the
+marginal's own presentation that was inverted, not the null's placement.
+
+**Watch the abstract's length.** 263 after round 23's deliberate cut → 307 (ABM sentences) →
+**341** (this). Each addition was chosen and each is reversible, but the drift is real. The only
+compressible material left is the two opening setup sentences, ~42 words before the first
+number; everything else is a pinned disclosure.
 
 ---
 
@@ -108,6 +126,10 @@ All of `HANDOFF_round22.md` §3 still binds. Specifically:
   Gate minima are lower than these counts; check the gate, not this table, before deleting.
 - **Gate #98 is paragraph-scoped.** Splitting the seventh qualification into two paragraphs
   fails it even though every literal survives in the file. That is intentional.
+- **Gate #99 asserts ORDER, not just presence.** The abstract must state `+3.0 to +8.0` before
+  `+5.6`. It is also the one abstract check that is **canonical-scoped** rather than applied to
+  every variant — the archived long abstract makes the same commitment in different words, and
+  rewriting an archive to suit a new pin was the worse option. Reasoning is in the gate header.
 - **The figure PNGs and `.env` are gitignored**, so a fresh worktree build needs both symlinked
   in from the main checkout before `tectonic` will run.
 

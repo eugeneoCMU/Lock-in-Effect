@@ -3981,3 +3981,73 @@ exists to close; neither is obviously right.
 
 This does not decide `HANDOFF_round24.md` §2. If Section IV is demoted the sentence shrinks with
 it; if it leads with the cross-design result, the sentence already carries that result.
+
+## 36. Round-24b: the front of the paper leads with the range (2026-07-27) — no runs
+
+`TECHNICAL.md` §35 put the posture in Section V.E and left the front of the paper alone. That
+was half a fix. The abstract, the introduction, Table 1, the literature comparison and the
+conclusion all still led with $+5.6$ and carried the range afterwards, so a reader met the
+point as the finding and the range as a caveat on it — the opposite of what V.E argues. Five
+sites reframed; posture chosen by Eugene as *range leads, point named inside*.
+
+**A correction to how this was first described.** The mechanical null already led in the
+abstract, the introduction and the conclusion; that part of the critique was overstated. The
+defect was narrower and entirely about the **marginal's own presentation**.
+
+### 36.1 What each site now says
+
+| site | before | after |
+|---|---|---|
+| abstract | "Lock-in itself adds $+5.6$ points… What the design pins down is a range around that" | "What lock-in itself adds is a range rather than a number… Inside that range, $+5.6$ points… is the value at the calibration I headline" |
+| introduction | $+5.6$, then $+4.3$ to $+6.8$ | $+4.3$ to $+6.8$ across the depth band, $+3.0$ to $+8.0$ once the floor's sampling error is propagated, **which is the binding layer**, then the point inside it |
+| `tab:headline` | value cell $+5.6$; uncertainty column had **no** binding layer | value cell is the interval with the point inside; uncertainty column leads with the floor-read bootstrap |
+| §II comparison | $+5.6$ percentage points | bounded between $+3.0$ and $+8.0$, $+5.6$ at the mid-grid anchor |
+| §VIII (×2) | a $+5.6$-point margin | a bounded margin, $+3.0$ to $+8.0$, point named inside |
+
+The introduction's change is the one that mattered most and was not on the list: it had been
+quoting only the **depth-cut band** $[+4.3, +6.8]$ as its uncertainty, which is the narrower,
+non-binding layer. `tab:headline` did not carry the binding layer at all.
+
+**One thing checked and deliberately NOT changed.** The definitions paragraph says the
+marginal's "operative uncertainty is the calibration-and-form envelope … rather than any
+sampling interval." That looks like it contradicts V.E's "binding layer," and does not: the
+box $[+2.1, +13.2]$ is wider than the floor-read interval, while "binding layer" ranks the
+floor's sampling error against the *other layers attaching to the off-window headline* — the
+depth convention and the loan/stratum bootstrap. Both statements are true and they are about
+different comparisons. Left alone.
+
+### 36.2 The frame is not decoration
+
+Every restatement carries "every correction **to the floor or to the accounting basis**."
+Without that frame the claim is false: the additive form ($+11.2$) and the Fonseca anchor
+($+11.5$) move the marginal up. `test_frame_dropped_from_the_corrections_claim_fails` exists
+because an unframed version is the single most likely way this sentence rots.
+
+### 36.3 Gate #99, and why the ordering assert carries it
+
+Span presence alone would not have caught the defect this round removed: **every span in
+`ABSTRACT_POSTURE` survives an abstract that states the point first and the range second.**
+The gate therefore asserts `index(range) < index(point)` inside the abstract environment, and
+`test_point_before_range_fails` checks that the *ordering* assert is what fires, not a missing
+span.
+
+`ABSTRACT_POSTURE` is **canonical-scoped**, a deliberate exception to gate C4's rule that every
+abstract check runs against every manuscript on disk. The archived long-abstract variant makes
+the same commitment in its own words ("a bounded range for the elasticity's contribution, not a
+pinned magnitude") and no span of *this* abstract occurs verbatim in it, so the alternatives
+were to rewrite an archive to suit a new pin or to leave the posture unpinned. The reasoning is
+in the gate header rather than only here.
+
+### 36.4 A gate caught a real break mid-edit
+
+Dropping "percentage points" from the §II sentence removed the only occurrence of the literal
+`$+5.6$ percentage points` and broke gate #55's `headline_marginal_pp`. Fixed in the tex, not
+the gate.
+
+### 36.5 The abstract is now 341 words
+
+263 after round 23's cut, 307 after §35.4's ABM sentences, **341** after this. Every addition
+was chosen deliberately and each is reversible, but the cumulative drift against Eugene's
+deliberate 263 is worth stating rather than discovering later. The compressible material is the
+two opening setup sentences (~42 words of framing before the first number); nothing else can go
+without dropping a pinned disclosure.
