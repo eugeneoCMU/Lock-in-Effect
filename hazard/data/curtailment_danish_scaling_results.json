@@ -1,8 +1,8 @@
 {
   "mode": "curtailment_danish_scaling",
   "spec": "hazard/curtailment_danish_scaling.py module docstring (fixed ex ante)",
-  "git_commit": "81c9fd830463519a72ccf31325a0c7e367440a2a",
-  "created_utc": "2026-07-16T07:34:12+00:00",
+  "git_commit": "801a3826e0102d3cdb6a85500108017f50e260a8",
+  "created_utc": "2026-07-26T20:34:47+00:00",
   "layer": "fed_mbs_extension_risk.compute_metrics(use_hazard_microsim=True) over the committed production microsim cache (data/microsim_results.parquet)",
   "scales": [
     0.75,
@@ -113,5 +113,5 @@
   "materiality_threshold_b": 1.0,
   "ex_ante_verdict": "Danish curtailment differential stays below $1.0B at both +/-25% endpoints \u2014 the manuscript's 'stays immaterial (below $1 billion)' phrase is upgraded to the exact figures, no claim change",
   "manuscript_sentence": "paper/v16/revised_paper_v16.tex, sec:robustness-hybrid: 'The Danish legs, which compute curtailment on their own counterfactual balances, scale only to first order, and their differential stays immaterial (below $1 billion) across the same range.'",
-  "runtime_s": 1.8
+  "runtime_s": 2.0
 }

@@ -1337,8 +1337,9 @@ Path B: NPV-reset-to-baseline heuristic → ~6%). That calibrates against a
 and it conflates two channels that behave differently under a U.S. transplant.
 
 **Fix.** [`common/berger_calibration.py`](common/berger_calibration.py) imports
-Berger, Milbradt, Tourre & Vavra's estimated elasticities directly (Table 3
-structural parameters; §3.3.1 / §4.9.1) and models **two separate channels**:
+Berger, Jeong, Marx, Olesen & Tourre's estimated elasticities directly (`berger2026`,
+"A Danish fix for U.S. mortgage lock-in?"; Table 3 structural parameters;
+§3.3.1 / §4.9.1) and models **two separate channels**:
 
 - **Moving channel** — anchored to the Danish unconditional moving rate of
   **3.2%/yr**, with the (statistically flat) Danish moving-hazard slope
@@ -2094,6 +2095,8 @@ The V.C acyclical-floor concession's residual: the marginal-over-null
 cancels the floor's LEVEL but not a floor co-varying with the rate cycle.
 Run: floor_t = 4%·(1 + κ·z_t), z_t the QT-window-standardized MORTGAGE30US
 (ddof=1), window mean pinned at 4% exactly so κ=0 nests production
+(SPEC INTENT; the pin holds only where the ≥0 clip does not bind — see the
+mean-pinning correction below and §24.1a, and do not quote this clause alone)
 (implemented as a `monthly_step` wrapper — at κ=0 the production code path
 runs bit-for-bit); κ ∈ {±0.5, ±0.25, ±0.1, 0}; central (p_q 6.5) + null
 (0.0) legs per κ under full production convention (committed 75k sample,
@@ -2102,21 +2105,125 @@ RNG_SEED 42, shared macro frame, raw-basis scoring).
 Parity gate at κ=0: EXACT (818.5301/748.1850/+70.3451B/+9.1985pp, all
 PASS). Marginals across the grid span **[+7.09, +9.36]pp** — every cell
 inside the constant-floor level-sweep envelope [+5.54, +10.82]pp (p_q 6.5,
-floors 3–5%, floor_sweep_results.json) → ex-ante verdict: **cyclicality is
-bounded by the reported level sweep; the acyclical-floor concession stands
-as written.** Direction: κ>0 (floor rising with rates) lowers the marginal
-(more involuntary exits exactly when voluntary refinancing is suppressed),
-κ<0 raises it slightly then falls back — the grid maximum is +9.36pp at
-κ=−0.1, within 0.2pp of production. The |κ|=0.5 stress cells hit the ≥0
-clip (flagged per spec; the spec header's parenthetical expectation that
-the floor stays strictly positive across the grid was wrong for those two
-cells — the per-cell flag governs, and pinning is exact everywhere else).
+floors 3–5%, floor_sweep_results.json) → ex-ante verdict as recorded at the
+time: **cyclicality is bounded by the reported level sweep; the
+acyclical-floor concession stands as written.** That bound survives the
+2026-07-19 re-diagnosis below (a fortiori, since most of the grid's movement
+turns out not to be cyclicality at all), but the ATTRIBUTION recorded in the
+original entry did not, and is superseded by §24.1a. The |κ|=0.5 stress
+cells hit the ≥0 clip (flagged per spec; the spec header's parenthetical
+expectation that the floor stays strictly positive across the grid was wrong
+for those two cells — the per-cell flag governs). Mean-pinning is exact
+everywhere the clip does not bind, and is NOT exact where it does: realized
+window means are 4.000519% at κ=−0.5 and 4.082786% at κ=+0.5.
+
+**Direction (rewritten 2026-07-19; the original narrative here read the grid
+as a co-movement response and was wrong about which component dominates).**
+The grid's movement splits into a large symmetric part and a small
+asymmetric part. The symmetric part is DISPERSION, not co-movement: under
+FLOOR_MODE='max' any within-run dispersion in the floor lifts the effective
+hazard one-sidedly (low cells truncated away, high cells bind), so BOTH
+signs of κ move the marginal down once the time order is destroyed, and the
+permuted means are near-symmetric in |κ| — 68.888/69.104B at |κ|=0.1,
+66.163/64.359B at 0.25, 62.789/56.783B at 0.5. The asymmetric part is the
+genuine co-movement: κ>0 (floor rising with rates) lowers the marginal, κ<0
+raises it, the true marginals being strongly asymmetric (68.078B at κ=−0.5
+against 54.256B at +0.5) where the permuted ones are not. Isolated order
+components: +5.289/+4.766/+2.691B at κ=−0.5/−0.25/−0.1 and
+−1.420/−1.751/−2.526B at +0.1/+0.25/+0.5 — monotone in |κ| and
+sign-consistent, so floor cyclicality is real and directional, but at most
+$5.29B in any cell against a grid span of ~$17B. The grid maximum +9.36pp at
+κ=−0.1 is within 0.2pp of production (+$1.234B) and is production, not a
+cyclicality endpoint.
+
 Artifact: `hazard/data/floor_cyclical_results.json` (runtime 238 s;
 per-run parquets under `hazard/data/floor_cyclical/`, regenerable,
 gitignored). Manuscript: V.C's concession paragraph upgraded from
 "future work" to the tested bound; the VIII.A next-steps sentence
-restated in the same pass as §24.2's edits. Gate arithmetic (mean-pin,
-κ=0 nesting, clip flag) is test-gated in `tests/test_floor_cyclical.py`.
+restated in the same pass as §24.2's edits (both further corrected
+2026-07-19, see §24.1a). Gate arithmetic (mean-pin, κ=0 nesting, clip
+flag) is test-gated in `tests/test_floor_cyclical.py`.
+
+### 24.1a Re-diagnosis of the floor_cyclical range (2026-07-19)
+
+Module: `hazard/floor_cyclical_permutation.py` (pre-committed spec in the
+module docstring). Artifact: `hazard/data/floor_cyclical_permutation_results.json`
+(seed 20260719, 12 permutations per non-zero κ, multiset AND mean preserved).
+Liveness gate #59 binds the artifact to the manuscript literals; tests in
+`tests/test_floor_cyclical_permutation.py`.
+
+The diagnosis was first run as a scratchpad probe and has since been promoted
+into the repo in the house idiom: the module recomputes the 72-permutation
+family, the additive-mode grid, the convexity-matched level controls and the
+per-κ decomposition from the macro frame rather than reading any of them from
+a stored table, and re-derives the floor path through a positional cursor over
+`qt_index` (self-checked every call against the market rate the engine passes,
+same wiring idiom as `seasonal_floor_timing.py:476-490`) rather than through
+floor_cyclical's rate-keyed callback. That re-wiring is why parity is asserted
+BIT-EXACT rather than to a tolerance: anything less would mean the re-wiring
+changed the object under study.
+
+Parity first: all SEVEN committed floor_cyclical cells reproduce bit-exactly
+(68.078268/70.928467/71.579067/70.345060/67.684635/62.607698/54.256434 B),
+and an independent second gate — additive-mode κ=0 giving 86.022492B —
+matches committed floor_form_results.json additive@4% (86.0225B/11.2485pp).
+
+The reported range [+7.09, +9.36]pp (span 2.2651pp) is mostly not
+cyclicality:
+
+- **Time-order scramble.** 72 permutations span [7.198683, 9.123154]pp,
+  1.9245pp = **84.96%** of the committed span. Destroying the time order
+  destroys almost none of the range.
+- **Combination-rule swap (decisive).** Under FLOOR_MODE='additive' the
+  identical κ grid gives [11.220844, 11.265427]pp, span 0.044583pp.
+  Changing ONLY the rule eliminates **98.03%** of the span. The additive κ
+  grid moves LESS (0.0446pp) than the constant-floor 3–5% level sweep moves
+  under additive (0.0845pp: 11.291154/11.248472/11.206648pp at 3/4/5%,
+  floor_form_results.json).
+- **Low endpoint (κ=+0.5, −16.0886B vs production).** Level-equivalence
+  −2.1413B (13.3%); order-free dispersion −11.4211B (71.0%); genuine
+  time-order −2.5263B (15.7%) → **84.3% order-free**.
+- **Genuine signal (why this is PARTIAL, not a full retraction).** The true
+  marginal lies OUTSIDE the whole 12-draw permutation range at every one of
+  the six non-zero κ (0/72 draws bracket it), and the order components are
+  monotone and sign-consistent (above). Cyclicality moves the marginal in
+  the predicted direction; it is the RANGE that is not its measure.
+
+Mechanism is the same one-sided Jensen/max effect already diagnosed and
+written up for seasonal_floor_timing (manuscript
+`sec:robustness-seasonalfloor`); floor_cyclical predates that diagnosis and
+never received it until now.
+
+**Neighbour exposure audit.** `floor_sweep.py:124`, `floor_form_test.py:80`
+and `oos_identification.py:258` each set a SCALAR CONSTANT floor per run, so
+within-window dispersion is zero and a permutation is a literal no-op: the
+level sweep is a genuine level sweep, the form test genuinely tests the
+rule, and **the v17 headline (+5.57pp / $42.6B off-window floor) is NOT
+exposed**. Only `floor_cyclical.py` and `seasonal_floor_timing.py` vary the
+floor within a run.
+
+**Manuscript edits made in the same pass:** V.C's cyclical paragraph
+rewritten to report the range, the scramble/additive shares, the Jensen
+mechanism (cross-referenced to `sec:robustness-seasonalfloor` rather than
+repeated), the surviving directional signal, and the clip-broken mean
+pinning; `tab:uncertainty`'s cell relabelled "within-run floor dispersion"
+with an explanatory tablenote; `sec:robustness-seasonalfloor`'s opening
+sentence corrected to count floor_cyclical among the within-window-varying
+checks; the VIII.A next-steps sentence corrected. On promotion, V.C also
+gained the `floor_cyclical_permutation` run citation so the artifact is
+reachable from the prose.
+
+**Test correction made on promotion.** `tests/test_floor_cyclical.py` carried
+the same false invariant as the manuscript did: its docstring asserted the
+window mean is "pinned at exactly 4% for every kappa", and
+`test_window_mean_pinned_for_every_kappa` asserted `not cf.clip_bound`
+alongside the pin. The test passed only because its synthetic six-point rate
+series is too narrow for the clip to bind at the kappas it sweeps — it was
+gating a claim it could not have falsified. The docstring is corrected, the
+test renamed `test_window_mean_pinned_where_the_clip_does_not_bind`, and a
+companion `test_window_mean_is_not_pinned_where_the_clip_binds` added so the
+conditional is exercised in both directions. The pin was never load-bearing
+for any reported marginal; what was wrong was the description of the spec.
 
 ### 24.2 W4 Fannie Mae external replication (spec cbabbd2; amendments a3ef6b7, 81c9fd8, f65976a; artifact d8199eb)
 
@@ -2775,6 +2882,376 @@ BUNDLE_NOTES_ROUND17.md). Letter placeholders filled with executed
 values in revision_roadmap_round17.md. Commits local — push awaits
 Eugene.
 
+## 28. Round-18 revision: full referee report — eight runs, basis crosswalk, non-cancellation finding (2026-07-17)
+
+Source: a second complete external referee report on the v16 draft
+(technical/methodological/clarity/related-work weaknesses, detailed
+comments, 10 questions, overall assessment "strong candidate for a
+top-tier field venue" conditional on enhancements). Parsed by an 18-agent
+coverage-and-adversarial-verify pass against HEAD (9 cluster readers + 9
+verifiers; 16 reference-precision corrections applied, zero coverage
+verdicts overturned); roadmap and response letter in
+`paper/v16/revision_roadmap_round18.md`. The parse found 12 of 30 items
+already addressed at HEAD, 18 partial, 0 absent; three requests already
+executed in rounds 15–17 (seasonal curtailment = gate #45's demo run;
+landmark+isotonic = gate #40's run; Danish OAS = tab:discount, short only
+of the reviewer's 150bp endpoint), and one existing object needing only
+reframing (Path A's fitted rate-gap coefficient IS the requested in-sample
+elasticity). Author go-ahead of record: "go" (2026-07-17).
+
+### 28.1 Runs (per-run artifact commits 060a725..2b86b57; opus subagents, spec-before-run)
+
+Eight runs (seven main + the E3 cohort-timing diagnostic added on author
+approval), all in-run gates PASS at execution:
+
+- `hazard/subgroup_marginals.py` (R18-A, gate #48, commit 2b86b57): the
+  review's most-repeated ask (M1+E2+Q3) — group-ablation marginal
+  decomposition extended past vintage × coupon to FICO/LTV/Census-region
+  partitions of the 75k sample (region replicates
+  `agents.MicrosimPool.region_code` including the GU/PR/VI→West
+  fallback). Central/null parity bit-exact (818.5300844066606 /
+  748.1850239867648, diffs 0.0). All nine cells positive; per-balance
+  intensities 0.879–1.261 (tighter than the committed grid's 0.8–1.5);
+  additivity residuals 0.80/0.37/0.54% (all under the committed 1.03%);
+  largest cell 740+ FICO $40.38B at 0.88×. Verdict (pre-committed rule):
+  broad_based_all_dimensions — the generality outcome the referee named.
+- `hazard/regime_split_marginal.py` (R18-G, gate #50, commit bf0a3db):
+  ±20% multiplicative break on h₀(a) from 2023-01 (pre-committed date and
+  grid), applied identically to both legs, nothing fit to the benchmark.
+  **The round's consequential finding: the marginal does NOT cancel under
+  a multiplicative baseline break** — it scales with the baseline level,
+  +4.966pp ($37.97B) at 0.8× to +12.124pp ($92.72B) at 1.2× around the
+  bit-exact +9.198460pp anchor; a floor-only ±20% break moves it
+  oppositely (+6.573 to +10.411pp). Verdict material_sensitivity per the
+  pre-committed envelope rule (outside the cyclical-floor band E2, inside
+  the calibration box E3, sign-positive everywhere). This REFUTED the
+  roadmap's drafted E4 cancellation narrative — cancellation is an
+  additive-layer property (curtailment), not a multiplicative-baseline
+  one — and the planned V.D sentence was replaced with the honest
+  statement before any commit carried the wrong claim. Pre-break marginal
+  identical at 5.330696B across all five legs (wrapper validation).
+- `hazard/danish_discount_bound.py` 125/150bp fill (R18-I, gate #51,
+  commit 7fb4cbb): SPREADS extended to the reviewer's named endpoint;
+  flips 55,210 / 92,495 of 1,683,082 at 125/150bp with deltas exactly
+  $0.00 (trapped standalone 934.2540552143059B identical at every grid
+  point); five prior rows byte-identical; grid now [0,25,50,75,100,125,150].
+- `hazard/grouped_calibration.py` (R18-J, gate #52, commit 8c3e8c9):
+  Q10's grouped exhibit — frozen spec v4 predictions on the committed
+  16,253-cell panel, five exposure-weighted prediction quintiles (edges
+  fit on train only) × ten calendar half-years, pure scoring. Frozen-RMSE
+  parity bit-exact (3.037942336998421 / 37.903228802264934). Train pooled
+  predicted/realized 1.000 (exact by construction of the exposure-offset
+  fit; per-half 0.80–1.17); holdout 0.532 with monotone worsening
+  0.64/0.57/0.44/0.43 across 2024H1–2025H2; upper bins 0.94–1.11 pooled.
+  Verdict temporal_drift_post_boundary — localizes tab:theil's U₂>1 to
+  prediction level × half-year. Path A diagnostic; no headline touched.
+- `hazard/fonseca_band_anchor.py` (R18-B, gate #53, commit 67738ae):
+  fonseca2024's ~9%/100bp moving-rate reduction through the eq:beta1
+  transform (β₁=0.0962) and the production band machinery
+  (`floor_sweep._run_scored` unchanged, parquets isolated): marginal
+  +$87.883B/+11.492pp at the 4% floor — ABOVE the L&R high edge
+  (+$79.47B/+10.39pp), inside the pre-committed box. Committed
+  central/null/marginal and both band edges reproduced bit-identically.
+  Reading: corroboration from the stronger side; the adopted L&R central
+  is the conservative choice. Unit caveat carried in artifact and letter
+  (moving-rate reduction vs quarterly-mobility decline; treated
+  quarterly-equivalent under the transform's near-frequency-invariance).
+- `hazard/vintage_1516_subleg.py` (R18-K, gate #54, commit 060a725): the
+  referee-named 2015–16 cohorts isolated from the pre-2017 tail by
+  re-aggregating the committed Fannie ingest cells (manifest ties
+  d8199eb: 24 cell files, 17,606,999 loans / 825,814,383 rows). They are
+  99.99% of the tail's exposure: observed speed 5.2644% (+0.9617pp),
+  bound with isolation $11.7484B/1.536% vs committed $11.7481B; residual
+  pre-2015 tail degenerate (332 loan-months, 2010–2013; no 2014 vintage
+  in the ingest). The named cohorts sit inside the bound already priced.
+- `hazard/curtailment_profile_demo.py` servicer_mix profile (R18-N,
+  gate #45 artifact extended, commit 7fb4cbb): deterministic 0.60/0.40
+  two-servicer mix (front-loaded and flat group factors aggregating to
+  one monthly rate) as a fourth profile — wedge 9.299pp/$71.118B netted,
+  marginal 9.198459770709775pp (departure 1.42e-14pp from unit);
+  unit/seasonal/regime results byte-identical to the committed artifact.
+- `abm/cohort_timing_diagnostic.py` (R18-L / referee E3, gate #55,
+  commit 2ab7582): the E3 cohort-split timing falsification, run after
+  the author approved the initially-optional extension. Parity bit-exact:
+  abm CCF lag-0 −0.3183375411255578, Path B first-difference velocity
+  −0.9428012605757549 (= manuscript −0.94), empirical +0.25496827096410607
+  (= +0.25), band 2/√41 = 0.31234752377721214. Predicted 30-year coupon
+  cohorts 2.0–4.5% all track the contemporaneous rate mechanically
+  (Δ-corr −0.87 to −0.94; five of six cohorts phase-locked at lag 0, the
+  4.5% coupon CCF peaking at lag −6 with r=−0.29 — the frozen artifact
+  verdict string still says "phase-locked at lag 0" for all six and was
+  left untouched); realized cohorts (Freddie 2017–21 + Fannie
+  replication) show no rate-velocity response at any lag ±6mo (Freddie
+  lag-0 −0.05 to −0.16, Fannie −0.03 to −0.14, all inside ±2/√n; best |r|
+  over all cohorts/lags 0.343). Residual structural not compositional,
+  not a datable phase shift. HONEST LIMIT (carried in §V.C and the letter):
+  realized cohort monthly CPR exists only in the loan-level Freddie/Fannie
+  panels (Path B universe), not the SOMA holdings behind the aggregate
+  empirical CPR — which justifies the estimator-level timing falsification
+  staying at the SOMA aggregate; pooled Freddie realized velocity −0.074
+  vs SOMA +0.25 differ in sign but both deep inside the zero band. 7 gates
+  PASS, deterministic. Note the artifact stores `gates` as a list (the
+  other round-18 runs use dicts); the liveness check #55 handles both.
+- `abm/dti_threshold_sweep.py` (R18-C, gate #49, commit ad83725):
+  36/43/50% front-end DTI wall on the frozen berger surface
+  (run-2026-07-05-berger, surface sha pinned; the run completed but its
+  agent's turn ended before reporting, so the artifact was audited
+  directly). Trapped $153.35B / $84.53B / $119.70B (share 20.05 / 11.05 /
+  15.65%); production 43% reproduced to +$0.025B (G1c). Involuntary floor
+  re-anchored into [4,5]% at every threshold (G6 floor-retention PASS,
+  recal floor_cpr 0.0483 / 0.0442 / 0.0447, all in-band). Isolated DTI
+  contribution production-vs-50% −$35.16B, production-vs-36% −$68.82B.
+  The ABM trapped estimate is materially DTI-sensitive — reinforcing that
+  the headline rests on the hazard marginal, not the ABM gates — while
+  never breaching the floor. 8 gates PASS.
+
+### 28.2 Manuscript edits (backup .bak-round18)
+
+Zero-compute batch: numeric FICO/LTV/coupon bucket edges + "geography is
+not a stratum axis" (V.B, T2/Q2); equity-as-static-original-LTV /
+no-CLTV-dynamics / no-HPA-feed design boundary (V.C, Q1/Q9); in-sample
+triangulation reframing of Path A's rate-gap coefficient + Fannie sign
+replication with unit-comparability caveats (V.C, M2/Q5); functional-form
+immateriality clause in the III.D accounting-bases paragraph (M3);
+one-sided Ginnie bound note (V.C, Q4); tab:crosswalk — basis-and-inputs
+crosswalk for every headline quantity, end of app:ledger, with
+tab:headline's caption pointing to it (C2; ABM basis "shared layer,
+native" verified against the fig. 5 caption before printing). Run-driven
+batch: subgroup-marginals sentence extending the fourth qualification
+(V.D); the corrected non-stationary-baseline passage (V.D — replaces the
+falsified cancellation draft); fonseca second-anchor sentence (V.C);
+tab:discount +2 rows and the 25–150bp prose span (III.C); servicer-mix
+sentence (VII.F); grouped-calibration paragraph (app:theil, placed per
+the run agent's direction caution — cell-panel CPR object, not the V.B
+dollar split); 2015–16 isolation clause (V.C). DTI sentence (VII.C)
+executed (gate #49).
+
+### 28.3 Gates, editions, letter
+
+Liveness gates 47 → 55 executed (#48–#55 in the round-16/17
+artifact-vs-tex pattern: in-run gates PASS + exactly-one run citation +
+printed literals derived from the artifact), suite ALL PASS. references.bib
+unchanged at 59 (no new sources needed; fonseca2024 and all round-18
+citations already present). PDF rebuilt (tectonic, 84pp, zero undefined
+references); md/txt editions regenerated (19 tables). Letter placeholders
+filled with executed values in revision_roadmap_round18.md — eight runs
+total (the seven main runs plus the E3 cohort-timing diagnostic added on
+author approval; no blocks remain pending). Commits local — push awaits
+Eugene.
+
+## 29. Round-19 partial: third-reviewer clarity/citation pass (2026-07-17)
+
+Source: an additional referee note (clarity/presentation + missing-related-work
+bins) supplied in-session. The coverage assessment found most points already
+addressed at HEAD — two suggested citations were already cited (ferreira2010
+L80 rate/equity mobility lock-in; defusco2020 L86 refinancing frictions), and
+the precision-discipline concern (the $[+9.17,+9.23]$ sampling CI ``gives false
+certainty'') is already answered by the explicit subordination of that CI to
+the calibration box at intro L43 and Path B L479. The author directed
+execution of the three genuinely-additive items only (``execute''); the
+presentation/foregrounding asks were left as an open style call.
+
+Three edits (backup .bak-round18 covers round 18+19; no separate .bak taken):
+
+- **QE/QT balance-sheet-supply transmission literature** (reviewer's one real
+  citation gap; the strand at L96 previously carried only micro
+  refinancing-channel cites — berger2021/eichenbaum2022/beraja2019/dimaggio2020).
+  Added two web-verified references and one situating sentence at L96:
+  `krishnamurthy2011` (Brookings Papers on Economic Activity 2011(2):215--287,
+  NBER WP 17555; documents QE's several channels incl. an agency-MBS prepayment
+  channel) and `vayanos2021` (Econometrica 89(1):77--112; preferred-habitat
+  foundation for why held-asset supply moves the term structure). Both verified
+  via WebSearch before insertion; DOIs omitted to match the bib's zero-DOI house
+  style (0/59 prior entries carry a doi field). New sentence frames the lock-in
+  friction as an input to the balance-sheet-supply channel, not a separate
+  phenomenon. references.bib 59 -> 61.
+- **Preprint status made explicit** (reviewer: future-dated 2025/2026 sources
+  need explicit status): peng2026 and lesniewski2026 `howpublished` changed to
+  ``Preprint, arXiv:...''; berger2026 already carried ``Working paper, SSRN''.
+  The other future-dated entries (liebersohn2024 JFE 2025, perotti2024 JCAM
+  2026) are published journal articles, left as-is.
+- **Round-18 E4 regime-split folded into the consolidated uncertainty exhibit**
+  (reviewer: magnitude insufficiently pinned down): tab:uncertainty's lock-in
+  marginal ``Calibration range'' cell extended with ``regime-split baseline
+  break $+5.0$ to $+12.1$'' alongside the box ($+2.1$ to $+13.2$), floor form
+  ($+11.2$), and cyclical floor ($+7.1$ to $+9.4$) — putting the
+  baseline-conditionality dimension into the one table a reader consults for how
+  pinned the magnitude is. The §V.D non-cancellation passage (round 18) already
+  states it in prose; this surfaces it in the summary table.
+
+Liveness suite unchanged at 55 gates, ALL PASS (gate #50's regime-split literals
+now appear in both §V.D and tab:uncertainty; the `in tex` presence checks are
+unaffected). PDF rebuilt (tectonic, 84pp, 0 undefined references; both new
+\cite resolve into the bibliography); md/txt editions regenerated (still 19
+tables). Response-letter blocks (L2, future-dated status, precision/magnitude)
+updated in revision_roadmap_round18.md and response_to_referees_round18.tex.
+Declined without action, with reasons of record: the ``front-load definitions /
+reduce parenthetical density'' restructuring (left to author judgment given the
+deliberately meaning-dense house style); ``foreground non-binding-cap logic /
+Fed-benchmark justification / ABM-hazard reconciliation earlier'' (all already
+present — L169 non-binding-cap + Fed-projection justification; L51/L270/L791 +
+cross-design 59.3% reconciliation — the asks are prominence tweaks, not missing
+content). Paper-dir files on disk only (gitignored). Commits: TECHNICAL.md this
+section, local-unpushed.
+
+## 30. Panel revision (2026-07-18): out-of-window involuntary-turnover floor anchor
+
+Source: the blind cold-panel referee report on the v16 draft (`paper/v16/referee_panel_v16.md`), parsed into the AE Revision Plan whose applied edits are logged in `paper/v16/panel_revision_applied.md` (branch `panel-revision-2026-07-18`). This section documents the one data run behind that revision — AE Revision-Plan **item 2**, "calibrate the involuntary floor out-of-window," the operator-marked GO item and the empirical response to the panel's sharpest new identification objection (R1-Obj2, echoed by R2-Obj1 and R3-Obj3): that the $\beta_1=0$ null's dominant level-setter, the 4\% involuntary-turnover floor, is measured in-window on the very locked-in cohorts whose behavior the marginal decomposes, so a floor itself suppressed by lock-in would understate baseline turnover and inflate the marginal. Author go-ahead of record: "write it up + integrate" (2026-07-18). NOTE: on this branch the LaTeX master is gitignored (edits are on the working file `paper/v16/revised_paper_v16.tex`, revertable via `revised_paper_v16.tex.bak-prePanelrev`), so §30.2 below is not a tracked diff.
+
+### 30.1 Run
+
+- `hazard/out_of_window_floor.py` (AE item 2 / R1-Obj2, R2-Obj1, R3-Obj3; gate #56): pre-committed spec and acceptance gate fixed in the script header before its runs, the ex-ante convention Appendix~A records. Definitions identical to the paper: rate gap = coupon − MORTGAGE30US (FRED monthly mean); exposure-weighted CPR = 1−(1−ΣprepaidUPB/ΣexposureUPB)^12; OTM = gap≤0; seasoning cut mean_loan_age≥12.
+  - **Method validation (in-window).** The identical procedure on the deeply out-of-the-money 2023–24 discount cohorts (gap≤−0.02) reproduces the production floor: 3.84% (age≥12) / 3.91% (age≥24). The measurement is sound where it is used.
+  - **Out-of-window primary.** Applied to 2017–2019 discount-cohort turnover (gap≤0, age≥12), before both the QT window and the 2020–21 refi wave, it recovers 6.065% (5.07–5.19% stripping shallow-OTM at gap≤−0.0025/−0.005; 5.1–6.1% across the OTM grid). Year-split (gate diagnostic, this round): 2018 (rising-rate, market 4.03→4.87%, mean gap −1.25%) 5.33% (n=155); 2019 (falling-rate refi year, 4.46→3.60%, mean gap −0.88%, the bulk of the sample) 6.91% (n=373); 2017 contributes nothing (all gap≤0 cells fail the age≥12 seasoning cut, panel begins 2017-01). The reading is **upper-leaning**: the episode drove rates only to 4.87%, so almost no deeply-OTM out-of-window cohorts exist (109 cohort-months at gap≤−0.02, $0.51B ≈ 0.0035% of the $14.76T window, on anomalous 2.0–2.5% coupons), and residual voluntary prepayment cannot be stripped as in-window; even so, the cleaner rising-rate 2018 leg alone exceeds 4%. The out-of-window reading also **rises with seasoning** (6.065% at age≥12 → 10.995% at age≥24, n=95; 8.92% at the deeper gap≤−0.005 age≥24 cut), whereas the in-window validation is flat across the same cuts (3.84% → 3.91%). A genuine involuntary floor is age-invariant, so the out-of-window age-rise is itself the signature of voluntary refinancing the episode cannot strip — the ~11% age≥24 figure is not a floor candidate and is excluded on that basis, not hidden; the pre-committed spec anchors on the age≥12 primary.
+  - **Pre-committed gate verdict: DOES_NOT_CORROBORATE** (F=6.065% outside both the [3.5, 4.5] corroboration band and the [3.0, 5.0] consistency band). Per the header's pre-registered branch, the in-window concession stands; the floor is disclosed as window-specific rather than a period-invariant involuntary rate.
+  - **Identification reading.** The result does not refute R1-Obj2's premise — the off-window floor is if anything *higher* (5–6%) than the in-window 4%, consistent with lock-in suppressing baseline turnover — but it bounds the consequence. Because the lock-in marginal decreases in the floor (`tab:floorband`: +9.2 at 4%, +2.1 to +2.4 at 6%), a higher anchor **shrinks** the identified contribution rather than reversing it; at the 6% out-of-window reading the marginal is +2.1 to +2.4 points, the box's bottom row, still positive. The lock-in sign survives a floor measured off the locked-in population; its magnitude sits toward the low edge of the pre-committed box, consistent with the abstract's "sign and a bounded range, not a pinned magnitude."
+  - Complementary to §24.1's within-window cyclical-floor variant (W2). **Corrected 2026-07-19 (see §24.1a): the characterization that stood here was wrong on both of its halves, and both halves were load-bearing.** It read that W2 "sweeps the floor's *shape* with its window-mean pinned at 4% and so, by construction, detects cyclicality but not level bias." Neither clause holds. (i) The window mean is pinned at 4% only where the floor's ≥0 clip does not bind, and it binds in both |κ|=0.5 cells — realized means 4.000519% at κ=−0.5 and 4.082786% at κ=+0.5 (convexity-matched flat 4.097653% at κ=+0.5) — and the κ=+0.5 cell is the one that sets the grid's low end (+7.094679 pp; κ=−0.5 sits mid-grid at +8.902049 pp, fourth lowest of seven), so the invariant failed in the cell that mattered most. (ii) The grid does not predominantly detect cyclicality: 84.96% of its range span survives scrambling the time order (72 permutations spanning +7.198683 to +9.123154 pp against the committed +7.094679 to +9.359821 pp), and 98.03% of the span vanishes under FLOOR_MODE='additive' (+11.220844 to +11.265427 pp, span 0.044583 pp). What W2 mostly measures is within-run floor DISPERSION under the hard maximum, not co-movement with the rate cycle. A genuine cyclicality component does survive — monotone in |κ| and sign-consistent, order components +5.289/+4.766/+2.691 B at κ=−0.5/−0.25/−0.1 and −1.420/−1.751/−2.526 B at +0.1/+0.25/+0.5 — but it is capped at $5.29B in any cell. The **complementarity claim itself stands**, restated on correct grounds: this run interrogates the floor *level's provenance* holding the shape constant, W2 varies the floor within the window, and neither subsumes the other. What W2 cannot be cited for is a clean cyclicality-versus-level separation.
+  - Artifacts (on branch): `hazard/out_of_window_floor.py`, `hazard/data/out_of_window_floor_results.json`.
+
+### 30.2 Manuscript edits (.tex gitignored on this branch; revert via `.bak-prePanelrev`)
+
+- **§VII.I floor box (`sec:robustness-floor`):** new paragraph — the cited out-of-window provenance anchor, framed as the *third* pre-committed floor check alongside the level sweep (the calibration box) and the competing-risks form test. Carries the single `run \texttt{out\_of\_window\_floor}` citation and the gated literals (in-window 3.8–3.9%, out-of-window 6.1% / 5.1–6.1%, the 2018/2019 legs, the +2.1 to +2.4 direction).
+- **§VIII.A limitations (`sec:limitations`):** the pre-existing uncited "≈5–6%" parenthetical (panel edit E) tightened to a cited cross-ref to §VII.I; loose literals removed so the result is single-sited. The "no untouched evaluation months" global disclosure is untouched.
+- **Appendix A run ledger:** the `out_of_window_floor` row was already present (added with panel edit E); its cross-ref repointed from `sec:limitations` to `sec:robustness-floor`, where the run's detailed treatment now lives (§VIII.A only cross-refs there).
+
+### 30.3 Gate
+
+- **Liveness gate #56** (`out_of_window_floor` cross-check, in the round-16/17 artifact-vs-tex pattern): loads `out_of_window_floor_results.json`, asserts gate_verdict == DOES_NOT_CORROBORATE, headline 6.065%, in-window deep-OTM validation 3.84%, floor 4.0%; requires the tex to cite the run exactly once and to print the literals 6.1% / 3.8–3.9% / 5.1–6.1% / +2.1 to +2.4. PASSES.
+- **Pre-existing suite state on this branch (NOT introduced here):** the gitignored working `.tex` on `panel-revision-2026-07-18` diverges from the committed round-19 gates — 21 round-17/18 runs are cited without the exact `run \texttt{NAME}` form the gates grep (their numeric literals are all present), plus one missing "supersede this tag" load-bearing sentence and one un-updated Danish "25--150 basis points" prose span. The suite therefore reports 23 pre-existing failures unrelated to this run; gate #56 itself passes. Flagged to Eugene as a separate branch-hygiene item (candidate cause: the `.bak-prePanelrev` reconstruction predates or diverges from the round-17/18 citation phrasing).
+- **RESOLVED 2026-07-19 (re-synced the gates, not the `.tex`):** the three divergences above were all *deliberate* manuscript evolution, so `tools/liveness_gates.py` was updated to the current conventions rather than reverting the narrative. Round-19b moved the inline `run \texttt{NAME}` repository identifiers into the Appendix `tab:runindex`/`tab:crosswalk` tables (each run is still tagged exactly once as bare `\texttt{NAME}`); the 24 artifact-vs-tex cross-checks now count `\texttt{NAME}` with `>= 1` (`out_of_window_floor` is tagged both inline in §VII.I and in the index, so count 2). The `supersede this tag` EXACTLY-ONE check was re-pointed to the surviving reproduction-provenance sentence `against the fold-in specification's code` (Reproducibility conventions paragraph, which carries the spec-drift disclosure's operational content), and the Danish prose literal updated to `25--150 bp`. The value-literal (tex == frozen-artifact) checks are unchanged, so the anti-drift guarantee is intact — teeth verified: deleting a run's `\texttt{}` tag drives its count to 0 and the gate fails. **Suite now reports `ALL GATES PASS` (55/55).** The gate-file change is git-tracked but was UNCOMMITTED pending review.
+
+Commits (local, push awaits Eugene): `hazard/out_of_window_floor.py` + `hazard/data/out_of_window_floor_results.json` (new, previously untracked), `TECHNICAL.md` (this section), `tools/liveness_gates.py` (gate #56 + OOWFLOOR_RESULTS constant). The `.tex` edits are on the working file only (gitignored).
+
+## 31. Panel revision (2026-07-19/20): headline-calibration reconciliation and sign-statistic provenance
+
+Two defects, both consequences of the same incomplete edit. When the lock-in marginal was demoted from the 4.0% in-window involuntary floor to the off-window floor of §30 / `oos_identification` (+$42.6B / +5.57pp at the clean mid 4.991%, band 4.695–5.334%), the demotion was propagated to the marginal and to nothing else. The recovery figures stayed at 4.0%.
+
+### 31.1 The mixed calibration (`hazard/calibration_reconciliation.py`, gate #63)
+
+**Basis mapping, established first because everything rests on it.** The paper's 97.9% ("benchmark-consistent accounting basis") and 88.7% (β₁=0 null on the same basis) are `share_pct` from `shared_layer_scoring_results.json`, produced by `fed_mbs_extension_risk.compute_metrics(use_hazard_microsim=True)`. Its 107.0%/97.8% counterparts are `standalone_share_pct` from `extension_risk.score_extension_risk`, the same numbers `floor_sweep_results.json` carries. The two bases differ by **one additive macro layer**: the shared scorer nets a constant $69.56220187263008B of curtailment off trapped liquidity over a common $764.7482532227002B cap benchmark, so
+
+    trapped_shared = trapped_standalone − 69.56220187263008 ;  share_shared = trapped_shared / 764.7482532227002 × 100
+
+equivalently a flat **−9.096092 pp** on the share basis. This is exact, not approximate: it reproduces the committed 97.9365273968041 and 88.73806762609433 from the committed 107.0326190295068 and 97.83415925879702 to machine precision (Gate A, bit-exact, run before anything new is computed). The layer is **path-invariant** — `curtailment_netted_b` and `empirical_trapped_b` are identical across all five committed estimators, which span 29.6 pp of standalone recovery from Path A's 121.5% to the null's 97.8% (Gate B) — so it does not depend on the CPR path and therefore does not depend on the floor generating it. That is what licenses carrying it to floors the shared layer was never run at. No new microsim and no new scorer: the standalone legs at every reported floor are already committed in `oos_identification_results.json`'s `instrument1_marginal_table`.
+
+**Recovery on the shared basis, floor by floor** (central = p_q 6.5, null = β₁ 0):
+
+| floor | central $B | central % | null $B | null % | marginal | miss vs benchmark |
+|---|---|---|---|---|---|---|
+| 4.000% (in-window, demoted) | 748.968 | 97.94% | 678.623 | 88.74% | +$70.345B / +9.198pp | **2.06 pp** |
+| 4.695% (clean band low) | 716.226 | 93.66% | 664.445 | 86.88% | +$51.782B / +6.771pp | **6.34 pp** |
+| 4.991% (**headline**) | 697.964 | 91.27% | 655.356 | 85.70% | +$42.608B / +5.572pp | **8.73 pp** |
+| 5.334% (clean band high) | 674.283 | 88.17% | 641.661 | 83.90% | +$32.622B / +4.266pp | **11.83 pp** |
+
+**The claim "recovers 97.9% … landing within 2.1% of the benchmark" is false at the calibration the paper headlines.** At the headline floor the central leg recovers **91.3%** (88.2–93.7% across the clean band) and the miss is **8.7 points** (6.3–11.8 across the band), not 2.1. The 97.9%/2.1-point pair belongs to the demoted in-window calibration and cannot be quoted alongside the $42.6B marginal. Roughly 15 occurrences are affected, including the abstract and conclusion.
+
+**The 88.7-vs-88.5 convergence does not survive either.** The NY Fed's ex-ante (May 2022) projection implied 88.51496735220967% of the realized cap-shortfall under the pre-committed uniform-spread allocation and 75.5765152376043% under the settlement-aware allocation the manuscript itself calls the more faithful of the two. Against the null's shared-basis recovery:
+
+| floor | null (shared) | vs uniform-spread 88.51% | vs settlement-aware 75.58% |
+|---|---|---|---|
+| 4.000% | 88.74% | **+0.22 pp** | +13.16 pp |
+| 4.991% (headline) | **85.70%** | **−2.82 pp** | +10.12 pp |
+| 4.695% / 5.334% | 86.88% / 83.90% | −1.63 / −4.61 pp | +11.31 / +8.33 pp |
+
+The 0.2-point coincidence is doubly conditional: on the demoted floor *and* on the allocation. At the headline calibration it is 2.8 points under one allocation and 10.1 points under the other, and it cannot be reported as a convergence.
+
+**Five collateral restatements**, all recomputed in the same artifact against their own sources: **S1** the seasonal-floor shape component $4.897B is 7.0% of the in-sample $70.345B but **11.49%** of the headline $42.608B; **S2** the $11.748B vintage bound is "about a sixth" of the in-sample marginal but **27.57%** — more than a quarter — of the headline; **S3** the "$+\$70$ billion of trapped roll-off" at §VII carries no in-sample qualifier, unlike every other occurrence; **S4** the "18.3-point real-book gap between the central leg's 107.0% and the β₁=0 null's 88.7%" **crosses accounting bases** (standalone minus shared) — the single-basis differential is +9.198pp in-window and +5.572pp at the headline; **S5** the vintage × coupon per-balance intensity range printed "0.8× to 1.5×" is actually **0.821 to 1.746** recomputed as `share_of_sum_pct / balance_share_pct` from `marginal_decomposition_results.json`; **S6** "the cells sum to within 1.0% of the paired-run total" is false as written — the artifact's own `residual_frac_of_total` is 0.010302, i.e. **1.03%**.
+
+### 31.2 Sign-statistic provenance (`hazard/sign_forcing_stats.py`, gate #64)
+
+§V rests the sign demotion (from identified content to a consistency check) on five figures that had been computed in session and written straight into the `.tex` with no committed artifact behind them — the one sourcing rule every other run in this repo is held to. They are now computed from `hazard/data/cohort_month_panel.parquet` and FRED `MORTGAGE30US`, and **all five reproduce at the manuscript's own printing precision**: exposure-weighted mean coupon **3.134%**, **97.40%** of exposure at or below 4.79%, **99.53%** at or below 5.09%, window-minimum 30-year rate **5.2311%** (August 2022), **40** covered window months.
+
+Two things the module pins deliberately. First, **the coupon column is decimal-scaled** (0.0–0.075, a 14-point grid), not percent: a naive percent-threshold query returns a meaningless 100.00% of exposure and would silently "confirm" the claim, so the gate asserts both the decimal range and that the reported shares are not the degenerate 100%. Second, **coverage is disclosed, not repaired**: the panel ends 2025-09, two months short of the window's 2025-11 close, so these are shares of 40 of 42 months. The gap cannot overturn the reading — the book is closed at 2017–2021 originations, so no higher-coupon loan can enter and the out-of-the-money share can only hold or rise as the low-coupon cohorts season — but it is not measured, and the artifact says so. Supplementary: the exposure share at or below the *window minimum* itself, the economically binding cut, is 99.53%.
+
+### 31.3 Gates
+
+- **Gate #63** (`calibration_reconciliation`): binds the arithmetic, not prose, because the whole correction rests on one claim. The basis map must equal the shared-layer artifact's own fields (read from that artifact, not from this one's echo); the 4.0% anchors must reproduce bit-exactly with the gate performing the subtraction itself rather than trusting a stored zero; the layer must be path-invariant across all five estimators *and* the standalone spread it is invariant across must exceed 20 pp, or the claim is vacuous; every floor row must trace to the committed OOS table so no floor can be silently re-simulated in; the miss must re-derive as 100 minus the central share; the direction must hold (miss < 2.5 pp at 4.0%, > 8.0 pp at the headline); and the convergence must be reported on **both** allocations with the retirement verdict intact, so a later editor cannot reinstate the 0.2-point coincidence by editing one field. PASSES.
+- **Gate #64** (`sign_forcing_stats`): binds the artifact to the manuscript literals by **deriving** each expected string from the artifact at the manuscript's printing precision, plus the decimal-scale assertion, the 40-of-42 coverage disclosure, and the requirement that the window minimum dominate both thresholds (if a data revision moved it below them the statistics would still compute but would no longer mean what §V says). PASSES.
+
+Suite state after this round: **63 gates, ALL PASS**.
+
+Artifacts (untracked/uncommitted, per this round's standing instruction): `hazard/calibration_reconciliation.py`, `hazard/data/calibration_reconciliation_results.json`, `hazard/sign_forcing_stats.py`, `hazard/data/sign_forcing_stats_results.json`, `tools/liveness_gates.py` (gates #63/#64 + five artifact-path constants), `TECHNICAL.md` (this section).
+
+### 31.4 The manuscript edit (`revised_paper_v17.tex`)
+
+§31.1's table is the source of record for every number below. The compute round left the `.tex` untouched; this round reconciled it.
+
+**Decision: report both calibrations, headline the off-window one.** The alternative — headline the in-window 4.0% recovery and footnote the off-window figure — was rejected. The recovery level and the lock-in marginal are computed by the *same paired run at the same floor*, so a reader who sees "recovers 97.9%" next to "marginal +$42.6B" reasonably infers that the model recovering 97.9% is the model producing +$42.6B, and it is not: that model recovers 91.3%. Nothing in the prose could fix that inference while the two numbers sat at different floors, which is why the fix is structural rather than a hedge. The paper had *already* adopted the both-calibrations pattern for the marginal (+5.6 headline, +9.2 labelled in-sample); extending the same pattern to the level keeps one convention throughout, whereas headlining the level in-window and the marginal off-window would have institutionalized the mix. The 4.0% figures are retained everywhere, never deleted, and labelled *in-sample calibration point*: they are not wrong, they are the model-fit diagnostic at the floor the framework was assembled on.
+
+**Discipline observed.** Only the central and null legs have committed off-window values. Path A (112.4%), the concave-gap variant (96.6%), the full-book (109.1%) and composed (100.0%) columns, the covariate-prior band (92.2–99.2%), the elasticity band, the Ginnie overlay, and the Danish legs were run only in-window and are **not** extrapolated; each is now explicitly labelled an in-sample-calibration quantity. `tab:bases` gains two off-window rows (central 100.4% standalone / 91.3% shared; null 94.8% / 85.7%) with `--` in the columns that were never run there.
+
+**What was retracted, not reworded.** (i) "Lands within 2.1% of the benchmark" as an unqualified headline: the miss is 8.7 points at the headline floor, 6.3–11.8 across the band, and 2.1 points in-sample. (ii) The 88.7-vs-88.5 convergence, in both places it appeared: it needs the in-window floor *and* the uniform-spread allocation, and the gap ranges from −2.8 pp (headline floor vs uniform) to +13.2 pp (in-sample vs settlement-aware) across those two disclosed choices. The coarse claim that survives — both objects put the anticipated mechanical component in the large majority of the shortfall — is stated and relied on; the 0.2-point precision is not. Both retractions are recorded in the run ledger rather than silently overwritten.
+
+**S1–S7.** S1 the $4.897B flat-floor bound is 7.0% of the in-sample marginal and 11.5% of the headline one, both now printed. S2 the $11.748B vintage bound is 27.6% of the headline marginal (a sixth only of the in-sample one). S3 the bare "+$70 billion of trapped roll-off" now carries both calibrations. S4 the 18.3-point real-book gap was a **basis error** — standalone central minus shared null — and the defect was in the artifact, not only the prose: `synthetic_companion_null.py`'s `real_book_reference` block hardcoded 107.0/88.7/18.3. It now derives both legs from one artifact on one basis (`floor_sweep_results.json` row 4.0), giving 107.0/97.8/9.2, and carries the off-window 5.6 from the OOS table. The synthetic differential (10.37 pp) therefore slightly *exceeds* its real-book counterpart rather than falling short, which the manuscript now says. S5 per-balance intensity 0.82×–1.75×, not 0.8×–1.5×. S6 the additivity residual is 1.03%, so "within 1.0%" was false as written; all three occurrences now say 1.03%. S7 the sign-forcing statistics were already numerically correct and gate #64 already bound them, but the manuscript cited no run; it now carries `\texttt{sign\_forcing\_stats}` and gate #64 requires that citation.
+
+**Gate changes made in the same pass, per the never-loosen rule.** Gate #61's stored precedent moved from 18.3 to 9.2, so its derived literals follow automatically; the gate was additionally **strengthened** to cross-read both legs from `floor_sweep_results.json` (so a cross-basis difference cannot be reinstated), to re-derive the gap on the shared basis and require the same value (basis-invariance), to require the superseded 18.3 stay recorded as superseded and differ from the live value by more than 8 points, and to trace the off-window leg to the committed OOS table. Gate #64 gained the run-citation requirement. No check was relaxed.
+
+**Verification.** 63 gates PASS, 267 pytest pass, PDF 99pp, 0 undefined references and 0 undefined citations. Nothing committed or pushed.
+
+## 32. Panel revision (2026-07-20): matched-depth reconciliation of the floor demotion, and three forced claims relabelled
+
+Two independent problems. §32.1–32.2 are a factual error and a missing decomposition in the off-window floor narrative (§VI.B / `sec:robustness-floor`). §32.3 applies, to three further claims, the same relabel-do-not-delete pattern already used twice in this repo for the sign demotion (§31.2) and the floor-cyclicality mislabel (§24.1a): keep the result, correct what it demonstrates, and say why the check could not have failed.
+
+### 32.1 The depth error (`hazard/matched_depth_reconciliation.py`)
+
+The manuscript asserted that the off-window 2017–2019 panel reaches no cohort at the two-point discount depth at which the in-window anchor is measured, and that "the off-window grid stops at half a point." **Both halves are false.** The 2018 leg's observed gap runs to **−0.02866**; the `gap<=-0.02` cell **exists** and holds **35 cohort-months** reading **3.440%** annual CPR. The grid stopped at −0.005 because `GAP_THRESHOLDS` was hardcoded to `(0, -0.0025, -0.005)` in the `oos_identification` script header — a grid choice, not a data limitation.
+
+The true limitation is **exposure collapse**. Down the 2018 leg's depth ladder, the share of its `gap<=0` exposure retained runs:
+
+| depth | 0 | −0.0025 | −0.005 | −0.0075 | −0.01 | −0.015 | −0.02 |
+|---|---|---|---|---|---|---|---|
+| exposure share | 100% | 83.68% | 72.87% | 35.87% | 11.34% | 3.87% | 0.02% |
+| CPR | 5.334% | 4.991% | 4.695% | 4.722% | 4.869% | 4.342% | 3.440% |
+
+The deep cell carries **$0.282B of $1,264.5B**. It is present and worthless. The run therefore fixes an **ex-ante support rule** in its header — a depth is admissible for a leg only if the leg retains **≥10%** of its `gap<=0` exposure there — and excludes the deep cell before any reading is taken. This distinction is load-bearing rather than pedantic: the hostile reading of the demotion is that it is a depth artifact, and the answer is not that the deep cell is missing but that it is noise.
+
+### 32.2 The decomposition the paper never gave
+
+Floor→marginal is taken from the committed `floor_sweep_results.json` by PCHIP, **not re-derived**; the mapping reproduces the committed grid to within **$0.69B** at every read inside it, and reads above 6.0% are refused rather than extrapolated. Step 1 parity-gates all 20 cells against `oos_identification_results.json`'s anchor grid (all pass, bit-exact).
+
+Total move, in-window `gap<=-0.02` **3.972%** → off-window 2018 `gap<=-0.0025` **4.991%**: **−$28.312B / −3.702pp**, splitting
+
+- **WINDOW** (depth held at −0.0025 on both sides): **−$20.874B / −2.729pp = 73.7%**
+- **DEPTH** (within the in-window panel, −0.02 → −0.0025): **−$7.438B / −0.973pp = 26.3%**
+
+Cross-checked at the deepest depth both panels support (`gap<=-0.01`): **66.9% window / 33.1% depth**. **Window dominates either way**, so the demotion is not primarily a depth artifact — but depth owns a real, previously unattributed **$7.4B**, and the consequence is that **at matched depth the correct in-sample comparison point is $63.5B, not $70.3B**. The paper narrates a $27.7B demotion; only ~$20.9B of it is the window.
+
+**The reverse ordering is refused, not computed.** Window-first at matched deep depth would read the off-window leg at `gap<=-0.02`, where it holds 0.02% of exposure. `path_b_window_first` is reported (`admissible: false`) and **no Shapley average is formed** (`shapley_average_refused: true`). Note the reported-but-unused reverse path would have given a *positive* window component (+$8.21B) and a −$36.5B depth component — i.e. the hostile reading is exactly what the support rule excludes, which is why the rule is ex ante.
+
+**A clean new robustness result.** Extending the 2018 ladder from 3 to **5** well-supported depths leaves the committed clean band **exactly [4.695%, 5.334%]** — the two new reads (**4.722%** at −0.0075, **4.869%** at −0.01) fall strictly inside it. Marginal band **$33.31B–$51.75B**, point **$42.58B**. The headline is better supported than the three-depth grid could show.
+
+### 32.2a What the matched-depth grid does *not* rescue
+
+The paper's rejection of the 2019 falling-rate leg compares 2019's `gap<=0` read (6.910%) against the retained 2018 `gap<=-0.0025` read (4.991%) — **a 1.919pp spread across different depths**, not a valid comparison as written. But matching depth does **not** make the legs converge either. Over the four depths where both legs clear the support rule the 2018-vs-2019 spread runs **1.576 / 0.491 / 2.112 / 0.857 pp** — non-monotone, and at −0.005 the matched-depth spread (2.112) **exceeds** the 1.919 the narrative rested on. So "the legs agree once depth is matched" would be a cherry-pick of one depth in four.
+
+Two further pins. `pooled_2017_2019` **contains** both 2018 and 2019 (plus 2017), so it is **not a third independent leg**: there are **two**, and any "three legs agree" phrasing double-counts. (Grepped: no such phrasing was present in the `.tex`; the fact is now stated affirmatively so it cannot be introduced.) And the 2019 leg's exposure collapses from **$1,085B** at `gap<=0` to **$199B** by −0.005 and **$0.29B** by −0.015, so its deep reads are noise on the same grounds that disqualify the deep off-window cell.
+
+**Verdict written into the paper:** the refi-contamination story is **unadjudicable below `gap<=0`, not refuted**. The only depth on solid exposure for both legs is `gap<=0`, where 2019 sits **1.576pp above** 2018 — directionally consistent with contamination, and consistent with the independent seasoning diagnostic. *The conclusion is defensible; the argument as stated was not.* The paper now states the weaker one.
+
+### 32.3 Three forced claims relabelled
+
+**B1 — the Danish positivity is an identity.** `hazard/danish_us_intercept.py` defines the Danish moving leg as *the production U.S. hazard evaluated at a zero rate gap*; its own docstring (line 37) concedes the zero-gap intercept exceeds the locked-in U.S. hazard wherever the gap is negative. The U.S. book carries a negative gap in essentially every cell (99.53% of exposure below the window-minimum market rate — §31.2), and the hazard is monotone in the gap. So the zero-gap leg **must** prepay faster, Danish trapped (**687.7795451639257B**) **must** come in below U.S. trapped (**748.9678825340305B**), and the gap (**+61.18833737010482B**) **must** be positive. `sweep_sign_robust: true` is forced for the same reason: additional refinance-in-place only adds Danish prepayment. Both are now labelled wiring checks.
+
+What is *not* forced and is preserved: the **magnitude** (+$61.2B, 8.0% of benchmark), and the **Danish-level bracketing anchor of −$99.9B**, which imports Denmark's baseline mobility rather than only the payoff rule and **does flip the sign**. The edits **lead with the flip**.
+
+Sites fixed: abstract, `tab:headline` row (both of which a reader meets before the §VII.C disclosure), the §I framing paragraph, §VII.C body, `tab:danish` note d, the `fig:gapsweep` caption, the §VII.C closing paragraph, the conclusion, and the ledger's superseded-figures entry. Also corrected: the Danish gap was repeatedly called **equal in size** to the lock-in marginal. That holds only against the **demoted** in-sample $70.3B. Against the **$42.6B headline** the Danish gap is **~44% larger**, and every unscoped occurrence now says so.
+
+**B2 — the Fannie envelope is too wide to constrain.** Pre-committed envelope **[2.113539257759882, 13.17046899604594] pp** — an **11.06pp** window around a Freddie point of **+9.20pp**, admitting a replication **77% below** or **43% above**. Fannie landed at **8.682485610390856 pp** ($66.39915704177633B), `in_envelope: true`, on **17,606,999** staged loans. The width is now stated at every site so a reader can price the evidence. **Critical distinction preserved:** the *envelope gate* is uninformative; the *agreement* is not — 17.6M loans landing **0.52pp** from the Freddie point is genuinely reassuring. The replication is kept and is **not** described as failed; the paper simply stops leaning on the PASS.
+
+**B3 — "stable in sign across both hazard specifications."** Only Path A *estimates* the rate-gap coefficient; Path B *imports* it from `liebersohn2024` as a signed elasticity band, so it has no freedom to take the other sign. The agreement is an **orientation/wiring check** on unit and sign conventions between the two paths (it would catch a transposed sign, and it passes), not corroboration that the par-payoff penalty does real work. Restated on that footing rather than dropped, per the standing preference for explicit-why-it-cannot-fail over deletion; the evidential load moves to the estimated Path A coefficient and the external literature taken separately.
+
+### 32.4 Gates
+
+No new gate. `matched_depth_reconciliation` carries its own hard-wiring self-checks (anchor-grid parity across all 20 cells, path-A components summing to the total, mapping reproducing the committed grid, mapping fidelity under $1B — all true) and four soft interpretive checks recorded honestly, two of which are **false by design and reported as such**: `off_window_reaches_gap_le_0.02_with_support: false` and `leg_spread_converges_monotonically_with_depth: false`. The manuscript's new prose states both.
+
+Existing gates that touched edited prose were reconciled **by updating the derived format strings, never by loosening a check or reverting prose** (see §32.5).
+
+### 32.5 Verification
+
+Protected content grepped and confirmed byte-identical after the pass: the +$42.6B/+5.57pp headline, the $4.695–5.334% OOS band and its $32.6–51.8B range, the levels-only timing concession, the sign demotion, the floor-dispersion relabel, the `floor_cyclical` corrections, the §31 calibration reconciliation, and the tex:476/716/430 null corrections.
+
+Artifacts (untracked/uncommitted, per this round's standing instruction): `hazard/matched_depth_reconciliation.py`, `hazard/data/matched_depth_reconciliation_results.json`, `paper/v17/revised_paper_v17.tex`, `TECHNICAL.md` (this section).
+
 ## Appendix A — File Map
 
 ```
@@ -2969,3 +3446,538 @@ cohort 2.00% at 39.7% weight; dynamic friction 8.23–9.96% (mean 8.95%).
 ---
 
 *Last updated: July 2026. Hazard spec v3: stratum FE (295 pools), burnout sign fixed (−0.13). Post robustness-fix program (§15): Path B at 107.0% trapped (band 105.9%–108.2%) after the β₁ units fix; ABM at 11.1% after the native 15-year gate (§19); cross-design test with real Freddie covariates recovers 59.3% (recalibrated) / 20.9% (frozen). Follow-on analyses: permutation test (§16, n=999, exact p=0.001) — Path B's recovery is a marginal-distribution result, moved only 0.27% ($2.2B) by scrambling joint structure, interaction-dominated across axes with the CPR-path signal localized to origination-time; Path A's fitted coefficients are far more structure-dependent (β can flip sign). Cross-foundation (§17): the institutional gap collapses $925.5B→$61.2B under a shared accounting layer; full-book SOMA weighting lifts Path B to 109.1%, Path A to 126.1%. Symmetric companion (§18): Path B recovers 106.0% on a fully synthetic population (zero Freddie data) — the hazard survival structure recovers the benchmark independent of data source, while the ABM needs real covariates to reach 59.3%. Berger recalibration (§20): importing estimated Danish elasticities (3.2% flat moving + tax-attenuated refi, ≈0 under U.S. taxes) collapses the institutional gap from +$925.5B to −$99.9B (Path B hybrid) — the large gap was an artifact of extrapolating a U.S.-calibrated mobility function to a Danish rate gap. Sweeping the refi channel (§20.1) shows the gap's *magnitude* stays small across [0, 18%] but its *sign* is not robust in Path B under that anchor (breakeven at just 1.4% refi vs 12.6% for the ABM). Referee round 13 (§23) then established that §20's 3.2% import is Denmark's descriptive LEVEL (rule+country bundle; Danish CPR below the 4% involuntary floor) and restated production to the U.S.-intercept anchor — Berger's flatness fact at the U.S. zero-gap hazard — which reproduces the §17 hybrid leg for leg: gap **+$61.2B (8.0%)**, signed positive at every refi sweep point, the counterfactual image of the +9.2pp lock-in marginal; the dk_level rows are retained as a labeled bracketing case. Round 13 also added the floor functional-form test (additive marginal +11.25pp at 4%, nearly floor-invariant — the floor sweep's failed ±2pp gate was max-form censoring, not elasticity instability) and the Path B stratified loan-level bootstrap (200 reps: central 95% [106.96, 107.10]%, paired marginal [+9.17, +9.23]pp — sampling noise negligible; uncertainty is calibration). July 2026 verification round (§21): Path A coefficients now carry stratum-bootstrap CIs (rate-gap sign-stable in 99.5% of replications; burnout/friction not distinguishable from zero), the fold-in-spec Monte Carlo (mean $103.7B; seed 42 = $90.98B exactly) and the β₁=0 no-lock-in null ($748.2B / 97.8%) are committed artifacts, and manuscript v14 aligns the paper with all of the above. Referee rounds 2–12 (§22) took the manuscript to v15r5 on the shared accounting basis; on 2026-07-11 the former `abm/TECHNICAL.md` and `REVISION_VERIFICATION.md` were consolidated into this file (Appendix B, §22).*
+
+## 29. Round-22 reproducibility observation: ABM Monte Carlo re-run drift (2026-07-26)
+
+`abm/production_scale_test.py` (round-22 B4) attempted a production-spec scale
+comparison and **halted at its pre-committed parity tier**. Recorded here because
+the halt is itself a reproducibility fact about the ABM leg.
+
+| | |
+|---|---|
+| Committed 50-seed mean (`abm/monte_carlo_results.csv`) | $96.6791545521707B |
+| Fresh arm-A 50-seed mean, same seeds, 2026-07-26 | $96.81525194824529B |
+| mean \|diff\| / max per-seed \|diff\| | $0.136B / $0.145B |
+| Binding tolerance (pre-committed) | $0.05B |
+
+The offset is **uniform across all fifty seeds** ($0.132–0.145B each), which
+distinguishes a changed input from code drift or sampling noise. `G1b` confirms
+intra-run determinism is exact (same seed twice, max |diff| 0.000e+00). FRED's
+median home value moved 403,200 → 410,700 since the freeze; the script pins the
+medians, so the residual comes from revision in the FRED macro frame feeding the
+friction index.
+
+**Scope.** Frozen artifacts are unaffected and no manuscript quantity moves. What
+this says is that a *fresh* re-run of the ABM Monte Carlo on today's data lands
+0.14% from the frozen mean. Any future run wanting bit-parity against the frozen
+ABM artifacts must either pin the full FRED frame or accept a ~0.14% offset.
+
+**Open decision (Eugene).** The scale test compares two arms, and both arms sit
+on the same fresh frame, so arm A could be re-anchored to a fresh baseline rather
+than to the committed CSV, with the uniform offset disclosed. That is defensible
+but is a post-hoc change to a pre-committed acceptance rule, so it is left as an
+amendment for Eugene to make explicitly rather than applied silently.
+
+## 30. Round-22 runs (2026-07-26)
+
+Four new pre-committed runs. Each has a spec commit preceding its result commit,
+per the standing convention.
+
+### 30.1 `concave_additive_marginal` — the joint form × transform cell
+
+The designated hull `[3.891507360127463, 13.09774126267503]` was a hull over floor
+FORMS at the log-linear transform only; `concave_marginal` ran the concave transform
+under `FLOOR_MODE='max'` alone. The joint cell had never been measured, and
+`tab:uncertainty` listed the two adjustments side by side, which presumes they add.
+
+All 24 parity gates bit-exact (diff `0.000e+00`). Runtime 90s.
+
+- **T1, hull stands.** Concave × additive marginal `+9.2546pp` at 4.0% and `+9.2219pp`
+  at 4.991%, both inside the hull. The five `$+3.9$ to $+13.1$` tex literals and
+  gate #69 are untouched.
+- **S2, separability refuted.** Interaction `−0.6695pp` at the production floor,
+  `−1.4697pp` at the headline anchor — past the ±1.0pp convention. The concave
+  transform costs `−0.5154pp` under the max form (which absorbs it into the floor)
+  against `−1.9852pp` under the additive form (which never censors).
+- Scope: run at the central elasticity only; the {5.5, 7.7} band ends are unrun, so
+  the hull is *not contradicted* rather than *shown complete*.
+
+Gate #81 pins the refutation, including `s1_separable is False` (not `None`).
+
+### 30.2 `burnout_ablation` — the β_B = 0 run the manuscript had quoted but never performed
+
+The four burnout sites cited `$6.6B / 0.9pp / 106.2% / peak lag −3` with no artifact,
+no script and no gate. All four reproduce the **minimum** over 100 replicates of
+`permutation_test_ablate_orig`, an origination-time permutation experiment:
+`818.5300844066606 − 811.911646619444 = 6.6184`; `107.0326190295068 − 106.16717896353396
+= 0.8654`; that run's `peak_lag_distribution` is `{-3: 100}`. Not its mean
+(812.8957 / 106.2959). Gate G0e asserts the identification bit-exactly.
+
+Real result, 8 legs, 46s: **−$6.5824B / −0.8607pp** at the 4.0% floor. The claim was
+right *by coincidence*, within $0.02B of an object it was not computed from.
+
+Two facts the manuscript did not have:
+- **The ablation halves at the headline floor**: `−$3.4773B / −0.4547pp` at 4.991%,
+  because the floor's bind share rises 36.3% → 68.8% and burnout is inert wherever
+  the hard maximum binds. Three interpretive sites had been pairing an in-sample
+  ablation with off-window levels.
+- **The marginal is not burnout-invariant**: `+9.20 → +9.94pp` at 4.0%, `+5.57 → +6.51pp`
+  at 4.991%. Both inside the ±1pp convention, the second barely.
+
+Gate #82 pins both floors, the T1 verdict and the forensic provenance record.
+
+### 30.3 `cross_design_seeds` — 50 seeds on an N=1 test
+
+Every cross-design number was a single seed-42 draw, and the paper crosses its own
+pre-committed 50% band with it. Both randomization layers varied. Runtime 306s.
+
+- **T1**: recalibrated mean **60.208%**, sd 3.309pp, 95% band [55.097, 66.046]; the
+  committed 59.303% draw sits at the **48th percentile**; **all 50 seeds** classify as
+  undercutting. Frozen mean 22.000%.
+- **S1**: `tab:headline`'s "calibration, not seed noise" is **not** falsified — band
+  10.948pp against a 19.223pp calibration swing. It previously rested on a 50-seed run
+  that never varied the calibration.
+- **S1b**: the band must be reported (10.948pp > the 7.689pp threshold fixed ex ante).
+- **Admissibility separates the variants**: recalibrated deep-gap floor 4.09–4.98% (in
+  band on all 50 seeds), frozen 6.31–7.63% (out on all 50). Applied consistently, the
+  paper's own admissibility test disqualifies the *frozen* leg.
+- The "frozen" anchor is itself seed-variable: mean 43,493, sd 1,181, min 39,984
+  against the committed 43,882.8125, which sits at the top of its range.
+
+Gate #83 pins n, mean, sd, both band edges and the `mean >= 50` condition.
+
+### 30.4 `production_scale_test` — halted, then executed under a second pre-commitment
+
+First execution halted at the pre-committed $0.05B committed-CSV parity tier on a
+uniform $0.136B offset from FRED revision (§29). The tolerance was **not** widened.
+A second pre-commitment (`--baseline fresh`) instead gates the per-seed **spread**
+of the drift while only reporting its level, on the argument that both arms are
+computed in one process on the same fresh frame, so arm A is a valid baseline for
+arm B provided the drift is a level shift rather than a change in the estimator.
+Disclosed: the $0.02B spread tolerance is informed by the halted run's observed
+$0.0135B spread, so it is not a blind ex-ante threshold.
+
+Executed. All gates PASS. **T1**: 12.6598% of benchmark at N=10,000 (SD 3.2473)
+against 12.1828% at N=75,000 (SD 1.0469); delta −0.4769pp, inside one SD. Mean CPR
+11.6002% / 11.6438%, against the production manifest's 11.7609% and the superseded
+isolated mechanic's 15.616%. Precision ratio 3.10 vs √7.5 = 2.74.
+
+### 30.5 `bootstrap_pathb_cluster` — spec committed
+
+Stratum-cluster bootstrap of the Path B legs at the headline floor. Two facts were
+established before the script was written: pool size is normalised away twice
+(`agents.py:205`, then `microsim_engine.py:57-58`), so variable loan count under
+cluster resampling is safe and composition variance survives; and the effective
+cluster count is **25.8, not 130** (largest stratum 9.77% of balance, top five 35.3%).
+
+---
+
+## 31. Round-23: no ABM counterpart to the β₁ = 0 null — NOT_FEASIBLE (2026-07-26)
+
+`HANDOFF_round22.md` §6.1 item A. Script `abm/abm_null_feasibility.py`, artifact
+`abm/data/abm_null_feasibility_results.json`, liveness gate #94, manuscript
+`sec:abm-interp`.
+
+**Status of this record.** This is a **feasibility probe, not a pre-committed run**, and
+the artifact carries `"pre_committed": false` / `"mode": "feasibility_probe"` so it cannot
+be quietly re-labelled later (gate #94 asserts both). The candidate nulls were executed
+while the item was being scoped, i.e. **before** any spec existed. That ordering is
+recorded rather than smoothed over, and it is the reason this run carries no threshold and
+no verdict code. It is admissible on those terms because the conclusion is a
+**non-existence** claim that no acceptance rule could have adjudicated, and because every
+candidate misses an interpretable range by one to three orders of magnitude. Had any
+candidate produced a usable differential, the correct course under round-22 C1 would have
+been to discard the numbers and re-run under a committed spec.
+
+### The question
+
+The manuscript identifies a differential, not a level (`sec:identification`: "The design
+does not identify the aggregate recovery level"). Path B therefore reports central − null
+= +5.6 points. The ABM has no null, so the estimator contrast (Path B 91.3% vs ABM 13.6%)
+is a contrast of the very levels the paper says do not identify.
+
+### Why Path B has a null and the ABM cannot
+
+Path B, `eq:pathB`: `h = max(h_floor, h₀(a)·exp(β₁·g + …))`. The elasticity is a
+**separable** term over a floor that is measured independently and **survives its
+removal**, so the β₁ = 0 leg stays anchored to observed involuntary turnover and lands at
+85.7% of benchmark.
+
+The ABM's move rule (`abm/abm_lockin_simulation.py:449-468`) contains no floor term. The
+4–5% involuntary floor is **produced** by `calibrate_mobility_scale`
+(`abm_lockin_simulation.py:649-685`), which binary-searches θ until the *penalty-bearing*
+rule returns 4–5% CPR at an 8% market rate on the reference cohort. The lock-in penalty is
+therefore simultaneously the behavioural mechanism and the level-setter. Zeroing it
+(`_mobility_penalty → 0`, the single line at `:458`) removes the floor along with the
+channel.
+
+### The three legs (live FRED/SOMA frame, 2026-07-26; 39 s)
+
+| leg | θ | anchor CPR @ 8% | window mean CPR | trapped $B | share of benchmark |
+|---|---|---|---|---|---|
+| central (production rule) | 43,882.8125 | **4.83%** (in the 4–5% band) | 11.758% | +84.64 | **11.068%** |
+| null A — penalty = 0, θ frozen | 43,882.8125 | **40.65%** (band destroyed) | 36.784% | −1,983.55 | **−259.373%** |
+| null B — penalty = 0, θ re-derived | 7,822.2656 | **4.73%** (band restored) | 2.419% | +889.73 | **+116.343%** |
+
+Implied "ABM marginal": **+270.44 pp** (vs null A) and **−105.28 pp** (vs null B).
+
+**The two defensible anchoring conventions disagree in sign.** They do not bracket a
+magnitude. Null A is uninterpretable because it is a model with no friction left (40.65%
+turnover at the calibration point, over-retiring the book by ~$2.0T against the caps);
+null B is uninterpretable because restoring the floor means re-fitting θ to the very
+turnover level the differential is supposed to measure. Gate #94 asserts the sign
+disagreement directly, since that — not either magnitude — is the finding.
+
+### Gotcha found in my own diagnostic
+
+The 8% anchor must be read **after** `attach_cohort(ref["coupon"], ref["months_elapsed"])`.
+Reading `cpr_at(0.08, "US")` off a freshly constructed engine measures the module-default
+3.0% cohort (`ORIGINAL_RATE`), not the 2.0% reference cohort the calibration targets, and
+returns 6.47% for the central leg — which looks like a miscalibration against the 4–5%
+band and is not. The committed script does the attach explicitly and says why.
+
+### Verified invariances (gates G3, G5)
+
+Under the production `dk_level` Danish anchor, `_cpr_vec` never calls `_mobility_penalty`
+(`abm_lockin_simulation.py:412-445`), so `danish_trapped` is bit-identical across legs
+(|Δ| < 1e-9). The curtailment layer is identical across all three legs
+($69.56220187263008B), so it cancels from any difference — the same property that makes
+Path B's marginal basis-invariant.
+
+### What this closes
+
+Item A is closed as **NOT_FEASIBLE**, not as done. The manuscript now states the asymmetry
+explicitly in `sec:abm-interp` rather than leaving a reader to notice that the ABM is
+compared on levels. This is the same disposition as the round-19 IV/RD identification
+finding: a negative result, reported as one.
+
+---
+
+## 32. Round-23: the form × transform hull is closed, and it widened (2026-07-26)
+
+`HANDOFF_round22.md` §6.3 / `PLAN_remaining_work.md` §5. Spec commit `19c1055`,
+script `hazard/concave_hull_band_ends.py`, artifact
+`hazard/data/concave_hull_band_ends_results.json`, liveness gate #95, manuscript
+V.E and VII.I.
+
+**Spec before run, properly this time.** The spec was committed at `19c1055` with the
+T1/T2/T3 partition fixed, and only then was the script run. The spec named the corner
+that would break the hull *before* the run — see below — which is the point of writing
+one.
+
+### What was open
+
+The designated form-conditional hull `[3.891507360127463, 13.09774126267503]` was built
+from **log-linear** cells only. Coverage audit over the off-window grid
+{4.695, 4.991, 5.334}% × {5.5, 6.5, 7.7}:
+
+| transform × form | coverage before |
+|---|---|
+| log-linear × max | complete (`oos_identification.instrument1_marginal_table`) |
+| log-linear × additive | complete (`floor_form_offwindow.rows`) |
+| concave × max | 1 of 9 — (4.991, 6.5) = +5.0561 |
+| concave × additive | 1 of 9 — (4.991, 6.5) = +9.2219 |
+
+So 16 concave cells were unrun, and the manuscript said so at V.E: "The hull is not shown
+*complete* over form × transform---this cell was run at the central elasticity, and its
+band ends are not."
+
+### The prediction, made ex ante
+
+From the spec header: the concave transform is signed downward (−1.3243pp under max,
+−1.9938pp under additive at the production floor), and the hull's **low** endpoint is a
+max-form cell at the band's low edge and the highest defensible floor — "precisely the
+corner a downward-signed transform is most likely to push below." The hull's lower edge is
+quoted in the **abstract**, so T2 was flagged as headline-adjacent before any number
+existed.
+
+### Result — T2, at exactly that corner
+
+18 concave cells run (24 legs, 137 s). 17 fall inside the committed hull. One does not:
+
+| cell | marginal |
+|---|---|
+| **concave × max, floor 5.334%, band 5.5** | **+3.5294 pp** (committed lower edge +3.8915) |
+
+Published hull moves to **[3.5294, 13.0977]** → the literal `$+3.9$ to $+13.1$` becomes
+`$+3.5$ to $+13.1$` at all five .tex sites, plus the "hull's lower end" reference in VII.I.
+
+**The upper edge did not move**, and that is a result rather than an omission: the concave
+transform is signed downward, so its highest cell reaches only +10.83 against the
+log-linear additive's +13.0977. Gate #95 pins the unmoved upper edge explicitly, to stop a
+successor re-widening the top from this run.
+
+### Parity
+
+All 11 gates pass; 8 bit-exact. G0/G1 replay the two committed concave cells to 1.2e-14
+and 1.8e-15 (floating-point recombination, five orders inside the 1e-9 tolerance). G2/G3
+replay six committed log-linear nulls **bit-exactly** — which also discharges G3's
+integrity role: β₁ = 0 makes the gap transform inert, so a concave null that differed from
+a log-linear null would mean the patch had leaked into a non-elasticity channel. It did
+not. G4 (sha256 over the sibling's output directory and the four consumed artifacts)
+confirms nothing committed was overwritten.
+
+### Gotcha, mine
+
+The gate first shipped with the offending cell's constant written as
+`3.5293997236646898` — digits I reconstructed from a rounded console line instead of
+reading the artifact. The true value is `3.5293843684633197`; the gate failed at 1e-6 and
+caught it. **Read constants out of the artifact; never retype them from printed output.**
+
+### Scope this does *not* close
+
+Completeness is asserted only over the off-window floor × band grid at the two transforms
+and two forms this paper defines. It says nothing about floors outside
+{4.695, 4.991, 5.334}, elasticities outside the Liebersohn–Rothstein band, a third
+transform, or the in-sample 4.0% floor. That limit is in the artifact as
+`residual_scope_not_settled` and in the spec header.
+
+---
+
+## 33. Round-23: the benchmark is convention-dependent by −5.5%, and all of it is mechanical (2026-07-26)
+
+`HANDOFF_round22.md` §6.3 (round-21 R10 leftover, never started). Spec commit `90dcf5c`,
+script `hazard/settlement_months_benchmark.py`, artifact
+`hazard/data/settlement_months_benchmark_results.json`, liveness gate #96, manuscript
+`sec:robustness-benchmark`.
+
+### What was open
+
+R10 listed "settlement-months benchmark variant" as a one-line leftover with no design.
+`$764.7482532227002B` is the **denominator of every percentage in the paper**, and
+`sec:robustness-benchmark` said only that researchers "should expect the benchmark level
+… to shift" under a different cap-schedule assumption. Nobody had measured it.
+
+### Design — no new parameter
+
+The repo already carries the prepayment-month → cash-month mapping:
+`abm/fed_mbs_extension_risk.py:91`, `SETTLEMENT_LAG_KERNEL = [0.10, 0.60, 0.30]` at lags
+0/1/2, mass-conserving, *"sourced from standard 55-day / ~50-day agency remittance cycles,
+not tuned."* The variant reuses it, read from the module rather than retyped (G3).
+
+**Convolve the cap, do not deconvolve the cash.** The realized series is the noisy
+observable and deconvolution against a 3-tap kernel is ill-conditioned — it would
+manufacture structure. The cap schedule is a deterministic step function known exactly, so
+the variant convolves the cap forward and nets the unchanged realized series against it.
+
+### Result — T2
+
+| leg | kernel | benchmark | shift | cap total |
+|---|---|---|---|---|
+| calendar (production) | — | **$764.7483B** | — | $1,417.50B |
+| settlement-aligned | [0.10, 0.60, 0.30] | **$722.7483B** | **−$42.000B (−5.49%)** | $1,375.50B |
+| slower | [0.0, 0.5, 0.5] | $712.2483B | −$52.500B | $1,365.00B |
+| faster | [0.3, 0.6, 0.1] | $736.7483B | −$28.000B | $1,389.50B |
+
+All four gates **bit-exact**, including G0 (the calendar leg reproduced the committed
+benchmark to 0.0 — no FRED/SOMA drift) and G2 (the degenerate kernel `[1,0,0]` reproduced
+the calendar leg, the wiring check on the convolution path).
+
+**The shift is 100% mechanical, and the identity is exact.** The QT window is half-open, so
+cap convolved past its last month is dropped: October 2025 loses its lag-2 tap
+(0.30 × $35B) and November 2025 its lag-1 and lag-2 taps (0.90 × $35B) — $42.0B. Because
+the realized series is untouched and both legs sum over the same months, the benchmark
+moves by *exactly* that $42.0B. Gate #96 pins the identity, since it is what makes the
+shift non-behavioural.
+
+**No dollar quantity in the paper moves.** The identified marginal is $42.6B on either
+denominator. Only the percentage expressions rescale, by the common factor 1.058: Path B
+central 91.3% → 96.6%, the β₁ = 0 null 85.7% → 90.7%, the marginal +5.6 → +5.9 points. The
+decomposition is unchanged in substance and the null still carries the large majority.
+
+The calendar convention **stays production** — pre-committed under every branch, for the
+reason `sec:method-benchmark` already gives for retaining the cap at all: it is the only
+policy-committed quantity available, and it is committed in cash-arrival months.
+
+### Gotcha, mine, and the run caught it
+
+The spec header's *explanation* of the shift was wrong in both direction and size: it
+attributed the loss to the window's **first two months** at "about $21B", reasoning that
+the convolution draws on pre-QT months whose cap is zero. Wrong edge. The start loses
+nothing *from the schedule* — pre-QT cap is zero, so there is no mass to draw in; the ramp
+is merely redistributed inside the window. The loss is at the **end**, and it is $42.0B,
+which is exactly what the run reported. The code was correct throughout; only the prose
+reasoning was wrong, and the run's own arithmetic exposed it. Corrected in the header and
+in the artifact's `shift_explained_by_window_edge`, with the error recorded rather than
+silently fixed.
+
+### Scope
+
+Month-**alignment** only. Does not revisit the cap schedule, the SOMA series, the window
+bounds, or the reinvestment-ceiling reading of the cap. A T1 would have licensed "the
+benchmark is insensitive to the netting convention", never "the benchmark is correct".
+
+---
+
+## 34. Round-23: the DTI non-monotonicity is a re-calibration artifact (2026-07-26)
+
+`HANDOFF_round22.md` §6.3 (round-21 R10 leftover, never started). Spec commit `945bd27`,
+script `abm/dti_nonmonotonicity_decomposition.py`, artifact
+`abm/data/dti_nonmonotonicity_decomposition_results.json`, liveness gate #97, manuscript
+`sec:robustness-extensions`.
+
+### The awkward fact
+
+`dti_threshold_sweep` (round 18, gate #49) reported trapped liquidity against the
+front-end DTI wall: 36% → $153.350B, 43% → $84.531B, 50% → $119.696B. **Production sits
+at 43%, the minimum of the sweep.** The sweep measured the non-monotonicity; it never
+decomposed it.
+
+### The mechanism, read off the committed artifact before the spec was written
+
+`floor_retention.per_dti` records the re-calibrated scale *and* the floor the production
+scale would have produced:
+
+| DTI | recal. scale | recal. floor | fixed-scale floor | |
+|---|---|---|---|---|
+| 0.36 | 43,882.8125 | 0.0442 | 0.0442 | no-op |
+| 0.43 | 43,882.8125 | 0.0483 | 0.0483 | no-op |
+| 0.50 | 41,933.59375 | 0.0447 | **0.0509** | **fired** |
+
+Only the 50% leg was re-calibrated. Loosening the wall lets more households clear the DTI
+gate, lifting the fixed-scale floor to 5.09% — outside the [4,5]% retention band — so the
+binary search cut the scale to 41,933.59. Lower desire scale → fewer movers → less
+prepayment → **more** trapped liquidity.
+
+### Result — T1, ARTIFACT
+
+| DTI | re-calibrated (published) | **frozen scale** | re-calibration channel |
+|---|---|---|---|
+| 36% | $153.448B | $153.448B | 0.000 |
+| 43% | $84.641B | $84.641B | 0.000 |
+| 50% | $119.805B | **$46.372B** | **−$73.432B** |
+
+Held at the production scale the sweep is **strictly monotone**. The 50% leg's entire
+rebound is the re-calibration. The frozen and re-calibrated legs are **bit-identical**
+(diff exactly 0.0) at 36% and 43%, where the artifact records the rule as a no-op — that
+identity is what isolates the channel, and gate #97 pins it rather than the magnitudes
+alone.
+
+So production 43% is not "the minimum of the mechanism". It is a point on a monotone curve
+whose 50% end was displaced by the floor-retention rule — the free parameter absorbing the
+floor constraint. This is the same class of finding V.A already names for a behavioural
+extension: "a mechanical recalibration artifact rather than … a mechanism."
+
+**No headline moves**, pre-committed under both branches: the ABM is a falsification device
+and the +5.6pp hazard marginal carries no DTI gate.
+
+### Upstream drift, handled ex ante rather than excused
+
+The committed sweep is on `run-2026-07-05-berger` accounting; this run scored on a live
+frame. G1 was therefore set *before* the run to a disclosed $1.0B tolerance with a
+**uniformity** requirement, on the argument that every reported quantity is a within-frame
+difference and common drift cancels. Realised offsets: +$0.098B, +$0.109B, +$0.108B —
+spread **$0.011B**, so the drift is a common level shift and the cancellation holds. Had
+the spread exceeded $1.0B the run would have halted at T3 rather than the tolerance being
+widened (round-22 C1).
+
+### Gotcha, caught before the run rather than by it
+
+The committed sweep's leg key is `trapped_b`, not `us_trapped_b`. G1 would have died on a
+`KeyError`. Caught by reading the artifact's schema instead of assuming it matched this
+script's own field names — the same habit that caught the retyped constant in §32.
+
+## 35. Round-24: the assembly (2026-07-27) — no runs
+
+Four items from `HANDOFF_round24.md`, none needing a run. Every number landed was read out of
+an already-committed artifact; nothing was retyped from console output. Gates 97 → 98, tests
+298 → 337, pages 115 → 116, 0 undefined refs.
+
+### 35.1 The assembly (§1 + §4) — `sec:identification`, gate #98
+
+The paper disclosed every downward correction to the headline marginal in the section that
+produced it and nowhere together, so a referee performed the assembly and the paper did not.
+A seventh qualification now performs it, placed immediately after the sixth so the two
+confrontations sit next to each other.
+
+| reading | marginal | source |
+|---|---|---|
+| in-sample calibration | $+9.2$pp | `tab:oosfloor` production row |
+| off-window headline | $+5.6$pp | `ginnie_overlay_offwindow_results.json` → `conventional_offwindow.marginal_pp` = 5.57156 |
+| Ginnie overlay, same floor | $+4.4$pp | same artifact → `overlay_offwindow.primary.marginal_pp` = 4.44342 |
+| age-standardised floor 5.51% | $+3.8$pp | `floor_uncertainty_results.json` → `part_b.adjusted_floor_pct` = 5.50775 |
+| Fannie read 5.52% | brackets below $+4.3$ | `fannie_floor_read_results.json` → `comparison.fannie_headline_cpr_pct` = 5.522 |
+| overlay × age-standardised | ~$+3.0$ | naive, not published |
+
+The overlay's `0.797` is the *ratio* of the overlay marginal to the conventional one
+(4.44342 / 5.57156 = 0.79752), not an input scale — worth stating because it reads like a
+parameter and is not one.
+
+**Posture committed.** Within the production max form the binding layer is the floor reads'
+own cluster-bootstrap sampling error, $[+2.974, +8.019]$pp. Its midpoint is $+5.50$; the
+headline is $+5.57$, so it sits *just above* the midpoint while all four corrections above
+fall in the lower half and the uncomposed pair falls at the bottom. Hence: $+5.6$ is an
+upper-middle member of that interval, not its centre. This is **not** a retraction — the
+interval excludes zero, the sign is rate-configuration-forced, and the form-conditional hull
+$+3.5$ to $+13.1$ remains the wider statement, since the form dimension is not a floor
+correction and this list does not discipline it.
+
+**Two things the assembly is careful about, both of which are easy to get wrong.**
+
+1. *The corrections are not independent.* The floor-level corrections and the censoring share
+   are one mechanism read twice: raising the floor is what crowds the elasticity out, so a
+   higher floor lowers the marginal and raises the bind share by the same act. The Ginnie
+   overlay is the one that moves a different lever (it confines the marginal to the
+   conventional face share at a fixed 4.991% floor), which is why the naive composition is
+   arithmetically available at all — and it is still not published, because the only joint
+   cell this paper has run for two adjustments returned an interaction of $-1.47$pp.
+2. *The censoring share is not a data-sufficiency statement.* `HANDOFF_round22.md` §8.2 stands
+   verbatim: a central-leg bind **truncates** a loan-month's contribution rather than zeroing
+   it (the null leg is pinned in only 35.8% at the same floor, so the legs still separate
+   wherever the null clears it), and 68.8% is an **unweighted loan-month count**, not a
+   balance-weighted share. "The estimate rests on a third of the data" is false on both counts
+   and does not appear.
+
+### 35.2 Gate #98 is paragraph-scoped, and why
+
+Each literal in that paragraph already occurs elsewhere in the manuscript, so a whole-file
+count gate would be satisfied by the exact scattering the paragraph exists to end. The
+manuscript is one paragraph per line, so the paragraph *is* a line and the gate binds the
+line — which also kills the relocation attack, since a paragraph split moves half the spans
+off it. Fifteen spans in four groups: the ladder, the posture, the censoring share **and** its
+framing (pinned separately: the share without the framing is the false reading, the framing
+without the share is a disclaimer about nothing), and the counterweight.
+
+Refactored into `assembly_check()` / `ASSEMBLY_SPANS` so the battery exercises the shipped
+rule, per gate #68's header. Mutation-tested nine ways by hand (8 adversarial FAIL, 1 benign
+PASS, file restored) and 34 ways in `tests/test_assembled_corrections_gate.py`. **The coverage
+test found a real hole on its first run:** the 68.8% share itself — the whole of item §4 — was
+not pinned by any span and could have been deleted while the gate stayed green. Added as
+`censor_share`. That is the third round running in which a test written against a gate's
+*intent* caught something the gate's *implementation* missed.
+
+### 35.3 Path A's prominence (§3) — presentational, no result touched
+
+Path A held three of the first seven tables while its refit-and-resimulate interval spans zero
+and its sign claim was withdrawn in round 22. `tab:panel` and `tab:bootstrap` moved verbatim
+into `app:ridge` (retitled *Path A Estimation Panel, Coefficient Uncertainty, and Ridge
+Device*); `tab:pathadiag` stays in the body as Path A's single exhibit, now table 5 of 7. Both
+`\ref` sites resolve unchanged and no cell, note, or caveat was edited — in particular the
+round-22 disclosure of the $598.9B / 78.3% bootstrap **mean** travels with its table.
+
+### 35.4 The abstract's orphaned Section IV (§6)
+
+Round 23's cut left the ABM occupying Section IV and Appendix A while the 263-word abstract did
+not mention it at all — an inconsistency that round introduced. Two sentences close it (263 →
+307 words), carrying both the production 13.6% seed mean **and** the cross-design counterweight,
+because round-22 §7 records that reporting one without the other was a regression it had to
+undo.
+
+Four new `ABSTRACT_HEDGES` spans travel with the returned claim; the five `RELOCATED_TO_BODY`
+pins stay, because the body still makes the claim and neither dict substitutes for the other.
+The wording is constrained rather than chosen: gate C4 applies `ABSTRACT_HEDGES` to every
+manuscript on disk, and the archived long-abstract variant's abstract must not be rewritten to
+suit a new pin, so every span is the widest hedge-to-claim binding that occurs **verbatim in
+both abstracts**.
+
+**A known seam, recorded rather than left to be found.** The recalibration hedge and the two
+recovery numbers cannot be joined into one span, because the archived variant carries a
+frozen-seed clause between them. A sentence boundary opened at that seam reattributes the
+60.2/76.3 recoveries and stays green. `test_known_seam_between_recalibration_and_the_numbers_is_not_caught`
+asserts the hole is open and **fails the moment anyone closes it**, so closing it is a
+deliberate act with the test updated, not a silent one. Closing it would require either
+rewriting an archive or per-file span scoping, which reopens the ungated-variant hole C4
+exists to close; neither is obviously right.
+
+This does not decide `HANDOFF_round24.md` §2. If Section IV is demoted the sentence shrinks with
+it; if it leads with the cross-design result, the sentence already carries that result.

@@ -1,0 +1,457 @@
+{
+  "mode": "floor_uncertainty",
+  "status": "OK",
+  "spec": "MF-4 cluster bootstrap (clusters = 4-way strata via stratum.build_stratum_id; 1000 reps; fresh default_rng(42) per read) of the committed floor reads {5.334, 4.991, 4.695 (2018 leg, age>=12), 3.972 (in-window calib 202206..202312), 3.840 (in-window 2023-24 deep-OTM)}%, each propagated through the committed floor_sweep PCHIP map at central elasticity 6.5 (extrapolation refused); MF-3 age-standardization of the 2018 gap<=-0.0025 read onto the in-window 2023-24 deep-OTM age distribution with labeled ratio imputation; parity gates G1a-c/G2/G3/G4 blocking; ex-ante thresholds T1/T2/T3 and the MF-4 wider-band rule; NO engine runs, PCHIP mapping only.",
+  "parity_gates": {
+    "G1a": {
+      "got_cpr_pct": 5.334239649398553,
+      "want_cpr_pct": 5.334,
+      "tol_pp": 0.001,
+      "got_n": 155,
+      "want_n": 155,
+      "pass": true
+    },
+    "G1b": {
+      "got_cpr_pct": 4.990624060575566,
+      "want_cpr_pct": 4.991,
+      "tol_pp": 0.001,
+      "got_n": 137,
+      "want_n": 137,
+      "pass": true
+    },
+    "G1c": {
+      "got_cpr_pct": 4.695495330057254,
+      "want_cpr_pct": 4.695,
+      "tol_pp": 0.001,
+      "got_n": 125,
+      "want_n": 125,
+      "pass": true
+    },
+    "G2": {
+      "got_cpr_pct": 3.9719264231555695,
+      "want_cpr_pct": 3.972,
+      "tol_pp": 0.01,
+      "got_n": 2838,
+      "want_n": 2838,
+      "pass": true
+    },
+    "G3": {
+      "got_cpr_pct": 3.8401498832998815,
+      "want_cpr_pct": 3.84,
+      "tol_pp": 0.01,
+      "got_n": 3984,
+      "want_n": 3984,
+      "pass": true
+    },
+    "G4_pchip_mapping": {
+      "reproduces_committed_grid_exactly": true,
+      "max_abs_err_b_inside_grid": 0.6867374936622994,
+      "tol_b": 0.69,
+      "pass": true
+    }
+  },
+  "parity_gates_all_pass": true,
+  "mapping_fidelity": {
+    "engine_reads": {
+      "3.9719": {
+        "engine_marginal_b": 70.92670908591003,
+        "mapped_marginal_b": 70.89771619156197,
+        "err_b": -0.028992894348064624,
+        "engine_marginal_pp": 9.274517305141941,
+        "mapped_marginal_pp": 9.270726136711568,
+        "inside_committed_grid": true
+      },
+      "4.0": {
+        "engine_marginal_b": 70.34506041989584,
+        "mapped_marginal_b": 70.34506041989584,
+        "err_b": 0.0,
+        "engine_marginal_pp": 9.198459770709789,
+        "mapped_marginal_pp": 9.198459770709789,
+        "inside_committed_grid": true
+      },
+      "4.5": {
+        "engine_marginal_b": 57.641550459468476,
+        "mapped_marginal_b": 57.641550459468476,
+        "err_b": 0.0,
+        "engine_marginal_pp": 7.537323585449613,
+        "mapped_marginal_pp": 7.537323585449613,
+        "inside_committed_grid": true
+      },
+      "4.695": {
+        "engine_marginal_b": 51.78150602512778,
+        "mapped_marginal_b": 51.74598896529668,
+        "err_b": -0.03551705983110054,
+        "engine_marginal_pp": 6.771052540089784,
+        "mapped_marginal_pp": 6.766408258827093,
+        "inside_committed_grid": true
+      },
+      "4.991": {
+        "engine_marginal_b": 42.60839388108866,
+        "mapped_marginal_b": 42.584238395300545,
+        "err_b": -0.024155485788114106,
+        "engine_marginal_pp": 5.571558182909726,
+        "mapped_marginal_pp": 5.568399563627344,
+        "inside_committed_grid": true
+      },
+      "5.0": {
+        "engine_marginal_b": 42.332885358660064,
+        "mapped_marginal_b": 42.332885358660064,
+        "err_b": 0.0,
+        "engine_marginal_pp": 5.535532141494471,
+        "mapped_marginal_pp": 5.535532141494471,
+        "inside_committed_grid": true
+      },
+      "5.334": {
+        "engine_marginal_b": 32.621640259889205,
+        "mapped_marginal_b": 33.308377753551504,
+        "err_b": 0.6867374936622994,
+        "engine_marginal_pp": 4.265670450690081,
+        "mapped_marginal_pp": 4.355469608879497,
+        "inside_committed_grid": true
+      },
+      "6.0": {
+        "engine_marginal_b": 17.44325421351391,
+        "mapped_marginal_b": 17.44325421351391,
+        "err_b": 0.0,
+        "engine_marginal_pp": 2.280914554561832,
+        "mapped_marginal_pp": 2.280914554561832,
+        "inside_committed_grid": true
+      },
+      "6.91": {
+        "engine_marginal_b": 5.686265484799492,
+        "mapped_marginal_b": null,
+        "err_b": null,
+        "engine_marginal_pp": 0.7435473648795181,
+        "mapped_marginal_pp": null,
+        "inside_committed_grid": false
+      }
+    },
+    "max_abs_err_b_inside_grid": 0.6867374936622994,
+    "reproduces_committed_grid_exactly": true,
+    "note": "PCHIP on the frozen floor_sweep grid; the mapping is not re-derived. Reads above 6.0% are outside the committed grid and are refused, not extrapolated."
+  },
+  "part_a_sampling_uncertainty": {
+    "cluster_unit": "4-way stratum (vintage x coupon-bps x fico_bucket x ltv_bucket; stratum.build_stratum_id)",
+    "n_reps": 1000,
+    "seed": 42,
+    "seeding": "fresh np.random.default_rng(42) per read",
+    "reads": {
+      "R1_2018_gap<=+0.0000_age>=12": {
+        "selection": "rp 201801..201812, gap<=+0.0000, age>=12",
+        "committed_cpr_pct": 5.334,
+        "point_cpr_pct": 5.334239649398553,
+        "exposure_upb": 1264479178651.8499,
+        "n_cohort_months": 155,
+        "n_clusters": 31,
+        "bootstrap": {
+          "n_reps": 1000,
+          "seed": 42,
+          "se_pp": 0.45957582003253433,
+          "ci95_pct": [
+            4.59595887561164,
+            6.42037871867004
+          ],
+          "draws_min_pct": 4.238658359413227,
+          "draws_max_pct": 7.1019134275138285
+        },
+        "mapped_marginal_at_6.5": {
+          "point_b": 33.302109026026166,
+          "point_pp": 4.35464989762172,
+          "computable": true,
+          "n_draws_outside_grid": 107,
+          "truncated_at_grid_edge": true,
+          "ci95_b": [
+            18.99175163697113,
+            55.66142652227618
+          ],
+          "ci95_pp": [
+            2.483399152196642,
+            7.278398647883829
+          ],
+          "se_b": 9.537610249691975,
+          "se_pp": 1.2471568531866337
+        }
+      },
+      "R2_2018_gap<=-0.0025_age>=12": {
+        "selection": "rp 201801..201812, gap<=-0.0025, age>=12",
+        "committed_cpr_pct": 4.991,
+        "point_cpr_pct": 4.990624060575566,
+        "exposure_upb": 1058073438192.2499,
+        "n_cohort_months": 137,
+        "n_clusters": 31,
+        "bootstrap": {
+          "n_reps": 1000,
+          "seed": 42,
+          "se_pp": 0.3933971547430653,
+          "ci95_pct": [
+            4.368576777908708,
+            6.003552252675821
+          ],
+          "draws_min_pct": 4.042512299929612,
+          "draws_max_pct": 6.508276957613679
+        },
+        "mapped_marginal_at_6.5": {
+          "point_b": 42.59479632851593,
+          "point_pp": 5.569780139937377,
+          "computable": true,
+          "n_draws_outside_grid": 26,
+          "truncated_at_grid_edge": true,
+          "ci95_b": [
+            22.74613335614501,
+            61.321412509877675
+          ],
+          "ci95_pp": [
+            2.974329560125351,
+            8.01850965353176
+          ],
+          "se_b": 9.868623497683647,
+          "se_pp": 1.2904408027212368
+        }
+      },
+      "R3_2018_gap<=-0.0050_age>=12": {
+        "selection": "rp 201801..201812, gap<=-0.0050, age>=12",
+        "committed_cpr_pct": 4.695,
+        "point_cpr_pct": 4.695495330057254,
+        "exposure_upb": 921389778258.0299,
+        "n_cohort_months": 125,
+        "n_clusters": 25,
+        "bootstrap": {
+          "n_reps": 1000,
+          "seed": 42,
+          "se_pp": 0.39623367408103766,
+          "ci95_pct": [
+            3.9558541118631183,
+            5.618468206286016
+          ],
+          "draws_min_pct": 3.7215799480101786,
+          "draws_max_pct": 6.2540278488485646
+        },
+        "mapped_marginal_at_6.5": {
+          "point_b": 51.73022059585622,
+          "point_pp": 6.764346355530941,
+          "computable": true,
+          "n_draws_outside_grid": 4,
+          "truncated_at_grid_edge": true,
+          "ci95_b": [
+            27.014067776292503,
+            71.21621929752786
+          ],
+          "ci95_pp": [
+            3.532413138892891,
+            9.312374235235975
+          ],
+          "se_b": 10.894830392122042,
+          "se_pp": 1.424629653773056
+        }
+      },
+      "R4_inwindow_calib_202206_202312_gap<=-0.02_age>=12": {
+        "selection": "rp 202206..202312, gap<=-0.0200, age>=12",
+        "committed_cpr_pct": 3.972,
+        "point_cpr_pct": 3.9719264231555695,
+        "exposure_upb": 34136335241658.965,
+        "n_cohort_months": 2838,
+        "n_clusters": 226,
+        "bootstrap": {
+          "n_reps": 1000,
+          "seed": 42,
+          "se_pp": 0.18637486244090604,
+          "ci95_pct": [
+            3.7092236213163874,
+            4.439834675996698
+          ],
+          "draws_min_pct": 3.595531202717428,
+          "draws_max_pct": 4.925658461874183
+        },
+        "mapped_marginal_at_6.5": {
+          "point_b": 70.8971999675114,
+          "point_pp": 9.270658634229749,
+          "computable": true,
+          "n_draws_outside_grid": 0,
+          "truncated_at_grid_edge": false,
+          "ci95_b": [
+            59.31592515806091,
+            75.59496032883719
+          ],
+          "ci95_pp": [
+            7.756268145510588,
+            9.884947106485694
+          ],
+          "se_b": 4.176856036043159,
+          "se_pp": 0.546173988425812
+        }
+      },
+      "R5_inwindow_2023_24_gap<=-0.02_age>=12": {
+        "selection": "rp 202301..202412, gap<=-0.0200, age>=12",
+        "committed_cpr_pct": 3.84,
+        "point_cpr_pct": 3.8401498832998815,
+        "exposure_upb": 44557119484831.3,
+        "n_cohort_months": 3984,
+        "n_clusters": 226,
+        "bootstrap": {
+          "n_reps": 1000,
+          "seed": 42,
+          "se_pp": 0.1630885728261085,
+          "ci95_pct": [
+            3.626083291211461,
+            4.252657717368832
+          ],
+          "draws_min_pct": 3.537332139786331,
+          "draws_max_pct": 4.67634383014598
+        },
+        "mapped_marginal_at_6.5": {
+          "point_b": 73.37519768122293,
+          "point_pp": 9.594686535342184,
+          "computable": true,
+          "n_draws_outside_grid": 0,
+          "truncated_at_grid_edge": false,
+          "ci95_b": [
+            64.42207064865929,
+            76.84439683926104
+          ],
+          "ci95_pp": [
+            8.423957868119402,
+            10.048325905346445
+          ],
+          "se_b": 3.2576531004596725,
+          "se_pp": 0.42597718749035207
+        }
+      }
+    },
+    "mf4_binding_uncertainty": {
+      "offwindow_point_marginal_pp_committed": 5.571558182909726,
+      "offwindow_point_marginal_b_committed": 42.60839388108866,
+      "sampling_ci95_pp": [
+        2.974329560125351,
+        8.01850965353176
+      ],
+      "sampling_ci95_width_pp": 5.044180093406409,
+      "depth_cut_band_pp_committed": [
+        4.265670450690081,
+        6.771052540089784
+      ],
+      "depth_cut_band_manuscript": "+4.3..+6.8",
+      "depth_cut_band_width_pp": 2.5053820893997027,
+      "binding_uncertainty": "sampling",
+      "manuscript_action": "The sampling CI is WIDER than the depth-cut band: sampling error is the binding uncertainty on the off-window marginal, and the manuscript must quote the bootstrap CI alongside \u2014 and as wider than \u2014 the +4.3..+6.8 depth-cut band wherever +5.57pp appears."
+    }
+  },
+  "part_b_age_standardization": {
+    "age_buckets": [
+      "[0,12)",
+      "[12,24)",
+      "[24,36)",
+      "[36,inf)"
+    ],
+    "off_window_selection": "2018 leg (201801..201812), gap<=-0.0025",
+    "in_window_selection": "202301..202412, gap<=-0.02 (deep-OTM, refi-free by rate configuration, seasoned)",
+    "leg_2018_reads_by_bucket": {
+      "[0,12)": {
+        "cpr_pct": 3.6371504560503976,
+        "exposure_upb": 1714298113189.4902,
+        "n_cohort_months": 439
+      },
+      "[12,24)": {
+        "cpr_pct": 4.990624060575566,
+        "exposure_upb": 1058073438192.2499,
+        "n_cohort_months": 137
+      },
+      "[24,36)": {
+        "cpr_pct": null,
+        "exposure_upb": 0.0,
+        "n_cohort_months": 0
+      },
+      "[36,inf)": {
+        "cpr_pct": null,
+        "exposure_upb": 0.0,
+        "n_cohort_months": 0
+      }
+    },
+    "in_window_2023_24_by_bucket": {
+      "[0,12)": {
+        "cpr_pct": null,
+        "exposure_upb": 0.0,
+        "n_cohort_months": 0
+      },
+      "[12,24)": {
+        "cpr_pct": 3.479340098831263,
+        "exposure_upb": 7134735727408.63,
+        "n_cohort_months": 247
+      },
+      "[24,36)": {
+        "cpr_pct": 3.6845916053532934,
+        "exposure_upb": 16894786214658.08,
+        "n_cohort_months": 792
+      },
+      "[36,inf)": {
+        "cpr_pct": 4.092969472940622,
+        "exposure_upb": 20527597542764.59,
+        "n_cohort_months": 2945
+      }
+    },
+    "in_window_weights": {
+      "[0,12)": 0.0,
+      "[12,24)": 0.16012560528823072,
+      "[24,36)": 0.379171418843842,
+      "[36,inf)": 0.46070297586792736
+    },
+    "oldest_populated_2018_bucket": "[12,24)",
+    "bucket_table": [
+      {
+        "bucket": "[0,12)",
+        "in_window_weight": 0.0,
+        "in_window_cpr_pct": null,
+        "read_2018_cpr_pct": 3.6371504560503976,
+        "read_used_pct": null,
+        "source": "no_in_window_weight (contributes nothing)"
+      },
+      {
+        "bucket": "[12,24)",
+        "in_window_weight": 0.16012560528823072,
+        "in_window_cpr_pct": 3.479340098831263,
+        "read_2018_cpr_pct": 4.990624060575566,
+        "read_used_pct": 4.990624060575566,
+        "source": "observed_2018"
+      },
+      {
+        "bucket": "[24,36)",
+        "in_window_weight": 0.379171418843842,
+        "in_window_cpr_pct": 3.6845916053532934,
+        "read_2018_cpr_pct": null,
+        "read_used_pct": 5.285028481477768,
+        "source": "IMPUTED: 2018 read in oldest populated bucket [12,24) (4.991%) x in-window ratio 3.685/3.479"
+      },
+      {
+        "bucket": "[36,inf)",
+        "in_window_weight": 0.46070297586792736,
+        "in_window_cpr_pct": 4.092969472940622,
+        "read_2018_cpr_pct": null,
+        "read_used_pct": 5.87078910099078,
+        "source": "IMPUTED: 2018 read in oldest populated bucket [12,24) (4.991%) x in-window ratio 4.093/3.479"
+      }
+    ],
+    "adjusted_floor_pct": 5.507748455937158,
+    "imputed_weight_share": 0.8398743947117693,
+    "adjusted_marginal_at_6.5": {
+      "computable": true,
+      "marginal_b": 28.855452192486087,
+      "marginal_pp": 3.7731962212253927
+    },
+    "committed_clean_band_pct": [
+      4.695,
+      5.334
+    ],
+    "threshold_verdict": {
+      "code": "T1",
+      "text": "the age-standardized floor lands above 5.334% (the committed band top): the clean band is one-sided-open downward and the manuscript's +4.3 lower bound is not conservative \u2014 the revision must state the band as open below +4.3 (or extend it to the adjusted read)."
+    }
+  },
+  "soft_checks": {
+    "2018_leg_age24plus_empty_as_committed": true,
+    "2018_bucket_12_24_equals_R2_anchor_when_older_empty": true,
+    "in_window_weights_sum_to_1": true
+  },
+  "verdict": {
+    "one_paragraph": "MF-4: the binding uncertainty on the off-window marginal is SAMPLING \u2014 sampling 95% CI [+2.97, +8.02]pp (width 5.04pp) vs depth-cut band +4.27..+6.77pp (width 2.51pp) at the +5.57pp anchor. MF-3: the age-standardized off-window floor is 5.508% (imputed weight share 84.0%), verdict T1: the age-standardized floor lands above 5.334% (the committed band top): the clean band is one-sided-open downward and the manuscript's +4.3 lower bound is not conservative \u2014 the revision must state the band as open below +4.3 (or extend it to the adjusted read)."
+  },
+  "runtime_s": 0.7
+}

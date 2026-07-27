@@ -33,6 +33,19 @@ structural finding: bit-identical Danish CPR paths, $0.00 deltas at every
 grid point (the production leg's prepayment never consumes the PV
 classification).
 
+Round-18 amendment (R18-I, gate #51, spec-before-run, 2026-07-17): SPREADS
+extended {0, 25, 50, 75, 100}bp → {0, 25, 50, 75, 100, 125, 150}bp to reach
+the referee's literal named 150bp endpoint (Q8). No other change; the two
+existing gates (baseline parity to the frozen production parquet + the
+shared-layer scorer's reconciliation to the printed 848.9 cell) carry over
+unchanged and are the only pass/fail criteria. The pre-committed expectation
+is identical to round 17's committed structural finding: bit-identical Danish
+CPR paths and exactly $0.00 deltas at the two new grid points, with the
+PV-vs-par classification's flip count rising monotonically above the 100bp
+value of 32,488 (the classification is computed but never consumed by the
+Berger-calibrated production Danish prepay branch). The five previously
+committed spread rows must reproduce their frozen values exactly.
+
 Run:  cd hazard && python3 danish_discount_bound.py
       → data/danish_discount_bound.json
 """
@@ -71,7 +84,8 @@ DATA_DIR = Path(__file__).parent / "data"
 OUT = DATA_DIR / "danish_discount_bound.json"
 TMP = DATA_DIR / "_danish_bound_tmp.parquet"
 
-SPREADS = [0.0, 0.0025, 0.005, 0.0075, 0.010]  # round-17: 25/75bp fill
+SPREADS = [0.0, 0.0025, 0.005, 0.0075, 0.010,  # round-17: 25/75bp fill
+           0.0125, 0.015]                        # round-18: 125/150bp fill
 PRINTED_TABLE1_DANISH_B = 848.9   # Table 1 row (c), shared-accounting basis
 FLIPS = {"evaluated": 0, "flipped": 0}
 

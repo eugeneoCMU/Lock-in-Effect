@@ -1,0 +1,252 @@
+{
+ "mode": "floor_form_offwindow",
+ "spec": "forms {max, additive-survival-scale}; floors {4.0 parity} + committed off-window clean band {4.695, 4.991, 5.334}% annual CPR; legs: beta1=0 null + central band {5.5,6.5,7.7} per (additive, clean floor), central 6.5 per (max, clean floor) with max band cells consumed from the committed oos artifact; production convention otherwise; parity gates G1/G2/G3; ex-ante thresholds T1/T2 at +/-1.0pp; designated interval = hull of max-form and additive-form off-window joint floor-x-band ranges",
+ "rows": [
+  {
+   "form": "max",
+   "floor_annual_cpr_pct": 4.695,
+   "null_trapped_b": 734.0068506865199,
+   "null_share_pct": 95.98019316727641,
+   "band": {
+    "6.5": {
+     "central_trapped_b": 785.7883567116477,
+     "central_share_pct": 102.7512457073662,
+     "marginal_b": 51.78150602512778,
+     "marginal_pp": 6.771052540089784
+    }
+   }
+  },
+  {
+   "form": "additive",
+   "floor_annual_cpr_pct": 4.695,
+   "null_trapped_b": 367.5933525586673,
+   "null_share_pct": 48.06723663762609,
+   "band": {
+    "5.5": {
+     "central_trapped_b": 441.0807552348291,
+     "central_share_pct": 57.67659532088963,
+     "marginal_b": 73.48740267616182,
+     "marginal_pp": 9.609358683263544
+    },
+    "6.5": {
+     "central_trapped_b": 453.39286186709637,
+     "central_share_pct": 59.2865508298278,
+     "marginal_b": 85.7995093084291,
+     "marginal_pp": 11.219314192201715
+    },
+    "7.7": {
+     "central_trapped_b": 467.7581000766034,
+     "central_share_pct": 61.16497790030112,
+     "marginal_b": 100.16474751793612,
+     "marginal_pp": 13.09774126267503
+    }
+   }
+  },
+  {
+   "form": "max",
+   "floor_annual_cpr_pct": 4.991,
+   "null_trapped_b": 724.9180585654117,
+   "null_share_pct": 94.79172466371236,
+   "band": {
+    "6.5": {
+     "central_trapped_b": 767.5264524465003,
+     "central_share_pct": 100.36328284662208,
+     "marginal_b": 42.60839388108866,
+     "marginal_pp": 5.571558182909726
+    }
+   }
+  },
+  {
+   "form": "additive",
+   "floor_annual_cpr_pct": 4.991,
+   "null_trapped_b": 341.83938974816874,
+   "null_share_pct": 44.69959732600039,
+   "band": {
+    "5.5": {
+     "central_trapped_b": 415.2465624893978,
+     "central_share_pct": 54.29846498367547,
+     "marginal_b": 73.40717274122903,
+     "marginal_pp": 9.598867657675086
+    },
+    "6.5": {
+     "central_trapped_b": 427.54488764725437,
+     "central_share_pct": 55.90661839965657,
+     "marginal_b": 85.70549789908563,
+     "marginal_pp": 11.207021073656186
+    },
+    "7.7": {
+     "central_trapped_b": 441.8939303288704,
+     "central_share_pct": 57.78292771074662,
+     "marginal_b": 100.05454058070166,
+     "marginal_pp": 13.083330384746233
+    }
+   }
+  },
+  {
+   "form": "max",
+   "floor_annual_cpr_pct": 5.334,
+   "null_trapped_b": 711.2235461485112,
+   "null_share_pct": 93.00100302960715,
+   "band": {
+    "6.5": {
+     "central_trapped_b": 743.8451864084004,
+     "central_share_pct": 97.26667348029723,
+     "marginal_b": 32.621640259889205,
+     "marginal_pp": 4.265670450690081
+    }
+   }
+  },
+  {
+   "form": "additive",
+   "floor_annual_cpr_pct": 5.334,
+   "null_trapped_b": 311.8808745845566,
+   "null_share_pct": 40.78216240053766,
+   "band": {
+    "5.5": {
+     "central_trapped_b": 385.1956827225547,
+     "central_share_pct": 50.368952279304246,
+     "marginal_b": 73.31480813799811,
+     "marginal_pp": 9.586789878766588
+    },
+    "6.5": {
+     "central_trapped_b": 397.47814487789094,
+     "central_share_pct": 51.97503141757978,
+     "marginal_b": 85.59727029333436,
+     "marginal_pp": 11.19286901704212
+    },
+    "7.7": {
+     "central_trapped_b": 411.8085469752808,
+     "central_share_pct": 53.84890324886551,
+     "marginal_b": 99.92767239072424,
+     "marginal_pp": 13.066740848327854
+    }
+   }
+  }
+ ],
+ "parity_gates": {
+  "G1_central_b": {
+   "got": 818.5300844066606,
+   "want": 818.5300844066606,
+   "tol": 0.01,
+   "pass": true
+  },
+  "G1_null_b": {
+   "got": 748.1850239867648,
+   "want": 748.1850239867648,
+   "tol": 0.01,
+   "pass": true
+  },
+  "G1_marginal_b": {
+   "got": 70.34506041989584,
+   "want": 70.34506041989584,
+   "tol": 0.01,
+   "pass": true
+  },
+  "G1_marginal_pp": {
+   "got": 9.198459770709789,
+   "want": 9.198459770709789,
+   "tol": 0.01,
+   "pass": true
+  },
+  "G2_central_b": {
+   "got": 513.7265922748531,
+   "want": 513.7265922748531,
+   "tol": 0.01,
+   "pass": true
+  },
+  "G2_null_b": {
+   "got": 427.7040999885527,
+   "want": 427.7040999885527,
+   "tol": 0.01,
+   "pass": true
+  },
+  "G2_marginal_b": {
+   "got": 86.02249228630046,
+   "want": 86.02249228630046,
+   "tol": 0.01,
+   "pass": true
+  },
+  "G2_marginal_pp": {
+   "got": 11.248471889121141,
+   "want": 11.248471889121141,
+   "tol": 0.01,
+   "pass": true
+  },
+  "G3_null_b@4.695": {
+   "got": 734.0068506865199,
+   "want": 734.0068506865199,
+   "tol": 0.01,
+   "pass": true
+  },
+  "G3_central_b@4.695": {
+   "got": 785.7883567116477,
+   "want": 785.7883567116477,
+   "tol": 0.01,
+   "pass": true
+  },
+  "G3_marginal_b@4.695": {
+   "got": 51.78150602512778,
+   "want": 51.78150602512778,
+   "tol": 0.01,
+   "pass": true
+  },
+  "G3_null_b@4.991": {
+   "got": 724.9180585654117,
+   "want": 724.9180585654117,
+   "tol": 0.01,
+   "pass": true
+  },
+  "G3_central_b@4.991": {
+   "got": 767.5264524465003,
+   "want": 767.5264524465003,
+   "tol": 0.01,
+   "pass": true
+  },
+  "G3_marginal_b@4.991": {
+   "got": 42.60839388108866,
+   "want": 42.60839388108866,
+   "tol": 0.01,
+   "pass": true
+  },
+  "G3_null_b@5.334": {
+   "got": 711.2235461485112,
+   "want": 711.2235461485112,
+   "tol": 0.01,
+   "pass": true
+  },
+  "G3_central_b@5.334": {
+   "got": 743.8451864084004,
+   "want": 743.8451864084004,
+   "tol": 0.01,
+   "pass": true
+  },
+  "G3_marginal_b@5.334": {
+   "got": 32.621640259889205,
+   "want": 32.621640259889205,
+   "tol": 0.01,
+   "pass": true
+  }
+ },
+ "parity_gates_all_pass": true,
+ "additive_marginal_pp_at_production_floor": 11.248471889121141,
+ "additive_marginal_pp_deltas_vs_production": {
+  "4.695": -0.029157696919426712,
+  "4.991": -0.041450815464955326,
+  "5.334": -0.055602872079020926
+ },
+ "t1_form_conditional_demotion": true,
+ "interpretive_verdict": "T1: additive-form marginal within +/-1.0pp of its production-floor value at every clean-band floor \u2014 the off-window demotion operates entirely through max-form censoring mechanics; state the headline form-conditionally and report the additive off-window marginal beside the max-form +5.6",
+ "max_form_offwindow_joint_range_pp_committed": [
+  3.891507360127463,
+  7.457602453261302
+ ],
+ "additive_form_offwindow_joint_range_pp": [
+  9.586789878766588,
+  13.09774126267503
+ ],
+ "designated_interval_pp": [
+  3.891507360127463,
+  13.09774126267503
+ ],
+ "runtime_s": 535.876379542
+}

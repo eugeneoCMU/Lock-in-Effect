@@ -1,0 +1,938 @@
+{
+  "mode": "matched_depth_reconciliation",
+  "spec": "decomposes the floor demotion into WINDOW and DEPTH components at matched discount depth; parity-gated against the committed oos_identification anchor_grid; floor->marginal taken from the committed floor_sweep_results.json (PCHIP, not re-derived); no extrapolation, no benchmark feedback.",
+  "support_rule": {
+    "min_exposure_share_of_gap0": 0.1,
+    "note": "a depth is WELL-SUPPORTED for a leg when the leg keeps at least this share of its gap<=0 exposure there."
+  },
+  "step1_parity_gate": {
+    "n_cells": 20,
+    "cells": {
+      "pooled_2017_2019|gap<=+0.0000_age>=12": {
+        "got_cpr_pct": 6.065,
+        "want_cpr_pct": 6.065,
+        "got_n": 528,
+        "want_n": 528,
+        "pass": true
+      },
+      "pooled_2017_2019|gap<=+0.0000_age>=24": {
+        "got_cpr_pct": 10.995,
+        "want_cpr_pct": 10.995,
+        "got_n": 95,
+        "want_n": 95,
+        "pass": true
+      },
+      "pooled_2017_2019|gap<=-0.0025_age>=12": {
+        "got_cpr_pct": 5.185,
+        "want_cpr_pct": 5.185,
+        "got_n": 438,
+        "want_n": 438,
+        "pass": true
+      },
+      "pooled_2017_2019|gap<=-0.0025_age>=24": {
+        "got_cpr_pct": 8.92,
+        "want_cpr_pct": 8.92,
+        "got_n": 65,
+        "want_n": 65,
+        "pass": true
+      },
+      "pooled_2017_2019|gap<=-0.0050_age>=12": {
+        "got_cpr_pct": 5.073,
+        "want_cpr_pct": 5.073,
+        "got_n": 396,
+        "want_n": 396,
+        "pass": true
+      },
+      "pooled_2017_2019|gap<=-0.0050_age>=24": {
+        "got_cpr_pct": 8.92,
+        "want_cpr_pct": 8.92,
+        "got_n": 65,
+        "want_n": 65,
+        "pass": true
+      },
+      "2018_rising_rate|gap<=+0.0000_age>=12": {
+        "got_cpr_pct": 5.334,
+        "want_cpr_pct": 5.334,
+        "got_n": 155,
+        "want_n": 155,
+        "pass": true
+      },
+      "2018_rising_rate|gap<=+0.0000_age>=24": {
+        "got_cpr_pct": null,
+        "want_cpr_pct": null,
+        "got_n": 0,
+        "want_n": 0,
+        "pass": true
+      },
+      "2018_rising_rate|gap<=-0.0025_age>=12": {
+        "got_cpr_pct": 4.991,
+        "want_cpr_pct": 4.991,
+        "got_n": 137,
+        "want_n": 137,
+        "pass": true
+      },
+      "2018_rising_rate|gap<=-0.0025_age>=24": {
+        "got_cpr_pct": null,
+        "want_cpr_pct": null,
+        "got_n": 0,
+        "want_n": 0,
+        "pass": true
+      },
+      "2018_rising_rate|gap<=-0.0050_age>=12": {
+        "got_cpr_pct": 4.695,
+        "want_cpr_pct": 4.695,
+        "got_n": 125,
+        "want_n": 125,
+        "pass": true
+      },
+      "2018_rising_rate|gap<=-0.0050_age>=24": {
+        "got_cpr_pct": null,
+        "want_cpr_pct": null,
+        "got_n": 0,
+        "want_n": 0,
+        "pass": true
+      },
+      "2019_falling_rate|gap<=+0.0000_age>=12": {
+        "got_cpr_pct": 6.91,
+        "want_cpr_pct": 6.91,
+        "got_n": 373,
+        "want_n": 373,
+        "pass": true
+      },
+      "2019_falling_rate|gap<=+0.0000_age>=24": {
+        "got_cpr_pct": 10.995,
+        "want_cpr_pct": 10.995,
+        "got_n": 95,
+        "want_n": 95,
+        "pass": true
+      },
+      "2019_falling_rate|gap<=-0.0025_age>=12": {
+        "got_cpr_pct": 5.482,
+        "want_cpr_pct": 5.482,
+        "got_n": 301,
+        "want_n": 301,
+        "pass": true
+      },
+      "2019_falling_rate|gap<=-0.0025_age>=24": {
+        "got_cpr_pct": 8.92,
+        "want_cpr_pct": 8.92,
+        "got_n": 65,
+        "want_n": 65,
+        "pass": true
+      },
+      "2019_falling_rate|gap<=-0.0050_age>=12": {
+        "got_cpr_pct": 6.807,
+        "want_cpr_pct": 6.807,
+        "got_n": 271,
+        "want_n": 271,
+        "pass": true
+      },
+      "2019_falling_rate|gap<=-0.0050_age>=24": {
+        "got_cpr_pct": 8.92,
+        "want_cpr_pct": 8.92,
+        "got_n": 65,
+        "want_n": 65,
+        "pass": true
+      },
+      "in_window_calib|gap<=-0.02_age>=12": {
+        "got_cpr_pct": 3.972,
+        "want_cpr_pct": 3.972,
+        "got_n": 2838,
+        "want_n": 2838,
+        "pass": true
+      },
+      "in_window_calib|gap<=0_age>=12": {
+        "got_cpr_pct": 4.305,
+        "want_cpr_pct": 4.305,
+        "got_n": 4740,
+        "want_n": 4740,
+        "pass": true
+      }
+    },
+    "failures": [],
+    "all_pass": true
+  },
+  "step2_matched_depth_grid": {
+    "OFF_pooled_2017_2019": {
+      "window": "201701..201912",
+      "min_gap_observed": -0.028659999999999995,
+      "gap0_exposure_upb": 2349443878136.6,
+      "depths": {
+        "+0.0000": {
+          "gap_threshold": 0.0,
+          "cpr_pct": 6.065,
+          "computable": true,
+          "exposure_upb": 2349443878136.6,
+          "exposure_share_of_gap0": 1.0,
+          "n_cohort_months": 528,
+          "well_supported": true
+        },
+        "-0.0025": {
+          "gap_threshold": -0.0025,
+          "cpr_pct": 5.185,
+          "computable": true,
+          "exposure_upb": 1748162889501.0798,
+          "exposure_share_of_gap0": 0.744075,
+          "n_cohort_months": 438,
+          "well_supported": true
+        },
+        "-0.0050": {
+          "gap_threshold": -0.005,
+          "cpr_pct": 5.073,
+          "computable": true,
+          "exposure_upb": 1120240339414.35,
+          "exposure_share_of_gap0": 0.476811,
+          "n_cohort_months": 396,
+          "well_supported": true
+        },
+        "-0.0075": {
+          "gap_threshold": -0.0075,
+          "cpr_pct": 4.901,
+          "computable": true,
+          "exposure_upb": 572585138380.46,
+          "exposure_share_of_gap0": 0.243711,
+          "n_cohort_months": 309,
+          "well_supported": true
+        },
+        "-0.0100": {
+          "gap_threshold": -0.01,
+          "cpr_pct": 4.961,
+          "computable": true,
+          "exposure_upb": 190186504651.86002,
+          "exposure_share_of_gap0": 0.08095,
+          "n_cohort_months": 261,
+          "well_supported": false
+        },
+        "-0.0150": {
+          "gap_threshold": -0.015,
+          "cpr_pct": 4.324,
+          "computable": true,
+          "exposure_upb": 49286880807.74999,
+          "exposure_share_of_gap0": 0.020978,
+          "n_cohort_months": 122,
+          "well_supported": false
+        },
+        "-0.0200": {
+          "gap_threshold": -0.02,
+          "cpr_pct": 3.297,
+          "computable": true,
+          "exposure_upb": 294183748.57,
+          "exposure_share_of_gap0": 0.000125,
+          "n_cohort_months": 40,
+          "well_supported": false
+        },
+        "-0.0250": {
+          "gap_threshold": -0.025,
+          "cpr_pct": 0.0,
+          "computable": true,
+          "exposure_upb": 13006723.89,
+          "exposure_share_of_gap0": 6e-06,
+          "n_cohort_months": 5,
+          "well_supported": false
+        }
+      }
+    },
+    "OFF_2018_rising_rate": {
+      "window": "201801..201812",
+      "min_gap_observed": -0.028659999999999995,
+      "gap0_exposure_upb": 1264479178651.8499,
+      "depths": {
+        "+0.0000": {
+          "gap_threshold": 0.0,
+          "cpr_pct": 5.334,
+          "computable": true,
+          "exposure_upb": 1264479178651.8499,
+          "exposure_share_of_gap0": 1.0,
+          "n_cohort_months": 155,
+          "well_supported": true
+        },
+        "-0.0025": {
+          "gap_threshold": -0.0025,
+          "cpr_pct": 4.991,
+          "computable": true,
+          "exposure_upb": 1058073438192.2499,
+          "exposure_share_of_gap0": 0.836766,
+          "n_cohort_months": 137,
+          "well_supported": true
+        },
+        "-0.0050": {
+          "gap_threshold": -0.005,
+          "cpr_pct": 4.695,
+          "computable": true,
+          "exposure_upb": 921389778258.0299,
+          "exposure_share_of_gap0": 0.728671,
+          "n_cohort_months": 125,
+          "well_supported": true
+        },
+        "-0.0075": {
+          "gap_threshold": -0.0075,
+          "cpr_pct": 4.722,
+          "computable": true,
+          "exposure_upb": 453541052660.94006,
+          "exposure_share_of_gap0": 0.358678,
+          "n_cohort_months": 107,
+          "well_supported": true
+        },
+        "-0.0100": {
+          "gap_threshold": -0.01,
+          "cpr_pct": 4.869,
+          "computable": true,
+          "exposure_upb": 143358794732.69,
+          "exposure_share_of_gap0": 0.113374,
+          "n_cohort_months": 95,
+          "well_supported": true
+        },
+        "-0.0150": {
+          "gap_threshold": -0.015,
+          "cpr_pct": 4.342,
+          "computable": true,
+          "exposure_upb": 48993732986.71,
+          "exposure_share_of_gap0": 0.038746,
+          "n_cohort_months": 65,
+          "well_supported": false
+        },
+        "-0.0200": {
+          "gap_threshold": -0.02,
+          "cpr_pct": 3.44,
+          "computable": true,
+          "exposure_upb": 281748676.0200001,
+          "exposure_share_of_gap0": 0.000223,
+          "n_cohort_months": 35,
+          "well_supported": false
+        },
+        "-0.0250": {
+          "gap_threshold": -0.025,
+          "cpr_pct": 0.0,
+          "computable": true,
+          "exposure_upb": 13006723.89,
+          "exposure_share_of_gap0": 1e-05,
+          "n_cohort_months": 5,
+          "well_supported": false
+        }
+      }
+    },
+    "OFF_2019_falling_rate": {
+      "window": "201901..201912",
+      "min_gap_observed": -0.024640000000000006,
+      "gap0_exposure_upb": 1084964699484.75,
+      "depths": {
+        "+0.0000": {
+          "gap_threshold": 0.0,
+          "cpr_pct": 6.91,
+          "computable": true,
+          "exposure_upb": 1084964699484.75,
+          "exposure_share_of_gap0": 1.0,
+          "n_cohort_months": 373,
+          "well_supported": true
+        },
+        "-0.0025": {
+          "gap_threshold": -0.0025,
+          "cpr_pct": 5.482,
+          "computable": true,
+          "exposure_upb": 690089451308.83,
+          "exposure_share_of_gap0": 0.636048,
+          "n_cohort_months": 301,
+          "well_supported": true
+        },
+        "-0.0050": {
+          "gap_threshold": -0.005,
+          "cpr_pct": 6.807,
+          "computable": true,
+          "exposure_upb": 198850561156.32,
+          "exposure_share_of_gap0": 0.183278,
+          "n_cohort_months": 271,
+          "well_supported": true
+        },
+        "-0.0075": {
+          "gap_threshold": -0.0075,
+          "cpr_pct": 5.579,
+          "computable": true,
+          "exposure_upb": 119044085719.52,
+          "exposure_share_of_gap0": 0.109722,
+          "n_cohort_months": 202,
+          "well_supported": true
+        },
+        "-0.0100": {
+          "gap_threshold": -0.01,
+          "cpr_pct": 5.245,
+          "computable": true,
+          "exposure_upb": 46827709919.17,
+          "exposure_share_of_gap0": 0.043161,
+          "n_cohort_months": 166,
+          "well_supported": false
+        },
+        "-0.0150": {
+          "gap_threshold": -0.015,
+          "cpr_pct": 1.258,
+          "computable": true,
+          "exposure_upb": 293147821.04,
+          "exposure_share_of_gap0": 0.00027,
+          "n_cohort_months": 57,
+          "well_supported": false
+        },
+        "-0.0200": {
+          "gap_threshold": -0.02,
+          "cpr_pct": 0.0,
+          "computable": true,
+          "exposure_upb": 12435072.549999999,
+          "exposure_share_of_gap0": 1.1e-05,
+          "n_cohort_months": 5,
+          "well_supported": false
+        },
+        "-0.0250": {
+          "gap_threshold": -0.025,
+          "cpr_pct": null,
+          "computable": false,
+          "exposure_upb": 0.0,
+          "exposure_share_of_gap0": 0.0,
+          "n_cohort_months": 0,
+          "well_supported": false
+        }
+      }
+    },
+    "IN_in_window_calibration_202206_202312": {
+      "window": "202206..202312",
+      "min_gap_observed": -0.061200000000000004,
+      "gap0_exposure_upb": 36379430399721.64,
+      "depths": {
+        "+0.0000": {
+          "gap_threshold": 0.0,
+          "cpr_pct": 4.305,
+          "computable": true,
+          "exposure_upb": 36379430399721.64,
+          "exposure_share_of_gap0": 1.0,
+          "n_cohort_months": 4740,
+          "well_supported": true
+        },
+        "-0.0025": {
+          "gap_threshold": -0.0025,
+          "cpr_pct": 4.289,
+          "computable": true,
+          "exposure_upb": 36321632824693.69,
+          "exposure_share_of_gap0": 0.998411,
+          "n_cohort_months": 4611,
+          "well_supported": true
+        },
+        "-0.0050": {
+          "gap_threshold": -0.005,
+          "cpr_pct": 4.274,
+          "computable": true,
+          "exposure_upb": 36261270481856.055,
+          "exposure_share_of_gap0": 0.996752,
+          "n_cohort_months": 4390,
+          "well_supported": true
+        },
+        "-0.0075": {
+          "gap_threshold": -0.0075,
+          "cpr_pct": 4.242,
+          "computable": true,
+          "exposure_upb": 36142970445929.84,
+          "exposure_share_of_gap0": 0.9935,
+          "n_cohort_months": 4218,
+          "well_supported": true
+        },
+        "-0.0100": {
+          "gap_threshold": -0.01,
+          "cpr_pct": 4.225,
+          "computable": true,
+          "exposure_upb": 36041570797604.54,
+          "exposure_share_of_gap0": 0.990713,
+          "n_cohort_months": 3931,
+          "well_supported": true
+        },
+        "-0.0150": {
+          "gap_threshold": -0.015,
+          "cpr_pct": 4.119,
+          "computable": true,
+          "exposure_upb": 35342082212054.44,
+          "exposure_share_of_gap0": 0.971485,
+          "n_cohort_months": 3396,
+          "well_supported": true
+        },
+        "-0.0200": {
+          "gap_threshold": -0.02,
+          "cpr_pct": 3.972,
+          "computable": true,
+          "exposure_upb": 34136335241658.965,
+          "exposure_share_of_gap0": 0.938342,
+          "n_cohort_months": 2838,
+          "well_supported": true
+        },
+        "-0.0250": {
+          "gap_threshold": -0.025,
+          "cpr_pct": 3.753,
+          "computable": true,
+          "exposure_upb": 30874798551664.76,
+          "exposure_share_of_gap0": 0.848688,
+          "n_cohort_months": 2280,
+          "well_supported": true
+        }
+      }
+    },
+    "IN_in_window_full_qt_202206_202509": {
+      "window": "202206..202509",
+      "min_gap_observed": -0.061200000000000004,
+      "gap0_exposure_upb": 73804966014961.03,
+      "depths": {
+        "+0.0000": {
+          "gap_threshold": 0.0,
+          "cpr_pct": 4.216,
+          "computable": true,
+          "exposure_upb": 73804966014961.03,
+          "exposure_share_of_gap0": 1.0,
+          "n_cohort_months": 10471,
+          "well_supported": true
+        },
+        "-0.0025": {
+          "gap_threshold": -0.0025,
+          "cpr_pct": 4.208,
+          "computable": true,
+          "exposure_upb": 73744280118817.66,
+          "exposure_share_of_gap0": 0.999178,
+          "n_cohort_months": 10167,
+          "well_supported": true
+        },
+        "-0.0050": {
+          "gap_threshold": -0.005,
+          "cpr_pct": 4.201,
+          "computable": true,
+          "exposure_upb": 73678756155351.16,
+          "exposure_share_of_gap0": 0.99829,
+          "n_cohort_months": 9695,
+          "well_supported": true
+        },
+        "-0.0075": {
+          "gap_threshold": -0.0075,
+          "cpr_pct": 4.183,
+          "computable": true,
+          "exposure_upb": 73539320702277.8,
+          "exposure_share_of_gap0": 0.996401,
+          "n_cohort_months": 9264,
+          "well_supported": true
+        },
+        "-0.0100": {
+          "gap_threshold": -0.01,
+          "cpr_pct": 4.173,
+          "computable": true,
+          "exposure_upb": 73404432584878.67,
+          "exposure_share_of_gap0": 0.994573,
+          "n_cohort_months": 8617,
+          "well_supported": true
+        },
+        "-0.0150": {
+          "gap_threshold": -0.015,
+          "cpr_pct": 4.113,
+          "computable": true,
+          "exposure_upb": 72494158039361.23,
+          "exposure_share_of_gap0": 0.98224,
+          "n_cohort_months": 7452,
+          "well_supported": true
+        },
+        "-0.0200": {
+          "gap_threshold": -0.02,
+          "cpr_pct": 4.018,
+          "computable": true,
+          "exposure_upb": 70513328824693.22,
+          "exposure_share_of_gap0": 0.955401,
+          "n_cohort_months": 6264,
+          "well_supported": true
+        },
+        "-0.0250": {
+          "gap_threshold": -0.025,
+          "cpr_pct": 3.883,
+          "computable": true,
+          "exposure_upb": 66006524107843.69,
+          "exposure_share_of_gap0": 0.894337,
+          "n_cohort_months": 5076,
+          "well_supported": true
+        }
+      }
+    }
+  },
+  "floor_to_marginal_mapping": {
+    "engine_reads": {
+      "3.9719": {
+        "engine_marginal_b": 70.92670908591003,
+        "mapped_marginal_b": 70.89771619156197,
+        "err_b": -0.028992894348064624,
+        "engine_marginal_pp": 9.274517305141941,
+        "mapped_marginal_pp": 9.270726136711568,
+        "inside_committed_grid": true
+      },
+      "4.0": {
+        "engine_marginal_b": 70.34506041989584,
+        "mapped_marginal_b": 70.34506041989584,
+        "err_b": 0.0,
+        "engine_marginal_pp": 9.198459770709789,
+        "mapped_marginal_pp": 9.198459770709789,
+        "inside_committed_grid": true
+      },
+      "4.5": {
+        "engine_marginal_b": 57.641550459468476,
+        "mapped_marginal_b": 57.641550459468476,
+        "err_b": 0.0,
+        "engine_marginal_pp": 7.537323585449613,
+        "mapped_marginal_pp": 7.537323585449613,
+        "inside_committed_grid": true
+      },
+      "4.695": {
+        "engine_marginal_b": 51.78150602512778,
+        "mapped_marginal_b": 51.74598896529668,
+        "err_b": -0.03551705983110054,
+        "engine_marginal_pp": 6.771052540089784,
+        "mapped_marginal_pp": 6.766408258827093,
+        "inside_committed_grid": true
+      },
+      "4.991": {
+        "engine_marginal_b": 42.60839388108866,
+        "mapped_marginal_b": 42.584238395300545,
+        "err_b": -0.024155485788114106,
+        "engine_marginal_pp": 5.571558182909726,
+        "mapped_marginal_pp": 5.568399563627344,
+        "inside_committed_grid": true
+      },
+      "5.0": {
+        "engine_marginal_b": 42.332885358660064,
+        "mapped_marginal_b": 42.332885358660064,
+        "err_b": 0.0,
+        "engine_marginal_pp": 5.535532141494471,
+        "mapped_marginal_pp": 5.535532141494471,
+        "inside_committed_grid": true
+      },
+      "5.334": {
+        "engine_marginal_b": 32.621640259889205,
+        "mapped_marginal_b": 33.308377753551504,
+        "err_b": 0.6867374936622994,
+        "engine_marginal_pp": 4.265670450690081,
+        "mapped_marginal_pp": 4.355469608879497,
+        "inside_committed_grid": true
+      },
+      "6.0": {
+        "engine_marginal_b": 17.44325421351391,
+        "mapped_marginal_b": 17.44325421351391,
+        "err_b": 0.0,
+        "engine_marginal_pp": 2.280914554561832,
+        "mapped_marginal_pp": 2.280914554561832,
+        "inside_committed_grid": true
+      },
+      "6.91": {
+        "engine_marginal_b": 5.686265484799492,
+        "mapped_marginal_b": null,
+        "err_b": null,
+        "engine_marginal_pp": 0.7435473648795181,
+        "mapped_marginal_pp": null,
+        "inside_committed_grid": false
+      }
+    },
+    "max_abs_err_b_inside_grid": 0.6867374936622994,
+    "reproduces_committed_grid_exactly": true,
+    "note": "PCHIP on the frozen floor_sweep grid; the mapping is not re-derived. Reads above 6.0% are outside the committed grid and are refused, not extrapolated."
+  },
+  "step3_decomposition": {
+    "start": {
+      "label": "in-window calibration window, gap<=-0.02, age>=12 (the floor the demoted $70.3B headline rests on)",
+      "floor_pct": 3.972,
+      "marginal_b": 70.89576247560494,
+      "marginal_pp": 9.270470664933919,
+      "production_floor_pct": 4.0,
+      "production_marginal_b": 70.34506041989584,
+      "production_marginal_pp": 9.198459770709789
+    },
+    "end": {
+      "label": "off-window 2018 rising leg, gap<=-0.0025, age>=12 (the floor the $42.6B headline rests on)",
+      "floor_pct": 4.991,
+      "marginal_b": 42.584238395300545,
+      "marginal_pp": 5.568399563627344
+    },
+    "total_move_b": -28.311524080304395,
+    "total_move_pp": -3.702071101306575,
+    "path_a_depth_first": {
+      "ordering": "in-window depth first, then window at matched shallow depth",
+      "matched_depth": -0.0025,
+      "in_window_deep_floor_pct": 3.972,
+      "in_window_shallow_floor_pct": 4.289,
+      "off_window_shallow_floor_pct": 4.991,
+      "depth_component_b": -7.437875622174431,
+      "depth_component_pp": -0.972591384266746,
+      "window_component_b": -20.873648458129964,
+      "window_component_pp": -2.729479717039829,
+      "both_endpoints_well_supported": true,
+      "admissible": true,
+      "depth_share_of_total": 0.262715479430822,
+      "window_share_of_total": 0.737284520569178
+    },
+    "path_b_window_first": {
+      "ordering": "window at matched deep depth first, then off-window depth",
+      "matched_depth": -0.02,
+      "off_window_deep_floor_pct": 3.44,
+      "off_window_deep_exposure_upb": 281748676.0200001,
+      "off_window_deep_exposure_share_of_gap0": 0.000223,
+      "off_window_deep_well_supported": false,
+      "window_component_b": 8.21306038287186,
+      "window_component_pp": 1.0739560827058288,
+      "depth_component_b": -36.524584463176254,
+      "depth_component_pp": -4.776027184012404,
+      "admissible": false,
+      "inadmissible_reason": "the off-window deep cell (gap<=-0.02) carries $0.282B = 0.02% of the leg's gap<=0 exposure, below the 10% support rule. The read is REPORTED but NOT used to attribute."
+    },
+    "interaction_b": 29.086708841001823,
+    "shapley_average_refused": true,
+    "shapley_refusal_reason": "the off-window deep cell (gap<=-0.02) carries $0.282B = 0.02% of the leg's gap<=0 exposure, below the 10% support rule. The read is REPORTED but NOT used to attribute.",
+    "deepest_well_supported_common_depth": -0.01,
+    "three_step_via_deepest_common_depth": {
+      "anchor_depth": -0.01,
+      "in_window_floor_pct": 4.225,
+      "off_window_floor_pct": 4.869,
+      "step1_in_window_depth_b": -5.75364839804125,
+      "step2_window_at_anchor_depth_b": -18.928927365945746,
+      "step3_off_window_depth_b": -3.6289483163173983,
+      "total_depth_b": -9.382596714358648,
+      "total_window_b": -18.928927365945746,
+      "depth_share_of_total": 0.331405567843869,
+      "window_share_of_total": 0.668594432156131
+    },
+    "window_component_by_depth": {
+      "+0.0000": {
+        "computable": true,
+        "in_window_floor_pct": 4.305,
+        "off_window_floor_pct": 5.334,
+        "floor_delta_pp": 1.029,
+        "window_component_b": -29.719391165124662,
+        "window_component_pp": -3.8861665966395087,
+        "off_window_well_supported": true,
+        "off_window_exposure_share": 1.0
+      },
+      "-0.0025": {
+        "computable": true,
+        "in_window_floor_pct": 4.289,
+        "off_window_floor_pct": 4.991,
+        "floor_delta_pp": 0.702,
+        "window_component_b": -20.873648458129964,
+        "window_component_pp": -2.729479717039829,
+        "off_window_well_supported": true,
+        "off_window_exposure_share": 0.836766
+      },
+      "-0.0050": {
+        "computable": true,
+        "in_window_floor_pct": 4.274,
+        "off_window_floor_pct": 4.695,
+        "floor_delta_pp": 0.421,
+        "window_component_b": -12.11213795148241,
+        "window_component_pp": -1.58380720720068,
+        "off_window_well_supported": true,
+        "off_window_exposure_share": 0.728671
+      },
+      "-0.0075": {
+        "computable": true,
+        "in_window_floor_pct": 4.242,
+        "off_window_floor_pct": 4.722,
+        "floor_delta_pp": 0.48,
+        "window_component_b": -13.816826253113248,
+        "window_component_pp": -1.8067156341826545,
+        "off_window_well_supported": true,
+        "off_window_exposure_share": 0.358678
+      },
+      "-0.0100": {
+        "computable": true,
+        "in_window_floor_pct": 4.225,
+        "off_window_floor_pct": 4.869,
+        "floor_delta_pp": 0.644,
+        "window_component_b": -18.928927365945746,
+        "window_component_pp": -2.475184125779693,
+        "off_window_well_supported": true,
+        "off_window_exposure_share": 0.113374
+      },
+      "-0.0150": {
+        "computable": true,
+        "in_window_floor_pct": 4.119,
+        "off_window_floor_pct": 4.342,
+        "floor_delta_pp": 0.223,
+        "window_component_b": -5.738252274469517,
+        "window_component_pp": -0.7503452607166015,
+        "off_window_well_supported": false,
+        "off_window_exposure_share": 0.038746
+      },
+      "-0.0200": {
+        "computable": true,
+        "in_window_floor_pct": 3.972,
+        "off_window_floor_pct": 3.44,
+        "floor_delta_pp": -0.532,
+        "window_component_b": 8.21306038287186,
+        "window_component_pp": 1.0739560827058288,
+        "off_window_well_supported": false,
+        "off_window_exposure_share": 0.000223
+      },
+      "-0.0250": {
+        "computable": false,
+        "reason": "floor read outside the committed sweep grid [2.0, 6.0]% (in=3.753, off=0.0) \u2014 NOT MAPPABLE, not extrapolated",
+        "in_window_floor_pct": 3.753,
+        "off_window_floor_pct": 0.0,
+        "off_window_exposure_share": 1e-05
+      }
+    }
+  },
+  "step4_contamination_at_matched_depth": {
+    "by_depth": {
+      "+0.0000": {
+        "2018_rising_pct": 5.334,
+        "2019_falling_pct": 6.91,
+        "pooled_pct": 6.065,
+        "spread_2018_vs_2019_pp": 1.576,
+        "three_leg_max_min_pp": 1.576,
+        "2018_well_supported": true,
+        "2019_well_supported": true,
+        "2019_exposure_upb": 1084964699484.75,
+        "both_legs_well_supported": true
+      },
+      "-0.0025": {
+        "2018_rising_pct": 4.991,
+        "2019_falling_pct": 5.482,
+        "pooled_pct": 5.185,
+        "spread_2018_vs_2019_pp": 0.491,
+        "three_leg_max_min_pp": 0.491,
+        "2018_well_supported": true,
+        "2019_well_supported": true,
+        "2019_exposure_upb": 690089451308.83,
+        "both_legs_well_supported": true
+      },
+      "-0.0050": {
+        "2018_rising_pct": 4.695,
+        "2019_falling_pct": 6.807,
+        "pooled_pct": 5.073,
+        "spread_2018_vs_2019_pp": 2.112,
+        "three_leg_max_min_pp": 2.112,
+        "2018_well_supported": true,
+        "2019_well_supported": true,
+        "2019_exposure_upb": 198850561156.32,
+        "both_legs_well_supported": true
+      },
+      "-0.0075": {
+        "2018_rising_pct": 4.722,
+        "2019_falling_pct": 5.579,
+        "pooled_pct": 4.901,
+        "spread_2018_vs_2019_pp": 0.857,
+        "three_leg_max_min_pp": 0.857,
+        "2018_well_supported": true,
+        "2019_well_supported": true,
+        "2019_exposure_upb": 119044085719.52,
+        "both_legs_well_supported": true
+      },
+      "-0.0100": {
+        "2018_rising_pct": 4.869,
+        "2019_falling_pct": 5.245,
+        "pooled_pct": 4.961,
+        "spread_2018_vs_2019_pp": 0.376,
+        "three_leg_max_min_pp": 0.376,
+        "2018_well_supported": true,
+        "2019_well_supported": false,
+        "2019_exposure_upb": 46827709919.17,
+        "both_legs_well_supported": false
+      },
+      "-0.0150": {
+        "2018_rising_pct": 4.342,
+        "2019_falling_pct": 1.258,
+        "pooled_pct": 4.324,
+        "spread_2018_vs_2019_pp": 3.084,
+        "three_leg_max_min_pp": 3.084,
+        "2018_well_supported": false,
+        "2019_well_supported": false,
+        "2019_exposure_upb": 293147821.04,
+        "both_legs_well_supported": false
+      },
+      "-0.0200": {
+        "2018_rising_pct": 3.44,
+        "2019_falling_pct": 0.0,
+        "pooled_pct": 3.297,
+        "spread_2018_vs_2019_pp": 3.44,
+        "three_leg_max_min_pp": 3.44,
+        "2018_well_supported": false,
+        "2019_well_supported": false,
+        "2019_exposure_upb": 12435072.549999999,
+        "both_legs_well_supported": false
+      },
+      "-0.0250": {
+        "2018_rising_pct": 0.0,
+        "2019_falling_pct": null,
+        "pooled_pct": 0.0,
+        "spread_2018_vs_2019_pp": null,
+        "three_leg_max_min_pp": 0.0,
+        "2018_well_supported": false,
+        "2019_well_supported": false,
+        "2019_exposure_upb": 0.0,
+        "both_legs_well_supported": false
+      }
+    },
+    "pooled_is_not_independent": true,
+    "pooled_note": "pooled_2017_2019 CONTAINS both the 2018 and 2019 legs (plus 2017), so it is not a third independent leg. Only 2018 and 2019 are independent; any 'three legs agree' claim double-counts.",
+    "depths_adjudicable_both_legs_supported": [
+      "+0.0000",
+      "-0.0025",
+      "-0.0050",
+      "-0.0075"
+    ],
+    "spread_2018_vs_2019_over_adjudicable_pp": [
+      1.576,
+      0.491,
+      2.112,
+      0.857
+    ],
+    "max_adjudicable_spread_pp": 2.112,
+    "min_adjudicable_spread_pp": 0.491,
+    "spread_converges_monotonically_with_depth": false,
+    "mismatched_depth_spread_paper_rejection_uses_pp": 1.919,
+    "note": "The paper's rejection compares the 2019 gap<=0 read (6.910%) against the 2018 gap<=-0.0025 read (4.991%) \u2014 a 1.919pp spread across DIFFERENT depths. At matched depth the spread is smaller at some depths and larger at others; see spread_2018_vs_2019_over_adjudicable_pp."
+  },
+  "clean_band_under_extended_ladder": {
+    "committed_band_pct": [
+      4.695,
+      5.334
+    ],
+    "extended_well_supported_band_pct": [
+      4.695,
+      5.334
+    ],
+    "band_unchanged_by_extension": true,
+    "well_supported_reads_pct": [
+      5.334,
+      4.991,
+      4.695,
+      4.722,
+      4.869
+    ],
+    "marginal_band_b": [
+      33.308377753551504,
+      51.74598896529668
+    ],
+    "point_floor_pct": 4.991,
+    "point_marginal_b": 42.584238395300545,
+    "loose_band_pct_exposure_gt_1B": [
+      4.342,
+      5.334
+    ],
+    "loose_band_marginal_b": [
+      33.308377753551504,
+      62.02222227231826
+    ]
+  },
+  "self_checks_hard_wiring": {
+    "anchor_grid_parity_all_18_cells": true,
+    "path_a_components_sum_to_total": true,
+    "mapping_reproduces_committed_grid": true,
+    "mapping_fidelity_under_1B": true
+  },
+  "self_checks_soft_interpretive": {
+    "extended_ladder_leaves_clean_band_unchanged": true,
+    "window_exceeds_depth_on_admissible_path": true,
+    "off_window_reaches_gap_le_0.02_with_support": false,
+    "leg_spread_converges_monotonically_with_depth": false
+  },
+  "verdict": {
+    "code": "MIXED",
+    "depth_share_admissible_path": 0.262715479430822,
+    "window_component_b": -20.873648458129964,
+    "depth_component_b": -7.437875622174431,
+    "matched_depth_in_sample_comparison_point_b": 63.45788685343051,
+    "one_paragraph": "On the only admissible decomposition path, the -28.3B move from the in-window deep floor (3.972%) to the off-window 2018 floor (4.991%) splits 74% WINDOW (-20.9B, measured at matched depth gap<=-0.0025) and 26% DEPTH (-7.4B, measured within the in-window panel). WINDOW dominates, so the demotion is NOT primarily a depth artifact. But depth owns a real, previously unattributed $7.4B: at matched depth the correct in-sample comparison point is $63.5B, not the $70.3B the demotion is narrated against. The reverse ordering cannot be computed: the off-window leg retains only 0.02% of its exposure at gap<=-0.02, so no Shapley average is formed."
+  },
+  "runtime_s": 0.4
+}

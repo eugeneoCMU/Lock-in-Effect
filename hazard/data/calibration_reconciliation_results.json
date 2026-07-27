@@ -1,0 +1,234 @@
+{
+  "mode": "calibration_reconciliation",
+  "spec": "Propagate the off-window floor demotion from the lock-in marginal to the recovery figures. Basis map derived from the committed shared-layer artifact (constant curtailment netting over a constant cap benchmark, verified path-invariant); standalone legs at every reported floor read from the committed oos_identification marginal table; no new microsim run, no new scorer. Gate A reproduces the committed 4.0% shared-basis anchors bit-exactly before anything new is computed.",
+  "basis_map": {
+    "curtailment_netted_b": 69.56220187263008,
+    "cap_benchmark_b": 764.7482532227002,
+    "offset_pp": 9.096091632702699
+  },
+  "gates": {
+    "A_committed_4pct_parity": {
+      "central": {
+        "standalone_share_got_pct": 107.0326190295068,
+        "standalone_share_want_pct": 107.0326190295068,
+        "standalone_diff_pp": 0.0,
+        "shared_share_got_pct": 97.9365273968041,
+        "shared_share_want_pct": 97.9365273968041,
+        "shared_diff_pp": 0.0,
+        "pass": true
+      },
+      "null": {
+        "standalone_share_got_pct": 97.83415925879702,
+        "standalone_share_want_pct": 97.83415925879702,
+        "standalone_diff_pp": 0.0,
+        "shared_share_got_pct": 88.7380676260943,
+        "shared_share_want_pct": 88.73806762609433,
+        "shared_diff_pp": -2.842170943040401e-14,
+        "pass": true
+      },
+      "all_pass": true
+    },
+    "B_layer_path_invariance": {
+      "curtailment_by_estimator_b": {
+        "path_b_central": 69.56220187263008,
+        "no_lockin_null": 69.56220187263008,
+        "path_a": 69.56220187263008,
+        "path_b_fullbook_composed": 69.56220187263008,
+        "path_a_fullbook_composed": 69.56220187263008
+      },
+      "cap_benchmark_by_estimator_b": {
+        "path_b_central": 764.7482532227002,
+        "no_lockin_null": 764.7482532227002,
+        "path_a": 764.7482532227002,
+        "path_b_fullbook_composed": 764.7482532227002,
+        "path_a_fullbook_composed": 764.7482532227002
+      },
+      "standalone_share_spread_pp": 29.62071850645995,
+      "pass": true,
+      "reading": "the curtailment layer and the cap benchmark are identical across five estimators spanning 29.6pp of standalone recovery, so the layer does not depend on the CPR path and therefore does not depend on the floor that generates it"
+    },
+    "all_pass": true
+  },
+  "floor_table": [
+    {
+      "floor_annual_cpr_pct": 4.0,
+      "role": "in-window production (demoted)",
+      "standalone": {
+        "central_trapped_b": 818.5300844066606,
+        "central_share_pct": 107.0326190295068,
+        "null_trapped_b": 748.1850239867648,
+        "null_share_pct": 97.83415925879702
+      },
+      "shared": {
+        "central_trapped_b": 748.9678825340305,
+        "central_share_pct": 97.9365273968041,
+        "null_trapped_b": 678.6228221141347,
+        "null_share_pct": 88.7380676260943
+      },
+      "marginal_b": 70.34506041989584,
+      "marginal_pp": 9.198459770709789,
+      "miss_vs_benchmark_pp": 2.0634726031959048,
+      "null_miss_vs_benchmark_pp": 11.261932373905694
+    },
+    {
+      "floor_annual_cpr_pct": 4.695,
+      "role": "clean band edge",
+      "standalone": {
+        "central_trapped_b": 785.7883567116477,
+        "central_share_pct": 102.7512457073662,
+        "null_trapped_b": 734.0068506865199,
+        "null_share_pct": 95.98019316727641
+      },
+      "shared": {
+        "central_trapped_b": 716.2261548390176,
+        "central_share_pct": 93.65515407466349,
+        "null_trapped_b": 664.4446488138898,
+        "null_share_pct": 86.88410153457372
+      },
+      "marginal_b": 51.78150602512778,
+      "marginal_pp": 6.771052540089784,
+      "miss_vs_benchmark_pp": 6.344845925336514,
+      "null_miss_vs_benchmark_pp": 13.115898465426284
+    },
+    {
+      "floor_annual_cpr_pct": 4.991,
+      "role": "headline off-window point",
+      "standalone": {
+        "central_trapped_b": 767.5264524465003,
+        "central_share_pct": 100.36328284662208,
+        "null_trapped_b": 724.9180585654117,
+        "null_share_pct": 94.79172466371236
+      },
+      "shared": {
+        "central_trapped_b": 697.9642505738702,
+        "central_share_pct": 91.26719121391939,
+        "null_trapped_b": 655.3558566927816,
+        "null_share_pct": 85.69563303100965
+      },
+      "marginal_b": 42.60839388108866,
+      "marginal_pp": 5.571558182909726,
+      "miss_vs_benchmark_pp": 8.73280878608061,
+      "null_miss_vs_benchmark_pp": 14.304366968990351
+    },
+    {
+      "floor_annual_cpr_pct": 5.334,
+      "role": "clean band edge",
+      "standalone": {
+        "central_trapped_b": 743.8451864084004,
+        "central_share_pct": 97.26667348029723,
+        "null_trapped_b": 711.2235461485112,
+        "null_share_pct": 93.00100302960715
+      },
+      "shared": {
+        "central_trapped_b": 674.2829845357703,
+        "central_share_pct": 88.17058184759452,
+        "null_trapped_b": 641.6613442758811,
+        "null_share_pct": 83.90491139690445
+      },
+      "marginal_b": 32.621640259889205,
+      "marginal_pp": 4.265670450690081,
+      "miss_vs_benchmark_pp": 11.82941815240548,
+      "null_miss_vs_benchmark_pp": 16.095088603095547
+    }
+  ],
+  "headline_calibration": {
+    "floor_annual_cpr_pct": 4.991,
+    "central_shared_share_pct": 91.26719121391939,
+    "central_shared_share_band_pct": [
+      88.17058184759452,
+      93.65515407466349
+    ],
+    "null_shared_share_pct": 85.69563303100965,
+    "null_shared_share_band_pct": [
+      83.90491139690445,
+      86.88410153457372
+    ],
+    "miss_vs_benchmark_pp": 8.73280878608061,
+    "miss_vs_benchmark_band_pp": [
+      6.344845925336514,
+      11.82941815240548
+    ],
+    "marginal_b": 42.60839388108866,
+    "marginal_pp": 5.571558182909726,
+    "superseded_claim": "recovers 97.9% of the shortfall on a benchmark-consistent accounting basis, landing within 2.1% of the benchmark",
+    "corrected_claim": "recovers 91.3% of the shortfall on a benchmark-consistent accounting basis at the off-window floor (88.2--93.7% across the clean band), a miss of 8.7 points (6.3--11.8 across the band). The 97.9% figure and the 2.1-point miss belong to the demoted in-window calibration and cannot be quoted alongside the headline marginal."
+  },
+  "convergence_88_7_vs_88_5": {
+    "allocations": {
+      "uniform_spread_pre_committed_pct": 88.51496735220967,
+      "settlement_aware_pct": 75.5765152376043
+    },
+    "at_4pct_in_window_floor": {
+      "floor_annual_cpr_pct": 4.0,
+      "null_shared_share_pct": 88.7380676260943,
+      "gap_vs_uniform_pp": 0.22310027388463993,
+      "gap_vs_settlement_aware_pp": 13.161552388490009
+    },
+    "at_headline_floor": {
+      "floor_annual_cpr_pct": 4.991,
+      "null_shared_share_pct": 85.69563303100965,
+      "gap_vs_uniform_pp": -2.8193343212000173,
+      "gap_vs_settlement_aware_pp": 10.119117793405351
+    },
+    "band_at_clean_edges": {
+      "4.695": {
+        "null_shared_share_pct": 86.88410153457372,
+        "gap_vs_uniform_pp": -1.63086581763595,
+        "gap_vs_settlement_aware_pp": 11.307586296969419
+      },
+      "5.334": {
+        "null_shared_share_pct": 83.90491139690445,
+        "gap_vs_uniform_pp": -4.610055955305214,
+        "gap_vs_settlement_aware_pp": 8.328396159300155
+      }
+    },
+    "verdict": "the 0.2-point convergence is an artifact of the demoted in-window floor. At the headline calibration the null recovers 85.70% on the shared basis, 2.82 points below the uniform-spread projection share and 10.12 points above the settlement-aware one. The coincidence does not survive either the floor demotion or the choice of allocation, and cannot be reported as a convergence."
+  },
+  "restatements": {
+    "S1_flat_floor_share": {
+      "manuscript_line": 850,
+      "component_b": 4.897,
+      "as_printed_pct_of_in_sample": 6.961398527159372,
+      "corrected_pct_of_headline": 11.493040581784259,
+      "note": "printed as '7.0% of it' against the $70.345B in-sample total; against the headline $42.608B the same $4.897B is 11.5%."
+    },
+    "S2_vintage_bound_fraction": {
+      "manuscript_line": 324,
+      "bound_b": 11.748,
+      "as_printed_fraction_of_in_sample": 0.1670053295835579,
+      "corrected_fraction_of_headline": 0.2757203201037399,
+      "note": "printed as 'about a sixth of the lock-in marginal' (16.7% of $70.345B); against the headline it is 27.6%, more than a quarter."
+    },
+    "S3_unqualified_70b": {
+      "manuscript_line": 595,
+      "note": "'+$70 billion of trapped roll-off' is quoted with no in-sample qualifier, unlike every other occurrence; the headline figure is $42.6B."
+    },
+    "S4_cross_basis_gap": {
+      "manuscript_line": 716,
+      "as_printed_pp": 18.3,
+      "as_printed_construction": "107.0% standalone central minus 88.7% SHARED null \u2014 the two terms sit on different accounting bases",
+      "single_basis_gap_at_4pct_pp": 9.198459770709789,
+      "single_basis_gap_at_headline_pp": 5.571558182909726,
+      "note": "the real-book central-minus-null differential on ONE basis is +9.20pp at the in-window floor and +5.57pp at the headline floor; the 18.3-point figure is a basis-crossing artifact."
+    },
+    "S5_intensity_range": {
+      "manuscript_line": 476,
+      "as_printed": "0.8x to 1.5x",
+      "recomputed_min": 0.8209928072067774,
+      "recomputed_max": 1.74613673284305,
+      "note": "share_of_sum_pct / balance_share_pct spans 0.821 to 1.746, not 0.8--1.5."
+    },
+    "S6_additivity_residual": {
+      "manuscript_lines": [
+        476,
+        483,
+        492
+      ],
+      "as_printed": "the cells sum to within 1.0% of the paired-run total",
+      "residual_frac_of_total": 0.010302247616550388,
+      "residual_pct_of_total": 1.0302247616550388,
+      "claim_true_as_written": false,
+      "note": "the artifact residual is 1.03% of the total, above 1.0%; 'within 1.0%' is false as written."
+    }
+  }
+}

@@ -88,6 +88,24 @@ for _p in (_REPO, _REPO / "abm", _REPO / "hazard"):
 
 DATA_DIR = Path(__file__).parent / "data"
 RESULTS_JSON = DATA_DIR / "curtailment_danish_scaling_results.json"
+# ITEM 7b: this script reads a COMMITTED microsim cache, and the committed cache
+# was built under the dk_level Danish anchor -- the BRACKETING leg, not the
+# production us_intercept leg. So the printed "+$0.77B, immaterial" curtailment
+# differential is measured on the leg the paper no longer headlines, the same
+# defect class as tab:discount. Under dk_level the Danish leg is SLOWER than the
+# U.S. leg (3.39% vs 4.76%) so it retains higher balances and accrues MORE
+# curtailment; under us_intercept it is FASTER (5.61%) so it should accrue LESS,
+# and the differential should change sign. --anchor selects the cache; the
+# default is unchanged so the committed artifact stays reproducible.
+ANCHOR_CACHE = {
+    "dk_level": None,  # config.MICROSIM_RESULTS_PATH, resolved in main()
+    "us_intercept": DATA_DIR / "microsim_results_us_intercept.parquet",
+}
+RESULTS_JSON_BY_ANCHOR = {
+    "dk_level": RESULTS_JSON,
+    "us_intercept": DATA_DIR / "curtailment_danish_scaling_us_intercept_results.json",
+}
+ANCHOR = "dk_level"
 SHARED_ANCHOR_ARTIFACT = DATA_DIR / "shared_layer_scoring_results.json"
 BOUND_ANCHOR_ARTIFACT = DATA_DIR / "danish_discount_bound.json"
 
@@ -127,6 +145,15 @@ def _make_scaled_curtailment(original, scaled_rate: float):
 
 
 def main() -> None:
+    import argparse
+    global ANCHOR, RESULTS_JSON
+    ap = argparse.ArgumentParser()
+    ap.add_argument("--anchor", choices=("dk_level", "us_intercept"),
+                    default="dk_level",
+                    help="which committed Danish leg to score (item 7b)")
+    ANCHOR = ap.parse_args().anchor
+    RESULTS_JSON = RESULTS_JSON_BY_ANCHOR[ANCHOR]
+
     import fed_mbs_extension_risk as fed
 
     from config import MICROSIM_RESULTS_PATH
@@ -139,7 +166,9 @@ def main() -> None:
     soma = fed.fetch_soma_mbs_monthly()
 
     print("Loading committed production microsim cache …")
-    micro_paths = _paths_from_combined_cache(MICROSIM_RESULTS_PATH)
+    _cache = ANCHOR_CACHE[ANCHOR] or MICROSIM_RESULTS_PATH
+    print(f"  anchor={ANCHOR}  cache={Path(_cache).name}")
+    micro_paths = _paths_from_combined_cache(_cache)
 
     base_rate = fed.CURTAILMENT_CPR_HEALTHY
     assert base_rate == BASE_CURTAILMENT_CPR, (

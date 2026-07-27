@@ -17,15 +17,31 @@ venv/
 *-service-account*.json
 service-account*.json
 
-# Manuscript editions — kept local-only, not published with the repo
-paper/
+# Manuscript: LaTeX source and bibliography are tracked so the drafts have
+# history and a rollback path (the v18 pre-edit source was lost once because
+# neither existed). Everything derived — PDFs, figures, .md/.txt editions,
+# build artifacts — and the ad-hoc .bak-<pass> copies stay untracked; git
+# history replaces the .bak convention.
+# NOTE: this repo is PUBLIC. Pushing a branch that carries these commits
+# publishes the working manuscript. Confirm that is intended before pushing.
+paper/**
+!paper/**/
+!paper/**/*.tex
+!paper/**/*.bib
+paper/**/snapshots/
 
 # Floor-sweep per-run parquets (regenerable via hazard/floor_sweep.py)
 hazard/data/floor_sweep/
 # Floor-form-test per-run parquets (regenerable via hazard/floor_form_test.py)
 hazard/data/floor_form/
+hazard/data/concave_hull_band_ends/
 # Cyclical-floor per-run parquets (regenerable via hazard/floor_cyclical.py)
 hazard/data/floor_cyclical/
+# OOS-identification per-run parquets + console log (regenerable via
+# hazard/oos_identification.py; the frozen artifact is
+# hazard/data/oos_identification_results.json)
+hazard/data/oos_identification/
+hazard/data/oos_identification_run.log
 
 # Editor/agent workspaces (stale worktree copies pollute repo greps)
 .claude/
@@ -41,3 +57,20 @@ hazard/data/cohort_month_panel_fannie.parquet
 hazard/data/*fannie*.parquet
 hazard/data/fannie_quarters/
 hazard/data/hazard_coefficients_fannie.json
+# Seasonal-floor-timing per-run parquets (regenerable via
+# hazard/seasonal_floor_timing.py; the frozen artifact is
+# hazard/data/seasonal_floor_timing_results.json)
+hazard/data/seasonal_floor_timing/
+
+# Round-21/22 per-run intermediate parquets and checkpoints. Each is
+# regenerable by its own script; the frozen artifact in each case is the
+# sibling *_results.json, which IS tracked and IS what the liveness gates read.
+hazard/data/concave_marginal/
+hazard/data/concave_additive_marginal/
+hazard/data/floor_form_offwindow/
+hazard/data/danish_offwindow_floor/
+hazard/data/burnout_ablation/
+hazard/data/_bootstrap_pathb_cluster_tmp.parquet
+abm/data/cross_design_reweight/
+abm/data/cross_design_seeds/
+abm/data/production_scale_test/

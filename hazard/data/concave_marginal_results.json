@@ -1,0 +1,103 @@
+{
+ "mode": "concave_marginal",
+ "spec": "concave transform (kink 2.0pp, slope2 0.5) central+null at floors {4.0, 4.991}%; production-transform parity pair at 4.0%; US regime; max floor form; gates G1/G2/G3; ex-ante T1/T2 at +/-1.0pp",
+ "legs": {
+  "production_central_4": {
+   "transform": "production",
+   "floor_annual_cpr_pct": 4.0,
+   "p_q_shock_pct": 6.5,
+   "beta1": -0.06857052676484808,
+   "trapped_b": 818.5300844066606,
+   "share_pct": 107.0326190295068,
+   "r_lag0": 0.19000395255236566,
+   "peak_lag": -3
+  },
+  "production_null_4": {
+   "transform": "production",
+   "floor_annual_cpr_pct": 4.0,
+   "p_q_shock_pct": 0.0,
+   "beta1": 0.0,
+   "trapped_b": 748.1850239867648,
+   "share_pct": 97.83415925879702,
+   "r_lag0": 0.3669902953388254,
+   "peak_lag": -3
+  },
+  "concave_central_4": {
+   "transform": "concave",
+   "floor_annual_cpr_pct": 4.0,
+   "p_q_shock_pct": 6.5,
+   "beta1": -0.06857052676484808,
+   "trapped_b": 808.4023371015244,
+   "share_pct": 105.70829468323242,
+   "r_lag0": 0.2806514840546485,
+   "peak_lag": -3
+  },
+  "concave_null_4": {
+   "transform": "concave",
+   "floor_annual_cpr_pct": 4.0,
+   "p_q_shock_pct": 0.0,
+   "beta1": 0.0,
+   "trapped_b": 748.1850239867648,
+   "share_pct": 97.83415925879702,
+   "r_lag0": 0.3669902953388254,
+   "peak_lag": -3
+  },
+  "concave_central_4991": {
+   "transform": "concave",
+   "floor_annual_cpr_pct": 4.9910000000000005,
+   "p_q_shock_pct": 6.5,
+   "beta1": -0.06857052676484808,
+   "trapped_b": 763.5848569701802,
+   "share_pct": 99.84787199609579,
+   "r_lag0": 0.0715578166633771,
+   "peak_lag": -3
+  },
+  "concave_null_4991": {
+   "transform": "concave",
+   "floor_annual_cpr_pct": 4.9910000000000005,
+   "p_q_shock_pct": 0.0,
+   "beta1": 0.0,
+   "trapped_b": 724.9180585654117,
+   "share_pct": 94.79172466371236,
+   "r_lag0": 0.35389036550042563,
+   "peak_lag": -3
+  }
+ },
+ "parity_gates": {
+  "G1_central_b": {
+   "got": 818.5300844066606,
+   "want": 818.5300844066606,
+   "tol": 0.01,
+   "pass": true
+  },
+  "G1_null_b": {
+   "got": 748.1850239867648,
+   "want": 748.1850239867648,
+   "tol": 0.01,
+   "pass": true
+  },
+  "G2_concave_central_b": {
+   "got": 808.4023371015244,
+   "want": 808.4023371015244,
+   "tol": 0.01,
+   "pass": true
+  },
+  "G3_null_transform_invariance": {
+   "got": 748.1850239867648,
+   "want": 748.1850239867648,
+   "tol": 0.01,
+   "pass": true
+  }
+ },
+ "parity_gates_all_pass": true,
+ "production_marginal_pp": 9.198459770709789,
+ "concave_marginal_pp_at_4": 7.8741354244354085,
+ "concave_marginal_b_at_4": 60.21731311475958,
+ "concave_marginal_pp_at_offwindow_point": 5.056147332383432,
+ "concave_marginal_b_at_offwindow_point": 38.66679840476854,
+ "offwindow_max_form_marginal_pp_committed": 5.571558182909726,
+ "transform_delta_pp_at_4": -1.3243243462743806,
+ "t1_load_bearing": true,
+ "interpretive_verdict": "T1: the concave transform moves the marginal by more than 1.0pp \u2014 the log-linear extrapolation IS load-bearing for the identified marginal; retract or scope the 'not load-bearing' sentence to the level and carry the transform dimension in Tables 8/10",
+ "runtime_s": 66.311032709
+}

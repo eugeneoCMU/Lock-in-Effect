@@ -1,0 +1,269 @@
+{
+  "run": "cohort_timing_diagnostic",
+  "roadmap_item": "R18-L / referee E3 / liveness gate #55",
+  "status": "success",
+  "spec": {
+    "realized_cohort_data_available": "monthly (loan-level Freddie & Fannie performance cohorts); NOT SOMA-holdings cohorts -- the aggregate SOMA back-out has no committed per-cohort realized speed",
+    "cohorts_coupon_pct": [
+      2.0,
+      2.5,
+      3.0,
+      3.5000000000000004,
+      4.0,
+      4.5
+    ],
+    "cohort_term_years": 30,
+    "qt_window": "2022-06..2025-11 (Freddie panel ends 2025-09; Fannie full)",
+    "diagnostic": "per-cohort first-difference velocity corr(dCPR,dRate) at lag 0 + phase scan over +/-6 lags; predicted from ABM surface, realized from loan panels",
+    "cpr_convention": "12*100*SMM, SMM=sum(prepaid_upb)/sum(exposure_upb) (matches macro Empirical_CPR_Pct)",
+    "velocity_reconstruction": "diff(6)/100 with hardcoded pre-QT extended rate tail (offline); CSV-only variant reported"
+  },
+  "gates": [
+    {
+      "name": "G1a_abm_ccf_lag0",
+      "pass": true,
+      "detail": "recomputed -0.3183375411255578 vs anchor -0.3183375411255578"
+    },
+    {
+      "name": "G1b_ccf_json_match",
+      "pass": true,
+      "detail": "ccf_data.json abm[0]=-0.3183375411255578"
+    },
+    {
+      "name": "G1c_pathb_dvel",
+      "pass": true,
+      "detail": "corr(dHazardCPR,dRate)=-0.9428012605757549 vs -0.9428012605757549 (n=41)"
+    },
+    {
+      "name": "G1d_emp_dvel_and_band",
+      "pass": true,
+      "detail": "corr(dEmpCPR,dRate)=0.2549682709641061 vs +0.25496827096410607; band 2/sqrt(41)=0.3123475237772121"
+    },
+    {
+      "name": "G2_predicted_mechanical",
+      "pass": true,
+      "detail": "max predicted velocity = -0.8687 (all <= -0.75)"
+    },
+    {
+      "name": "G3_realized_inside_band",
+      "pass": true,
+      "detail": "all 12 realized cohorts inside 2/sqrt(n) band; worst |vel|=0.1642 (Freddie_2017_2021_originations 4.5%, band 0.320)"
+    },
+    {
+      "name": "G4_no_phase_shift_separation",
+      "pass": true,
+      "detail": "realized best |r| over all cohorts/lags = 0.3435 (< 0.5); predicted min |lag0| = 0.8687 (>= 0.75); separation 0.5252"
+    }
+  ],
+  "aggregate_anchors_reproduced": {
+    "abm_ccf_lag0": -0.3183375411255578,
+    "abm_us_cpr_self_delta_velocity": -0.8787097162827273,
+    "pathb_delta_velocity_lag0": -0.9428012605757549,
+    "empirical_delta_velocity_lag0": 0.25496827096410607,
+    "empirical_zero_band_2_over_sqrt_n": 0.31234752377721214,
+    "empirical_n": 41
+  },
+  "predicted_cohorts": {
+    "2.0": {
+      "coupon_pct": 2.0,
+      "mean_cpr_pct": 8.124390236378286,
+      "delta_velocity_lag0": -0.8722889190871694,
+      "delta_velocity_lag0_csvonly_variant": -0.9662127666723715,
+      "ccf_peak_lag": 0,
+      "ccf_peak_r": -0.3216465074322543,
+      "n": 41
+    },
+    "2.5": {
+      "coupon_pct": 2.5,
+      "mean_cpr_pct": 9.496964010984593,
+      "delta_velocity_lag0": -0.8686570875941707,
+      "delta_velocity_lag0_csvonly_variant": -0.9611178417087823,
+      "ccf_peak_lag": 0,
+      "ccf_peak_r": -0.3292277081446714,
+      "n": 41
+    },
+    "3.0": {
+      "coupon_pct": 3.0,
+      "mean_cpr_pct": 17.75084319552691,
+      "delta_velocity_lag0": -0.8781010444778079,
+      "delta_velocity_lag0_csvonly_variant": -0.9665755917437215,
+      "ccf_peak_lag": 0,
+      "ccf_peak_r": -0.32699493154361486,
+      "n": 41
+    },
+    "3.5": {
+      "coupon_pct": 3.5000000000000004,
+      "mean_cpr_pct": 21.855082563273537,
+      "delta_velocity_lag0": -0.901512272901739,
+      "delta_velocity_lag0_csvonly_variant": -0.9795861089888843,
+      "ccf_peak_lag": 0,
+      "ccf_peak_r": -0.32376991229873275,
+      "n": 41
+    },
+    "4.0": {
+      "coupon_pct": 4.0,
+      "mean_cpr_pct": 22.30187444291976,
+      "delta_velocity_lag0": -0.9125755195198026,
+      "delta_velocity_lag0_csvonly_variant": -0.9829580308796965,
+      "ccf_peak_lag": 0,
+      "ccf_peak_r": -0.33009976036201544,
+      "n": 41
+    },
+    "4.5": {
+      "coupon_pct": 4.5,
+      "mean_cpr_pct": 26.062879258852014,
+      "delta_velocity_lag0": -0.9368392654372983,
+      "delta_velocity_lag0_csvonly_variant": -0.985718213263249,
+      "ccf_peak_lag": -6,
+      "ccf_peak_r": -0.2910692134756028,
+      "n": 41
+    }
+  },
+  "realized_cohorts": {
+    "freddie": {
+      "label": "Freddie_2017_2021_originations",
+      "cohorts": {
+        "2.0": {
+          "coupon_pct": 2.0,
+          "mean_cpr_pct": 3.1129479141683722,
+          "delta_velocity_lag0": -0.08923910432952191,
+          "zero_band": 0.32025630761017426,
+          "inside_band": true,
+          "phase_best_lag": 5,
+          "phase_best_r": 0.34348614263876986,
+          "n": 39
+        },
+        "2.5": {
+          "coupon_pct": 2.5,
+          "mean_cpr_pct": 3.223241087322138,
+          "delta_velocity_lag0": -0.05738215063977279,
+          "zero_band": 0.32025630761017426,
+          "inside_band": true,
+          "phase_best_lag": 3,
+          "phase_best_r": -0.29507794766076906,
+          "n": 39
+        },
+        "3.0": {
+          "coupon_pct": 3.0,
+          "mean_cpr_pct": 3.9267069054921877,
+          "delta_velocity_lag0": -0.047200878876133945,
+          "zero_band": 0.32025630761017426,
+          "inside_band": true,
+          "phase_best_lag": 3,
+          "phase_best_r": -0.3193445394201831,
+          "n": 39
+        },
+        "3.5": {
+          "coupon_pct": 3.5000000000000004,
+          "mean_cpr_pct": 5.129432094444129,
+          "delta_velocity_lag0": -0.0871594360120068,
+          "zero_band": 0.32025630761017426,
+          "inside_band": true,
+          "phase_best_lag": 3,
+          "phase_best_r": -0.3013511304763014,
+          "n": 39
+        },
+        "4.0": {
+          "coupon_pct": 4.0,
+          "mean_cpr_pct": 6.123399570684848,
+          "delta_velocity_lag0": -0.12512233533245845,
+          "zero_band": 0.32025630761017426,
+          "inside_band": true,
+          "phase_best_lag": 1,
+          "phase_best_r": -0.3265557863659257,
+          "n": 39
+        },
+        "4.5": {
+          "coupon_pct": 4.5,
+          "mean_cpr_pct": 7.000698762481545,
+          "delta_velocity_lag0": -0.16419433385089685,
+          "zero_band": 0.32025630761017426,
+          "inside_band": true,
+          "phase_best_lag": 1,
+          "phase_best_r": -0.3287138870461401,
+          "n": 39
+        }
+      },
+      "best_abs_over_all_lags": 0.34348614263876986
+    },
+    "fannie": {
+      "label": "Fannie_W4_replication",
+      "cohorts": {
+        "2.0": {
+          "coupon_pct": 2.0,
+          "mean_cpr_pct": 2.944229659569236,
+          "delta_velocity_lag0": -0.030624321175769548,
+          "zero_band": 0.31234752377721214,
+          "inside_band": true,
+          "phase_best_lag": -4,
+          "phase_best_r": -0.18872666874734736,
+          "n": 41
+        },
+        "2.5": {
+          "coupon_pct": 2.5,
+          "mean_cpr_pct": 3.2459095423611526,
+          "delta_velocity_lag0": -0.03934475791380765,
+          "zero_band": 0.31234752377721214,
+          "inside_band": true,
+          "phase_best_lag": 5,
+          "phase_best_r": 0.27050654076266173,
+          "n": 41
+        },
+        "3.0": {
+          "coupon_pct": 3.0,
+          "mean_cpr_pct": 3.917501820590364,
+          "delta_velocity_lag0": -0.05018372463511339,
+          "zero_band": 0.31234752377721214,
+          "inside_band": true,
+          "phase_best_lag": 3,
+          "phase_best_r": -0.30546704034502,
+          "n": 41
+        },
+        "3.5": {
+          "coupon_pct": 3.5000000000000004,
+          "mean_cpr_pct": 4.876420371192569,
+          "delta_velocity_lag0": -0.10478173934276987,
+          "zero_band": 0.31234752377721214,
+          "inside_band": true,
+          "phase_best_lag": 3,
+          "phase_best_r": -0.31128730085248674,
+          "n": 41
+        },
+        "4.0": {
+          "coupon_pct": 4.0,
+          "mean_cpr_pct": 5.479139601858042,
+          "delta_velocity_lag0": -0.07274885521514576,
+          "zero_band": 0.31234752377721214,
+          "inside_band": true,
+          "phase_best_lag": 3,
+          "phase_best_r": -0.339913923096601,
+          "n": 41
+        },
+        "4.5": {
+          "coupon_pct": 4.5,
+          "mean_cpr_pct": 6.079382651401433,
+          "delta_velocity_lag0": -0.13731405452970552,
+          "zero_band": 0.31234752377721214,
+          "inside_band": true,
+          "phase_best_lag": 5,
+          "phase_best_r": 0.3117387773767922,
+          "n": 41
+        }
+      },
+      "best_abs_over_all_lags": 0.339913923096601
+    },
+    "pooled_velocity": {
+      "freddie": {
+        "delta_velocity_lag0": -0.07438857974396679,
+        "n": 39,
+        "zero_band": 0.32025630761017426
+      },
+      "fannie": {
+        "delta_velocity_lag0": -0.07910209462521413,
+        "n": 41,
+        "zero_band": 0.31234752377721214
+      }
+    }
+  },
+  "verdict": "PASS-branch: aggregate velocity residual reproduced cohort-by-cohort. Every predicted coupon cohort tracks the contemporaneous rate change mechanically (Delta-corr <= -0.87, CCF phase-locked at lag 0, matching the aggregate ABM CCF -0.318 and Path B -0.94); no realized coupon cohort (Freddie or Fannie), at any lag in +/-6 months, shows a rate-velocity response distinguishable from zero (worst best-lag |r| = 0.343 vs the model's 0.87+). The aggregate +0.25 is not a composition artifact and the residual is not a datable phase shift at the cohort level; it is a structural (seasonality-dominated) mismatch present in every cohort."
+}

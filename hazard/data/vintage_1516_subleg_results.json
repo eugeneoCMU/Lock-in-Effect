@@ -1,0 +1,286 @@
+{
+  "mode": "vintage_1516_subleg",
+  "status": "PASS",
+  "spec": "round-18 R18-K optional light leg; re-aggregate the SAME Fannie ingest cells to isolate the referee's named 2015-2016 acquisition-vintage observed QT speed from the round-16 W2 pre-2017 tail, with a completing pre-2015 residual (module docstring, fixed ex ante). No upstream object modified; loader/aggregation imported from vintage_residual_bound.",
+  "qt_window": {
+    "start": "2022-06-01",
+    "end_exclusive": "2025-12-01",
+    "months": 42,
+    "source": "common/qt_window.py (half-open, production convention)"
+  },
+  "cpr_convention": "pooled dollar SMM over the window, compound-annualized CPR = 1-(1-SMM)^12 (imported pooled_cpr_pct); mean-monthly variant disclosed",
+  "parent_run": {
+    "script": "hazard/vintage_residual_bound.py",
+    "artifact": "hazard/data/vintage_residual_bound_results.json",
+    "committed_sampled_cpr_pct": 4.302657826519651,
+    "committed_2022_cpr_pct": 4.475590534559171,
+    "committed_pre2017_cpr_pct": 5.264339724557043,
+    "committed_bound_b": 11.748139002824871,
+    "committed_pre2017_leg_bound_b": 8.440489682694587
+  },
+  "committed_anchors": {
+    "benchmark_b": 764.7482532227002,
+    "sensitivity_b_per_pp": 82.8,
+    "share_pre2017": 0.106,
+    "share_2022": 0.231,
+    "source": "imported from vintage_residual_bound (ginnie_bound.json / expectation_benchmark_results.json / wal_table.VINTAGE_SHARES)"
+  },
+  "gates": {
+    "G2_manifest_integrity": {
+      "files_present": 24,
+      "files_expected": 24,
+      "manifest_tags_match_spec": true,
+      "per_file_rows_match_manifest": true,
+      "cells_rows_total": 175383,
+      "staged_loans_total": {
+        "got": 17606999,
+        "want": 17606999
+      },
+      "staged_rows_total": {
+        "got": 825814383,
+        "want": 825814383
+      },
+      "committed_artifact_tie": true,
+      "vintage_range": [
+        2010,
+        2022
+      ],
+      "vintage_range_ok": true,
+      "pass": true
+    },
+    "G1_parity": {
+      "cpr_sampled": {
+        "got": 4.302657826519651,
+        "want": 4.302657826519651,
+        "pass": true
+      },
+      "cpr_2022": {
+        "got": 4.475590534559171,
+        "want": 4.475590534559171,
+        "pass": true
+      },
+      "cpr_pre2017": {
+        "got": 5.264339724557043,
+        "want": 5.264339724557043,
+        "pass": true
+      },
+      "bound_b": {
+        "got": 11.748139002824871,
+        "want": 11.748139002824871,
+        "pass": true
+      },
+      "pre2017_leg_bound_b": {
+        "got": 8.440489682694587,
+        "want": 8.440489682694587,
+        "pass": true
+      },
+      "abs_tol": 1e-09,
+      "pass": true
+    },
+    "G4_constants_integrity": {
+      "sensitivity": {
+        "got": 82.8,
+        "want": 82.8,
+        "pass": true
+      },
+      "share_pre2017": {
+        "got": 0.106,
+        "want": 0.106,
+        "pass": true
+      },
+      "benchmark": {
+        "got": 764.7482532227002,
+        "want": 764.7482532227002,
+        "pass": true
+      },
+      "pass": true
+    },
+    "G3_additivity_coverage": {
+      "exposure_add": {
+        "exp_2015_2016": 534689802748.6098,
+        "exp_pre_2015": 40349794.739999995,
+        "sum": 534730152543.3498,
+        "pre_2017": 534730152543.3498,
+        "exact": true
+      },
+      "loan_count_add": {
+        "lc_2015_2016": 3444695,
+        "lc_pre_2015": 332,
+        "sum": 3445027,
+        "pre_2017": 3445027,
+        "exact": true
+      },
+      "prepaid_add": {
+        "sum": 2404415029.83,
+        "pre_2017": 2404415029.8300004,
+        "abs_diff": -4.76837158203125e-07,
+        "rel_tol": 1e-12,
+        "pass": true
+      },
+      "recombined_cpr": {
+        "got": 5.26433972455691,
+        "committed_pre2017": 5.264339724557043,
+        "abs_diff_pp": 1.3322676295501878e-13,
+        "abs_tol_pp": 1e-09,
+        "pass": true
+      },
+      "vintage_set_partition": {
+        "v_2015_2016": [
+          2015,
+          2016
+        ],
+        "v_pre_2015": [
+          2010,
+          2011,
+          2012,
+          2013
+        ],
+        "v_pre_2017": [
+          2010,
+          2011,
+          2012,
+          2013,
+          2015,
+          2016
+        ],
+        "disjoint_and_complete": true
+      },
+      "coverage": {
+        "months_2015_2016": 42,
+        "months_pre_2015": 42,
+        "expected": 42,
+        "loan_months_pre_2015": 332,
+        "pass_2015_2016": true
+      },
+      "pass": true
+    }
+  },
+  "results": {
+    "segments": {
+      "sampled_2017_2021": {
+        "cpr_pct": 4.302657826519651,
+        "mean_monthly_cpr_pct": 4.27875279667458,
+        "qt_months": 42,
+        "qt_loan_months": 393755296,
+        "qt_exposure_usd_t": 92.57197095810685,
+        "exposure_share_of_observed_pct": 82.94189930538512,
+        "exposure_share_within_pre2017_pct": 17311.90405437295,
+        "differential_pp": 0.0,
+        "vintages_present": [
+          2017,
+          2018,
+          2019,
+          2020,
+          2021
+        ]
+      },
+      "vintage_2022": {
+        "cpr_pct": 4.475590534559171,
+        "mean_monthly_cpr_pct": 4.50199037751084,
+        "qt_months": 42,
+        "qt_loan_months": 64762884,
+        "qt_exposure_usd_t": 18.503922390102563,
+        "exposure_share_of_observed_pct": 16.578997419522317,
+        "exposure_share_within_pre2017_pct": 3460.4224770366727,
+        "differential_pp": 0.17293270803951977,
+        "vintages_present": [
+          2022
+        ]
+      },
+      "pre_2017": {
+        "cpr_pct": 5.264339724557043,
+        "mean_monthly_cpr_pct": 5.158807679634769,
+        "qt_months": 42,
+        "qt_loan_months": 3445027,
+        "qt_exposure_usd_t": 0.5347301525433498,
+        "exposure_share_of_observed_pct": 0.47910327509257516,
+        "exposure_share_within_pre2017_pct": 100.0,
+        "differential_pp": 0.9616818980373925,
+        "vintages_present": [
+          2010,
+          2011,
+          2012,
+          2013,
+          2015,
+          2016
+        ]
+      },
+      "vintage_2015_2016": {
+        "cpr_pct": 5.264372215538815,
+        "mean_monthly_cpr_pct": 5.158846577434259,
+        "qt_months": 42,
+        "qt_loan_months": 3444695,
+        "qt_exposure_usd_t": 0.5346898027486098,
+        "exposure_share_of_observed_pct": 0.4790671228039539,
+        "exposure_share_within_pre2017_pct": 99.9924541762704,
+        "differential_pp": 0.9617143890191642,
+        "vintages_present": [
+          2015,
+          2016
+        ]
+      },
+      "pre_2015": {
+        "cpr_pct": 4.832891868519907,
+        "mean_monthly_cpr_pct": 3.6689213263442726,
+        "qt_months": 42,
+        "qt_loan_months": 332,
+        "qt_exposure_usd_t": 4.0349794739999995e-05,
+        "exposure_share_of_observed_pct": 3.615228862127794e-05,
+        "exposure_share_within_pre2017_pct": 0.007545823729610776,
+        "differential_pp": 0.5302340420002558,
+        "vintages_present": [
+          2010,
+          2011,
+          2012,
+          2013
+        ]
+      }
+    },
+    "vintage_2015_2016_specific": {
+      "observed_speed_pct": 5.264372215538815,
+      "mean_monthly_cpr_pct": 5.158846577434259,
+      "differential_vs_sampled_pp": 0.9617143890191642,
+      "sampled_universe_cpr_pct": 4.302657826519651,
+      "exposure_share_of_observed_pct": 0.4790671228039539,
+      "exposure_share_within_pre2017_pct": 99.9924541762704,
+      "qt_loan_months": 3444695,
+      "vintages_present": [
+        2015,
+        2016
+      ],
+      "full_share_leg_bound_b": 8.4407748495434,
+      "book_bound_with_1516_b": 11.748424169673685,
+      "book_bound_with_1516_pct_of_benchmark": 1.536247270937206,
+      "sign_direction": "overstates_trapped",
+      "note": "2015-16 carries ~99.99% of the pre-2017 observed exposure, so full_share_leg_bound_b is the drop-in for the committed $8.44B pre-2017 leg and book_bound_with_1516_b is essentially the committed $11.75B / 1.54% bound."
+    },
+    "pre_2015_residual": {
+      "observed_speed_pct": 4.832891868519907,
+      "differential_vs_sampled_pp": 0.5302340420002558,
+      "exposure_share_of_observed_pct": 3.615228862127794e-05,
+      "qt_loan_months": 332,
+      "vintages_present": [
+        2010,
+        2011,
+        2012,
+        2013
+      ],
+      "note": "degenerate tail (a few hundred QT loan-months across 2010-2013; no 2014 vintage in the ingest); reported for completeness only, not an estimate."
+    },
+    "bound_decomposition": {
+      "committed_pre2017_leg_bound_b": 8.440489682694587,
+      "exposure_split_leg_2015_2016_b": 8.44013792355184,
+      "exposure_split_leg_pre_2015_b": 0.00035116438603382264,
+      "exposure_split_sum_b": 8.440489087937873,
+      "cpr_nonlinearity_gap_b": -5.947567132125187e-07,
+      "pre2017_weight_2015_2016": 0.999924541762704,
+      "pre2017_weight_pre_2015": 7.545823729610777e-05,
+      "note": "exposure-split legs sum to the committed pre-2017 leg to within the CPR-nonlinearity gap (pooled CPR is not exposure-linear); the exact partition is at the dollar/loan-month level in gate G3."
+    }
+  },
+  "caveats": [
+    "Fannie observed speeds proxy the SOMA book (same posture as the parent run).",
+    "2015-16 / pre-2015 legs are the seasoned tail of 2017+ acquisition files (survivor-composition-tilted), not random 2015-16 / pre-2015 origination draws; the 10.6% pre-2017 face share is applied as-is.",
+    "pre-2015 residual is degenerate (a few hundred QT loan-months, vintages 2010-2013, no 2014); reported for completeness."
+  ]
+}

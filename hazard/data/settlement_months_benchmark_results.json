@@ -1,0 +1,102 @@
+{
+ "mode": "settlement_months_benchmark",
+ "pre_committed": true,
+ "spec": "convolve the cap schedule with the committed settlement-lag kernel; net the unchanged realized series against it; calendar convention stays production under every branch",
+ "production_convention_stays_calendar": true,
+ "committed_benchmark_b": 764.7482532227002,
+ "calendar_benchmark_b": 764.7482532227002,
+ "kernel_production": [
+  0.1,
+  0.6,
+  0.3
+ ],
+ "legs": {
+  "production": {
+   "kernel": [
+    0.1,
+    0.6,
+    0.3
+   ],
+   "benchmark_b": 722.7482532227002,
+   "shift_b": -42.0,
+   "shift_pct_of_committed": -5.492003391051787,
+   "cap_total_b": 1375.5,
+   "cap_mass_lost_b": 42.0
+  },
+  "slower": {
+   "kernel": [
+    0.0,
+    0.5,
+    0.5
+   ],
+   "benchmark_b": 712.2482532227002,
+   "shift_b": -52.5,
+   "shift_pct_of_committed": -6.865004238814733,
+   "cap_total_b": 1365.0,
+   "cap_mass_lost_b": 52.5
+  },
+  "faster": {
+   "kernel": [
+    0.3,
+    0.6,
+    0.1
+   ],
+   "benchmark_b": 736.7482532227002,
+   "shift_b": -28.0,
+   "shift_pct_of_committed": -3.6613355940345245,
+   "cap_total_b": 1389.5,
+   "cap_mass_lost_b": 28.0
+  }
+ },
+ "n_qt_active_months": 42,
+ "cap_total_calendar_b": 1417.5,
+ "window_edge_cap_mass_lost_b": 42.0,
+ "shift_explained_by_window_edge": "The settlement-aligned cap loses mass at the window's END, not its start: the half-open window drops cap convolved past QT_END (Oct 2025 loses its lag-2 tap, 0.30 x $35B; Nov 2025 loses lags 1 and 2, 0.90 x $35B; $42.0B in total). The window's start loses nothing from the schedule because the pre-QT cap is zero \u2014 the ramp is only redistributed within the window. The loss is mechanical, not behavioural, and because the realized series is untouched and both legs sum over the same months it accounts for $42.000B of the $42.000B shift exactly.",
+ "shift_pct_abs": 5.492003391051787,
+ "interpretive_verdict": "T2: disclosed sensitivity, headline unchanged \u2014 settlement-aligned benchmark $722.7483B against the calendar $764.7483B, a shift of -5.492% of the committed benchmark.",
+ "t1_immaterial": false,
+ "t2_disclosed_sensitivity": true,
+ "t3_material_to_headline": false,
+ "residual_scope_not_settled": "Tests month-ALIGNMENT only. Does not revisit the cap schedule, the SOMA series, the window bounds, or the reinvestment-ceiling reading of the cap.",
+ "gates": {
+  "G3_kernel_sums_to_one": {
+   "got": 1.0,
+   "want": 1.0,
+   "diff": 0.0,
+   "tol": 1e-12,
+   "bit_exact": true,
+   "pass": true,
+   "note": "kernel=[0.1, 0.6, 0.3] read from fed_mbs_extension_risk"
+  },
+  "G1_cap_schedule_total": {
+   "got": 1417.5,
+   "want": 1417.5,
+   "diff": 0.0,
+   "tol": 1e-06,
+   "bit_exact": true,
+   "pass": true,
+   "note": "42 active months, ramp -17.5 full -35.0"
+  },
+  "G0_calendar_reproduces_committed": {
+   "got": 764.7482532227002,
+   "want": 764.7482532227002,
+   "diff": 0.0,
+   "tol": 1e-09,
+   "bit_exact": true,
+   "pass": true,
+   "note": "FRED/SOMA drift halts the run; tolerance is NOT widened"
+  },
+  "G2_degenerate_kernel_is_calendar": {
+   "got": 764.7482532227002,
+   "want": 764.7482532227002,
+   "diff": 0.0,
+   "tol": 1e-09,
+   "bit_exact": true,
+   "pass": true,
+   "note": "wiring check on the convolution path"
+  }
+ },
+ "gates_all_pass": true,
+ "runtime_s": 1.54565125,
+ "generated_utc": "2026-07-27T05:31:16.727725+00:00"
+}

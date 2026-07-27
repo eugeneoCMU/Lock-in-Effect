@@ -74,13 +74,28 @@ def test_aggregates_ignore_post_qt_rows():
 
 def test_unbounded_qt_start_filter_would_drift():
     """The pre-fix filter (index >= QT_START, no upper bound) must disagree —
-    proving this suite would have caught the original bug."""
+    proving this suite would have caught the original bug.
+
+    HARDENED (suite-hardening pass). The inequality above compares two
+    quantities BOTH derived from the module, so it holds for any upper bound
+    the module happens to apply, including a wrong one: it fired under none of
+    12 single-point mutants of common/qt_window.py. The added assertions pin
+    the property that actually matters — the correct frame must contain no
+    post-QT row AT ALL, which is checkable against the 500.0 sentinel these
+    rows carry, and must have exactly the expected month count.
+    """
     df = _synthetic_frame()
     buggy = df.loc[df.index >= QT_START]  # original Error-4 filter
     correct = qt_active_frame(df)
     assert buggy["Extension_Delta_Billions"].sum() > (
         correct["Extension_Delta_Billions"].sum() + 1000.0
     )
+    # Not one sentinel row survived the filter.
+    assert (correct["Extension_Delta_Billions"] < 500.0).all()
+    assert (correct["Empirical_CPR_Pct"] < 99.0).all()
+    assert len(correct) == expected_qt_active_months()
+    assert correct.index.max() < QT_END
+    assert correct.index.min() >= QT_START
 
 
 def test_assert_qt_window_only_raises_on_unmasked_index():
@@ -90,8 +105,23 @@ def test_assert_qt_window_only_raises_on_unmasked_index():
 
 
 def test_assert_qt_window_only_passes_on_masked_index():
+    """HARDENED: the original body only round-tripped the module's own mask
+    through the module's own assertion, which agrees with itself under any
+    bound (it fired under none of 12 mutants). The boundary probes below state
+    where the guard must and must not raise, in calendar terms."""
     df = _synthetic_frame()
     assert_qt_window_only(qt_active_frame(df).index)
+
+    # The last instant inside the window is accepted ...
+    assert_qt_window_only(pd.DatetimeIndex([QT_END - pd.Timedelta(days=1)]))
+    assert_qt_window_only(pd.DatetimeIndex([QT_START]))
+    # ... and the exclusive upper bound itself is not.
+    with pytest.raises(ValueError, match="outside the active QT window"):
+        assert_qt_window_only(pd.DatetimeIndex([QT_END]))
+    with pytest.raises(ValueError, match="outside the active QT window"):
+        assert_qt_window_only(
+            pd.DatetimeIndex([QT_START - pd.Timedelta(days=1)])
+        )
 
 
 def test_qt_mask_bounds_are_half_open():
@@ -118,7 +148,15 @@ def test_qt_target_series_regimes():
 
 
 def test_frameworks_share_single_window_definition():
-    """abm and hazard must expose the same objects, not copies."""
+    """abm and hazard must expose the same objects, not copies.
+
+    HARDENED: `is` identity is true for ANY value the shared object holds, so
+    on its own this fired under none of 12 mutants — a re-export of a wrong
+    date passes it. Identity is still the point (a copy would drift), but the
+    shared object must additionally span the window the module's own mask
+    selects, checked without restating the two dates (tests/
+    test_qt_window_literals.py owns the literals).
+    """
     import importlib
 
     sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "abm"))
@@ -126,6 +164,16 @@ def test_frameworks_share_single_window_definition():
     hazard_config = importlib.import_module("config")
     assert hazard_config.QT_START is QT_START
     assert hazard_config.QT_END is QT_END
+
+    # The shared bounds and the shared mask must describe the same window:
+    # every month the mask accepts lies in [QT_START, QT_END), the first
+    # accepted month IS QT_START, and the count matches.
+    probe = pd.date_range("2018-01-01", "2030-01-01", freq="MS")
+    active = probe[qt_active_mask(probe)]
+    assert active.min() == hazard_config.QT_START
+    assert active.max() < hazard_config.QT_END
+    assert (active.max() + pd.DateOffset(months=1)) == hazard_config.QT_END
+    assert len(active) == expected_qt_active_months()
 
 
 if __name__ == "__main__":

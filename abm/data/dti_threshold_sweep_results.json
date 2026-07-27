@@ -1,0 +1,223 @@
+{
+  "mode": "dti_threshold_sweep",
+  "status": "OK",
+  "spec": "round-18 R18-C (referee W2/Q6/C3); front-end DTI threshold sensitivity 36/43/50% on the frozen berger surface, freeze_sensitivity Part-2 harness pattern, floor retained; gate #49",
+  "reference_run": {
+    "tag": "run-2026-07-05-berger",
+    "manifest": "abm/data/runs/run-2026-07-05-berger/manifest.json",
+    "surface_sha256": "a828fcbe5c33ce40b75719f64c64ad84c8135da45c00089578c6146889caa2d6",
+    "committed_dollars_b": {
+      "empirical_trapped": 764.7482532227002,
+      "us_trapped": 84.50667328005531,
+      "danish_trapped": 812.9212962858466,
+      "institutional_gap": -728.4146230057912,
+      "share_explained_pct": 11.050260386204029,
+      "avg_actual_rolloff_monthly": -15.541708256602377
+    },
+    "committed_us_cpr_mean_pct": 11.760904343422906,
+    "scope_note": "parity anchors to the latest frozen production accounting; the ABM is a demoted institutional counterfactual \u2014 the +9.2pp hazard marginal carries no DTI gate"
+  },
+  "swept_parameter": {
+    "name": "front_end_dti_ceiling",
+    "production_value": 0.43,
+    "swept_values": [
+      0.36,
+      0.43,
+      0.5
+    ],
+    "source": "abm.DTI_MAX; pre-2021 General QM limit 12 C.F.R. 1026.43(e)(2)(vi); front-end only (mortgage payment / gross income)",
+    "danish_leg_dti_invariant": true,
+    "danish_anchor": "dk_level (Berger flat elasticity; no DTI gate)"
+  },
+  "gates": {
+    "G0a_latest_tag": {
+      "pass": true,
+      "tag": "run-2026-07-05-berger"
+    },
+    "G0b_surface_sha": {
+      "pass": true,
+      "sha256": "a828fcbe5c33ce40b75719f64c64ad84c8135da45c00089578c6146889caa2d6"
+    },
+    "G0c_constants": {
+      "pass": true,
+      "dti_max": 0.43,
+      "wait_and_see_prob": 0.2,
+      "rng_seed": 42,
+      "n_households": 10000
+    },
+    "G0d_cohort_identity": {
+      "pass": true,
+      "n_cohorts": 11
+    },
+    "G1a_calibration_parity": {
+      "pass": true,
+      "scale": 43882.8125,
+      "committed": 43882.8125,
+      "floor_cpr": 0.0483
+    },
+    "G1b_surface_rebuild_parity": {
+      "pass": true,
+      "rows_rebuilt": 37180,
+      "rows_committed": 37180,
+      "max_abs_dev_us": 0.0,
+      "max_abs_dev_danish": 8.326672684688674e-17
+    },
+    "G1c_score_parity": {
+      "pass": true,
+      "diffs": {
+        "us_trapped_b": 0.024667146963096798,
+        "share_pp": 0.0032255251135442364,
+        "empirical_b": 0.0,
+        "danish_b": -0.001240266271111068,
+        "us_cpr_mean_pp": -0.0003058906388009319
+      },
+      "tolerances": {
+        "trapped_b": 0.5,
+        "share_pp": 0.1,
+        "cpr_mean_pp": 0.05
+      }
+    },
+    "G6_floor_retention": {
+      "pass": true,
+      "band": [
+        0.04,
+        0.05
+      ],
+      "per_dti": {
+        "dti_0.43": {
+          "dti_max": 0.43,
+          "recalibrated_scale": 43882.8125,
+          "recalibrated_floor_cpr": 0.0483,
+          "fixed_scale_floor_cpr": 0.0483,
+          "in_band": true
+        },
+        "dti_0.36": {
+          "dti_max": 0.36,
+          "recalibrated_scale": 43882.8125,
+          "recalibrated_floor_cpr": 0.0442,
+          "fixed_scale_floor_cpr": 0.0442,
+          "in_band": true
+        },
+        "dti_0.50": {
+          "dti_max": 0.5,
+          "recalibrated_scale": 41933.59375,
+          "recalibrated_floor_cpr": 0.0447,
+          "fixed_scale_floor_cpr": 0.0509,
+          "in_band": true
+        }
+      }
+    }
+  },
+  "method": "freeze_sensitivity Part-2 pattern: override abm.DTI_MAX, production calibration re-run per DTI (floor retained via the [4,5]% binary search; mobility scale absorbs the DTI change), one multi-cohort surface build per DTI, scored through the production compute_metrics path with raw realized velocities; calibration inputs pinned to the frozen manifest; seed 42, N=10000",
+  "pinned_inputs": {
+    "median_income": 83730.0,
+    "median_home_value": 403200.0,
+    "reference_cohort": [
+      0.02,
+      60
+    ]
+  },
+  "live_medians_recorded_not_used": [
+    83730.0,
+    403200.0
+  ],
+  "legs": {
+    "dti_0.43": {
+      "trapped_b": 84.5313404270184,
+      "share_pct": 11.053485911317573,
+      "empirical_trapped_b": 764.7482532227002,
+      "danish_trapped_b": 812.9200560195754,
+      "institutional_gap_b": -728.388715592557,
+      "us_cpr_mean_pct": 11.760598452784105,
+      "dti_max": 0.43,
+      "mobility_scale": 43882.8125,
+      "floor_cpr_at_8pct": 0.0483
+    },
+    "dti_0.36": {
+      "trapped_b": 153.34957263571803,
+      "share_pct": 20.05229459361204,
+      "empirical_trapped_b": 764.7482532227002,
+      "danish_trapped_b": 812.9200560195754,
+      "institutional_gap_b": -659.5704833838574,
+      "us_cpr_mean_pct": 10.943245971323394,
+      "dti_max": 0.36,
+      "mobility_scale": 43882.8125,
+      "floor_cpr_at_8pct": 0.0442
+    },
+    "dti_0.50": {
+      "trapped_b": 119.69627136839641,
+      "share_pct": 15.651722101225904,
+      "empirical_trapped_b": 764.7482532227002,
+      "danish_trapped_b": 812.9200560195754,
+      "institutional_gap_b": -693.223784651179,
+      "us_cpr_mean_pct": 11.344045076170527,
+      "dti_max": 0.5,
+      "mobility_scale": 41933.59375,
+      "floor_cpr_at_8pct": 0.0447
+    }
+  },
+  "floor_retention": {
+    "band": [
+      0.04,
+      0.05
+    ],
+    "note": "unlike freeze_sensitivity's G6 (freeze never touches the zero-velocity floor, so scale and floor are literally invariant), the DTI gate binds at the 8% floor; 'floor retained' means the floor is re-anchored into [4,5]% by re-calibration, with the mobility scale as the absorbing free parameter \u2014 the fixed_scale_floor_cpr column shows the drift the re-calibration corrects",
+    "per_dti": {
+      "dti_0.43": {
+        "dti_max": 0.43,
+        "recalibrated_scale": 43882.8125,
+        "recalibrated_floor_cpr": 0.0483,
+        "fixed_scale_floor_cpr": 0.0483,
+        "in_band": true
+      },
+      "dti_0.36": {
+        "dti_max": 0.36,
+        "recalibrated_scale": 43882.8125,
+        "recalibrated_floor_cpr": 0.0442,
+        "fixed_scale_floor_cpr": 0.0442,
+        "in_band": true
+      },
+      "dti_0.50": {
+        "dti_max": 0.5,
+        "recalibrated_scale": 41933.59375,
+        "recalibrated_floor_cpr": 0.0447,
+        "fixed_scale_floor_cpr": 0.0509,
+        "in_band": true
+      }
+    }
+  },
+  "dti_contribution": {
+    "production_vs_loosened_50": {
+      "trapped_b": -35.164930941378,
+      "share_pp": -4.598236189908331,
+      "us_cpr_mean_pp": 0.41655337661357805,
+      "basis": "DTI 43% minus 50% (loosened wall), run-2026-07-05-berger accounting"
+    },
+    "production_vs_tightened_36": {
+      "trapped_b": -68.81823220869963,
+      "share_pp": -8.998808682294467,
+      "us_cpr_mean_pp": 0.8173524814607109,
+      "basis": "DTI 43% minus 36% (tightened wall), run-2026-07-05-berger accounting"
+    },
+    "full_span_36_to_50": {
+      "trapped_b": 33.65330126732162,
+      "share_pp": 4.400572492386136,
+      "note": "tightest minus loosest trapped span across the swept wall"
+    }
+  },
+  "interpretation_precommitted": "Descriptive accounting only, in run-2026-07-05-berger units. Per-DTI trapped/share/CPR are the production reproduction of the trapped-liquidity accounting under a 36/43/50% front-end DTI wall, floor retained. The isolated DTI contribution is production(43%) minus the loosened(50%) and tightened(36%) legs. The G6 floor-retention check \u2014 the involuntary-turnover floor is re-anchored into [4,5]% at every threshold \u2014 is the answer to Q6's 'without compromising the involuntary-turnover floor'. The ABM is not the headline estimator; the +9.2pp hazard marginal carries no DTI gate. No verdict vocabulary.",
+  "cohort_weights_pct": {
+    "15yr_1.50": 3.4564595532731017,
+    "15yr_2.00": 4.0681419517200705,
+    "15yr_2.50": 0.9098218140094665,
+    "15yr_3.00": 0.6974280472627884,
+    "30yr_1.50": 2.7531084274680975,
+    "30yr_2.00": 36.12078731398665,
+    "30yr_2.50": 26.6270555978975,
+    "30yr_3.00": 10.74683156729313,
+    "30yr_3.50": 7.336576020524956,
+    "30yr_4.00": 4.643756887474026,
+    "30yr_4.50": 2.6400328190902114
+  },
+  "generated_utc": "2026-07-17T17:25:48.113806+00:00"
+}

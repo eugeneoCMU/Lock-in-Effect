@@ -1,0 +1,196 @@
+{
+  "mode": "subgroup_marginals",
+  "roadmap_item": "R18-A",
+  "gate": 48,
+  "spec": "round-18 R18-A group-ablation; grids fico_bucket {<680,680-740,740+}, ltv_bucket {<=80,>80}, region {Northeast,Midwest,South,West via agents.STATE_TO_REGION, .get(state,3) fallback}",
+  "engine": "production US regime, fractional mode, seed RNG_SEED, committed 75k sample; run_leg + anchors imported from marginal_decomposition.py",
+  "basis": "standalone scorer; marginal basis-invariant per manuscript Sec V",
+  "committed_anchors": {
+    "central_trapped_b": 818.5300844066606,
+    "null_trapped_b": 748.1850239867648,
+    "total_marginal_b": 70.34506041989584,
+    "total_marginal_pp": 9.198459770709789
+  },
+  "gates": {
+    "G1_central_parity": {
+      "trapped_b": 818.5300844066606,
+      "diff_b": 0.0,
+      "pass": true
+    },
+    "G2_null_parity": {
+      "trapped_b": 748.1850239867648,
+      "diff_b": 0.0,
+      "pass": true
+    },
+    "G3_additivity_per_grid": {
+      "fico_bucket": {
+        "sum_cells_b": 69.78362458460538,
+        "committed_total_b": 70.34506041989584,
+        "residual_b": 0.5614358352904674,
+        "residual_frac_of_total": 0.007981169280958855,
+        "threshold_frac": 0.1,
+        "additivity_verdict": "shares_readable",
+        "pass": true
+      },
+      "ltv_bucket": {
+        "sum_cells_b": 70.08651633805755,
+        "committed_total_b": 70.34506041989584,
+        "residual_b": 0.2585440818382949,
+        "residual_frac_of_total": 0.003675369390473511,
+        "threshold_frac": 0.1,
+        "additivity_verdict": "shares_readable",
+        "pass": true
+      },
+      "region": {
+        "sum_cells_b": 69.96681686828686,
+        "committed_total_b": 70.34506041989584,
+        "residual_b": 0.37824355160898904,
+        "residual_frac_of_total": 0.005376973867834075,
+        "threshold_frac": 0.1,
+        "additivity_verdict": "shares_readable",
+        "pass": true
+      }
+    }
+  },
+  "benchmark_b": 764.7482532227002,
+  "grids": {
+    "fico_bucket": {
+      "cells": [
+        {
+          "cell": "<680",
+          "n_loans": 5985,
+          "balance_share_pct": 6.781971276120065,
+          "marginal_b": 5.966384513387425,
+          "marginal_pp": 0.7801762852343477,
+          "share_of_sum_pct": 8.549834648032368,
+          "intensity": 1.260671020258831
+        },
+        {
+          "cell": "680-740",
+          "n_loans": 21767,
+          "balance_share_pct": 27.411976714369573,
+          "marginal_b": 23.441675966324624,
+          "marginal_pp": 3.065280092833143,
+          "share_of_sum_pct": 33.59194382043603,
+          "intensity": 1.2254477001225115
+        },
+        {
+          "cell": "740+",
+          "n_loans": 47248,
+          "balance_share_pct": 65.80605200951038,
+          "marginal_b": 40.37556410489333,
+          "marginal_pp": 5.279588928088166,
+          "share_of_sum_pct": 57.858221531531605,
+          "intensity": 0.8792234112930807
+        }
+      ],
+      "sum_cells_b": 69.78362458460538,
+      "residual_b": 0.5614358352904674,
+      "sign_homogeneous": true,
+      "intensity_band": [
+        0.5,
+        2.0
+      ],
+      "intensity_band_ok": true,
+      "intensity_min": 0.8792234112930807,
+      "intensity_max": 1.260671020258831,
+      "max_cell_share_pct": 57.858221531531605,
+      "offending_cells": [],
+      "verdict": "broad_based"
+    },
+    "ltv_bucket": {
+      "cells": [
+        {
+          "cell": "\u226480",
+          "n_loans": 54286,
+          "balance_share_pct": 75.10574589657281,
+          "marginal_b": 48.631933662598954,
+          "marginal_pp": 6.35920820448569,
+          "share_of_sum_pct": 69.38843047645017,
+          "intensity": 0.9238764577613557
+        },
+        {
+          "cell": ">80",
+          "n_loans": 20714,
+          "balance_share_pct": 24.894254103427187,
+          "marginal_b": 21.454582675458596,
+          "marginal_pp": 2.805443828743322,
+          "share_of_sum_pct": 30.611569523549832,
+          "intensity": 1.22966405807417
+        }
+      ],
+      "sum_cells_b": 70.08651633805755,
+      "residual_b": 0.2585440818382949,
+      "sign_homogeneous": true,
+      "intensity_band": [
+        0.5,
+        2.0
+      ],
+      "intensity_band_ok": true,
+      "intensity_min": 0.9238764577613557,
+      "intensity_max": 1.22966405807417,
+      "max_cell_share_pct": 69.38843047645017,
+      "offending_cells": [],
+      "verdict": "broad_based"
+    },
+    "region": {
+      "cells": [
+        {
+          "cell": "Northeast",
+          "n_loans": 9877,
+          "balance_share_pct": 16.00291938420727,
+          "marginal_b": 11.369707195090882,
+          "marginal_pp": 1.4867254873977387,
+          "share_of_sum_pct": 16.25014214451753,
+          "intensity": 1.015448603743779
+        },
+        {
+          "cell": "Midwest",
+          "n_loans": 16818,
+          "balance_share_pct": 17.139839162526123,
+          "marginal_b": 12.660785437977438,
+          "marginal_pp": 1.6555494418750278,
+          "share_of_sum_pct": 18.095414375948355,
+          "intensity": 1.0557517024728835
+        },
+        {
+          "cell": "South",
+          "n_loans": 25530,
+          "balance_share_pct": 32.69055646868645,
+          "marginal_b": 23.71999637219062,
+          "marginal_pp": 3.10167382170969,
+          "share_of_sum_pct": 33.901780063603184,
+          "intensity": 1.0370511770295785
+        },
+        {
+          "cell": "West",
+          "n_loans": 22775,
+          "balance_share_pct": 34.16668498458015,
+          "marginal_b": 22.216327863027914,
+          "marginal_pp": 2.9050511419158953,
+          "share_of_sum_pct": 31.752663415930932,
+          "intensity": 0.929345748066027
+        }
+      ],
+      "sum_cells_b": 69.96681686828686,
+      "residual_b": 0.37824355160898904,
+      "sign_homogeneous": true,
+      "intensity_band": [
+        0.5,
+        2.0
+      ],
+      "intensity_band_ok": true,
+      "intensity_min": 0.929345748066027,
+      "intensity_max": 1.0557517024728835,
+      "max_cell_share_pct": 33.901780063603184,
+      "offending_cells": [],
+      "verdict": "broad_based"
+    }
+  },
+  "verdict_overall": "broad_based_all_dimensions",
+  "verdict_intensity_band": [
+    0.5,
+    2.0
+  ],
+  "runtime_s": 140.7
+}

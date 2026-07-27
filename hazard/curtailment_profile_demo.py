@@ -31,7 +31,7 @@ netted window total Sum_t H_t * c_t and hence the wedge — and because H_t
 declines over the window, a front-loaded profile nets MORE dollars than a
 back-loaded one of equal mean — uniformly across all U.S. legs.
 
-SPEC (fixed ex ante) — three pre-committed profiles, applied as
+SPEC (fixed ex ante) — four pre-committed profiles, applied as
 multiplicative monthly factors on the curtailment SMM series:
   P0 UNIT      factor(t) = 1.0 every month (the parity leg).
   P1 SEASONAL  factor(t) = 1 + 0.25 * sin(2*pi*(month_of_year - 1)/12) —
@@ -40,6 +40,28 @@ multiplicative monthly factors on the curtailment SMM series:
   P2 REGIME-SPLIT  factor(t) = 1.25 for calendar months before 2024-01,
                0.75 from 2024-01 on — an income-elasticity regime-break
                stand-in (2022-23 vs 2024-25), front-loaded by design.
+  P3 SERVICER-MIX (round-18, R18-N optional)  a DETERMINISTIC two-servicer
+               aggregation. Two servicer groups carry fixed portfolio
+               shares s_A = 0.60 ("fast-remit") and s_B = 0.40
+               ("slow-remit"), each with its OWN group-specific monthly
+               factor: f_A(t) = 1.20 before 2024-01, 0.90 from 2024-01 on
+               (a front-loaded servicer), and f_B(t) = 1.00 every month
+               (a flat servicer). The share-weighted AGGREGATE is a single
+               monthly factor a(t) = s_A f_A(t) + s_B f_B(t) = 1.12 before
+               2024-01 and 0.94 from 2024-01 on, applied to the shared
+               series exactly like P0–P2. The POINT of this profile is
+               subsumption, not a new sensitivity: any servicer-
+               heterogeneous curtailment pattern — however many groups,
+               whatever their shares or group time-shapes — that is
+               aggregated across servicers into a single monthly rate
+               BEFORE it nets against the shared holdings path is, by that
+               aggregation, one more monthly profile a(t), hence a special
+               case of the identity below. It therefore moves only the
+               common wedge (a(t) is front-loaded, so it nets more than
+               unit) and leaves the marginal invariant to float headroom,
+               exactly as P1/P2 do. The shares are asserted to sum to one
+               (a servicer partition); the construction is fully
+               deterministic with no draws.
 - Machinery: the committed production caches, no microsim re-run. Each
   profile is scored on BOTH legs: the central Path B cache
   (data/microsim_results.parquet) and the beta1=0 null cache
@@ -151,6 +173,17 @@ REGIME_PRE_FACTOR = 1.25             # P2: months before 2024-01
 REGIME_POST_FACTOR = 0.75            # P2: months from 2024-01 on
 REGIME_BREAK = pd.Period("2024-01", freq="M")
 
+# P3 servicer_mix (round-18): a deterministic two-servicer partition whose
+# group-specific monthly factors aggregate (share-weighted) to ONE monthly
+# rate a(t) = s_A*f_A(t) + s_B*f_B(t) before it nets against the shared path.
+SERVICER_A_SHARE = 0.60             # P3: "fast-remit" servicer group share
+SERVICER_B_SHARE = 0.40             # P3: "slow-remit" servicer group share
+SERVICER_A_PRE = 1.20               # P3: group A factor before 2024-01
+SERVICER_A_POST = 0.90              # P3: group A factor from 2024-01 on
+SERVICER_B_FACTOR = 1.00            # P3: group B factor (flat, every month)
+assert abs(SERVICER_A_SHARE + SERVICER_B_SHARE - 1.0) < 1e-12, (
+    "servicer shares must partition the book (sum to 1)")
+
 PARITY_TOL_B = 0.01                  # $0.01B netting gates (W6 convention)
 SHARE_PARITY_TOL_PP = 0.05           # share gates; residuals = live-FRED
 NETTING_MATCH_TOL_B = 1e-9           # G3 machine-precision gate ($B)
@@ -182,6 +215,23 @@ def _factor_regime(idx: pd.DatetimeIndex) -> np.ndarray:
     return np.where(pre, REGIME_PRE_FACTOR, REGIME_POST_FACTOR).astype(float)
 
 
+def _factor_servicer_mix(idx: pd.DatetimeIndex) -> np.ndarray:
+    """Deterministic two-servicer aggregation → one aggregate monthly rate.
+
+    Group A ("fast-remit", share s_A) is front-loaded, f_A = 1.20 before the
+    2024-01 break and 0.90 after; group B ("slow-remit", share s_B) is flat
+    at 1.00. The share-weighted aggregate a(t) = s_A f_A(t) + s_B f_B(t) is a
+    single monthly factor (1.12 pre-break, 0.94 after) applied to the shared
+    curtailment SMM exactly like the other profiles — so any servicer-
+    heterogeneous pattern that aggregates to a monthly rate is a special case
+    of the identity, moving only the common wedge, not the marginal.
+    """
+    pre = idx.to_period("M") < REGIME_BREAK
+    f_a = np.where(pre, SERVICER_A_PRE, SERVICER_A_POST).astype(float)
+    f_b = np.full(len(idx), SERVICER_B_FACTOR, dtype=float)
+    return SERVICER_A_SHARE * f_a + SERVICER_B_SHARE * f_b
+
+
 PROFILES: dict[str, tuple[str, object]] = {
     "unit": (
         "factor(t) = 1.0 every month (parity leg)",
@@ -196,6 +246,14 @@ PROFILES: dict[str, tuple[str, object]] = {
         "factor(t) = 1.25 for months before 2024-01, 0.75 from 2024-01 on "
         "— income-elasticity regime-break stand-in",
         _factor_regime,
+    ),
+    "servicer_mix": (
+        "deterministic two-servicer aggregation: shares 0.60/0.40 weight "
+        "group factors f_A(t)=1.20 pre-2024-01/0.90 after and f_B(t)=1.00 "
+        "into one monthly rate a(t)=1.12 pre/0.94 after — servicer "
+        "heterogeneity that aggregates to a monthly rate, a special case of "
+        "the identity",
+        _factor_servicer_mix,
     ),
 }
 

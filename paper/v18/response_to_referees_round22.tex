@@ -1,0 +1,312 @@
+\documentclass[11pt]{article}
+
+% ============================================================
+% Response to Reviewer -- Round 22
+% Companion to: revised_paper_v18.tex
+% "Mortgage Lock-In and the Federal Reserve's Quantitative
+%  Tightening Shortfall"
+% Sixteen-item report across three tiers.
+% Section references are to revised_paper_v18.tex; every numeric
+% value is drawn from a committed run artifact or from the code
+% path named inline.
+% ============================================================
+
+\usepackage[margin=1in]{geometry}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{enumitem}
+\usepackage{parskip}
+\usepackage[hidelinks]{hyperref}
+
+\newcommand{\mlabel}[1]{\texttt{#1}}
+\newcommand{\run}[1]{\texttt{#1}}
+
+\title{\vspace{-2em}Response to Reviewer\\[0.3em]
+\large Manuscript: \emph{Mortgage Lock-In and the Federal Reserve's
+Quantitative Tightening Shortfall}\\[0.2em]
+\normalsize Sixteen-item report: Danish counterfactual, fit statistics,
+floor form, and estimator scope}
+\author{}
+\date{26 July 2026}
+
+\begin{document}
+\sloppy
+\maketitle
+\vspace{-2.5em}
+
+Dear Editor and Reviewer,
+
+Thank you for the report. It is the most useful I have had, and I want to be
+straightforward about two things before the point-by-point.
+
+First, several items were written against a draft that a prior revision had
+already changed. I say so not to deflect but because the reader deserves to know
+which of my responses are new work and which are pointers to work already in the
+manuscript; I have labelled every item accordingly, and where an item is already
+met I quote the sentence that meets it so you can judge for yourself rather than
+take my word.
+
+Second, and more important: the items that did land were not marginal. Your
+functional-form point (item 3) turned out to have a second half neither of us
+had seen, your fit-statistic point (item 2) was right about a defect I had been
+reporting for three rounds, and your instinct about the Danish leg (item 1) was
+correct on a channel different from the one you named. Chasing them produced
+five new pre-committed runs and, along the way, four defects in the manuscript
+that no reviewer had raised and my own verification suite could not see. Those
+are itemised in \S5, because a report that surfaces errors it did not itself
+identify has done its job better than a report that only lists its own hits.
+
+Numbers below are quoted from committed artifacts. New runs follow the project's
+spec-before-run convention: a specification commit precedes each result commit,
+and each carries parity gates that replay committed values bit-exactly before
+anything new is reported.
+
+\section{Item 1 --- the Danish counterfactual}
+
+\textbf{Status: the constructive fix was already in the manuscript; one prong
+you raised was live, and it was worse than you argued.}
+
+\subsection{1(a) The floor violation and the U.S.-intercept transplant}
+
+This is implemented, and by exactly the construction you prescribe. The
+production leg (\run{danish\_us\_intercept}) keeps the identified flatness but
+anchors the level at the U.S. hazard evaluated at zero rate gap, with the
+involuntary floor retained: \texttt{competing\_risks.py} passes a zeroed rate gap
+into \texttt{prepay\_hazard}, so the floor is applied on the Danish leg exactly as
+on the U.S.\ leg. It lands at 5.61\% mean Danish CPR --- your own predicted
+``roughly 6\% CPR'' --- and turns the gap positive: $+\$61.2$ billion at the
+in-sample calibration point and $+\$28.2$ billion at the off-window calibration
+the headline marginal uses.
+
+The Danish-level leg survives only as a labelled bracketing case, and your
+diagnosis of it is correct: it prepays at 3.39\%, below the 4\% floor both
+frameworks impose. That inconsistency is now disclosed wherever the
+$-\$99.9$ billion figure appears, including the Introduction and the Conclusion,
+which previously carried the number without the caveat.
+
+\subsection{1(b) ``No Danish mechanism'': the numbers are right, the inference
+is not}
+
+Your arithmetic checks exactly --- I verified it from the two parquets rather
+than from the tables. The rule-only Danish leg and the $\beta_1 = 0$ null agree
+to $0.000107$ percentage points of mean CPR and to $\$0.004$ billion of trapped
+balance.
+
+But that identity is forced, and it is forced by the fix you ask for in 1(a). The
+gap enters the hazard only through $(-\beta_1) \times \text{gap}$; setting the gap
+to zero and setting $\beta_1$ to zero are the same operation on that term. A
+gap-flat hazard at the U.S.\ zero-gap intercept \emph{is} the null leg with the
+floor retained. So the coincidence is not evidence that the mechanism is absent;
+it is what a correct transplant must produce. The manuscript states this
+directly: the two are ``one object measured on two accounting legs.''
+
+\subsection{1(c) The discount-rate table --- you were right, and about a larger
+channel than you named}
+
+You read the exactly-zero deltas as evidence that market-value repurchase is
+absent rather than as immunity to a pricing critique. That reading is correct,
+and pursuing it found two things.
+
+The smaller one is that the diagnostic had executed on the \emph{wrong leg}.
+\texttt{danish\_discount\_bound.py} contains no call to
+\texttt{set\_danish\_moving\_anchor}, so it ran at the module default
+(\texttt{dk\_level}); its artifact records a mean Danish CPR of 3.39\%, the
+bracketing anchor's speed, not the production leg's 5.61\%. The table caption
+nevertheless described it as the production leg and extended the result to the
+production gap. Caption and text now name the leg that ran, and state that the
+production anchor's PV-independence is structural rather than run-verified.
+
+The larger one is the accounting. The Danish leg credits every retired balance at
+\emph{par}: the dynamic-balance loop books roll-off as balance times drain with
+no price term anywhere in it. Netting the roughly \$199 billion scheduled
+component from the leg's \$669.3 billion of Danish roll-off leaves on the order
+of \$470 billion credited at par, against a proxy discount of 32--34\% at the
+representative 3.0\%/6.8\% state. A market-value credit would reduce Danish cash
+receipts by more than the $+\$61.2$ billion gap itself, and in the direction that
+shrinks it. I have not restated the gap under such a credit, because the pipeline
+does not distinguish a cash haircut from a balance adjustment; I record it as the
+largest un-priced channel in the counterfactual and retract the claim that the
+pricing critique attaches to the superseded variant alone.
+
+\subsection{1(d)--1(e) The sweep, and the Berger citation}
+
+The sign-fragility framing you object to is gone: the figure and the text now say
+that the anchor, not the refinance channel, decides the sign. Two further
+corrections came out of re-reading that figure, both reported in \S5.
+
+On your falsifier --- whether Berger et al.\ estimate 3.2\% per year as a
+general-equilibrium prediction for U.S.\ households or as a Danish descriptive
+level --- I checked the source directly. It is the latter: the January 2026 draft
+uses 3.2\% as ``the unconditional average moving rate among Danish FRM
+borrowers,'' a calibration target in its \S4.6. The manuscript's slope-versus-level
+distinction is therefore the correct reading of that paper, and it now carries
+locators so you can check it in one step.
+
+\section{Item 2 --- recovery percentage as the primary fit statistic}
+
+\textbf{Status: implemented, with one correction to the argument.}
+
+You are right that recovery is an affine transform of cumulative error with a
+large additive constant, and that this flatters every estimator. \mlabel{tab:bases}
+now carries a terminal cumulative runoff error column, the note states the
+identity explicitly, and errors are given as shares of the \$652.8 billion of
+runoff actually realized. Your arithmetic reproduces exactly.
+
+One correction. Nothing changes sign under the transform: recovery
+$= 1 + \text{error}/764.7$ is monotone. What flips is the \emph{referent} --- an
+over-prediction of trapped liquidity is an under-prediction of runoff --- and the
+denominator. I have written it that way because the sharper claim is available
+without the stronger one: Path B's in-sample $+\$53.8$ billion is simultaneously
+an 8.2\% under-prediction of realized runoff, and the headline off-window leg,
+which reads as a worse fit at 91.3\%, in fact carries the \emph{smallest} error in
+the table on the standalone scorer, $+\$2.8$ billion or 0.4\%.
+
+Your asymmetry point about WSHOMCB rescaling is a correct reading of the code and
+now underwrites a different result; see item 6.
+
+\section{Item 3 --- the floor's functional form}
+
+\textbf{Status: the level-versus-form test was already in the manuscript; the
+prong you identified as still open was open, and it refuted a claim I was making
+implicitly.}
+
+The additive competing-risks form had been run at the production floor and at the
+three off-window anchors, giving a form-conditional identified range of $+3.9$ to
+$+13.1$ points. Your specific charge --- that the concave-transform check had
+been executed inside the censoring regime it needed to escape --- was correct:
+\run{concave\_marginal} ran under the hard-maximum form only.
+
+Running the joint cell (\run{concave\_additive\_marginal}) leaves the range intact:
+the concave $\times$ additive marginal is $+9.25$ points at the production floor and
+$+9.22$ at the headline anchor, inside the hull at both. But it refutes something
+the manuscript had been asserting without measurement. \mlabel{tab:uncertainty}
+listed the form adjustment and the transform adjustment side by side, which
+presumes they add. They do not: the interaction is $-1.47$ points at the headline
+anchor, past the $\pm 1$-point convention used throughout. The mechanism is the
+censoring at issue --- the concave transform costs $-0.52$ points under the max
+form, which absorbs most of it into the floor, against $-1.99$ under the additive
+form, which never censors. The table now reports the joint cell and the
+interaction rather than implying additivity.
+
+I have also disclosed what the additive form costs in level terms, which the
+manuscript had priced only at the production floor: at the off-window anchors the
+additive central leg recovers 55.9\% of the benchmark against a 44.7\% null, and
+the hull's upper endpoint comes from a cell recovering 61.2\%. The
+form-conditional range is therefore a range over specifications of sharply
+different aggregate fit, and its upper end is not an equally credentialed member.
+That cuts against the additive form rather than for it, and it belongs in the
+open.
+
+\section{Item 4 --- the ABM; item 5 --- Path A; item 16 --- scale}
+
+\textbf{Item 4: partly already met, one prong newly closed.} The abstract already
+reported the fifty-seed mean rather than the seed-42 draw. Your remaining charge
+--- that the cross-design threshold test was a single draw from an estimator with
+material seed dispersion --- was correct, and \run{cross\_design\_seeds} now runs
+fifty seeds across both randomization layers. The verdict survives and
+strengthens: mean 60.2\%, standard deviation 3.3 points, 95\% band 55.1--66.0\%,
+the committed draw at the 48th percentile of its own distribution, and all fifty
+seeds classifying as undercutting. The band is reported wherever the point
+appears.
+
+That sweep also separates the two variants on the manuscript's own admissibility
+test, in the direction that was not convenient for me: the recalibrated variant's
+deep-gap floor is inside the observed 4--5\% band on all fifty seeds, and the
+frozen variant's is outside it on all fifty. Applied consistently, my own test
+disqualifies the leg I had been reporting as corroborating.
+
+\textbf{Item 5: your premise does not hold, and I want to be exact about where.}
+The abstract's 97.9\% is Path~B's in-sample recovery, not Path~A's; the abstract
+contains no Path~A figure. But your underlying concern was sound at one site:
+Section~I carried Path~A's 112.4\% describing it as corroboration, and a
+bias-respecting sign test (\run{patha\_sign\_test}) does not reject
+$\beta_g \leq 0$ under any construction. The corroboration language is retracted
+there and in the interpretation section, and the diagnostic table now labels each
+row's specification --- it had been interleaving spec v4 and spec v3 rows without
+saying so.
+
+\textbf{Item 16: correct, and unmet until now.} The scale check exercised the
+household mechanic in isolation, without the DTI wall, the freeze trait,
+curtailment, multi-vintage weighting or the settlement kernel, and ran 3.9 points
+hot against the production ABM. The claim is now scoped at all five sites to what
+was measured. A production-specification rerun is reported separately; its first
+execution halted at a pre-committed parity tier on upstream data revision, and I
+have recorded the halt rather than relaxing the tolerance.
+
+\section{Defects this report surfaced indirectly}
+
+These were found while chasing the items above. None was raised in the report and
+none was visible to the verification suite, which pins numeric literals and
+therefore cannot see a false statement about a magnitude, an omitted summary
+statistic, or a caption describing the wrong object.
+
+\begin{enumerate}[leftmargin=1.4em]
+\item \textbf{A false claim in the sweep figure's caption.} It asserted that both
+anchors stay ``an order of magnitude below the superseded \$925.5 billion
+extrapolation across the entire sweep.'' The body text five lines earlier gives
+$+\$1{,}038.9$ billion at the ceiling, and both artifacts agree; both anchors
+\emph{exceed} \$925.5 billion there. Corrected, with both ceilings quoted.
+
+\item \textbf{Negative trapped balances in the same sweep.} At refinance
+contributions of 12\% and above the Danish leg's trapped balance goes to
+$-\$14.4$, $-\$158.0$ and $-\$290.0$ billion. That is not an economically
+meaningful quantity, and the upper half of the axis is now marked directional only.
+
+\item \textbf{Selective reporting in the Path A bootstrap.} The manuscript
+reported the median, the interquartile range, the interval and the fraction of
+draws above the benchmark, and omitted the mean: \$598.9 billion, or 78.3\% of
+the benchmark --- below the paper's own mechanical null. Now reported, with the
+reason.
+
+\item \textbf{An ablation that had never been run.} The burnout ablation was
+quoted at four sites with no artifact, script or gate behind it, and its figures
+reproduce the \emph{minimum} over 100 replicates of an unrelated origination-time
+permutation experiment. Executed properly (\run{burnout\_ablation}), the true
+value is $-\$6.58$ billion against the claimed $-\$6.6$ billion: the number was
+right by coincidence. The run also showed the ablation halves at the headline
+calibration, where three interpretive sites had been quoting the in-sample figure.
+\end{enumerate}
+
+\section{Items 6--15, and what I have not done}
+
+Item~6's global validation statement has been moved into Section~I. The
+loan-level bootstrap you ask for existed, but you were right that it was the
+wrong scheme: it resampled within strata and held the 130 strata fixed, so
+between-stratum variance was never drawn. Drawing the strata
+(\run{bootstrap\_pathb\_cluster}) widens the marginal's interval by roughly a
+factor of 37, to $[+4.63, +6.92]$ points. The floor-read layer remains the wider
+of the two, so the headline is unaffected --- but ``the single stratified draw
+contributes essentially no uncertainty'' was a statement about the scheme, not
+the estimator, and it is retracted.
+
+Item~14's third pre-commitment gap was the sharpest thing in the report. The
+admissibility precondition excluding the externally anchored variant does not
+appear in that run's specification commit, which instead states that the variant
+``is evaluated against the SAME pre-registered bands'' and pre-registers the floor
+diagnostic as reported ``whichever direction it moves''; the frozen artifact
+classifies the result as undercutting. The manuscript now states the
+pre-committed classification first and labels the qualification as post hoc, and
+the verification suite reads the artifact's classification so a green suite can no
+longer pass over it.
+
+Items~7, 8, 10, 11, 12(b), 12(c) and 15 were met in the manuscript already, and I
+quote the operative sentences in the point-by-point appendix rather than here.
+Item~13's reduction is correct and is now stated explicitly: the no-trade-off
+claim reduces to the marginal being bounded by the excess of the null hazard over
+the floor, and to zero where the floor binds --- a property of the production form
+that lifts under the additive one.
+
+Two items I have \emph{not} implemented, with reasons. Item~9's abstract remains
+longer than you would like: cutting it further requires deleting a disclosed
+result, and each candidate is a disclosure a prior round added deliberately. It
+now stands at 424 words. And item~12(a)'s Ginnie overlay is promoted into
+Table~1 but not made the headline level, because \$27.8 billion of the raw
+adjustment is a component common to any observed-series overlay; I have labelled
+it an accounting-correction variant instead, and I am glad to go further if you
+think that understates it.
+
+\vspace{1em}
+\noindent Thank you again. The report cost me more runs than any previous one and
+the manuscript is materially more honest for it.
+
+\end{document}

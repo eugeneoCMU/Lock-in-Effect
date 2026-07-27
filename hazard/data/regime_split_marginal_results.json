@@ -1,0 +1,251 @@
+{
+  "run": "regime_split_marginal",
+  "roadmap_item": "R18-G",
+  "gate_id": 50,
+  "status": "OK",
+  "spec": {
+    "break_date": "2023-01-01",
+    "break_justification": "QT window [2022-06,2025-12): pandemic predates the window; the in-window non-stationarity is the 2022-23 spread-repricing era. 2023-01 separates the acute 2022 repricing tail (7 months) from the 2023+ regime (35 months).",
+    "break_idx": 7,
+    "n_window_months": 42,
+    "n_pre_months": 7,
+    "n_post_months": 35,
+    "h0_factors": [
+      0.8,
+      1.0,
+      1.2
+    ],
+    "floor_factors": [
+      0.8,
+      1.2
+    ],
+    "variant_A": "multiplicative level shift on baseline h0(a), post-break",
+    "variant_B": "multiplicative level shift on involuntary floor CPR, post-break",
+    "applied_identically_to_both_legs": true,
+    "floor_mode": "max",
+    "engine": "committed microsim_engine._simulate_regime; US regime; seed RNG_SEED; committed 75k sample; in-process monkey-patch only",
+    "basis": "standalone scorer (matches marginal_decomposition harness); marginal basis-invariant per manuscript Sec V",
+    "netting_basis_context_b": 69.56220187263008
+  },
+  "committed_anchors": {
+    "central_trapped_b": 818.5300844066606,
+    "null_trapped_b": 748.1850239867648,
+    "marginal_b": 70.34506041989584,
+    "marginal_pp": 9.198459770709789
+  },
+  "gates": {
+    "G1_central_parity": {
+      "trapped_b": 818.5300844066606,
+      "committed_b": 818.5300844066606,
+      "diff_b": 0.0,
+      "tol_b": 1e-06,
+      "pass": true
+    },
+    "G2_null_parity": {
+      "trapped_b": 748.1850239867648,
+      "committed_b": 748.1850239867648,
+      "diff_b": 0.0,
+      "tol_b": 1e-06,
+      "pass": true
+    },
+    "G3_marginal_parity": {
+      "marginal_b": 70.34506041989584,
+      "committed_b": 70.34506041989584,
+      "diff_b": 0.0,
+      "marginal_pp": 9.198459770709789,
+      "committed_pp": 9.198459770709789,
+      "diff_pp": 0.0,
+      "pass": true
+    },
+    "G4_permonth_additivity_anchor": {
+      "diff_b": -5.684341886080802e-14,
+      "tol_b": 1e-06,
+      "pass": true
+    },
+    "G4_permonth_additivity_all_legs": {
+      "max_abs_diff_b": 1.7053025658242404e-13,
+      "tol_b": 1e-06,
+      "pass": true
+    }
+  },
+  "envelope": {
+    "committed_marginal_pp": 9.198459770709789,
+    "E1_near_cancellation_pp": [
+      8.198459770709789,
+      10.198459770709789
+    ],
+    "E2_cyclical_floor_band_pp": [
+      7.1,
+      9.4
+    ],
+    "E3_calibration_box_pp": [
+      2.1,
+      13.2
+    ],
+    "linear_noncancellation_reference_pp": 1.8396919541419579,
+    "justification": "E1 (+/-1.0pp) is below the cyclical-floor variant's own -2.1pp downside and below the +/-1.84pp a linear response to a +/-20% baseline shift would give; E2 is the accepted cyclical-floor span; E3 the outer calibration box."
+  },
+  "h0_sweep": [
+    {
+      "variant": "h0",
+      "post_h0_factor": 0.8,
+      "post_floor_factor": 1.0,
+      "central_trapped_b": 853.1303764196794,
+      "central_share_pct": 111.55702191205157,
+      "null_trapped_b": 815.1561628523993,
+      "null_share_pct": 106.59143834814617,
+      "marginal_b": 37.97421356728,
+      "marginal_pp": 4.965583563905398,
+      "split": {
+        "n_pre_months": 7,
+        "n_post_months": 35,
+        "pre_marginal_b": 5.3306955833511225,
+        "post_marginal_b": 32.64351798392883,
+        "pre_marginal_pp": 0.6970523385816463,
+        "post_marginal_pp": 4.268531225323741,
+        "pre_central_trapped_b": 85.56764337948299,
+        "post_central_trapped_b": 767.5627330401963,
+        "pre_null_trapped_b": 80.23694779613187,
+        "post_null_trapped_b": 734.9192150562674,
+        "emp_trapped_b": 764.7482532227002
+      },
+      "g4_additivity_diff_b": -4.973799150320701e-14,
+      "g4_pass": true,
+      "runtime_s": 28.0
+    },
+    {
+      "variant": "anchor",
+      "post_h0_factor": 1.0,
+      "post_floor_factor": 1.0,
+      "central_trapped_b": 818.5300844066606,
+      "central_share_pct": 107.0326190295068,
+      "null_trapped_b": 748.1850239867648,
+      "null_share_pct": 97.83415925879702,
+      "marginal_b": 70.34506041989584,
+      "marginal_pp": 9.198459770709789,
+      "split": {
+        "n_pre_months": 7,
+        "n_post_months": 35,
+        "pre_marginal_b": 5.3306955833511225,
+        "post_marginal_b": 65.01436483654467,
+        "pre_marginal_pp": 0.6970523385816463,
+        "post_marginal_pp": 8.501407432128127,
+        "pre_central_trapped_b": 85.56764337948299,
+        "post_central_trapped_b": 732.9624410271776,
+        "pre_null_trapped_b": 80.23694779613187,
+        "post_null_trapped_b": 667.948076190633,
+        "emp_trapped_b": 764.7482532227002
+      },
+      "g4_additivity_diff_b": -5.684341886080802e-14,
+      "g4_pass": true,
+      "runtime_s": 27.5
+    },
+    {
+      "variant": "h0",
+      "post_h0_factor": 1.2,
+      "post_floor_factor": 1.0,
+      "central_trapped_b": 767.5147752746379,
+      "central_share_pct": 100.36175591644432,
+      "null_trapped_b": 674.7989035411849,
+      "null_share_pct": 88.23804444110036,
+      "marginal_b": 92.71587173345301,
+      "marginal_pp": 12.123711475343967,
+      "split": {
+        "n_pre_months": 7,
+        "n_post_months": 35,
+        "pre_marginal_b": 5.3306955833511225,
+        "post_marginal_b": 87.38517615010171,
+        "pre_marginal_pp": 0.6970523385816463,
+        "post_marginal_pp": 11.426659136762293,
+        "pre_central_trapped_b": 85.56764337948299,
+        "post_central_trapped_b": 681.947131895155,
+        "pre_null_trapped_b": 80.23694779613187,
+        "post_null_trapped_b": 594.5619557450532,
+        "emp_trapped_b": 764.7482532227002
+      },
+      "g4_additivity_diff_b": -1.7053025658242404e-13,
+      "g4_pass": true,
+      "runtime_s": 25.0
+    }
+  ],
+  "floor_sweep": [
+    {
+      "variant": "floor",
+      "post_h0_factor": 1.0,
+      "post_floor_factor": 0.8,
+      "central_trapped_b": 830.9959168777908,
+      "central_share_pct": 108.6626760343575,
+      "null_trapped_b": 751.3749243045412,
+      "null_share_pct": 98.25127695790047,
+      "marginal_b": 79.62099257324962,
+      "marginal_pp": 10.41139907645703,
+      "split": {
+        "n_pre_months": 7,
+        "n_post_months": 35,
+        "pre_marginal_b": 5.3306955833511225,
+        "post_marginal_b": 74.29029698989838,
+        "pre_marginal_pp": 0.6970523385816463,
+        "post_marginal_pp": 9.714346737875386,
+        "pre_central_trapped_b": 85.56764337948299,
+        "post_central_trapped_b": 745.4282734983079,
+        "pre_null_trapped_b": 80.23694779613187,
+        "post_null_trapped_b": 671.1379765084095,
+        "emp_trapped_b": 764.7482532227002
+      },
+      "g4_additivity_diff_b": -1.1368683772161603e-13,
+      "g4_pass": true,
+      "runtime_s": 22.0
+    },
+    {
+      "variant": "floor",
+      "post_h0_factor": 1.0,
+      "post_floor_factor": 1.2,
+      "central_trapped_b": 788.8335444284984,
+      "central_share_pct": 103.14944049944556,
+      "null_trapped_b": 738.5687480921907,
+      "null_share_pct": 96.57671592969487,
+      "marginal_b": 50.264796336307654,
+      "marginal_pp": 6.57272456975069,
+      "split": {
+        "n_pre_months": 7,
+        "n_post_months": 35,
+        "pre_marginal_b": 5.3306955833511225,
+        "post_marginal_b": 44.93410075295648,
+        "pre_marginal_pp": 0.6970523385816463,
+        "post_marginal_pp": 5.875672231169039,
+        "pre_central_trapped_b": 85.56764337948299,
+        "post_central_trapped_b": 703.2659010490155,
+        "pre_null_trapped_b": 80.23694779613187,
+        "post_null_trapped_b": 658.3318002960589,
+        "emp_trapped_b": 764.7482532227002
+      },
+      "g4_additivity_diff_b": -4.973799150320701e-14,
+      "g4_pass": true,
+      "runtime_s": 22.4
+    }
+  ],
+  "results": {
+    "h0_marginal_pps": [
+      4.965583563905398,
+      9.198459770709789,
+      12.123711475343967
+    ],
+    "floor_marginal_pps": [
+      10.41139907645703,
+      6.57272456975069
+    ],
+    "h0_span_pp": [
+      4.965583563905398,
+      12.123711475343967
+    ],
+    "joint_span_pp": [
+      4.965583563905398,
+      12.123711475343967
+    ],
+    "max_excursion_h0_pp": 4.2328762068043915,
+    "max_excursion_joint_pp": 4.2328762068043915,
+    "verdict_h0": "material_sensitivity",
+    "verdict_joint": "material_sensitivity"
+  },
+  "runtime_s": 126.3
+}

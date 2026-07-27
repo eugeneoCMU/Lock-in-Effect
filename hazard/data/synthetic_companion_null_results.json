@@ -1,0 +1,52 @@
+{
+  "mode": "synthetic_companion_null",
+  "null_for": "synthetic_companion.py / data/synthetic_companion_results.json two_by_two.hazard_synthetic_pathB (revised_paper_v17.tex sec:robustness-synthesis)",
+  "spec": "same baseline synthetic population, both legs through one call site; central p_q_shock_pct=6.5 vs null p_q_shock_pct=0.0 (beta1=0 exactly, asserted); nothing else differs",
+  "engine": "microsim_engine.run_qt_microsim, US regime, synthetic baseline population; standalone scorer extension_risk.score_extension_risk",
+  "parity_gate": {
+    "rule": "exact float equality against data/synthetic_companion_results.json two_by_two.hazard_synthetic_pathB",
+    "central_trapped_b": 810.3754477878556,
+    "committed_trapped_b": 810.3754477878556,
+    "abs_diff_trapped_b": 0.0,
+    "central_share_pct": 105.96630255419079,
+    "committed_share_pct": 105.96630255419079,
+    "abs_diff_share_pct": 0.0,
+    "bit_exact": true,
+    "pass": true
+  },
+  "central": {
+    "p_q_shock_pct": 6.5,
+    "beta1": -0.06857052676484808,
+    "trapped_b": 810.3754477878556,
+    "share_pct": 105.96630255419079,
+    "cpr_r_lag0": -0.063022292971199
+  },
+  "null_beta1_0": {
+    "p_q_shock_pct": 0.0,
+    "beta1": 0.0,
+    "trapped_b": 731.0864968037362,
+    "share_pct": 95.59832189519739,
+    "cpr_r_lag0": 0.3574268707709409
+  },
+  "differential": {
+    "marginal_pp": 10.367980658993403,
+    "marginal_b": 79.28895098411942,
+    "null_share_of_central_pct": 90.2157757616472
+  },
+  "real_book_reference": {
+    "note": "the paper's own precedent for demoting a recovery level: on the real Freddie book the central leg and the beta1=0 null differ by the gap below, already treated as too small to license a level-based reading (sec:identification). BOTH legs are the standalone scorer's shares from floor_sweep_results.json, i.e. ONE basis; an earlier version of this block differenced a standalone central against a shared null and reported a spurious 18.3pp.",
+    "basis": "standalone scorer (extension_risk.score_extension_risk), both legs",
+    "source": "data/floor_sweep_results.json rows[floor=4.0]",
+    "calibration": "in-sample calibration point, 4.0% in-window involuntary floor",
+    "central_share_pct": 107.0326190295068,
+    "null_share_pct": 97.83415925879702,
+    "differential_pp": 9.198459770709789,
+    "off_window_floor_pct": 4.991,
+    "off_window_differential_pp": 5.571558182909726,
+    "off_window_source": "data/oos_identification_results.json instrument1_marginal_table[4.991].band['6.5'].marginal_pp",
+    "superseded_cross_basis_differential_pp": 18.3
+  },
+  "material_differential_threshold_pp": 25.0,
+  "verdict": "level_reading_unsupported",
+  "runtime_s": 22.9
+}

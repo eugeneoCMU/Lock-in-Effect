@@ -1,0 +1,370 @@
+{
+ "mode": "burnout_ablation",
+ "spec": "beta_burnout 0.0 vs production -0.5 (in-place LITERATURE_COEFS override; monthly_step never forwards prepay_hazard's coefs argument), central p_q 6.5 + beta_1=0 null at floors {4.0 production, 4.991 off-window headline}; US regime, seed 42, committed 75k sample, hard-max floor form, one shared macro frame, standalone raw-basis scoring with the committed flat shared-basis offset emitted alongside; bit-exact parity gates G0a-G0g/G1-G8; ex-ante partition T3->T1->T2 on the signed standalone share delta at the production floor, plus R1/R2/P1 rounding-and-clause checks and the +/-1.0pp M1 marginal materiality rule",
+ "provenance_audit": {
+  "manuscript_sites_tex_v18": [
+   324,
+   584,
+   588,
+   899
+  ],
+  "claimed_delta_b": -6.6,
+  "claimed_delta_pp": -0.9,
+  "claimed_level_pct_standalone": 106.2,
+  "claimed_peak_lag": -3,
+  "misattributed_source": "permutation_test_ablate_orig_summary.json null.trapped_b.min / null.share_pct.min \u2014 the MINIMUM over 100 replicates of the origination-time permutation experiment, not a beta_B = 0 run",
+  "perm_min_trapped_b": 811.911646619444,
+  "perm_min_share_pct": 106.16717896353396,
+  "perm_mean_trapped_b": 812.8957323430761,
+  "perm_mean_share_pct": 106.29585996665953,
+  "perm_min_implied_delta_b": -6.618437787216635,
+  "perm_min_implied_delta_pp": -0.8654400659728481,
+  "prior_artifact": null,
+  "prior_gate": null,
+  "prior_technical_record": null
+ },
+ "legs": {
+  "production_central_4": {
+   "tag": "prod_central_floor4",
+   "beta_burnout": -0.5,
+   "floor_annual_cpr_pct": 4.0,
+   "p_q_shock_pct": 6.5,
+   "beta1": -0.06857052676484808,
+   "trapped_b": 818.5300844066606,
+   "share_pct": 107.0326190295068,
+   "empirical_trapped_b": 764.7482532227002,
+   "r_lag0": 0.19000395255236566,
+   "peak_lag": -3,
+   "mean_us_cpr_pct": 4.763203719157251,
+   "floor_bind_share": 0.36269282595934704,
+   "floor_bind_loan_months": 1683124
+  },
+  "production_null_4": {
+   "tag": "prod_null_floor4",
+   "beta_burnout": -0.5,
+   "floor_annual_cpr_pct": 4.0,
+   "p_q_shock_pct": 0.0,
+   "beta1": 0.0,
+   "trapped_b": 748.1850239867648,
+   "share_pct": 97.83415925879702,
+   "empirical_trapped_b": 764.7482532227002,
+   "r_lag0": 0.3669902953388254,
+   "peak_lag": -3,
+   "mean_us_cpr_pct": 5.613584778161411,
+   "floor_bind_share": 0.14340654639824515,
+   "floor_bind_loan_months": 1683124
+  },
+  "burnout_off_central_4": {
+   "tag": "burnoutoff_central_floor4",
+   "beta_burnout": 0.0,
+   "floor_annual_cpr_pct": 4.0,
+   "p_q_shock_pct": 6.5,
+   "beta1": -0.06857052676484808,
+   "trapped_b": 811.9476875008777,
+   "share_pct": 106.17189174074943,
+   "empirical_trapped_b": 764.7482532227002,
+   "r_lag0": 0.24065124178517666,
+   "peak_lag": -3,
+   "mean_us_cpr_pct": 4.846080402191977,
+   "floor_bind_share": 0.3292900582488278,
+   "floor_bind_loan_months": 1683124
+  },
+  "burnout_off_null_4": {
+   "tag": "burnoutoff_null_floor4",
+   "beta_burnout": 0.0,
+   "floor_annual_cpr_pct": 4.0,
+   "p_q_shock_pct": 0.0,
+   "beta1": 0.0,
+   "trapped_b": 735.9187602894997,
+   "share_pct": 96.23019826306093,
+   "empirical_trapped_b": 764.7482532227002,
+   "r_lag0": 0.3676472254675343,
+   "peak_lag": -3,
+   "mean_us_cpr_pct": 5.767319467987943,
+   "floor_bind_share": 0.13198552215998346,
+   "floor_bind_loan_months": 1683124
+  },
+  "production_central_4991": {
+   "tag": "prod_central_floor4991",
+   "beta_burnout": -0.5,
+   "floor_annual_cpr_pct": 4.9910000000000005,
+   "p_q_shock_pct": 6.5,
+   "beta1": -0.06857052676484808,
+   "trapped_b": 767.5264524465003,
+   "share_pct": 100.36328284662208,
+   "empirical_trapped_b": 764.7482532227002,
+   "r_lag0": -0.13792245738381698,
+   "peak_lag": -3,
+   "mean_us_cpr_pct": 5.3591856812637735,
+   "floor_bind_share": 0.6881875607501289,
+   "floor_bind_loan_months": 1683124
+  },
+  "production_null_4991": {
+   "tag": "prod_null_floor4991",
+   "beta_burnout": -0.5,
+   "floor_annual_cpr_pct": 4.9910000000000005,
+   "p_q_shock_pct": 0.0,
+   "beta1": 0.0,
+   "trapped_b": 724.9180585654117,
+   "share_pct": 94.79172466371236,
+   "empirical_trapped_b": 764.7482532227002,
+   "r_lag0": 0.35389036550042563,
+   "peak_lag": -3,
+   "mean_us_cpr_pct": 5.873901098860486,
+   "floor_bind_share": 0.35785836337667337,
+   "floor_bind_loan_months": 1683124
+  },
+  "burnout_off_central_4991": {
+   "tag": "burnoutoff_central_floor4991",
+   "beta_burnout": 0.0,
+   "floor_annual_cpr_pct": 4.9910000000000005,
+   "p_q_shock_pct": 6.5,
+   "beta1": -0.06857052676484808,
+   "trapped_b": 764.0491230084167,
+   "share_pct": 99.90858034505638,
+   "empirical_trapped_b": 764.7482532227002,
+   "r_lag0": 0.07932479885082662,
+   "peak_lag": -3,
+   "mean_us_cpr_pct": 5.402950750827571,
+   "floor_bind_share": 0.653370161675551,
+   "floor_bind_loan_months": 1683124
+  },
+  "burnout_off_null_4991": {
+   "tag": "burnoutoff_null_floor4991",
+   "beta_burnout": 0.0,
+   "floor_annual_cpr_pct": 4.9910000000000005,
+   "p_q_shock_pct": 0.0,
+   "beta1": 0.0,
+   "trapped_b": 714.2312713548689,
+   "share_pct": 93.3942991494326,
+   "empirical_trapped_b": 764.7482532227002,
+   "r_lag0": 0.3547205291602819,
+   "peak_lag": -3,
+   "mean_us_cpr_pct": 6.0080188389446985,
+   "floor_bind_share": 0.3145216870533603,
+   "floor_bind_loan_months": 1683124
+  }
+ },
+ "parity_gates": {
+  "G0f_offset_pp_internal": {
+   "got": 9.096091632702699,
+   "want": 9.096091632702699,
+   "tol": 1e-09,
+   "pass": true
+  },
+  "G0g_shared_central_from_standalone": {
+   "got": 97.93652739680411,
+   "want": 97.9365273968041,
+   "tol": 1e-09,
+   "pass": true
+  },
+  "G0e_perm_min_trapped_b": {
+   "got": 811.911646619444,
+   "want": 811.911646619444,
+   "tol": 1e-09,
+   "pass": true
+  },
+  "G0e_perm_min_share_pct": {
+   "got": 106.16717896353396,
+   "want": 106.16717896353396,
+   "tol": 1e-09,
+   "pass": true
+  },
+  "G0e_perm_min_reproduces_claimed_b": {
+   "got": 6.6,
+   "want": 6.6,
+   "tol": 1e-09,
+   "pass": true
+  },
+  "G0e_perm_min_reproduces_claimed_pp": {
+   "got": 0.9,
+   "want": 0.9,
+   "tol": 1e-09,
+   "pass": true
+  },
+  "G0e_perm_min_reproduces_claimed_level": {
+   "got": 106.2,
+   "want": 106.2,
+   "tol": 1e-09,
+   "pass": true
+  },
+  "G0d_probe_floor_non_binding": {
+   "h_prod": 0.006192533731036605,
+   "h_off": 0.010209762081888077,
+   "h_floor": 0.003396053198917559,
+   "pass": true
+  },
+  "G0d_beta_burnout_response": {
+   "got": 1.6487212707001282,
+   "want": 1.6487212707001282,
+   "tol": 1e-12,
+   "pass": true
+  },
+  "G0d2_no_leak_at_zero_burnout": {
+   "got": 0.0,
+   "want": 0.0,
+   "tol": 1e-12,
+   "pass": true
+  },
+  "G0a_benchmark_frame_b": {
+   "got": 764.7482532227002,
+   "want": 764.7482532227002,
+   "tol": 1e-09,
+   "pass": true
+  },
+  "G0b_committed_central_cache_b": {
+   "got": 818.5300844066606,
+   "want": 818.5300844066606,
+   "tol": 1e-09,
+   "pass": true
+  },
+  "G0c_committed_null_cache_b": {
+   "got": 748.1850239867648,
+   "want": 748.1850239867648,
+   "tol": 1e-09,
+   "pass": true
+  },
+  "G1_central_b_at4": {
+   "got": 818.5300844066606,
+   "want": 818.5300844066606,
+   "tol": 1e-09,
+   "pass": true
+  },
+  "G2_null_b_at4": {
+   "got": 748.1850239867648,
+   "want": 748.1850239867648,
+   "tol": 1e-09,
+   "pass": true
+  },
+  "G3_marginal_b_at4": {
+   "got": 70.34506041989584,
+   "want": 70.34506041989584,
+   "tol": 1e-09,
+   "pass": true
+  },
+  "G3_marginal_pp_at4": {
+   "got": 9.198459770709789,
+   "want": 9.198459770709789,
+   "tol": 1e-09,
+   "pass": true
+  },
+  "G4_central_share_at4": {
+   "got": 107.0326190295068,
+   "want": 107.0326190295068,
+   "tol": 1e-09,
+   "pass": true
+  },
+  "G4_null_share_at4": {
+   "got": 97.83415925879702,
+   "want": 97.83415925879702,
+   "tol": 1e-09,
+   "pass": true
+  },
+  "G5_central_peak_lag_at4": {
+   "got": -3.0,
+   "want": -3.0,
+   "tol": 1e-09,
+   "pass": true
+  },
+  "G7_bind_share_at4": {
+   "got": 0.36269282595934704,
+   "want": 0.36269282595934704,
+   "tol": 1e-09,
+   "pass": true
+  },
+  "G7_bind_n_at4": {
+   "got": 1683124.0,
+   "want": 1683124.0,
+   "tol": 1e-09,
+   "pass": true
+  },
+  "G6_central_b_at4991": {
+   "got": 767.5264524465003,
+   "want": 767.5264524465003,
+   "tol": 1e-09,
+   "pass": true
+  },
+  "G6_null_b_at4991": {
+   "got": 724.9180585654117,
+   "want": 724.9180585654117,
+   "tol": 1e-09,
+   "pass": true
+  }
+ },
+ "parity_gates_all_pass": true,
+ "parity_tolerance": 1e-09,
+ "house_tolerance_b_for_comparison": 0.01,
+ "basis_map": {
+  "curtailment_netted_b": 69.56220187263008,
+  "cap_benchmark_b": 764.7482532227002,
+  "offset_pp": 9.096091632702699,
+  "note": "shared = standalone - offset_pp; pp DELTAS are basis-invariant (constant dollar netting over a constant denominator), the 106.2% LEVEL is standalone-only"
+ },
+ "ablation_at_production_floor": {
+  "floor_annual_cpr_pct": 4.0,
+  "production_trapped_b": 818.5300844066606,
+  "burnout_off_trapped_b": 811.9476875008777,
+  "delta_b": -6.582396905782957,
+  "production_share_pct_standalone": 107.0326190295068,
+  "burnout_off_share_pct_standalone": 106.17189174074943,
+  "delta_pp": -0.8607272887573743,
+  "production_share_pct_shared": 97.93652739680411,
+  "burnout_off_share_pct_shared": 97.07580010804674,
+  "production_peak_lag": -3,
+  "burnout_off_peak_lag": -3,
+  "production_r_lag0": 0.19000395255236566,
+  "burnout_off_r_lag0": 0.24065124178517666,
+  "production_floor_bind_share": 0.36269282595934704,
+  "burnout_off_floor_bind_share": 0.3292900582488278,
+  "production_marginal_b": 70.34506041989584,
+  "production_marginal_pp": 9.198459770709789,
+  "burnout_off_marginal_b": 76.028927211378,
+  "burnout_off_marginal_pp": 9.941693477688503,
+  "marginal_delta_pp": 0.7432337069787138,
+  "marginal_delta_b": 5.68386679148216
+ },
+ "ablation_at_offwindow_floor": {
+  "floor_annual_cpr_pct": 4.9910000000000005,
+  "production_trapped_b": 767.5264524465003,
+  "burnout_off_trapped_b": 764.0491230084167,
+  "delta_b": -3.4773294380836433,
+  "production_share_pct_standalone": 100.36328284662208,
+  "burnout_off_share_pct_standalone": 99.90858034505638,
+  "delta_pp": -0.4547025015657056,
+  "production_share_pct_shared": 91.26719121391939,
+  "burnout_off_share_pct_shared": 90.81248871235368,
+  "production_peak_lag": -3,
+  "burnout_off_peak_lag": -3,
+  "production_r_lag0": -0.13792245738381698,
+  "burnout_off_r_lag0": 0.07932479885082662,
+  "production_floor_bind_share": 0.6881875607501289,
+  "burnout_off_floor_bind_share": 0.653370161675551,
+  "production_marginal_b": 42.60839388108866,
+  "production_marginal_pp": 5.571558182909726,
+  "burnout_off_marginal_b": 49.81785165354779,
+  "burnout_off_marginal_pp": 6.514281195623781,
+  "marginal_delta_pp": 0.9427230127140547,
+  "marginal_delta_b": 7.209457772459132
+ },
+ "offwindow_committed_marginal_pp": 5.571558182909726,
+ "claim_checks": {
+  "d_b": -6.582396905782957,
+  "d_pp": -0.8607272887573743,
+  "t1_window_pp": [
+   -1.1,
+   -0.7
+  ],
+  "R1_level_ok": true,
+  "R1_level_got_pct": 106.17189174074943,
+  "R2_dollar_ok": true,
+  "P1_peak_lag_ok": true,
+  "P1_peak_lag_got": -3
+ },
+ "verdict_band": "T1",
+ "t1_manuscript_literal_stands": true,
+ "t3_channel_degenerate": false,
+ "m1_burnout_material_for_marginal": false,
+ "interpretive_verdict": "T1: the recomputed beta_B = 0 ablation lands within +/-0.2pp of the manuscript's claimed -0.9pp \u2014 the literal magnitude stands, but it now rests on a committed artifact instead of on the origination-permutation minimum it was read off. Keep the wording at all four sites, add the burnout_ablation run tag at the V.B site, and restate any single digit that R1/R2/P1 contradict.",
+ "runtime_s": 45.824650916,
+ "runtime_includes_benchmark_fetch": true
+}
