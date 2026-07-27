@@ -391,6 +391,58 @@ ASSEMBLY_SPANS = {
 }
 
 
+# --- Round-24b (gate #99): THE ABSTRACT LEADS WITH THE RANGE ---------------
+# Section V.E's seventh qualification argues that the identified content is the
+# range and that $+5.6$ is an upper-middle member of it. Until this round the
+# abstract, the introduction, Table 1 and the conclusion all led with the point
+# and carried the range afterwards, so the front of the paper argued against its
+# own Section V.E. Fixing the four sites is worth nothing if the next concision
+# pass quietly puts the point back in front, which is what this gate is for.
+#
+# CANONICAL-ONLY, and that is a deliberate exception to gate C4's rule that
+# every abstract check runs against every manuscript on disk. The archived
+# long-abstract variant makes the same commitment in its own words ("a bounded
+# range for the elasticity's contribution, not a pinned magnitude"), and no span
+# expressing THIS abstract's version occurs verbatim in it. The alternatives
+# were to rewrite an archive to suit a new pin, or to leave the posture
+# unpinned; a canonical-scoped dict is better than either, and putting these in
+# ABSTRACT_HEDGES would simply have failed the variant.
+#
+# The ORDERING assert is the load-bearing half. Every span below survives an
+# abstract that states the point first and the range second -- which is exactly
+# the arrangement this round removed -- so a span check alone would not have
+# caught the defect it exists to prevent.
+ABSTRACT_POSTURE = {
+    "range_not_number": "What lock-in itself adds is a range rather than a number",
+    "interval": "The design pins it between $+3.0$ and $+8.0$ points",
+    "point_named_inside": "Inside that range, $+5.6$ points, or \\$42.6 billion, is the "
+                          "value at the calibration I headline",
+    # the frame is not decoration: WITHOUT it the claim is false, because the
+    # additive form (+11.2) and the Fonseca anchor (+11.5) move the marginal UP.
+    # Only floor and accounting-basis corrections run one way.
+    "corrections_framed": "every correction I can measure to the involuntary-turnover floor "
+                          "or to the accounting basis moves it down within the range rather "
+                          "than up",
+}
+
+
+def abstract_posture_check(tex: str) -> tuple[bool, dict]:
+    """Gate #99's rule, as a function so the battery exercises the shipped rule."""
+    tex_nc = re.sub(r"(?<!\\)%.*", "", tex)
+    _i = tex_nc.find(ABSTRACT_BOUNDS[0])
+    _j = tex_nc.find(ABSTRACT_BOUNDS[1], _i + 1)
+    found = _i != -1 and _j != -1
+    abstract = tex_nc[_i + len(ABSTRACT_BOUNDS[0]):_j] if found else ""
+    missing = sorted(k for k, v in ABSTRACT_POSTURE.items() if v not in abstract)
+    # the range must be stated BEFORE the point it contains
+    i_range = abstract.find("$+3.0$ and $+8.0$")
+    i_point = abstract.find("$+5.6$ points")
+    ordered = i_range != -1 and i_point != -1 and i_range < i_point
+    return (found and not missing and ordered,
+            {"found": found, "missing": missing, "ordered": ordered,
+             "i_range": i_range, "i_point": i_point})
+
+
 def assembly_check(tex: str) -> tuple[bool, dict]:
     """Gate #98's rule, as a function so the perturbation battery exercises THE
     SHIPPED RULE rather than a copy of it (gate #68's header explains why that
@@ -4280,6 +4332,14 @@ def main() -> int:
           f"paragraphs={_asm['paragraphs']} (want 1), "
           f"{len(ASSEMBLY_SPANS) - len(_asm['missing'])}/{len(ASSEMBLY_SPANS)} "
           f"spans present, missing={_asm['missing'] or 'none'}")
+
+    post_ok, _post = abstract_posture_check(tex)
+    failures += 0 if post_ok else 1
+    print(f"[{'PASS' if post_ok else 'FAIL'}] abstract leads with the range (gate #99): "
+          f"{len(ABSTRACT_POSTURE) - len(_post['missing'])}/{len(ABSTRACT_POSTURE)} spans "
+          f"present, range-before-point={_post['ordered']} "
+          f"(idx {_post['i_range']} vs {_post['i_point']}), "
+          f"missing={_post['missing'] or 'none'}")
 
     print(f"\n{'ALL GATES PASS' if failures == 0 else f'{failures} GATE(S) FAILED'}")
     return 0 if failures == 0 else 1
