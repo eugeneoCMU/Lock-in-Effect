@@ -307,6 +307,75 @@ RELOCATED_TO_BODY = {
 }
 
 
+# --- Round-24 (gate #98): THE ASSEMBLED CORRECTIONS ------------------------
+# Every downward correction to the headline marginal was disclosed in the
+# section that produced it and nowhere together, so a referee performed the
+# assembly and the paper did not. Section V.E now performs it.
+#
+# PARAGRAPH-SCOPED, for the same reason gate #68 is abstract-scoped: each of
+# these literals already occurs elsewhere in the file, so a whole-file count is
+# satisfied by the very scattering this paragraph exists to end. The manuscript
+# is one paragraph per line, so the paragraph IS a line and the gate binds the
+# line -- which also kills the relocation attack, since a paragraph split moves
+# half the spans off it.
+#
+# Four things are pinned, and each is a way the paragraph could rot:
+#   (a) the LADDER -- drop a rung and the assembly stops being an assembly;
+#   (b) the POSTURE -- "upper-middle member ... rather than its center" is the
+#       commitment the round was asked for, and a concision pass that deletes
+#       it leaves the ladder with no conclusion;
+#   (c) the CENSORING FRAMING -- "truncated at the floor rather than erased"
+#       plus the unweighted-count disclaimer. HANDOFF_round22 §8.2 records that
+#       the obvious reading ("the estimate rests on a third of the data") is
+#       false on two independent counts, and it is the reading a reader
+#       supplies unprompted. Losing the disclaimer re-opens it;
+#   (d) the COUNTERWEIGHT -- the additive form, the Fonseca anchor, and the
+#       three declined readings all run the other way. Without them the
+#       paragraph is a one-sided case for a smaller number, which is not what
+#       the evidence says.
+ASSEMBLY_OPENER = "A seventh qualification"
+ASSEMBLY_SPANS = {
+    # (a) the ladder, in order
+    "ladder_insample": "in-sample calibration returns $+9.2$ points",
+    "ladder_headline": "outside the window returns the headline $+5.6$",
+    "ladder_overlay": "overlay at that same floor returns $+4.4$",
+    "ladder_agestd": "floor read of 5.51\\% implies near $+3.8$",
+    "ladder_fannie": "5.52\\%, brackets the marginal below the $+4.3$ edge",
+    "ladder_composed": "would put the marginal near $+3.0$",
+    # (b) the posture, bound to the interval it is a posture about
+    "posture_upper_middle": "I therefore read $+5.6$ as an upper-middle member of that "
+                            "interval rather than its center",
+    "posture_binding_layer": "the binding layer is the floor reads' own sampling error, "
+                             "$+3.0$ to $+8.0$ points",
+    "posture_lower_half": "every correction listed above falls in its lower half",
+    # (c) the censoring share (HANDOFF_round24 §4) and the framing that
+    #     HANDOFF_round22 §8.2 exists to protect. The share and its framing are
+    #     pinned as separate spans on purpose: the share without the framing is
+    #     the false reading, and the framing without the share is a disclaimer
+    #     about nothing.
+    "censor_share": "pinned to the floor in 68.8\\% of evaluated loan-months, against 36.3\\%",
+    "censor_truncated": "truncated at the floor rather than erased",
+    "censor_unweighted": "unweighted loan-month counts rather than balance-weighted shares",
+    # (d) the counterweight, without which this is a one-sided case
+    "counter_additive": "the additive form returns $+11.2$ points at the same off-window "
+                        "anchors",
+    "counter_fonseca": "$+11.5$ points at the production floor",
+    "counter_three_readings": "point to a larger lock-in channel, not a smaller one",
+}
+
+
+def assembly_check(tex: str) -> tuple[bool, dict]:
+    """Gate #98's rule, as a function so the perturbation battery exercises THE
+    SHIPPED RULE rather than a copy of it (gate #68's header explains why that
+    distinction is not pedantry)."""
+    tex_nc = re.sub(r"(?<!\\)%.*", "", tex)
+    paras = [ln for ln in tex_nc.split("\n") if ln.startswith(ASSEMBLY_OPENER)]
+    line = paras[0] if len(paras) == 1 else ""
+    missing = sorted(k for k, v in ASSEMBLY_SPANS.items() if v not in line)
+    return (len(paras) == 1 and not missing,
+            {"paragraphs": len(paras), "missing": missing})
+
+
 def abstract_hedge_check(tex: str) -> tuple[bool, dict]:
     """Gate #68's rule, as a function so the perturbation battery can exercise
     THE SHIPPED RULE instead of a copy of it.
@@ -4154,6 +4223,36 @@ def main() -> int:
           f"{dnd_frozen['0.36']:.1f}/{dnd_frozen['0.43']:.1f}/{dnd_frozen['0.5']:.1f}B "
           f"monotone, recal channel @50% {dnd_chan['0.5']:+.2f}B), tex literals="
           f"{'ok' if dnd_tex_ok else 'MISSING'}")
+
+    # ROUND-24 (gate #98): THE ASSEMBLED CORRECTIONS. Every downward correction
+    # to the headline marginal was disclosed in the section that produced it and
+    # nowhere together, so a referee performed the assembly and the paper did
+    # not. Section V.E now performs it. This gate is PARAGRAPH-SCOPED for the
+    # same reason gate #68 is abstract-scoped: each of these literals already
+    # occurs elsewhere in the file, so a whole-file count is satisfied by the
+    # very scattering this paragraph exists to end. The file is one paragraph
+    # per line, so the paragraph is a line, and the gate binds the line.
+    #
+    # Four things are pinned, and each is a way the paragraph could rot:
+    #   (a) the LADDER -- drop a rung and the assembly stops being an assembly;
+    #   (b) the POSTURE -- "upper-middle member ... rather than its center" is
+    #       the commitment the round was asked for, and a concision pass that
+    #       deletes it leaves the ladder with no conclusion;
+    #   (c) the CENSORING FRAMING -- "truncated at the floor rather than erased"
+    #       and the unweighted-count disclaimer. HANDOFF_round22 §8.2 records
+    #       that the obvious reading ("the estimate rests on a third of the
+    #       data") is false on two independent counts, and it is the reading a
+    #       reader supplies unprompted. Losing the disclaimer re-opens it;
+    #   (d) the COUNTERWEIGHT -- the additive form and the three declined
+    #       readings run the other way. Without them the paragraph is a
+    #       one-sided case for a smaller number, which is not what the evidence
+    #       says.
+    asm_ok, _asm = assembly_check(tex)
+    failures += 0 if asm_ok else 1
+    print(f"[{'PASS' if asm_ok else 'FAIL'}] assembled corrections paragraph (V.E): "
+          f"paragraphs={_asm['paragraphs']} (want 1), "
+          f"{len(ASSEMBLY_SPANS) - len(_asm['missing'])}/{len(ASSEMBLY_SPANS)} "
+          f"spans present, missing={_asm['missing'] or 'none'}")
 
     print(f"\n{'ALL GATES PASS' if failures == 0 else f'{failures} GATE(S) FAILED'}")
     return 0 if failures == 0 else 1
