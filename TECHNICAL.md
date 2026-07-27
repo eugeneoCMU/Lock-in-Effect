@@ -3650,3 +3650,84 @@ Item A is closed as **NOT_FEASIBLE**, not as done. The manuscript now states the
 explicitly in `sec:abm-interp` rather than leaving a reader to notice that the ABM is
 compared on levels. This is the same disposition as the round-19 IV/RD identification
 finding: a negative result, reported as one.
+
+---
+
+## 32. Round-23: the form × transform hull is closed, and it widened (2026-07-26)
+
+`HANDOFF_round22.md` §6.3 / `PLAN_remaining_work.md` §5. Spec commit `19c1055`,
+script `hazard/concave_hull_band_ends.py`, artifact
+`hazard/data/concave_hull_band_ends_results.json`, liveness gate #95, manuscript
+V.E and VII.I.
+
+**Spec before run, properly this time.** The spec was committed at `19c1055` with the
+T1/T2/T3 partition fixed, and only then was the script run. The spec named the corner
+that would break the hull *before* the run — see below — which is the point of writing
+one.
+
+### What was open
+
+The designated form-conditional hull `[3.891507360127463, 13.09774126267503]` was built
+from **log-linear** cells only. Coverage audit over the off-window grid
+{4.695, 4.991, 5.334}% × {5.5, 6.5, 7.7}:
+
+| transform × form | coverage before |
+|---|---|
+| log-linear × max | complete (`oos_identification.instrument1_marginal_table`) |
+| log-linear × additive | complete (`floor_form_offwindow.rows`) |
+| concave × max | 1 of 9 — (4.991, 6.5) = +5.0561 |
+| concave × additive | 1 of 9 — (4.991, 6.5) = +9.2219 |
+
+So 16 concave cells were unrun, and the manuscript said so at V.E: "The hull is not shown
+*complete* over form × transform---this cell was run at the central elasticity, and its
+band ends are not."
+
+### The prediction, made ex ante
+
+From the spec header: the concave transform is signed downward (−1.3243pp under max,
+−1.9938pp under additive at the production floor), and the hull's **low** endpoint is a
+max-form cell at the band's low edge and the highest defensible floor — "precisely the
+corner a downward-signed transform is most likely to push below." The hull's lower edge is
+quoted in the **abstract**, so T2 was flagged as headline-adjacent before any number
+existed.
+
+### Result — T2, at exactly that corner
+
+18 concave cells run (24 legs, 137 s). 17 fall inside the committed hull. One does not:
+
+| cell | marginal |
+|---|---|
+| **concave × max, floor 5.334%, band 5.5** | **+3.5294 pp** (committed lower edge +3.8915) |
+
+Published hull moves to **[3.5294, 13.0977]** → the literal `$+3.9$ to $+13.1$` becomes
+`$+3.5$ to $+13.1$` at all five .tex sites, plus the "hull's lower end" reference in VII.I.
+
+**The upper edge did not move**, and that is a result rather than an omission: the concave
+transform is signed downward, so its highest cell reaches only +10.83 against the
+log-linear additive's +13.0977. Gate #95 pins the unmoved upper edge explicitly, to stop a
+successor re-widening the top from this run.
+
+### Parity
+
+All 11 gates pass; 8 bit-exact. G0/G1 replay the two committed concave cells to 1.2e-14
+and 1.8e-15 (floating-point recombination, five orders inside the 1e-9 tolerance). G2/G3
+replay six committed log-linear nulls **bit-exactly** — which also discharges G3's
+integrity role: β₁ = 0 makes the gap transform inert, so a concave null that differed from
+a log-linear null would mean the patch had leaked into a non-elasticity channel. It did
+not. G4 (sha256 over the sibling's output directory and the four consumed artifacts)
+confirms nothing committed was overwritten.
+
+### Gotcha, mine
+
+The gate first shipped with the offending cell's constant written as
+`3.5293997236646898` — digits I reconstructed from a rounded console line instead of
+reading the artifact. The true value is `3.5293843684633197`; the gate failed at 1e-6 and
+caught it. **Read constants out of the artifact; never retype them from printed output.**
+
+### Scope this does *not* close
+
+Completeness is asserted only over the off-window floor × band grid at the two transforms
+and two forms this paper defines. It says nothing about floors outside
+{4.695, 4.991, 5.334}, elasticities outside the Liebersohn–Rothstein band, a third
+transform, or the in-sample 4.0% floor. That limit is in the artifact as
+`residual_scope_not_settled` and in the spec header.

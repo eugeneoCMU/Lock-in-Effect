@@ -3539,7 +3539,17 @@ def main() -> int:
     ffo_ok = (ffo["parity_gates_all_pass"] and ffo["t1_form_conditional_demotion"]
               and abs(ffo["designated_interval_pp"][0] - 3.891507360127463) < 1e-9
               and abs(ffo["designated_interval_pp"][1] - 13.09774126267503) < 1e-9)
-    ffo_tex_ok = (tex.count("$+3.9$ to $+13.1$") >= 3
+    # ROUND-23: the designated hull MOVED. floor_form_offwindow's
+    # designated_interval_pp [3.8915, 13.0977] is still correct for what that
+    # run measured -- the LOG-LINEAR transform -- and is still pinned above.
+    # But concave_hull_band_ends closed the concave transform over the same
+    # off-window floor x band grid and one cell (max form, 5.334% floor, band
+    # 5.5) came in at +3.5294pp, below that lower edge. The published hull is
+    # therefore the union over all 36 off-window cells, and the tex literal
+    # that must be present is the WIDENED one. Pinning the old literal here
+    # would now pin a superseded number.
+    ffo_tex_ok = (tex.count("$+3.5$ to $+13.1$") >= 3
+                  and tex.count("$+3.9$ to $+13.1$") == 0
                   and "floor\\_form\\_offwindow" in tex
                   and tex.count("form-conditional") >= 3)
     ok = ffo_ok and ffo_tex_ok
@@ -3547,7 +3557,9 @@ def main() -> int:
     print(f"[{'PASS' if ok else 'FAIL'}] cross-check form-conditional headline: "
           f"artifact parity+T1={ffo_ok} (hull [{ffo['designated_interval_pp'][0]:.4f}, "
           f"{ffo['designated_interval_pp'][1]:.4f}]pp), tex hull-count="
-          f"{tex.count('$+3.9$ to $+13.1$')} (want >=3), run-tag={'floor_form_offwindow' if ffo_tex_ok else 'MISSING'}")
+          f"{tex.count('$+3.5$ to $+13.1$')} (want >=3, widened by "
+          f"concave_hull_band_ends), run-tag="
+          f"{'floor_form_offwindow' if ffo_tex_ok else 'MISSING'}")
 
     # Round-21 (gate #70): CONCAVE MARGINAL. concave_marginal ran the paired
     # legs under the concave transform (never run before); T1 verdict: the
@@ -3971,6 +3983,46 @@ def main() -> int:
           f"{anf_imp['null_frozen']['marginal_pp']:+.1f}pp vs "
           f"{anf_imp['null_reanchored']['marginal_pp']:+.1f}pp), tex literals="
           f"{'ok' if anf_tex_ok else 'MISSING'}")
+
+    # ROUND-23 (gate #95): THE FORM x TRANSFORM HULL IS NOW CLOSED, AND IT WIDENED.
+    # concave_hull_band_ends ran the concave transform's 16 unrun off-window
+    # cells, taking the {form x transform} x {floor x band} product to 36 of 36.
+    # T2 fired at exactly the corner its spec named ex ante: a downward-signed
+    # transform, evaluated at the band's low edge and the highest defensible
+    # floor, undercuts the log-linear lower edge. This gate pins the verdict,
+    # the offending cell, and the fact that the UPPER edge did not move -- the
+    # last of which is what stops anyone re-widening the top from this run.
+    chb = json.loads((HAZ_DATA / "concave_hull_band_ends_results.json").read_text())
+    chb_cells = chb["cells"]
+    chb_low = chb["new_hull_pp_all_36_offwindow_cells"][0]
+    chb_hi = chb["new_hull_pp_all_36_offwindow_cells"][1]
+    chb_ok = (chb["parity_gates_all_pass"]
+              and chb["pre_committed"] is True
+              and chb["t2_hull_widens"] is True
+              and chb["n_cells_outside_committed_hull"] == 1
+              # the offending cell, named exactly
+              and "max|5.334|5.5" in chb["cells_outside_committed_hull"]
+              and abs(chb_cells["max|5.334|5.5"]["marginal_pp"]
+                      - 3.5293843684633197) < 1e-6
+              # the widened hull, and an unmoved upper edge
+              and abs(chb_low - 3.5293843684633197) < 1e-6
+              and abs(chb_hi - 13.09774126267503) < 1e-9
+              # all 18 concave cells present, and the grid actually closed
+              and len(chb_cells) == 18)
+    chb_tex_ok = ("concave\\_hull\\_band\\_ends" in tex
+                  and "$+3.53$ points" in tex
+                  and "thirty-six of thirty-six" in tex
+                  # the upper edge must stay explained, not silently retained
+                  and "$+10.83$" in tex
+                  # and the superseded framing must be gone
+                  and "not shown \\emph{complete}" not in tex)
+    ok = chb_ok and chb_tex_ok
+    failures += 0 if ok else 1
+    print(f"[{'PASS' if ok else 'FAIL'}] cross-check concave hull band ends: "
+          f"artifact={chb_ok} (T2, {chb['n_cells_outside_committed_hull']}/18 outside, "
+          f"hull [{chb_low:.4f}, {chb_hi:.4f}]pp, offender max|5.334|5.5 "
+          f"{chb_cells['max|5.334|5.5']['marginal_pp']:+.4f}pp), tex literals="
+          f"{'ok' if chb_tex_ok else 'MISSING'}")
 
     print(f"\n{'ALL GATES PASS' if failures == 0 else f'{failures} GATE(S) FAILED'}")
     return 0 if failures == 0 else 1

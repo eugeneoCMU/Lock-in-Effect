@@ -16,7 +16,7 @@ still bind). Companion documents: `PLAN_remaining_work.md` (the open-items ledge
 | Manuscript | `paper/v18/revised_paper_v18.tex` — **115pp** (was 113pp before round 23), ~52k words, one paragraph per line (lines are LONG) |
 | Archived variant | `paper/v18/revised_paper_v18_long_abstract.tex` — identical body, the old 574-word abstract |
 | Build | `~/Downloads/texbuild/tectonic -X compile revised_paper_v18.tex --outdir build_r22 --keep-logs` (no `tectonic`/`pdflatex` on PATH) |
-| Gates | `python3 tools/liveness_gates.py` → **94 ALL PASS** |
+| Gates | `python3 tools/liveness_gates.py` → **95 ALL PASS** |
 | Tests | `python3 -m pytest tests/` → **297 pass** |
 | Response letter | `paper/v18/response_to_referees_round22.tex` (5pp, drafted, **not sent**) |
 
@@ -60,7 +60,7 @@ unequal standing: **Path B** carries the result; the **ABM** is a falsification 
   that round's rewrites strengthened a claim past its evidence **while passing all gates**.
 - **Zero-slack gate counts** (check before deleting any literal):
   `positive at every` ≥7 (exactly 7) · `$+3.0$ to $+8.0$` ≥2 · `11.06` ≥3 · `76.3\%` ≥4 ·
-  `$+3.9$ to $+13.1$` ≥3 · `60.2\%` ≥3
+  **`$+3.5$ to $+13.1$` ≥3 (round 23: the hull WIDENED; `$+3.9$ to $+13.1$` must now be ZERO)** · `60.2\%` ≥3
 - **`HARDCODED_XREF` bans** literal `Table~N`, `Figure~N`, `Section~V.C`, `Appendix~A`,
   `Equation~(N)`. Always `\ref`/`\eqref`. (For an *external* paper's table, write `tab.~3`.)
 - **PAGE COMPRESSION IS ABANDONED** (Eugene, 2026-07-26). Do not reopen. No journal
