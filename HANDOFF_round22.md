@@ -16,7 +16,7 @@ still bind). Companion documents: `PLAN_remaining_work.md` (the open-items ledge
 | Manuscript | `paper/v18/revised_paper_v18.tex` — **115pp** (was 113pp before round 23), ~52k words, one paragraph per line (lines are LONG) |
 | Archived variant | `paper/v18/revised_paper_v18_long_abstract.tex` — identical body, the old 574-word abstract |
 | Build | `~/Downloads/texbuild/tectonic -X compile revised_paper_v18.tex --outdir build_r22 --keep-logs` (no `tectonic`/`pdflatex` on PATH) |
-| Gates | `python3 tools/liveness_gates.py` → **95 ALL PASS** |
+| Gates | `python3 tools/liveness_gates.py` → **96 ALL PASS** |
 | Tests | `python3 -m pytest tests/` → **297 pass** |
 | Response letter | `paper/v18/response_to_referees_round22.tex` (5pp, drafted, **not sent**) |
 

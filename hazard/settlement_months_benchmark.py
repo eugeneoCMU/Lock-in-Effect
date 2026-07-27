@@ -50,12 +50,26 @@ direction and it is exactly equivalent to asking: "given when cash actually
 arrives, what cap does the schedule imply for each arrival month?"
 
 MASS IS NOT CONSERVED INSIDE THE WINDOW, AND THAT IS THE POINT. The kernel is
-mass-conserving on an infinite line, but the window is half-open and the cap is
-zero before it, so the first two months lose cap mass that would have flowed in
-from pre-QT months: 0.90 of a ramp month at t=0 and 0.30 at t=1. The
-settlement-aligned cap total is therefore MECHANICALLY smaller than $1,417.5B by
-about $21B, and the benchmark shrinks with it. The run reports that decomposition
-explicitly rather than letting it look like a behavioural finding.
+mass-conserving on an infinite line, but the window is half-open, so cap mass
+convolved past QT_END is dropped. The loss is at the window's END, not its start:
+
+  Oct 2025 cap: the lag-2 tap lands in Dec 2025, outside -> 0.30 x $35B = $10.5B
+  Nov 2025 cap: the lag-1 and lag-2 taps land in Dec 2025 / Jan 2026, outside
+                                                  -> 0.90 x $35B = $31.5B
+  total leaving the window                                       -> $42.0B
+
+The window's START loses nothing FROM THE SCHEDULE — the pre-QT cap is zero, so
+there is no mass to draw in; the ramp is merely redistributed within the window.
+The settlement-aligned cap total is therefore mechanically smaller than $1,417.5B
+by $42.0B, and because the realized series is untouched and both legs sum over
+the same months, the benchmark shifts by EXACTLY that amount. The run reports the
+decomposition so the shift cannot be read as behavioural.
+
+(An earlier draft of this header attributed the loss to the window's first two
+months and put it near $21B. That was wrong on both the edge and the magnitude;
+the code was always correct and the run's own numbers exposed it. Recorded rather
+than quietly corrected, per the project's standing rule about checks that
+disagree with artifacts.)
 
 SPEC (fixed ex ante)
 - One macro frame, fetched once (macro.fetch_data + fetch_soma_mbs_monthly),
@@ -248,10 +262,16 @@ def main() -> None:
         "cap_total_calendar_b": abs(cap_total),
         "window_edge_cap_mass_lost_b": edge_lost,
         "shift_explained_by_window_edge": (
-            "The settlement-aligned cap loses cap mass at the window's first two "
-            "months, where the convolution draws on pre-QT months whose cap is "
-            "zero. That loss is mechanical, not behavioural, and accounts for "
-            f"${edge_lost:.3f}B of the ${abs(prod['shift_b']):.3f}B shift."),
+            "The settlement-aligned cap loses mass at the window's END, not its "
+            "start: the half-open window drops cap convolved past QT_END "
+            "(Oct 2025 loses its lag-2 tap, 0.30 x $35B; Nov 2025 loses lags 1 "
+            "and 2, 0.90 x $35B; $42.0B in total). The window's start loses "
+            "nothing from the schedule because the pre-QT cap is zero — the ramp "
+            "is only redistributed within the window. The loss is mechanical, "
+            "not behavioural, and because the realized series is untouched and "
+            "both legs sum over the same months it accounts for "
+            f"${edge_lost:.3f}B of the ${abs(prod['shift_b']):.3f}B shift "
+            "exactly."),
         "shift_pct_abs": shift_pct,
         "interpretive_verdict": f"{verdict}: {label} — settlement-aligned "
                                 f"benchmark ${prod['benchmark_b']:.4f}B against the "

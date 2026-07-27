@@ -4024,6 +4024,45 @@ def main() -> int:
           f"{chb_cells['max|5.334|5.5']['marginal_pp']:+.4f}pp), tex literals="
           f"{'ok' if chb_tex_ok else 'MISSING'}")
 
+    # ROUND-23 (gate #96): IS THE DENOMINATOR A CONVENTION ARTIFACT?
+    # $764.7B is the denominator of every percentage in the paper, and until this
+    # run nothing tested whether it depended on netting cash-arrival months
+    # against the cap for the same month. It does, by -5.5% -- and the shift is
+    # ENTIRELY mechanical: the half-open window drops cap convolved past its last
+    # month. This gate pins that the shift equals the dropped cap mass EXACTLY,
+    # because that identity is what makes the shift non-behavioural. It also pins
+    # that the calendar convention stays production (pre-committed under every
+    # branch) so the variant cannot later be promoted to the headline.
+    smb = json.loads((HAZ_DATA / "settlement_months_benchmark_results.json").read_text())
+    smb_prod = smb["legs"]["production"]
+    smb_ok = (smb["gates_all_pass"]
+              and smb["pre_committed"] is True
+              and smb["production_convention_stays_calendar"] is True
+              and smb["t2_disclosed_sensitivity"] is True
+              # the calendar leg still reproduces the committed benchmark exactly
+              and abs(smb["calendar_benchmark_b"] - 764.7482532227002) < 1e-9
+              and abs(smb_prod["benchmark_b"] - 722.7482532227002) < 1e-6
+              # the identity that makes the shift mechanical rather than behavioural
+              and abs(abs(smb_prod["shift_b"])
+                      - smb["window_edge_cap_mass_lost_b"]) < 1e-9
+              and abs(smb["window_edge_cap_mass_lost_b"] - 42.0) < 1e-6
+              # the kernel is the committed one, not a fitted one
+              and smb["kernel_production"] == [0.1, 0.6, 0.3])
+    smb_tex_ok = ("settlement\\_months\\_benchmark" in tex
+                  and "\\$722.7 billion" in tex
+                  and "$-5.5$\\%" in tex
+                  # the mechanical explanation must travel with the number
+                  and "the QT window is half-open" in tex
+                  # and the dollar-invariance, which is the actual reassurance
+                  and "\\$42.6 billion on either denominator" in tex)
+    ok = smb_ok and smb_tex_ok
+    failures += 0 if ok else 1
+    print(f"[{'PASS' if ok else 'FAIL'}] cross-check settlement-months benchmark: "
+          f"artifact={smb_ok} (T2, settlement ${smb_prod['benchmark_b']:.4f}B vs "
+          f"calendar ${smb['calendar_benchmark_b']:.4f}B, shift "
+          f"{smb_prod['shift_pct_of_committed']:+.3f}%, all mechanical), "
+          f"tex literals={'ok' if smb_tex_ok else 'MISSING'}")
+
     print(f"\n{'ALL GATES PASS' if failures == 0 else f'{failures} GATE(S) FAILED'}")
     return 0 if failures == 0 else 1
 

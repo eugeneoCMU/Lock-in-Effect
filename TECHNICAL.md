@@ -3731,3 +3731,78 @@ and two forms this paper defines. It says nothing about floors outside
 {4.695, 4.991, 5.334}, elasticities outside the Liebersohn–Rothstein band, a third
 transform, or the in-sample 4.0% floor. That limit is in the artifact as
 `residual_scope_not_settled` and in the spec header.
+
+---
+
+## 33. Round-23: the benchmark is convention-dependent by −5.5%, and all of it is mechanical (2026-07-26)
+
+`HANDOFF_round22.md` §6.3 (round-21 R10 leftover, never started). Spec commit `90dcf5c`,
+script `hazard/settlement_months_benchmark.py`, artifact
+`hazard/data/settlement_months_benchmark_results.json`, liveness gate #96, manuscript
+`sec:robustness-benchmark`.
+
+### What was open
+
+R10 listed "settlement-months benchmark variant" as a one-line leftover with no design.
+`$764.7482532227002B` is the **denominator of every percentage in the paper**, and
+`sec:robustness-benchmark` said only that researchers "should expect the benchmark level
+… to shift" under a different cap-schedule assumption. Nobody had measured it.
+
+### Design — no new parameter
+
+The repo already carries the prepayment-month → cash-month mapping:
+`abm/fed_mbs_extension_risk.py:91`, `SETTLEMENT_LAG_KERNEL = [0.10, 0.60, 0.30]` at lags
+0/1/2, mass-conserving, *"sourced from standard 55-day / ~50-day agency remittance cycles,
+not tuned."* The variant reuses it, read from the module rather than retyped (G3).
+
+**Convolve the cap, do not deconvolve the cash.** The realized series is the noisy
+observable and deconvolution against a 3-tap kernel is ill-conditioned — it would
+manufacture structure. The cap schedule is a deterministic step function known exactly, so
+the variant convolves the cap forward and nets the unchanged realized series against it.
+
+### Result — T2
+
+| leg | kernel | benchmark | shift | cap total |
+|---|---|---|---|---|
+| calendar (production) | — | **$764.7483B** | — | $1,417.50B |
+| settlement-aligned | [0.10, 0.60, 0.30] | **$722.7483B** | **−$42.000B (−5.49%)** | $1,375.50B |
+| slower | [0.0, 0.5, 0.5] | $712.2483B | −$52.500B | $1,365.00B |
+| faster | [0.3, 0.6, 0.1] | $736.7483B | −$28.000B | $1,389.50B |
+
+All four gates **bit-exact**, including G0 (the calendar leg reproduced the committed
+benchmark to 0.0 — no FRED/SOMA drift) and G2 (the degenerate kernel `[1,0,0]` reproduced
+the calendar leg, the wiring check on the convolution path).
+
+**The shift is 100% mechanical, and the identity is exact.** The QT window is half-open, so
+cap convolved past its last month is dropped: October 2025 loses its lag-2 tap
+(0.30 × $35B) and November 2025 its lag-1 and lag-2 taps (0.90 × $35B) — $42.0B. Because
+the realized series is untouched and both legs sum over the same months, the benchmark
+moves by *exactly* that $42.0B. Gate #96 pins the identity, since it is what makes the
+shift non-behavioural.
+
+**No dollar quantity in the paper moves.** The identified marginal is $42.6B on either
+denominator. Only the percentage expressions rescale, by the common factor 1.058: Path B
+central 91.3% → 96.6%, the β₁ = 0 null 85.7% → 90.7%, the marginal +5.6 → +5.9 points. The
+decomposition is unchanged in substance and the null still carries the large majority.
+
+The calendar convention **stays production** — pre-committed under every branch, for the
+reason `sec:method-benchmark` already gives for retaining the cap at all: it is the only
+policy-committed quantity available, and it is committed in cash-arrival months.
+
+### Gotcha, mine, and the run caught it
+
+The spec header's *explanation* of the shift was wrong in both direction and size: it
+attributed the loss to the window's **first two months** at "about $21B", reasoning that
+the convolution draws on pre-QT months whose cap is zero. Wrong edge. The start loses
+nothing *from the schedule* — pre-QT cap is zero, so there is no mass to draw in; the ramp
+is merely redistributed inside the window. The loss is at the **end**, and it is $42.0B,
+which is exactly what the run reported. The code was correct throughout; only the prose
+reasoning was wrong, and the run's own arithmetic exposed it. Corrected in the header and
+in the artifact's `shift_explained_by_window_edge`, with the error recorded rather than
+silently fixed.
+
+### Scope
+
+Month-**alignment** only. Does not revisit the cap schedule, the SOMA series, the window
+bounds, or the reinvestment-ceiling reading of the cap. A T1 would have licensed "the
+benchmark is insensitive to the netting convention", never "the benchmark is correct".
