@@ -2,7 +2,7 @@
 
 **Read this first.** It supersedes `HANDOFF_round24.md`, whose items **1, 3, 4 and 6 are
 closed**. `HANDOFF_round22.md` **§3 hard constraints and §4 gotchas still bind** — read them
-before editing anything. Companions: `TECHNICAL.md` §35 (this round), §§31–34 (round 23).
+before editing anything. Companions: `TECHNICAL.md` §§35–36 (this round), §§31–34 (round 23).
 
 ---
 
@@ -101,7 +101,7 @@ added a page rather than removing one, which is the right trade for the paper's 
 exposure but is worth stating plainly.
 
 **My recommendation: do nothing about length, and split the methods note only if you want to
-publish it.** The apparatus (spec-before-run, 98 gates, parity replay, the perturbation
+publish it.** The apparatus (spec-before-run, 99 gates, parity replay, the perturbation
 batteries) is a genuine contribution and it is crowding the finding — but "crowding" is an
 argument for a *second paper*, not for deleting the apparatus from this one. A conference
 venue does not force the issue. If §2.1 is taken, ~15–20pp leave as a byproduct and the
@@ -120,8 +120,8 @@ All of `HANDOFF_round22.md` §3 still binds. Specifically:
   The variant gate requires an **identical line count** and difference on the abstract line
   **only**. The reliable move is to regenerate it: canonical with line 30 swapped for the
   archived abstract line. Doing this by hand will drift.
-- **Zero-slack literals, recounted at 116pp:** `positive at every` **6** · `$+3.0$ to $+8.0$`
-  **4** · `11.06` **4** · `76.3\%` **7** · `$+3.5$ to $+13.1$` **6** ·
+- **Zero-slack literals, recounted after the round-24b reframe:** `positive at every` **6** ·
+  `$+3.0$ to $+8.0$` **7** · `11.06` **4** · `76.3\%` **7** · `$+3.5$ to $+13.1$` **6** ·
   `$+3.9$ to $+13.1$` **0 (must stay 0)** · `60.2\%` **8** · `13.6\%` **10**.
   Gate minima are lower than these counts; check the gate, not this table, before deleting.
 - **Gate #98 is paragraph-scoped.** Splitting the seventh qualification into two paragraphs
