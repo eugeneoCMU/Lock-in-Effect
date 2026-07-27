@@ -1,4 +1,4 @@
-# Handoff — round 25 — two scope calls, and nothing else open
+# Handoff — round 25 — one scope call open, nothing else
 
 **Read this first.** It supersedes `HANDOFF_round24.md`, whose items **1, 3, 4 and 6 are
 closed**, and whose **§2 (the ABM) is now closed too** — see §1 below. `HANDOFF_round22.md` **§3 hard constraints and §4 gotchas still bind** — read them
