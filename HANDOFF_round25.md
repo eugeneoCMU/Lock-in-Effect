@@ -11,7 +11,7 @@ before editing anything. Companions: `TECHNICAL.md` §§35–38 (this round), §
 | | |
 |---|---|
 | Repo | `/Users/eugene/somthing/Lock In effect/Lock-in-Effect` (**public**, `eugeneoCMU/Lock-in-Effect`) |
-| Branch | `claude/handoff-rounds-22-24-59c228`, **pushed** (2026-07-27, Eugene authorised). It carries round 23's unpushed `00d938d` plus round 24. `claude/handoff-round22-edits-701fb2` is a strict ancestor and fast-forwards onto it — consolidating the two on origin is a pure fast-forward whenever you want it. `panel-revision-2026-07-18` and `main` untouched. |
+| Branch | `claude/handoff-rounds-22-24-59c228`, **pushed**. `claude/handoff-round22-edits-701fb2` has been fast-forwarded onto it, so the two are identical on origin and the stale pointer is gone. **`main` is NO LONGER untouched**: Eugene merged PR #10 from this branch on 2026-07-27 (`c930408`), which carries round 24 through `39caf3e` — that is items 1/3/4/6 only. **Rounds 24b, 24c and 24d (8 commits) are on the branch and NOT in `main`**, and `main` carries a merge commit the branch does not, so the two have diverged and a second PR (or merge) is the way in. `panel-revision-2026-07-18` untouched at `152345b`. |
 | Manuscript | `paper/v18/revised_paper_v18.tex` — **116pp**, abstract **328 words**, one paragraph per line |
 | Gates | `python3 tools/liveness_gates.py` → **101 ALL PASS** |
 | Tests | `python3 -m pytest tests/` → **398 pass** |
