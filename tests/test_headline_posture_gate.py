@@ -74,7 +74,10 @@ def test_point_before_range_fails(tex, abstract):
     mutated = (
         " \\noindent Lock-in itself adds $+5.6$ points, or \\$42.6 billion. "
         "What lock-in itself adds is a range rather than a number. "
-        "The design pins it between $+3.0$ and $+8.0$ points, and it identifies "
+        "The design pins it between $+3.0$ and $+8.0$ points under its "
+        "production floor form (a few-cluster sampling interval, a lower bound "
+        "on that uncertainty), with a form-conditional hull of $+3.5$ to "
+        "$+13.1$ points, and it identifies "
         "levels only. Inside that range, $+5.6$ points, or \\$42.6 billion, is "
         "the value at the calibration I headline, and every correction I can "
         "measure to the involuntary-turnover floor or to the accounting basis "

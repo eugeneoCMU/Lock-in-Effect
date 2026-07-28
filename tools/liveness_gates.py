@@ -423,6 +423,17 @@ ABSTRACT_POSTURE = {
     "corrections_framed": "every correction I can measure to the involuntary-turnover floor "
                           "or to the accounting basis moves it down within the range rather "
                           "than up",
+    # ROUND-26: the panel's two strongest correlated findings (DA-C1 + R1-W1,
+    # both verified) were that the abstract quoted the interval without its
+    # form conditionality and without its few-cluster inferential status.
+    # Both now travel with the interval IN the abstract, and these pins keep
+    # them there: the qualifier span binds the sampling caveat to the pinned
+    # interval sentence, and the hull span keeps the form dimension stated
+    # where the max-form interval is stated. Canonical-scoped like the rest
+    # of this dict (the archived variant predates both).
+    "interval_qualifier": "a few-cluster sampling interval, a lower bound on "
+                          "that uncertainty",
+    "hull_in_abstract": "form-conditional hull of $+3.5$ to $+13.1$ points",
 }
 
 
