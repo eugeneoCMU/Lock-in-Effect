@@ -1,0 +1,88 @@
+{
+  "mode": "moving_share_bracket",
+  "status": "OK",
+  "spec": "gap response applied to share s of the voluntary hazard, floor unscaled, s in {0.25, 0.5, 1.0} + null at production floor 4.0% / central 6.5; parity P1 (s=1 mixture vs committed central + 1e-12 identity probe) and P2 (null); ex-ante C1 bracket ordering; descriptive posture.",
+  "parity_gates": {
+    "P1_s1_central": {
+      "got": 818.5300844066606,
+      "want": 818.5300844066606,
+      "identity_probe": {
+        "max_abs_diff_s1": 3.469446951953614e-18,
+        "max_abs_diff_s0": 0.0,
+        "pass": true
+      },
+      "pass": true
+    },
+    "P2_null": {
+      "got": 748.1850239867648,
+      "want": 748.1850239867648,
+      "pass": true
+    }
+  },
+  "parity_gates_all_pass": true,
+  "c1_bracket_ordering_pass": true,
+  "null": {
+    "floor_annual_cpr_pct": 4.0,
+    "p_q_shock_pct": 0.0,
+    "beta1": 0.0,
+    "trapped_b": 748.1850239867648,
+    "share_pct": 97.83415925879702,
+    "cpr_r_lag0": 0.3669902953388254,
+    "best_lag": -3,
+    "peak_lag_r": 0.44376461325997124,
+    "mean_us_cpr_pct": 5.613584778161411,
+    "floor_bind_share": 0.14340654639824515,
+    "floor_bind_loan_months": 1683124
+  },
+  "cells": {
+    "0.25": {
+      "floor_annual_cpr_pct": 4.0,
+      "p_q_shock_pct": 6.5,
+      "beta1": -0.06857052676484808,
+      "trapped_b": 767.4194261451531,
+      "share_pct": 100.34928787495707,
+      "cpr_r_lag0": 0.3520032140314095,
+      "best_lag": -3,
+      "peak_lag_r": 0.44481677884590637,
+      "mean_us_cpr_pct": 5.381525590927876,
+      "floor_bind_share": 0.1764908586651964,
+      "floor_bind_loan_months": 1683124,
+      "share_s": 0.25,
+      "marginal_b": 19.23440215838832,
+      "marginal_pp": 2.5151286161600552
+    },
+    "0.5": {
+      "floor_annual_cpr_pct": 4.0,
+      "p_q_shock_pct": 6.5,
+      "beta1": -0.06857052676484808,
+      "trapped_b": 785.8494145883939,
+      "share_pct": 102.75922975656002,
+      "cpr_r_lag0": 0.3274181021517743,
+      "best_lag": -3,
+      "peak_lag_r": 0.4431185201978478,
+      "mean_us_cpr_pct": 5.158825118930916,
+      "floor_bind_share": 0.22309229741837203,
+      "floor_bind_loan_months": 1683124,
+      "share_s": 0.5,
+      "marginal_b": 37.664390601629066,
+      "marginal_pp": 4.925070497763002
+    },
+    "1": {
+      "floor_annual_cpr_pct": 4.0,
+      "p_q_shock_pct": 6.5,
+      "beta1": -0.06857052676484808,
+      "trapped_b": 818.5300844066606,
+      "share_pct": 107.0326190295068,
+      "cpr_r_lag0": 0.19000395255236568,
+      "best_lag": -3,
+      "peak_lag_r": 0.40436496933191357,
+      "mean_us_cpr_pct": 4.763203719157251,
+      "floor_bind_share": 0.36269282595934704,
+      "floor_bind_loan_months": 1683124,
+      "share_s": 1.0,
+      "marginal_b": 70.34506041989584,
+      "marginal_pp": 9.198459770709789
+    }
+  },
+  "runtime_s": 93.3
+}
