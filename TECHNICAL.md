@@ -4215,3 +4215,15 @@ Commits `5e5dee6..1a6287d`; details in the plan file's execution log. Gotchas ea
 - **`app:floormech` landed after the old L1207 nocite block — deliberately outside the ledger's find-window** (`\section` after L741 truncates it; liveness_gates ledger rule).
 - **The `\par` is inline** (no newline) so gate C4's line-count parity holds; the variant's line 30 is untouched by design.
 - Two positional-deixis repairs were the split's only non-verbatim edits: kept-line callers of the stability threshold and the 2019-leg rejection now cite `Appendix~\ref{app:floormech}`.
+
+## 41. Round-27 second half: the survivor set executed (2026-07-28)
+
+Ten commits `c68ff9f..ce5fc6e` on Eugene's "start working on all of them sequentially"; full per-item log in `PLAN_score_improvements_2026-07-28.md`'s second execution log. End state: **ALL GATES PASS, 440 tests, 126pp (main text ends ~p.82 with references; Online Appendix pp.83–126), abstract 367 words, zero-slack counts exact, 0 undefined refs.** 28 of the 35 plan survivors are now executed; open: the two run-class items (#21 vintage segment; B5 + landing rule) — both Eugene-gated, spec-before-run.
+
+Gotchas earned:
+- **Presence-gate blunting shaped two drafts:** §V's counterweight clause was phrased WITHOUT "cleanly attributed" (three pinned spans carry it; a verbatim repeat would blunt `bound_verdict_wording`), and the abstract's third sentence opens "And it identifies levels only" to preserve the `levels_only_abstract` literal at gates:1866 without a gate edit.
+- **The fig:gapsweep diet deviated from spec deliberately:** the forced-positivity clause stayed in-caption because it is the ±450-char forced-marker for the caption's "positive at every" occurrence (gate #66); routing it to the Notes block risked the window arithmetic.
+- **Gate #98 now has two span classes:** the paragraph-scoped `ASSEMBLY_SPANS` and the whole-file `ASSEMBLY_TABLE_SPANS` (tab:assembly label, anchor sentence, composed-row and Fonseca-row wording). The battery's table cases assert span uniqueness before mutating, so the round-24c vacuity class is structurally excluded.
+- **Wave 2b resolved #14's head ambiguity at zero cost:** the `\subsection` + `sec:patha` label stayed as the V.D stub's head, so all ~26 "(Section~\ref{sec:patha})" callers resolve unchanged — no repoint wave. The moved timing paragraph's concession sentence stays verbatim behind a new pointer sentence that re-anchors its "these exhibits" referent.
+- **Two-PDF packaging:** references now print before `\appendix` (natbib collects appendix cites regardless), so one compilation splits cleanly: `qpdf build/revised_paper_v18.pdf --pages . 1-82 -- main.pdf` and `--pages . 83-126 -- online_appendix.pdf` (page numbers from the aux; recompute after any reflow).
+- **The appendix wording pass reused the round-26 method at full discipline:** 404 pins extracted from `liveness_gates.py` via `ast` into a validator enforcing old-string uniqueness, digit/math/backslash token-sequence identity, and post-apply pin survival; 12/12 Opus-agent proposals passed and applied.
