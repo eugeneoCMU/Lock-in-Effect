@@ -1,0 +1,60 @@
+{
+  "mode": "buyback_credit_bracket",
+  "status": "OK",
+  "spec": "incidence bracket on the production rule-only pair, committed artifacts only: gap_face = gap_par (balance adjustment); gap_cash(D) = gap_par - D*E, E = Danish roll-off minus scheduled (the manuscript's own netting convention), D in {0.32,0.34,0.36,0.38} (the manuscript's committed proxy range); ex-ante rule in header.",
+  "gates": {
+    "P1_gap": {
+      "got": 61.18833737010482,
+      "want": 61.18833737010482,
+      "identity": 61.18833737010482,
+      "pass": true
+    },
+    "P2_parquet_sums": {
+      "dk_total": 669.3189402666527,
+      "want_dk_total": 669.3189402666527,
+      "sched": 198.66568741255054,
+      "want_sched": 198.66568741255054,
+      "us_identity_gap_b": 0.0,
+      "pass": true
+    },
+    "P3_channel_magnitude": {
+      "E_b": 470.65325285410216,
+      "pass": true
+    }
+  },
+  "gates_all_pass": true,
+  "verdict": {
+    "gap_face_b": 61.18833737010482,
+    "early_face_E_b": 470.65325285410216,
+    "cash_rows": [
+      {
+        "D": 0.32,
+        "haircut_b": 150.6090409133127,
+        "gap_cash_b": -89.42070354320788
+      },
+      {
+        "D": 0.34,
+        "haircut_b": 160.02210597039473,
+        "gap_cash_b": -98.83376860028991
+      },
+      {
+        "D": 0.36,
+        "haircut_b": 169.43517102747677,
+        "gap_cash_b": -108.24683365737195
+      },
+      {
+        "D": 0.38,
+        "haircut_b": 178.84823608455883,
+        "gap_cash_b": -117.65989871445402
+      }
+    ],
+    "gap_cash_range_b": [
+      -117.65989871445402,
+      -89.42070354320788
+    ],
+    "all_grid_points_negative": true,
+    "code": "REVERSES",
+    "manuscript_action": "Restate the counterfactual's cash-flow claim as incidence-conditional wherever stated as signed relief; the conclusion's leg-(3) sentence replaces the signed 'modestly improved (3)' reading with the bracket. The magnitude reading (trade-off is modest) survives; the sign claim becomes incidence-dependent."
+  },
+  "runtime_s": 0.084
+}
