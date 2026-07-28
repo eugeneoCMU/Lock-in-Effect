@@ -395,6 +395,20 @@ ASSEMBLY_SPANS = {
     "counter_three_readings": "point to a larger lock-in channel, not a smaller one",
 }
 
+# ROUND-27: tab:assembly tabulates the assembly the paragraph builds in prose.
+# Whole-file spans (the table is its own lines, not the paragraph's): the label,
+# the paragraph's anchor sentence, and the two rows a hostile edit would most
+# plausibly corrupt -- the composed row (must NOT read as reporting a composed
+# point; the no-composed-point discipline is gate-#104-pinned) and the Fonseca
+# row (a counterweight, NOT a declined reading -- the checker caught that
+# mislabel before it shipped).
+ASSEMBLY_TABLE_SPANS = {
+    "table_label": "\\label{tab:assembly}",
+    "table_anchor": "Table~\\ref{tab:assembly} tabulates this assembly",
+    "table_row_composed": "projection only; no composed point is reported (run pending)",
+    "table_row_fonseca": "counterweight, conservative-band evidence",
+}
+
 
 # --- Round-24b (gate #99): THE ABSTRACT LEADS WITH THE RANGE ---------------
 # Section V.E's seventh qualification argues that the identified content is the
@@ -706,8 +720,11 @@ def assembly_check(tex: str) -> tuple[bool, dict]:
     paras = [ln for ln in tex_nc.split("\n") if ln.startswith(ASSEMBLY_OPENER)]
     line = paras[0] if len(paras) == 1 else ""
     missing = sorted(k for k, v in ASSEMBLY_SPANS.items() if v not in line)
-    return (len(paras) == 1 and not missing,
-            {"paragraphs": len(paras), "missing": missing})
+    table_missing = sorted(k for k, v in ASSEMBLY_TABLE_SPANS.items()
+                           if v not in tex_nc)
+    return (len(paras) == 1 and not missing and not table_missing,
+            {"paragraphs": len(paras), "missing": missing,
+             "table_missing": table_missing})
 
 
 def abstract_hedge_check(tex: str) -> tuple[bool, dict]:

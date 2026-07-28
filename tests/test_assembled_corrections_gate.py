@@ -31,6 +31,7 @@ sys.path.insert(0, str(ROOT / "tools"))
 from liveness_gates import (  # noqa: E402
     ASSEMBLY_OPENER,
     ASSEMBLY_SPANS,
+    ASSEMBLY_TABLE_SPANS,
     TEX,
     assembly_check,
 )
@@ -78,6 +79,20 @@ def test_deleting_any_span_fails(tex, key):
     ok, info = assembly_check(mutated)
     assert not ok, f"deleting span {key} left gate #98 green"
     assert key in info["missing"]
+
+
+# ROUND-27: tab:assembly's whole-file spans. Each span string is unique in the
+# manuscript, so replace(..., 1) cannot silently mutate a different site (the
+# round-24c vacuous-mutation class); the table_missing assert would catch a
+# no-op replace regardless.
+@pytest.mark.parametrize("key", sorted(ASSEMBLY_TABLE_SPANS))
+def test_deleting_any_table_span_fails(tex, key):
+    span = ASSEMBLY_TABLE_SPANS[key]
+    assert tex.count(span) == 1, f"table span {key} is not unique in the manuscript"
+    mutated = tex.replace(span, "", 1)
+    ok, info = assembly_check(mutated)
+    assert not ok, f"deleting table span {key} left gate #98 green"
+    assert key in info["table_missing"]
 
 
 # --------------------------------------------------------------------------
