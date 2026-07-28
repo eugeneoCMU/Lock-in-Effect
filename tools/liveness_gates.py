@@ -542,6 +542,7 @@ LETTER_CURRENT_LITERALS = [
     "68.8\\%", "35.8\\%",   # the censoring shares, central and null legs
     "60.2\\%", "76.3\\%", "12.6\\%",  # cross-design, and the reweight's other side
     "$-1.47$",              # the interaction that forbids a composed point
+    "$-\\$89.4$ to $-\\$117.7$ billion",  # the buyback bracket's cash-incidence range
     "$+11.2$", "$+11.5$",   # the two corrections that run the other way
 ]
 
@@ -572,6 +573,35 @@ ELASTICITY_DISCIPLINE_SPANS = {
                       "$+\\$19.2$ billion ($+2.5$ points) at $s = 0.25$",
     "bracket_posture": "$s$ is a bracketing parameter rather than an estimate",
 }
+
+
+# --- Round-26 (gate #103): THE BUYBACK INCIDENCE BRACKET -------------------
+# The conclusion asserted a signed leg-(3) improvement (+$61.2B) while the
+# manuscript's own pathb paragraph recorded the market-value buyback credit
+# as the largest un-priced channel, exceeding the gap. Run
+# buyback_credit_bracket priced both incidence readings from committed
+# artifacts (verdict REVERSES: cash-incidence gap negative at every proxy
+# discount), and the paper now states the gap's sign as incidence-
+# conditional at every site that previously stated signed relief. These
+# spans keep that statement from quietly reverting to the signed claim.
+BUYBACK_BRACKET_SPANS = {
+    "run_tag": "\\texttt{buyback\\_credit\\_bracket}",
+    "reversal_range": "$-\\$89.4$ to $-\\$117.7$ billion",
+    "pathb_sign": "The gap's sign is therefore incidence-conditional",
+    "conclusion_sign": "its sign is set by the incidence, which this design "
+                       "does not establish",
+    "trilemma_conditional": "while its effect on (3) is incidence-conditional",
+    # the dissolution claim must stay scoped to face accounting
+    "dissolution_scope": "trade off sharply under face accounting",
+}
+
+
+def buyback_bracket_check(tex: str) -> tuple[bool, dict]:
+    """Gate #103's rule, as a function so a battery can exercise it."""
+    tex_nc = re.sub(r"(?<!\\)%.*", "", tex)
+    missing = sorted(k for k, v in BUYBACK_BRACKET_SPANS.items()
+                     if v not in tex_nc)
+    return (not missing), {"missing": missing}
 
 
 def elasticity_discipline_check(tex: str) -> tuple[bool, dict]:
@@ -4545,6 +4575,13 @@ def main() -> int:
           f"{len(ELASTICITY_DISCIPLINE_SPANS) - len(_eld['missing'])}/"
           f"{len(ELASTICITY_DISCIPLINE_SPANS)} spans present, "
           f"missing={_eld['missing'] or 'none'}")
+
+    bb_ok, _bb = buyback_bracket_check(tex)
+    failures += 0 if bb_ok else 1
+    print(f"[{'PASS' if bb_ok else 'FAIL'}] buyback incidence bracket (gate #103): "
+          f"{len(BUYBACK_BRACKET_SPANS) - len(_bb['missing'])}/"
+          f"{len(BUYBACK_BRACKET_SPANS)} spans present, "
+          f"missing={_bb['missing'] or 'none'}")
 
     print(f"\n{'ALL GATES PASS' if failures == 0 else f'{failures} GATE(S) FAILED'}")
     return 0 if failures == 0 else 1
