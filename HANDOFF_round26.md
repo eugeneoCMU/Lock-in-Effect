@@ -13,9 +13,9 @@ disposition of all 12 roadmap items).
 | | |
 |---|---|
 | Branch | `claude/paper-v18-review-plan-5b7b5e` (worktree), ~25 commits `89ba2e4..`, **UNPUSHED**. Cut from the round-24d state. `main` still lacks rounds 24b–24d AND all of round 26; `main` has a merge commit the branches lack (HANDOFF_round25 §0) — **a PR from this branch is the way in and carries everything**. |
-| Manuscript | `paper/v18/revised_paper_v18.tex` — **121pp total: main text ends p.92, Online Appendix pp.93–121** (designated in-document). Abstract **366 words**, one paragraph per line, 1342 lines. |
-| Gates | `python3 tools/liveness_gates.py` → **104 ALL PASS** (new: #102 elasticity exhibits, #103 buyback incidence, #104 verdict audit) |
-| Tests | `python3 -m pytest tests/` → **433 pass** |
+| Manuscript | `paper/v18/revised_paper_v18.tex` — **122pp total: main text ends p.87, Online Appendix pp.88–122** (wave 2a done) (designated in-document). Abstract **366 words**, one paragraph per line, 1342 lines. |
+| Gates | `python3 tools/liveness_gates.py` → **104 ALL PASS** (#103 now 8 spans: denomination resolution) (new: #102 elasticity exhibits, #103 buyback incidence, #104 verdict audit) |
+| Tests | `python3 -m pytest tests/` → **435 pass** |
 | Build | tectonic, 0 undefined refs. Worktree needs figure PNGs + `.env` symlinked from the main checkout. |
 | Letter | `response_to_referees_round22.tex` — current (§7 lists FOUR against-the-paper developments), gate #101 green, **STILL UNSENT — Eugene's** |
 
@@ -41,10 +41,13 @@ disposition of all 12 roadmap items).
 
 ## 2. WHAT IS OPEN
 
-1. **B1 wave 2 (optional, submission-time):** main text 92pp → ~60pp needs moving derivation-heavy blocks
-   (V.B detail, III.B, VII.I paragraph splits) whose callers say "Section shows…" — that crosses from moves
-   into reference re-wording. Budget a full session; consider compiling the Online Appendix as a separate
-   PDF in the same pass (compile-level split, not content).
+1. **B1 wave 2b (optional, submission-time):** wave 2a moved III.B+III.C (spec) and the notation
+   glossary — main text is 87pp. **The Danish gap is no longer sign-open:** the incidence bracket is
+   resolved by denomination (face = benchmark-consistent, +$61.2B stands; cash reversal = the foregone
+   par-windfall transfer), gate #103 pins both halves. The remaining ~25pp to the EIC's 55–60 is
+   results-and-qualifications prose: getting it out requires paragraph splits with deixis repairs
+   (VII.I class) or condensing results — the rewrite class the concision round proved dangerous.
+   Budget a full session with fresh eyes; consider a separate Online Appendix PDF in the same pass.
 2. **Send the letter** — Eugene only. It is current as of this round; anything further that changes a §7
    figure must update it in the same commit (gate #101 recomputes).
 3. **Push / PR** — Eugene only. Everything since round 24b is only on branches.
