@@ -47,6 +47,20 @@ def _para(tex: str) -> str:
     return lines[0]
 
 
+def _mutate_para(tex: str, old: str, new: str) -> str:
+    """Mutate INSIDE the assembly paragraph, not the first match in the file.
+
+    ROUND-24c: the sibling battery for gate #100 reported a hole that did not
+    exist, because `tex.replace(span, "", 1)` had deleted an earlier copy of the
+    span from the ABSTRACT and left the target paragraph untouched. Every span
+    in ASSEMBLY_SPANS happens to occur first in its own paragraph today, so the
+    naive form works here by luck. This removes the luck.
+    """
+    para = _para(tex)
+    assert old in para, f"{old!r} is not in the assembly paragraph"
+    return tex.replace(para, para.replace(old, new, 1), 1)
+
+
 def test_shipped_manuscript_passes(tex):
     ok, info = assembly_check(tex)
     assert ok, f"gate #98 fails on the shipped manuscript: {info}"
@@ -59,7 +73,7 @@ def test_shipped_manuscript_passes(tex):
 # --------------------------------------------------------------------------
 @pytest.mark.parametrize("key", sorted(ASSEMBLY_SPANS))
 def test_deleting_any_span_fails(tex, key):
-    mutated = tex.replace(ASSEMBLY_SPANS[key], "", 1)
+    mutated = _mutate_para(tex, ASSEMBLY_SPANS[key], "")
     assert mutated != tex, f"span {key} not found verbatim in the manuscript"
     ok, info = assembly_check(mutated)
     assert not ok, f"deleting span {key} left gate #98 green"
@@ -115,9 +129,9 @@ def test_commented_out_paragraph_fails(tex):
 def test_posture_softened_to_a_centre_claim_fails(tex):
     """`+5.6 is the center of the interval` is the reading the round rejected;
     it keeps every ladder rung and reverses the conclusion drawn from them."""
-    mutated = tex.replace(
-        "an upper-middle member of that interval rather than its center",
-        "the center of that interval", 1)
+    mutated = _mutate_para(
+        tex, "an upper-middle member of that interval rather than its center",
+        "the center of that interval")
     assert mutated != tex
     ok, _ = assembly_check(mutated)
     assert not ok
@@ -128,7 +142,7 @@ def test_censoring_disclaimer_removed_fails(tex):
     a third of the data`, which HANDOFF_round22 §8.2 records is false on two
     independent counts."""
     for key in ("censor_truncated", "censor_unweighted"):
-        mutated = tex.replace(ASSEMBLY_SPANS[key], "", 1)
+        mutated = _mutate_para(tex, ASSEMBLY_SPANS[key], "")
         ok, _ = assembly_check(mutated)
         assert not ok, f"{key} is not actually pinned"
 
@@ -138,7 +152,7 @@ def test_one_sided_assembly_fails(tex):
     case for a smaller headline, which the evidence does not support."""
     mutated = tex
     for key in ("counter_additive", "counter_fonseca", "counter_three_readings"):
-        mutated = mutated.replace(ASSEMBLY_SPANS[key], "", 1)
+        mutated = _mutate_para(mutated, ASSEMBLY_SPANS[key], "")
     ok, info = assembly_check(mutated)
     assert not ok and len(info["missing"]) == 3
 
@@ -154,7 +168,7 @@ def test_one_sided_assembly_fails(tex):
      "What the assembly settles is where the mass of the interval sits"),
 ])
 def test_benign_rewrites_stay_green(tex, old, new):
-    mutated = tex.replace(old, new, 1)
+    mutated = _mutate_para(tex, old, new)
     assert mutated != tex, f"benign fixture {old!r} is stale"
     ok, info = assembly_check(mutated)
     assert ok, f"benign rewrite tripped gate #98: {info}"

@@ -3981,3 +3981,197 @@ exists to close; neither is obviously right.
 
 This does not decide `HANDOFF_round24.md` §2. If Section IV is demoted the sentence shrinks with
 it; if it leads with the cross-design result, the sentence already carries that result.
+
+## 36. Round-24b: the front of the paper leads with the range (2026-07-27) — no runs
+
+`TECHNICAL.md` §35 put the posture in Section V.E and left the front of the paper alone. That
+was half a fix. The abstract, the introduction, Table 1, the literature comparison and the
+conclusion all still led with $+5.6$ and carried the range afterwards, so a reader met the
+point as the finding and the range as a caveat on it — the opposite of what V.E argues. Five
+sites reframed; posture chosen by Eugene as *range leads, point named inside*.
+
+**A correction to how this was first described.** The mechanical null already led in the
+abstract, the introduction and the conclusion; that part of the critique was overstated. The
+defect was narrower and entirely about the **marginal's own presentation**.
+
+### 36.1 What each site now says
+
+| site | before | after |
+|---|---|---|
+| abstract | "Lock-in itself adds $+5.6$ points… What the design pins down is a range around that" | "What lock-in itself adds is a range rather than a number… Inside that range, $+5.6$ points… is the value at the calibration I headline" |
+| introduction | $+5.6$, then $+4.3$ to $+6.8$ | $+4.3$ to $+6.8$ across the depth band, $+3.0$ to $+8.0$ once the floor's sampling error is propagated, **which is the binding layer**, then the point inside it |
+| `tab:headline` | value cell $+5.6$; uncertainty column had **no** binding layer | value cell is the interval with the point inside; uncertainty column leads with the floor-read bootstrap |
+| §II comparison | $+5.6$ percentage points | bounded between $+3.0$ and $+8.0$, $+5.6$ at the mid-grid anchor |
+| §VIII (×2) | a $+5.6$-point margin | a bounded margin, $+3.0$ to $+8.0$, point named inside |
+
+The introduction's change is the one that mattered most and was not on the list: it had been
+quoting only the **depth-cut band** $[+4.3, +6.8]$ as its uncertainty, which is the narrower,
+non-binding layer. `tab:headline` did not carry the binding layer at all.
+
+**One thing checked and deliberately NOT changed.** The definitions paragraph says the
+marginal's "operative uncertainty is the calibration-and-form envelope … rather than any
+sampling interval." That looks like it contradicts V.E's "binding layer," and does not: the
+box $[+2.1, +13.2]$ is wider than the floor-read interval, while "binding layer" ranks the
+floor's sampling error against the *other layers attaching to the off-window headline* — the
+depth convention and the loan/stratum bootstrap. Both statements are true and they are about
+different comparisons. Left alone.
+
+### 36.2 The frame is not decoration
+
+Every restatement carries "every correction **to the floor or to the accounting basis**."
+Without that frame the claim is false: the additive form ($+11.2$) and the Fonseca anchor
+($+11.5$) move the marginal up. `test_frame_dropped_from_the_corrections_claim_fails` exists
+because an unframed version is the single most likely way this sentence rots.
+
+### 36.3 Gate #99, and why the ordering assert carries it
+
+Span presence alone would not have caught the defect this round removed: **every span in
+`ABSTRACT_POSTURE` survives an abstract that states the point first and the range second.**
+The gate therefore asserts `index(range) < index(point)` inside the abstract environment, and
+`test_point_before_range_fails` checks that the *ordering* assert is what fires, not a missing
+span.
+
+`ABSTRACT_POSTURE` is **canonical-scoped**, a deliberate exception to gate C4's rule that every
+abstract check runs against every manuscript on disk. The archived long-abstract variant makes
+the same commitment in its own words ("a bounded range for the elasticity's contribution, not a
+pinned magnitude") and no span of *this* abstract occurs verbatim in it, so the alternatives
+were to rewrite an archive to suit a new pin or to leave the posture unpinned. The reasoning is
+in the gate header rather than only here.
+
+### 36.4 A gate caught a real break mid-edit
+
+Dropping "percentage points" from the §II sentence removed the only occurrence of the literal
+`$+5.6$ percentage points` and broke gate #55's `headline_marginal_pp`. Fixed in the tex, not
+the gate.
+
+### 36.5 The abstract is now 341 words
+
+263 after round 23's cut, 307 after §35.4's ABM sentences, **341** after this. Every addition
+was chosen deliberately and each is reversible, but the cumulative drift against Eugene's
+deliberate 263 is worth stating rather than discovering later. The compressible material is the
+two opening setup sentences (~42 words of framing before the first number); nothing else can go
+without dropping a pinned disclosure.
+
+## 37. Round-24c: Section IV leads with the cross-design result (2026-07-27) — no runs
+
+The recommendation of `HANDOFF_round25.md` §2.1, taken. Section IV opened with the production
+13.6% and treated the cross-design leg as a qualifier three sections later, so it read as if
+13.6% were the result. It is not: the same decision rule on real Freddie structural covariates
+recovers 59.3% on the committed draw and **60.2% over fifty seeds**, above the **50% threshold
+fixed before that run** at which the section's own paradigm reading is undercut, and
+undercutting on **all fifty** seeds. Emphasis changed; no number moved.
+
+### 37.1 What moved
+
+- **§IV title** → *Agent-Based Model Results: A Synthetic-Population Falsification Test*.
+- **§IV lead** opens with the cross-design leg and what bounds it, then names the production
+  estimate as the synthetic-population special case.
+- **§IV.A title** → *The Synthetic-Population Estimate: Baseline, Production, and Behavioral
+  Extensions*.
+- **§IV.C** now says the cross-design bears on the missing-mechanism versus missing-population
+  either-or and **narrows it without settling it**, because the behavioral layer stays synthetic
+  in both legs.
+
+### 37.2 Three bounds travel with the lead, and they are the point
+
+A lead that keeps 76.3% and drops any of these is an overclaim that leaves every number in
+place — the cheapest possible edit to that paragraph, and the one gate #100 exists to stop.
+
+1. The same reweight that lifts the recalibrated leg to 76.3% moves the **frozen** leg *down*
+   to 12.6%. Round 23 caught exactly this being quoted one-sidedly.
+2. The covariates swapped in are **structural only**; the loan records hold no analogue for
+   mobility desire or loss aversion, so no leg replaces a synthetic behavioral population with
+   a real one.
+3. The verdict is "**cannot**, on that test alone, be cleanly attributed to modeling paradigm"
+   — a limit on what the test resolves, not the verdict "is not a paradigm effect".
+
+### 37.3 The consistency point is stated in §IV, not left for a referee
+
+Section V.E **declines** this same cross-design number as evidence that the imported elasticity
+is too small, on the ground that a recovery level is not what that design identifies. Section IV
+now uses it as a **scope limit on its own verdict**, which is a narrower claim and survives that
+objection: it bounds the population over which a household-choice specification was shown to
+fail and says nothing about the size of the elasticity. Gate #100 asserts that V.E still
+declines it, so the two uses cannot drift apart without a gate failing.
+
+### 37.4 Two test defects, both mine, both found by the batteries
+
+1. **Repeating the paradigm hedge verbatim in §IV made it occur twice**, so
+   `RELOCATED_TO_BODY`'s single-site deletion mutation stopped biting. Repeating the hedge is
+   correct for the manuscript — a hedge should travel with the claim it scopes, and the claim is
+   now made in two places — so the fix is in the mutation, which now removes *every* occurrence.
+   That is what a whole-body PRESENCE rule actually promises. Recorded in the test file rather
+   than quietly patched.
+2. **The new battery reported a gate hole that did not exist.** `60.2\% averaged over fifty
+   seeds` occurs four times and the first is in the **abstract**, so `tex.replace(span, "", 1)`
+   deleted the abstract's copy and left the lead untouched. Both paragraph-scoped batteries now
+   mutate *inside* their target paragraph. The assembly battery had been working by luck; the
+   luck is removed. **A test that mutates the wrong text proves nothing in either direction** —
+   this is the round-22 §4.5 lesson ("when a check disagrees with an artifact, suspect the
+   check") in its testing form.
+
+### 37.5 Abstract
+
+341 → **328 words**: the two opening setup sentences compressed, keeping all three contract
+features (fixed rate, par repayment, non-portability). That is the only compressible material
+left, and the honest saving is 13 words rather than the 20-odd first estimated. Anything further
+means dropping a disclosure.
+
+## 38. Round-24d: the response letter, and the gate that reads it (2026-07-27)
+
+`paper/v18/response_to_referees_round22.tex` was drafted on 26 July and never sent. Within a
+day it was wrong in two places, and nothing caught it — **every gate in the suite reads the
+manuscript and no gate read the letter.** A wrong number in the manuscript meets a hundred
+checks; a wrong number in the letter meets a referee.
+
+### 38.1 What was stale
+
+| claim | was | is |
+|---|---|---|
+| form-conditional hull | `+3.9` to `+13.1` | `+3.5` to `+13.1` (round 23's `concave_hull_band_ends`) |
+| abstract length | "now stands at 424 words" | 263 after the round-23 cut, **328** now |
+
+The hull one mattered most: the manuscript's own zero-slack rule requires `$+3.9$ to $+13.1$` to
+appear **zero** times, and the letter was about to send it to a referee. It now appears once, in
+a sentence that marks it historical, with §7 explaining the widening.
+
+The abstract one changed the *substance* of a response. Item 9 had been **declined**, on the
+ground that cutting further meant deleting a disclosure. Half of that was wrong — a hedge only
+has to travel with the claim it scopes — and it is now answered as implemented, with the trail
+(424 → 263 → 328) rather than an endpoint.
+
+### 38.2 The new §7
+
+Six subsections, with the three that move **against** the paper placed first: the hull widened;
+there is no ABM counterpart to the β₁ = 0 null and the reason is structural (+270.4 against
+−105.3, opposite signs); and every floor-or-basis correction to the headline points down, which
+the paper now assembles in one place and commits a posture on. Then the censoring share with
+what does *not* follow from it, the §IV and Path A demotions, and the two null-result runs.
+
+All 28 numeric literals in §7 were checked to exist in the manuscript before the commit.
+
+### 38.3 Gate #101 is three narrow rules, not one broad one
+
+The letter is **partly historical** — §§1–6 legitimately describe the state at the time the
+report was answered — so "every literal must match the manuscript" would be the wrong rule and
+would fire on correct prose. Instead, each rule is aimed at a way the letter actually rotted or
+could:
+
+1. the retired hull literal may appear **only** inside the sentence marking it historical;
+2. the stated abstract word count must equal the **recomputed** one (`abstract_hedge_check` is
+   reused rather than a number being trusted);
+3. every present-tense figure in §7 must still exist in the manuscript — §7 is the section that
+   speaks in the present tense, so it is the section that must track.
+
+The battery mutates a **scratch copy** of the letter via `monkeypatch`, because this rule reads
+from disk rather than taking text as an argument, and a mutation left behind in a shipped file
+is exactly the accident `HANDOFF_round22.md` §4.3 records. A final test asserts the real letter
+is untouched.
+
+### 38.4 The counts rotted inside the same session
+
+The letter's §7 originally stated "100 checks and 372 tests". Adding gate #101 and its battery
+made that wrong within the hour. The counts were removed rather than corrected: they live in the
+manuscript, where something checks them, and **a count quoted in a letter is a number with
+nothing behind it.** That is the same lesson as the rest of this section, arriving fast enough
+to be instructive.

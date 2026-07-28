@@ -6,6 +6,9 @@
 % "Mortgage Lock-In and the Federal Reserve's Quantitative
 %  Tightening Shortfall"
 % Sixteen-item report across three tiers.
+% Point-by-point drafted 26 July 2026; Section 7 added 27 July 2026
+% recording what changed in the manuscript between drafting and sending.
+% NOT SENT.
 % Section references are to revised_paper_v18.tex; every numeric
 % value is drawn from a committed run artifact or from the code
 % path named inline.
@@ -25,9 +28,11 @@
 \large Manuscript: \emph{Mortgage Lock-In and the Federal Reserve's
 Quantitative Tightening Shortfall}\\[0.2em]
 \normalsize Sixteen-item report: Danish counterfactual, fit statistics,
-floor form, and estimator scope}
+floor form, and estimator scope\\[0.2em]
+\footnotesize Point-by-point drafted 26 July 2026; \S7 records what changed in the
+manuscript between drafting and sending}
 \author{}
-\date{26 July 2026}
+\date{27 July 2026}
 
 \begin{document}
 \sloppy
@@ -171,8 +176,9 @@ prong you identified as still open was open, and it refuted a claim I was making
 implicitly.}
 
 The additive competing-risks form had been run at the production floor and at the
-three off-window anchors, giving a form-conditional identified range of $+3.9$ to
-$+13.1$ points. Your specific charge --- that the concave-transform check had
+three off-window anchors, giving a form-conditional identified range that stood at
+the time at $+3.9$ to $+13.1$ points. That range has since widened, against me, and
+I take it up in \S7. Your specific charge --- that the concave-transform check had
 been executed inside the censoring regime it needed to escape --- was correct:
 \run{concave\_marginal} ran under the hard-maximum form only.
 
@@ -296,14 +302,173 @@ claim reduces to the marginal being bounded by the excess of the null hazard ove
 the floor, and to zero where the floor binds --- a property of the production form
 that lifts under the additive one.
 
-Two items I have \emph{not} implemented, with reasons. Item~9's abstract remains
-longer than you would like: cutting it further requires deleting a disclosed
-result, and each candidate is a disclosure a prior round added deliberately. It
-now stands at 424 words. And item~12(a)'s Ginnie overlay is promoted into
-Table~1 but not made the headline level, because \$27.8 billion of the raw
-adjustment is a component common to any observed-series overlay; I have labelled
-it an accounting-correction variant instead, and I am glad to go further if you
-think that understates it.
+One item I have \emph{not} implemented, with a reason. Item~12(a)'s Ginnie overlay
+is promoted into Table~1 but not made the headline level, because \$27.8 billion of
+the raw adjustment is a component common to any observed-series overlay; I have
+labelled it an accounting-correction variant instead, and I am glad to go further if
+you think that understates it.
+
+Item~9 I declined when I first drafted this section, on the ground that cutting the
+abstract further meant deleting a disclosed result and that each candidate was a
+disclosure a prior round had added deliberately. It stood at 424 words. That
+argument was half right, and I have since acted on the half that was wrong: a hedge
+only has to travel with the claim it scopes, so when five claims left the abstract
+their hedges could leave with them, provided they were pinned somewhere the reader
+still meets them. They are --- against the body, by a verification rule written for
+the purpose --- and nothing was de-hedged. The abstract went to 263 words. Two
+deliberate additions have since taken it to 328 words: returning the agent-based model to
+it, which the cut had orphaned against a section the model still occupies, and
+reporting the lock-in contribution as a range rather than as a point (\S7). I would
+rather give you the trail than the endpoint, since the endpoint is longer than 263
+and the direction of travel is the honest part.
+
+\section{Changes since this response was drafted}
+
+The point-by-point above was written on 26 July 2026 and this letter was not sent
+that day. Rather than leave it describing a manuscript that no longer exists, I
+record here what has changed. Three of the six items below move \emph{against} the
+paper, and those are the ones I would read first.
+
+\subsection{The form-conditional hull widened at the bottom}
+
+A pre-committed run (\run{concave\_hull\_band\_ends}) closed the sixteen concave
+off-window cells the grid was missing, completing the form $\times$ transform product
+at thirty-six of thirty-six. Seventeen of the eighteen concave cells fall inside the
+hull I quoted in \S3. The eighteenth does not: concave under the hard-maximum form at
+the highest defensible floor and the elasticity band's low edge returns $+3.53$
+points, below the $+3.89$ lower edge the log-linear cells had set. The
+form-conditional range is therefore $+3.5$ to $+13.1$ points rather than the range
+\S3 quotes, and the manuscript carries the wider figure throughout. The upper edge is unchanged,
+because the concave transform is signed downward and its highest cell reaches only
+$+10.83$.
+
+\subsection{There is no ABM counterpart to the $\beta_1 = 0$ null, and the reason is
+structural}
+
+You did not raise this, and you would have. The paper insists that levels do not
+identify and that only the central-minus-null differential does, and then conducts the
+entire ABM comparison on levels. I tried to build the missing null
+(\run{abm\_null\_feasibility}) and it is \textbf{not feasible}, for a reason worth
+stating rather than burying: Path~B's elasticity is a separable term over a floor that
+is measured independently and survives its removal, whereas the ABM's 4--5\%
+involuntary floor is not a term in its move rule at all but a \emph{product} of it,
+obtained by searching the mobility-desire scale until the penalty-bearing rule returns
+4--5\% CPR at an 8\% rate. Zeroing the penalty removes the floor along with the
+channel. Holding the scale fixed gives a leg scoring $-259$\% of the benchmark;
+re-deriving it gives $+116$\%. The implied marginals are $+270.4$ and $-105.3$ points
+--- they disagree in \emph{sign}, and neither is interpretable. I therefore report no
+ABM differential and say so where the contrast is drawn. The estimator comparison
+remains a comparison of levels, now with its limitation named rather than implied.
+
+\subsection{Every correction to the headline points the same way, and the paper now
+says so in one place}
+
+This is the change I expect you to care about most, and it was not on your list. Each
+downward correction to the lock-in marginal was disclosed in the section that produced
+it and nowhere together: the in-sample calibration returns $+9.2$ points, re-anchoring
+the floor off window returns $+5.6$, the Ginnie overlay at that same floor returns
+$+4.4$, an age-standardised floor read implies near $+3.8$, and an independent Fannie
+Mae read of the same off-window cell (5.52\%) sits above the clean band and brackets
+the marginal below $+4.3$. Composing the overlay with the age-standardised floor ---
+a composition neither run establishes --- would put it near $+3.0$.
+
+A reader assembling those in their head reaches a conclusion the sections never state,
+so the manuscript now performs the assembly itself, in one paragraph, and commits to a
+posture: holding the production form and the imported elasticity fixed, every
+correction to the floor or to the accounting basis moves the headline down; the
+binding uncertainty layer is the floor reads' own cluster bootstrap, $+3.0$ to $+8.0$
+points; the headline sits just above that interval's midpoint while every correction
+falls in its lower half; and $+5.6$ is therefore an upper-middle member of the range
+rather than its centre. I publish no composed point, because the one joint cell this
+paper has run for two adjustments returned an interaction of $-1.47$ points.
+
+Two things keep that from being a retraction, and both are in the same paragraph. The
+interval does not contain zero, and the sign is fixed by the window's rate
+configuration rather than by any of these calibrations. And the corrections that are
+not floor corrections run the other way: the additive form returns $+11.2$ points at
+the same anchors, the Fonseca--Liu (2024) anchor would put the marginal at $+11.5$
+at the production floor, and the three readings I decline elsewhere all point to a
+larger channel, not a smaller one.
+
+The front of the paper has been rewritten to match. The abstract, the introduction,
+Table~1 and the conclusion now lead with the range and name $+5.6$ inside it, where
+they previously led with the point and carried the range afterwards. Two defects
+surfaced in the course of that: the introduction had been quoting only the depth-cut
+band, $+4.3$ to $+6.8$, as its uncertainty --- the narrower, non-binding layer --- and
+Table~1 carried no binding layer at all.
+
+\subsection{The censoring share, and what does not follow from it}
+
+At the off-window floor the paper headlines, the central leg's hazard is pinned to the
+involuntary floor in 68.8\% of evaluated loan-months, against 36.3\% at the in-sample
+calibration point. That is now disclosed where the identification is argued, together
+with what does \emph{not} follow from it, because the obvious reading is wrong twice
+over: a pinned month's contribution is \emph{truncated} at the floor rather than
+erased --- the $\beta_1 = 0$ leg is pinned in only 35.8\% of loan-months at the same
+floor, so the two legs still separate wherever the null clears it --- and these are
+unweighted loan-month counts rather than balance-weighted shares, so nothing follows
+about what fraction of the dollar marginal the uncensored months carry.
+
+\subsection{Two estimators demoted in presentation, with no result touched}
+
+Your items 4 and 5 both pointed at exhibits carrying more prominence than their
+evidential standing. I have gone further than the report asked in both cases, and
+neither change moves a number.
+
+Section~IV now \emph{leads} with the cross-design result rather than the production
+13.6\%: the same decision rule on real Freddie structural covariates recovers 60.2\%
+averaged over fifty seeds, above the 50\% threshold fixed before that run at which the
+section's own paradigm reading is undercut. The production estimate is named as the
+synthetic-population special case, which is what it is. Three bounds travel with that
+lead wherever it appears --- the same reweight that lifts the recalibrated leg to
+76.3\% at book composition moves the frozen leg \emph{down} to 12.6\%; the covariates
+swapped in are structural only, so no leg replaces a synthetic behavioural population
+with a real one; and the verdict is that the contrast cannot, on that test alone, be
+cleanly attributed to modelling paradigm rather than to calibration and data source.
+
+Path~A occupied three of the paper's first seven tables while its refit-and-resimulate
+interval spans zero and its sign claim was retracted in response to your item~5. Its
+estimation-panel and bootstrap tables have moved to the appendix verbatim; one
+diagnostic table remains in the body. No cell, note or caveat was edited --- in
+particular the \$598.9 billion bootstrap mean of \S5 travels with its table.
+
+\subsection{Two further pre-committed runs, both null results}
+
+The benchmark is convention-dependent, and I now measure by how much. Rebasing the
+\$764.7 billion cap-shortfall from calendar months to settlement months
+(\run{settlement\_months\_benchmark}) moves it to \$722.7 billion, $-5.5$\%, and the
+entire shift is mechanical: the QT window is half-open, so cap convolved past the
+window's end drops out, and that dropped quantity equals the shift exactly. No dollar
+figure in the paper moves --- the marginal is \$42.6 billion on either denominator ---
+and the calendar convention remains production, as pre-committed.
+
+The production 43\% DTI threshold sat at the minimum of its own sweep, which reads
+badly (\run{dti\_nonmonotonicity\_decomposition}). It is an artifact of the
+floor-retention rule, which re-calibrates the mobility scale only where the fixed-scale
+floor leaves the observed band, and across those thresholds fires exactly once. Hold
+the scale still and the sweep is monotone. No headline moves under either branch,
+which was pre-committed.
+
+\subsection{Verification}
+
+The suite has grown by roughly a tenth in checks and a third in tests since the
+point-by-point above; the current counts are stated in the manuscript rather than
+here, because a count quoted in a letter is a number with nothing checking it.
+
+Several of the additions pin \emph{prose} rather than numbers, which is new. The
+assembly paragraph and the abstract's ordering are checked as contiguous spans within
+a single paragraph, because every literal in them already occurs elsewhere in the
+manuscript and a whole-file count would be satisfied by the very scattering they exist
+to end; and two of the checks assert an \emph{order} rather than a presence, because
+every span survives the arrangement each was written to prevent.
+
+Each new check was mutation-tested, and the exercise earned its keep twice. One
+battery found that the check it was written for had failed to pin its own headline
+number --- the censoring share, which was the whole point of that check. Another
+reported a failure that turned out to be the test's fault rather than the check's: it
+had deleted an earlier copy of the span from a different section and left the target
+untouched. This letter is now covered too, which is what should have been true when I
+first drafted it.
 
 \vspace{1em}
 \noindent Thank you again. The report cost me more runs than any previous one and

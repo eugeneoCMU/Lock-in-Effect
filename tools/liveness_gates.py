@@ -391,6 +391,183 @@ ASSEMBLY_SPANS = {
 }
 
 
+# --- Round-24b (gate #99): THE ABSTRACT LEADS WITH THE RANGE ---------------
+# Section V.E's seventh qualification argues that the identified content is the
+# range and that $+5.6$ is an upper-middle member of it. Until this round the
+# abstract, the introduction, Table 1 and the conclusion all led with the point
+# and carried the range afterwards, so the front of the paper argued against its
+# own Section V.E. Fixing the four sites is worth nothing if the next concision
+# pass quietly puts the point back in front, which is what this gate is for.
+#
+# CANONICAL-ONLY, and that is a deliberate exception to gate C4's rule that
+# every abstract check runs against every manuscript on disk. The archived
+# long-abstract variant makes the same commitment in its own words ("a bounded
+# range for the elasticity's contribution, not a pinned magnitude"), and no span
+# expressing THIS abstract's version occurs verbatim in it. The alternatives
+# were to rewrite an archive to suit a new pin, or to leave the posture
+# unpinned; a canonical-scoped dict is better than either, and putting these in
+# ABSTRACT_HEDGES would simply have failed the variant.
+#
+# The ORDERING assert is the load-bearing half. Every span below survives an
+# abstract that states the point first and the range second -- which is exactly
+# the arrangement this round removed -- so a span check alone would not have
+# caught the defect it exists to prevent.
+ABSTRACT_POSTURE = {
+    "range_not_number": "What lock-in itself adds is a range rather than a number",
+    "interval": "The design pins it between $+3.0$ and $+8.0$ points",
+    "point_named_inside": "Inside that range, $+5.6$ points, or \\$42.6 billion, is the "
+                          "value at the calibration I headline",
+    # the frame is not decoration: WITHOUT it the claim is false, because the
+    # additive form (+11.2) and the Fonseca anchor (+11.5) move the marginal UP.
+    # Only floor and accounting-basis corrections run one way.
+    "corrections_framed": "every correction I can measure to the involuntary-turnover floor "
+                          "or to the accounting basis moves it down within the range rather "
+                          "than up",
+}
+
+
+def abstract_posture_check(tex: str) -> tuple[bool, dict]:
+    """Gate #99's rule, as a function so the battery exercises the shipped rule."""
+    tex_nc = re.sub(r"(?<!\\)%.*", "", tex)
+    _i = tex_nc.find(ABSTRACT_BOUNDS[0])
+    _j = tex_nc.find(ABSTRACT_BOUNDS[1], _i + 1)
+    found = _i != -1 and _j != -1
+    abstract = tex_nc[_i + len(ABSTRACT_BOUNDS[0]):_j] if found else ""
+    missing = sorted(k for k, v in ABSTRACT_POSTURE.items() if v not in abstract)
+    # the range must be stated BEFORE the point it contains
+    i_range = abstract.find("$+3.0$ and $+8.0$")
+    i_point = abstract.find("$+5.6$ points")
+    ordered = i_range != -1 and i_point != -1 and i_range < i_point
+    return (found and not missing and ordered,
+            {"found": found, "missing": missing, "ordered": ordered,
+             "i_range": i_range, "i_point": i_point})
+
+
+# --- Round-24c (gate #100): SECTION IV LEADS WITH THE CROSS-DESIGN ---------
+# Section IV used to open with the production 13.6% and mention the cross-design
+# leg as a qualifier three sections later, so it read as if 13.6% were the
+# result. It is not: the same rule on real structural covariates recovers 60.2%
+# over fifty seeds, above the 50% threshold fixed BEFORE that run at which this
+# section's paradigm reading is undercut, and undercutting on all fifty. The
+# section now leads with that and frames the production estimate as the
+# synthetic-population special case.
+#
+# This whole reframing was, before this gate, entirely unpinned prose -- the
+# case HANDOFF_round22 §4.2 warns about, where a green suite says nothing
+# because no literal moved. Paragraph-scoped for gate #98's reason.
+#
+# THE THREE BOUNDS ARE THE POINT. Round 23 caught the reweight being quoted
+# one-sidedly (the same reweight moves the FROZEN leg down to 12.6%), and the
+# behavioral layer stays synthetic in both legs. A lead that keeps 76.3% and
+# drops either bound is exactly the overclaim this gate exists to prevent, and
+# it is the cheapest edit anyone would make to this paragraph.
+#
+# The ORDERING assert carries the "leads with" half: every span below survives a
+# paragraph that states the falsification verdict first and the cross-design
+# afterwards, which is the arrangement round 24c removed.
+ABM_LEAD_OPENER = "This section is a falsification test"
+ABM_LEAD_SPANS = {
+    "leads_with_scope": "the first thing to report about it is what its own cross-design leg "
+                        "establishes about its scope",
+    "crossdesign_level": "60.2\\% averaged over fifty seeds",
+    "threshold_precommitted": "above the 50\\% threshold fixed before that run",
+    "reweighted": "76.3\\% once the sample is reweighted to the SOMA book's own coupon "
+                  "composition",
+    # bound 1: the reweight cuts both ways (round-23 catch)
+    "bound_frozen_leg": "the same reweight moves the frozen-calibration leg the other way, "
+                        "down to 12.6\\%",
+    # bound 2: this is not a real population
+    "bound_behavioral_synthetic": "no leg here replaces a synthetic behavioral population "
+                                  "with a real one",
+    # bound 3: the verdict is "cannot attribute", not "is not a paradigm effect"
+    "bound_verdict_wording": "cannot, on that test alone, be cleanly attributed to modeling "
+                             "paradigm",
+    # and the verdict the section actually delivers, confined
+    "verdict_confined": "What this section falsifies is therefore a \\emph{synthetic-population} "
+                        "household-choice specification",
+}
+
+
+# --- Round-24c (gate #101): THE RESPONSE LETTER MUST NOT GO STALE ----------
+# `response_to_referees_round22.tex` was drafted on 26 July and not sent. By the
+# next day it stated a form-conditional hull the manuscript had already widened
+# (+3.9 vs +3.5) and an abstract word count off by 96. Nothing checked it,
+# because every gate in this file reads the manuscript.
+#
+# That is the highest-stakes rot in the repository: the manuscript's errors are
+# caught by 100 checks, and the letter's errors go to a referee.
+#
+# The letter is PARTLY HISTORICAL, so "every literal must match the manuscript"
+# would be the wrong rule -- §1-§6 legitimately describe the state at the time
+# the report was answered. The rule is therefore three narrow ones, each aimed
+# at a way the letter actually rotted or could:
+#
+#   (a) the retired hull literal may appear ONLY inside the sentence that marks
+#       it historical. This is the exact defect that was found;
+#   (b) the letter's claim about the abstract's length must equal the abstract's
+#       actual length, recomputed here rather than trusted;
+#   (c) every current-state figure §7 quotes must still exist in the manuscript.
+#       §7 is the section that speaks in the present tense, so it is the section
+#       that must track.
+LETTER = ROOT / "paper" / "v18" / "response_to_referees_round22.tex"
+LETTER_CURRENT_SECTION = "\\section{Changes since this response was drafted}"
+LETTER_RETIRED_HULL = "$+3.9$ to $+13.1$"
+LETTER_HISTORICAL_MARKER = "range that stood at\nthe time at $+3.9$ to $+13.1$ points. That range has since widened"
+LETTER_CURRENT_LITERALS = [
+    "$+3.5$ to $+13.1$",   # the hull, as it now stands
+    "$+3.0$ to $+8.0$",    # the binding layer the posture is stated against
+    "$+3.53$", "$+10.83$",  # the cell that widened it, and the concave ceiling
+    "$+270.4$", "$-105.3$",  # the ABM null's sign disagreement
+    "68.8\\%", "35.8\\%",   # the censoring shares, central and null legs
+    "60.2\\%", "76.3\\%", "12.6\\%",  # cross-design, and the reweight's other side
+    "$-1.47$",              # the interaction that forbids a composed point
+    "$+11.2$", "$+11.5$",   # the two corrections that run the other way
+]
+
+
+def letter_check(tex: str) -> tuple[bool, dict]:
+    """Gate #101's rule, as a function so a battery can exercise it."""
+    if not LETTER.exists():
+        return False, {"exists": False}
+    letter = LETTER.read_text()
+    i = letter.find(LETTER_CURRENT_SECTION)
+    current = letter[i:] if i != -1 else ""
+    # (a) the retired hull literal, only where it is marked historical
+    hull_hits = letter.count(LETTER_RETIRED_HULL)
+    hull_ok = hull_hits == 0 or (hull_hits == 1
+                                 and LETTER_HISTORICAL_MARKER in letter)
+    # (b) the stated abstract length must equal the measured one
+    _, ab = abstract_hedge_check(tex)
+    claimed = re.findall(r"taken it to (\d+) words", letter)
+    words_ok = len(claimed) == 1 and int(claimed[0]) == ab["words"]
+    # (c) every current-state figure must still be in the manuscript
+    drifted = [lit for lit in LETTER_CURRENT_LITERALS
+               if lit in current and lit not in tex]
+    absent = [lit for lit in LETTER_CURRENT_LITERALS if lit not in current]
+    return (i != -1 and hull_ok and words_ok and not drifted and not absent,
+            {"exists": True, "has_current_section": i != -1, "hull_ok": hull_ok,
+             "claimed_words": claimed, "actual_words": ab["words"],
+             "drifted": drifted, "absent": absent})
+
+
+def abm_lead_check(tex: str) -> tuple[bool, dict]:
+    """Gate #100's rule, as a function so the battery exercises the shipped rule."""
+    tex_nc = re.sub(r"(?<!\\)%.*", "", tex)
+    paras = [ln for ln in tex_nc.split("\n") if ln.startswith(ABM_LEAD_OPENER)]
+    line = paras[0] if len(paras) == 1 else ""
+    missing = sorted(k for k, v in ABM_LEAD_SPANS.items() if v not in line)
+    # the cross-design must be stated BEFORE the falsification verdict it scopes
+    i_cross = line.find("60.2\\%")
+    i_verdict = line.find("no specification tested here explains")
+    ordered = i_cross != -1 and i_verdict != -1 and i_cross < i_verdict
+    # and Section V.E must still DECLINE the same number, or the consistency
+    # paragraph below the lead is talking about something that is not there
+    ve_declines = "the third is a recovery level, which this design does not identify" in tex_nc
+    return (len(paras) == 1 and not missing and ordered and ve_declines,
+            {"paragraphs": len(paras), "missing": missing, "ordered": ordered,
+             "ve_declines": ve_declines})
+
+
 def assembly_check(tex: str) -> tuple[bool, dict]:
     """Gate #98's rule, as a function so the perturbation battery exercises THE
     SHIPPED RULE rather than a copy of it (gate #68's header explains why that
@@ -4280,6 +4457,28 @@ def main() -> int:
           f"paragraphs={_asm['paragraphs']} (want 1), "
           f"{len(ASSEMBLY_SPANS) - len(_asm['missing'])}/{len(ASSEMBLY_SPANS)} "
           f"spans present, missing={_asm['missing'] or 'none'}")
+
+    post_ok, _post = abstract_posture_check(tex)
+    failures += 0 if post_ok else 1
+    print(f"[{'PASS' if post_ok else 'FAIL'}] abstract leads with the range (gate #99): "
+          f"{len(ABSTRACT_POSTURE) - len(_post['missing'])}/{len(ABSTRACT_POSTURE)} spans "
+          f"present, range-before-point={_post['ordered']} "
+          f"(idx {_post['i_range']} vs {_post['i_point']}), "
+          f"missing={_post['missing'] or 'none'}")
+
+    abml_ok, _abml = abm_lead_check(tex)
+    failures += 0 if abml_ok else 1
+    print(f"[{'PASS' if abml_ok else 'FAIL'}] Section IV leads with the cross-design (gate "
+          f"#100): {len(ABM_LEAD_SPANS) - len(_abml['missing'])}/{len(ABM_LEAD_SPANS)} spans "
+          f"present, cross-design-before-verdict={_abml['ordered']}, "
+          f"V.E-still-declines={_abml['ve_declines']}, missing={_abml['missing'] or 'none'}")
+
+    let_ok, _let = letter_check(tex)
+    failures += 0 if let_ok else 1
+    print(f"[{'PASS' if let_ok else 'FAIL'}] response letter tracks the manuscript (gate "
+          f"#101): retired-hull-confined={_let.get('hull_ok')}, abstract-words "
+          f"claimed={_let.get('claimed_words')} actual={_let.get('actual_words')}, "
+          f"drifted={_let.get('drifted') or 'none'}, absent={_let.get('absent') or 'none'}")
 
     print(f"\n{'ALL GATES PASS' if failures == 0 else f'{failures} GATE(S) FAILED'}")
     return 0 if failures == 0 else 1
