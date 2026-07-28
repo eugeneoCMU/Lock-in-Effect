@@ -605,3 +605,22 @@ Two repairs appear under two dimensions each and must be executed ONCE, not twic
 2. **SMD two-moment infeasibility promotion** — rigor's LOW entry and coherence's MEDIUM entry both insert near-identical sentences at the SAME point, tex 188 (§IV interpretation). Landing both verbatim would duplicate the sentence. Execute the coherence variant (MEDIUM, slightly fuller) once; count the rigor entry satisfied by it.
 
 Verified by the coordinating session before this file entered the repo: tex 461's renormalization sentence (the K1 kill's load-bearing fact) verbatim; the outcome-holdout/"without exception" disclosures at exactly tex 80, 663, 730; tex 188's content; the Graybill absence from tex 243–295.
+
+---
+
+## Execution log — 2026-07-28, same day (Eugene: "1 yes, 2 yes, 3 no, 4 yes")
+
+The queued re-review repairs landed first, per this file's sequencing rule:
+- **NEW-2 + NEW-6a** (`5e5dee6`): L43's stale posture clause replaced with the L369 phrasing verbatim; the promoted appendix section's "This subsection" deixis fixed. Gate #104's `intro_pointer`, the L43 "positive at every" occurrence, and its binding-interval literal all preserved.
+- **NEW-1** (`c5f68b2`) — **executed literal-neutral**: the binding interval entered §II in its and-form (`$+2.8$ and $+8.7$`, the abstract's own form), so the ×7/×5 zero-slack counts never moved and no gate/test/letter update was needed. The percentile's bare and-form is gone; a wild-cluster qualifier and under-coverage label are in the sentence.
+- **NEW-3** (`8e2bb50`): §VI.C's summary now carries the incidence scope and denomination resolution with a pointer to the pricing section; the conclusion's par-crediting cross-ref re-aimed from `sec:abm-danish` to `sec:pathb`. Gate #103's `conclusion_sign` span untouched.
+- **NEW-4** (`431a8db`): the seasonal-timing verdict row relabeled `Pass weakened: rule met as written; the timing claim withheld, levels only (against the headline)` — matching the caption's own taxonomy and the sibling rows' label.
+- **NEW-5** (`95d9f6c`): letter §7 gains an eighth (presentational) item covering the online appendix, both elasticity exhibits, and the audit table; "Four of the **eight** items"; the "Two things"/"Three things" enumeration reconciled with manuscript L369, `$+11.2$`/`$+11.5$` kept inside the §7 window.
+
+Then the approved posture set:
+- **Posture #4** (`d600273`): inline `\par` at the "accounts for 91.3%." seam; abstract 366→367 words; letter recount and BOTH hard-coded test literals updated in the same commit; **366 added to the wrong-count parametrization** (the round-26 lesson: the wrong-count list carries every count that was ever true). 436 tests.
+- **Posture #1** (`a6db8dd`): the paired design-crossing claimed at the L102 tail as a validation design in its own right; the ex-ante-thresholds clause scoped to the cross-design leg only; **indirect inference named as the nearest relative** per the external literature check (verdict SUPPORTED-WITH-CAVEAT: Platt 2020 and the Fagiolo-authors' JASSS companion read in full text; the 2017 successor survey and the 2024 JASSS overview also checked; none names the pair).
+- **Posture #2** (`1a6287d`): VII.F split — the sweep-mechanics paragraphs, `tab:lowband`, the contamination-separation paragraphs, `tab:floorband`, and `tab:oosfloor` moved verbatim to a new `app:floormech`; a pointer paragraph in VII.F; **two positional-deixis repairs on kept lines** (the "stability threshold above" and "2019 leg was rejected above" callers now cite the appendix). Manuscript now 1356 lines.
+- **Posture #3: declined by Eugene.** No submission-variant abstract; the ≤150-word remedy stays declined.
+
+**Final state: 104 gates ALL PASS · 436 tests · zero-slack counts unchanged (7/5/7/5/6/8/10/11/0) · build 123pp, 0 undefined refs · conclusion p.78 · Online Appendix pp.85–123 · app:floormech p.105 · main text ends ~p.84 (was 87).** Everything else in this file — the wording/structural survivor set — remains unexecuted and is the natural queue for a next session; observe the dedup note above.

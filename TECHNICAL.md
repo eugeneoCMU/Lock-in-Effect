@@ -4197,3 +4197,21 @@ Abstract: form-conditional hull + few-cluster qualifier + null-floor-behavioral 
 
 ### 39.6 Bookkeeping deltas a future session must know
 Zero-slack recount: `$+2.8$ to $+8.7$` **7** · `$+3.0$ to $+8.0$` **5** (demoted) · `$+3.5$ to $+13.1$` **7** · `11.06` **5** (the verdict table's "11.06-point envelope" row added one) · `positive at every` 6 · `76.3\%` 8 · `60.2\%` 10 · `13.6\%` 11 · `$+3.9$ to $+13.1$` 0. Letter word-count claim: **366**. Letter current-literals gained `$+2.8$ to $+8.7$` and `$-\$89.4$ to $-\$117.7$ billion`. Batteries: gate #102/#103/#104 mutations remove ALL occurrences (presence-gate power; the run tag appears twice — known single-site limit recorded in the tests).
+
+## 40. Round-27: re-review verification, score-improvement plan, and the approved posture set (2026-07-28)
+
+One session on `claude/paper-v18-review-plan-5b7b5e` (continues the round-26 branch). Three deliverables plus an execution pass; end state **104 gates ALL PASS, 436 tests, 1356 lines, 123pp (main text ends ~p.84; Online Appendix pp.85–123), abstract 367 words in two paragraphs, 0 undefined refs.**
+
+### 40.1 Panel re-review (verification mode)
+ARS re-review (roadmap checklist → per-item EIC verification by 4 read-only agents → synthesis; every quoted claim independently re-verified against the tex). **Decision: Minor Revision** (`REREVIEW_v18_panel_2026-07-28.md`, commit `263fcb0`). Traceability: B3/B4/B6/B7/B8/B9/A1 FULLY addressed; B1/B2/A2 PARTIAL; B5 NOT (disclosed ×4). The finding that matters: **two variant-phrased lines survived the round-26 restatement, the zero-slack literals, AND the gates** — L96's and-form interval and L43's stale posture clause. Lesson: literal sweeps must grep variant phrasings (and-forms, bracket forms), not just the pinned literal.
+
+### 40.2 Score-improvement plan
+12-agent propose+verify workflow over the six rubric dimensions → **35 surviving proposals (14 keep / 21 amend), 4 kills** (`PLAN_score_improvements_2026-07-28.md`, commit `16991a5`; Opus-drafted, Fable-verified). The rigor kill is the batch's most valuable negative result: a plausible "outcome holdout" for Path B's level is partially circular because the engine renormalises the simulated pool to realized Fed holdings monthly (tex's own disclosure) — do not resurrect.
+
+### 40.3 The approved posture set (Eugene: "1 yes, 2 yes, 3 no, 4 yes")
+Commits `5e5dee6..1a6287d`; details in the plan file's execution log. Gotchas earned this round:
+- **NEW-1 was literal-neutral by design:** quoting the binding interval in its and-form left every zero-slack count untouched — the same variant-phrasing that caused the miss enables the count-neutral fix.
+- **The letter word-count battery's two hard-coded literals silently no-op when the count changes** (same vacuity class as round 26's mutation-literal lesson). Both re-anchored at 367; 366 joined the wrong-count parametrization.
+- **`app:floormech` landed after the old L1207 nocite block — deliberately outside the ledger's find-window** (`\section` after L741 truncates it; liveness_gates ledger rule).
+- **The `\par` is inline** (no newline) so gate C4's line-count parity holds; the variant's line 30 is untouched by design.
+- Two positional-deixis repairs were the split's only non-verbatim edits: kept-line callers of the stability threshold and the 2019-leg rejection now cite `Appendix~\ref{app:floormech}`.
