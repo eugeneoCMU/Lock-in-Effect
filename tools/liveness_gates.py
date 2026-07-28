@@ -536,6 +536,42 @@ LETTER_CURRENT_LITERALS = [
 ]
 
 
+# --- Round-26 (gate #102): THE ELASTICITY-DISCIPLINE EXHIBITS --------------
+# The round-26 panel's consensus-3 finding (R1-W3 / R2-W2 / DA-C2, verified
+# CONFIRMED) was that the imported elasticity is undisciplined by the paper's
+# own data and the manuscript never showed what the marginal would be at any
+# smaller elasticity or narrower hazard share. Two pre-committed runs now
+# price both dimensions (band_low_extension: the marginal as a curve in the
+# elasticity below the adopted band; moving_share_bracket: the gap response
+# confined to a share s of the voluntary hazard), and these spans keep the
+# exhibits, their run tags, their key values, and their descriptive posture
+# in the manuscript. Whole-file presence: each span is unique prose, not a
+# scattered literal, so paragraph scoping buys nothing here.
+ELASTICITY_DISCIPLINE_SPANS = {
+    "curve_run_tag": "\\texttt{band\\_low\\_extension}",
+    "curve_table": "\\label{tab:lowband}",
+    "curve_half_central": "$+5.1$ points ($+\\$39.1$ billion) at the in-sample "
+                          "floor and $+3.5$ points ($+\\$26.5$ billion) at the "
+                          "headline off-window floor",
+    # the posture sentence is the load-bearing half: without it the curve
+    # reads as identifying the elasticity, which it does not.
+    "curve_posture": "prices the dependence on the imported elasticity rather "
+                     "than identifying it",
+    "bracket_run_tag": "\\texttt{moving\\_share\\_bracket}",
+    "bracket_values": "$+\\$37.7$ billion ($+4.9$ points) at $s = 0.5$ and "
+                      "$+\\$19.2$ billion ($+2.5$ points) at $s = 0.25$",
+    "bracket_posture": "$s$ is a bracketing parameter rather than an estimate",
+}
+
+
+def elasticity_discipline_check(tex: str) -> tuple[bool, dict]:
+    """Gate #102's rule, as a function so a battery can exercise it."""
+    tex_nc = re.sub(r"(?<!\\)%.*", "", tex)
+    missing = sorted(k for k, v in ELASTICITY_DISCIPLINE_SPANS.items()
+                     if v not in tex_nc)
+    return (not missing), {"missing": missing}
+
+
 def letter_check(tex: str) -> tuple[bool, dict]:
     """Gate #101's rule, as a function so a battery can exercise it."""
     if not LETTER.exists():
@@ -4490,6 +4526,13 @@ def main() -> int:
           f"#101): retired-hull-confined={_let.get('hull_ok')}, abstract-words "
           f"claimed={_let.get('claimed_words')} actual={_let.get('actual_words')}, "
           f"drifted={_let.get('drifted') or 'none'}, absent={_let.get('absent') or 'none'}")
+
+    eld_ok, _eld = elasticity_discipline_check(tex)
+    failures += 0 if eld_ok else 1
+    print(f"[{'PASS' if eld_ok else 'FAIL'}] elasticity-discipline exhibits (gate #102): "
+          f"{len(ELASTICITY_DISCIPLINE_SPANS) - len(_eld['missing'])}/"
+          f"{len(ELASTICITY_DISCIPLINE_SPANS)} spans present, "
+          f"missing={_eld['missing'] or 'none'}")
 
     print(f"\n{'ALL GATES PASS' if failures == 0 else f'{failures} GATE(S) FAILED'}")
     return 0 if failures == 0 else 1
