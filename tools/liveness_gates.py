@@ -595,8 +595,18 @@ BUYBACK_BRACKET_SPANS = {
     "run_tag": "\\texttt{buyback\\_credit\\_bracket}",
     "reversal_range": "$-\\$89.4$ to $-\\$117.7$ billion",
     "pathb_sign": "The gap's sign is therefore incidence-conditional",
-    "conclusion_sign": "its sign is set by the incidence, which this design "
-                       "does not establish",
+    # ROUND-26 denomination resolution: the two incidences answer two
+    # QUESTIONS. The benchmark is a face-value object (SOMA current face vs
+    # par caps), so balance-adjustment is the benchmark-consistent reading;
+    # the cash reversal prices the foregone par windfall from moving
+    # households -- a transfer, not a resource cost. These pins keep both
+    # halves of that resolution from being separated.
+    "conclusion_sign": "the par windfall it would otherwise have extracted "
+                       "from moving households",
+    "denomination_resolution": "the balance-adjustment reading is the "
+                               "benchmark-consistent one",
+    "transfer_not_cost": "a household-to-bondholder transfer, not an added "
+                         "resource cost",
     "trilemma_conditional": "while its effect on (3) is incidence-conditional",
     # the dissolution claim must stay scoped to face accounting
     "dissolution_scope": "trade off sharply under face accounting",
