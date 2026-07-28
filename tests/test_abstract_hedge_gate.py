@@ -141,7 +141,8 @@ def _mutations(abstract: str) -> dict[str, str]:
         "drops_institutional_scope": abstract.replace(
             "The institutional cash-flow cost is small", "The cost is small"),
         "drops_involuntary_turnover": abstract.replace(
-            "scheduled amortization and baseline involuntary turnover fall short",
+            "scheduled amortization and baseline involuntary turnover (itself "
+            "read from realized, partly behavioral turnover) fall short",
             "scheduled amortization falls short"),
         # --- scoping ------------------------------------------------------
         # the body keeps every phrase; only the abstract is gutted. A

@@ -72,7 +72,9 @@ def test_point_before_range_fails(tex, abstract):
     """Put the point back in front, keeping every literal. This is the exact
     arrangement round 24b removed, and a span-presence check accepts it."""
     mutated = (
-        " \\noindent Lock-in itself adds $+5.6$ points, or \\$42.6 billion. "
+        " \\noindent Baseline involuntary turnover (itself read from realized, "
+        "partly behavioral turnover) sets the floor. "
+        "Lock-in itself adds $+5.6$ points, or \\$42.6 billion. "
         "What lock-in itself adds is a range rather than a number. "
         "The design pins it between $+2.8$ and $+8.7$ points under its "
         "production floor form (a wild-cluster interval on the floor read's 31 "

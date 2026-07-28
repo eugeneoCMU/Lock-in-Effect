@@ -443,6 +443,13 @@ ABSTRACT_POSTURE = {
                           "clusters; the narrower percentile read, $+3.0$ to "
                           "$+8.0$, under-covers",
     "hull_in_abstract": "form-conditional hull of $+3.5$ to $+13.1$ points",
+    # ROUND-26 B8 (DA-M3): the abstract's mechanical-null sentence scoped
+    # "however households react to rates" without marking that the floor it
+    # rests on is itself calibrated from realized -- partly behavioral --
+    # turnover. The qualifier travels with the null claim; canonical-scoped
+    # because the archived variant's abstract predates it.
+    "null_floor_behavioral": "itself read from realized, partly behavioral "
+                             "turnover",
 }
 
 
