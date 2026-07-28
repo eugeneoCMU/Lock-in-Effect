@@ -603,6 +603,32 @@ BUYBACK_BRACKET_SPANS = {
 }
 
 
+# --- Round-26 (gate #104): THE VERDICT-ADJUDICATION AUDIT ------------------
+# DA-M2: verdict adjudication involves post-run judgment in both directions,
+# and a green suite is not self-certifying. Appendix app:verdicts is the
+# census of every non-mechanical adjudication. These spans pin the table,
+# the epistemic sentence that gives it its point, and one row from EACH
+# direction, so the table cannot quietly become a one-sided list.
+VERDICT_AUDIT_SPANS = {
+    "table": "\\label{tab:verdicts}",
+    "appendix": "\\label{app:verdicts}",
+    "epistemic": "A green gate suite is therefore not self-certifying",
+    "row_for_headline": "the instability is the max form's censoring mechanics",
+    "row_against_own_pass": "the 11.06-point envelope judged too wide to carry "
+                            "information",
+    "intro_pointer": "tabulates every such rule together with how its outcome "
+                     "was adjudicated after the run",
+}
+
+
+def verdict_audit_check(tex: str) -> tuple[bool, dict]:
+    """Gate #104's rule, as a function so a battery can exercise it."""
+    tex_nc = re.sub(r"(?<!\\)%.*", "", tex)
+    missing = sorted(k for k, v in VERDICT_AUDIT_SPANS.items()
+                     if v not in tex_nc)
+    return (not missing), {"missing": missing}
+
+
 def buyback_bracket_check(tex: str) -> tuple[bool, dict]:
     """Gate #103's rule, as a function so a battery can exercise it."""
     tex_nc = re.sub(r"(?<!\\)%.*", "", tex)
@@ -4589,6 +4615,13 @@ def main() -> int:
           f"{len(BUYBACK_BRACKET_SPANS) - len(_bb['missing'])}/"
           f"{len(BUYBACK_BRACKET_SPANS)} spans present, "
           f"missing={_bb['missing'] or 'none'}")
+
+    va_ok, _va = verdict_audit_check(tex)
+    failures += 0 if va_ok else 1
+    print(f"[{'PASS' if va_ok else 'FAIL'}] verdict-adjudication audit (gate #104): "
+          f"{len(VERDICT_AUDIT_SPANS) - len(_va['missing'])}/"
+          f"{len(VERDICT_AUDIT_SPANS)} spans present, "
+          f"missing={_va['missing'] or 'none'}")
 
     print(f"\n{'ALL GATES PASS' if failures == 0 else f'{failures} GATE(S) FAILED'}")
     return 0 if failures == 0 else 1
