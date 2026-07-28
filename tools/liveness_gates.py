@@ -369,11 +369,16 @@ ASSEMBLY_SPANS = {
     "ladder_agestd": "floor read of 5.51\\% implies a marginal near $+3.8$",
     "ladder_fannie": "5.52\\%, brackets the marginal below the $+4.3$ edge",
     "ladder_composed": "would put the marginal near $+3.0$",
-    # (b) the posture, bound to the interval it is a posture about
-    "posture_upper_middle": "I therefore read $+5.6$ as an upper-middle member of that "
-                            "interval rather than its center",
+    # (b) the posture, bound to the interval it is a posture about.
+    #     ROUND-26 re-derivation: the corrected interval's midpoint is 5.76,
+    #     so +5.57 sits just BELOW it and "upper-middle" would overstate;
+    #     the commitment's surviving content is that the measured corrections
+    #     concentrate below the point, and the span pins exactly that.
+    "posture_middle_member": "I therefore read $+5.6$ as a middle member of an "
+                             "interval whose measured corrections concentrate "
+                             "below it",
     "posture_binding_layer": "the binding layer is the floor reads' own sampling error, "
-                             "$+3.0$ to $+8.0$ points",
+                             "$+2.8$ to $+8.7$ points after wild-cluster correction",
     "posture_lower_half": "every correction listed above falls in its lower half",
     # (c) the censoring share (HANDOFF_round24 §4) and the framing that
     #     HANDOFF_round22 §8.2 exists to protect. The share and its framing are
@@ -414,7 +419,10 @@ ASSEMBLY_SPANS = {
 # caught the defect it exists to prevent.
 ABSTRACT_POSTURE = {
     "range_not_number": "What lock-in itself adds is a range rather than a number",
-    "interval": "The design pins it between $+3.0$ and $+8.0$ points",
+    # ROUND-26 full restatement: the binding layer is the wild-cluster
+    # bootstrap-t interval from run floor_inference_correction; the percentile
+    # read is demoted to a labeled mention inside the same parenthetical.
+    "interval": "The design pins it between $+2.8$ and $+8.7$ points",
     "point_named_inside": "Inside that range, $+5.6$ points, or \\$42.6 billion, is the "
                           "value at the calibration I headline",
     # the frame is not decoration: WITHOUT it the claim is false, because the
@@ -431,8 +439,9 @@ ABSTRACT_POSTURE = {
     # interval sentence, and the hull span keeps the form dimension stated
     # where the max-form interval is stated. Canonical-scoped like the rest
     # of this dict (the archived variant predates both).
-    "interval_qualifier": "a few-cluster sampling interval, a lower bound on "
-                          "that uncertainty",
+    "interval_qualifier": "a wild-cluster interval on the floor read's 31 "
+                          "clusters; the narrower percentile read, $+3.0$ to "
+                          "$+8.0$, under-covers",
     "hull_in_abstract": "form-conditional hull of $+3.5$ to $+13.1$ points",
 }
 
@@ -446,7 +455,7 @@ def abstract_posture_check(tex: str) -> tuple[bool, dict]:
     abstract = tex_nc[_i + len(ABSTRACT_BOUNDS[0]):_j] if found else ""
     missing = sorted(k for k, v in ABSTRACT_POSTURE.items() if v not in abstract)
     # the range must be stated BEFORE the point it contains
-    i_range = abstract.find("$+3.0$ and $+8.0$")
+    i_range = abstract.find("$+2.8$ and $+8.7$")
     i_point = abstract.find("$+5.6$ points")
     ordered = i_range != -1 and i_point != -1 and i_range < i_point
     return (found and not missing and ordered,
@@ -526,7 +535,8 @@ LETTER_RETIRED_HULL = "$+3.9$ to $+13.1$"
 LETTER_HISTORICAL_MARKER = "range that stood at\nthe time at $+3.9$ to $+13.1$ points. That range has since widened"
 LETTER_CURRENT_LITERALS = [
     "$+3.5$ to $+13.1$",   # the hull, as it now stands
-    "$+3.0$ to $+8.0$",    # the binding layer the posture is stated against
+    "$+3.0$ to $+8.0$",    # the demoted percentile read (still quoted, labeled)
+    "$+2.8$ to $+8.7$",    # the corrected binding layer the posture is stated against
     "$+3.53$", "$+10.83$",  # the cell that widened it, and the concave ceiling
     "$+270.4$", "$-105.3$",  # the ABM null's sign disagreement
     "68.8\\%", "35.8\\%",   # the censoring shares, central and null legs
@@ -4215,7 +4225,9 @@ def main() -> int:
              and abs(fu_pb["adjusted_floor_pct"] - 5.507748455937158) < 1e-9
              and abs(fu_pb["imputed_weight_share"] - 0.8398743947117693) < 1e-9)
     fu_tex_ok = (tex.count("$+3.0$ to $+8.0$") >= 2
+                 and tex.count("$+2.8$ to $+8.7$") >= 4
                  and "floor\\_uncertainty" in tex
+                 and "floor\\_inference\\_correction" in tex
                  and "open below $+4.3$" in tex
                  and "binding layer" in tex
                  and "84.0\\% of weight imputed" in tex)

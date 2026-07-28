@@ -74,9 +74,10 @@ def test_point_before_range_fails(tex, abstract):
     mutated = (
         " \\noindent Lock-in itself adds $+5.6$ points, or \\$42.6 billion. "
         "What lock-in itself adds is a range rather than a number. "
-        "The design pins it between $+3.0$ and $+8.0$ points under its "
-        "production floor form (a few-cluster sampling interval, a lower bound "
-        "on that uncertainty), with a form-conditional hull of $+3.5$ to "
+        "The design pins it between $+2.8$ and $+8.7$ points under its "
+        "production floor form (a wild-cluster interval on the floor read's 31 "
+        "clusters; the narrower percentile read, $+3.0$ to $+8.0$, "
+        "under-covers), with a form-conditional hull of $+3.5$ to "
         "$+13.1$ points, and it identifies "
         "levels only. Inside that range, $+5.6$ points, or \\$42.6 billion, is "
         "the value at the calibration I headline, and every correction I can "
@@ -146,6 +147,6 @@ def test_benign_rewrites_stay_green(tex, old, new):
 def test_abstract_posture_agrees_with_section_ve(tex):
     ve = [ln for ln in tex.split("\n") if ln.startswith("A seventh qualification")]
     assert len(ve) == 1, "Section V.E's assembly paragraph is missing or duplicated"
-    assert "$+3.0$ to $+8.0$ points" in ve[0], "V.E no longer quotes the binding interval"
-    assert "upper-middle member of that interval rather than its center" in ve[0], (
+    assert "$+2.8$ to $+8.7$ points" in ve[0], "V.E no longer quotes the binding interval"
+    assert "middle member of an interval whose measured corrections concentrate below it" in ve[0], (
         "V.E no longer states the posture the abstract now leads with")
