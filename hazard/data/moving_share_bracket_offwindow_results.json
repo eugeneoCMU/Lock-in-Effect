@@ -1,0 +1,137 @@
+{
+  "mode": "moving_share_bracket_offwindow",
+  "status": "OK",
+  "spec": "in-sample mixture machinery unmodified at the 4.991% off-window floor; s in {0.25,0.5,1} + null; parity P1-P4 bit-exact vs oos_identification anchors; C1 ordering blocking, C2 ratio-monotonicity reported; projection r_in-proportional with +-1pp band; landing branch A/B/C fixed ex ante on m(0.5).",
+  "floor_annual_cpr_pct": 4.991,
+  "floor_provenance": "oos_identification_results.json headline_oos_marginal.clean_floor_point_pct",
+  "parity_gates": {
+    "P1_s1_offwindow": {
+      "got_b": 767.5264524465003,
+      "want_b": 767.5264524465003,
+      "got_share": 100.36328284662208,
+      "want_share": 100.36328284662208,
+      "identity_probe": {
+        "max_abs_diff_s1": 3.469446951953614e-18,
+        "max_abs_diff_s0": 0.0,
+        "pass": true
+      },
+      "pass": true
+    },
+    "P2_null": {
+      "got_b": 724.9180585654117,
+      "want_b": 724.9180585654117,
+      "got_share": 94.79172466371236,
+      "want_share": 94.79172466371236,
+      "pass": true
+    },
+    "P3_bind": {
+      "got_share": 0.6881875607501289,
+      "want_share": 0.6881875607501289,
+      "got_n": 1683124,
+      "want_n": 1683124,
+      "pass": true
+    },
+    "P4_restoration": {
+      "pass": true
+    }
+  },
+  "parity_gates_all_pass": true,
+  "c1_bracket_ordering_pass": true,
+  "c2_ratio_monotone": {
+    "r_ow_0.5": 0.6033349047200607,
+    "r_in_0.5": 0.5354233883204735,
+    "r_ow_0.25": 0.3268698492774934,
+    "r_in_0.25": 0.27342932174024,
+    "pass": true
+  },
+  "null": {
+    "floor_annual_cpr_pct": 4.991,
+    "p_q_shock_pct": 0.0,
+    "beta1": 0.0,
+    "trapped_b": 724.9180585654117,
+    "share_pct": 94.79172466371236,
+    "cpr_r_lag0": 0.35389036550042563,
+    "best_lag": -3,
+    "peak_lag_r": 0.41863839648970513,
+    "mean_us_cpr_pct": 5.873901098860486,
+    "floor_bind_share": 0.35785836337667337,
+    "floor_bind_loan_months": 1683124,
+    "share_pct_shared": 85.69563303100966
+  },
+  "cells": {
+    "0.25": {
+      "floor_annual_cpr_pct": 4.991,
+      "p_q_shock_pct": 6.5,
+      "beta1": -0.06857052676484808,
+      "trapped_b": 738.8454578512792,
+      "share_pct": 96.61289904720084,
+      "cpr_r_lag0": 0.3269713626148536,
+      "best_lag": -3,
+      "peak_lag_r": 0.423170018273523,
+      "mean_us_cpr_pct": 5.705562697709543,
+      "floor_bind_share": 0.4381334946207172,
+      "floor_bind_loan_months": 1683124,
+      "share_s": 0.25,
+      "marginal_b": 13.927399285867523,
+      "marginal_pp": 1.8211743834884828,
+      "share_pct_shared": 87.51680741449815,
+      "ratio_vs_s1": 0.3268698492774934
+    },
+    "0.5": {
+      "floor_annual_cpr_pct": 4.991,
+      "p_q_shock_pct": 6.5,
+      "beta1": -0.06857052676484808,
+      "trapped_b": 750.6251898279331,
+      "share_pct": 98.15324018914046,
+      "cpr_r_lag0": 0.26128273428959503,
+      "best_lag": -3,
+      "peak_lag_r": 0.4158232005877545,
+      "mean_us_cpr_pct": 5.563193004047629,
+      "floor_bind_share": 0.525437816821577,
+      "floor_bind_loan_months": 1683124,
+      "share_s": 0.5,
+      "marginal_b": 25.707131262521443,
+      "marginal_pp": 3.3615155254281035,
+      "share_pct_shared": 89.05714855643777,
+      "ratio_vs_s1": 0.6033349047200607
+    },
+    "1": {
+      "floor_annual_cpr_pct": 4.991,
+      "p_q_shock_pct": 6.5,
+      "beta1": -0.06857052676484808,
+      "trapped_b": 767.5264524465003,
+      "share_pct": 100.36328284662208,
+      "cpr_r_lag0": -0.13792245738381698,
+      "best_lag": -3,
+      "peak_lag_r": 0.270180825657945,
+      "mean_us_cpr_pct": 5.3591856812637735,
+      "floor_bind_share": 0.6881875607501289,
+      "floor_bind_loan_months": 1683124,
+      "share_s": 1.0,
+      "marginal_b": 42.60839388108866,
+      "marginal_pp": 5.571558182909726,
+      "share_pct_shared": 91.26719121391939,
+      "ratio_vs_s1": null
+    }
+  },
+  "projection": {
+    "0.5": {
+      "projected_pp": 2.983,
+      "projected_b": 22.81,
+      "realized_pp": 3.3615155254281035,
+      "realized_b": 25.707131262521443,
+      "deviation_pp": 0.3785155254281034,
+      "within_materiality_band_1pp": true
+    },
+    "0.25": {
+      "projected_pp": 1.523,
+      "projected_b": 11.65,
+      "realized_pp": 1.8211743834884828,
+      "realized_b": 13.927399285867523,
+      "deviation_pp": 0.2981743834884829,
+      "within_materiality_band_1pp": true
+    }
+  },
+  "landing_branch": "A",
+  "runtime_s": 91.7
+}
