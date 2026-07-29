@@ -723,6 +723,39 @@ COUPON_CONVENTION_SPANS = {
 }
 
 
+FLOOR_LADDER_SPANS = {
+    # ROUND-30 E7/CR1 (gate #107): the ladder's baseline rung and the floor
+    # read's interval in the units a cap is set in. What the gate protects:
+    # (a) both CR1 rungs, cell for cell, against the artifact they are rounded
+    # from; (b) the tablenote's three claims about CR1 (df ownership, that it
+    # is the narrowest sandwich and the wild rows' studentizer, and that its
+    # Bell--McCaffrey row coinciding with CR3's conventional-df row is a
+    # printed accident and not an identity) --- without that sentence the
+    # table shows two rows with identical intervals and no reason; (c) the
+    # run-tag credit, which is only honest because the t(30) rung is
+    # bit-identical in the committed run; (d) the designer-units restatement,
+    # which is the SAME read's Webb interval expressed in floor units, so a
+    # drift between it and the $+2.9$ to $+8.7$ the paper quotes is a defect.
+    "cr1_conventional": "CR1 $t$ & $+3.2$ to $+8.3$ & $t(30)$, $G-1$ & no "
+                        "leverage adjustment",
+    "cr1_bell_mccaffrey": "CR1 $t$, Bell--McCaffrey & $+2.8$ to $+8.8$ & "
+                          "$t(6.2)$, data-driven & small-sample df",
+    "df_ownership": "the 6.2 and 5.1 shown are CR1's and CR2's, and CR3's own "
+                    "is smaller still",
+    "cr1_is_the_baseline": "is the standard error the wild rows studentize "
+                           "with, so its two rows are the ladder's baseline "
+                           "rather than competing reads",
+    "printed_tie_is_not_an_identity": "an accident of this leverage profile, "
+                                      "not an identity",
+    "run_credit": "\\texttt{floor\\_inference\\_correction} (Rademacher "
+                  "wild-$t$; CR1--CR3 at $t(30)$)",
+    "designer_frame": "in the units a cap designer would have to plug in",
+    "designer_units": "wild-cluster interval runs from 4.177\\% to 5.800\\%",
+}
+
+FLOOR_LADDER_READ = "R2_2018_gap<=-0.0025_age>=12"
+
+
 def coupon_convention_check(tex: str) -> tuple[bool, dict]:
     """Gate #106's rule, as a function so a battery can exercise it."""
     tex_nc = re.sub(r"(?<!\\)%.*", "", tex)
@@ -771,6 +804,65 @@ def convolved_line_check(tex: str) -> tuple[bool, dict]:
     )
     info["artifact_ok"] = art_ok
     return (not missing) and art_ok, info
+
+
+def floor_ladder_check(tex: str) -> tuple[bool, dict]:
+    """Gate #107's rule, as a function so a battery can exercise it."""
+    tex_nc = re.sub(r"(?<!\\)%.*", "", tex)
+    missing = sorted(k for k, v in FLOOR_LADDER_SPANS.items()
+                     if v not in tex_nc)
+    info: dict = {"missing": missing}
+    if missing:
+        return False, info
+    ordered = (tex_nc.index(FLOOR_LADDER_SPANS["cr1_conventional"])
+               < tex_nc.index("CR2 $t$ & $+3.0$ to $+8.6$")
+               and tex_nc.index(FLOOR_LADDER_SPANS["cr1_bell_mccaffrey"])
+               < tex_nc.index("CR2 $t$, Bell--McCaffrey"))
+    info["ordered"] = ordered
+    art = ROOT / "hazard" / "data" / "floor_inference_correction_v2_results.json"
+    if not art.exists():
+        return False, {**info, "artifact": "MISSING"}
+    fi = json.loads(art.read_text())
+    rd = fi.get("reads", {}).get(FLOOR_LADDER_READ, {})
+    cr1 = rd.get("cr1_t_interval", {})
+    cr1bm = rd.get("cr1_t_interval_df_bm", {})
+    cr3 = rd.get("cr3_t_interval", {})
+    webb = rd.get("wild_t_webb", {})
+    c1 = cr1.get("marginal_ci95_pp") or [None, None]
+    c1b = cr1bm.get("marginal_ci95_pp") or [None, None]
+    wf = webb.get("floor_ci95_pct") or [None, None]
+    dfbm = rd.get("df_bm_by_estimator", {})
+    if None in (c1[0], c1b[0], wf[0]):
+        return False, {**info, "artifact": "INCOMPLETE"}
+    df1 = cr1bm.get("df_used", 0.0)
+    art_ok = (
+        fi.get("status") == "OK"
+        and fi.get("parity_gates_all_pass") is True
+        and rd.get("n_clusters") == 31
+        # the two CR1 rungs reproduce their printed cells from full precision
+        and f"${c1[0]:+.1f}$ to ${c1[1]:+.1f}$" == "$+3.2$ to $+8.3$"
+        and f"${c1b[0]:+.1f}$ to ${c1b[1]:+.1f}$" == "$+2.8$ to $+8.8$"
+        and cr1.get("df_used") == 30.0
+        and cr1.get("df_kind") == "G_minus_1"
+        and cr1bm.get("df_kind") == "bell_mccaffrey_imbens_kolesar"
+        and f"$t({df1:.1f})$" == "$t(6.2)$"
+        # neither CR1 rung is carried by a grid-edge truncation
+        and not any(cell[edge]["truncated_at_grid_edge"]
+                    for cell in (cr1, cr1bm)
+                    for edge in ("lower_pp_edge", "upper_pp_edge"))
+        # the tablenote's three claims about CR1
+        and dfbm["cr1"] > dfbm["cr2"] > dfbm["cr3"]
+        and rd["se_cr1_smm"] < rd["se_cr2_smm"] < rd["se_cr3_smm"]
+        and c1b != cr3.get("marginal_ci95_pp")
+        # the designer-units clause is the SAME read's Webb interval in floor
+        # units, and the floor-to-marginal map is inverse
+        and f"{wf[0]:.3f}\\% to {wf[1]:.3f}\\%" == "4.177\\% to 5.800\\%"
+        and webb["upper_pp_edge"]["floor_pct"] < webb["lower_pp_edge"]["floor_pct"]
+        and abs(webb["marginal_ci95_pp"][0] - 2.8549950653913494) < 1e-9
+        and abs(webb["marginal_ci95_pp"][1] - 8.677971792194077) < 1e-9
+    )
+    info["artifact_ok"] = art_ok
+    return ordered and art_ok, info
 
 
 def buyback_bracket_check(tex: str) -> tuple[bool, dict]:
@@ -4771,11 +4863,20 @@ def main() -> int:
     failures += 0 if cl_ok else 1
     cc_ok, _cc = coupon_convention_check(tex)
     failures += 0 if cc_ok else 1
+    fl_ok, _fl = floor_ladder_check(tex)
+    failures += 0 if fl_ok else 1
     print(f"[{'PASS' if cc_ok else 'FAIL'}] coupon-convention companion (gate #106): "
           f"{len(COUPON_CONVENTION_SPANS) - len(_cc['missing'])}/"
           f"{len(COUPON_CONVENTION_SPANS)} spans present, "
           f"artifact_ok={_cc.get('artifact_ok')}, "
           f"missing={_cc['missing'] or 'none'}")
+    print(f"[{'PASS' if fl_ok else 'FAIL'}] floor-read ladder and designer "
+          f"units (gate #107): "
+          f"{len(FLOOR_LADDER_SPANS) - len(_fl['missing'])}/"
+          f"{len(FLOOR_LADDER_SPANS)} spans present, "
+          f"ordered={_fl.get('ordered')}, "
+          f"artifact_ok={_fl.get('artifact_ok')}, "
+          f"missing={_fl['missing'] or 'none'}")
     print(f"[{'PASS' if cl_ok else 'FAIL'}] convolved sampling line (gate #105): "
           f"{len(CONVOLVED_LINE_SPANS) - len(_cl['missing'])}/"
           f"{len(CONVOLVED_LINE_SPANS)} spans present, "
