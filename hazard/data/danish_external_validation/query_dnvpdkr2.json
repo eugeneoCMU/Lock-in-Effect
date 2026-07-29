@@ -1,0 +1,7 @@
+{"table":"DNVPDKR2","format":"CSV","valuePresentation":"Code","variables":[
+ {"code":"TYPREAL","values":["FK","FKU","FKE"]},
+ {"code":"LØBETID3","values":["A0","5"]},
+ {"code":"KUPON2","values":["A0","B","C","D","E","F","G","H","I","J","K","O","L","M","N"]},
+ {"code":"VALUTA","values":["DKK"]},
+ {"code":"DATAT","values":["N1","N2"]},
+ {"code":"Tid","values":["*"]}]}
