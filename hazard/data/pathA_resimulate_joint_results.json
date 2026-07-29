@@ -1,0 +1,207 @@
+{
+  "mode": "pathA_resimulate_joint",
+  "status": "OK",
+  "spec": "SPEC_round28_C1_C2_C3_C6.md C6(ii): stage A persists the FULL params_head + standardization scales + FE block per replicate; stage B resimulates with const + age spline (+ months at v4) transferred UNRESCALED and only the 3 macro betas rescaled; tier 1 (FE at production) primary, tier 2 (mean-over-duplicates map, production fallback) secondary and non-manuscript.",
+  "spec_versions": [
+    3
+  ],
+  "labeled_deviations": [
+    "1: per-replicate month effects are delivered through a temporary coefficient artifact because simulate_qt_window reads month_effects from coef_path, not from coefs.",
+    "2: the spec-v3 leg pins coef_path to hazard_coefficients_specv3.json; the default is now the v4 artifact and would silently score 928.9B instead of 915.1B.",
+    "3: the v4 Stage-A point fit is warm-started; run_bootstrap's cold point fit is the known incompletely-converged v4 optimum. The cold triple is recorded as point_cold_native_units.",
+    "4: tier-2 FE carry an unremoved level shift (bootstrap-label reference vs production reference) on top of the arbitrary averaging rule.",
+    "5: G0 added \u2014 fit_betas_ext must reproduce bootstrap_se.fit_betas field-for-field; fit_betas returns neither the FE block nor the absorbed label."
+  ],
+  "parity_gates": {
+    "G0_fit_betas_ext_parity": {
+      "tol": 1e-12,
+      "checks": {
+        "spec3": {
+          "max_abs_diff": 0.0,
+          "fit_method_match": true,
+          "head_len": 11,
+          "pass": true
+        },
+        "spec4": {
+          "max_abs_diff": 0.0,
+          "fit_method_match": true,
+          "head_len": 22,
+          "pass": true
+        }
+      },
+      "blocking": true,
+      "pass": true
+    },
+    "P1_stageA_specv3": {
+      "blocking": true,
+      "rows": {
+        "n_committed": 198,
+        "n_replayed": 198,
+        "max_abs_row_diff": 0.0,
+        "pass": true,
+        "tol": 1e-12
+      },
+      "summary": {
+        "max_abs_diff": 0.0,
+        "tol": 1e-09,
+        "pass": true
+      },
+      "n_failed": {
+        "got": 2,
+        "want": 2,
+        "pass": true
+      },
+      "pass": true
+    },
+    "P3_point_head": {
+      "spec3": {
+        "tol": 1e-09,
+        "checks": {
+          "rate_gap_bps": {
+            "got": 0.6733519352905115,
+            "want": 0.6733519352905115,
+            "abs_diff": 0.0,
+            "want_ddof_adjusted": 0.6733519352905115,
+            "abs_diff_ddof_adjusted": 0.0,
+            "pass": true
+          },
+          "burnout_orth": {
+            "got": -0.13009048732147674,
+            "want": -0.13009048732147674,
+            "abs_diff": 0.0,
+            "want_ddof_adjusted": -0.13009048732147674,
+            "abs_diff_ddof_adjusted": 0.0,
+            "pass": true
+          },
+          "friction": {
+            "got": -0.037066025306261775,
+            "want": -0.037066025306261775,
+            "abs_diff": 0.0,
+            "want_ddof_adjusted": -0.037066025306261775,
+            "abs_diff_ddof_adjusted": 0.0,
+            "pass": true
+          }
+        },
+        "blocking": true,
+        "pass": true,
+        "note": ""
+      }
+    }
+  },
+  "parity_gates_all_pass": true,
+  "construction": {
+    "tier1": {
+      "head_swapped": [
+        "const",
+        "age_spline",
+        "macro"
+      ],
+      "fe": "production",
+      "rescaled": "macro only (rescale_to_production_units)"
+    },
+    "tier2": {
+      "fe_map_rule": "mean over stratum_id_src duplicates; production fallback for undrawn",
+      "rule_is_arbitrary": true,
+      "level_shift_not_removed": true,
+      "enters_manuscript": false,
+      "mean_undrawn_share": {}
+    }
+  },
+  "stage_a": {
+    "spec3": {
+      "spec_version": 3,
+      "seasonal_design": false,
+      "n_reps": 200,
+      "n_failed": 2,
+      "n_converged": 198,
+      "ridge_alpha": 0.0001,
+      "seed": 42,
+      "cluster": "stratum",
+      "alpha_reselected_per_rep": false,
+      "production_scales": {
+        "gap_std": 220.9672399353969,
+        "burn_std": 0.12023165105258038,
+        "fric_std": 0.00408347579150525
+      },
+      "point_head": {
+        "const": -3.8279628737057037,
+        "age_linear": 0.053662271462127216,
+        "age_spline_12": -0.004102659208830387,
+        "age_spline_24": 0.004922628594396383,
+        "age_spline_36": -0.0013449103876497517,
+        "age_spline_60": 0.002503569821495732,
+        "age_spline_84": 9.305338111789176e-09,
+        "age_spline_120": 3.689775246653279e-08,
+        "rate_gap_bps": 0.6733519352905115,
+        "burnout_orth": -0.13009048732147674,
+        "friction": -0.037066025306261775
+      },
+      "point_fit_method": "ridge(alpha=0.0001)",
+      "point_native_units": {
+        "rate_gap_bps": 0.6733519352905115,
+        "burnout_orth": -0.13009048732147674,
+        "friction": -0.037066025306261775
+      },
+      "point_production_units": {
+        "rate_gap_bps": 0.6733519352905115,
+        "burnout_orth": -0.13009048732147674,
+        "friction": -0.037066025306261775
+      },
+      "point_cold_native_units": {
+        "rate_gap_bps": 0.6733519352905115,
+        "burnout_orth": -0.13009048732147674,
+        "friction": -0.037066025306261775
+      },
+      "point_cold_fit_method": "ridge(alpha=0.0001)",
+      "se": {
+        "rate_gap_bps": 1.1524183275992108,
+        "burnout_orth": 1.3633337414553404,
+        "friction": 0.5060654034737094
+      },
+      "ci_95": {
+        "rate_gap_bps": {
+          "lo": 0.6038694206026911,
+          "hi": 4.108538287772931
+        },
+        "burnout_orth": {
+          "lo": -1.7563793589910415,
+          "hi": 1.4303110311223504
+        },
+        "friction": {
+          "lo": -0.2530889688116257,
+          "hi": 1.380968449572465
+        }
+      },
+      "frac_le_0": {
+        "rate_gap_bps": 0.005050505050505051,
+        "burnout_orth": 0.7525252525252525,
+        "friction": 0.4797979797979798
+      },
+      "draws_csv": "pathA_bootstrap_fullvec_draws_specv3.csv",
+      "fe_npz": "pathA_bootstrap_fullvec_fe_specv3.npz",
+      "runtime_s": 348.7
+    }
+  },
+  "results": {},
+  "comparison_vs_committed": {
+    "committed_ci_95_b": [
+      -4459.7936261770865,
+      1190.1355126947665
+    ],
+    "committed_width_b": 5649.929138871853,
+    "committed_point_trapped_b": 915.067027857209,
+    "committed_frac_above_benchmark": 0.8383838383838383,
+    "joint_ci_95_b": null,
+    "width_ratio": null,
+    "narrow_threshold": 0.8
+  },
+  "verdict": {
+    "code": "INCOMPLETE",
+    "v4_n_failed": null,
+    "v4_failure_material_threshold": 10,
+    "v4_unstable": false,
+    "manuscript_action": "run all stages before landing anything",
+    "propagation": "none \u2014 Path A is excluded from every headline figure (tex 290, 978, 1053)"
+  },
+  "runtime_s": 358.3
+}

@@ -101,6 +101,30 @@ LABELED DEVIATIONS from the drafted spec (all forced by the code; none silent):
      sigma = maximum(rung * |head_prod|, 0.05) elementwise — a flat absolute
      floor, not rung * 0.05.
 
+FAILURE AND PROBE SEMANTICS (added after a --limit 3 timing probe surfaced two
+defects; deviations 6-8):
+  * The penalized objective is computed in numpy as
+    y*eta - exp(eta) - gammaln(y+1) with the linear predictor scanned for
+    overflow FIRST, not through GLM.loglike. At a non-converged parameter
+    vector exp(eta) overflows and GLM.loglike returns inf - inf = NaN, which
+    the first draft printed as "OK" and fed into the optimum census; a
+    dispersed start reported obj = 2.15e+266 and the cold start obj = NaN, both
+    counted as landings.
+  * A start is CONVERGED only if the optimizer raised no non-convergence
+    warning, |macro| stayed inside MAX_ABS_BETA, and the objective is finite.
+    Everything else is a FAILURE and enters n_failed only — never the
+    production-branch count, the distinct-optima census, or the better-optimum
+    test. Per-start convergence flags and the IRLS iteration count are printed
+    and written to the draws CSV.
+  * The ANCHOR must be finite: if the production warm start's objective is not
+    finite, its leg hard-fails with the reason attached (status GATE_FAILURE) —
+    an NaN anchor cannot adjudicate a branch census.
+  * A run that did not complete all 50 starts of the primary leg (or in which
+    the primary leg did not run at all) emits NO verdict code and exits
+    PROBE_INCOMPLETE. Timing probes cannot produce MAJORITY/MINORITY verdicts.
+  * Legs are reordered so the primary (production, ddof-0) leg runs first, so
+    that --limit exercises the leg the blocking gate G1 lives on.
+
 PARITY GATES (all BLOCKING; on failure status=GATE_FAILURE, artifact still
 written, exit 1, nothing lands):
   G0 the reimplemented fit reproduces bootstrap_se.fit_betas field-for-field on
@@ -166,9 +190,11 @@ and hazard_bootstrap_se.json; every committed artifact. Path A's $928.9B /
 any headline number under any branch.
 
 Run:  cd hazard
-      python3 pathA_cold_starts.py --limit 3        # measure s/fit first
-      python3 pathA_cold_starts.py                  # 2 legs x 50 starts
-      python3 pathA_cold_starts.py --legs prod_direct --resume
+      python3 pathA_cold_starts.py --limit 3   # timing probe; runs the PRIMARY
+                                               # leg first, exits
+                                               # PROBE_INCOMPLETE, no verdict
+      python3 pathA_cold_starts.py             # 2 legs x 50 starts, adjudicates
+      python3 pathA_cold_starts.py --legs prod_direct
       -> data/pathA_cold_starts_results.json + data/pathA_cold_starts_draws.csv
 """
 from __future__ import annotations
@@ -177,6 +203,7 @@ import argparse
 import json
 import sys
 import time
+import warnings
 from collections import defaultdict
 from pathlib import Path
 
@@ -184,6 +211,7 @@ import numpy as np
 import pandas as pd
 import polars as pl
 import statsmodels.api as sm
+from scipy import special
 
 from bootstrap_se import BETA_NAMES, MAX_ABS_BETA, fit_betas, production_start_head
 from config import AGE_SPLINE_KNOTS, HAZARD_COEF_PATH, HOLDOUT_DATE, PANEL_PATH
@@ -221,6 +249,17 @@ N_TRAIN = 10176
 N_STRATA = 296
 HEAD_LEN_V4 = 22
 
+# exp() overflows float64 above ~709.78; anything near it means the parameter
+# vector is nowhere near a solution and the objective is meaningless.
+ETA_OVERFLOW = 700.0
+# statsmodels warning texts that mean the RIDGE solve did not converge. Scoped
+# deliberately to the ridge/elastic-net step: an IRLS maxiter warning from the
+# prestep is NOT a start failure — _fit_poisson_glm and fit_betas both tolerate
+# a non-converged IRLS and only require finite params, and the prestep's status
+# is carried separately as irls_converged.
+NONCONVERGENCE_MARKERS = ("ridge optimization may have failed",
+                          "Elastic net fitting did not converge")
+
 PROD_V4 = {
     "rate_gap_bps": 0.6468566611612588,
     "burnout_orth": -0.17126111626112517,
@@ -236,12 +275,22 @@ LEGS = {
     "prod_direct": ("ddof0", False),
 }
 DEFAULT_LEGS = ["prod_warm", "fitbetas_warm"]
+PRIMARY_LEG = "prod_warm"   # the production (ddof-0) design; G1 lives here
 
 
 def _np(o):
     if hasattr(o, "item"):
         return o.item()
     raise TypeError(f"not serializable: {type(o)}")
+
+
+def _f(x):
+    """float, or None when non-finite — keeps NaN/inf out of the artifact."""
+    try:
+        v = float(x)
+    except (TypeError, ValueError):
+        return None
+    return v if np.isfinite(v) else None
 
 
 # --------------------------------------------------------------------------
@@ -291,62 +340,175 @@ def build_design(train: pd.DataFrame, convention: str) -> dict:
     y = train["events"].to_numpy()
     offset = np.log(train["exposure"].to_numpy())
     model = sm.GLM(y, X, family=sm.families.Poisson(), offset=offset)
-    return {"X": X, "y": y, "offset": offset, "model": model,
+    return {"X": X, "y": np.asarray(y, dtype=np.float64),
+            "offset": np.asarray(offset, dtype=np.float64), "model": model,
+            "gammaln_y1": special.gammaln(np.asarray(y, dtype=np.float64) + 1.0),
+            "nobs": float(len(y)),
             "k_age": age_basis.shape[1], "n_months": months.shape[1],
             "fe_columns": fe_columns, "col_names": HEAD_NAMES + fe_columns,
             "convention": convention,
             "reference_stratum": sorted(train["stratum_id"].unique())[0]}
 
 
-def penalized_objective(model, params, alpha: float = ALPHA) -> float:
+def penalized_objective(design: dict, params, alpha: float = ALPHA) -> dict:
     """The exact function statsmodels GLM._fit_ridge minimizes:
        -loglike(b)/nobs + alpha * sum(b**2)/2
     (statsmodels 0.14.6, genmod/generalized_linear_model.py). RECOMPUTED
     post-fit — fit_regularized returns a RegularizedResults carrying only
-    .params, so the objective cannot be read off the fit."""
+    .params, so the objective cannot be read off the fit.
+
+    GUARDED (probe defect 1). The Poisson term is evaluated as
+        y*eta - exp(eta) - gammaln(y+1)
+    directly in numpy rather than through GLM.loglike, for two reasons:
+      * at a non-converged parameter vector exp(eta) overflows to +inf and
+        GLM.loglike returns y*log(mu) - mu = inf - inf = NaN, which the caller
+        previously printed as a finite-looking "OK" and fed into the optimum
+        census;
+      * GLM.loglike reads scale off the model object, and the same sm.GLM
+        instance is mutated by every .fit()/.fit_regularized() call in the leg,
+        so scoring through it is not state-independent.
+    The linear predictor is scanned first and a non-finite / overflowing
+    evaluation is REPORTED as such (finite=False + reason) instead of being
+    silently returned as NaN. Mathematically identical to GLM.loglike wherever
+    both are finite (log(exp(eta)) == eta; y=0 cells contribute 0 under both,
+    matching statsmodels' xlogy convention)."""
+    out = {"objective": float("nan"), "finite": False, "reason": "",
+           "eta_max": None, "eta_min": None}
     b = np.asarray(params, dtype=np.float64).ravel()
-    return float(-(model.loglike(b) / model.nobs) + alpha * float(np.sum(b ** 2)) / 2.0)
+    if not np.isfinite(b).all():
+        out["reason"] = "non-finite parameter vector"
+        return out
+    eta = design["X"].dot(b) + design["offset"]
+    if not np.isfinite(eta).all():
+        out["reason"] = "non-finite linear predictor"
+        return out
+    out["eta_max"], out["eta_min"] = float(np.max(eta)), float(np.min(eta))
+    if out["eta_max"] > ETA_OVERFLOW:
+        out["reason"] = (f"exp overflow: max eta {out['eta_max']:.4g} > "
+                         f"{ETA_OVERFLOW:g}")
+        return out
+    with np.errstate(over="ignore", invalid="ignore"):
+        mu = np.exp(eta)
+        llf = float(np.sum(design["y"] * eta - mu - design["gammaln_y1"]))
+    if not np.isfinite(llf):
+        out["reason"] = "non-finite log-likelihood"
+        return out
+    obj = float(-(llf / design["nobs"])
+                + alpha * float(np.sum(b ** 2)) / 2.0)
+    if not np.isfinite(obj):
+        out["reason"] = "non-finite objective"
+        return out
+    out["objective"], out["finite"] = obj, True
+    return out
+
+
+def _statsmodels_objective(design: dict, params, alpha: float = ALPHA):
+    """Informational cross-check of penalized_objective against GLM.loglike.
+    Non-gating; recorded once, at the anchor, so the finite objective the
+    verdict rests on is shown to agree with statsmodels' own evaluation."""
+    try:
+        with warnings.catch_warnings():
+            warnings.simplefilter("ignore")
+            model = design["model"]
+            b = np.asarray(params, dtype=np.float64).ravel()
+            val = float(-(model.loglike(b) / model.nobs)
+                        + alpha * float(np.sum(b ** 2)) / 2.0)
+        return val if np.isfinite(val) else None
+    except Exception as exc:                    # noqa: BLE001 — informational
+        return f"unavailable: {repr(exc)[:120]}"
+
+
+def _irls_iterations(irls) -> int | None:
+    """Best-effort IRLS iteration count. GLMResults exposes it as
+    fit_history['iteration']; _fit_ridge's BFGS step exposes nothing at all
+    (RegularizedResults carries only .params), so the ridge leg reports None."""
+    try:
+        hist = getattr(irls, "fit_history", None)
+        if isinstance(hist, dict):
+            it = hist.get("iteration")
+            if it is not None and np.isscalar(it):
+                return int(it)
+            dev = hist.get("deviance")
+            if dev is not None:
+                return int(len(dev))
+        it = getattr(irls, "iteration", None)
+        return int(it) if it is not None else None
+    except Exception:                           # noqa: BLE001 — diagnostic only
+        return None
 
 
 def fit_from_start(design: dict, start_head: np.ndarray | None,
                    irls_prestep: bool, alpha: float = ALPHA) -> dict:
     """bootstrap_se.fit_betas' fit path (lines 133-156), reimplemented so the
-    full parameter vector survives for the objective."""
+    full parameter vector survives for the objective.
+
+    Convergence is CARRIED, not assumed (probe defect 1b): statsmodels signals
+    a failed ridge solve only through a warning ("GLM ridge optimization may
+    have failed, |grad|=…") because GLM._fit_ridge discards scipy's success
+    flag, so the fit is run inside warnings.catch_warnings(record=True) and the
+    warning text is scanned. A start is `converged` only if the optimizer
+    raised no non-convergence warning, the macro block is inside MAX_ABS_BETA,
+    and the penalized objective evaluates finite."""
     X, y, offset, model = design["X"], design["y"], design["offset"], design["model"]
-    irls_converged = None
-    if start_head is None:
-        result, fit_method = _fit_poisson_glm(X, y, offset, alpha)
-    else:
-        start = np.zeros(X.shape[1])
-        start[: len(start_head)] = start_head
-        if irls_prestep:
-            try:
-                irls = model.fit(maxiter=100, start_params=start)
-                ok = np.isfinite(np.asarray(irls.params)).all()
-                irls_converged = bool(getattr(irls, "converged", False)) and ok
-                warm = irls.params if ok else start
-            except (ValueError, np.linalg.LinAlgError):
-                irls_converged = False
-                warm = start
+    irls_converged, irls_iters = None, None
+    with warnings.catch_warnings(record=True) as caught:
+        warnings.simplefilter("always")
+        if start_head is None:
+            result, fit_method = _fit_poisson_glm(X, y, offset, alpha)
         else:
-            warm = start
-        result = model.fit_regularized(
-            method="elastic_net", alpha=alpha, L1_wt=0.0,
-            maxiter=100, start_params=warm,
-        )
-        fit_method = (f"ridge(alpha={alpha}, warm_start)" if irls_prestep
-                      else f"ridge(alpha={alpha}, direct_start)")
+            start = np.zeros(X.shape[1])
+            start[: len(start_head)] = start_head
+            if irls_prestep:
+                try:
+                    irls = model.fit(maxiter=100, start_params=start)
+                    ok = np.isfinite(np.asarray(irls.params)).all()
+                    irls_converged = bool(getattr(irls, "converged", False)) and ok
+                    irls_iters = _irls_iterations(irls)
+                    warm = irls.params if ok else start
+                except (ValueError, np.linalg.LinAlgError):
+                    irls_converged = False
+                    warm = start
+            else:
+                warm = start
+            result = model.fit_regularized(
+                method="elastic_net", alpha=alpha, L1_wt=0.0,
+                maxiter=100, start_params=warm,
+            )
+            fit_method = (f"ridge(alpha={alpha}, warm_start)" if irls_prestep
+                          else f"ridge(alpha={alpha}, direct_start)")
+        messages = [str(w.message) for w in caught]
+    optimizer_warning = "; ".join(m[:140] for m in messages)[:400]
+    optimizer_converged = not any(mk in m for m in messages
+                                  for mk in NONCONVERGENCE_MARKERS)
+
     params = np.asarray(result.params, dtype=np.float64).ravel()
     k = design["k_age"]
     macro = params[1 + k: 4 + k]
-    diverged = (not np.isfinite(params).all()
-                or float(np.abs(macro).max()) > MAX_ABS_BETA)
+    beta_ok = (np.isfinite(params).all()
+               and float(np.abs(macro).max()) <= MAX_ABS_BETA)
+    obj = penalized_objective(design, params, alpha)
+    failure = ""
+    if not beta_ok:
+        failure = (f"|macro beta| {float(np.abs(macro).max()):.3g} > "
+                   f"{MAX_ABS_BETA}" if np.isfinite(params).all()
+                   else "non-finite parameter vector")
+    elif not obj["finite"]:
+        failure = f"objective: {obj['reason']}"
+    elif not optimizer_converged:
+        failure = f"optimizer: {optimizer_warning}"
     return {"params": params, "fit_method": fit_method,
-            "irls_converged": irls_converged, "diverged": bool(diverged),
+            "irls_converged": irls_converged, "irls_iterations": irls_iters,
+            "optimizer_converged": bool(optimizer_converged),
+            "optimizer_warning": optimizer_warning,
+            "objective_finite": bool(obj["finite"]),
+            "objective_reason": obj["reason"],
+            "eta_max": obj["eta_max"], "eta_min": obj["eta_min"],
+            "converged": bool(beta_ok and obj["finite"] and optimizer_converged),
+            "failure": failure,
             "macro": {n: float(params[1 + k + i])
                       for i, n in enumerate(BETA_NAMES)},
             "head": params[:HEAD_LEN_V4].copy(),
-            "objective": penalized_objective(model, params, alpha)}
+            "objective": obj["objective"]}
 
 
 def start_plan(head_prod: np.ndarray) -> list[dict]:
@@ -380,27 +542,48 @@ def run_leg(name: str, design: dict, head_prod: np.ndarray,
         row = {"leg": name, "convention": convention, "irls_prestep": prestep,
                "start_id": st["start_id"], "kind": st["kind"],
                "sigma_rung": st["sigma_rung"], "seed": st["seed"],
-               "converged": (not f["diverged"]),
+               "converged": f["converged"],
+               "optimizer_converged": f["optimizer_converged"],
+               "objective_finite": f["objective_finite"],
                "irls_converged": f["irls_converged"],
+               "irls_iterations": f["irls_iterations"],
+               "eta_max": f["eta_max"], "eta_min": f["eta_min"],
+               "failure": f["failure"],
+               "optimizer_warning": f["optimizer_warning"],
                "fit_method": f["fit_method"],
                **f["macro"],
                "penalized_objective": f["objective"]}
         row["_head"] = f["head"]
+        row["_params"] = f["params"]      # full vector; never written to CSV
         rows.append(row)
+        obj_txt = (f"{f['objective']:.10f}" if f["objective_finite"]
+                   else f"NONFINITE({f['objective_reason']})")
         print(f"  [{name}] start {st['start_id']:>2} {st['kind']:<15} "
               f"rung={str(st['sigma_rung']):>4} "
               f"gap={f['macro']['rate_gap_bps']:+.4f} "
               f"burn={f['macro']['burnout_orth']:+.4f} "
               f"fric={f['macro']['friction']:+.5f} "
-              f"obj={f['objective']:.10f} "
-              f"{'OK' if not f['diverged'] else 'DIVERGED'} "
+              f"obj={obj_txt} "
+              f"conv={f['converged']} "
+              f"(opt={f['optimizer_converged']}, irls={f['irls_converged']}, "
+              f"iters={f['irls_iterations']}) "
+              f"{'OK' if f['converged'] else 'FAILED: ' + f['failure']} "
               f"({time.perf_counter() - t0:.0f}s elapsed)")
     return rows
 
 
 def classify(rows: list[dict]) -> dict:
+    """Census over CONVERGED starts only. A start whose optimizer did not
+    converge, whose macro block left MAX_ABS_BETA, or whose penalized
+    objective is non-finite is a FAILURE: it enters n_failed and enters
+    NEITHER the production-branch count, NOR the distinct-optima census, NOR
+    the better-optimum test (probe defect 1b)."""
     anchor = next(r for r in rows if r["kind"] == "warm_production")
     a_head, a_obj = anchor["_head"], anchor["penalized_objective"]
+    anchor_valid = bool(anchor["converged"] and np.isfinite(a_obj))
+    anchor_reason = "" if anchor_valid else (
+        anchor.get("failure") or "anchor objective is not finite")
+
     for r in rows:
         r["l2_distance_to_production"] = float(
             np.linalg.norm(np.asarray(r["_head"]) - np.asarray(a_head)))
@@ -408,12 +591,14 @@ def classify(rows: list[dict]) -> dict:
             [r[n] - anchor[n] for n in BETA_NAMES]))
         macro_close = all(abs(r[n] - PROD_V4[n]) <= BRANCH_MACRO_TOL
                           for n in BETA_NAMES)
-        obj_close = abs(r["penalized_objective"] - a_obj) <= BRANCH_OBJ_TOL
+        obj_close = (anchor_valid and np.isfinite(r["penalized_objective"])
+                     and abs(r["penalized_objective"] - a_obj) <= BRANCH_OBJ_TOL)
         r["on_production_branch"] = bool(r["converged"] and macro_close
                                          and obj_close)
 
     ok = [r for r in rows if r["converged"]]
-    n_failed = len(rows) - len(ok)
+    failed = [r for r in rows if not r["converged"]]
+    n_failed = len(failed)
     n_branch = sum(1 for r in ok if r["on_production_branch"])
 
     clusters: dict = defaultdict(list)
@@ -431,10 +616,11 @@ def classify(rows: list[dict]) -> dict:
                                    key=lambda kv: min(x["penalized_objective"]
                                                       for x in kv[1]))]
 
-    better = [r for r in ok
-              if r["penalized_objective"] < a_obj - BETTER_OBJ_TOL
-              and any(abs(r[n] - anchor[n]) > BRANCH_MACRO_TOL
-                      for n in BETA_NAMES)]
+    better = ([r for r in ok
+               if r["penalized_objective"] < a_obj - BETTER_OBJ_TOL
+               and any(abs(r[n] - anchor[n]) > BRANCH_MACRO_TOL
+                       for n in BETA_NAMES)]
+              if anchor_valid else [])
     cold = next((r for r in rows if r["kind"] == "cold"), None)
     dispersed = [r for r in rows if r["kind"] == "dispersed"]
     cold_alone = bool(
@@ -443,11 +629,19 @@ def classify(rows: list[dict]) -> dict:
 
     return {
         "n_starts": len(rows), "n_failed": n_failed,
+        "n_converged": len(ok),
         "n_on_production_branch": n_branch,
-        "anchor_objective": a_obj,
-        "anchor_macro": {n: anchor[n] for n in BETA_NAMES},
-        "best_objective_found": float(min(r["penalized_objective"] for r in ok)),
-        "production_is_best_objective": bool(not better),
+        "anchor_valid": anchor_valid,
+        "anchor_invalid_reason": anchor_reason,
+        "anchor_objective": _f(a_obj),
+        "anchor_macro": {n: _f(anchor[n]) for n in BETA_NAMES},
+        "failures": [{"start_id": r["start_id"], "kind": r["kind"],
+                      "sigma_rung": r["sigma_rung"], "reason": r["failure"],
+                      "eta_max": _f(r["eta_max"]),
+                      **{n: _f(r[n]) for n in BETA_NAMES}} for r in failed],
+        "best_objective_found": (
+            float(min(r["penalized_objective"] for r in ok)) if ok else None),
+        "production_is_best_objective": bool(anchor_valid and not better),
         "better_optimum_starts": [{"start_id": r["start_id"],
                                    "kind": r["kind"],
                                    "objective": r["penalized_objective"],
@@ -455,10 +649,15 @@ def classify(rows: list[dict]) -> dict:
                                    **{n: r[n] for n in BETA_NAMES}}
                                   for r in better],
         "distinct_optima": distinct,
+        "cold_start_converged": (bool(cold["converged"]) if cold else None),
         "cold_start_on_production_branch": (bool(cold["on_production_branch"])
                                             if cold else None),
         "cold_start_macro": ({n: cold[n] for n in BETA_NAMES} if cold else None),
-        "cold_start_objective": (cold["penalized_objective"] if cold else None),
+        "cold_start_objective": (
+            (cold["penalized_objective"]
+             if np.isfinite(cold["penalized_objective"]) else None)
+            if cold else None),
+        "cold_start_failure": (cold["failure"] if cold else None),
         "cold_start_diverged_alone": cold_alone,
         "by_rung": {str(rung): {
             "n": sum(1 for r in dispersed if r["sigma_rung"] == rung),
@@ -480,6 +679,12 @@ def main() -> None:
     legs = [l.strip() for l in args.legs.split(",") if l.strip()]
     for l in legs:
         assert l in LEGS, f"unknown leg {l!r}; choose from {sorted(LEGS)}"
+    # PRIMARY FIRST (probe defect 3): under --limit only the leading starts of
+    # each leg run, and the blocking gate G1 lives on the primary (production,
+    # ddof-0) leg — so a timing probe must exercise that leg, not the
+    # spec-literal one. Order is normalized here rather than left to --legs.
+    legs = ([PRIMARY_LEG] if PRIMARY_LEG in legs else []) + \
+           [l for l in legs if l != PRIMARY_LEG]
     t0 = time.perf_counter()
 
     prod = json.loads(Path(HAZARD_COEF_PATH).read_text())
@@ -555,26 +760,47 @@ def main() -> None:
         all_rows.extend(rows)
 
     # ---- G1: the anchor ---------------------------------------------------
-    primary = "prod_warm" if "prod_warm" in verdicts else legs[0]
-    anchor_row = next(r for r in all_rows
-                      if r["leg"] == primary and r["kind"] == "warm_production")
+    primary = (PRIMARY_LEG if PRIMARY_LEG in verdicts
+               else (legs[0] if legs and legs[0] in verdicts else None))
+    primary_ran = primary is not None
+    anchor_row = (next(r for r in all_rows
+                       if r["leg"] == primary and r["kind"] == "warm_production")
+                  if primary_ran else None)
+    # (probe defect 1c) an anchor whose objective is not finite cannot
+    # adjudicate anything — the leg hard-fails with the reason attached.
+    anchor_bad = {l: x["anchor_invalid_reason"]
+                  for l, x in verdicts.items() if not x["anchor_valid"]}
     fac = float(np.sqrt(n_train / (n_train - 1.0)))
     g1_checks = {}
-    for n in BETA_NAMES:
-        got, want = float(anchor_row[n]), PROD_V4[n]
-        adj = want * (fac if (LEGS[primary][0] == "ddof1"
-                              and n != "burnout_orth") else 1.0)
-        g1_checks[n] = {"got": got, "want": want, "abs_diff": abs(got - want),
-                        "want_ddof_adjusted": adj,
-                        "abs_diff_ddof_adjusted": abs(got - adj),
-                        "pass": bool(abs(got - want) <= TOL_G1)}
+    if primary_ran:
+        for n in BETA_NAMES:
+            got, want = float(anchor_row[n]), PROD_V4[n]
+            adj = want * (fac if (LEGS[primary][0] == "ddof1"
+                                  and n != "burnout_orth") else 1.0)
+            g1_checks[n] = {"got": got, "want": want,
+                            "abs_diff": abs(got - want),
+                            "want_ddof_adjusted": adj,
+                            "abs_diff_ddof_adjusted": abs(got - adj),
+                            "pass": bool(abs(got - want) <= TOL_G1)}
     gates["G1_production_anchor"] = {
         "leg": primary, "tol": TOL_G1, "checks": g1_checks,
-        "fit_method_anchor": anchor_row["fit_method"],
+        "anchor_valid": (bool(verdicts[primary]["anchor_valid"])
+                         if primary_ran else False),
+        "anchor_invalid_reason": (verdicts[primary]["anchor_invalid_reason"]
+                                  if primary_ran else "primary leg did not run"),
+        "anchor_objective": (verdicts[primary]["anchor_objective"]
+                             if primary_ran else None),
+        "anchor_objective_statsmodels_crosscheck": (
+            _statsmodels_objective(designs[LEGS[primary][0]],
+                                   anchor_row["_params"])
+            if primary_ran else None),
+        "fit_method_anchor": (anchor_row["fit_method"] if primary_ran else None),
         "fit_method_artifact": prod.get("fit_method"),
-        "alpha_matches": bool(f"alpha={ALPHA}" in str(anchor_row["fit_method"])
-                              and f"alpha={ALPHA}" in str(prod.get("fit_method"))),
-        "pass": bool(all(c["pass"] for c in g1_checks.values())
+        "alpha_matches": bool(
+            primary_ran and f"alpha={ALPHA}" in str(anchor_row["fit_method"])
+            and f"alpha={ALPHA}" in str(prod.get("fit_method"))),
+        "pass": bool(primary_ran and verdicts[primary]["anchor_valid"]
+                     and all(c["pass"] for c in g1_checks.values())
                      and f"alpha={ALPHA}" in str(prod.get("fit_method"))),
         "note": ("DEVIATION 3: the artifact's fit_method is the COLD string "
                  "'ridge(alpha=0.0001)'; fit_betas' warm branch returns "
@@ -584,16 +810,29 @@ def main() -> None:
 
     # ---- draws CSV --------------------------------------------------------
     csv_cols = ["leg", "convention", "irls_prestep", "start_id", "kind",
-                "sigma_rung", "seed", "converged", "irls_converged",
+                "sigma_rung", "seed", "converged", "optimizer_converged",
+                "objective_finite", "irls_converged", "irls_iterations",
+                "eta_max", "eta_min", "failure", "optimizer_warning",
                 "fit_method", "rate_gap_bps", "burnout_orth", "friction",
                 "penalized_objective", "on_production_branch",
                 "l2_distance_to_production", "l2_macro_distance_to_production"]
     pd.DataFrame([{c: r.get(c) for c in csv_cols}
                   for r in all_rows]).to_csv(DRAWS_CSV, index=False)
 
-    # ---- verdict (read off the primary leg) -------------------------------
-    v = verdicts[primary]
-    if not v["production_is_best_objective"]:
+    # ---- verdict (read off the primary leg, and ONLY if it fully ran) ------
+    # (probe defect 2) a leg that ran 3 of 50 starts cannot adjudicate
+    # MAJORITY/MINORITY, and a leg that did not run cannot adjudicate at all.
+    v = verdicts.get(primary)
+    full_run = bool(primary_ran and args.limit is None
+                    and v["n_starts"] == N_STARTS)
+    code = None
+    if not full_run:
+        why = ("the primary leg did not run" if not primary_ran else
+               f"only {v['n_starts']} of {N_STARTS} starts ran"
+               + (" (--limit)" if args.limit is not None else ""))
+        action = (f"PROBE ONLY — {why}; no verdict is adjudicated and NOTHING "
+                  "may be landed in the manuscript.")
+    elif not v["production_is_best_objective"]:
         code, action = "BETTER_OPTIMUM_FOUND", (
             "(iii-c) STOP. REPORT TO EUGENE. LAND NOTHING. No headline number "
             "is at risk (Path A is excluded everywhere), but every Path A "
@@ -614,7 +853,12 @@ def main() -> None:
             "exclusion is STRENGTHENED, not weakened.")
 
     all_pass = all(bool(gates[g]["pass"]) for g in gates)
-    status = "OK" if all_pass else "GATE_FAILURE"
+    if anchor_bad:
+        status = "GATE_FAILURE"
+    elif not full_run:
+        status = "PROBE_INCOMPLETE"
+    else:
+        status = "OK" if all_pass else "GATE_FAILURE"
 
     payload = {
         "mode": "pathA_cold_starts",
@@ -645,6 +889,19 @@ def main() -> None:
             "artifact string is the COLD one; the alpha is compared instead.",
             "4: dispersed seeds are 1000+s for s in 0..47, rung = s // 12.",
             "5: the sigma floor is a flat absolute 0.05.",
+            "6: the penalized objective is evaluated in numpy with an "
+            "overflow scan on the linear predictor, not through GLM.loglike "
+            "(which returns inf-inf = NaN at non-converged parameters and "
+            "reads state off a model object this script mutates 50 times per "
+            "leg); a non-finite objective makes the start a FAILURE, and a "
+            "non-finite anchor hard-fails its leg.",
+            "7: convergence is carried from the optimizer via captured "
+            "warnings — GLM._fit_ridge discards scipy's success flag and only "
+            "warns; non-converged starts are failures and enter neither the "
+            "branch count nor the optimum census.",
+            "8: legs are reordered so the primary (production, ddof-0) leg "
+            "runs first, and a run that did not complete all 50 starts of the "
+            "primary leg emits NO verdict code (status PROBE_INCOMPLETE).",
         ],
         "panel": {"n_train": n_train, "n_strata": n_strata,
                   "alpha": ALPHA, "ddof_factor": fac},
@@ -662,15 +919,23 @@ def main() -> None:
         "legs": {l: {"convention": LEGS[l][0], "irls_prestep": LEGS[l][1]}
                  for l in legs},
         "primary_leg": primary,
+        "primary_leg_complete": bool(full_run),
+        "legs_requested": legs,
+        "legs_run": sorted(verdicts),
+        "limit": args.limit,
+        "anchor_invalid_legs": anchor_bad,
         "by_leg": verdicts,
         "draws_csv": DRAWS_CSV.name,
         "verdict": {
             "code": code,
-            "n_on_production_branch": v["n_on_production_branch"],
-            "n_failed": v["n_failed"],
-            "distinct_optima": v["distinct_optima"],
-            "production_is_best_objective": v["production_is_best_objective"],
-            "cold_start_diverged_alone": v["cold_start_diverged_alone"],
+            "adjudicated": bool(code is not None),
+            "n_on_production_branch": (v["n_on_production_branch"] if v else None),
+            "n_failed": (v["n_failed"] if v else None),
+            "distinct_optima": (v["distinct_optima"] if v else None),
+            "production_is_best_objective": (
+                v["production_is_best_objective"] if v else None),
+            "cold_start_diverged_alone": (
+                v["cold_start_diverged_alone"] if v else None),
             "manuscript_action": action,
             "propagation": ("none — Path A is excluded from every headline "
                             "figure (tex 290, 978, 1053); under (iii-c) "
@@ -682,18 +947,38 @@ def main() -> None:
         json.dump(payload, f, indent=2, default=_np)
         f.write("\n")
 
+    def _fmt(x):
+        return f"{x:.10f}" if isinstance(x, float) and np.isfinite(x) else str(x)
+
     print("\n" + "=" * 66)
-    print(f" pathA_cold_starts — status {status} — verdict {code}")
+    print(f" pathA_cold_starts — status {status} — verdict "
+          f"{code if code else 'NOT ADJUDICATED (probe)'}")
     print("=" * 66)
-    print(f"  primary leg {primary}: {v['n_on_production_branch']}/"
-          f"{v['n_starts']} on the production branch, {v['n_failed']} failed")
-    print(f"  anchor objective {v['anchor_objective']:.10f}  |  best found "
-          f"{v['best_objective_found']:.10f}  |  production is best: "
-          f"{v['production_is_best_objective']}")
-    print(f"  distinct non-production optima: {len(v['distinct_optima'])}")
+    if v is not None:
+        print(f"  primary leg {primary}: {v['n_on_production_branch']}/"
+              f"{v['n_starts']} on the production branch, {v['n_failed']} failed"
+              f" ({v['n_converged']} converged)")
+        print(f"  anchor objective {_fmt(v['anchor_objective'])}  |  best found "
+              f"{_fmt(v['best_objective_found'])}  |  production is best: "
+              f"{v['production_is_best_objective']}")
+        print(f"  distinct non-production optima: {len(v['distinct_optima'])}")
+    else:
+        print(f"  primary leg {PRIMARY_LEG} did not run "
+              f"(legs run: {sorted(verdicts)})")
+    for leg, reason in anchor_bad.items():
+        print(f"  ANCHOR INVALID in leg {leg}: {reason}")
     print(f"  Saved: {RESULTS_JSON} + {DRAWS_CSV}")
     if code == "BETTER_OPTIMUM_FOUND":
         print("  *** (iii-c) STOP — report to Eugene, land nothing. ***")
+    if anchor_bad:
+        raise SystemExit(
+            "GATE_FAILURE — the production anchor's penalized objective is not "
+            f"finite in leg(s) {sorted(anchor_bad)}; an NaN/overflowing anchor "
+            "cannot adjudicate the branch census. Nothing lands.")
+    if status == "PROBE_INCOMPLETE":
+        raise SystemExit(
+            f"PROBE_INCOMPLETE — {action} Re-run without --limit and with the "
+            f"{PRIMARY_LEG} leg to adjudicate.")
     if status != "OK":
         raise SystemExit("GATE_FAILURE — nothing lands in the manuscript.")
 
