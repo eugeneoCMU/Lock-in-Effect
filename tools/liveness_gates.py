@@ -2130,7 +2130,12 @@ def main() -> int:
         "dispersion_split": "3.9\\%" in tex and "96.1\\%" in tex,
         # the verdict, in the manuscript's own words, in body and abstract
         "levels_only_body": "restrict every claim in this paper to levels" in tex,
-        "levels_only_abstract": "it identifies levels only" in tex,
+        # ROUND-32 (C-R1a): the abstract's bare "identifies levels only" was
+        # self-refuting beside Section V.E's "does not identify levels" -- the
+        # word carried the TIMING concession here and the LEVEL claim there,
+        # with nothing signposting the difference. The abstract now states both
+        # truths, and this pin follows the timing half to its new wording.
+        "levels_only_abstract": "not a level and not monthly timing" in tex,
         # the retired early-draft retention share must not reappear
         "no_stale_934": "93.4\\%" not in tex,
     }

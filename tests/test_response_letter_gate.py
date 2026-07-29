@@ -96,12 +96,12 @@ def test_historical_marker_removed_fails(tex, letter_file):
 
 
 # --- (b) the count that silently rotted -----------------------------------
-@pytest.mark.parametrize("wrong", ["263", "328", "341", "352", "359", "366", "367", "280", "424", "226", "235"])
+@pytest.mark.parametrize("wrong", ["263", "328", "341", "352", "359", "366", "367", "280", "424", "226", "235", "248"])
 def test_wrong_abstract_word_count_fails(tex, letter_file, wrong):
     """Every one of these was the true count at some point, which is
     precisely why a stated count has to be recomputed rather than trusted."""
     letter_file.write_text(
-        letter_file.read_text().replace("taken it to 248 words", f"taken it to {wrong} words", 1))
+        letter_file.read_text().replace("taken it to 287 words", f"taken it to {wrong} words", 1))
     ok, info = letter_check(tex)
     assert not ok, f"gate #101 accepted a {wrong}-word claim"
     assert info["claimed_words"] == [wrong] and info["actual_words"] != int(wrong)
@@ -109,7 +109,7 @@ def test_wrong_abstract_word_count_fails(tex, letter_file, wrong):
 
 def test_word_count_claim_deleted_fails(tex, letter_file):
     letter_file.write_text(
-        letter_file.read_text().replace("taken it to 248 words", "lengthened it", 1))
+        letter_file.read_text().replace("taken it to 287 words", "lengthened it", 1))
     ok, info = letter_check(tex)
     assert not ok and info["claimed_words"] == []
 
