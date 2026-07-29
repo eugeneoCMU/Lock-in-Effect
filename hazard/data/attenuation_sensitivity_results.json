@@ -1,0 +1,447 @@
+{
+  "mode": "attenuation_sensitivity",
+  "status": "OK",
+  "spec": "survival-selection attenuation of the imported elasticity via the invert-and-pass route: solve delta' with rothstein_beta1(delta') = a*rothstein_beta1(0.065), pass p_q_shock_pct = 100*delta', assert the identity to 1e-12 on the engine's own recomputation; a = S^theta from the gamma-frailty selection identity (lesniewski2026, tex 194/980) at the MEASURED pre-window survival share S = 40234/75000 (tex 966), theta in {0,.25,.5,1}; central legs only at floors {4.0%, 4.991% consumed from the oos artifact}, one null per floor (beta1=0 is invariant to a); production convention otherwise (75k sample, seed 42, US+Danish regime tuple, shared macro frame, raw-basis scorer, bind tally); no hazard patching. Direction SIGNED ex ante: a<1, the marginal falls, a DOWNWARD member. Predictions off-window from eps~0.54; non-monotonicity is the only hard check-stop.",
+  "selection_identity": {
+    "form": "a = S^theta",
+    "S_numerator": 40234,
+    "S_denominator": 75000,
+    "S": 0.5364533333333333,
+    "ln_S": -0.6227757042299303,
+    "source": "tex 966",
+    "source_quote": "of the 75,000 sampled loans, 34,734 prepaid and 32 defaulted before the QT window opens, so 40,234 are active at the June 2022 start",
+    "identity_source": "lesniewski2026 selection identity, cited at tex 194 and tex 980",
+    "theta_grid": [
+      0.0,
+      0.25,
+      0.5,
+      1.0
+    ],
+    "a_grid": [
+      1.0,
+      0.855821094824492,
+      0.7324297463465922,
+      0.5364533333333333
+    ],
+    "a_grid_drafted_literals": [
+      1.0,
+      0.8558,
+      0.7325,
+      0.5365
+    ],
+    "a_grid_max_dev_vs_drafted": 7.025365340784795e-05,
+    "free_parameter_note": "theta is not estimated in this design; the only object that speaks to it is Path A's burnout coefficient, of which tex 980 says, verbatim: \"under both schemes it is imprecise and not statistically distinguishable from zero, so I treat it as a control rather than a finding\"."
+  },
+  "direction_signed_ex_ante": "a < 1 => the marginal falls; this is a DOWNWARD member. It discharges the second of R1-W5's two unnamed transport assumptions (the elasticity is a ZIP-level moving probability estimated on a population not conditioned on mortgage survival, tex 253, applied to a pool 46.3% depleted before the window).",
+  "floor_provenance": "oos_identification_results.json headline_oos_marginal.clean_floor_point_pct, asserted == 4.991",
+  "parity_gates": {
+    "P1_inversion_identity": {
+      "cells": {
+        "0": {
+          "theta": 0.0,
+          "a": 1.0,
+          "a_drafted": 1.0,
+          "delta_prime": 0.065,
+          "p_q_shock_pct": 6.5,
+          "beta1_target": -0.06857052676484808,
+          "beta1_engine": -0.06857052676484808,
+          "residual": 0.0,
+          "pass": true
+        },
+        "0.25": {
+          "theta": 0.25,
+          "a": 0.855821094824492,
+          "a_drafted": 0.8558,
+          "delta_prime": 0.055890303018141185,
+          "p_q_shock_pct": 5.589030301814119,
+          "beta1_target": -0.058684103288584415,
+          "beta1_engine": -0.058684103288585886,
+          "residual": 1.4710455076283324e-15,
+          "pass": true
+        },
+        "0.5": {
+          "theta": 0.5,
+          "a": 0.7324297463465922,
+          "a_drafted": 0.7325,
+          "delta_prime": 0.04802502193281083,
+          "p_q_shock_pct": 4.802502193281083,
+          "beta1_target": -0.05022309352522989,
+          "beta1_engine": -0.05022309352523432,
+          "residual": 4.427014310692812e-15,
+          "pass": true
+        },
+        "1": {
+          "theta": 1.0,
+          "a": 0.5364533333333333,
+          "a_drafted": 0.5365,
+          "delta_prime": 0.03540087919867346,
+          "p_q_shock_pct": 3.5400879198673465,
+          "beta1_target": -0.036784887651425305,
+          "beta1_engine": -0.036784887651429655,
+          "residual": 4.350686477749832e-15,
+          "pass": true
+        }
+      },
+      "a1_delta_prime_exact": true,
+      "a1_independent_solver_dev": 5.329070518200751e-15,
+      "pass": true
+    },
+    "P2_null_4": {
+      "got": 748.1850239867648,
+      "want": 748.1850239867648,
+      "diff": 0.0,
+      "pass": true,
+      "soft_alarm": false
+    },
+    "P4_central_a1_4": {
+      "got": 818.5300844066606,
+      "want": 818.5300844066606,
+      "diff": 0.0,
+      "pass": true,
+      "soft_alarm": false
+    },
+    "P3_null_4.991": {
+      "got": 724.9180585654117,
+      "want": 724.9180585654117,
+      "diff": 0.0,
+      "pass": true,
+      "soft_alarm": false
+    },
+    "P5_central_a1_4.991": {
+      "got": 767.5264524465003,
+      "want": 767.5264524465003,
+      "diff": 0.0,
+      "pass": true,
+      "soft_alarm": false
+    },
+    "P6_bind_instrumentation": {
+      "n_anchor": 1683124,
+      "cells": {
+        "4|6.5": {
+          "got_share": 0.36269282595934704,
+          "want_share": 0.36269282595934704,
+          "got_n": 1683124,
+          "pass": true
+        },
+        "4|0": {
+          "got_share": 0.14340654639824515,
+          "want_share": 0.14340654639824515,
+          "got_n": 1683124,
+          "pass": true
+        },
+        "4.991|6.5": {
+          "got_share": 0.6881875607501289,
+          "want_share": 0.6881875607501289,
+          "got_n": 1683124,
+          "pass": true
+        }
+      },
+      "offwindow_null_share_got": 0.35785836337667337,
+      "offwindow_null_share_ref": 0.35785836337667337,
+      "offwindow_null_reported_only": true,
+      "pass": true
+    },
+    "R1_restoration": {
+      "pass": true,
+      "floor_after": 0.04,
+      "floor_mode_after": "max"
+    }
+  },
+  "parity_gates_all_pass": true,
+  "soft_alarms": [],
+  "nulls": {
+    "4": {
+      "floor_annual_cpr_pct": 4.0,
+      "p_q_shock_pct": 0.0,
+      "beta1": 0.0,
+      "trapped_b": 748.1850239867648,
+      "share_pct": 97.83415925879702,
+      "cpr_r_lag0": 0.3669902953388254,
+      "best_lag": -3,
+      "peak_lag_r": 0.44376461325997124,
+      "mean_us_cpr_pct": 5.613584778161411,
+      "floor_bind_share": 0.14340654639824515,
+      "floor_bind_loan_months": 1683124
+    },
+    "4.991": {
+      "floor_annual_cpr_pct": 4.991,
+      "p_q_shock_pct": 0.0,
+      "beta1": 0.0,
+      "trapped_b": 724.9180585654117,
+      "share_pct": 94.79172466371236,
+      "cpr_r_lag0": 0.35389036550042563,
+      "best_lag": -3,
+      "peak_lag_r": 0.41863839648970513,
+      "mean_us_cpr_pct": 5.873901098860486,
+      "floor_bind_share": 0.35785836337667337,
+      "floor_bind_loan_months": 1683124
+    }
+  },
+  "cells": {
+    "4|1.0000": {
+      "floor_annual_cpr_pct": 4.0,
+      "p_q_shock_pct": 6.5,
+      "beta1": -0.06857052676484808,
+      "trapped_b": 818.5300844066606,
+      "share_pct": 107.0326190295068,
+      "cpr_r_lag0": 0.19000395255236566,
+      "best_lag": -3,
+      "peak_lag_r": 0.40436496933191357,
+      "mean_us_cpr_pct": 4.763203719157251,
+      "floor_bind_share": 0.36269282595934704,
+      "floor_bind_loan_months": 1683124,
+      "a": 1.0,
+      "theta": 0.0,
+      "delta_prime": 0.065,
+      "null_trapped_b": 748.1850239867648,
+      "central_trapped_b": 818.5300844066606,
+      "marginal_b": 70.34506041989584,
+      "marginal_pp": 9.198459770709789
+    },
+    "4|0.8558": {
+      "floor_annual_cpr_pct": 4.0,
+      "p_q_shock_pct": 5.589030301814119,
+      "beta1": -0.058684103288585886,
+      "trapped_b": 810.7116497062308,
+      "share_pct": 106.01026498456685,
+      "cpr_r_lag0": 0.24392138632363727,
+      "best_lag": -3,
+      "peak_lag_r": 0.42192870375777125,
+      "mean_us_cpr_pct": 4.857886072883237,
+      "floor_bind_share": 0.31940665096570425,
+      "floor_bind_loan_months": 1683124,
+      "a": 0.855821094824492,
+      "theta": 0.25,
+      "delta_prime": 0.055890303018141185,
+      "null_trapped_b": 748.1850239867648,
+      "central_trapped_b": 810.7116497062308,
+      "marginal_b": 62.52662571946598,
+      "marginal_pp": 8.17610572576983
+    },
+    "4|0.7324": {
+      "floor_annual_cpr_pct": 4.0,
+      "p_q_shock_pct": 4.802502193281083,
+      "beta1": -0.05022309352523432,
+      "trapped_b": 803.355825802715,
+      "share_pct": 105.0484028459457,
+      "cpr_r_lag0": 0.2786136785952128,
+      "best_lag": -3,
+      "peak_lag_r": 0.43215262412904515,
+      "mean_us_cpr_pct": 4.946948386214926,
+      "floor_bind_share": 0.28529389397334953,
+      "floor_bind_loan_months": 1683124,
+      "a": 0.7324297463465922,
+      "theta": 0.5,
+      "delta_prime": 0.04802502193281083,
+      "null_trapped_b": 748.1850239867648,
+      "central_trapped_b": 803.355825802715,
+      "marginal_b": 55.1708018159502,
+      "marginal_pp": 7.214243587148687
+    },
+    "4|0.5365": {
+      "floor_annual_cpr_pct": 4.0,
+      "p_q_shock_pct": 3.5400879198673465,
+      "beta1": -0.036784887651429655,
+      "trapped_b": 790.464854040213,
+      "share_pct": 103.3627537832406,
+      "cpr_r_lag0": 0.316933028920758,
+      "best_lag": -3,
+      "peak_lag_r": 0.44136670057712224,
+      "mean_us_cpr_pct": 5.102947476156103,
+      "floor_bind_share": 0.23818387712372946,
+      "floor_bind_loan_months": 1683124,
+      "a": 0.5364533333333333,
+      "theta": 1.0,
+      "delta_prime": 0.03540087919867346,
+      "null_trapped_b": 748.1850239867648,
+      "central_trapped_b": 790.464854040213,
+      "marginal_b": 42.27983005344822,
+      "marginal_pp": 5.528594524443591
+    },
+    "4.991|1.0000": {
+      "floor_annual_cpr_pct": 4.991,
+      "p_q_shock_pct": 6.5,
+      "beta1": -0.06857052676484808,
+      "trapped_b": 767.5264524465003,
+      "share_pct": 100.36328284662208,
+      "cpr_r_lag0": -0.13792245738381698,
+      "best_lag": -3,
+      "peak_lag_r": 0.270180825657945,
+      "mean_us_cpr_pct": 5.3591856812637735,
+      "floor_bind_share": 0.6881875607501289,
+      "floor_bind_loan_months": 1683124,
+      "a": 1.0,
+      "theta": 0.0,
+      "delta_prime": 0.065,
+      "null_trapped_b": 724.9180585654117,
+      "central_trapped_b": 767.5264524465003,
+      "marginal_b": 42.60839388108866,
+      "marginal_pp": 5.571558182909726
+    },
+    "4.991|0.8558": {
+      "floor_annual_cpr_pct": 4.991,
+      "p_q_shock_pct": 5.589030301814119,
+      "beta1": -0.058684103288585886,
+      "trapped_b": 763.8857061988886,
+      "share_pct": 99.88721163857821,
+      "cpr_r_lag0": -0.01248726264499663,
+      "best_lag": -3,
+      "peak_lag_r": 0.32787055716427344,
+      "mean_us_cpr_pct": 5.403061493228636,
+      "floor_bind_share": 0.6486301662860253,
+      "floor_bind_loan_months": 1683124,
+      "a": 0.855821094824492,
+      "theta": 0.25,
+      "delta_prime": 0.055890303018141185,
+      "null_trapped_b": 724.9180585654117,
+      "central_trapped_b": 763.8857061988886,
+      "marginal_b": 38.96764763347687,
+      "marginal_pp": 5.09548697486585
+    },
+    "4.991|0.7324": {
+      "floor_annual_cpr_pct": 4.991,
+      "p_q_shock_pct": 4.802502193281083,
+      "beta1": -0.05022309352523432,
+      "trapped_b": 760.2318969696965,
+      "share_pct": 99.40943228912633,
+      "cpr_r_lag0": 0.0961328470743241,
+      "best_lag": -3,
+      "peak_lag_r": 0.3676444112018683,
+      "mean_us_cpr_pct": 5.447137094138111,
+      "floor_bind_share": 0.611866980685915,
+      "floor_bind_loan_months": 1683124,
+      "a": 0.7324297463465922,
+      "theta": 0.5,
+      "delta_prime": 0.04802502193281083,
+      "null_trapped_b": 724.9180585654117,
+      "central_trapped_b": 760.2318969696965,
+      "marginal_b": 35.313838404284866,
+      "marginal_pp": 4.617707625413971
+    },
+    "4.991|0.5365": {
+      "floor_annual_cpr_pct": 4.991,
+      "p_q_shock_pct": 3.5400879198673465,
+      "beta1": -0.036784887651429655,
+      "trapped_b": 753.2419767642509,
+      "share_pct": 98.49541644456707,
+      "cpr_r_lag0": 0.2282965078281176,
+      "best_lag": -3,
+      "peak_lag_r": 0.4071965869383786,
+      "mean_us_cpr_pct": 5.531534142048325,
+      "floor_bind_share": 0.5477784168011388,
+      "floor_bind_loan_months": 1683124,
+      "a": 0.5364533333333333,
+      "theta": 1.0,
+      "delta_prime": 0.03540087919867346,
+      "null_trapped_b": 724.9180585654117,
+      "central_trapped_b": 753.2419767642509,
+      "marginal_b": 28.323918198839237,
+      "marginal_pp": 3.7036917808547116
+    }
+  },
+  "base_marginal_pp": {
+    "4": 9.198459770709789,
+    "4.991": 5.571558182909726
+  },
+  "realized_elasticity_eps": {
+    "4": {
+      "per_a": {
+        "0.8558": 0.7567417187284242,
+        "0.7324": 0.7803088796110441,
+        "0.5365": 0.8174731638287235
+      },
+      "mean": 0.784841254056064,
+      "reference_eps_used_for_predictions": 0.54
+    },
+    "4.991": {
+      "per_a": {
+        "0.8558": 0.5736866015566148,
+        "0.7324": 0.6030304719651604,
+        "0.5365": 0.6556849549847008
+      },
+      "mean": 0.6108006761688253,
+      "reference_eps_used_for_predictions": 0.54
+    },
+    "ordering_check_insample_gt_offwindow": true
+  },
+  "predicted_vs_realized": {
+    "0.8558": {
+      "theta": 0.25,
+      "a": 0.855821094824492,
+      "predicted_pp": 5.12,
+      "tolerance_pp": 0.25,
+      "realized_pp": 5.09548697486585,
+      "deviation_pp": -0.024513025134150546,
+      "inside_band": true,
+      "outside_2x_band": false
+    },
+    "0.7324": {
+      "theta": 0.5,
+      "a": 0.7324297463465922,
+      "predicted_pp": 4.71,
+      "tolerance_pp": 0.3,
+      "realized_pp": 4.617707625413971,
+      "deviation_pp": -0.09229237458602935,
+      "inside_band": true,
+      "outside_2x_band": false
+    },
+    "0.5365": {
+      "theta": 1.0,
+      "a": 0.5364533333333333,
+      "predicted_pp": 3.98,
+      "tolerance_pp": 0.4,
+      "realized_pp": 3.7036917808547116,
+      "deviation_pp": -0.27630821914528836,
+      "inside_band": true,
+      "outside_2x_band": false
+    }
+  },
+  "monotonicity": {
+    "4": {
+      "a_grid_descending": [
+        1.0,
+        0.855821094824492,
+        0.7324297463465922,
+        0.5364533333333333
+      ],
+      "marginal_b_ordered": [
+        70.34506041989584,
+        62.52662571946598,
+        55.1708018159502,
+        42.27983005344822
+      ],
+      "marginal_pp_ordered": [
+        9.198459770709789,
+        8.17610572576983,
+        7.214243587148687,
+        5.528594524443591
+      ],
+      "strictly_decreasing_in_falling_a": true
+    },
+    "4.991": {
+      "a_grid_descending": [
+        1.0,
+        0.855821094824492,
+        0.7324297463465922,
+        0.5364533333333333
+      ],
+      "marginal_b_ordered": [
+        42.60839388108866,
+        38.96764763347687,
+        35.313838404284866,
+        28.323918198839237
+      ],
+      "marginal_pp_ordered": [
+        5.571558182909726,
+        5.09548697486585,
+        4.617707625413971,
+        3.7036917808547116
+      ],
+      "strictly_decreasing_in_falling_a": true
+    },
+    "all_pass": true
+  },
+  "not_an_elasticity_band_widening": "The attenuation grid is a DIFFERENT AXIS from the 5.5-7.7 Rothstein band and must never be presented as widening it.",
+  "runtime_s": 121.7,
+  "wall_s": 123.4
+}
