@@ -1,0 +1,106 @@
+{
+  "mode": "wal_normal_turnover",
+  "run_tag": "wal_normal_turnover",
+  "spec": {
+    "spec_file": "specs/SPEC_R30_wal_normal_turnover.md",
+    "question": "the SOMA book's approximate WAL at the paper's own off-window baseline-turnover-floor read",
+    "calculator": "hazard/wal_table.py (imported; main() never called)",
+    "calculator_sha256": "26308a9ff7de7ca86f5753ba63129758cdf2b76907d84e5a6f30a16bfce70b32",
+    "frozen_companion": "hazard/data/wal_table_results.json",
+    "frozen_companion_sha256": "1aeaf45b47e6622d02dcf55470ca740902beb45292454726c9d859a9cc2bf18a",
+    "anchor_source": "hazard/data/oos_identification_results.json:instrument1_oow_floor.defensible_clean_floor",
+    "anchor_full_precision_pct": 4.991,
+    "anchor_band_full_precision_pct": {
+      "lo": 4.695,
+      "mid": 4.991,
+      "hi": 5.334
+    },
+    "anchor_primary_point_selection": "gap<=-0.0025_age>=12",
+    "cpr_precision_convention": "2-decimal percent, as all nine committed scenarios",
+    "nov_2025_extra_age_months": 42,
+    "printed_row": "turnover_floor_oow_mid"
+  },
+  "parity": {
+    "nine_rows_bit_identical": true,
+    "extension_years_vs_no_shock": 6.0,
+    "rule_only_wal_shortening_years": 0.6,
+    "frozen_artifact_untouched": true,
+    "import_side_effect_free": true,
+    "printed_row_precision_insensitive": true
+  },
+  "expectations": {
+    "E1_bracket_rows": [
+      "empirical",
+      "path_b"
+    ],
+    "E1_june_2022": [
+      9.4,
+      9.7
+    ],
+    "E1_nov_2025": [
+      8.5,
+      8.7
+    ],
+    "E1_pass": true,
+    "E1_strict_interior_june_2022": true,
+    "E1_strict_interior_nov_2025": true
+  },
+  "rows": {
+    "turnover_floor_oow_mid": {
+      "cpr": 0.0499,
+      "mean_cpr_pct": 4.99,
+      "wal_june_2022": 9.5,
+      "wal_nov_2025": 8.6,
+      "raw_june_2022": 9.508532193243326,
+      "raw_nov_2025": 8.570486370268116
+    },
+    "turnover_floor_oow_lo": {
+      "cpr": 0.047,
+      "mean_cpr_pct": 4.7,
+      "wal_june_2022": 9.7,
+      "wal_nov_2025": 8.7,
+      "raw_june_2022": 9.729933564586188,
+      "raw_nov_2025": 8.749245746310194
+    },
+    "turnover_floor_oow_hi": {
+      "cpr": 0.0533,
+      "mean_cpr_pct": 5.33,
+      "wal_june_2022": 9.3,
+      "wal_nov_2025": 8.4,
+      "raw_june_2022": 9.258536498371232,
+      "raw_nov_2025": 8.367761676184845
+    }
+  },
+  "full_precision_rows": {
+    "turnover_floor_oow_mid": {
+      "cpr": 0.049909999999999996,
+      "mean_cpr_pct": 4.991,
+      "wal_june_2022": 9.5,
+      "wal_nov_2025": 8.6,
+      "raw_june_2022": 9.507781967695035,
+      "raw_nov_2025": 8.569879406664267
+    },
+    "turnover_floor_oow_lo": {
+      "cpr": 0.046950000000000006,
+      "mean_cpr_pct": 4.695,
+      "wal_june_2022": 9.7,
+      "wal_nov_2025": 8.8,
+      "raw_june_2022": 9.733818851664969,
+      "raw_nov_2025": 8.75237630436063
+    },
+    "turnover_floor_oow_hi": {
+      "cpr": 0.05334,
+      "mean_cpr_pct": 5.334,
+      "wal_june_2022": 9.3,
+      "wal_nov_2025": 8.4,
+      "raw_june_2022": 9.255655028528622,
+      "raw_nov_2025": 8.365419538912048
+    }
+  },
+  "precision_agreement_2dp_vs_full": {
+    "turnover_floor_oow_mid": true,
+    "turnover_floor_oow_lo": false,
+    "turnover_floor_oow_hi": true
+  },
+  "runtime_s": 0.025
+}

@@ -56,6 +56,7 @@ MARGMONTH_RESULTS = ROOT / "hazard" / "data" / "marginal_monthly_decomposition_r
 INTERP_RESULTS = ROOT / "abm" / "data" / "interp_spot_check_results.json"
 SMD_RESULTS = ROOT / "abm" / "data" / "smd_two_moment_results.json"
 WALTAB_RESULTS = ROOT / "hazard" / "data" / "wal_table_results.json"
+WALNT_RESULTS = ROOT / "hazard" / "data" / "wal_normal_turnover_results.json"
 CURTDEMO_RESULTS = ROOT / "hazard" / "data" / "curtailment_profile_demo_results.json"
 SPREADVAR_RESULTS = ROOT / "hazard" / "data" / "expectation_spread_variants_results.json"
 DANBOUND_RESULTS = ROOT / "hazard" / "data" / "danish_discount_bound.json"
@@ -863,6 +864,34 @@ def floor_ladder_check(tex: str) -> tuple[bool, dict]:
     )
     info["artifact_ok"] = art_ok
     return ordered and art_ok, info
+
+
+def wal_normal_turnover_check(tex, wnt, oos):
+    """Gate #108's rule, as a function so a battery can exercise it.
+
+    Round-30 D2: the normal-turnover WAL row must be the committed artifact's, the
+    artifact's anchor must still be the floor artifact's headline read, its parity
+    against the frozen calculator must have passed, and the sentence the run
+    falsified must not come back.
+    """
+    r = wnt["rows"]["turnover_floor_oow_mid"]
+    lit_row = (f"({r['mean_cpr_pct']:.2f}\\%) & {r['wal_june_2022']:.1f} & "
+               f"{r['wal_nov_2025']:.1f}")
+    anchor = (oos["instrument1_oow_floor"]["defensible_clean_floor"])
+    par = wnt["parity"]
+    ok = (bool(par["nine_rows_bit_identical"])
+          and bool(par["frozen_artifact_untouched"])
+          and bool(par["printed_row_precision_insensitive"])
+          and bool(wnt["expectations"]["E1_pass"])
+          and wnt["spec"]["anchor_full_precision_pct"] == anchor["clean_mid_pct"]
+          and tex.count("\\texttt{wal\\_normal\\_turnover}") >= 1
+          and lit_row in tex
+          and "No row is printed at a normal-turnover speed." not in tex)
+    return ok, {"lit_row": lit_row, "present": lit_row in tex,
+                "tag_citations": tex.count("\\texttt{wal\\_normal\\_turnover}"),
+                "anchor_pct": wnt["spec"]["anchor_full_precision_pct"],
+                "stale_sentence_gone":
+                    "No row is printed at a normal-turnover speed." not in tex}
 
 
 def buyback_bracket_check(tex: str) -> tuple[bool, dict]:
@@ -4877,6 +4906,15 @@ def main() -> int:
           f"ordered={_fl.get('ordered')}, "
           f"artifact_ok={_fl.get('artifact_ok')}, "
           f"missing={_fl['missing'] or 'none'}")
+    _wnt = json.loads(WALNT_RESULTS.read_text())
+    _oos_wnt = json.loads((ROOT / "hazard" / "data"
+                           / "oos_identification_results.json").read_text())
+    wnt_ok, _wn = wal_normal_turnover_check(tex, _wnt, _oos_wnt)
+    failures += 0 if wnt_ok else 1
+    print(f"[{'PASS' if wnt_ok else 'FAIL'}] normal-turnover WAL row (gate #108): "
+          f"row_present={_wn['present']}, tag_citations={_wn['tag_citations']}, "
+          f"anchor_pct={_wn['anchor_pct']}, "
+          f"stale_sentence_gone={_wn['stale_sentence_gone']}")
     print(f"[{'PASS' if cl_ok else 'FAIL'}] convolved sampling line (gate #105): "
           f"{len(CONVOLVED_LINE_SPANS) - len(_cl['missing'])}/"
           f"{len(CONVOLVED_LINE_SPANS)} spans present, "

@@ -4259,3 +4259,30 @@ Eugene: match the cited literature's abstract length. The reference-list norm is
 
 ### 44.1 Option-2 second cut, 280 -> 226 (author choice from the presented menu)
 The expectations pair (fed-projection attribution + denominator switch/quarter-to-half) left the abstract with its two hedges; body pins added as SINGLE spans joining attribution/switch to hedge (fed_projection_body: the New York Fed May-2022 staff-baseline sentence at the intro results block; surprise_denominator_body: the Section III "roughly half the genuine surprise under the central allocation" statement), so the round-24 seam attack has no boundary to open -- its two battery cases, the two projection-misattribution cases, drops_large_majority and drops_denominator_switch retired with the sentences they mutated (436 -> 431 tests). Headline point, corrections frame, and all three panel disclosures kept; hook compressed. Letter recount 226; 280 joined the wrong-count list. The remaining path to ~150 (drop the point sentence, gate #99 redesign) was presented and NOT taken.
+
+## 45. Round-30: the normal-turnover WAL row — run `wal_normal_turnover`, LANDS (2026-07-29)
+
+The round-28 `tab:wal` tablenote stated the hole ("No row is printed at a
+normal-turnover speed"); this run closes it with the paper's own off-window
+turnover measurement. **Anchor:** `clean_mid_pct` 4.991 from
+`oos_identification_results.json` — the 2018 rising-rate leg's headline read; the
+contaminated candidates (pooled 2017–2019 at 6.07%, 2019 at 6.91%) were rejected
+ex ante for the same refi contamination the 22.81% row carries. **Guarded
+runner** (`tools/wal_normal_turnover_run.py`, verbatim from the committed spec):
+`wal_table.py` imported by sha256 pin (26308a9f…), never executed as a program;
+the frozen artifact (1aeaf45b…) hashed before/after import and at exit. All
+gates PASS: P0/P0b pins held; P1 all nine committed rows recomputed bit-identical
+plus both derived statistics; P2 anchor still the primary selection with
+lo<mid<hi; P3 the printed row is precision-insensitive (2dp CPR == full
+precision at both dates). **E1 PASS strict-interior**: realized 9.5 / 8.6 years,
+exactly the E1′ chord (9.52/8.58 rounded), between Path B's 9.7/8.7 and the
+empirical 9.4/8.5. Landed: the row (after the Danish-level row, so the no-shock
+row stays the table's final row), the two falsified tablenote sentences retired
+(strict-interior variant), runindex row, **gate #108** (artifact-equality +
+live cross-artifact anchor tie with no literal in the gate + parity/E1 flags +
+stale-sentence ban) + 8-test battery (479 total). Band ends 4.695/5.334 →
+9.7/8.7 and 9.3/8.4 committed to the artifact, NOT printed (the low end is
+precision-fragile: 2dp vs full precision differ by 0.1yr at Nov-2025 — recorded
+per-row in `precision_agreement_2dp_vs_full`). Verdicts row: none (clean E1
+pass, no post-run judgment — the spec's default). Note: the spec numbered its
+gate #107; D1 (E7+CR1) took that slot in the same round, so this landed as #108.
