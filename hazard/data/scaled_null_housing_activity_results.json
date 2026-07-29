@@ -1,0 +1,402 @@
+{
+  "mode": "scaled_null_housing_activity",
+  "status": "OK",
+  "spec": "M1 mapping (PICKED): scale the PSA seasoning baseline h0 by phi in BOTH legs via lh.baseline_hazard = lambda age, mode=None: lh.h0_psa(age, psa_speed=100*phi), floor UNTOUCHED. The floor is an empirical read of realized deep-discount turnover (tex 249) and already embeds the non-rate suppression, so scaling it would double-count; h0 is the PSA convention with no housing-cycle content and is exactly the object R2-W2 says is missing. REJECTED: M2 scale the floor only (double-counts the floor's empirical content; already swept in level 3-5% and dispersion kappa); M3 scale the null leg only (asymmetric, so central-null is no longer a beta1 contrast \u2014 it silently changes the estimand); M4 scale h0 AND floor (M1+M2's defect; stress cell only on request). Ladder phi {1,.9,.8,.7} (+0.75 cross-route) x paired legs x floors {4.0%, 4.991% from the oos artifact}; phi=1 cells run PATCHED and are the wiring test (bit-exact by construction, 100.0*1.0 == config.PSA_SPEED). Root: bisection on phi, null leg only, tol $0.05B, <=10 iters, bracket seeded from the ladder (labeled deviation D1). Danish us_intercept branch (competing_risks.py:148) also carries the scaled baseline; only the U.S. leg is scored.",
+  "anchor": {
+    "source": "aladangady2024, tex 98",
+    "rate_share": 0.44,
+    "non_rate_share": 0.56,
+    "ratio": 1.272727272727273,
+    "ratio_drafted_literal": 1.272727,
+    "tex_98_claim": "rate-gap-driven lock-in explains only 44% of the actual decline in mortgage borrower mobility between 2021 and 2022"
+  },
+  "calibration_condition": "find phi* such that trapped_null(phi*) - trapped_null(1) = (0.56/0.44) * [ trapped_central(1) - trapped_null(1) ]",
+  "feasibility_precheck": {
+    "4": {
+      "required_lift_b": 89.53007689804927,
+      "headroom_estimate_b": 134.0,
+      "measured_lift_at_phi_0p75_b": 91.33452976385718,
+      "measured_lift_source": "psa_level_sweep_results.json (PSA 75)",
+      "root_expected": true,
+      "root_bracketed_by_measurement": true
+    },
+    "4.991": {
+      "required_lift_b": 54.228864939567394,
+      "headroom_estimate_b": 74.0,
+      "measured_lift_at_phi_0p75_b": 54.67769520924696,
+      "measured_lift_source": "psa_level_sweep_results.json (PSA 75)",
+      "root_expected": true,
+      "root_bracketed_by_measurement": true
+    }
+  },
+  "floor_provenance": "oos_identification_results.json headline_oos_marginal.clean_floor_point_pct, asserted == 4.991",
+  "parity_gates": {
+    "P1_phi1_4_0": {
+      "got": 748.1850239867648,
+      "want": 748.1850239867648,
+      "diff": 0.0,
+      "pass": true
+    },
+    "P2_phi1_4_6.5": {
+      "got": 818.5300844066606,
+      "want": 818.5300844066606,
+      "diff": 0.0,
+      "pass": true
+    },
+    "P3_phi1_4.991_0": {
+      "got": 724.9180585654117,
+      "want": 724.9180585654117,
+      "diff": 0.0,
+      "pass": true
+    },
+    "P4_phi1_4.991_6.5": {
+      "got": 767.5264524465003,
+      "want": 767.5264524465003,
+      "diff": 0.0,
+      "pass": true
+    },
+    "P5_baseline_identity": {
+      "max_abs_vs_h0_psa": 0.0,
+      "max_abs_vs_baseline_hazard": 0.0,
+      "age_grid": "0..360",
+      "pass": true
+    },
+    "P6_bind_anchors": {
+      "n_anchor": 1683124,
+      "cells": {
+        "4|6.5": {
+          "got": 0.36269282595934704,
+          "want": 0.36269282595934704,
+          "pass": true
+        },
+        "4|0": {
+          "got": 0.14340654639824515,
+          "want": 0.14340654639824515,
+          "pass": true
+        },
+        "4.991|6.5": {
+          "got": 0.6881875607501289,
+          "want": 0.6881875607501289,
+          "pass": true
+        }
+      },
+      "pass": true
+    },
+    "P7_restoration": {
+      "baseline_hazard_is_original": true,
+      "floor_after": 0.04,
+      "psa_speed": 100.0,
+      "floor_mode": "max",
+      "baseline_mode": "psa",
+      "pass": true
+    }
+  },
+  "parity_gates_all_pass": true,
+  "cross_route_check_x1": {
+    "enabled": true,
+    "phi": 0.75,
+    "committed_source": "psa_level_sweep_results.json (PSA 75)",
+    "bit_exact_not_expected": "production computes h0*exp(A+B); psa_level_sweep's make_psa_prepay computes h0*exp(B)*exp(A) \u2014 the routes are algebraically identical, not IEEE-754 identical",
+    "cells": {
+      "4|0": {
+        "got": 839.519553750622,
+        "want_committed": 839.519553750622,
+        "pin": 839.519553750622,
+        "provenance_pin_ok": true,
+        "diff_b": 0.0
+      },
+      "4|6.5": {
+        "got": 864.9304552633807,
+        "want_committed": 864.9304552633807,
+        "pin": 864.9304552633807,
+        "provenance_pin_ok": true,
+        "diff_b": 0.0
+      },
+      "4.991|0": {
+        "got": 779.5957537746586,
+        "want_committed": 779.5957537746586,
+        "pin": 779.5957537746586,
+        "provenance_pin_ok": true,
+        "diff_b": 0.0
+      },
+      "4.991|6.5": {
+        "got": 786.1422706212454,
+        "want_committed": 786.1422706212454,
+        "pin": 786.1422706212454,
+        "provenance_pin_ok": true,
+        "diff_b": 0.0
+      }
+    },
+    "max_abs_diff_b": 0.0,
+    "alarm": false
+  },
+  "ladder": {
+    "4|1": {
+      "phi": 1.0,
+      "psa_speed_effective": 100.0,
+      "null_trapped_b": 748.1850239867648,
+      "central_trapped_b": 818.5300844066606,
+      "null_share_pct": 97.83415925879702,
+      "central_share_pct": 107.0326190295068,
+      "marginal_b": 70.34506041989584,
+      "marginal_pp": 9.198459770709789,
+      "null_mean_cpr_pct": 5.613584778161411,
+      "central_mean_cpr_pct": 4.763203719157251,
+      "floor_bind_share": 0.36269282595934704,
+      "floor_bind_share_null": 0.14340654639824515,
+      "floor_bind_loan_months": 1683124,
+      "cross_route_cell": false
+    },
+    "4|0.9": {
+      "phi": 0.9,
+      "psa_speed_effective": 90.0,
+      "null_trapped_b": 788.2569278070252,
+      "central_trapped_b": 841.925758094496,
+      "null_share_pct": 103.07404096514871,
+      "central_share_pct": 110.09188377306711,
+      "marginal_b": 53.66883028747077,
+      "marginal_pp": 7.017842807918399,
+      "null_mean_cpr_pct": 5.13200374933533,
+      "central_mean_cpr_pct": 4.482045426906588,
+      "floor_bind_share": 0.5134951435544856,
+      "floor_bind_share_null": 0.2186802636050582,
+      "floor_bind_loan_months": 1683124,
+      "cross_route_cell": false
+    },
+    "4|0.8": {
+      "phi": 0.8,
+      "psa_speed_effective": 80.0,
+      "null_trapped_b": 824.2813194001793,
+      "central_trapped_b": 858.9393367464714,
+      "null_share_pct": 107.78466193634347,
+      "central_share_pct": 112.31661309808081,
+      "marginal_b": 34.65801734629213,
+      "marginal_pp": 4.531951161737339,
+      "null_mean_cpr_pct": 4.698032963781965,
+      "central_mean_cpr_pct": 4.278093087160604,
+      "floor_bind_share": 0.685426623350389,
+      "floor_bind_share_null": 0.3528765557380205,
+      "floor_bind_loan_months": 1683124,
+      "cross_route_cell": false
+    },
+    "4|0.75": {
+      "phi": 0.75,
+      "psa_speed_effective": 75.0,
+      "null_trapped_b": 839.519553750622,
+      "central_trapped_b": 864.9304552633807,
+      "null_share_pct": 109.77724371554045,
+      "central_share_pct": 113.10002365072506,
+      "marginal_b": 25.410901512758755,
+      "marginal_pp": 3.322779935184613,
+      "null_mean_cpr_pct": 4.514315806780604,
+      "central_mean_cpr_pct": 4.206490244240832,
+      "floor_bind_share": 0.7662441982884208,
+      "floor_bind_share_null": 0.45904223337080335,
+      "floor_bind_loan_months": 1683124,
+      "cross_route_cell": true
+    },
+    "4|0.7": {
+      "phi": 0.7,
+      "psa_speed_effective": 70.0,
+      "null_trapped_b": 852.1008636429783,
+      "central_trapped_b": 869.3085857591745,
+      "null_share_pct": 111.42240077727126,
+      "central_share_pct": 113.67251668713855,
+      "marginal_b": 17.207722116196237,
+      "marginal_pp": 2.25011590986729,
+      "null_mean_cpr_pct": 4.362643000574169,
+      "central_mean_cpr_pct": 4.1543264564592866,
+      "floor_bind_share": 0.8392037663297535,
+      "floor_bind_share_null": 0.5791011238625318,
+      "floor_bind_loan_months": 1683124,
+      "cross_route_cell": false
+    },
+    "4.991|1": {
+      "phi": 1.0,
+      "psa_speed_effective": 100.0,
+      "null_trapped_b": 724.9180585654117,
+      "central_trapped_b": 767.5264524465003,
+      "null_share_pct": 94.79172466371236,
+      "central_share_pct": 100.36328284662208,
+      "marginal_b": 42.60839388108866,
+      "marginal_pp": 5.571558182909726,
+      "null_mean_cpr_pct": 5.873901098860486,
+      "central_mean_cpr_pct": 5.3591856812637735,
+      "floor_bind_share": 0.6881875607501289,
+      "floor_bind_share_null": 0.35785836337667337,
+      "floor_bind_loan_months": 1683124,
+      "cross_route_cell": false
+    },
+    "4.991|0.9": {
+      "phi": 0.9,
+      "psa_speed_effective": 90.0,
+      "null_trapped_b": 753.5874851369742,
+      "central_trapped_b": 778.43329760605,
+      "null_share_pct": 98.54059580539167,
+      "central_share_pct": 101.78948357523932,
+      "marginal_b": 24.84581246907578,
+      "marginal_pp": 3.2488877698476415,
+      "null_mean_cpr_pct": 5.529275054063578,
+      "central_mean_cpr_pct": 5.229369799037313,
+      "floor_bind_share": 0.8134641297967351,
+      "floor_bind_share_null": 0.5367554618673371,
+      "floor_bind_loan_months": 1683124,
+      "cross_route_cell": false
+    },
+    "4.991|0.8": {
+      "phi": 0.8,
+      "psa_speed_effective": 80.0,
+      "null_trapped_b": 773.2053892656851,
+      "central_trapped_b": 784.5147714933616,
+      "null_share_pct": 101.10587190063474,
+      "central_share_pct": 102.5847091755181,
+      "marginal_b": 11.309382227676565,
+      "marginal_pp": 1.478837274883361,
+      "null_mean_cpr_pct": 5.293638745150807,
+      "central_mean_cpr_pct": 5.157446358780764,
+      "floor_bind_share": 0.9116856512057341,
+      "floor_bind_share_null": 0.7227774067745454,
+      "floor_bind_loan_months": 1683124,
+      "cross_route_cell": false
+    },
+    "4.991|0.75": {
+      "phi": 0.75,
+      "psa_speed_effective": 75.0,
+      "null_trapped_b": 779.5957537746586,
+      "central_trapped_b": 786.1422706212454,
+      "null_share_pct": 101.94148865190473,
+      "central_share_pct": 102.79752419288168,
+      "marginal_b": 6.546516846586769,
+      "marginal_pp": 0.8560355409769471,
+      "null_mean_cpr_pct": 5.216999654256758,
+      "central_mean_cpr_pct": 5.138341614138929,
+      "floor_bind_share": 0.9468642833207773,
+      "floor_bind_share_null": 0.8073718870386258,
+      "floor_bind_loan_months": 1683124,
+      "cross_route_cell": true
+    },
+    "4.991|0.7": {
+      "phi": 0.7,
+      "psa_speed_effective": 70.0,
+      "null_trapped_b": 783.8395874287759,
+      "central_trapped_b": 787.0946956539814,
+      "null_share_pct": 102.49642076665407,
+      "central_share_pct": 102.92206518120332,
+      "marginal_b": 3.255108225205504,
+      "marginal_pp": 0.4256444145492537,
+      "null_mean_cpr_pct": 5.166210027935223,
+      "central_mean_cpr_pct": 5.127228105370657,
+      "floor_bind_share": 0.9727702771750626,
+      "floor_bind_share_null": 0.8820894954857753,
+      "floor_bind_loan_months": 1683124,
+      "cross_route_cell": false
+    }
+  },
+  "root": {
+    "4": {
+      "phi_star": 0.75625,
+      "psa_speed_effective": 75.625,
+      "iterations": 3,
+      "residual_b": 0.035509636176144,
+      "converged": true,
+      "tolerance_b": 0.05,
+      "max_iters": 10,
+      "bracket_final": [
+        0.75,
+        0.7625
+      ],
+      "bracket_drafted": [
+        0.3,
+        1.0
+      ],
+      "bracket_seeded_from_ladder": true,
+      "required_lift_b": 89.53007689804927,
+      "realized_lift_b": 89.56558653422542,
+      "null_trapped_b": 837.7506105209902,
+      "central_trapped_b": 864.271703834128,
+      "null_mean_cpr_pct": 4.535645549068315,
+      "marginal_b": 26.521093313137726,
+      "marginal_pp": 3.4679508192893707,
+      "floor_bind_share": 0.7564017862023238,
+      "no_root": false
+    },
+    "4.991": {
+      "phi_star": 0.75390625,
+      "psa_speed_effective": 75.390625,
+      "iterations": 6,
+      "residual_b": 0.028581316179973726,
+      "converged": true,
+      "tolerance_b": 0.05,
+      "max_iters": 10,
+      "bracket_final": [
+        0.753125,
+        0.7546875
+      ],
+      "bracket_drafted": [
+        0.3,
+        1.0
+      ],
+      "bracket_seeded_from_ladder": true,
+      "required_lift_b": 54.228864939567394,
+      "realized_lift_b": 54.25744625574737,
+      "null_trapped_b": 779.175504821159,
+      "central_trapped_b": 786.0418041742873,
+      "null_mean_cpr_pct": 5.2220346518501755,
+      "marginal_b": 6.866299353128284,
+      "marginal_pp": 0.897850936460884,
+      "floor_bind_share": 0.9444295250973784,
+      "no_root": false
+    }
+  },
+  "direction_check": {
+    "monotone": true,
+    "all_below_production": true,
+    "detail": {
+      "per_floor": {
+        "4": {
+          "phi_ascending": [
+            0.7,
+            0.75,
+            0.8,
+            0.9,
+            1.0
+          ],
+          "marginal_pp_ordered": [
+            2.25011590986729,
+            3.322779935184613,
+            4.531951161737339,
+            7.017842807918399,
+            9.198459770709789
+          ],
+          "marginal_pp_at_phi1": 9.198459770709789,
+          "monotone": true,
+          "all_below_production": true
+        },
+        "4.991": {
+          "phi_ascending": [
+            0.7,
+            0.75,
+            0.8,
+            0.9,
+            1.0
+          ],
+          "marginal_pp_ordered": [
+            0.4256444145492537,
+            0.8560355409769471,
+            1.478837274883361,
+            3.2488877698476415,
+            5.571558182909726
+          ],
+          "marginal_pp_at_phi1": 5.571558182909726,
+          "monotone": true,
+          "all_below_production": true
+        }
+      },
+      "monotone": true,
+      "all_below_production": true
+    }
+  },
+  "direction_reconciliation": "The mechanics say DOWN. Lowering h0 lowers h_vol in both legs; the null is less censored than the central (bind 0.143 vs 0.363 at 4.0%), so the null's trapped balance rises faster and marginal(phi) < marginal(1). REVIEW2 #9's 'upward bias' and PLAN WP-J2's 'upward-bias entry' both mean the CURRENT marginal is biased upward, so the corrected member sits BELOW it. Manuscript wording must say: 'documents an upward bias; the corrected member lies BELOW the headline' \u2014 never 'an upward member'.",
+  "runtime_s": 379.5,
+  "wall_s": 381.1
+}
