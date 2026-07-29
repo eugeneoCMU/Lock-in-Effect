@@ -55,7 +55,7 @@ HANDOFF_PHRASES = [
     "fifty-seed mean",
     "recalibrated on real loan covariates",
     "institutional cash-flow",
-    "baseline involuntary turnover",
+    "baseline turnover",
     "uniform-spread",
     "input-stability check",
     "modeling paradigm",
@@ -120,8 +120,8 @@ def _mutations(abstract: str) -> dict[str, str]:
         # --- dropped hedges ----------------------------------------------
         "drops_institutional_scope": abstract.replace(
             "The institutional cash-flow cost is small", "The cost is small"),
-        "drops_involuntary_turnover": abstract.replace(
-            "scheduled amortization and baseline involuntary turnover (itself "
+        "drops_baseline_turnover": abstract.replace(
+            "scheduled amortization and baseline turnover (itself "
             "read from realized, partly behavioral turnover) fall short",
             "scheduled amortization falls short"),
         # --- scoping ------------------------------------------------------
@@ -146,7 +146,7 @@ MUTATION_NAMES = [
     "comment_smuggled_hedge",
     "whole_abstract_commented_out",
     "drops_institutional_scope",
-    "drops_involuntary_turnover",
+    "drops_baseline_turnover",
     "abstract_emptied_body_intact",
     "abstract_reduced_to_stub",
 ]

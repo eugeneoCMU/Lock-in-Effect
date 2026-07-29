@@ -1,7 +1,7 @@
 """
 Gates for the W2 cyclical-floor variant (hazard/floor_cyclical.py).
 
-The variant replaces the constant 4% involuntary-turnover floor with
+The variant replaces the constant 4% baseline turnover floor with
 floor_t = 0.04 * (1 + kappa * z_t), z_t the standardized QT-window mortgage
 rate. Everything hangs on three arithmetic facts, testable without data:
 (1) the window MEAN of floor_t is pinned at exactly 4% WHENEVER THE

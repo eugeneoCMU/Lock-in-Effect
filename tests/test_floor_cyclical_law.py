@@ -51,7 +51,7 @@ def test_spec_constants_are_the_pre_registered_values():
     asserted as literals; nothing here re-derives them from the module."""
     import floor_cyclical as fc
 
-    assert fc.PRODUCTION_FLOOR == 0.04           # 4% annual involuntary CPR
+    assert fc.PRODUCTION_FLOOR == 0.04           # 4% annual baseline-turnover CPR
     assert fc.KAPPA_GRID == [-0.5, -0.25, -0.1, 0.0, 0.1, 0.25, 0.5]
     assert fc.CENTRAL_PQ == 6.5                  # central elasticity leg
     assert fc.NULL_PQ == 0.0                     # no-lock-in null leg
@@ -125,7 +125,7 @@ def test_floor_at_matches_the_closed_form_law(rate):
 
 
 def test_positive_kappa_raises_the_floor_when_rates_are_above_the_window_mean():
-    """The spec's sign convention: kappa > 0 means involuntary turnover RISES
+    """The spec's sign convention: kappa > 0 means baseline turnover RISES
     with rates. A z-sign flip inverts the economics of every cell while leaving
     the window mean pinned at 4%, so the existing mean-pin tests cannot see it."""
     import floor_cyclical as fc

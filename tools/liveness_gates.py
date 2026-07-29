@@ -265,9 +265,9 @@ ABSTRACT_HEDGES = {
     # "small" scopes to the institutional cash-flow cost only; the mobility cost
     # is real, and the abstract must not let the two be read as one
     "cost_scoped_institutional": "The institutional cash-flow cost is small",
-    # the null's recovery rests on amortization AND baseline involuntary turnover
+    # the null's recovery rests on amortization AND baseline turnover
     "null_mechanical_components": "scheduled amortization and baseline "
-                                  "involuntary turnover",
+                                  "turnover",
     # ROUND 22 (3d): the ABM-vs-hazard contrast must not be attributed to
     # modeling paradigm in the abstract. This is the hedge the concision handoff
     # named as the highest-value ungated abstract hedge; pinning it BEFORE any
@@ -473,7 +473,7 @@ ABSTRACT_POSTURE = {
     # the frame is not decoration: WITHOUT it the claim is false, because the
     # additive form (+11.2) and the Fonseca anchor (+11.5) move the marginal UP.
     # Only floor and accounting-basis corrections run one way.
-    "corrections_framed": "every correction I can measure to the involuntary-turnover floor "
+    "corrections_framed": "every correction I can measure to the baseline turnover floor "
                           "or to the accounting basis moves it down within the range rather "
                           "than up",
     # ROUND-26: the panel's two strongest correlated findings (DA-C1 + R1-W1,
@@ -1552,7 +1552,7 @@ def main() -> int:
         f"{'$-0.05$ to $-0.16$' in tex}/{'$-0.87$ and $-0.94$' in tex}"
     )
 
-    # Panel revision (gate #56): out-of-window involuntary-turnover floor anchor —
+    # Panel revision (gate #56): out-of-window baseline turnover floor anchor —
     # the run behind §VII.I's provenance check must agree with the committed
     # artifact (pre-committed does-not-corroborate verdict, headline CPR and the
     # in-window validation reproduced), and be cited once in the tex with its
@@ -1643,7 +1643,7 @@ def main() -> int:
         f"literals={ {k: v for k, v in oos_lits.items() if not v} or 'all present'}"
     )
 
-    # Panel revision (gate #58): seasonalized involuntary floor and the timing
+    # Panel revision (gate #58): seasonalized turnover floor and the timing
     # concession. Section~\ref{sec:robustness-seasonalfloor} makes three kinds of
     # claim that can drift independently of the run, so the gate binds all three:
     # (i) the constant-4.0%/4.5% control legs reproduce the committed production
@@ -4545,7 +4545,7 @@ def main() -> int:
     # ROUND-23 (gate #94): NO ABM COUNTERPART TO THE beta_1 = 0 NULL.
     # The paper compares the ABM with Path B on LEVELS while insisting elsewhere
     # that levels do not identify. The reason is structural and must stay stated:
-    # the ABM's involuntary floor is not a term in its move rule, it is PRODUCED by
+    # the ABM's turnover floor is not a term in its move rule, it is PRODUCED by
     # calibrating theta against the penalty-bearing rule, so zeroing the penalty
     # removes the floor with the channel. This gate pins the artifact's NON-EXISTENCE
     # conclusion and the two anchoring conventions that disagree in SIGN -- the sign

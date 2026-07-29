@@ -72,7 +72,7 @@ def test_point_before_range_fails(tex, abstract):
     """Put the point back in front, keeping every literal. This is the exact
     arrangement round 24b removed, and a span-presence check accepts it."""
     mutated = (
-        " \\noindent Baseline involuntary turnover (itself read from realized, "
+        " \\noindent Baseline turnover (itself read from realized, "
         "partly behavioral turnover) sets the floor. "
         "Lock-in itself adds $+5.6$ points, or \\$42.6 billion. "
         "What lock-in itself adds is a range rather than a number. "
@@ -83,7 +83,7 @@ def test_point_before_range_fails(tex, abstract):
         "form-conditional hull of $+3.5$ to $+13.1$ points, and it identifies "
         "levels only. Inside that range, $+5.6$ points, or \\$42.6 billion, is "
         "the value at the calibration I headline, and every correction I can "
-        "measure to the involuntary-turnover floor or to the accounting basis "
+        "measure to the baseline turnover floor or to the accounting basis "
         "moves it down within the range rather than up. ")
     ok, info = abstract_posture_check(_swap(tex, abstract, mutated))
     assert not ok, "gate #99 accepted a point-first abstract"
@@ -93,7 +93,7 @@ def test_point_before_range_fails(tex, abstract):
 
 
 def test_frame_dropped_from_the_corrections_claim_fails(tex):
-    """Without `to the involuntary-turnover floor or to the accounting basis`
+    """Without `to the baseline turnover floor or to the accounting basis`
     the claim is FALSE: the additive form (+11.2) and the Fonseca anchor (+11.5)
     move the marginal up. An unframed 'every correction moves it down' is the
     overclaim HANDOFF_round25 §4.2 records."""

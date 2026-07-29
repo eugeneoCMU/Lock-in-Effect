@@ -70,7 +70,7 @@ class TestBeta1Units:
     def test_one_beta1_of_suppression_per_100bp(self):
         """At −100bp the multiplier is exactly exp(β₁) (floor not binding)."""
         # Precondition: the suppressed voluntary hazard sits above the
-        # involuntary floor, so the ratio is the pure elasticity effect.
+        # turnover floor, so the ratio is the pure elasticity effect.
         h0 = float(baseline_hazard(AGE)[0])
         floor = float(
             cpr_annual_to_monthly_hazard(np.array([INVOLUNTARY_CPR_ANNUAL]))[0]
