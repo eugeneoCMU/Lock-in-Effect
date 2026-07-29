@@ -110,15 +110,32 @@ defects; deviations 6-8):
     the first draft printed as "OK" and fed into the optimum census; a
     dispersed start reported obj = 2.15e+266 and the cold start obj = NaN, both
     counted as landings.
-  * A start is CONVERGED only if the optimizer raised no non-convergence
-    warning, |macro| stayed inside MAX_ABS_BETA, and the objective is finite.
-    Everything else is a FAILURE and enters n_failed only — never the
+  * THE ANCHOR IS AN EVALUATION, NOT A REFIT. The reference objective is
+    penalized_objective(design, frozen 317-vector) — hazard_coefficients.json's
+    own coefficients read in the design's column order — so it cannot "fail to
+    converge". A second probe showed why this matters: the fitted warm start
+    reproduces the production point exactly and still draws "GLM ridge
+    optimization may have failed, |grad|=0.014021", because that incomplete
+    convergence is the STANDING character of the committed fit and is the very
+    thing C6(iii) exists to measure; and on the ddof-0 design the unpenalized
+    IRLS prestep blows the same start up (objective 2.04e13). Anchoring on
+    either would make the run unable to adjudicate, forever. The fitted
+    warm_production START is still run and reported (leg.warm_start_fit) — it
+    measures whether the committed pipeline can walk back to its own adopted
+    point — but it defines nothing.
+  * A start is CONVERGED under the committed pipeline's OWN criterion, mirrored
+    from pathA_resimulate_joint.py:337 (= bootstrap_se.fit_betas:153): finite
+    params AND np.abs(macro).max() <= MAX_ABS_BETA, plus a finite penalized
+    objective. OPTIMIZER WARNINGS ARE DIAGNOSTICS AND NEVER BY THEMSELVES A
+    FAILURE. Everything else is a FAILURE and enters n_failed only — never the
     production-branch count, the distinct-optima census, or the better-optimum
-    test. Per-start convergence flags and the IRLS iteration count are printed
-    and written to the draws CSV.
-  * The ANCHOR must be finite: if the production warm start's objective is not
-    finite, its leg hard-fails with the reason attached (status GATE_FAILURE) —
-    an NaN anchor cannot adjudicate a branch census.
+    test. Per-start convergence flags, the IRLS iteration count, eta bounds and
+    the warning text are printed and written to the draws CSV.
+  * If the anchor EVALUATION is non-finite, that is a genuine hard failure: the
+    leg stops with the reason attached (status GATE_FAILURE).
+  * Every optimizer call is wrapped: a blown-up or raising IRLS prestep is
+    recorded (fit_error) and the start is still scored and failed on the
+    criterion above — it cannot crash the leg.
   * A run that did not complete all 50 starts of the primary leg (or in which
     the primary leg did not run at all) emits NO verdict code and exits
     PROBE_INCOMPLETE. Timing probes cannot produce MAJORITY/MINORITY verdicts.
@@ -132,9 +149,14 @@ written, exit 1, nothing lands):
      seasonality_concave_gap.fit_with_month_dummies on the ddof-0 design
      (1e-12). Added here, not in the spec — it is what licenses the
      reimplementation.
-  G1 the production warm start returns hazard_coefficients.json .coefficients
-     .{rate_gap_bps, burnout_orth, friction} to 1e-9 (primary leg) and the
-     fit-method alpha matches (deviation 3).
+  G1 the production anchor on the primary leg: the design's columns map
+     one-for-one onto the 317 committed coefficients of
+     hazard_coefficients.json, the evaluation at that frozen vector is finite,
+     and the artifact's ridge alpha is this run's alpha (deviation 3). The
+     older form of G1 — the warm-start REFIT reproducing the committed macro
+     coefficients to 1e-9 — is retained under
+     G1_production_anchor.warm_start_refit_vs_anchor with its own pass flag but
+     is NOT blocking (deviation 9).
   G2 n_train = 10,176 and n_strata = 296 (hazard_coefficients.json .n_train /
      .n_strata).
   G3 _month_dummy_matrix yields exactly 11 columns and the head length is 22.
@@ -323,6 +345,11 @@ def build_design(train: pd.DataFrame, convention: str) -> dict:
     burnout_orth, _ = _orthogonalize_burnout(age_basis, burn_demean)
     gm, gs = _moments(train["rate_gap_bps"], convention)
     fm, fs = _moments(train["friction"], convention)
+    # the PRODUCTION (ddof-0) moments are always carried, whatever this design's
+    # convention is: they are the units hazard_coefficients.json is written in,
+    # and anchor_from_artifact needs the ratio to translate the frozen vector.
+    _, gs0 = _moments(train["rate_gap_bps"], "ddof0")
+    _, fs0 = _moments(train["friction"], "ddof0")
     bs = float(burnout_orth.std()) or 1.0
     months = _month_dummy_matrix(train["period"])
     dummies = pd.get_dummies(train["stratum_id"], prefix="fe_stratum",
@@ -344,6 +371,8 @@ def build_design(train: pd.DataFrame, convention: str) -> dict:
             "offset": np.asarray(offset, dtype=np.float64), "model": model,
             "gammaln_y1": special.gammaln(np.asarray(y, dtype=np.float64) + 1.0),
             "nobs": float(len(y)),
+            "gm": gm, "gs": gs, "fm": fm, "fs": fs, "bs": bs,
+            "gs_ddof0": gs0, "fs_ddof0": fs0,
             "k_age": age_basis.shape[1], "n_months": months.shape[1],
             "fe_columns": fe_columns, "col_names": HEAD_NAMES + fe_columns,
             "convention": convention,
@@ -418,6 +447,62 @@ def _statsmodels_objective(design: dict, params, alpha: float = ALPHA):
         return f"unavailable: {repr(exc)[:120]}"
 
 
+def anchor_from_artifact(design: dict, prod: dict) -> dict:
+    """THE ANCHOR IS AN EVALUATION, NOT A REFIT (second-probe defect 1).
+
+    The reference objective the branch rule and the better-optimum test are
+    measured against is the penalized objective AT THE FROZEN PRODUCTION
+    PARAMETER VECTOR — all 317 coefficients of hazard_coefficients.json, read in
+    this design's column order — not at whatever a warm-started refit happens to
+    return. An evaluation cannot "fail to converge", so the standing character
+    of the committed ridge fit (statsmodels warns |grad| ~ 0.014 on it, which is
+    precisely what C6(iii) exists to measure) can no longer invalidate the
+    anchor. If the EVALUATION is non-finite, that is a genuine hard failure.
+
+    UNITS. The committed vector is in the ddof-0 units of
+    seasonality_concave_gap.fit_with_month_dummies. On a ddof-1 design the same
+    regressor column is scaled by s_ddof0 / s_ddof1, so the coefficient that
+    leaves the linear predictor unchanged is b * (s_design / s_ddof0), applied
+    to the rate-gap and friction entries only (the burnout block is numpy ddof-0
+    in BOTH constructions, and const / age spline / months / FE are unstandardized).
+    The translation is therefore exact for the log-likelihood and moves only the
+    ridge penalty, by O(1e-9). On the ddof-0 design both factors are exactly 1.0.
+    """
+    coefs = prod["coefficients"]
+    names = list(design["col_names"])
+    missing = [n for n in names if n not in coefs]
+    out = {"finite": False, "objective": float("nan"), "reason": "",
+           "n_design_columns": len(names),
+           "n_committed_coefficients": len(coefs),
+           "missing_columns": missing[:5],
+           "column_map_exact": bool(not missing and len(names) == len(coefs))}
+    if missing or len(names) != len(coefs):
+        out["reason"] = (f"design/artifact column mismatch: {len(names)} design "
+                         f"columns vs {len(coefs)} committed coefficients, "
+                         f"{len(missing)} missing")
+        return out
+    b = np.array([float(coefs[n]) for n in names], dtype=np.float64)
+    fg = float(design["gs"] / design["gs_ddof0"])
+    ff = float(design["fs"] / design["fs_ddof0"])
+    b[names.index("rate_gap_bps")] *= fg
+    b[names.index("friction")] *= ff
+    obj = penalized_objective(design, b)
+    k = design["k_age"]
+    out.update({
+        "params": b,
+        "head": b[:HEAD_LEN_V4].copy(),
+        "macro": {n: float(b[1 + k + i]) for i, n in enumerate(BETA_NAMES)},
+        "unit_translation": {"rate_gap_bps_factor": fg, "friction_factor": ff,
+                             "burnout_orth_factor": 1.0,
+                             "exact_for_loglike": True},
+        "objective": obj["objective"], "finite": obj["finite"],
+        "reason": obj["reason"], "eta_max": obj["eta_max"],
+        "eta_min": obj["eta_min"],
+        "source": "hazard_coefficients.json .coefficients (frozen, 317 entries)",
+    })
+    return out
+
+
 def _irls_iterations(irls) -> int | None:
     """Best-effort IRLS iteration count. GLMResults exposes it as
     fit_history['iteration']; _fit_ridge's BFGS step exposes nothing at all
@@ -442,68 +527,86 @@ def fit_from_start(design: dict, start_head: np.ndarray | None,
     """bootstrap_se.fit_betas' fit path (lines 133-156), reimplemented so the
     full parameter vector survives for the objective.
 
-    Convergence is CARRIED, not assumed (probe defect 1b): statsmodels signals
-    a failed ridge solve only through a warning ("GLM ridge optimization may
-    have failed, |grad|=…") because GLM._fit_ridge discards scipy's success
-    flag, so the fit is run inside warnings.catch_warnings(record=True) and the
-    warning text is scanned. A start is `converged` only if the optimizer
-    raised no non-convergence warning, the macro block is inside MAX_ABS_BETA,
-    and the penalized objective evaluates finite."""
+    CONVERGENCE POLICY = the committed pipeline's own criterion, mirrored from
+    pathA_resimulate_joint.py:337 (itself bootstrap_se.fit_betas:153):
+        finite params AND np.abs(macro).max() <= MAX_ABS_BETA
+    plus a finite penalized objective. Optimizer warnings are RECORDED as
+    diagnostics and are NEVER by themselves a failure (second-probe defect 2):
+    statsmodels warns "GLM ridge optimization may have failed, |grad|=0.014" on
+    the committed production fit itself — that incomplete convergence is the
+    standing character of the adopted point and is exactly what this run exists
+    to measure, so treating the warning as failure would disqualify the truth.
+    Every optimizer call is wrapped so a blown-up IRLS prestep cannot crash the
+    leg (second-probe defect 3): it is recorded and the start continues to be
+    scored, failing on the criterion above."""
     X, y, offset, model = design["X"], design["y"], design["offset"], design["model"]
     irls_converged, irls_iters = None, None
+    fit_error, result = "", None
+    fit_method = ("cold(_fit_poisson_glm)" if start_head is None
+                  else (f"ridge(alpha={alpha}, warm_start)" if irls_prestep
+                        else f"ridge(alpha={alpha}, direct_start)"))
     with warnings.catch_warnings(record=True) as caught:
         warnings.simplefilter("always")
-        if start_head is None:
-            result, fit_method = _fit_poisson_glm(X, y, offset, alpha)
-        else:
-            start = np.zeros(X.shape[1])
-            start[: len(start_head)] = start_head
-            if irls_prestep:
-                try:
-                    irls = model.fit(maxiter=100, start_params=start)
-                    ok = np.isfinite(np.asarray(irls.params)).all()
-                    irls_converged = bool(getattr(irls, "converged", False)) and ok
-                    irls_iters = _irls_iterations(irls)
-                    warm = irls.params if ok else start
-                except (ValueError, np.linalg.LinAlgError):
-                    irls_converged = False
-                    warm = start
+        try:
+            if start_head is None:
+                result, fit_method = _fit_poisson_glm(X, y, offset, alpha)
             else:
+                start = np.zeros(X.shape[1])
+                start[: len(start_head)] = start_head
                 warm = start
-            result = model.fit_regularized(
-                method="elastic_net", alpha=alpha, L1_wt=0.0,
-                maxiter=100, start_params=warm,
-            )
-            fit_method = (f"ridge(alpha={alpha}, warm_start)" if irls_prestep
-                          else f"ridge(alpha={alpha}, direct_start)")
+                if irls_prestep:
+                    try:
+                        irls = model.fit(maxiter=100, start_params=start)
+                        ok = np.isfinite(np.asarray(irls.params)).all()
+                        irls_converged = (bool(getattr(irls, "converged", False))
+                                          and ok)
+                        irls_iters = _irls_iterations(irls)
+                        warm = irls.params if ok else start
+                    except Exception as exc:    # noqa: BLE001 — recorded, not fatal
+                        irls_converged = False
+                        fit_error = f"IRLS prestep raised: {repr(exc)[:160]}"
+                result = model.fit_regularized(
+                    method="elastic_net", alpha=alpha, L1_wt=0.0,
+                    maxiter=100, start_params=warm,
+                )
+        except Exception as exc:                # noqa: BLE001 — recorded, not fatal
+            fit_error = (fit_error + " | " if fit_error else "") + \
+                        f"ridge solve raised: {repr(exc)[:160]}"
         messages = [str(w.message) for w in caught]
     optimizer_warning = "; ".join(m[:140] for m in messages)[:400]
     optimizer_converged = not any(mk in m for m in messages
                                   for mk in NONCONVERGENCE_MARKERS)
 
-    params = np.asarray(result.params, dtype=np.float64).ravel()
+    if result is None:
+        params = np.full(X.shape[1], np.nan)
+    else:
+        params = np.asarray(result.params, dtype=np.float64).ravel()
     k = design["k_age"]
     macro = params[1 + k: 4 + k]
-    beta_ok = (np.isfinite(params).all()
-               and float(np.abs(macro).max()) <= MAX_ABS_BETA)
+    finite_params = bool(np.isfinite(params).all())
+    max_abs_macro = float(np.abs(macro).max()) if finite_params else float("inf")
+    beta_ok = finite_params and max_abs_macro <= MAX_ABS_BETA
     obj = penalized_objective(design, params, alpha)
     failure = ""
-    if not beta_ok:
-        failure = (f"|macro beta| {float(np.abs(macro).max()):.3g} > "
-                   f"{MAX_ABS_BETA}" if np.isfinite(params).all()
-                   else "non-finite parameter vector")
+    if fit_error and not beta_ok:
+        failure = fit_error
+    elif not beta_ok:
+        failure = (f"|macro beta| {max_abs_macro:.3g} > {MAX_ABS_BETA}"
+                   if finite_params else "non-finite parameter vector")
     elif not obj["finite"]:
         failure = f"objective: {obj['reason']}"
-    elif not optimizer_converged:
-        failure = f"optimizer: {optimizer_warning}"
     return {"params": params, "fit_method": fit_method,
+            "fit_error": fit_error, "max_abs_macro": (
+                max_abs_macro if np.isfinite(max_abs_macro) else None),
             "irls_converged": irls_converged, "irls_iterations": irls_iters,
             "optimizer_converged": bool(optimizer_converged),
             "optimizer_warning": optimizer_warning,
             "objective_finite": bool(obj["finite"]),
             "objective_reason": obj["reason"],
             "eta_max": obj["eta_max"], "eta_min": obj["eta_min"],
-            "converged": bool(beta_ok and obj["finite"] and optimizer_converged),
+            # pathA_resimulate_joint.py:337 criterion + finite objective;
+            # optimizer_converged is diagnostic ONLY (second-probe defect 2)
+            "converged": bool(beta_ok and obj["finite"]),
             "failure": failure,
             "macro": {n: float(params[1 + k + i])
                       for i, n in enumerate(BETA_NAMES)},
@@ -548,7 +651,8 @@ def run_leg(name: str, design: dict, head_prod: np.ndarray,
                "irls_converged": f["irls_converged"],
                "irls_iterations": f["irls_iterations"],
                "eta_max": f["eta_max"], "eta_min": f["eta_min"],
-               "failure": f["failure"],
+               "max_abs_macro": f["max_abs_macro"],
+               "failure": f["failure"], "fit_error": f["fit_error"],
                "optimizer_warning": f["optimizer_warning"],
                "fit_method": f["fit_method"],
                **f["macro"],
@@ -572,23 +676,29 @@ def run_leg(name: str, design: dict, head_prod: np.ndarray,
     return rows
 
 
-def classify(rows: list[dict]) -> dict:
-    """Census over CONVERGED starts only. A start whose optimizer did not
-    converge, whose macro block left MAX_ABS_BETA, or whose penalized
-    objective is non-finite is a FAILURE: it enters n_failed and enters
-    NEITHER the production-branch count, NOR the distinct-optima census, NOR
-    the better-optimum test (probe defect 1b)."""
-    anchor = next(r for r in rows if r["kind"] == "warm_production")
-    a_head, a_obj = anchor["_head"], anchor["penalized_objective"]
-    anchor_valid = bool(anchor["converged"] and np.isfinite(a_obj))
-    anchor_reason = "" if anchor_valid else (
-        anchor.get("failure") or "anchor objective is not finite")
+def classify(rows: list[dict], anchor: dict) -> dict:
+    """Census over CONVERGED starts only, against the EVALUATED anchor.
 
+    `anchor` is anchor_from_artifact's evaluation at the frozen production
+    parameter vector — NOT the fitted warm_production start. A start whose
+    parameters left MAX_ABS_BETA or whose penalized objective is non-finite is a
+    FAILURE: it enters n_failed and enters NEITHER the production-branch count,
+    NOR the distinct-optima census, NOR the better-optimum test. Optimizer
+    warnings do not make a start a failure (second-probe defect 2)."""
+    a_head, a_obj = anchor.get("head"), anchor["objective"]
+    anchor_valid = bool(anchor["finite"])
+    anchor_reason = "" if anchor_valid else (
+        anchor.get("reason") or "anchor evaluation is not finite")
+    a_macro = anchor.get("macro", dict(PROD_V4))
+    if a_head is None:
+        a_head = np.full(HEAD_LEN_V4, np.nan)
+
+    warm = next((r for r in rows if r["kind"] == "warm_production"), None)
     for r in rows:
         r["l2_distance_to_production"] = float(
             np.linalg.norm(np.asarray(r["_head"]) - np.asarray(a_head)))
         r["l2_macro_distance_to_production"] = float(np.linalg.norm(
-            [r[n] - anchor[n] for n in BETA_NAMES]))
+            [r[n] - a_macro[n] for n in BETA_NAMES]))
         macro_close = all(abs(r[n] - PROD_V4[n]) <= BRANCH_MACRO_TOL
                           for n in BETA_NAMES)
         obj_close = (anchor_valid and np.isfinite(r["penalized_objective"])
@@ -616,9 +726,10 @@ def classify(rows: list[dict]) -> dict:
                                    key=lambda kv: min(x["penalized_objective"]
                                                       for x in kv[1]))]
 
+    # (iii-c) test: converged starts scored against the EVALUATED anchor
     better = ([r for r in ok
                if r["penalized_objective"] < a_obj - BETTER_OBJ_TOL
-               and any(abs(r[n] - anchor[n]) > BRANCH_MACRO_TOL
+               and any(abs(r[n] - a_macro[n]) > BRANCH_MACRO_TOL
                        for n in BETA_NAMES)]
               if anchor_valid else [])
     cold = next((r for r in rows if r["kind"] == "cold"), None)
@@ -633,8 +744,29 @@ def classify(rows: list[dict]) -> dict:
         "n_on_production_branch": n_branch,
         "anchor_valid": anchor_valid,
         "anchor_invalid_reason": anchor_reason,
+        "anchor_kind": "evaluation_at_frozen_production_vector",
         "anchor_objective": _f(a_obj),
-        "anchor_macro": {n: _f(anchor[n]) for n in BETA_NAMES},
+        "anchor_macro": {n: _f(a_macro[n]) for n in BETA_NAMES},
+        "anchor_eta_max": _f(anchor.get("eta_max")),
+        "anchor_unit_translation": anchor.get("unit_translation"),
+        # the fitted warm_production START is kept because it is informative —
+        # it measures whether the committed pipeline can walk back to its own
+        # adopted point — but it no longer defines the anchor.
+        "warm_start_fit": ({
+            "converged": bool(warm["converged"]),
+            "objective": _f(warm["penalized_objective"]),
+            "macro": {n: _f(warm[n]) for n in BETA_NAMES},
+            "objective_minus_anchor": (
+                _f(warm["penalized_objective"] - a_obj)
+                if anchor_valid else None),
+            "max_abs_macro_gap_vs_anchor": _f(
+                max(abs(warm[n] - a_macro[n]) for n in BETA_NAMES)),
+            "optimizer_converged": bool(warm["optimizer_converged"]),
+            "optimizer_warning": warm["optimizer_warning"],
+            "irls_converged": warm["irls_converged"],
+            "irls_iterations": warm["irls_iterations"],
+            "failure": warm["failure"],
+        } if warm is not None else None),
         "failures": [{"start_id": r["start_id"], "kind": r["kind"],
                       "sigma_rung": r["sigma_rung"], "reason": r["failure"],
                       "eta_max": _f(r["eta_max"]),
@@ -737,6 +869,7 @@ def main() -> None:
                                 - b["head"]).max())])
         g0["ddof1_vs_fit_betas"] = {"max_abs_diff": float(d),
                                     "pass": bool(d <= TOL_G0)}
+    units_check = None
     if "ddof0" in designs:
         coefs_pc, months_pc, method_pc = fit_with_month_dummies(train, ALPHA)
         b = fit_from_start(designs["ddof0"], None, True)   # cold == production path
@@ -746,8 +879,32 @@ def main() -> None:
             "fit_method_reimpl": b["fit_method"],
             "fit_method_source": method_pc,
             "pass": bool(d <= TOL_G0)}
+        # Diagnostic (NON-gating): is the FROZEN 317-vector still in this
+        # design's units on today's inputs? Two independent readings — the
+        # committed construction replayed now vs the artifact, and this
+        # script's ddof-0 cold fit vs the artifact.
+        names0 = list(designs["ddof0"]["col_names"])
+        units_check = {
+            "fit_with_month_dummies_vs_artifact_max_abs": float(max(
+                abs(float(coefs_pc[n]) - float(prod["coefficients"][n]))
+                for n in names0)),
+            "ddof0_cold_refit_vs_artifact_max_abs": float(np.abs(
+                b["params"] - np.array([float(prod["coefficients"][n])
+                                        for n in names0])).max()),
+            "n_columns": len(names0),
+            "note": ("the anchor is evaluated at the frozen vector, so this "
+                     "records whether that vector is still the ddof-0 design's "
+                     "own solution on today's panel + FRED join; non-gating"),
+        }
     gates["G0_reimplementation"] = {"tol": TOL_G0, "checks": g0,
                                     "pass": all(c["pass"] for c in g0.values())}
+
+    # ---- evaluated anchors, one per design (NOT a refit) -------------------
+    anchors = {c: anchor_from_artifact(d, prod) for c, d in designs.items()}
+    for c, a in anchors.items():
+        print(f"  anchor[{c}] evaluated at the frozen 317-vector: "
+              f"objective={_f(a['objective'])} finite={a['finite']} "
+              f"{a['reason']}")
 
     # ---- the legs ---------------------------------------------------------
     all_rows, verdicts = [], {}
@@ -756,7 +913,7 @@ def main() -> None:
         print(f"\n=== leg {leg} (convention {convention}, "
               f"irls_prestep={LEGS[leg][1]}) ===")
         rows = run_leg(leg, designs[convention], head_prod, args.limit)
-        verdicts[leg] = classify(rows)
+        verdicts[leg] = classify(rows, anchors[convention])
         all_rows.extend(rows)
 
     # ---- G1: the anchor ---------------------------------------------------
@@ -766,53 +923,93 @@ def main() -> None:
     anchor_row = (next(r for r in all_rows
                        if r["leg"] == primary and r["kind"] == "warm_production")
                   if primary_ran else None)
-    # (probe defect 1c) an anchor whose objective is not finite cannot
-    # adjudicate anything — the leg hard-fails with the reason attached.
+    # An anchor EVALUATION that is non-finite is a genuine hard failure — but a
+    # fitted start that merely warns is not (second-probe defects 1 and 2).
     anchor_bad = {l: x["anchor_invalid_reason"]
                   for l, x in verdicts.items() if not x["anchor_valid"]}
     fac = float(np.sqrt(n_train / (n_train - 1.0)))
-    g1_checks = {}
+    primary_anchor = anchors[LEGS[primary][0]] if primary_ran else {}
+
+    # G1 BLOCKING CLAUSE: the anchor is an evaluation at the frozen vector, so
+    # what must hold is (a) the design's columns map one-for-one onto the 317
+    # committed coefficients, (b) the evaluation is finite, (c) the artifact's
+    # ridge alpha is this run's alpha. The warm-start REFIT comparison is kept
+    # and reported with its own pass flag but is NOT blocking: whether the
+    # committed pipeline can walk back to its own adopted point is the object
+    # of study here, not a precondition for measuring it.
+    g1_refit = {}
     if primary_ran:
         for n in BETA_NAMES:
-            got, want = float(anchor_row[n]), PROD_V4[n]
-            adj = want * (fac if (LEGS[primary][0] == "ddof1"
-                                  and n != "burnout_orth") else 1.0)
-            g1_checks[n] = {"got": got, "want": want,
-                            "abs_diff": abs(got - want),
-                            "want_ddof_adjusted": adj,
-                            "abs_diff_ddof_adjusted": abs(got - adj),
-                            "pass": bool(abs(got - want) <= TOL_G1)}
+            got = float(anchor_row[n])
+            want = float(primary_anchor.get("macro", PROD_V4)[n])
+            g1_refit[n] = {"got": got, "want_anchor": want,
+                           "want_artifact": PROD_V4[n],
+                           "abs_diff_vs_anchor": abs(got - want),
+                           "abs_diff_vs_artifact": abs(got - PROD_V4[n]),
+                           "pass": bool(abs(got - want) <= TOL_G1)}
+    alpha_ok = f"alpha={ALPHA}" in str(prod.get("fit_method"))
     gates["G1_production_anchor"] = {
-        "leg": primary, "tol": TOL_G1, "checks": g1_checks,
-        "anchor_valid": (bool(verdicts[primary]["anchor_valid"])
-                         if primary_ran else False),
-        "anchor_invalid_reason": (verdicts[primary]["anchor_invalid_reason"]
+        "leg": primary,
+        "anchor_kind": "evaluation_at_frozen_production_vector",
+        "column_map_exact": bool(primary_anchor.get("column_map_exact", False)),
+        "n_design_columns": primary_anchor.get("n_design_columns"),
+        "n_committed_coefficients": primary_anchor.get(
+            "n_committed_coefficients"),
+        "anchor_valid": bool(primary_anchor.get("finite", False)),
+        "anchor_invalid_reason": (primary_anchor.get("reason", "")
                                   if primary_ran else "primary leg did not run"),
-        "anchor_objective": (verdicts[primary]["anchor_objective"]
-                             if primary_ran else None),
+        "anchor_objective": _f(primary_anchor.get("objective")),
+        "anchor_eta_max": _f(primary_anchor.get("eta_max")),
+        "anchor_unit_translation": primary_anchor.get("unit_translation"),
         "anchor_objective_statsmodels_crosscheck": (
             _statsmodels_objective(designs[LEGS[primary][0]],
-                                   anchor_row["_params"])
-            if primary_ran else None),
-        "fit_method_anchor": (anchor_row["fit_method"] if primary_ran else None),
+                                   primary_anchor["params"])
+            if primary_ran and "params" in primary_anchor else None),
+        "design_units_check": units_check,
+        "warm_start_refit_vs_anchor": {
+            "tol": TOL_G1, "checks": g1_refit, "blocking": False,
+            "pass": bool(g1_refit and all(c["pass"] for c in g1_refit.values())),
+            "fit_method_anchor_start": (anchor_row["fit_method"]
+                                        if primary_ran else None),
+            "optimizer_warning": (anchor_row["optimizer_warning"]
+                                  if primary_ran else None),
+            "note": ("the fitted warm_production start; statsmodels warns "
+                     "|grad| ~ 0.014 on the committed ridge fit itself, which "
+                     "is C6(iii)'s premise, so this is reported, not blocking."),
+        },
+        "ddof_factor": fac,
         "fit_method_artifact": prod.get("fit_method"),
-        "alpha_matches": bool(
-            primary_ran and f"alpha={ALPHA}" in str(anchor_row["fit_method"])
-            and f"alpha={ALPHA}" in str(prod.get("fit_method"))),
-        "pass": bool(primary_ran and verdicts[primary]["anchor_valid"]
-                     and all(c["pass"] for c in g1_checks.values())
-                     and f"alpha={ALPHA}" in str(prod.get("fit_method"))),
+        "alpha_matches": bool(alpha_ok),
+        "pass": bool(primary_ran
+                     and primary_anchor.get("column_map_exact", False)
+                     and primary_anchor.get("finite", False)
+                     and alpha_ok),
         "note": ("DEVIATION 3: the artifact's fit_method is the COLD string "
                  "'ridge(alpha=0.0001)'; fit_betas' warm branch returns "
                  "'…, warm_start' by construction, so G1 compares the alpha "
                  "and records both strings."),
     }
 
+    # cross-leg consistency of the evaluated anchor (NON-gating): the unit
+    # translation leaves the linear predictor unchanged, so the two legs'
+    # anchors may differ only through the ridge penalty on the two rescaled
+    # coefficients — O(1e-9) on a value of ~1.9e6.
+    finite_anchors = [a["objective"] for a in anchors.values() if a["finite"]]
+    anchor_cross_leg = {
+        "objectives": {c: _f(a["objective"]) for c, a in anchors.items()},
+        "max_abs_spread": (float(max(finite_anchors) - min(finite_anchors))
+                           if len(finite_anchors) > 1 else None),
+        "expected_spread_order": 1e-8,
+        "note": ("same linear predictor by construction; only the penalty term "
+                 "moves under the ddof translation"),
+    }
+
     # ---- draws CSV --------------------------------------------------------
     csv_cols = ["leg", "convention", "irls_prestep", "start_id", "kind",
                 "sigma_rung", "seed", "converged", "optimizer_converged",
                 "objective_finite", "irls_converged", "irls_iterations",
-                "eta_max", "eta_min", "failure", "optimizer_warning",
+                "eta_max", "eta_min", "max_abs_macro", "failure", "fit_error",
+                "optimizer_warning",
                 "fit_method", "rate_gap_bps", "burnout_orth", "friction",
                 "penalized_objective", "on_production_branch",
                 "l2_distance_to_production", "l2_macro_distance_to_production"]
@@ -902,6 +1099,16 @@ def main() -> None:
             "8: legs are reordered so the primary (production, ddof-0) leg "
             "runs first, and a run that did not complete all 50 starts of the "
             "primary leg emits NO verdict code (status PROBE_INCOMPLETE).",
+            "9: the anchor is an EVALUATION at the frozen 317-vector, not a "
+            "refit; G1's blocking clause is column-map + finiteness + alpha, "
+            "and the warm-start refit comparison is retained non-blocking. "
+            "Anchoring on a refit made every anchor invalid: the fitted start "
+            "reproduces production and still warns |grad|=0.014 (the committed "
+            "fit's own standing character), and on the ddof-0 design the IRLS "
+            "prestep blows it up.",
+            "10: convergence is the committed pipeline's criterion "
+            "(pathA_resimulate_joint.py:337) plus a finite objective; "
+            "optimizer warnings are recorded, never failure.",
         ],
         "panel": {"n_train": n_train, "n_strata": n_strata,
                   "alpha": ALPHA, "ddof_factor": fac},
@@ -918,6 +1125,10 @@ def main() -> None:
         "parity_gates_all_pass": all_pass,
         "legs": {l: {"convention": LEGS[l][0], "irls_prestep": LEGS[l][1]}
                  for l in legs},
+        "anchor": {c: {k: v for k, v in a.items()
+                       if k not in ("params", "head")}
+                   for c, a in anchors.items()},
+        "anchor_cross_leg_consistency": anchor_cross_leg,
         "primary_leg": primary,
         "primary_leg_complete": bool(full_run),
         "legs_requested": legs,
@@ -965,6 +1176,17 @@ def main() -> None:
     else:
         print(f"  primary leg {PRIMARY_LEG} did not run "
               f"(legs run: {sorted(verdicts)})")
+    print(f"  anchor objectives (evaluated at the frozen 317-vector): "
+          f"{anchor_cross_leg['objectives']}  spread "
+          f"{anchor_cross_leg['max_abs_spread']}")
+    if v is not None and v.get("warm_start_fit"):
+        w = v["warm_start_fit"]
+        print(f"  warm_production START (informative, non-blocking): "
+              f"obj {w['objective']}  Δ vs anchor "
+              f"{w['objective_minus_anchor']}  max|Δmacro| "
+              f"{w['max_abs_macro_gap_vs_anchor']}  converged {w['converged']}"
+              + (f"  warning: {w['optimizer_warning'][:80]}"
+                 if w["optimizer_warning"] else ""))
     for leg, reason in anchor_bad.items():
         print(f"  ANCHOR INVALID in leg {leg}: {reason}")
     print(f"  Saved: {RESULTS_JSON} + {DRAWS_CSV}")
@@ -972,9 +1194,11 @@ def main() -> None:
         print("  *** (iii-c) STOP — report to Eugene, land nothing. ***")
     if anchor_bad:
         raise SystemExit(
-            "GATE_FAILURE — the production anchor's penalized objective is not "
-            f"finite in leg(s) {sorted(anchor_bad)}; an NaN/overflowing anchor "
-            "cannot adjudicate the branch census. Nothing lands.")
+            "GATE_FAILURE — the penalized objective EVALUATED at the frozen "
+            f"production vector is not finite in leg(s) {sorted(anchor_bad)} "
+            f"({anchor_bad}); this is an evaluation, not a fit, so it cannot be "
+            "a convergence problem — check the design/artifact column map and "
+            "the linear predictor. Nothing lands.")
     if status == "PROBE_INCOMPLETE":
         raise SystemExit(
             f"PROBE_INCOMPLETE — {action} Re-run without --limit and with the "
