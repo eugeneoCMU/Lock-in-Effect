@@ -96,7 +96,49 @@ LABELED DEVIATIONS from the drafted spec (all forced by the code; none silent):
      specs, since fit_betas returns neither the FE block nor the absorbed
      label and therefore could not be used directly.
 
+AMENDMENT A7 (labeled, POST-RUN, 2026-07-29; appended to the drafting spec
+after the first Stage-B v3 execution — adopted here verbatim). Stage B v3
+realized verdict NARROWS (joint [689.0, 1217.6]B, width ratio 0.094), but
+106/198 draws sat at EXACTLY the accounting ceiling $1217.6339B — the value
+score_extension_risk returns when the simulated roll-off is identically zero,
+i.e. minus the sum of the QT target series — and the saturated draws are the
+rogue-optimizer-mode replicates (mean rate_gap +2.2317, burnout -0.1428,
+friction +0.6748 with the sign flipped; the committed hazard_bootstrap_draws.csv
+itself has rate_gap mean 1.4914, so the COMMITTED population is bimodal and the
+rogue mode is the optimizer-path artifact the paper documents at the
+reference-swap site). At QT gaps near -380bp a rate-gap coefficient of +2.2
+drives the hazard to e^-8.4 ~ 0, hence saturation. The committed 3-beta
+rendering of the SAME rogue draws produced the -$4,460B tail; the joint
+rendering piles them on the ceiling instead: two renderings of one pathology,
+and neither tail is a sampling statement about the estimand. A7 requires,
+before ANY landing:
+  A7(1) the aggregation must index only the specs that ran — a --specs 4 or
+        --stage B invocation previously raised KeyError on
+        gates["P3_point_head"]["spec3"]. It is now recovered from the persisted
+        Stage-A summary when one exists, else marked PENDING, excluded from
+        all_pass, and warned about on the console and in .parity_gates_pending.
+  A7(2) a NEW BLOCKING Stage-B parity leg, run automatically at the start of
+        every stage-B invocation BEFORE any replicate is scored: the PRODUCTION
+        head pushed through stage_b's exact coefficient handoff must reproduce
+        the committed 915.067027857209 B at v3 within $0.50B. On failure the
+        whole Stage B construction is void — wiring, not finding — and the run
+        aborts rather than spending 198 simulations. The v4 leg runs against
+        928.892970289881 B and is recorded non-blocking (A7 mandates v3).
+  A7(3) Stage B reported under BOTH pre-committed decompositions: saturated vs
+        not (|trapped - ceiling| < 1e-6, ceiling computed from the target
+        series, never hard-coded) and production-branch vs rogue (all three
+        DRAWN macro coefficients within 0.02 of the spec's production values —
+        C6(iii)'s own branch rule), with n, trapped_b and share_pct per cell
+        and a cross-tab. The headline results block keeps the full-sample
+        numbers and gains ceiling_b, n_at_ceiling and the decompositions.
+  A7(4) the verdict is re-adjudicated on the pre-committed codes ON THE FULL
+        SAMPLE (no code change) and carries verdict.ceiling_disclosure
+        (mandatory) and verdict.production_branch_only (a labeled
+        sub-population, never the quoted interval). The provisional NARROWS is
+        NOT accepted as adjudicated.
+
 PARITY GATES:
+  A7 (BLOCKING) point-head parity — see amendment A7(2) above.
   P1 (BLOCKING) Stage A at spec v3, seed 42, alpha=1e-4 reproduces
      hazard_bootstrap_draws.csv ROW-FOR-ROW to 1e-12 (198 rows) and
      hazard_bootstrap_se.json .se / .ci_95 / .frac_le_0 to 1e-9. Without P1
@@ -156,6 +198,7 @@ ARTIFACTS (all NEW paths):
   data/pathA_bootstrap_fullvec_fe_specv3.npz      data/…_specv4.npz
   data/pathA_resimulate_joint_simdraws_spec{3,4}_tier{1,2}.csv  (checkpoints)
   data/pathA_resimulate_joint_p2_simdraws.csv                   (checkpoint)
+  data/pathA_resimulate_joint_pointhead_spec{3,4}.csv           (A7(2) leg)
   data/pathA_resimulate_joint_results.json
 
 MUST NOT CHANGE (spec C6.7): hazard/bootstrap_se.py,
@@ -220,7 +263,12 @@ from hazard_fit import (
     _orthogonalize_burnout,
     enrich_panel_with_macro,
 )
-from macro import build_empirical_metrics, fetch_data, fetch_soma_mbs_monthly
+from macro import (
+    build_empirical_metrics,
+    fetch_data,
+    fetch_soma_mbs_monthly,
+    qt_active_frame,
+)
 from markov import load_transition_matrix
 
 DATA_DIR = Path(__file__).parent / "data"
@@ -242,6 +290,10 @@ def simdraws_csv(spec: int, tier: int) -> Path:
     return DATA_DIR / f"pathA_resimulate_joint_simdraws_spec{spec}_tier{tier}.csv"
 
 
+def pointhead_csv(spec: int) -> Path:
+    return DATA_DIR / f"pathA_resimulate_joint_pointhead_spec{spec}.csv"
+
+
 TOL_P1_ROWS = 1e-12
 TOL_P1_SUMMARY = 1e-9
 TOL_P2 = 1e-6
@@ -251,6 +303,19 @@ TOL_G0 = 1e-12
 NARROW_THRESHOLD = 0.80         # (ii-b): >20% narrower
 V4_FAILURE_MATERIAL = 10        # (ii-c): >= 10/200 is "materially higher"
 COMMITTED_N_FAILED_V3 = 2
+
+# --- amendment A7 (2026-07-29) ------------------------------------------------
+# A7(2): the point-head parity leg. The committed forward-simulation points the
+# production head must reproduce THROUGH stage_b's own handoff.
+POINT_PARITY_TOL_B = 0.50
+COMMITTED_POINT_B = {
+    3: 915.067027857209,        # bootstrap_resimulate_results.json .point_trapped_b
+    4: 928.892970289881,        # pathA_seasonal_adoption_results.json .v4_trapped_b
+}
+POINT_PARITY_BLOCKING_SPECS = (3,)   # A7 mandates v3; v4 recorded, non-blocking
+# A7(3): the two pre-committed Stage-B decompositions.
+SATURATION_TOL_B = 1e-6              # |trapped − ceiling| < 1e-6 ⇒ saturated
+BRANCH_MACRO_TOL = 0.02              # C6(iii)'s own production-branch rule
 
 AGE_NAMES = ["age_linear"] + [f"age_spline_{k}" for k in AGE_SPLINE_KNOTS]
 MONTH_NAMES = [f"m_{m}" for m in range(2, 13)]
@@ -641,19 +706,102 @@ def stage_b(spec: int, tier: int, heads: pd.DataFrame, base_art: dict,
             (float(np.mean(undrawn_shares)) if undrawn_shares else None)}
 
 
+def _block(a: np.ndarray) -> dict:
+    a = np.asarray(a, dtype=float)
+    return {"mean": float(a.mean()),
+            "se": float(a.std(ddof=1)) if len(a) > 1 else None,
+            "median": float(np.percentile(a, 50)),
+            "iqr": [float(np.percentile(a, 25)), float(np.percentile(a, 75))],
+            "ci_95": [float(np.percentile(a, 2.5)),
+                      float(np.percentile(a, 97.5))]}
+
+
 def summarize(df: pd.DataFrame) -> dict:
     trapped = df["trapped_b"].to_numpy(dtype=float)
     share = df["share_pct"].to_numpy(dtype=float)
-
-    def block(a):
-        return {"mean": float(a.mean()), "se": float(a.std(ddof=1)),
-                "median": float(np.percentile(a, 50)),
-                "iqr": [float(np.percentile(a, 25)), float(np.percentile(a, 75))],
-                "ci_95": [float(np.percentile(a, 2.5)),
-                          float(np.percentile(a, 97.5))]}
-    return {"n_reps": int(len(df)), "trapped_b": block(trapped),
-            "share_pct": block(share),
+    return {"n_reps": int(len(df)), "trapped_b": _block(trapped),
+            "share_pct": _block(share),
             "frac_above_benchmark": float(np.mean(share > 100.0))}
+
+
+def accounting_ceiling(empirical) -> dict:
+    """The ACCOUNTING CEILING on trapped liquidity, computed from the target
+    series — never hard-coded (amendment A7(3)).
+
+    score_extension_risk (extension_risk.py:58-60) forms
+        sim_trapped = Σ (simulated_rolloff_b − QT_Target_Billions)
+    over the active QT window. A replicate whose hazard is driven to ≈0 has
+    simulated_rolloff_b ≡ 0, so its trapped figure is exactly −Σ target: an
+    identity of the target series, not a model output. Draws that sit there are
+    saturated, and their contribution to the interval is mechanical."""
+    qt_emp = qt_active_frame(empirical)
+    tgt = qt_emp["QT_Target_Billions"]
+    emp_trapped = float(qt_emp["Extension_Delta_Billions"].sum())
+    ceiling = float(-tgt.sum())
+    return {
+        "ceiling_b": ceiling,
+        "ceiling_share_pct": (ceiling / emp_trapped * 100.0
+                              if emp_trapped else None),
+        "empirical_trapped_b": emp_trapped,
+        "n_months": int(len(tgt)),
+        "targets_all_nonpositive": bool((tgt <= 0).all()),
+        "sum_abs_targets_b": float(tgt.abs().sum()),
+        "definition": ("−Σ QT_Target_Billions over the active QT window; the "
+                       "value score_extension_risk returns when the simulated "
+                       "roll-off is identically zero"),
+    }
+
+
+def decompose(df: pd.DataFrame, ceiling_b: float, prod_macro: dict) -> dict:
+    """The two PRE-COMMITTED Stage-B decompositions (amendment A7(3)).
+
+    (a) saturated vs not — |trapped − ceiling| < 1e-6, the mechanical cut;
+    (b) production-branch vs rogue — all three DRAWN macro coefficients (in
+        production standardized units, as stored by stage_b) within 0.02 of the
+        spec's production values, i.e. C6(iii)'s own branch rule applied to the
+        bootstrap population rather than to optimizer starts.
+    A cross-tab of the two is reported because the whole point of A7 is that
+    they coincide: the rogue-optimizer-mode replicates are the saturated ones."""
+    n = len(df)
+    trapped = df["trapped_b"].to_numpy(dtype=float)
+    sat = np.abs(trapped - float(ceiling_b)) < SATURATION_TOL_B
+    inb = np.ones(n, dtype=bool)
+    for name in BETA_NAMES:
+        inb &= np.abs(df[name].to_numpy(dtype=float)
+                      - float(prod_macro[name])) <= BRANCH_MACRO_TOL
+
+    def cell(mask: np.ndarray) -> dict:
+        sub = df[mask]
+        out = {"n": int(mask.sum()),
+               "share_of_draws": (float(mask.mean()) if n else None)}
+        if len(sub):
+            out["trapped_b"] = _block(sub["trapped_b"].to_numpy(dtype=float))
+            out["share_pct"] = _block(sub["share_pct"].to_numpy(dtype=float))
+            out["drawn_macro_means"] = {
+                m: float(sub[m].mean()) for m in BETA_NAMES}
+        return out
+
+    return {
+        "saturation": {
+            "rule": (f"|trapped_b − ceiling| < {SATURATION_TOL_B:g} B, ceiling "
+                     "computed from the QT target series"),
+            "ceiling_b": float(ceiling_b),
+            "at_ceiling": cell(sat), "below_ceiling": cell(~sat),
+        },
+        "branch": {
+            "rule": (f"all three drawn macro coefficients within "
+                     f"{BRANCH_MACRO_TOL} of the spec's production values "
+                     "(C6(iii)'s branch rule)"),
+            "production_values": {m: float(prod_macro[m]) for m in BETA_NAMES},
+            "production_branch": cell(inb), "rogue": cell(~inb),
+        },
+        "cross_tab_counts": {
+            "production_branch_at_ceiling": int((inb & sat).sum()),
+            "production_branch_below_ceiling": int((inb & ~sat).sum()),
+            "rogue_at_ceiling": int((~inb & sat).sum()),
+            "rogue_below_ceiling": int((~inb & ~sat).sum()),
+        },
+    }
 
 
 def sim_context():
@@ -707,6 +855,54 @@ def run_p2(panel, trans, empirical, prod_scales: dict, limit, resume) -> dict:
             "pass": all(c["pass"] for c in checks.values()),
             "note": ("coef_path pinned to hazard_coefficients_specv3.json — "
                      "the default is now the v4 artifact (DEVIATION 2).")}
+
+
+def stage_b_point_parity(spec: int, panel, trans, empirical, prod_scales: dict,
+                         resume: bool) -> dict:
+    """A7(2) — BLOCKING Stage-B wiring gate, run before any replicate is scored.
+
+    Pushes the PRODUCTION head — the spec's own committed intercept, 7 age
+    spline coefficients, 3 macro point estimates (+ 11 month coefficients at v4)
+    with the PRODUCTION standardization scales — through stage_b's EXACT
+    coefficient-handoff and resimulation machinery, and requires the committed
+    forward-simulation point back within $0.50B. Because rep_scales are the
+    production scales the rescale factors are identically 1, so this gate
+    isolates the HANDOFF (which head entry lands on which coefficient name,
+    months delivered through coef_path, FE and prediction scales held at
+    production, temp-artifact assembly, simulate/score call) from the rescaling
+    arithmetic, which P2 and P3 cover. If it fails, the whole Stage B
+    construction is void — wiring, not finding — and nothing lands."""
+    base_art = json.loads(COEF_PATH[spec].read_text())
+    names = HEAD_NAMES[spec]
+    head = np.array([float(base_art["coefficients"][n]) for n in names])
+    heads = pd.DataFrame([{
+        "rep": 0,
+        "gap_std": prod_scales["gap_std"],
+        "burn_std": prod_scales["burn_std"],
+        "fric_std": prod_scales["fric_std"],
+        **{f"head_{n}": float(v) for n, v in zip(names, head)},
+    }])
+    out = stage_b(spec, 1, heads, base_art, prod_scales, panel, trans,
+                  empirical, pointhead_csv(spec), None, None, resume)
+    got = float(out["df"]["trapped_b"].iloc[0])
+    want = COMMITTED_POINT_B[spec]
+    blocking = spec in POINT_PARITY_BLOCKING_SPECS
+    ok = abs(got - want) <= POINT_PARITY_TOL_B
+    return {
+        "spec_version": spec, "blocking": bool(blocking),
+        "got_trapped_b": got, "want_trapped_b": want,
+        "abs_diff_b": abs(got - want), "tol_b": POINT_PARITY_TOL_B,
+        "got_share_pct": float(out["df"]["share_pct"].iloc[0]),
+        "head_source": (f"{COEF_PATH[spec].name} .coefficients, "
+                        f"{len(names)} head entries"),
+        "want_source": ("bootstrap_resimulate_results.json .point_trapped_b"
+                        if spec == 3 else
+                        "pathA_seasonal_adoption_results.json .v4_trapped_b"),
+        "pass": bool(ok),
+        "note": ("exercises the handoff, not the rescaling: rep_scales are the "
+                 "production scales, so rescale_to_production_units is the "
+                 "identity here by construction."),
+    }
 
 
 def gate_p3(summaries: dict) -> dict:
@@ -795,8 +991,14 @@ def main() -> None:
         gates["P3_point_head"] = gate_p3(stage_a_summaries)
 
     results: dict = {}
+    ceiling: dict = {}
     if args.stage in ("B", "P2", "all"):
         panel, trans, empirical = sim_context()
+        ceiling = accounting_ceiling(empirical)
+        print(f"  accounting ceiling (from the QT target series): "
+              f"${ceiling['ceiling_b']:.4f}B "
+              f"({ceiling['ceiling_share_pct']:.2f}% of the benchmark) over "
+              f"{ceiling['n_months']} months")
         if args.stage in ("P2", "all"):
             print("\nP2 — Stage B with the head forced to production "
                   "except the macro block …")
@@ -805,24 +1007,65 @@ def main() -> None:
                                                args.resume)
             print(f"  P2 {'PASS' if gates['P2_stageB_replay']['pass'] else 'FAIL'}")
         if args.stage in ("B", "all"):
-            for spec in specs:
-                if not FULLVEC_CSV[spec].exists():
-                    print(f"  spec v{spec}: no Stage A draws — skipping")
-                    continue
-                heads = pd.read_csv(FULLVEC_CSV[spec])
-                heads = heads[heads["converged"].astype(bool)]
-                base_art = json.loads(COEF_PATH[spec].read_text())
-                for tier in tiers:
-                    print(f"\nStage B — spec v{spec}, tier {tier} "
-                          f"({len(heads)} replications) …")
-                    out = stage_b(spec, tier, heads, base_art, prod_scales,
-                                  panel, trans, empirical,
-                                  simdraws_csv(spec, tier),
-                                  FULLVEC_NPZ[spec] if tier == 2 else None,
-                                  args.limit, args.resume)
-                    s = summarize(out["df"])
-                    s["mean_undrawn_share"] = out["mean_undrawn_share"]
-                    results.setdefault(f"spec{spec}", {})[f"tier{tier}"] = s
+            # ---- A7(2): point-head parity FIRST, before any replicate -------
+            parity_specs = sorted(set(specs) | set(POINT_PARITY_BLOCKING_SPECS))
+            print("\nA7 point-head parity (BLOCKING for spec v3) — the "
+                  "production head through stage_b's own handoff …")
+            pp = {}
+            for spec in parity_specs:
+                pp[f"spec{spec}"] = stage_b_point_parity(
+                    spec, panel, trans, empirical, prod_scales, args.resume)
+                c = pp[f"spec{spec}"]
+                print(f"  spec v{spec}: got ${c['got_trapped_b']:.4f}B  "
+                      f"want ${c['want_trapped_b']:.4f}B  "
+                      f"|Δ| {c['abs_diff_b']:.4f}B (tol {c['tol_b']})  "
+                      f"{'PASS' if c['pass'] else 'FAIL'}"
+                      f"{'' if c['blocking'] else '  [non-blocking]'}")
+            gates["A7_point_head_parity"] = {
+                "blocking": True, "tol_b": POINT_PARITY_TOL_B, "legs": pp,
+                "pass": all(c["pass"] for c in pp.values() if c["blocking"]),
+                "note": ("amendment A7(2): if this fails the whole Stage B "
+                         "construction is void — wiring, not finding."),
+            }
+            if not gates["A7_point_head_parity"]["pass"]:
+                print("  A7 POINT-HEAD PARITY FAILED — Stage B aborted before "
+                      "any replicate was scored; the construction is void.")
+            else:
+                for spec in specs:
+                    if not FULLVEC_CSV[spec].exists():
+                        print(f"  spec v{spec}: no Stage A draws — skipping")
+                        continue
+                    heads = pd.read_csv(FULLVEC_CSV[spec])
+                    heads = heads[heads["converged"].astype(bool)]
+                    base_art = json.loads(COEF_PATH[spec].read_text())
+                    prod_macro = {n: float(base_art["coefficients"][n])
+                                  for n in BETA_NAMES}
+                    for tier in tiers:
+                        print(f"\nStage B — spec v{spec}, tier {tier} "
+                              f"({len(heads)} replications) …")
+                        out = stage_b(spec, tier, heads, base_art, prod_scales,
+                                      panel, trans, empirical,
+                                      simdraws_csv(spec, tier),
+                                      FULLVEC_NPZ[spec] if tier == 2 else None,
+                                      args.limit, args.resume)
+                        # headline block keeps the FULL-SAMPLE numbers
+                        s = summarize(out["df"])
+                        s["mean_undrawn_share"] = out["mean_undrawn_share"]
+                        s["ceiling_b"] = ceiling["ceiling_b"]
+                        s["ceiling_share_pct"] = ceiling["ceiling_share_pct"]
+                        dec = decompose(out["df"], ceiling["ceiling_b"],
+                                        prod_macro)
+                        s["n_at_ceiling"] = dec["saturation"]["at_ceiling"]["n"]
+                        s["decompositions"] = dec
+                        results.setdefault(f"spec{spec}",
+                                           {})[f"tier{tier}"] = s
+                        print(f"  spec{spec} tier{tier}: n={s['n_reps']}  "
+                              f"at ceiling {s['n_at_ceiling']}  "
+                              f"production-branch "
+                              f"{dec['branch']['production_branch']['n']}  "
+                              f"rogue {dec['branch']['rogue']['n']}  "
+                              f"(rogue∧ceiling "
+                              f"{dec['cross_tab_counts']['rogue_at_ceiling']})")
         for tmp in (TMP_SIM, TMP_COEF):
             if tmp.exists():
                 tmp.unlink()
@@ -844,6 +1087,29 @@ def main() -> None:
     for k, v in results.items():
         merged_results.setdefault(k, {}).update(v)
     results = merged_results
+    if not ceiling:
+        ceiling = dict(prior.get("accounting_ceiling", {}))
+
+    # ---- A7(1): P3_point_head must not be indexed unconditionally ----------
+    # A --specs 4 or --stage B invocation never builds the spec-3 leg. Recover
+    # it from the persisted Stage-A summary when one exists; otherwise mark it
+    # PENDING, exclude it from all_pass, and say so out loud.
+    p3 = dict(gates.get("P3_point_head", {}))
+    if "spec3" not in p3 and "spec3" in stage_a_out:
+        try:
+            p3.update(gate_p3({3: stage_a_out["spec3"]}))
+            p3["spec3"]["recovered_from"] = "persisted stage_a.spec3"
+        except Exception as exc:                # noqa: BLE001 — degrade, not crash
+            p3["spec3"] = {"pass": None, "status": "PENDING", "blocking": True,
+                           "reason": f"recovery failed: {repr(exc)[:160]}"}
+    if "spec3" not in p3:
+        p3["spec3"] = {
+            "pass": None, "status": "PENDING", "blocking": True,
+            "reason": ("stage A was not run for spec v3 in this or any prior "
+                       "invocation recorded in this artifact"),
+        }
+    if p3:
+        gates["P3_point_head"] = p3
 
     committed = json.loads(COMMITTED_RESIM.read_text())
     c_lo, c_hi = committed["trapped_b"]["ci_95"]
@@ -881,10 +1147,86 @@ def main() -> None:
             "(ii-a) as SURVIVES_WIDER, with the interval reported as "
             "materially unchanged.")
 
-    all_pass = all(bool(gates[k]["pass"]) for k in gates
-                   if isinstance(gates[k], dict) and gates[k].get("blocking"))
-    if "P3_point_head" in gates:
-        all_pass = all_pass and bool(gates["P3_point_head"]["spec3"]["pass"])
+    # ---- A7(4): mandatory ceiling disclosure + production-branch-only read --
+    # The CODE above is adjudicated on the FULL SAMPLE and is unchanged. What
+    # follows accompanies it; neither replaces it.
+    dec_primary = (primary or {}).get("decompositions", {})
+    n_ceiling = (primary or {}).get("n_at_ceiling")
+    ceiling_b = (primary or {}).get("ceiling_b", ceiling.get("ceiling_b"))
+    if primary is None or not dec_primary or ceiling_b is None:
+        ceiling_disclosure = ("not computable — the spec v3 / tier 1 Stage B "
+                              "leg has not been scored with the A7 "
+                              "decompositions in this artifact; re-run "
+                              "--stage B --specs 3 --tiers 1")
+    elif n_ceiling:
+        ceiling_disclosure = (
+            "MANDATORY DISCLOSURE (amendment A7): the narrowing is partly "
+            f"MECHANICAL. {n_ceiling} of {primary['n_reps']} spec-v3 tier-1 "
+            f"draws sit at EXACTLY the accounting ceiling "
+            f"${ceiling_b:.4f}B — the value score_extension_risk returns when "
+            "the simulated roll-off is identically zero, i.e. minus the sum of "
+            "the QT target series, an accounting identity rather than a model "
+            "output. The interval's upper edge and its median therefore sit at "
+            "that ceiling, reached by the rogue-optimizer-mode replicates "
+            f"({dec_primary['cross_tab_counts']['rogue_at_ceiling']} of the "
+            f"{dec_primary['branch']['rogue']['n']} rogue draws are saturated), "
+            "and are not a sampling statement about the estimand. The committed "
+            "3-beta rendering of the same rogue draws produced the -$4,460B "
+            "tail; the joint rendering saturates the ceiling instead — two "
+            "renderings of one optimizer pathology, not two findings.")
+    else:
+        ceiling_disclosure = (
+            f"no draw sits at the accounting ceiling ${ceiling_b:.4f}B; the "
+            "interval is not mechanically bounded in this leg.")
+
+    pb = dec_primary.get("branch", {}).get("production_branch")
+    production_branch_only = None
+    if pb and pb.get("n"):
+        pb_lo, pb_hi = pb["trapped_b"]["ci_95"]
+        production_branch_only = {
+            "label": ("spec v3, tier 1, PRODUCTION-BRANCH DRAWS ONLY (all three "
+                      "drawn macro coefficients within 0.02 of the spec-v3 "
+                      "production values). Reported as a labeled sub-population "
+                      "for diagnosis: it is NOT the pre-committed estimand, NOT "
+                      "the quoted interval, and NOT a substitute for the "
+                      "full-sample numbers above."),
+            "n": pb["n"],
+            "share_of_draws": pb["share_of_draws"],
+            "ci_95_b": [pb_lo, pb_hi],
+            "median_b": pb["trapped_b"]["median"],
+            "mean_b": pb["trapped_b"]["mean"],
+            "share_pct_ci_95": pb["share_pct"]["ci_95"],
+            "width_b": float(pb_hi - pb_lo),
+            "width_ratio_vs_committed": (float((pb_hi - pb_lo) / c_width)
+                                         if c_width else None),
+            "n_at_ceiling": dec_primary["cross_tab_counts"][
+                "production_branch_at_ceiling"],
+            "drawn_macro_means": pb.get("drawn_macro_means"),
+        }
+    if n_ceiling and code == "NARROWS":
+        action = ("[posture] NOT ADJUDICABLE AS IT STANDS (amendment A7): the "
+                  "NARROWS code is driven by ceiling saturation. " + action)
+
+    # Blocking-gate roll-up over exactly the gates that exist. P3_point_head is
+    # a per-spec container, so its blocking sub-legs are walked individually;
+    # every other blocking gate contributes its own pass flag. A `pass` of None
+    # means PENDING: excluded from all_pass, listed, and warned about.
+    blocking: list[tuple[str, object]] = []
+    for key, g in gates.items():
+        if not isinstance(g, dict):
+            continue
+        if key == "P3_point_head":
+            for sk, sg in g.items():
+                if isinstance(sg, dict) and sg.get("blocking"):
+                    blocking.append((f"{key}.{sk}", sg.get("pass")))
+        elif g.get("blocking"):
+            blocking.append((key, g.get("pass")))
+    pending = [k for k, p in blocking if p is None]
+    all_pass = all(bool(p) for _, p in blocking if p is not None)
+    for k in pending:
+        print(f"  WARNING: blocking gate {k} is PENDING (not evaluated in this "
+              f"or any recorded invocation) — excluded from all_pass; the run "
+              f"is NOT fully gated.")
     status = "OK" if all_pass else "GATE_FAILURE"
 
     payload = {
@@ -945,15 +1287,21 @@ def main() -> None:
         },
         "verdict": {
             "code": code,
+            "adjudicated_on": "full sample (pre-committed codes, unchanged)",
             "v4_n_failed": v4_failed,
             "v4_failure_material_threshold": V4_FAILURE_MATERIAL,
             "v4_unstable": bool(v4_unstable),
+            "ceiling_disclosure": ceiling_disclosure,
+            "ceiling_driven": bool(n_ceiling),
+            "production_branch_only": production_branch_only,
             "manuscript_action": action,
             "propagation": ("none — Path A is excluded from every headline "
                             "figure (tex 290, 978, 1053)"),
         },
         "runtime_s": round(time.perf_counter() - t_all, 1),
     }
+    payload["accounting_ceiling"] = ceiling
+    payload["parity_gates_pending"] = pending
     with open(RESULTS_JSON, "w") as f:
         json.dump(payload, f, indent=2, default=_np)
         f.write("\n")
@@ -968,6 +1316,20 @@ def main() -> None:
         print(f"  mean ${primary['trapped_b']['mean']:.1f}B  "
               f"median ${primary['trapped_b']['median']:.1f}B  "
               f"above benchmark {primary['frac_above_benchmark'] * 100:.1f}%")
+        if primary.get("n_at_ceiling") is not None:
+            print(f"  at accounting ceiling: {primary['n_at_ceiling']}/"
+                  f"{primary['n_reps']} "
+                  f"(${primary.get('ceiling_b') or float('nan'):.4f}B)")
+        if production_branch_only:
+            print(f"  production-branch draws only ({production_branch_only['n']}): "
+                  f"[{production_branch_only['ci_95_b'][0]:.1f}, "
+                  f"{production_branch_only['ci_95_b'][1]:.1f}]B  "
+                  f"width ratio "
+                  f"{production_branch_only['width_ratio_vs_committed']:.3f}"
+                  f"  [labeled sub-population, NOT the quoted interval]")
+    print(f"  {ceiling_disclosure}")
+    if pending:
+        print(f"  PENDING blocking gates: {pending}")
     print(f"  Saved: {RESULTS_JSON}")
     if status != "OK":
         raise SystemExit("GATE_FAILURE — nothing lands in the manuscript.")
