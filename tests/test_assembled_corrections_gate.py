@@ -198,7 +198,9 @@ HANDOFF_COMMITMENTS = [
     "$+5.6$",          # off-window headline
     "$+4.4$",          # Ginnie overlay
     "$+3.8$",          # age-standardised floor
-    "$+3.0$",          # naive composition, and the sampling interval's floor
+    "$+2.9$",          # the composed lower member, measured by b5_joint_cell
+                       # (round 27; supersedes the naive $+3.0$ projection,
+                       # which survives in prose as the projection history)
     "5.52\\%",         # the independent Fannie read, above the clean band
     "68.8\\%",         # the censoring share (§4)
     "truncated",       # and the framing it must carry

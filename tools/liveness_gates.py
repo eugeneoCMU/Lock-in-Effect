@@ -368,7 +368,13 @@ ASSEMBLY_SPANS = {
     "ladder_overlay": "overlay at that same floor returns $+4.4$",
     "ladder_agestd": "floor read of 5.51\\% implies a marginal near $+3.8$",
     "ladder_fannie": "5.52\\%, brackets the marginal below the $+4.3$ edge",
-    "ladder_composed": "would put the marginal near $+3.0$",
+    # ROUND-27 B5: the joint cell was run under the pre-committed landing rule
+    # (b5_joint_cell: composed +2.928pp, deviation -0.07 from the +3.0
+    # projection, interaction ~0 vs proportional; all parity gates PASS).
+    # The rung is now a measured composed point, and the span pins the run
+    # tag + measurement so a wording pass cannot demote it back to projection.
+    "ladder_composed": "run under a pre-committed landing rule (run "
+                       "\\texttt{b5\\_joint\\_cell}) and measures $+2.9$ points",
     # (b) the posture, bound to the interval it is a posture about.
     #     ROUND-26 re-derivation: the corrected interval's midpoint is 5.76,
     #     so +5.57 sits just BELOW it and "upper-middle" would overstate;
@@ -405,7 +411,7 @@ ASSEMBLY_SPANS = {
 ASSEMBLY_TABLE_SPANS = {
     "table_label": "\\label{tab:assembly}",
     "table_anchor": "Table~\\ref{tab:assembly} tabulates this assembly",
-    "table_row_composed": "projection only; no composed point is reported (run pending)",
+    "table_row_composed": "measured composed lower member (run \\texttt{b5\\_joint\\_cell})",
     "table_row_fonseca": "counterweight, conservative-band evidence",
 }
 
