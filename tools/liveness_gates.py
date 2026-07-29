@@ -534,9 +534,9 @@ def abstract_posture_check(tex: str) -> tuple[bool, dict]:
 # it is the cheapest edit anyone would make to this paragraph.
 #
 # The ORDERING assert carries the "leads with" half: every span below survives a
-# paragraph that states the falsification verdict first and the cross-design
+# paragraph that states the negative verdict first and the cross-design
 # afterwards, which is the arrangement round 24c removed.
-ABM_LEAD_OPENER = "This section is a falsification test"
+ABM_LEAD_OPENER = "This section is a stress test"
 ABM_LEAD_SPANS = {
     "leads_with_scope": "the first thing to report about it is what its own cross-design leg "
                         "establishes about its scope",
@@ -730,7 +730,7 @@ def abm_lead_check(tex: str) -> tuple[bool, dict]:
     paras = [ln for ln in tex_nc.split("\n") if ln.startswith(ABM_LEAD_OPENER)]
     line = paras[0] if len(paras) == 1 else ""
     missing = sorted(k for k, v in ABM_LEAD_SPANS.items() if v not in line)
-    # the cross-design must be stated BEFORE the falsification verdict it scopes
+    # the cross-design must be stated BEFORE the negative verdict it scopes
     i_cross = line.find("60.2\\%")
     i_verdict = line.find("no specification tested here explains")
     ordered = i_cross != -1 and i_verdict != -1 and i_cross < i_verdict

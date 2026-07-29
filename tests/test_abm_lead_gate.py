@@ -81,13 +81,13 @@ def test_deleting_any_span_fails(tex, key):
 # Attack 1: the reversion. Every literal survives; only the order changes.
 # --------------------------------------------------------------------------
 def test_verdict_before_crossdesign_fails(tex):
-    """Put the falsification verdict back in front. A span-presence check
+    """Put the negative verdict back in front. A span-presence check
     accepts this and it undoes the entire round."""
     lead = _lead(tex)
     reverted = (
-        "This section is a falsification test of the household-choice hypothesis: "
+        "This section is a stress test of the household-choice hypothesis: "
         "no specification tested here explains the Federal Reserve's trapped liquidity. "
-        + lead.split("This section is a falsification test", 1)[1])
+        + lead.split("This section is a stress test", 1)[1])
     mutated = tex.replace(lead, reverted, 1)
     ok, info = abm_lead_check(mutated)
     assert not ok, "gate #100 accepted a verdict-first lead"

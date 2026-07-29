@@ -186,7 +186,7 @@ def fig2_ccf():
 
 
 def fig3_abm_waterfall():
-    """ABM falsification bridge: every extension moves away from 100%."""
+    """ABM stress-test bridge: every extension moves away from 100%."""
     early = _j("figures/fig3_stage_levels.json")["stages"]
     stages = [(s["label"], s["share_pct"]) for s in early]
     stages.append(("+ production corrections\n(parse, back-out,\namort., kernel)",
