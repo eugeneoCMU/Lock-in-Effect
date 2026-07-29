@@ -1,0 +1,160 @@
+{
+  "mode": "danish_refi_finegrid",
+  "status": "OK",
+  "spec": "us_intercept anchor, refi-in-place 0--3% in 0.25% steps (13 cells) + one artifact-only cell at the realized-implied anchor 22.4%/yr; band V2 authorized; committed-endpoint parity G3/G4 bit-exact; landing per RULE-A' dispositions.",
+  "anchor": "us_intercept",
+  "grid_pct": [
+    0.0,
+    0.25,
+    0.5,
+    0.75,
+    1.0,
+    1.25,
+    1.5,
+    1.7500000000000002,
+    2.0,
+    2.25,
+    2.5,
+    2.75,
+    3.0
+  ],
+  "parity_gates": {
+    "G1_us_standalone": {
+      "pass": true
+    },
+    "G2_us_shared": {
+      "pass": true
+    },
+    "G3_cell0": {
+      "got": 61.18833737010482,
+      "want": 61.18833737010482,
+      "pass": true,
+      "stop": false
+    },
+    "G4_cell3pct": {
+      "got": 256.8415840324639,
+      "want": 256.8415840324639,
+      "pass": true,
+      "stop": false
+    },
+    "G5_monotone": {
+      "pass": true
+    },
+    "G6_dk_cpr": {
+      "got": 5.613626373336359,
+      "want": 5.613626373336359,
+      "pass": true
+    }
+  },
+  "parity_gates_all_pass": true,
+  "sweep": [
+    {
+      "refi_inplace_cpr": 0.0,
+      "gap_hybrid_us_intercept_b": 61.18833737010482,
+      "danish_trapped_shared_b": 687.7795451639257,
+      "mean_danish_cpr_pct": 5.613626373336359
+    },
+    {
+      "refi_inplace_cpr": 0.0025,
+      "gap_hybrid_us_intercept_b": 78.02905522090862,
+      "danish_trapped_shared_b": 670.9388273131219,
+      "mean_danish_cpr_pct": 5.856745538946537
+    },
+    {
+      "refi_inplace_cpr": 0.005,
+      "gap_hybrid_us_intercept_b": 94.77138998046655,
+      "danish_trapped_shared_b": 654.196492553564,
+      "mean_danish_cpr_pct": 6.100478628189448
+    },
+    {
+      "refi_inplace_cpr": 0.0075,
+      "gap_hybrid_us_intercept_b": 111.41560406173335,
+      "danish_trapped_shared_b": 637.5522784722972,
+      "mean_danish_cpr_pct": 6.344828202873385
+    },
+    {
+      "refi_inplace_cpr": 0.01,
+      "gap_hybrid_us_intercept_b": 127.96195848351613,
+      "danish_trapped_shared_b": 621.0059240505144,
+      "mean_danish_cpr_pct": 6.589796809110507
+    },
+    {
+      "refi_inplace_cpr": 0.0125,
+      "gap_hybrid_us_intercept_b": 144.41071378025833,
+      "danish_trapped_shared_b": 604.5571687537722,
+      "mean_danish_cpr_pct": 6.835386989750615
+    },
+    {
+      "refi_inplace_cpr": 0.015,
+      "gap_hybrid_us_intercept_b": 160.76212428212693,
+      "danish_trapped_shared_b": 588.2057582519036,
+      "mean_danish_cpr_pct": 7.081601197234763
+    },
+    {
+      "refi_inplace_cpr": 0.0175,
+      "gap_hybrid_us_intercept_b": 177.01646236516183,
+      "danish_trapped_shared_b": 571.9514201688687,
+      "mean_danish_cpr_pct": 7.328442159180675
+    },
+    {
+      "refi_inplace_cpr": 0.02,
+      "gap_hybrid_us_intercept_b": 193.17399566132292,
+      "danish_trapped_shared_b": 555.7938868727076,
+      "mean_danish_cpr_pct": 7.575912539115791
+    },
+    {
+      "refi_inplace_cpr": 0.0225,
+      "gap_hybrid_us_intercept_b": 209.23499613347292,
+      "danish_trapped_shared_b": 539.7328864005576,
+      "mean_danish_cpr_pct": 7.824015073985253
+    },
+    {
+      "refi_inplace_cpr": 0.025,
+      "gap_hybrid_us_intercept_b": 225.1997437476591,
+      "danish_trapped_shared_b": 523.7681387863714,
+      "mean_danish_cpr_pct": 8.072752634203859
+    },
+    {
+      "refi_inplace_cpr": 0.0275,
+      "gap_hybrid_us_intercept_b": 241.06851772840957,
+      "danish_trapped_shared_b": 507.89936480562096,
+      "mean_danish_cpr_pct": 8.322128090903451
+    },
+    {
+      "refi_inplace_cpr": 0.03,
+      "gap_hybrid_us_intercept_b": 256.8415840324639,
+      "danish_trapped_shared_b": 492.1262985015666,
+      "mean_danish_cpr_pct": 8.572144115988056
+    }
+  ],
+  "band_0_1_b": [
+    61.18833737010482,
+    127.96195848351613
+  ],
+  "band_0_3_b": [
+    61.18833737010482,
+    256.8415840324639
+  ],
+  "slope_b_per_cpr_point": 65.21774888745303,
+  "realized_implied_anchor": {
+    "value_pct": 22.4,
+    "source": "hazard/data/danish_external_validation/results_refinement.json",
+    "R_pct": 26.42,
+    "allowance_pp": 4.0,
+    "confounds": [
+      "gross bond-level measure (conversions bundle in)",
+      "stock includes non-household collateral",
+      "environment-matched, not book-matched",
+      "Danish-tax realized vs U.S.-transplant GE object: an upper anchor on the transplant, not an estimate"
+    ],
+    "above_grid": true,
+    "above_pe_ceiling": true
+  },
+  "cell_at_realized_anchor": {
+    "refi_inplace_cpr": 0.224,
+    "gap_hybrid_us_intercept_b": 1212.3201905483634,
+    "danish_trapped_shared_b": -463.3523080143327,
+    "mean_danish_cpr_pct": 30.198629858243926
+  },
+  "runtime_s": 275.2
+}
