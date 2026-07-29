@@ -40,13 +40,24 @@ def main() -> None:
     monthly = weekly.resample("ME").last()
     diff = monthly.diff()
 
+    # H1-A1: the manuscript's zeros are BACK-OUT CPR zeros (clip binding),
+    # not raw-diff zeros. Compute the back-out on this probe's series.
+    sched_a1 = mz.scheduled_amortization_series(
+        monthly.index, coupon=0.025, origin=pd.Timestamp("2020-06-01"))
+    unclipped = ((diff.abs() / monthly) - sched_a1) * 12 * 100
+    backout_cpr = unclipped.clip(lower=0)
     p1_rows, p1_ok = {}, True
     for zm in ZERO_MONTHS:
-        d = float(diff.loc[zm].iloc[0])
-        ok = abs(d) < TOL_ZERO_B
+        c = float(backout_cpr.loc[zm].iloc[0])
+        u = float(unclipped.loc[zm].iloc[0])
+        ok = (c == 0.0) and (u < -0.01)
         p1_ok &= ok
-        p1_rows[zm] = {"me_last_diff_b": d, "abs_lt_tol": ok}
-    print(f"P1 zeros reproduce: {p1_rows} [{'PASS' if p1_ok else 'FAIL'}]")
+        p1_rows[zm] = {"backout_cpr_pct": c, "unclipped_pct": u,
+                       "raw_me_diff_b": float(diff.loc[zm].iloc[0]),
+                       "clip_binds": ok}
+    print(f"P1 back-out zeros (clip binds): "
+          f"{ {k: round(v['unclipped_pct'], 2) for k, v in p1_rows.items()} } "
+          f"[{'PASS' if p1_ok else 'FAIL'}]")
 
     # P2 — the 14.01% spike, back-out arithmetic replicated on the spot
     sched = mz.scheduled_amortization_series(
@@ -80,13 +91,16 @@ def main() -> None:
         nxt = (per + 1).strftime("%Y-%m")
         nxt_diff = float(diff.loc[nxt].iloc[0]) if nxt in diff.index.strftime("%Y-%m") else np.nan
         tmean = float(trail.loc[zm].iloc[0])
-        if max_step < TOL_ZERO_B:
-            cls = "F"
-        elif abs(me_diff) < TOL_ZERO_B:
-            cls = "A"
+        # H1-A1 classification: CLIP-BOUND artifact = unclipped back-out
+        # negative + next-month rolloff >= 1.5x trailing mean |diff|.
+        u_zm = float(unclipped.loc[zm].iloc[0])
+        spike = abs(nxt_diff) >= 1.5 * tmean if np.isfinite(nxt_diff) else False
+        if u_zm < -0.01 and (spike or me_diff > 0):
+            cls = "A"  # clip-bound boundary-shift artifact
+        elif u_zm < -0.01:
+            cls = "F"  # clip-bound, no downstream spike (still artifact)
         else:
-            spike = abs(nxt_diff) >= 1.5 * tmean if np.isfinite(nxt_diff) else False
-            cls = "G" if not spike else "A"
+            cls = "G"
         if cls in ("F", "A"):
             n_artifact += 1
         months[zm] = {

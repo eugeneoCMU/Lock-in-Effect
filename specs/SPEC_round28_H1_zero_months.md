@@ -70,3 +70,24 @@ diff, pair total, trailing mean}, spike_check, classification_summary, verdict
 `hazard/macro.py`; any committed artifact; any timing exhibit number; the
 appendix's five diagnostics and its frozen-rule reporting; the CONCEDE_LEVELS_ONLY
 posture (this probe can only add mechanism, never subtract concession).
+
+---
+
+## POST-RUN AMENDMENT H1-A1 (labeled, 2026-07-29 — first run stopped on P1 as designed)
+
+P1's operationalization was WRONG: it targeted zeros of the raw ME-last rolloff
+diff. The manuscript's "four exact-zero months in the SOMA back-out" are zeros of
+the BACK-OUT CPR — `clip((|rolloff|/holdings − sched_smm), 0)` — i.e. months where
+the reported rolloff falls below the scheduled-amortization floor and the
+non-negativity clip pins the month at exactly zero. First-run measurements (raw
+diffs −$4.48/−$3.70/−$3.63/+$1.99B vs sched-amort ≈ $4.9B/mo; next-month diffs
+−$25.7/−$30.1/−$29.2B ≥ 1.5× trailing means; P2 spike 14.07 ≈ 14.01 PASS).
+**Amended P1:** back-out CPR == 0.0 exactly at the four months AND the unclipped
+value < −0.01 pp/mo·12·100 margin (proves the clip binds). **Amended
+classification:** CLIP-BOUND (artifact) = unclipped negative + next-month rolloff
+≥ 1.5× trailing mean |diff| (June 2022 variant: net POSITIVE diff at window open —
+settlement overlap with residual reinvestment purchases — same clip mechanism).
+Landing rule, outcome mapping, and MUST-NOT-CHANGE unchanged. The mechanism
+sentence for the ARTIFACT landing becomes: the zeros are clip-induced
+month-boundary allocation artifacts, with the displaced mass appearing in the
+following month's reading (pair totals conserved in dollars).
