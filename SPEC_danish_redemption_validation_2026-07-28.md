@@ -38,3 +38,15 @@ Let **R** = M2's load-bearing-window mean (M1's if M2 unavailable).
 ## What this spec does not authorize
 
 No manuscript, gate, test, or letter edit. The dispositions above are the pre-committed landing rules for WP-F when Eugene executes it.
+
+---
+
+## Substitution addendum (committed BEFORE any data values were fetched, after metadata-only inspection)
+
+**Finding from metadata (tableinfo + full catalog sweep, no data values seen):** no table on the API carries extraordinary redemptions directly — DNVPDKR2's data-type dimension has only stocks, net transactions, and value adjustments; DNRIURQ carries scheduled instalments only; a title sweep of all 2,317 tables returns zero redemption-flow tables. The spec's substitution clause therefore activates with a **derived measure**, defined now:
+
+- **Universe refinement**: DNVPDKR2, `TYPREAL=FKE` ("no longer open for issue — fixed rate callable", defined since 2015), `VALUTA=DKK`, all sectors (investor dimension eliminated), monthly. For a closed-for-issue series, gross issuance ≡ 0, so **−(net transactions, nominal) = total redemptions exactly** (scheduled + extraordinary; nominal is valuation-free in DKK). Cross-check: −ΔStock(N1) ≈ −N2 month by month.
+- **Derived metric M2′** (replaces M2): annualized **total-redemption rate** on the coupon ≤2% FKE stock: `1 − (1 + N2_t/S_{t−1})^12` (N2 negative when redeeming). M1′ analogously on all-coupon FKE, and on FK all-callable as context (labeled net-of-issuance where the series is open).
+- **Scheduled allowance, fixed now**: extraordinary redemptions ≥ total-redemption rate − **4pp/yr**. (Danish 30y annuity amortization runs ~1.5–2.5%/yr early-life; the interest-only share lowers it; 4pp is deliberately generous, which makes the test conservative against firing RULE-A.)
+- **Read-rule mapping onto the derived space** (thresholds unchanged in extraordinary space): RULE-A fires if the ≤2%-coupon FKE total-redemption rate averaged over 2022M07–2023M12 exceeds **8%/yr** (⇒ extraordinary > 4% under the allowance); RULE-A′ if it exceeds **12%/yr**; RULE-B if ≤ 8%/yr; boundary band ±0.25pp maps to 8%±0.25pp.
+- **Deviation label**: this is a derived lower-bound construction, not the direct series; every use of the result carries that label. The direct series exists in Finance Denmark's published XLSX statistics and can replace this construction later; the derived read is committed first so the threshold precedes any sighting of either source's values.
