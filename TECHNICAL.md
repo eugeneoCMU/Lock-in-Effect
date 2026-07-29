@@ -4227,3 +4227,16 @@ Gotchas earned:
 - **Wave 2b resolved #14's head ambiguity at zero cost:** the `\subsection` + `sec:patha` label stayed as the V.D stub's head, so all ~26 "(Section~\ref{sec:patha})" callers resolve unchanged — no repoint wave. The moved timing paragraph's concession sentence stays verbatim behind a new pointer sentence that re-anchors its "these exhibits" referent.
 - **Two-PDF packaging:** references now print before `\appendix` (natbib collects appendix cites regardless), so one compilation splits cleanly: `qpdf build/revised_paper_v18.pdf --pages . 1-82 -- main.pdf` and `--pages . 83-126 -- online_appendix.pdf` (page numbers from the aux; recompute after any reflow).
 - **The appendix wording pass reused the round-26 method at full discipline:** 404 pins extracted from `liveness_gates.py` via `ast` into a validator enforcing old-string uniqueness, digit/math/backslash token-sequence identity, and post-apply pin survival; 12/12 Opus-agent proposals passed and applied.
+
+## 42. Round-27: the #21 vintage-segment run is NOT_FEASIBLE — feasibility determination, no execution (2026-07-28)
+
+Scouted read-only under spec-before-run (no model number was produced; parquet metadata and committed artifacts only, all claims re-verified by the coordinating session). The proposed Path B run on the Fannie 2022-origination cohort is **not constructible from what survives, and not by re-pull either**:
+1. `hazard/data/loan_sample_fannie.parquet` (main checkout) carries vintages 2017–2021 only (verified: 15,515/14,010/13,723/13,815/17,937; 2022 = 0) — `config.VINTAGE_YEARS = range(2017, 2022)` filtered the Path B pool at draw time; the 2022Q3/Q4 pool pieces are 0 rows.
+2. The raw and staged pairs were deleted by the replication's own disk protocol; `fannie_native/` and `raw/fannie/` are empty; `FANNIE_CLIENT_ID/SECRET` are not in `.env`; free disk 17 GiB vs a 17 GB single native.
+3. **The structural blocker survives any re-pull:** `loan_sample.py`'s pre-QT snapshot rule (`reporting_period < QT_START`) leaves second-half-2022 originations with no admissible observation month — the same hard censoring recorded in the identification NOT_FEASIBLE. A 2022 "segment" under the committed sampler would be H1-2022 originations at near-zero seasoning, defined by the censoring rule rather than the vintage. The acquisition window (2022Q4 close) additionally excludes 2022 originations acquired in 2023.
+
+**Salvage landed without any run (two committed-artifact facts):**
+- The joint agency×vintage cells in `composition_shift_results.json` settle the plan's netting question: UMBS×2022 = 0.206797 (20.7% of face), GNMA×2022 = 0.0236 — so the "51.0 + 23.1" arithmetic double-counts 2.4pp, and the conventional-2022 cell is 20.7%, not 23.1%. Landed in the app:composition paragraph.
+- The infeasibility itself is now disclosed in the limitations Status paragraph, with the 2022 leg of the observed-speed bound named ($3.3076B of the $11.748B, differential +0.173pp, from `vintage_residual_bound_results.json`) as the vintage's standing discipline.
+
+PLAN #21 is dispositioned NOT_FEASIBLE; resurrecting it requires credentials, disk, an acquisition-window extension past 2022Q4, AND a deviation from the frozen snapshot rule — the last of these is a design change to the committed sampler, not a parameter.
