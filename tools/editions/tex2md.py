@@ -185,14 +185,26 @@ class Conv:
         i = block.find("\\caption{")
         if i >= 0:
             cap, _ = balanced(block, i + len("\\caption"))
+        block = block.replace("}\\\\\n\\toprule", "}\n\\toprule")
         lm = re.search(r"\\label\{(tab:[^}]*)\}", block)
         num = self.lab.get(lm.group(1), "?") if lm else "?"
         # tabular body
         rows_md = []
-        ti = block.find("\\begin{tabular}")
+        env = "tabular" if "\\begin{tabular}" in block else "longtable"
+        ti = block.find("\\begin{" + env + "}")
         if ti >= 0:
-            _, after_spec = balanced(block, ti + len("\\begin{tabular}"))
-            body = block[after_spec:block.index("\\end{tabular}")]
+            _, after_spec = balanced(block, ti + len("\\begin{" + env + "}"))
+            body = block[after_spec:block.index("\\end{" + env + "}")]
+            # longtable repeats its header for continuation pages; keep one copy
+            if env == "longtable":
+                if "\\endhead" in body:
+                    body = body.split("\\endhead", 1)[1]
+                    hdr = block[after_spec:block.index("\\endfirsthead")] \
+                        if "\\endfirsthead" in block else ""
+                    body = hdr + body
+                for mk in ("\\endfirsthead", "\\endhead", "\\endfoot",
+                           "\\endlastfoot"):
+                    body = body.replace(mk, "")
             body = re.sub(r"\\(top|mid|bottom)rule", "", body)
             body = re.sub(r"\\cmidrule(\([^)]*\))?\{[^}]*\}", "", body)
             body = re.sub(r"\\addlinespace(\[[^\]]*\])?", "", body)
@@ -300,7 +312,8 @@ class Conv:
                 out += ["## Abstract", "", self.inline(inner).strip(), ""]
                 i = j + 1
                 continue
-            for env, fn in (("table", self.table_block),
+            for env, fn in (("longtable", self.table_block),
+                            ("table", self.table_block),
                             ("figure", self.figure_block),
                             ("equation", self.equation_block)):
                 if stripped.startswith(f"\\begin{{{env}}}"):
