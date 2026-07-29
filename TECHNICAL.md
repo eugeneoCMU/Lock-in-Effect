@@ -4240,3 +4240,15 @@ Scouted read-only under spec-before-run (no model number was produced; parquet m
 - The infeasibility itself is now disclosed in the limitations Status paragraph, with the 2022 leg of the observed-speed bound named ($3.3076B of the $11.748B, differential +0.173pp, from `vintage_residual_bound_results.json`) as the vintage's standing discipline.
 
 PLAN #21 is dispositioned NOT_FEASIBLE; resurrecting it requires credentials, disk, an acquisition-window extension past 2022Q4, AND a deviation from the frozen snapshot rule — the last of these is a design change to the committed sampler, not a parameter.
+
+## 43. Round-27: B5 joint cell — run, LANDS at +2.9 (2026-07-28)
+
+The one genuinely never-run cell (panel B5) executed under a spec + landing rule committed BEFORE the run (`63450c4`; author authorization in-session). `hazard/b5_joint_cell.py`: the published-series Ginnie overlay composed with the age-standardized floor read (artifact float 5.507748455937158%, NOT the rounded 5.51), max form, p_q {0, 6.5}, overlay machinery imported unmodified.
+
+**Parity: all five gates PASS, three of them bit-exact.** Fresh engine legs at 4.991% reproduced the committed oos_identification trapped_b values to full float precision (got == want on both legs — engine determinism in this worktree is exact); the overlay code path reproduced the committed +4.443419pp exactly; own-series identity at 1e-13.
+
+**Result: composed marginal +2.928pp (+$22.39B).** Deviation from the pre-committed +3.0 expectation: −0.07pp (materiality band ±1.0). Interaction against the proportional projection: +0.000pp — this composition is proportional, where concave×additive returned −1.47. Conventional marginal measured at the age-standardized floor: +3.671pp vs the ladder's PCHIP-implied ~+3.8 (delta −0.13, consistency report, not a gate; the ladder_agestd rung deliberately left as the implied value). All three overlay variants agree to 0.01pp (the observed-series component nets out of the marginal, as at 4.991%).
+
+**Landing (per the ex-ante rule, one commit `68016cf`):** the five no-composed-point sites (overlay paragraph, seventh qualification, derivation paragraph, tab:uncertainty note, tab:assembly row) now carry the measured +2.9 as the assembly's composed lower member; the verdict-audit row records the ±1pp convention applied and passed (neutral direction); gate #98's `ladder_composed` span re-pinned to the run tag + measurement, `ASSEMBLY_TABLE_SPANS.table_row_composed` updated; the commitment battery's `$+3.0$` entry became `$+2.9$` (the projection survives in prose as history); letter §7's "I publish no composed point" sentence replaced, `$-1.47$` kept inside the §7 window (LETTER_CURRENT_LITERALS).
+
+**Posture note:** +2.9 sits inside the wild-cluster interval ([+2.8, +8.7]) just above its lower edge and below the hull's +3.5 lower end — the assembly's "corrections concentrate below" posture is unchanged and now ends on a measured, not projected, lower member. The abstract was not touched (the landing rule never authorized it).
