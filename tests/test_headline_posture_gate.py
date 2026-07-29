@@ -76,7 +76,7 @@ def test_point_before_range_fails(tex, abstract):
         "partly behavioral turnover) sets the floor. "
         "Lock-in itself adds $+5.6$ points, or \\$42.6 billion. "
         "What lock-in itself adds is a range rather than a number. "
-        "The design bounds it between $+2.8$ and $+8.7$ points under its "
+        "The design bounds it between $+2.9$ and $+8.7$ points under its "
         "production floor form (the floor read's sampling error at my "
         "central elasticity; a wild-cluster interval on 31 clusters; the "
         "percentile read under-covers), with a "
@@ -149,6 +149,6 @@ def test_benign_rewrites_stay_green(tex, old, new):
 def test_abstract_posture_agrees_with_section_ve(tex):
     ve = [ln for ln in tex.split("\n") if ln.startswith("A seventh qualification")]
     assert len(ve) == 1, "Section V.E's assembly paragraph is missing or duplicated"
-    assert "$+2.8$ to $+8.7$ points" in ve[0], "V.E no longer quotes the binding interval"
+    assert "$+2.9$ to $+8.7$ points" in ve[0], "V.E no longer quotes the binding interval"
     assert "no interior member is privileged, and the range rather than any point is what the design delivers" in ve[0], (
         "V.E no longer states the range-carries reading of Section V.E")

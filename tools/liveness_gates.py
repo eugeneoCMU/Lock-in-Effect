@@ -402,7 +402,7 @@ ASSEMBLY_SPANS = {
     # baseline-level convention spans wider but has no coverage property; the
     # floor read is the widest layer WITH one, and that scoping is pinned.
     "posture_binding_layer": "The widest layer that does have a coverage property is the "
-                             "floor reads' own sampling error, $+2.8$ to $+8.7$ points "
+                             "floor reads' own sampling error, $+2.9$ to $+8.7$ points "
                              "after wild-cluster correction",
     "posture_lower_half": "every correction listed above falls in its lower half",
     # (c) the censoring share (HANDOFF_round24 §4) and the framing that
@@ -461,7 +461,7 @@ ABSTRACT_POSTURE = {
     # ROUND-26 full restatement: the binding layer is the wild-cluster
     # bootstrap-t interval from run floor_inference_correction; the percentile
     # read is demoted to a labeled mention inside the same parenthetical.
-    "interval": "The design bounds it between $+2.8$ and $+8.7$ points",
+    "interval": "The design bounds it between $+2.9$ and $+8.7$ points",
     # ROUND-28 (DA-C3): the abstract must say WHAT the interval bounds. "pins"
     # claimed the design pinned the elasticity's contribution; the interval is
     # the floor read's sampling error at a FIXED elasticity, which contributes
@@ -510,7 +510,7 @@ def abstract_posture_check(tex: str) -> tuple[bool, dict]:
     abstract = tex_nc[_i + len(ABSTRACT_BOUNDS[0]):_j] if found else ""
     missing = sorted(k for k, v in ABSTRACT_POSTURE.items() if v not in abstract)
     # the range must be stated BEFORE the point it contains
-    i_range = abstract.find("$+2.8$ and $+8.7$")
+    i_range = abstract.find("$+2.9$ and $+8.7$")
     i_point = abstract.find("$+5.6$ points")
     ordered = i_range != -1 and i_point != -1 and i_range < i_point
     return (found and not missing and ordered,
@@ -591,7 +591,7 @@ LETTER_HISTORICAL_MARKER = "range that stood at\nthe time at $+3.9$ to $+13.1$ p
 LETTER_CURRENT_LITERALS = [
     "$+3.5$ to $+13.1$",   # the hull, as it now stands
     "$+3.0$ to $+8.0$",    # the demoted percentile read (still quoted, labeled)
-    "$+2.8$ to $+8.7$",    # the corrected binding layer the posture is stated against
+    "$+2.9$ to $+8.7$",    # the corrected binding layer the posture is stated against
     "$+3.53$", "$+10.83$",  # the cell that widened it, and the concave ceiling
     "$+270.4$", "$-105.3$",  # the ABM null's sign disagreement
     "68.8\\%", "35.8\\%",   # the censoring shares, central and null legs
@@ -4349,7 +4349,7 @@ def main() -> int:
              and abs(fu_pb["adjusted_floor_pct"] - 5.507748455937158) < 1e-9
              and abs(fu_pb["imputed_weight_share"] - 0.8398743947117693) < 1e-9)
     fu_tex_ok = (tex.count("$+3.0$ to $+8.0$") >= 2
-                 and tex.count("$+2.8$ to $+8.7$") >= 4
+                 and tex.count("$+2.9$ to $+8.7$") >= 4
                  and "floor\\_uncertainty" in tex
                  and "floor\\_inference\\_correction" in tex
                  and "open below $+4.3$" in tex
