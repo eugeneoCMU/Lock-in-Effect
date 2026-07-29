@@ -687,6 +687,48 @@ def verdict_audit_check(tex: str) -> tuple[bool, dict]:
     return (not missing), {"missing": missing}
 
 
+CONVOLVED_LINE_SPANS = {
+    # ROUND-28 C2 (gate #105): the convolved sampling line is a labeled second
+    # line, never a replacement. What the gate protects is the LABELING: the
+    # pair without the independence caveat overstates what was measured; the
+    # caveat without the comonotone bound understates how wrong independence
+    # could be; and the lower-bound inheritance is what stops the line being
+    # read as calibrated coverage.
+    "run_tag": "\\texttt{layer\\_convolution}",
+    "pair": "$[+2.80, +8.99]$",
+    "independence_caveat": "independence is assumed, not measured",
+    "comonotone_bound": "under maximal positive dependence the width is $8.12$pp",
+    "one_number_reading": "the interval a reader who wants one number for "
+                          "sampling error should use",
+    "non_substitution": "an assumption rather than a measurement",
+    "lower_bound_inheritance": "makes the convolved line a lower bound as well",
+}
+
+
+def convolved_line_check(tex: str) -> tuple[bool, dict]:
+    """Gate #105's rule, as a function so a battery can exercise it."""
+    tex_nc = re.sub(r"(?<!\\)%.*", "", tex)
+    missing = sorted(k for k, v in CONVOLVED_LINE_SPANS.items()
+                     if v not in tex_nc)
+    info: dict = {"missing": missing}
+    art = ROOT / "hazard" / "data" / "layer_convolution_results.json"
+    if not art.exists():
+        return False, {**info, "artifact": "MISSING"}
+    lc = json.loads(art.read_text())
+    prim = lc.get("convolved_primary", {})
+    ci = prim.get("ci95_pp", [None, None])
+    art_ok = (
+        lc.get("status") == "OK"
+        and lc.get("parity_gates_all_pass") is True
+        and ci[0] is not None
+        and f"[{ci[0]:+.2f}, {ci[1]:+.2f}]" == "[+2.80, +8.99]"
+        and prim.get("width_pp", 0) > 5.822976726802727
+        and lc.get("floor_invariance_probe", {}).get("within_tolerance") is True
+    )
+    info["artifact_ok"] = art_ok
+    return (not missing) and art_ok, info
+
+
 def buyback_bracket_check(tex: str) -> tuple[bool, dict]:
     """Gate #103's rule, as a function so a battery can exercise it."""
     tex_nc = re.sub(r"(?<!\\)%.*", "", tex)
@@ -4672,6 +4714,13 @@ def main() -> int:
 
     bb_ok, _bb = buyback_bracket_check(tex)
     failures += 0 if bb_ok else 1
+    cl_ok, _cl = convolved_line_check(tex)
+    failures += 0 if cl_ok else 1
+    print(f"[{'PASS' if cl_ok else 'FAIL'}] convolved sampling line (gate #105): "
+          f"{len(CONVOLVED_LINE_SPANS) - len(_cl['missing'])}/"
+          f"{len(CONVOLVED_LINE_SPANS)} spans present, "
+          f"artifact_ok={_cl.get('artifact_ok')}, "
+          f"missing={_cl['missing'] or 'none'}")
     print(f"[{'PASS' if bb_ok else 'FAIL'}] buyback incidence bracket (gate #103): "
           f"{len(BUYBACK_BRACKET_SPANS) - len(_bb['missing'])}/"
           f"{len(BUYBACK_BRACKET_SPANS)} spans present, "

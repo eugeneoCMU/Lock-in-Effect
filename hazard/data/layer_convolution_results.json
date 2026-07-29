@@ -1,0 +1,461 @@
+{
+  "mode": "layer_convolution",
+  "status": "OK",
+  "spec": "The floor-read layer and the loan-sample layer summed as INDEPENDENT draws on the marginal (pp) scale and reported as a labeled second line, never as a replacement. Floor layer: a confidence distribution built from C1's 9,999 Webb wild-t draws, R_b = R_smm - t*_b*se_cr1_smm on the SMM scale, converted by CPR = 100(1-(1-SMM)^12) and mapped through the committed floor_sweep PCHIP at band 6.5 under C1's grid-edge truncation convention (flagged and counted, never extrapolated). Loan layer: deviations of the 200 committed stratum-cluster marginal_pp replicates from the COMMITTED POINT +5.5715581829pp, a centering fixed ex ante (the replicate median 5.6407 / mean 5.6830 would smuggle a +0.07/+0.11pp recentering into the headline layer). Convolved by exact enumeration of the full 9,999 x 200 outer sum. Secondary line: the same construction on the 1,000 percentile floor replicates regenerated under the committed rng-42 cluster bootstrap, with BOTH truncation conventions' counts disclosed. Independence is an ASSUMPTION, not a measurement, and is the lower bound of a dependence bracket whose upper bound is the comonotone sum; one summand (the loan/stratum interval) is itself a lower bound, so the convolved line is a lower bound too. Gates P0-P4 as in the header; verdict rule: the convolved width must exceed the floor-read width. NO ENGINE RUNS, NO REFIT, NO RESIMULATION; pure post-processing plus the single committed FRED MORTGAGE30US fetch inherited from mdr.build_panel.",
+  "spec_source": "specs/SPEC_round28_C1_C2_C3_C6.md SPEC C2, with the trailing C2 AMENDMENTS block A1-A6 (PRE-RUN, 2026-07-29) APPLIED and overriding the base spec wherever they conflict",
+  "amendments_applied": {
+    "A1": "P2 re-anchored to C1's REALIZED Webb interval [2.8549950653913494, 8.677971792194077] (width 5.822976726802727), not C2.3's pre-C1 predicted [2.796, 8.723] (width 5.9268); R_smm, se_cr1_smm and the t* CSV pinned and asserted against the C1 artifact.",
+    "A2": "expectation restated at realized widths: w2/w1 = 0.3939, RSS +7.5%, predicted [+2.67, +8.93]pp width 6.26pp, comonotone bound 8.117pp; VERDICT RULE unchanged (the convolved width must exceed 5.822976726802727pp).",
+    "A3": "the P4 band-end anchors are the committed band-6.5 cells of oos_identification_results.json .instrument1_marginal_table, already pinned into bootstrap_pathb_cluster.ANCHORS_BY_FLOOR.",
+    "A4": "landing literals re-anchored to the post-C1 printed pair; the C2.4 draft sentences are re-anchored to current text at apply time with count-asserted replacements.",
+    "A5": "the 1,000 percentile floor draws were NOT persisted by C1, so C2.0's standalone fallback is executed as STEP 0 here and gated bit-exactly (P0).",
+    "A6": "the interaction probe RUNS (not declined); this script consumes its floor-tagged artifacts and marks P4 PENDING if they have not landed yet."
+  },
+  "spec_deviations": [
+    "P2 is split into P2a (quantile route, tol 1e-12) and P2b (per-draw route, tol 1e-6 pp plus a tolerance-free shared order-statistic bracket assertion). SPEC C2.2 claims the per-draw percentiles reproduce C1 'exactly'; they cannot, because np.percentile interpolates linearly between order statistics and the floor->marginal map is curved, so interpolate-then-map (C1) and map-then-interpolate (this line) differ by ~(1/2)|g''|w(1-w)h^2 = O(1e-7)pp at B=9,999. A 1e-9 gate would fail on an interpolation artifact and land nothing. The realized residual and the bracket width are both reported so the loosened tolerance is auditable.",
+    "P3's 'loan deviations set to zero' is read as the degenerate one-point loan layer {0} (the outer sum is the retained set itself). Replicating each retained value 200x changes the percentile interpolation index and is a different number; that variant is reported as a diagnostic, not as the gate.",
+    "P4 is NOT blocking in either direction \u2014 it routes the landing, per C2.5's own text. A probe results JSON that disagrees with its own draws CSV row count IS blocking (data integrity, distinct from the tolerance question). A missing probe artifact marks P4 PENDING and excludes it from parity_gates_all_pass.",
+    "P0 is added to the C2.6 schema (the schema names P1..P4 only) because amendment A5 makes the percentile regeneration a gated step of THIS run rather than an inherited C1 by-product.",
+    "The committed loan sd's ddof is undocumented, so both are computed and the matching one is adopted and recorded (sd_ddof_matched); it is the ddof used for every sd reported here.",
+    "dependence_bracket.comonotone_width_pp is RECOMPUTED from the realized layer widths rather than taking A2's 8.117 arithmetic as an input.",
+    "$B companions to every pp quantity are computed on the same construction (floor layer through the PCHIP's marginal_b; loan deviations centred on the committed $42.60839388108866B anchor delta) because C2.6's schema asks for convolved_primary.ci95_b."
+  ],
+  "parity_gates": {
+    "P0_percentile_regeneration": {
+      "source": "fu.cluster_bootstrap_cpr(fu._select(panel, 201801, 201812, -0.0025, 12)) with committed defaults n_reps=1000, fresh np.random.default_rng(42)",
+      "n_reps": 1000,
+      "want_n_reps": 1000,
+      "seed": 42,
+      "n_clusters": 31,
+      "want_n_clusters": 31,
+      "n_cohort_months": 137,
+      "want_n_cohort_months": 137,
+      "point_cpr_pct": 4.990624060575566,
+      "want_point_cpr_pct": 4.990624060575566,
+      "got_se_pp": 0.3933971547430653,
+      "want_se_pp": 0.3933971547430653,
+      "got_ci95_pct": [
+        4.368576777908708,
+        6.003552252675821
+      ],
+      "want_ci95_pct": [
+        4.368576777908708,
+        6.003552252675821
+      ],
+      "tol": 1e-09,
+      "pass": true
+    },
+    "P1_loan_draws": {
+      "csv": "/Users/eugene/somthing/Lock In effect/Lock-in-Effect/.claude/worktrees/paper-v18-review-plan-5b7b5e/hazard/data/bootstrap_pathb_cluster_draws.csv",
+      "field": "marginal_pp",
+      "n_rows": 200,
+      "want_n_rows": 200,
+      "got_ci95_pp": [
+        4.630919609903703,
+        6.924433300615744
+      ],
+      "want_ci95_pp": [
+        4.630919609903703,
+        6.924433300615744
+      ],
+      "want_sd_pp": 0.6044572173024999,
+      "sd_ddof0": 0.6029441805933085,
+      "sd_ddof1": 0.6044572173024999,
+      "sd_ddof_matched": 1,
+      "sd_ddof_note": "the committed sd's ddof is undocumented; BOTH were computed and the matching one is adopted for every sd this script reports",
+      "got_width_pp": 2.2935136907120413,
+      "want_width_pp": 2.2935136907120413,
+      "tol": 1e-09,
+      "pass": true
+    },
+    "P2_floor_layer_vs_C1_webb": {
+      "target_pp": [
+        2.8549950653913494,
+        8.677971792194077
+      ],
+      "target_source": "A1 / C1 artifact reads.R2_2018_gap<=-0.0025_age>=12.wild_t_webb.marginal_ci95_pp",
+      "P2a_quantile_route": {
+        "got_pp": [
+          2.8549950653913494,
+          8.677971792194077
+        ],
+        "abs_diff_pp": [
+          0.0,
+          0.0
+        ],
+        "tol": 1e-12,
+        "pass": true,
+        "t_star_q_from_csv": [
+          -2.3247847481083914,
+          2.318667436396434
+        ],
+        "t_star_q_committed": [
+          -2.3247847481083914,
+          2.318667436396434
+        ],
+        "t_star_q_abs_diff": [
+          0.0,
+          0.0
+        ],
+        "note": "percentile(t*,[2.5,97.5]) -> SMM -> CPR% -> PCHIP; this is C1's own arithmetic and must agree to machine precision. The CSV's own t* quantiles are asserted against the committed .wild_t_webb.t_star_q, which is what proves the CSV is C1's draw set and not a re-draw."
+      },
+      "P2b_per_draw_route": {
+        "got_pp": [
+          2.8549950713745713,
+          8.677971787845557
+        ],
+        "abs_diff_pp": [
+          5.983221917915671e-09,
+          4.348519766494974e-09
+        ],
+        "tol_pp": 1e-06,
+        "order_stat_brackets": {
+          "p2.5": {
+            "k": 249,
+            "M_k_pp": 2.853651823483708,
+            "M_k_plus_1_pp": 2.855065768631985,
+            "bracket_width_pp": 0.0014139451482768628,
+            "per_draw_percentile_pp": 2.8549950713745713,
+            "c1_value_pp": 2.8549950653913494,
+            "both_inside_same_bracket": true
+          },
+          "p97.5": {
+            "k": 9748,
+            "M_k_pp": 8.677930280189365,
+            "M_k_plus_1_pp": 8.67876043331322,
+            "bracket_width_pp": 0.0008301531238554816,
+            "per_draw_percentile_pp": 8.677971787845557,
+            "c1_value_pp": 8.677971792194077,
+            "both_inside_same_bracket": true
+          }
+        },
+        "both_values_in_same_order_stat_bracket": true,
+        "pass": true,
+        "note": "np.percentile interpolates linearly between order statistics, so mapping-then-interpolating differs from C1's interpolating-then-mapping by ~(1/2)|g''|w(1-w)h^2, O(1e-7)pp at the realized tail gap. SPEC C2.2's 'exactly' is unattainable; the tolerance-free statement is the shared order-statistic bracket, which is asserted."
+      },
+      "pass": true
+    },
+    "P3_percentile_secondary_zero_deviation": {
+      "convention": "EXCLUSION (the convention the committed number was computed under); the secondary CONVOLUTION uses edge truncation, this gate does not",
+      "zero_deviation_reading": "degenerate one-point loan layer {0}: the outer sum is the retained set itself",
+      "got_pp": [
+        2.974329560125351,
+        8.01850965353176
+      ],
+      "want_pp": [
+        2.974329560125351,
+        8.01850965353176
+      ],
+      "abs_diff_pp": [
+        0.0,
+        0.0
+      ],
+      "tol": 1e-09,
+      "cross_check_vs_fu_map_draws_pp": [
+        2.974329560125351,
+        8.01850965353176
+      ],
+      "cross_check_abs_diff": [
+        0.0,
+        0.0
+      ],
+      "cross_check_tol": 1e-12,
+      "n_draws_outside_grid": 26,
+      "want_n_draws_outside_grid": 26,
+      "replicated_outer_variant_pp": [
+        2.9735414926268273,
+        8.020412802641962
+      ],
+      "replicated_outer_variant_note": "replicating each retained value 200x and taking percentiles of the 194,800-value array lands the interpolation index inside a repeated block and is a DIFFERENT number; diagnostic only",
+      "pass": true
+    },
+    "P4_floor_invariance_probe": {
+      "status": "RUN",
+      "reps": 60,
+      "floors": [
+        4.695,
+        5.334
+      ],
+      "ref_floor_pct": 4.991,
+      "ref_width_5_95_pp": 1.8592072274174134,
+      "percentiles": [
+        5.0,
+        95.0
+      ],
+      "tol_rel": 0.25,
+      "cells": {
+        "4.695": {
+          "status": "RUN",
+          "results_json": "/Users/eugene/somthing/Lock In effect/Lock-in-Effect/.claude/worktrees/paper-v18-review-plan-5b7b5e/hazard/data/bootstrap_pathb_cluster_results_floor4.695.json",
+          "draws_csv": "/Users/eugene/somthing/Lock In effect/Lock-in-Effect/.claude/worktrees/paper-v18-review-plan-5b7b5e/hazard/data/bootstrap_pathb_cluster_draws_floor4.695.csv",
+          "n_reps_declared": 60,
+          "n_draws_csv_rows": 60,
+          "draws_consistent_with_results": true,
+          "want_n_reps": 60,
+          "parity_gates_all_pass": true,
+          "width_5_95_pp": 2.0546452738356553,
+          "ratio_vs_ref": 1.1051190225253809,
+          "abs_rel_dev": 0.10511902252538086,
+          "within_tolerance": true
+        },
+        "5.334": {
+          "status": "RUN",
+          "results_json": "/Users/eugene/somthing/Lock In effect/Lock-in-Effect/.claude/worktrees/paper-v18-review-plan-5b7b5e/hazard/data/bootstrap_pathb_cluster_results_floor5.334.json",
+          "draws_csv": "/Users/eugene/somthing/Lock In effect/Lock-in-Effect/.claude/worktrees/paper-v18-review-plan-5b7b5e/hazard/data/bootstrap_pathb_cluster_draws_floor5.334.csv",
+          "n_reps_declared": 60,
+          "n_draws_csv_rows": 60,
+          "draws_consistent_with_results": true,
+          "want_n_reps": 60,
+          "parity_gates_all_pass": true,
+          "width_5_95_pp": 2.0798188771368036,
+          "ratio_vs_ref": 1.1186589888776612,
+          "abs_rel_dev": 0.11865898887766124,
+          "within_tolerance": true
+        }
+      },
+      "widths_pp": {
+        "4.695": 2.0546452738356553,
+        "5.334": 2.0798188771368036
+      },
+      "within_tolerance": true,
+      "excluded_from_parity_gates_all_pass": false,
+      "note": "NOT blocking in either direction \u2014 it ROUTES the landing (C2.5): inside tolerance the additive convolution stands as specified; outside, the convolved line is reported ONLY at 4.991% with the floor dependence disclosed and the RSS is not claimed across the floor range.",
+      "pass": true
+    }
+  },
+  "parity_gates_all_pass": true,
+  "inputs": {
+    "floor_tstar_csv": "/Users/eugene/somthing/Lock In effect/Lock-in-Effect/.claude/worktrees/paper-v18-review-plan-5b7b5e/hazard/data/floor_inference_v2_tstar_R2_webb.csv",
+    "floor_tstar_source": "floor_inference_correction_v2_results.json reads.R2_2018_gap<=-0.0025_age>=12.wild_t_webb (Webb six-point, B=9999, default_rng(42))",
+    "floor_percentile_source": "REGENERATED in this run (amendment A5): fu.cluster_bootstrap_cpr on the R2 selection, n_reps=1000, fresh np.random.default_rng(42); gated on P0. C1 persisted only the t* CSVs.",
+    "loan_draws_csv": "/Users/eugene/somthing/Lock In effect/Lock-in-Effect/.claude/worktrees/paper-v18-review-plan-5b7b5e/hazard/data/bootstrap_pathb_cluster_draws.csv",
+    "loan_draws_field": "marginal_pp (and marginal_b for the $B line)",
+    "n_floor_reps": 9999,
+    "n_floor_reps_percentile": 1000,
+    "n_loan_reps": 200,
+    "centering_convention": "the COMMITTED POINT marginal at this floor, fixed ex ante \u2014 NOT the replicate median or mean",
+    "center_pp": 5.5715581829,
+    "center_b": 42.60839388108866,
+    "center_pp_unrounded_reference": 5.571558182909726,
+    "loan_replicate_median_pp_not_used": 5.640716853146607,
+    "loan_replicate_mean_pp_not_used": 5.682988123686434,
+    "R_smm": 0.004257129719866917,
+    "se_cr1_smm": 0.0003053670536820312,
+    "pchip_grid_pct": [
+      2.0,
+      3.0,
+      3.5000000000000004,
+      4.0,
+      4.5,
+      5.0,
+      6.0
+    ],
+    "sd_ddof": 1
+  },
+  "layers": {
+    "floor_wild_t": {
+      "ci95_pp": [
+        2.8549950713745713,
+        8.677971787845557
+      ],
+      "ci95_b": [
+        21.83352493793118,
+        66.36463766270757
+      ],
+      "width_pp": 5.822976716470986,
+      "c1_ci95_pp": [
+        2.8549950653913494,
+        8.677971792194077
+      ],
+      "c1_width_pp": 5.822976726802727,
+      "median_pp": 5.58459144778724,
+      "sd_pp": 1.4632648444660474,
+      "n_reps": 9999,
+      "n_truncated_at_edge": 70,
+      "n_truncated_above_grid_hi": 70,
+      "n_truncated_below_grid_lo": 0,
+      "truncation_convention": "edge truncation: min(max(floor, 2.0), 6.0), flagged and counted (C1/v1 convention; extrapolation refused)",
+      "floor_pct_min": 3.664096300786679,
+      "floor_pct_max": 6.30136283250885
+    },
+    "floor_percentile": {
+      "ci95_pp_edge_truncation": [
+        2.280914554561832,
+        8.014703355311358
+      ],
+      "ci95_pp_exclusion": [
+        2.974329560125351,
+        8.01850965353176
+      ],
+      "width_pp_edge_truncation": 5.733788800749526,
+      "width_pp_exclusion": 5.044180093406409,
+      "n_reps": 1000,
+      "n_truncated_at_edge": 26,
+      "n_truncated_above_grid_hi": 26,
+      "n_truncated_below_grid_lo": 0,
+      "n_draws_outside_grid_excluded": 26,
+      "n_retained_under_exclusion": 974,
+      "committed_exclusion_ci95_pp": [
+        2.974329560125351,
+        8.01850965353176
+      ],
+      "disclosure": "26 of 1000 percentile draws fall outside the committed grid, all ABOVE the 6.0% floor edge, i.e. all on the LOW-marginal side \u2014 the side the lower edge is read from. The committed interval dropped them; this line clips them to the edge instead. Both counts are reported."
+    },
+    "loan_cluster": {
+      "ci95_pp": [
+        4.630919609903703,
+        6.924433300615744
+      ],
+      "width_pp": 2.2935136907120413,
+      "sd_pp": 0.6044572173024999,
+      "median_pp": 5.640716853146607,
+      "n_reps": 200,
+      "effective_clusters": 25.77710660741266,
+      "deviation_min_pp": -1.3686089369772327,
+      "deviation_max_pp": 2.6714931830775788,
+      "is_itself_a_lower_bound": true,
+      "lower_bound_note": "no wild-cluster correction is run for the loan/stratum scheme; tab:uncertainty's tablenote already calls its interval better read as a lower bound on sampling uncertainty than as calibrated 95% coverage. A sum with a lower-bound summand is a lower bound."
+    }
+  },
+  "convolved_primary": {
+    "ci95_pp": [
+      2.7959402736169983,
+      8.992166408790572
+    ],
+    "ci95_b": [
+      21.3819044035614,
+      68.76743553802969
+    ],
+    "width_pp": 6.196226135173574,
+    "width_b": 47.38553113446829,
+    "median_pp": 5.70947650104276,
+    "sd_pp": 1.5825526236144998,
+    "width_ratio_vs_floor_read": 1.064099416137593,
+    "width_ratio_vs_realized_floor_layer": 1.0640994180256307,
+    "n_pairs": 1999800,
+    "construction": "exact enumeration of the full outer sum {M_b + d_j}, not a Monte-Carlo sub-sample"
+  },
+  "convolved_percentile_secondary": {
+    "ci95_pp": [
+      2.444937713021133,
+      8.396159046578694
+    ],
+    "ci95_b": [
+      18.697618452637588,
+      64.20947964643578
+    ],
+    "width_pp": 5.9512213335575606,
+    "median_pp": 5.559244103766112,
+    "sd_pp": 1.4990884998702292,
+    "n_pairs": 200000,
+    "floor_convention_used": "edge truncation",
+    "ci95_pp_exclusion_variant": [
+      2.838458879253658,
+      8.411590130541052
+    ],
+    "companion_to": "the committed percentile layer [+3.0, +8.0]"
+  },
+  "dependence_bracket": {
+    "independent_width_pp": 6.196226135173574,
+    "comonotone_width_pp": 8.116490407183028,
+    "comonotone_components_pp": {
+      "floor_layer": 5.822976716470986,
+      "loan_layer": 2.2935136907120413
+    },
+    "recomputed_in_script": true,
+    "independence_is_assumed_not_measured": true,
+    "note": "the two layers sit on disjoint data and disjoint time and nothing in any committed artifact links a 2018 cohort-month cluster ratio to a window-period composition resample; independence is the LOWER bound of the bracket and the comonotone sum is the upper bound"
+  },
+  "expectation_check": {
+    "predicted_ci95_pp": [
+      2.67,
+      8.93
+    ],
+    "predicted_width_pp": 6.26,
+    "predicted_rss_width_ratio": 1.0748,
+    "realized_ci95_pp": [
+      2.7959402736169983,
+      8.992166408790572
+    ],
+    "realized_width_pp": 6.196226135173574,
+    "abs_err_pp": 0.06377386482642589,
+    "abs_err_endpoints_pp": [
+      0.12594027361699833,
+      0.06216640879057245
+    ],
+    "rss_prediction_recomputed_pp": [
+      2.6967510478195913,
+      8.959784351432031
+    ],
+    "rss_prediction_recomputed_width_pp": 6.263033303612438,
+    "rss_half_widths_pp": {
+      "lower": 2.8748071350804083,
+      "upper": 3.3882261685320305
+    },
+    "realized_width_ratio": 1.0640994180256307,
+    "source": "amendment A2"
+  },
+  "floor_invariance_probe": {
+    "status": "RUN",
+    "reps": 60,
+    "floors": [
+      4.695,
+      5.334
+    ],
+    "ref_floor_pct": 4.991,
+    "ref_width_5_95_pp": 1.8592072274174134,
+    "percentiles": [
+      5.0,
+      95.0
+    ],
+    "tol_rel": 0.25,
+    "cells": {
+      "4.695": {
+        "status": "RUN",
+        "results_json": "/Users/eugene/somthing/Lock In effect/Lock-in-Effect/.claude/worktrees/paper-v18-review-plan-5b7b5e/hazard/data/bootstrap_pathb_cluster_results_floor4.695.json",
+        "draws_csv": "/Users/eugene/somthing/Lock In effect/Lock-in-Effect/.claude/worktrees/paper-v18-review-plan-5b7b5e/hazard/data/bootstrap_pathb_cluster_draws_floor4.695.csv",
+        "n_reps_declared": 60,
+        "n_draws_csv_rows": 60,
+        "draws_consistent_with_results": true,
+        "want_n_reps": 60,
+        "parity_gates_all_pass": true,
+        "width_5_95_pp": 2.0546452738356553,
+        "ratio_vs_ref": 1.1051190225253809,
+        "abs_rel_dev": 0.10511902252538086,
+        "within_tolerance": true
+      },
+      "5.334": {
+        "status": "RUN",
+        "results_json": "/Users/eugene/somthing/Lock In effect/Lock-in-Effect/.claude/worktrees/paper-v18-review-plan-5b7b5e/hazard/data/bootstrap_pathb_cluster_results_floor5.334.json",
+        "draws_csv": "/Users/eugene/somthing/Lock In effect/Lock-in-Effect/.claude/worktrees/paper-v18-review-plan-5b7b5e/hazard/data/bootstrap_pathb_cluster_draws_floor5.334.csv",
+        "n_reps_declared": 60,
+        "n_draws_csv_rows": 60,
+        "draws_consistent_with_results": true,
+        "want_n_reps": 60,
+        "parity_gates_all_pass": true,
+        "width_5_95_pp": 2.0798188771368036,
+        "ratio_vs_ref": 1.1186589888776612,
+        "abs_rel_dev": 0.11865898887766124,
+        "within_tolerance": true
+      }
+    },
+    "widths_pp": {
+      "4.695": 2.0546452738356553,
+      "5.334": 2.0798188771368036
+    },
+    "within_tolerance": true,
+    "excluded_from_parity_gates_all_pass": false,
+    "note": "NOT blocking in either direction \u2014 it ROUTES the landing (C2.5): inside tolerance the additive convolution stands as specified; outside, the convolved line is reported ONLY at 4.991% with the floor dependence disclosed and the RSS is not claimed across the floor range.",
+    "pass": true
+  },
+  "verdict": {
+    "wider_than_committed": true,
+    "convolved_width_pp": 6.196226135173574,
+    "floor_read_width_pp": 5.822976726802727,
+    "width_excess_pp": 0.37324940837084686,
+    "p4_probe_pending": false,
+    "p4_within_tolerance": true,
+    "manuscript_action": "LABELED SECOND LINE, NOT A REPLACEMENT (PLAN Decision record item 4). (1) tab:uncertainty tex 357, headline row 'Sampling 95% CI': append the convolved pair [+2.80, +8.99]pp naming run layer_convolution, stating that independence is ASSUMED and not measured, and quoting the comonotone width 8.12pp as the bound under maximal positive dependence. DO NOT disturb the bracket-form binding-layer literal, $[+4.63, +6.92]$ (liveness_gates.py:4175) or 25.8 (:4177), and confirm :4167's width_ratio_vs_floor_read < 0.5 is unaffected (it is against the PERCENTILE width). (2) tex 301: append the side-by-side sentence giving $+2.8$ to $+9.0$ points as the one number a reader who wants one number should use, with the reason it does not replace the floor read. (3) tex 364 tablenote: one clause recording that the loan/stratum input is itself a lower bound, so the convolved line is a lower bound too. NOT LANDING: abstract tex 30, tab:headline tex 76, tab:crosswalk tex 677, conclusion tex 605/611. [posture-adjacent: the tex 301 sentence re-ranks the uncertainty layers \u2014 Eugene sees the draft before it lands.] Per A4 re-anchor every literal to the current printed pair and re-derive the census with count-asserted replacements. P4 inside tolerance: the additive convolution stands as specified across the band ends."
+  },
+  "runtime_s": 0.6
+}
