@@ -112,6 +112,7 @@ Run:  cd hazard && python3 bootstrap_pathb_cluster.py [--reps 200] [--floor 4.99
 from __future__ import annotations
 
 import argparse
+import os
 import json
 import time
 from pathlib import Path
@@ -136,10 +137,15 @@ NULL_PQ = 0.0
 PRODUCTION_FLOOR = 0.04
 DEFAULT_FLOOR_PCT = 4.991
 
-# committed anchors (oos_identification_results.json, band 6.5 at floor 4.991)
-COMMITTED_CENTRAL_B = 767.5264524465003
-COMMITTED_NULL_B = 724.9180585654117
-COMMITTED_MARGINAL_PP = 5.5715581829
+# committed anchors by floor (ROUND-28 C4 patch, specs/SPEC_round28_B2_C4_C5.md
+# C4.2): 4.991 from oos_identification_results.json band 6.5; 4.0 from
+# no_lockin_null_results.json.
+ANCHORS_BY_FLOOR = {
+    4.991: (767.5264524465003, 724.9180585654117, 5.5715581829),
+    4.0: (818.5300844066606, 748.1850239867648, 9.198459770709789),
+}
+COMMITTED_CENTRAL_B, COMMITTED_NULL_B, COMMITTED_MARGINAL_PP = \
+    ANCHORS_BY_FLOOR[DEFAULT_FLOOR_PCT]
 TOL_PARITY = 1e-9
 
 # floor_uncertainty_results.json part_a_sampling_uncertainty.mf4_binding_uncertainty
@@ -203,6 +209,26 @@ def main() -> None:
                     help="involuntary floor, annual CPR percent")
     args = ap.parse_args()
     floor = args.floor / 100.0
+    # ROUND-28 C4 patch: floor-tagged outputs at non-default floors; the
+    # committed off-window artifact (gate #84) is overwrite-guarded; anchors
+    # are floor-conditional.
+    global RESULTS_JSON, DRAWS_CSV, COMMITTED_CENTRAL_B, COMMITTED_NULL_B, \
+        COMMITTED_MARGINAL_PP
+    if abs(args.floor - DEFAULT_FLOOR_PCT) > 1e-12:
+        tag = f"_floor{args.floor:g}"
+        RESULTS_JSON = DATA_DIR / f"bootstrap_pathb_cluster_results{tag}.json"
+        DRAWS_CSV = DATA_DIR / f"bootstrap_pathb_cluster_draws{tag}.csv"
+        if DRAWS_CSV.exists():
+            DRAWS_CSV.unlink()
+    elif not os.environ.get("ALLOW_DEFAULT_FLOOR_OVERWRITE"):
+        raise SystemExit(
+            "refusing to overwrite the committed off-window artifact "
+            "(gate #84); set ALLOW_DEFAULT_FLOOR_OVERWRITE=1 to force")
+    try:
+        COMMITTED_CENTRAL_B, COMMITTED_NULL_B, COMMITTED_MARGINAL_PP = \
+            ANCHORS_BY_FLOOR[round(args.floor, 6)]
+    except KeyError:
+        raise SystemExit(f"no committed anchors for floor {args.floor}%")
 
     print("Fetching shared macro frame + empirical benchmark …")
     macro = fetch_data()
@@ -276,7 +302,16 @@ def main() -> None:
     marg = pcts("marginal_pp")
     width = marg["p97_5"] - marg["p2_5"]
     fw = FLOOR_READ_CI_PP[1] - FLOOR_READ_CI_PP[0]
-    verdict = classify(width)
+    raw_tier = classify(width)
+    if abs(args.floor - DEFAULT_FLOOR_PCT) > 1e-12:
+        # T-tiers partition against the OFF-WINDOW floor-read interval and are
+        # non-operative at other floors (ROUND-28 C4 patch): reference only;
+        # operative comparisons are the same-floor within-stratum width and
+        # the in-sample calibration box (11.1pp).
+        verdict = {"verdict_offwindow_reference_only": raw_tier,
+                   "vs_calibration_box_width_pp": width / 11.1}
+    else:
+        verdict = raw_tier
     r2_inside = bool(marg["p2_5"] <= COMMITTED_MARGINAL_PP <= marg["p97_5"])
 
     payload = {
@@ -308,6 +343,7 @@ def main() -> None:
             "floor_read_width_pp": fw,
             "width_ratio_vs_floor_read": width / fw,
             "within_stratum_width_pp_at_4pct": WITHIN_STRATUM_WIDTH_PP,
+            "within_stratum_same_floor": abs(args.floor - 4.0) < 1e-9,
             "R1_width_ratio_vs_within_stratum": width / WITHIN_STRATUM_WIDTH_PP,
             "R2_committed_point_inside": r2_inside,
             "committed_point_marginal_pp": COMMITTED_MARGINAL_PP,
