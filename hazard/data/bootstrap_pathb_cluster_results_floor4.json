@@ -1,0 +1,79 @@
+{
+ "mode": "bootstrap_pathb_cluster",
+ "spec": "stratum-CLUSTER resample with replacement (130 strata drawn with replacement, every loan of each drawn stratum taken; total loan count varies by construction); resample rng seed = replicate index; engine seed 42 fixed; US regime only; central (p_q 6.5) + null (p_q 0) per replicate; raw-basis scoring; percentile intervals",
+ "floor_annual_cpr_pct": 4.0,
+ "n_reps": 200,
+ "cluster_structure": {
+  "n_clusters": 130,
+  "effective_n_clusters": 25.77710660741266,
+  "largest_cluster_balance_share": 0.09769928846876974,
+  "top5_balance_share": 0.3530439449533174
+ },
+ "parity_gates": {
+  "G1_central_b": {
+   "got": 818.5300844066606,
+   "want": 818.5300844066606,
+   "pass": true
+  },
+  "G1_null_b": {
+   "got": 748.1850239867648,
+   "want": 748.1850239867648,
+   "pass": true
+  }
+ },
+ "parity_gates_all_pass": true,
+ "central_share_pct": {
+  "p2_5": 104.21393475231271,
+  "median": 106.93160488764119,
+  "p97_5": 108.44319058661225,
+  "mean": 106.80578039549462,
+  "sd": 1.0181551137090872
+ },
+ "null_share_pct": {
+  "p2_5": 94.4761853768622,
+  "median": 97.60927693526557,
+  "p97_5": 99.94706504061297,
+  "mean": 97.56089882368255,
+  "sd": 1.376700084632096
+ },
+ "marginal_pp": {
+  "p2_5": 8.273242000825274,
+  "median": 9.273487009843635,
+  "p97_5": 10.19169399330386,
+  "mean": 9.244881571812066,
+  "sd": 0.5151143061113934
+ },
+ "marginal_b": {
+  "p2_5": 63.269473686198026,
+  "median": 70.91882992061323,
+  "p97_5": 77.94080178759413,
+  "mean": 70.70007033294009,
+  "sd": 3.939327658087117
+ },
+ "n_loans": {
+  "p2_5": 54134.325,
+  "median": 75612.5,
+  "p97_5": 101403.6,
+  "mean": 74904.145,
+  "sd": 11342.547645455235
+ },
+ "comparison": {
+  "cluster_interval_width_pp": 1.9184519924785857,
+  "floor_read_interval_pp": [
+   2.974329560125351,
+   8.01850965353176
+  ],
+  "floor_read_width_pp": 5.044180093406409,
+  "width_ratio_vs_floor_read": 0.3803297973017111,
+  "within_stratum_width_pp_at_4pct": 0.0622000000000007,
+  "within_stratum_same_floor": true,
+  "R1_width_ratio_vs_within_stratum": 30.843279621841866,
+  "R2_committed_point_inside": true,
+  "committed_point_marginal_pp": 9.198459770709789
+ },
+ "verdict": {
+  "verdict_offwindow_reference_only": "T1",
+  "vs_calibration_box_width_pp": 0.17283351283590861
+ },
+ "runtime_s": 2579.1748483329998
+}
