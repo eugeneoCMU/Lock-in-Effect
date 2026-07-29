@@ -65,7 +65,8 @@ def build_cohort_inventory(panel: pl.DataFrame) -> pd.DataFrame:
 
 
 def _reweight_balances_to_soma(balances: dict, coupons: dict,
-                               soma_cohorts: list) -> dict:
+                               soma_cohorts: list,
+                               coupon_convert=None) -> dict:
     """
     Full-book weighting (roadmap 3.1): rescale per-cohort balances so the
     coupon-bucket composition matches the SOMA book instead of the Freddie
@@ -87,14 +88,28 @@ def _reweight_balances_to_soma(balances: dict, coupons: dict,
     total_bal = sum(balances.values())
     if total_bal <= 0:
         return balances
+    # G2 (coupon-convention, round 28). Same basis mismatch as
+    # agents.reweight_to_soma_coupons, on the Path A cohort side: soma_share is
+    # keyed by PASS-THROUGH coupon, coupons[key] is the cohort's NOTE rate.
+    # The cohort key is (vintage, coupon, fico_bucket, ltv_bucket) — see
+    # _cohort_key above — so key[0] IS the vintage and no stratum-id parsing is
+    # needed. The converter is applied to a LOCAL value; `coupons` is never
+    # mutated, and the hazard path (predict_hazard's rate gap) reads the
+    # untouched dict.
+    def _bucket(key) -> float:
+        c = float(coupons[key])
+        if coupon_convert is not None:
+            c = float(coupon_convert(c, key[0]))
+        return round(round(c / step) * step, 4)
+
     cur_share: dict = {}
     for key, bal in balances.items():
-        b = round(round(float(coupons[key]) / step) * step, 4)
+        b = _bucket(key)
         cur_share[b] = cur_share.get(b, 0.0) + bal / total_bal
 
     out = {}
     for key, bal in balances.items():
-        b = round(round(float(coupons[key]) / step) * step, 4)
+        b = _bucket(key)
         w = (soma_share.get(b, 0.0) / cur_share[b]) if cur_share.get(b, 0) > 0 else 0.0
         out[key] = bal * w
     return out
@@ -107,6 +122,7 @@ def simulate_qt_window(
     output: Path = SIM_RESULTS_PATH,
     soma_cohorts: Optional[list] = None,
     coef_path: Path = HAZARD_COEF_PATH,
+    coupon_convert=None,
 ) -> pd.DataFrame:
     """
     Forward-walk cohort balances through QT window on actual rate path.
@@ -152,7 +168,8 @@ def simulate_qt_window(
     stratum_ids = {k: v["stratum_id"] for k, v in cohort_meta.items()}
 
     if soma_cohorts is not None:
-        balances = _reweight_balances_to_soma(balances, coupons, soma_cohorts)
+        balances = _reweight_balances_to_soma(balances, coupons, soma_cohorts,
+                                              coupon_convert=coupon_convert)
         total_balance = sum(balances.values())
 
     holdings_at_qt = float(

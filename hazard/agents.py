@@ -117,6 +117,15 @@ class MicrosimPool:
         self.property_states = pdf["property_state"].fillna("CA").astype(str).values
         self.orig_ltv = pdf["orig_ltv"].fillna(80).values.astype(np.float64)
         self.coupon = coupon_to_decimal(pdf["coupon"].values.astype(np.float64))
+        # G2 (coupon-convention, round 28): origination year, carried ONLY so
+        # that the full-book reweight can convert note rates to pass-through
+        # equivalents per vintage. Read by reweight_to_soma_coupons and by
+        # nothing else — no hazard, rate-gap, stress, or scoring path consumes
+        # it. None when the frame predates the column (Path A fixtures).
+        self.vintage = (
+            pdf["vintage"].values.astype(np.int64)
+            if "vintage" in pdf.columns else None
+        )
         self.orig_upb = pdf["orig_upb"].values.astype(np.float64)
         self.balance = pdf["balance"].values.astype(np.float64)
         self.loan_age = pdf["loan_age"].fillna(36).values.astype(np.int32)
@@ -159,7 +168,8 @@ class MicrosimPool:
     def agent(self, idx: int) -> MortgageAgent:
         return MortgageAgent(self, idx)
 
-    def reweight_to_soma_coupons(self, soma_cohorts: list) -> None:
+    def reweight_to_soma_coupons(self, soma_cohorts: list,
+                                 coupon_convert=None) -> None:
         """
         Full-book weighting: rescale per-loan balances so the pool's coupon
         composition matches the actual SOMA book (roadmap 3.1), instead of the
@@ -171,6 +181,13 @@ class MicrosimPool:
         are zeroed; SOMA buckets absent from the sample cannot be created and
         their share is renormalized away. Call BEFORE scale_to_holdings, which
         then restores the total to Fed holdings.
+
+        CONVENTIONS. soma_cohorts carry the security PASS-THROUGH coupon;
+        self.coupon is the borrower NOTE rate. `coupon_convert(coupon, vintage)
+        -> array` maps the sample side onto the pass-through basis (note rate
+        minus vintage g-fee minus base servicing). It is applied to a local
+        copy only; self.coupon is never modified. Default None reproduces the
+        historical mixed-basis matching bit-for-bit.
         """
         step = 0.005
         soma_share = {}
@@ -184,7 +201,31 @@ class MicrosimPool:
             return
         soma_share = {k: v / tot for k, v in soma_share.items()}
 
-        buckets = np.round(np.round(self.coupon / step) * step, 4)
+        # G2 (coupon-convention, round 28). SOMA's `coupon` is the security
+        # PASS-THROUGH rate, parsed from securityDescription
+        # (abm/fed_mbs_extension_risk.py:561-565); self.coupon is the borrower
+        # NOTE rate (loan_sample.parquet). Bucketing them against each other on
+        # the same 0.5% grid is a ~0.8pp basis mismatch, about 1.6 buckets. When
+        # a converter is supplied the SAMPLE side is mapped onto the
+        # pass-through basis so both sides are bucketed on one convention.
+        #
+        # The conversion is applied to a LOCAL COPY. self.coupon is never
+        # reassigned, so no hazard input can move: compute_rate_gap,
+        # rate_stress and the Danish berger_calibration branches all read
+        # self.coupon (competing_risks.py:120-168) and see the note rate
+        # unchanged. This is the design in SPEC_round28_G2 §G2.1.1 and it is
+        # what makes the marginal's invariance structural rather than restored.
+        src = self.coupon
+        if coupon_convert is not None:
+            src = np.asarray(
+                coupon_convert(self.coupon, self.vintage), dtype=np.float64
+            )
+            if src.shape != self.coupon.shape:
+                raise ValueError(
+                    "coupon_convert changed array shape "
+                    f"({self.coupon.shape} -> {src.shape})"
+                )
+        buckets = np.round(np.round(src / step) * step, 4)
         total_bal = self.balance.sum()
         if total_bal <= 0:
             return

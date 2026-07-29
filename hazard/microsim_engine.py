@@ -36,12 +36,14 @@ def _simulate_regime(
     seed: int,
     beta1: float,
     soma_cohorts: Optional[list] = None,
+    coupon_convert=None,
 ) -> pd.DataFrame:
     """Walk one regime pool through QT window."""
     qt_index = macro.index[(macro.index >= QT_START) & (macro.index < QT_END)]
     pool = MicrosimPool(loan_df, regime=regime, rng=np.random.default_rng(seed))
     if soma_cohorts is not None:
-        pool.reweight_to_soma_coupons(soma_cohorts)  # full-book weighting (3.1)
+        pool.reweight_to_soma_coupons(  # full-book weighting (3.1)
+            soma_cohorts, coupon_convert=coupon_convert)
     pool.scale_to_holdings(holdings_scale_b)
 
     records = []
@@ -89,6 +91,7 @@ def run_qt_microsim(
     output: Path = MICROSIM_RESULTS_PATH,
     p_q_shock_pct: float = ROTHSTEIN_Q_DECLINE_MID * 100,
     soma_cohorts: Optional[list] = None,
+    coupon_convert=None,
 ) -> dict[str, pd.DataFrame]:
     """
     Forward-walk loan sample through QT window under US and Danish rate-gap regimes.
@@ -120,6 +123,7 @@ def run_qt_microsim(
             seed=seed + i * 1000,
             beta1=beta1,
             soma_cohorts=soma_cohorts,
+            coupon_convert=coupon_convert,
         )
 
     # Combined output for extension-risk scoring (US primary)
