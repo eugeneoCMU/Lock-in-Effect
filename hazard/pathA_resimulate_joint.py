@@ -124,21 +124,59 @@ before ANY landing:
         whole Stage B construction is void — wiring, not finding — and the run
         aborts rather than spending 198 simulations. The v4 leg runs against
         928.892970289881 B and is recorded non-blocking (A7 mandates v3).
-  A7(3) Stage B reported under BOTH pre-committed decompositions: saturated vs
-        not (|trapped - ceiling| < 1e-6, ceiling computed from the target
-        series, never hard-coded) and production-branch vs rogue (all three
-        DRAWN macro coefficients within 0.02 of the spec's production values —
-        C6(iii)'s own branch rule), with n, trapped_b and share_pct per cell
-        and a cross-tab. The headline results block keeps the full-sample
-        numbers and gains ceiling_b, n_at_ceiling and the decompositions.
+  A7(3) Stage B reported under BOTH decompositions — a mechanical-bound cut and
+        a production-vs-rogue cut — with n, trapped_b and share_pct per cell
+        and a cross-tab, the headline results block keeping the full-sample
+        numbers. *** A7 AS DRAFTED SPECIFIED BOTH CUTS WRONG; the operative
+        definitions are A7-C1 and A7-C2 below, and the field names are
+        floor_b / n_at_floor / decompositions.{saturation,mode}. ***
   A7(4) the verdict is re-adjudicated on the pre-committed codes ON THE FULL
-        SAMPLE (no code change) and carries verdict.ceiling_disclosure
-        (mandatory) and verdict.production_branch_only (a labeled
-        sub-population, never the quoted interval). The provisional NARROWS is
-        NOT accepted as adjudicated.
+        SAMPLE (no code change) and carries verdict.floor_disclosure
+        (mandatory) and verdict.production_mode_only (a labeled sub-population,
+        never the quoted interval). The provisional NARROWS is NOT accepted as
+        adjudicated.
+
+A7 CORRECTIONS (labeled, POST-RERUN, 2026-07-29). The A7 rerun validated the
+point-head parity leg at |Δ| = $0.0000B for BOTH specs — the coefficient handoff
+is proven — but exposed two wrong constants in the A7 machinery itself:
+  A7-C1 WRONG BOUND OBJECT. −Σ QT_Target came to $1417.50B and 0 of 198 draws
+        sat there, VACUOUSLY: a pool with zero VOLUNTARY prepayment still
+        amortizes scheduled principal (~$200B across the window). The bound the
+        first run's 106 draws actually piled at ($1217.6339179089177, share
+        159.22%) is the ZERO-VOLUNTARY-PREPAYMENT FLOOR. It is now MEASURED, not
+        derived: one probe simulation through stage_b's own machinery with the
+        head's rate-gap coefficient set to +50.0, so that at QT-era gaps every
+        out-of-the-money month is driven past predict_hazard's lower clip. The
+        probe's trapped_b IS the floor, by construction. −Σ targets is retained
+        as a recorded audit number (target_sum_audit) and adjudicates nothing.
+        Everything named "ceiling" is renamed "zero_voluntary_floor".
+        Precision worth keeping: the pile-up is exact because predict_hazard
+        CLIPS log_mu at −20, so every sufficiently rogue draw shares the
+        identical exp(−20) hazard path — it is the clip, not underflow to zero.
+  A7-C2 WRONG BRANCH RULE (the coordinator's own labeled spec error). The 0.02
+        same-data optimizer-basin rule labelled 185 of 198 legitimate bootstrap
+        draws "rogue": resampled panels scatter the macro coefficients by
+        ~0.1–0.6 on their own, so a basin rule written for optimizer starts on
+        ONE panel cannot classify draws across 200 panels. The population is
+        bimodal in the rate gap and its two modes are the two documented
+        attractors, so the cut is NEAREST KNOWN ATTRACTOR in rate_gap:
+        production = COEF_PATH[spec].coefficients.rate_gap_bps (v3 value for
+        spec-3 legs, v4 for spec-4 legs), rogue =
+        ridge_reference_weighting.json .reference_swap.betas_swapped_ref
+        .rate_gap_bps — both READ, never hard-coded — with the midpoint as
+        cutpoint. Both attractors, the cutpoint and each cell's drawn-macro
+        means are recorded. The 0.02-rule counts survive as
+        legacy_same_data_basin_rule, labelled "same-data basin rule; too strict
+        for resampled draws", non-adjudicating.
+  A guard added with them: decompose reports the EMPIRICAL MODE of trapped_b
+  (value and count) next to the probe floor and flags whether they coincide, so
+  a probe that measures the wrong object announces itself instead of silently
+  reporting zero saturated draws — the exact way A7-C1 slipped through.
+  verdict.production_branch_only is renamed verdict.production_mode_only.
 
 PARITY GATES:
-  A7 (BLOCKING) point-head parity — see amendment A7(2) above.
+  A7 (BLOCKING) point-head parity — see amendment A7(2) above. VALIDATED on the
+     rerun at |Δ| = $0.0000B for spec v3 and spec v4.
   P1 (BLOCKING) Stage A at spec v3, seed 42, alpha=1e-4 reproduces
      hazard_bootstrap_draws.csv ROW-FOR-ROW to 1e-12 (198 rows) and
      hazard_bootstrap_se.json .se / .ci_95 / .frac_le_0 to 1e-9. Without P1
@@ -199,6 +237,7 @@ ARTIFACTS (all NEW paths):
   data/pathA_resimulate_joint_simdraws_spec{3,4}_tier{1,2}.csv  (checkpoints)
   data/pathA_resimulate_joint_p2_simdraws.csv                   (checkpoint)
   data/pathA_resimulate_joint_pointhead_spec{3,4}.csv           (A7(2) leg)
+  data/pathA_resimulate_joint_floorprobe_spec{3,4}.csv          (A7-C1 probe)
   data/pathA_resimulate_joint_results.json
 
 MUST NOT CHANGE (spec C6.7): hazard/bootstrap_se.py,
@@ -294,6 +333,10 @@ def pointhead_csv(spec: int) -> Path:
     return DATA_DIR / f"pathA_resimulate_joint_pointhead_spec{spec}.csv"
 
 
+def floorprobe_csv(spec: int) -> Path:
+    return DATA_DIR / f"pathA_resimulate_joint_floorprobe_spec{spec}.csv"
+
+
 TOL_P1_ROWS = 1e-12
 TOL_P1_SUMMARY = 1e-9
 TOL_P2 = 1e-6
@@ -313,9 +356,11 @@ COMMITTED_POINT_B = {
     4: 928.892970289881,        # pathA_seasonal_adoption_results.json .v4_trapped_b
 }
 POINT_PARITY_BLOCKING_SPECS = (3,)   # A7 mandates v3; v4 recorded, non-blocking
-# A7(3): the two pre-committed Stage-B decompositions.
-SATURATION_TOL_B = 1e-6              # |trapped − ceiling| < 1e-6 ⇒ saturated
-BRANCH_MACRO_TOL = 0.02              # C6(iii)'s own production-branch rule
+# A7(3), as CORRECTED after the first A7 rerun (see A7-C1/A7-C2 in the header).
+SATURATION_TOL_B = 1e-6              # |trapped − floor| < 1e-6 ⇒ saturated
+FLOOR_PROBE_RATE_GAP = 50.0          # drives every OTM month past predict_hazard's clip
+LEGACY_BASIN_TOL = 0.02              # retired same-data basin rule, diagnostic only
+RIDGE_REF_JSON = DATA_DIR / "ridge_reference_weighting.json"   # frozen, read-only
 
 AGE_NAMES = ["age_linear"] + [f"age_spline_{k}" for k in AGE_SPLINE_KNOTS]
 MONTH_NAMES = [f"m_{m}" for m in range(2, 13)]
@@ -724,51 +769,134 @@ def summarize(df: pd.DataFrame) -> dict:
             "frac_above_benchmark": float(np.mean(share > 100.0))}
 
 
-def accounting_ceiling(empirical) -> dict:
-    """The ACCOUNTING CEILING on trapped liquidity, computed from the target
-    series — never hard-coded (amendment A7(3)).
+def target_sum_audit(empirical) -> dict:
+    """RECORDED AUDIT NUMBER ONLY — the sum of the QT target series.
 
-    score_extension_risk (extension_risk.py:58-60) forms
-        sim_trapped = Σ (simulated_rolloff_b − QT_Target_Billions)
-    over the active QT window. A replicate whose hazard is driven to ≈0 has
-    simulated_rolloff_b ≡ 0, so its trapped figure is exactly −Σ target: an
-    identity of the target series, not a model output. Draws that sit there are
-    saturated, and their contribution to the interval is mechanical."""
+    The first A7 implementation used −Σ QT_Target_Billions as the mechanical
+    bound. That was the WRONG OBJECT (correction A7-C1): it came out $1417.50B
+    and 0 of 198 draws sat there, vacuously, because a pool with zero VOLUNTARY
+    prepayment still amortizes scheduled principal — roughly $200B of it across
+    the window. The real bound is the zero-voluntary-prepayment FLOOR, measured
+    by probe (zero_voluntary_floor_probe). This function is kept because the
+    target sum is a useful audit of the target series itself; it adjudicates
+    nothing."""
     qt_emp = qt_active_frame(empirical)
     tgt = qt_emp["QT_Target_Billions"]
     emp_trapped = float(qt_emp["Extension_Delta_Billions"].sum())
-    ceiling = float(-tgt.sum())
+    neg_sum = float(-tgt.sum())
     return {
-        "ceiling_b": ceiling,
-        "ceiling_share_pct": (ceiling / emp_trapped * 100.0
-                              if emp_trapped else None),
+        "neg_sum_targets_b": neg_sum,
+        "neg_sum_targets_share_pct": (neg_sum / emp_trapped * 100.0
+                                      if emp_trapped else None),
+        "sum_abs_targets_b": float(tgt.abs().sum()),
         "empirical_trapped_b": emp_trapped,
         "n_months": int(len(tgt)),
         "targets_all_nonpositive": bool((tgt <= 0).all()),
-        "sum_abs_targets_b": float(tgt.abs().sum()),
-        "definition": ("−Σ QT_Target_Billions over the active QT window; the "
-                       "value score_extension_risk returns when the simulated "
-                       "roll-off is identically zero"),
+        "adjudicates": "nothing — audit only (correction A7-C1)",
     }
 
 
-def decompose(df: pd.DataFrame, ceiling_b: float, prod_macro: dict) -> dict:
-    """The two PRE-COMMITTED Stage-B decompositions (amendment A7(3)).
+def zero_voluntary_floor_probe(spec: int, panel, trans, empirical,
+                               prod_scales: dict, resume: bool) -> dict:
+    """The ZERO-VOLUNTARY-PREPAYMENT FLOOR, measured THROUGH THE SAME HANDOFF
+    (correction A7-C1).
 
-    (a) saturated vs not — |trapped − ceiling| < 1e-6, the mechanical cut;
-    (b) production-branch vs rogue — all three DRAWN macro coefficients (in
-        production standardized units, as stored by stage_b) within 0.02 of the
-        spec's production values, i.e. C6(iii)'s own branch rule applied to the
-        bootstrap population rather than to optimizer starts.
-    A cross-tab of the two is reported because the whole point of A7 is that
-    they coincide: the rogue-optimizer-mode replicates are the saturated ones."""
+    One probe simulation through stage_b's own machinery: the production head
+    with its rate-gap coefficient replaced by +50.0. At QT-era gaps the
+    standardized rate gap is large and negative on every out-of-the-money
+    cohort-month, so +50 drives the linear predictor far past the lower clip in
+    hazard_fit.predict_hazard (`np.exp(np.clip(log_mu, -20, 0))`); voluntary
+    prepayment is switched off and only scheduled amortization rolls off. The
+    probe's trapped_b IS the floor, by construction — not a formula, not a
+    hard-coded constant.
+
+    WHY SATURATED DRAWS ARE EXACTLY EQUAL. It is the CLIP, not underflow, that
+    makes the pile-up exact: every draw whose log-hazard sits below -20 on the
+    same months gets the identical exp(-20) hazard there, hence the identical
+    roll-off and the identical trapped figure. The first run's 106 draws
+    matched to the last printed digit for that reason, and the probe reproduces
+    the same clipped path."""
+    base_art = json.loads(COEF_PATH[spec].read_text())
+    names = HEAD_NAMES[spec]
+    head = np.array([float(base_art["coefficients"][n]) for n in names])
+    head[names.index("rate_gap_bps")] = FLOOR_PROBE_RATE_GAP
+    heads = pd.DataFrame([{
+        "rep": 0,
+        "gap_std": prod_scales["gap_std"],
+        "burn_std": prod_scales["burn_std"],
+        "fric_std": prod_scales["fric_std"],
+        **{f"head_{n}": float(v) for n, v in zip(names, head)},
+    }])
+    out = stage_b(spec, 1, heads, base_art, prod_scales, panel, trans,
+                  empirical, floorprobe_csv(spec), None, None, resume)
+    floor_b = float(out["df"]["trapped_b"].iloc[0])
+    audit = target_sum_audit(empirical)
+    return {
+        "spec_version": spec,
+        "floor_b": floor_b,
+        "floor_share_pct": float(out["df"]["share_pct"].iloc[0]),
+        "probe_rate_gap_coefficient": FLOOR_PROBE_RATE_GAP,
+        "route": ("stage_b(spec, tier=1) with the production head and "
+                  "rate_gap_bps := +50.0; production scales, production FE, "
+                  "months at production"),
+        "scheduled_amortization_b": float(audit["neg_sum_targets_b"] - floor_b),
+        "sum_of_targets_audit": audit,
+        "mechanism": ("predict_hazard clips log_mu at -20, so every "
+                      "sufficiently rogue draw shares the identical hazard "
+                      "path and lands on this exact value"),
+    }
+
+
+def attractors_for(spec: int) -> dict:
+    """The two KNOWN optimizer attractors in the rate-gap coefficient, both READ
+    from committed artifacts (correction A7-C2).
+
+    The retired rule — all three macros within 0.02 of the production point —
+    is a SAME-DATA optimizer-basin rule. Applied to a cluster bootstrap it
+    labels 185 of 198 legitimate draws "rogue", because resampled panels scatter
+    the macro coefficients by ~0.1-0.6 on their own. The population is bimodal
+    in the rate gap, and the two modes are the two documented optimizer
+    attractors, so the cut is nearest-attractor with the midpoint as cutpoint."""
+    prod = float(json.loads(COEF_PATH[spec].read_text())
+                 ["coefficients"]["rate_gap_bps"])
+    rogue = float(json.loads(RIDGE_REF_JSON.read_text())
+                  ["reference_swap"]["betas_swapped_ref"]["rate_gap_bps"])
+    return {
+        "production_attractor_rate_gap": prod,
+        "production_source": f"{COEF_PATH[spec].name} .coefficients.rate_gap_bps",
+        "rogue_attractor_rate_gap": rogue,
+        "rogue_source": ("ridge_reference_weighting.json .reference_swap"
+                         ".betas_swapped_ref.rate_gap_bps"),
+        "cutpoint": float((prod + rogue) / 2.0),
+        "rule": ("nearest attractor in the drawn rate-gap coefficient; "
+                 "cutpoint = midpoint of the two attractors"),
+    }
+
+
+def decompose(df: pd.DataFrame, floor_b: float, attractors: dict,
+              prod_macro: dict) -> dict:
+    """The two Stage-B decompositions, as CORRECTED (A7-C1, A7-C2).
+
+    (a) saturated vs not — |trapped − zero-voluntary floor| < 1e-6, the
+        mechanical cut, with the floor MEASURED by probe;
+    (b) production-mode vs rogue-mode — nearest attractor in the drawn rate-gap
+        coefficient.
+    The cross-tab is the point: A7's claim is that the rogue-mode replicates are
+    the saturated ones. An `empirical_mode` audit is reported alongside so that
+    a probe which does NOT coincide with the actual pile-up says so loudly
+    rather than silently reporting zero saturated draws — the exact failure the
+    first A7 implementation had."""
     n = len(df)
     trapped = df["trapped_b"].to_numpy(dtype=float)
-    sat = np.abs(trapped - float(ceiling_b)) < SATURATION_TOL_B
-    inb = np.ones(n, dtype=bool)
+    sat = np.abs(trapped - float(floor_b)) < SATURATION_TOL_B
+    gap = df["rate_gap_bps"].to_numpy(dtype=float)
+    cut = float(attractors["cutpoint"])
+    prod_mode = gap < cut
+
+    legacy = np.ones(n, dtype=bool)
     for name in BETA_NAMES:
-        inb &= np.abs(df[name].to_numpy(dtype=float)
-                      - float(prod_macro[name])) <= BRANCH_MACRO_TOL
+        legacy &= np.abs(df[name].to_numpy(dtype=float)
+                         - float(prod_macro[name])) <= LEGACY_BASIN_TOL
 
     def cell(mask: np.ndarray) -> dict:
         sub = df[mask]
@@ -781,26 +909,72 @@ def decompose(df: pd.DataFrame, ceiling_b: float, prod_macro: dict) -> dict:
                 m: float(sub[m].mean()) for m in BETA_NAMES}
         return out
 
+    vc = pd.Series(trapped).value_counts()
+    mode_value = float(vc.index[0]) if len(vc) else None
+    mode_count = int(vc.iloc[0]) if len(vc) else 0
+
     return {
         "saturation": {
-            "rule": (f"|trapped_b − ceiling| < {SATURATION_TOL_B:g} B, ceiling "
-                     "computed from the QT target series"),
-            "ceiling_b": float(ceiling_b),
-            "at_ceiling": cell(sat), "below_ceiling": cell(~sat),
+            "rule": (f"|trapped_b − zero_voluntary_floor| < "
+                     f"{SATURATION_TOL_B:g} B; the floor is MEASURED by probe "
+                     "through stage_b's own handoff, never computed from a "
+                     "formula"),
+            "floor_b": float(floor_b),
+            "at_floor": cell(sat), "below_floor": cell(~sat),
+            "empirical_mode": {
+                "value_b": mode_value, "count": mode_count,
+                "probe_matches_empirical_mode": bool(
+                    mode_value is not None
+                    and abs(mode_value - float(floor_b)) < SATURATION_TOL_B),
+                "note": ("if the probe floor and the empirical pile-up disagree "
+                         "the saturation cut is measuring the wrong object — "
+                         "this is the guard the first A7 run lacked"),
+            },
         },
-        "branch": {
-            "rule": (f"all three drawn macro coefficients within "
-                     f"{BRANCH_MACRO_TOL} of the spec's production values "
-                     "(C6(iii)'s branch rule)"),
-            "production_values": {m: float(prod_macro[m]) for m in BETA_NAMES},
-            "production_branch": cell(inb), "rogue": cell(~inb),
+        "mode": {
+            "rule": attractors["rule"],
+            "attractors": attractors,
+            "production_mode": cell(prod_mode), "rogue_mode": cell(~prod_mode),
         },
         "cross_tab_counts": {
-            "production_branch_at_ceiling": int((inb & sat).sum()),
-            "production_branch_below_ceiling": int((inb & ~sat).sum()),
-            "rogue_at_ceiling": int((~inb & sat).sum()),
-            "rogue_below_ceiling": int((~inb & ~sat).sum()),
+            "production_mode_at_floor": int((prod_mode & sat).sum()),
+            "production_mode_below_floor": int((prod_mode & ~sat).sum()),
+            "rogue_mode_at_floor": int((~prod_mode & sat).sum()),
+            "rogue_mode_below_floor": int((~prod_mode & ~sat).sum()),
         },
+        "legacy_same_data_basin_rule": {
+            "label": ("same-data basin rule; too strict for resampled draws — "
+                      "RETIRED, non-adjudicating diagnostic (correction A7-C2)"),
+            "tol": LEGACY_BASIN_TOL,
+            "production_values": {m: float(prod_macro[m]) for m in BETA_NAMES},
+            "n_within": int(legacy.sum()), "n_outside": int((~legacy).sum()),
+        },
+    }
+
+
+def recover_stage_a_counts(spec: int) -> dict | None:
+    """Replication counts recovered from the persisted Stage-A draw CSV.
+
+    The spec-v4 Stage A completed and persisted its 200 rows but the run died in
+    the aggregation (the A7(1) KeyError), so no stage_a.spec4 summary was ever
+    written. The convergence counts survive in the CSV's `converged` column and
+    are what verdict branch (ii-c) needs. `point_native_units` does NOT survive,
+    so P3 for a recovered spec stays PENDING."""
+    p = FULLVEC_CSV[spec]
+    if not p.exists():
+        return None
+    d = pd.read_csv(p)
+    if "converged" not in d.columns:
+        return None
+    c = d["converged"].astype(bool)
+    return {
+        "n_reps": int(len(d)), "n_converged": int(c.sum()),
+        "n_failed": int((~c).sum()),
+        "recovered_from": p.name,
+        "counts_only": True,
+        "note": ("counts only; the Stage-A summary was never written for this "
+                 "spec (A7(1) aggregation crash). point_native_units is not "
+                 "recoverable, so P3 for this spec stays PENDING."),
     }
 
 
@@ -991,14 +1165,9 @@ def main() -> None:
         gates["P3_point_head"] = gate_p3(stage_a_summaries)
 
     results: dict = {}
-    ceiling: dict = {}
+    floors: dict = {}
     if args.stage in ("B", "P2", "all"):
         panel, trans, empirical = sim_context()
-        ceiling = accounting_ceiling(empirical)
-        print(f"  accounting ceiling (from the QT target series): "
-              f"${ceiling['ceiling_b']:.4f}B "
-              f"({ceiling['ceiling_share_pct']:.2f}% of the benchmark) over "
-              f"{ceiling['n_months']} months")
         if args.stage in ("P2", "all"):
             print("\nP2 — Stage B with the head forced to production "
                   "except the macro block …")
@@ -1040,6 +1209,21 @@ def main() -> None:
                     base_art = json.loads(COEF_PATH[spec].read_text())
                     prod_macro = {n: float(base_art["coefficients"][n])
                                   for n in BETA_NAMES}
+                    # A7-C1: the mechanical bound is MEASURED, once per spec,
+                    # through the same handoff, before the replicates.
+                    fl = zero_voluntary_floor_probe(spec, panel, trans,
+                                                    empirical, prod_scales,
+                                                    args.resume)
+                    floors[f"spec{spec}"] = fl
+                    att = attractors_for(spec)
+                    print(f"  spec v{spec} zero-voluntary floor (probe, "
+                          f"rate_gap:=+{FLOOR_PROBE_RATE_GAP:g}): "
+                          f"${fl['floor_b']:.7f}B "
+                          f"({fl['floor_share_pct']:.2f}%); scheduled "
+                          f"amortization ${fl['scheduled_amortization_b']:.1f}B; "
+                          f"attractors {att['production_attractor_rate_gap']:.4f}"
+                          f" / {att['rogue_attractor_rate_gap']:.4f}, cutpoint "
+                          f"{att['cutpoint']:.4f}")
                     for tier in tiers:
                         print(f"\nStage B — spec v{spec}, tier {tier} "
                               f"({len(heads)} replications) …")
@@ -1051,21 +1235,28 @@ def main() -> None:
                         # headline block keeps the FULL-SAMPLE numbers
                         s = summarize(out["df"])
                         s["mean_undrawn_share"] = out["mean_undrawn_share"]
-                        s["ceiling_b"] = ceiling["ceiling_b"]
-                        s["ceiling_share_pct"] = ceiling["ceiling_share_pct"]
-                        dec = decompose(out["df"], ceiling["ceiling_b"],
+                        s["floor_b"] = fl["floor_b"]
+                        s["floor_share_pct"] = fl["floor_share_pct"]
+                        dec = decompose(out["df"], fl["floor_b"], att,
                                         prod_macro)
-                        s["n_at_ceiling"] = dec["saturation"]["at_ceiling"]["n"]
+                        s["n_at_floor"] = dec["saturation"]["at_floor"]["n"]
                         s["decompositions"] = dec
                         results.setdefault(f"spec{spec}",
                                            {})[f"tier{tier}"] = s
+                        em = dec["saturation"]["empirical_mode"]
                         print(f"  spec{spec} tier{tier}: n={s['n_reps']}  "
-                              f"at ceiling {s['n_at_ceiling']}  "
-                              f"production-branch "
-                              f"{dec['branch']['production_branch']['n']}  "
-                              f"rogue {dec['branch']['rogue']['n']}  "
-                              f"(rogue∧ceiling "
-                              f"{dec['cross_tab_counts']['rogue_at_ceiling']})")
+                              f"at floor {s['n_at_floor']}  "
+                              f"production-mode "
+                              f"{dec['mode']['production_mode']['n']}  "
+                              f"rogue-mode {dec['mode']['rogue_mode']['n']}  "
+                              f"(rogue∧floor "
+                              f"{dec['cross_tab_counts']['rogue_mode_at_floor']})"
+                              f"  | empirical mode {em['count']} draws at "
+                              f"{em['value_b']}, probe match "
+                              f"{em['probe_matches_empirical_mode']}"
+                              f"  | retired 0.02 rule would call "
+                              f"{dec['legacy_same_data_basin_rule']['n_outside']}"
+                              f" of {s['n_reps']} rogue")
         for tmp in (TMP_SIM, TMP_COEF):
             if tmp.exists():
                 tmp.unlink()
@@ -1087,8 +1278,16 @@ def main() -> None:
     for k, v in results.items():
         merged_results.setdefault(k, {}).update(v)
     results = merged_results
-    if not ceiling:
-        ceiling = dict(prior.get("accounting_ceiling", {}))
+    floors = {**prior.get("zero_voluntary_floor", {}), **floors}
+
+    # Stage-A counts the aggregation needs but the summary may never have had:
+    # recovered from the persisted draw CSVs (see recover_stage_a_counts).
+    stage_a_recovered: dict = {}
+    for _spec in (3, 4):
+        if f"spec{_spec}" not in stage_a_out:
+            rec = recover_stage_a_counts(_spec)
+            if rec is not None:
+                stage_a_recovered[f"spec{_spec}"] = rec
 
     # ---- A7(1): P3_point_head must not be indexed unconditionally ----------
     # A --specs 4 or --stage B invocation never builds the spec-3 leg. Recover
@@ -1121,6 +1320,11 @@ def main() -> None:
         width_ratio = float((j_hi - j_lo) / c_width) if c_width else None
 
     v4_failed = stage_a_out.get("spec4", {}).get("n_failed")
+    v4_failed_source = "stage_a.spec4"
+    if v4_failed is None:
+        v4_failed = stage_a_recovered.get("spec4", {}).get("n_failed")
+        v4_failed_source = (stage_a_recovered.get("spec4", {})
+                            .get("recovered_from", "unavailable"))
     v4_unstable = (v4_failed is not None and v4_failed >= V4_FAILURE_MATERIAL)
 
     if width_ratio is None:
@@ -1147,65 +1351,76 @@ def main() -> None:
             "(ii-a) as SURVIVES_WIDER, with the interval reported as "
             "materially unchanged.")
 
-    # ---- A7(4): mandatory ceiling disclosure + production-branch-only read --
+    # ---- A7(4): mandatory floor disclosure + production-mode-only read ------
     # The CODE above is adjudicated on the FULL SAMPLE and is unchanged. What
     # follows accompanies it; neither replaces it.
     dec_primary = (primary or {}).get("decompositions", {})
-    n_ceiling = (primary or {}).get("n_at_ceiling")
-    ceiling_b = (primary or {}).get("ceiling_b", ceiling.get("ceiling_b"))
-    if primary is None or not dec_primary or ceiling_b is None:
-        ceiling_disclosure = ("not computable — the spec v3 / tier 1 Stage B "
-                              "leg has not been scored with the A7 "
-                              "decompositions in this artifact; re-run "
-                              "--stage B --specs 3 --tiers 1")
-    elif n_ceiling:
-        ceiling_disclosure = (
-            "MANDATORY DISCLOSURE (amendment A7): the narrowing is partly "
-            f"MECHANICAL. {n_ceiling} of {primary['n_reps']} spec-v3 tier-1 "
-            f"draws sit at EXACTLY the accounting ceiling "
-            f"${ceiling_b:.4f}B — the value score_extension_risk returns when "
-            "the simulated roll-off is identically zero, i.e. minus the sum of "
-            "the QT target series, an accounting identity rather than a model "
-            "output. The interval's upper edge and its median therefore sit at "
-            "that ceiling, reached by the rogue-optimizer-mode replicates "
-            f"({dec_primary['cross_tab_counts']['rogue_at_ceiling']} of the "
-            f"{dec_primary['branch']['rogue']['n']} rogue draws are saturated), "
-            "and are not a sampling statement about the estimand. The committed "
-            "3-beta rendering of the same rogue draws produced the -$4,460B "
-            "tail; the joint rendering saturates the ceiling instead — two "
-            "renderings of one optimizer pathology, not two findings.")
+    n_floor = (primary or {}).get("n_at_floor")
+    floor_b = (primary or {}).get(
+        "floor_b", floors.get("spec3", {}).get("floor_b"))
+    has_corrected = bool(dec_primary.get("mode")
+                         and dec_primary.get("saturation", {}).get("at_floor"))
+    if primary is None or not has_corrected or floor_b is None:
+        floor_disclosure = ("not computable — the spec v3 / tier 1 Stage B leg "
+                            "has not been scored with the CORRECTED A7 cuts "
+                            "(zero-voluntary floor + nearest-attractor mode) in "
+                            "this artifact; re-run --stage B --specs 3 "
+                            "--tiers 1")
+    elif n_floor:
+        ct = dec_primary["cross_tab_counts"]
+        floor_disclosure = (
+            "MANDATORY DISCLOSURE (amendment A7, corrections A7-C1/A7-C2): the "
+            f"narrowing is partly MECHANICAL. {n_floor} of "
+            f"{primary['n_reps']} spec-v3 tier-1 draws sit at EXACTLY the "
+            f"ZERO-VOLUNTARY-PREPAYMENT FLOOR ${floor_b:.7f}B — the trapped "
+            "figure a pool returns when voluntary prepayment is switched off "
+            "and only scheduled amortization rolls off, measured by probe "
+            "through the same coefficient handoff, not a formula. The "
+            "interval's upper edge and its median therefore sit at that floor, "
+            "reached by the rogue-mode replicates "
+            f"({ct['rogue_mode_at_floor']} of the "
+            f"{dec_primary['mode']['rogue_mode']['n']} rogue-mode draws are "
+            "saturated), and are not a sampling statement about the estimand. "
+            "The committed 3-beta rendering of the same rogue draws produced "
+            "the -$4,460B tail; the joint rendering piles them on the floor "
+            "instead — two renderings of one optimizer pathology, not two "
+            "findings.")
     else:
-        ceiling_disclosure = (
-            f"no draw sits at the accounting ceiling ${ceiling_b:.4f}B; the "
-            "interval is not mechanically bounded in this leg.")
+        floor_disclosure = (
+            f"no draw sits at the zero-voluntary-prepayment floor "
+            f"${floor_b:.7f}B; the interval is not mechanically bounded in "
+            "this leg.")
 
-    pb = dec_primary.get("branch", {}).get("production_branch")
-    production_branch_only = None
-    if pb and pb.get("n"):
-        pb_lo, pb_hi = pb["trapped_b"]["ci_95"]
-        production_branch_only = {
-            "label": ("spec v3, tier 1, PRODUCTION-BRANCH DRAWS ONLY (all three "
-                      "drawn macro coefficients within 0.02 of the spec-v3 "
-                      "production values). Reported as a labeled sub-population "
-                      "for diagnosis: it is NOT the pre-committed estimand, NOT "
-                      "the quoted interval, and NOT a substitute for the "
-                      "full-sample numbers above."),
-            "n": pb["n"],
-            "share_of_draws": pb["share_of_draws"],
-            "ci_95_b": [pb_lo, pb_hi],
-            "median_b": pb["trapped_b"]["median"],
-            "mean_b": pb["trapped_b"]["mean"],
-            "share_pct_ci_95": pb["share_pct"]["ci_95"],
-            "width_b": float(pb_hi - pb_lo),
-            "width_ratio_vs_committed": (float((pb_hi - pb_lo) / c_width)
+    pm = dec_primary.get("mode", {}).get("production_mode")
+    production_mode_only = None
+    if pm and pm.get("n"):
+        pm_lo, pm_hi = pm["trapped_b"]["ci_95"]
+        att = dec_primary["mode"]["attractors"]
+        production_mode_only = {
+            "label": ("spec v3, tier 1, PRODUCTION-MODE DRAWS ONLY (drawn "
+                      "rate-gap coefficient nearer the production attractor "
+                      f"{att['production_attractor_rate_gap']:.6f} than the "
+                      f"rogue attractor {att['rogue_attractor_rate_gap']:.6f}; "
+                      f"cutpoint {att['cutpoint']:.6f}). Reported as a labeled "
+                      "sub-population for diagnosis: it is NOT the "
+                      "pre-committed estimand, NOT the quoted interval, and NOT "
+                      "a substitute for the full-sample numbers above."),
+            "n": pm["n"],
+            "share_of_draws": pm["share_of_draws"],
+            "ci_95_b": [pm_lo, pm_hi],
+            "median_b": pm["trapped_b"]["median"],
+            "mean_b": pm["trapped_b"]["mean"],
+            "share_pct_ci_95": pm["share_pct"]["ci_95"],
+            "width_b": float(pm_hi - pm_lo),
+            "width_ratio_vs_committed": (float((pm_hi - pm_lo) / c_width)
                                          if c_width else None),
-            "n_at_ceiling": dec_primary["cross_tab_counts"][
-                "production_branch_at_ceiling"],
-            "drawn_macro_means": pb.get("drawn_macro_means"),
+            "n_at_floor": dec_primary["cross_tab_counts"][
+                "production_mode_at_floor"],
+            "drawn_macro_means": pm.get("drawn_macro_means"),
         }
-    if n_ceiling and code == "NARROWS":
+    if n_floor and code == "NARROWS":
         action = ("[posture] NOT ADJUDICABLE AS IT STANDS (amendment A7): the "
-                  "NARROWS code is driven by ceiling saturation. " + action)
+                  "NARROWS code is driven by floor saturation. " + action)
 
     # Blocking-gate roll-up over exactly the gates that exist. P3_point_head is
     # a per-spec container, so its blocking sub-legs are walked individually;
@@ -1289,18 +1504,21 @@ def main() -> None:
             "code": code,
             "adjudicated_on": "full sample (pre-committed codes, unchanged)",
             "v4_n_failed": v4_failed,
+            "v4_n_failed_source": v4_failed_source,
             "v4_failure_material_threshold": V4_FAILURE_MATERIAL,
             "v4_unstable": bool(v4_unstable),
-            "ceiling_disclosure": ceiling_disclosure,
-            "ceiling_driven": bool(n_ceiling),
-            "production_branch_only": production_branch_only,
+            "v4_expectation_fired": bool(v4_unstable),
+            "floor_disclosure": floor_disclosure,
+            "floor_driven": bool(n_floor),
+            "production_mode_only": production_mode_only,
             "manuscript_action": action,
             "propagation": ("none — Path A is excluded from every headline "
                             "figure (tex 290, 978, 1053)"),
         },
         "runtime_s": round(time.perf_counter() - t_all, 1),
     }
-    payload["accounting_ceiling"] = ceiling
+    payload["zero_voluntary_floor"] = floors
+    payload["stage_a_recovered"] = stage_a_recovered
     payload["parity_gates_pending"] = pending
     with open(RESULTS_JSON, "w") as f:
         json.dump(payload, f, indent=2, default=_np)
@@ -1316,18 +1534,20 @@ def main() -> None:
         print(f"  mean ${primary['trapped_b']['mean']:.1f}B  "
               f"median ${primary['trapped_b']['median']:.1f}B  "
               f"above benchmark {primary['frac_above_benchmark'] * 100:.1f}%")
-        if primary.get("n_at_ceiling") is not None:
-            print(f"  at accounting ceiling: {primary['n_at_ceiling']}/"
+        if primary.get("n_at_floor") is not None:
+            print(f"  at zero-voluntary floor: {primary['n_at_floor']}/"
                   f"{primary['n_reps']} "
-                  f"(${primary.get('ceiling_b') or float('nan'):.4f}B)")
-        if production_branch_only:
-            print(f"  production-branch draws only ({production_branch_only['n']}): "
-                  f"[{production_branch_only['ci_95_b'][0]:.1f}, "
-                  f"{production_branch_only['ci_95_b'][1]:.1f}]B  "
+                  f"(${primary.get('floor_b') or float('nan'):.7f}B)")
+        if production_mode_only:
+            print(f"  production-mode draws only ({production_mode_only['n']}): "
+                  f"[{production_mode_only['ci_95_b'][0]:.1f}, "
+                  f"{production_mode_only['ci_95_b'][1]:.1f}]B  "
                   f"width ratio "
-                  f"{production_branch_only['width_ratio_vs_committed']:.3f}"
+                  f"{production_mode_only['width_ratio_vs_committed']:.3f}"
                   f"  [labeled sub-population, NOT the quoted interval]")
-    print(f"  {ceiling_disclosure}")
+    print(f"  spec-v4 Stage A failures: {v4_failed} "
+          f"(threshold {V4_FAILURE_MATERIAL}; source {v4_failed_source})")
+    print(f"  {floor_disclosure}")
     if pending:
         print(f"  PENDING blocking gates: {pending}")
     print(f"  Saved: {RESULTS_JSON}")
