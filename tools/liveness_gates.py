@@ -894,6 +894,50 @@ def wal_normal_turnover_check(tex, wnt, oos):
                     "No row is printed at a normal-turnover speed." not in tex}
 
 
+
+def beta1_sign_check(tex: str) -> tuple[bool, dict]:
+    """Gate #109's rule (round 32, C-R4): the manuscript prints beta_1 under ONE
+    sign convention.
+
+    The panel saw $0.069$ in tab:params and $-0.0686$ in tab:lowband for the same
+    parameter at the same delta and proposed flipping the printed signs. Reading
+    the source first showed why that would have been wrong: eq:beta1 defines
+    beta_1 WITH a leading minus, so it is positive under the manuscript's own
+    definition, and eq:pathB multiplies it by the signed gap, which is negative
+    for a locked-in borrower -- so a positive beta_1 suppresses prepayment and
+    tab:params was already correct. tab:lowband was printing the convention of
+    the production helper hazard/literature_hazard.py:rothstein_beta1, which
+    returns ln(h_shocked/h_base) WITHOUT that minus. Neither was a computational
+    error; one symbol was being printed under two conventions.
+
+    So this gate asserts AGREEMENT, not a sign: whatever sign tab:params states
+    for the central beta_1, every tab:lowband cell carries the same one. That is
+    the property the objection was about, and it survives a later round choosing
+    to restate eq:beta1 the other way round -- which a hardcoded "must be
+    positive" gate would not.
+    """
+    m = re.search(r"\$\\beta_1\$ \(central\) & \$(-?)([0-9.]+)\$", tex)
+    params_sign = 0 if m is None else (-1 if m.group(1) else 1)
+    i = tex.find(r"\label{tab:lowband}")
+    j = tex.find(r"\end{tabular}", i) if i != -1 else -1
+    # the float runs past \end{tabular}, and the replicator note lives in the
+    # tablenotes block between there and \end{threeparttable} -- so the cells are
+    # read from the tabular and the note is looked for over the whole float.
+    k = tex.find(r"\end{threeparttable}", i) if i != -1 else -1
+    body = tex[i:j] if (i != -1 and j != -1) else ""
+    float_txt = tex[i:k] if (i != -1 and k != -1) else ""
+    # the delta and beta_1 columns lead each row: "6.50 & $0.0686$ & ..."
+    cells = [float(sign + digits) for sign, digits in
+             re.findall(r"^\s*[0-9.]+ & \$(-?)([0-9.]+)\$ &", body, re.M)]
+    nonzero = [c for c in cells if c != 0.0]
+    signs = {1 if c > 0 else -1 for c in nonzero}
+    ok = (m is not None and body != "" and len(nonzero) == 9
+          and len(signs) == 1 and signs == {params_sign}
+          and "rothstein" in float_txt)
+    return ok, {"params_sign": params_sign, "lowband": nonzero,
+                "lowband_signs": sorted(signs), "cells_found": len(cells),
+                "replicator_note": "rothstein" in float_txt}
+
 def buyback_bracket_check(tex: str) -> tuple[bool, dict]:
     """Gate #103's rule, as a function so a battery can exercise it."""
     tex_nc = re.sub(r"(?<!\\)%.*", "", tex)
@@ -4929,6 +4973,14 @@ def main() -> int:
           f"{len(BUYBACK_BRACKET_SPANS) - len(_bb['missing'])}/"
           f"{len(BUYBACK_BRACKET_SPANS)} spans present, "
           f"missing={_bb['missing'] or 'none'}")
+
+    b1_ok, _b1 = beta1_sign_check(tex)
+    failures += 0 if b1_ok else 1
+    print(f"[{'PASS' if b1_ok else 'FAIL'}] beta_1 sign agreement (gate #109): "
+          f"tab:params sign={_b1['params_sign']:+d}, "
+          f"tab:lowband cells={_b1['cells_found']} "
+          f"signs={_b1['lowband_signs']}, "
+          f"replicator_note={_b1['replicator_note']}")
 
     va_ok, _va = verdict_audit_check(tex)
     failures += 0 if va_ok else 1

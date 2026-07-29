@@ -393,17 +393,20 @@ Early-window calibration & full window\tnote{a} & 3.97\% & $+8.1$ & $+9.3$ & $+1
 $\delta$ (\%) & $\beta_1$ & marginal (\$B) & (pp) & marginal (\$B) & (pp) \\
 \midrule
 0.00 & $0.0000$ & $0.0$ & $0.00$ & $0.0$ & $0.00$ \\
-1.00 & $-0.0103$ & $+12.8$ & $+1.67$ & $+9.4$ & $+1.23$ \\
-2.00 & $-0.0206$ & $+24.9$ & $+3.26$ & $+17.7$ & $+2.31$ \\
-3.00 & $-0.0311$ & $+36.4$ & $+4.76$ & $+24.9$ & $+3.25$ \\
-3.25 & $-0.0337$ & $+39.1$ & $+5.12$ & $+26.5$ & $+3.47$ \\
-4.00 & $-0.0417$ & $+47.1$ & $+6.16$ & $+31.0$ & $+4.06$ \\
-5.00 & $-0.0523$ & $+57.1$ & $+7.46$ & $+36.3$ & $+4.74$ \\
-5.50 & $-0.0577$ & $+61.7$ & $+8.07$ & $+38.6$ & $+5.05$ \\
-6.50 & $-0.0686$ & $+70.3$ & $+9.20$ & $+42.6$ & $+5.57$ \\
-7.70 & $-0.0817$ & $+79.5$ & $+10.39$ & $+46.6$ & $+6.09$ \\
+1.00 & $0.0103$ & $+12.8$ & $+1.67$ & $+9.4$ & $+1.23$ \\
+2.00 & $0.0206$ & $+24.9$ & $+3.26$ & $+17.7$ & $+2.31$ \\
+3.00 & $0.0311$ & $+36.4$ & $+4.76$ & $+24.9$ & $+3.25$ \\
+3.25 & $0.0337$ & $+39.1$ & $+5.12$ & $+26.5$ & $+3.47$ \\
+4.00 & $0.0417$ & $+47.1$ & $+6.16$ & $+31.0$ & $+4.06$ \\
+5.00 & $0.0523$ & $+57.1$ & $+7.46$ & $+36.3$ & $+4.74$ \\
+5.50 & $0.0577$ & $+61.7$ & $+8.07$ & $+38.6$ & $+5.05$ \\
+6.50 & $0.0686$ & $+70.3$ & $+9.20$ & $+42.6$ & $+5.57$ \\
+7.70 & $0.0817$ & $+79.5$ & $+10.39$ & $+46.6$ & $+6.09$ \\
 \bottomrule
 \end{tabular}
+\begin{tablenotes}[flushleft]\footnotesize
+\item The $\beta_1$ column follows \eqref{eq:beta1}'s sign convention, under which $\beta_1$ is positive and suppression enters \eqref{eq:pathB} through the signed gap $g_{i,t}$, negative for a locked-in borrower. The production helper \texttt{rothstein\_beta1} returns the same quantity without that leading minus, so a replicator reading the code will see these nine values negated; the marginal columns are unaffected either way.
+\end{tablenotes}
 \end{threeparttable}
 \end{table}
 
