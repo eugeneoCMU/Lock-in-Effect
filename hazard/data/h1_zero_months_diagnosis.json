@@ -1,0 +1,135 @@
+{
+  "mode": "h1_zero_months_diagnosis",
+  "status": "OK",
+  "spec": "specs/SPEC_round28_H1_zero_months.md (committed pre-run)",
+  "parity_gates": {
+    "P1_zeros_reproduce": {
+      "rows": {
+        "2022-06": {
+          "backout_cpr_pct": 0.0,
+          "unclipped_pct": -1.586600923883977,
+          "raw_me_diff_b": 1.9872877183997844,
+          "clip_binds": true
+        },
+        "2023-02": {
+          "backout_cpr_pct": 0.0,
+          "unclipped_pct": -0.4929187461734207,
+          "raw_me_diff_b": -4.484763706699596,
+          "clip_binds": true
+        },
+        "2024-04": {
+          "backout_cpr_pct": 0.0,
+          "unclipped_pct": -0.8409496296434036,
+          "raw_me_diff_b": -3.7031782845001544,
+          "clip_binds": true
+        },
+        "2025-09": {
+          "backout_cpr_pct": 0.0,
+          "unclipped_pct": -0.8406390968637847,
+          "raw_me_diff_b": -3.6283161820001624,
+          "clip_binds": true
+        }
+      },
+      "tol_b": 0.005,
+      "pass": true
+    },
+    "P2_spike_consistent": {
+      "spikes_pct": {
+        "2023-02->2023-03": 9.381312489849186,
+        "2024-04->2024-05": 12.646808642270408,
+        "2025-09->2025-10": 14.070571780032767
+      },
+      "max_pct": 14.070571780032767,
+      "want_pct": 14.01,
+      "tol": 0.75,
+      "holdings_note": "SOMA-level holdings, not production WSHOMCB; tol widened on that ground in-spec",
+      "pass": true
+    }
+  },
+  "parity_gates_all_pass": true,
+  "zero_months": {
+    "2022-06": {
+      "span_first_asof": "2022-05-25",
+      "span_last_asof": "2022-06-29",
+      "weekly_obs_b": {
+        "2022-05-25": 2698.5764064294,
+        "2022-06-01": 2698.5764065293997,
+        "2022-06-08": 2698.5764063303,
+        "2022-06-15": 2718.6967046532004,
+        "2022-06-22": 2719.9701300531,
+        "2022-06-29": 2700.5636941477997
+      },
+      "n_weekly_steps": 5,
+      "max_abs_step_b": 20.120298322900453,
+      "me_last_diff_b": 1.9872877183997844,
+      "next_month_diff_b": 8.091318853800658,
+      "pair_total_b": 10.078606572200442,
+      "trailing6_mean_abs_diff_b": 19.12294604034999,
+      "classification": "A"
+    },
+    "2023-02": {
+      "span_first_asof": "2023-01-25",
+      "span_last_asof": "2023-02-22",
+      "weekly_obs_b": {
+        "2023-01-25": 2616.2734730824,
+        "2023-02-01": 2616.2734730824,
+        "2023-02-08": 2616.2734730824,
+        "2023-02-15": 2615.0506434441,
+        "2023-02-22": 2611.7887093757004
+      },
+      "n_weekly_steps": 4,
+      "max_abs_step_b": 3.261934068399569,
+      "me_last_diff_b": -4.484763706699596,
+      "next_month_diff_b": -25.743125985900406,
+      "pair_total_b": -30.2278896926,
+      "trailing6_mean_abs_diff_b": 14.803481182449937,
+      "classification": "A"
+    },
+    "2024-04": {
+      "span_first_asof": "2024-03-27",
+      "span_last_asof": "2024-04-24",
+      "weekly_obs_b": {
+        "2024-03-27": 2380.2399259614,
+        "2024-04-03": 2380.2399259614,
+        "2024-04-10": 2380.2399259614,
+        "2024-04-17": 2380.0572594196,
+        "2024-04-24": 2376.5367476768997
+      },
+      "n_weekly_steps": 4,
+      "max_abs_step_b": 3.5205117427003643,
+      "me_last_diff_b": -3.7031782845001544,
+      "next_month_diff_b": -30.053418050699747,
+      "pair_total_b": -33.7565963351999,
+      "trailing6_mean_abs_diff_b": 13.013476947016747,
+      "classification": "A"
+    },
+    "2025-09": {
+      "span_first_asof": "2025-08-27",
+      "span_last_asof": "2025-09-24",
+      "weekly_obs_b": {
+        "2025-08-27": 2094.945324575,
+        "2025-09-03": 2094.945324575,
+        "2025-09-10": 2094.945324575,
+        "2025-09-17": 2094.8854110936,
+        "2025-09-24": 2091.317008393
+      },
+      "n_weekly_steps": 4,
+      "max_abs_step_b": 3.568402700600018,
+      "me_last_diff_b": -3.6283161820001624,
+      "next_month_diff_b": -29.223950978299854,
+      "pair_total_b": -32.852267160300016,
+      "trailing6_mean_abs_diff_b": 14.945715160033311,
+      "classification": "A"
+    }
+  },
+  "classification_summary": {
+    "n_artifact": 4,
+    "n_total": 4,
+    "spike_followed_all_artifact": true
+  },
+  "verdict": {
+    "outcome": "ARTIFACT",
+    "manuscript_action": "Outcome ARTIFACT: wording-class only \u2014 appendix mechanism clause + promote the cannot-adjudicate-timing concession to the III.B / VI.B descriptor sites; NO re-score; no committed number moves."
+  },
+  "runtime_s": 0.2
+}
