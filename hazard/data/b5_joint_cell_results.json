@@ -1,0 +1,104 @@
+{
+ "mode": "b5_joint_cell",
+ "pre_committed": true,
+ "agestd_floor_pct": 5.507748455937158,
+ "parity_gates": {
+  "GA_central": {
+   "got": 767.5264524465003,
+   "want": 767.5264524465003,
+   "pass": true
+  },
+  "GA_null": {
+   "got": 724.9180585654117,
+   "want": 724.9180585654117,
+   "pass": true
+  },
+  "GB_overlay_4991": {
+   "got_pp": 4.443419164229439,
+   "want_pp": 4.443419164229439,
+   "pass": true
+  },
+  "GC_identity_central": {
+   "diff_b": -1.1368683772161603e-13,
+   "pass": true
+  },
+  "GC_identity_null": {
+   "diff_b": -1.1368683772161603e-13,
+   "pass": true
+  }
+ },
+ "conventional_agestd": {
+  "central_trapped_b": 730.9824684296934,
+  "null_trapped_b": 702.9061479314323,
+  "central_shared_pct": 86.4886273057564,
+  "null_shared_pct": 82.8173118918348,
+  "marginal_pp": 3.67131541392159,
+  "ladder_implied_pp": 3.8,
+  "measured_minus_implied_pp": -0.1286845860784096
+ },
+ "overlay_agestd": {
+  "primary": {
+   "central": {
+    "trapped_b": 682.4507698430152,
+    "share_pct": 89.23861767151766,
+    "adjustment_sum_b": 48.53169858667804,
+    "mean_series_minus_model_pp": 2.546854362905933,
+    "share_pct_shared": 80.14252603881496
+   },
+   "null": {
+    "trapped_b": 660.0576113278025,
+    "share_pct": 86.3104438024246,
+    "adjustment_sum_b": 42.848536603629775,
+    "mean_series_minus_model_pp": 2.2084982526374897,
+    "share_pct_shared": 77.2143521697219
+   },
+   "marginal_b": 22.39315851521269,
+   "marginal_pp": 2.928173869093058
+  },
+  "crr_only": {
+   "central": {
+    "trapped_b": 701.2792752845949,
+    "share_pct": 91.70067042707939,
+    "adjustment_sum_b": 29.70319314509852,
+    "mean_series_minus_model_pp": 1.5050924581440281,
+    "share_pct_shared": 82.60457879437668
+   },
+   "null": {
+    "trapped_b": 678.8916340873373,
+    "share_pct": 88.77321801343679,
+    "adjustment_sum_b": 24.014513844095095,
+    "mean_series_minus_model_pp": 1.166736347875585,
+    "share_pct_shared": 79.67712638073408
+   },
+   "marginal_b": 22.387641197257608,
+   "marginal_pp": 2.927452413642598
+  },
+  "gse_placebo": {
+   "central": {
+    "trapped_b": 720.9469531642277,
+    "share_pct": 94.27245503681885,
+    "adjustment_sum_b": 10.035515265465708,
+    "mean_series_minus_model_pp": 0.43958055338212326,
+    "share_pct_shared": 85.17636340411616
+   },
+   "null": {
+    "trapped_b": 698.5644403814633,
+    "share_pct": 91.34567322483787,
+    "adjustment_sum_b": 4.341707549969035,
+    "mean_series_minus_model_pp": 0.10122444311368026,
+    "share_pct_shared": 82.24958159213516
+   },
+   "marginal_b": 22.382512782764366,
+   "marginal_pp": 2.9267818119810016
+  }
+ },
+ "committed_ratio_4991": 0.7975182199226121,
+ "adjudication": {
+  "composed_pp": 2.928173869093058,
+  "expectation_pp": 3.0,
+  "materiality_pp": 1.0,
+  "deviation_pp": -0.0718261309069419,
+  "interaction_vs_proportional_pp": 0.00023293540786362144,
+  "verdict": "LANDS_AS_COMPOSED_LOWER_MEMBER"
+ }
+}
