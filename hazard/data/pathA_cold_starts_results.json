@@ -1,0 +1,2537 @@
+{
+  "mode": "pathA_cold_starts",
+  "status": "OK",
+  "spec": "SPEC_round28_C1_C2_C3_C6.md C6(iii): 50 starts on the PRODUCTION panel (1 warm production anchor, 1 true cold, 48 dispersed on the sigma ladder {0.25,0.5,1.0,2.0} x |head_prod| floored at 0.05, 12 per rung, seeds 1000+s), spec v4 seasonal design, alpha=1e-4, FE starting at zero; branch = macro triple within 0.02 AND penalized objective within 1e-4 of the production fit's.",
+  "convexity_note": "statsmodels GLM.fit_regularized(L1_wt=0) dispatches to GLM._fit_ridge, which BFGS-minimizes -loglike/nobs + alpha*||b||^2/2. That objective is strictly convex, so it has exactly one minimizer: a materially lower objective is evidence of UNDER-CONVERGENCE at the production point, not of a rival mode. Verdict codes are as pre-committed; this fixes their reading.",
+  "labeled_deviations": [
+    "1: two design conventions \u2014 production spec v4 is ddof-0 (seasonality_concave_gap.fit_with_month_dummies), fit_betas is ddof-1; the primary leg is the production design and G1 is evaluated there.",
+    "2: the IRLS prestep partly defeats the dispersion; the prod_direct leg is the literal dispersed-start probe.",
+    "3: G1's fit_method equality is not achievable as written \u2014 the artifact string is the COLD one; the alpha is compared instead.",
+    "4: dispersed seeds are 1000+s for s in 0..47, rung = s // 12.",
+    "5: the sigma floor is a flat absolute 0.05.",
+    "6: the penalized objective is evaluated in numpy with an overflow scan on the linear predictor, not through GLM.loglike (which returns inf-inf = NaN at non-converged parameters and reads state off a model object this script mutates 50 times per leg); a non-finite objective makes the start a FAILURE, and a non-finite anchor hard-fails its leg.",
+    "7: convergence is carried from the optimizer via captured warnings \u2014 GLM._fit_ridge discards scipy's success flag and only warns; non-converged starts are failures and enter neither the branch count nor the optimum census.",
+    "8: legs are reordered so the primary (production, ddof-0) leg runs first, and a run that did not complete all 50 starts of the primary leg emits NO verdict code (status PROBE_INCOMPLETE).",
+    "9: the anchor is an EVALUATION at the frozen 317-vector, not a refit; G1's blocking clause is column-map + finiteness + alpha, and the warm-start refit comparison is retained non-blocking. Anchoring on a refit made every anchor invalid: the fitted start reproduces production and still warns |grad|=0.014 (the committed fit's own standing character), and on the ddof-0 design the IRLS prestep blows it up.",
+    "10: convergence is the committed pipeline's criterion (pathA_resimulate_joint.py:337) plus a finite objective; optimizer warnings are recorded, never failure."
+  ],
+  "panel": {
+    "n_train": 10176,
+    "n_strata": 296,
+    "alpha": 0.0001,
+    "ddof_factor": 1.0000491388418271
+  },
+  "start_composition": {
+    "n_starts": 50,
+    "n_dispersed": 48,
+    "sigma_ladder": [
+      0.25,
+      0.5,
+      1.0,
+      2.0
+    ],
+    "per_rung": 12,
+    "seed_base": 1000,
+    "sigma_floor_abs": 0.05
+  },
+  "branch_rule": {
+    "macro_tol": 0.02,
+    "objective_tol": 0.0001,
+    "cluster_decimals": 3,
+    "majority_threshold": 26,
+    "production_v4_macro": {
+      "rate_gap_bps": 0.6468566611612588,
+      "burnout_orth": -0.17126111626112517,
+      "friction": -0.007112288418868083
+    }
+  },
+  "parity_gates": {
+    "G2_panel": {
+      "n_train": {
+        "got": 10176,
+        "want": 10176
+      },
+      "n_strata": {
+        "got": 296,
+        "want": 296
+      },
+      "pass": true
+    },
+    "G3_design_shape": {
+      "n_month_dummies": {
+        "got": 11,
+        "want": 11
+      },
+      "head_len": {
+        "got": 22,
+        "want": 22
+      },
+      "n_fe_columns": 295,
+      "fe_columns_match_artifact": true,
+      "reference_stratum": {
+        "got": "2017_200_740+_\u226480",
+        "want": "2017_200_740+_\u226480"
+      },
+      "all_12_months_present": true,
+      "pass": true
+    },
+    "G0_reimplementation": {
+      "tol": 1e-12,
+      "checks": {
+        "ddof1_vs_fit_betas": {
+          "max_abs_diff": 0.0,
+          "pass": true
+        },
+        "ddof0_vs_fit_with_month_dummies": {
+          "max_abs_macro_diff": 0.0,
+          "fit_method_reimpl": "ridge(alpha=0.0001)",
+          "fit_method_source": "ridge(alpha=0.0001)",
+          "pass": true
+        }
+      },
+      "pass": true
+    },
+    "G1_production_anchor": {
+      "leg": "prod_warm",
+      "anchor_kind": "evaluation_at_frozen_production_vector",
+      "column_map_exact": true,
+      "n_design_columns": 317,
+      "n_committed_coefficients": 317,
+      "anchor_valid": true,
+      "anchor_invalid_reason": "",
+      "anchor_objective": 1920053.7607715488,
+      "anchor_eta_max": 22.271552736550717,
+      "anchor_unit_translation": {
+        "rate_gap_bps_factor": 1.0,
+        "friction_factor": 1.0,
+        "burnout_orth_factor": 1.0,
+        "exact_for_loglike": true
+      },
+      "anchor_objective_statsmodels_crosscheck": 1920053.7607715488,
+      "design_units_check": {
+        "fit_with_month_dummies_vs_artifact_max_abs": 0.0,
+        "ddof0_cold_refit_vs_artifact_max_abs": 0.0,
+        "n_columns": 317,
+        "note": "the anchor is evaluated at the frozen vector, so this records whether that vector is still the ddof-0 design's own solution on today's panel + FRED join; non-gating"
+      },
+      "warm_start_refit_vs_anchor": {
+        "tol": 1e-09,
+        "checks": {
+          "rate_gap_bps": {
+            "got": 2.461329910512011,
+            "want_anchor": 0.6468566611612588,
+            "want_artifact": 0.6468566611612588,
+            "abs_diff_vs_anchor": 1.8144732493507525,
+            "abs_diff_vs_artifact": 1.8144732493507525,
+            "pass": false
+          },
+          "burnout_orth": {
+            "got": -0.19283775376907647,
+            "want_anchor": -0.17126111626112517,
+            "want_artifact": -0.17126111626112517,
+            "abs_diff_vs_anchor": 0.021576637507951302,
+            "abs_diff_vs_artifact": 0.021576637507951302,
+            "pass": false
+          },
+          "friction": {
+            "got": 0.6794048232026807,
+            "want_anchor": -0.007112288418868083,
+            "want_artifact": -0.007112288418868083,
+            "abs_diff_vs_anchor": 0.6865171116215488,
+            "abs_diff_vs_artifact": 0.6865171116215488,
+            "pass": false
+          }
+        },
+        "blocking": false,
+        "pass": false,
+        "fit_method_anchor_start": "ridge(alpha=0.0001, warm_start)",
+        "optimizer_warning": "overflow encountered in exp; invalid value encountered in divide; invalid value encountered in multiply; divide by zero encountered in divide; invalid value encountered in multiply; divide by zero encountered in log; invalid value encountered in multiply; divide by zero encountered in divide; overflow encountered in divide; invalid value encountered in divide; divide by zero encountered in log; in",
+        "note": "the fitted warm_production start; statsmodels warns |grad| ~ 0.014 on the committed ridge fit itself, which is C6(iii)'s premise, so this is reported, not blocking."
+      },
+      "ddof_factor": 1.0000491388418271,
+      "fit_method_artifact": "ridge(alpha=0.0001)",
+      "alpha_matches": true,
+      "pass": true,
+      "note": "DEVIATION 3: the artifact's fit_method is the COLD string 'ridge(alpha=0.0001)'; fit_betas' warm branch returns '\u2026, warm_start' by construction, so G1 compares the alpha and records both strings."
+    }
+  },
+  "parity_gates_all_pass": true,
+  "legs": {
+    "prod_warm": {
+      "convention": "ddof0",
+      "irls_prestep": true
+    },
+    "fitbetas_warm": {
+      "convention": "ddof1",
+      "irls_prestep": true
+    },
+    "prod_direct": {
+      "convention": "ddof0",
+      "irls_prestep": false
+    }
+  },
+  "anchor": {
+    "ddof0": {
+      "finite": true,
+      "objective": 1920053.7607715488,
+      "reason": "",
+      "n_design_columns": 317,
+      "n_committed_coefficients": 317,
+      "missing_columns": [],
+      "column_map_exact": true,
+      "macro": {
+        "rate_gap_bps": 0.6468566611612588,
+        "burnout_orth": -0.17126111626112517,
+        "friction": -0.007112288418868083
+      },
+      "unit_translation": {
+        "rate_gap_bps_factor": 1.0,
+        "friction_factor": 1.0,
+        "burnout_orth_factor": 1.0,
+        "exact_for_loglike": true
+      },
+      "eta_max": 22.271552736550717,
+      "eta_min": -27.67655165339363,
+      "source": "hazard_coefficients.json .coefficients (frozen, 317 entries)"
+    },
+    "ddof1": {
+      "finite": true,
+      "objective": 1920053.760771551,
+      "reason": "",
+      "n_design_columns": 317,
+      "n_committed_coefficients": 317,
+      "missing_columns": [],
+      "column_map_exact": true,
+      "macro": {
+        "rate_gap_bps": 0.6468884469484164,
+        "burnout_orth": -0.17126111626112517,
+        "friction": -0.007112637908483726
+      },
+      "unit_translation": {
+        "rate_gap_bps_factor": 1.0000491388418271,
+        "friction_factor": 1.0000491388418271,
+        "burnout_orth_factor": 1.0,
+        "exact_for_loglike": true
+      },
+      "eta_max": 22.271552736550717,
+      "eta_min": -27.67655165339363,
+      "source": "hazard_coefficients.json .coefficients (frozen, 317 entries)"
+    }
+  },
+  "anchor_cross_leg_consistency": {
+    "objectives": {
+      "ddof0": 1920053.7607715488,
+      "ddof1": 1920053.760771551
+    },
+    "max_abs_spread": 2.0954757928848267e-09,
+    "expected_spread_order": 1e-08,
+    "note": "same linear predictor by construction; only the penalty term moves under the ddof translation"
+  },
+  "primary_leg": "prod_warm",
+  "primary_leg_complete": true,
+  "legs_requested": [
+    "prod_warm",
+    "fitbetas_warm",
+    "prod_direct"
+  ],
+  "legs_run": [
+    "fitbetas_warm",
+    "prod_direct",
+    "prod_warm"
+  ],
+  "limit": null,
+  "anchor_invalid_legs": {},
+  "by_leg": {
+    "prod_warm": {
+      "n_starts": 50,
+      "n_failed": 23,
+      "n_converged": 27,
+      "n_on_production_branch": 1,
+      "anchor_valid": true,
+      "anchor_invalid_reason": "",
+      "anchor_kind": "evaluation_at_frozen_production_vector",
+      "anchor_objective": 1920053.7607715488,
+      "anchor_macro": {
+        "rate_gap_bps": 0.6468566611612588,
+        "burnout_orth": -0.17126111626112517,
+        "friction": -0.007112288418868083
+      },
+      "anchor_eta_max": 22.271552736550717,
+      "anchor_unit_translation": {
+        "rate_gap_bps_factor": 1.0,
+        "friction_factor": 1.0,
+        "burnout_orth_factor": 1.0,
+        "exact_for_loglike": true
+      },
+      "warm_start_fit": {
+        "converged": true,
+        "objective": 20382293849144.7,
+        "macro": {
+          "rate_gap_bps": 2.461329910512011,
+          "burnout_orth": -0.19283775376907647,
+          "friction": 0.6794048232026807
+        },
+        "objective_minus_anchor": 20382291929090.938,
+        "max_abs_macro_gap_vs_anchor": 1.8144732493507525,
+        "optimizer_converged": false,
+        "optimizer_warning": "overflow encountered in exp; invalid value encountered in divide; invalid value encountered in multiply; divide by zero encountered in divide; invalid value encountered in multiply; divide by zero encountered in log; invalid value encountered in multiply; divide by zero encountered in divide; overflow encountered in divide; invalid value encountered in divide; divide by zero encountered in log; in",
+        "irls_converged": false,
+        "irls_iterations": null,
+        "failure": ""
+      },
+      "failures": [
+        {
+          "start_id": 3,
+          "kind": "dispersed",
+          "sigma_rung": 0.25,
+          "reason": "objective: exp overflow: max eta 5.73e+06 > 700",
+          "eta_max": 5729913.8134865165,
+          "rate_gap_bps": 0.41121455890513287,
+          "burnout_orth": -0.11639690172878919,
+          "friction": -0.21775051189243347
+        },
+        {
+          "start_id": 5,
+          "kind": "dispersed",
+          "sigma_rung": 0.25,
+          "reason": "objective: exp overflow: max eta 5.73e+06 > 700",
+          "eta_max": 5729771.293196176,
+          "rate_gap_bps": 0.5370222453333842,
+          "burnout_orth": -0.11983107534719376,
+          "friction": -0.20127631980693145
+        },
+        {
+          "start_id": 7,
+          "kind": "dispersed",
+          "sigma_rung": 0.25,
+          "reason": "objective: exp overflow: max eta 5.73e+06 > 700",
+          "eta_max": 5729508.903651745,
+          "rate_gap_bps": 0.10081312497610384,
+          "burnout_orth": -0.14515168529707428,
+          "friction": -0.15108595804906427
+        },
+        {
+          "start_id": 12,
+          "kind": "dispersed",
+          "sigma_rung": 0.25,
+          "reason": "objective: exp overflow: max eta 5.73e+06 > 700",
+          "eta_max": 5729932.397482132,
+          "rate_gap_bps": 0.28883382802880714,
+          "burnout_orth": -0.14549620055039436,
+          "friction": -0.23543862966942766
+        },
+        {
+          "start_id": 13,
+          "kind": "dispersed",
+          "sigma_rung": 0.25,
+          "reason": "objective: exp overflow: max eta 5.73e+06 > 700",
+          "eta_max": 5729851.08578705,
+          "rate_gap_bps": 0.7403329538054726,
+          "burnout_orth": -0.12695908922830312,
+          "friction": -0.24893848641366978
+        },
+        {
+          "start_id": 14,
+          "kind": "dispersed",
+          "sigma_rung": 0.5,
+          "reason": "objective: exp overflow: max eta 5.73e+06 > 700",
+          "eta_max": 5729913.907872858,
+          "rate_gap_bps": 1.0458885900951551,
+          "burnout_orth": -0.18177304995267876,
+          "friction": -0.09638599827707788
+        },
+        {
+          "start_id": 19,
+          "kind": "dispersed",
+          "sigma_rung": 0.5,
+          "reason": "objective: exp overflow: max eta 5.406e+06 > 700",
+          "eta_max": 5405545.010085815,
+          "rate_gap_bps": -1.6513029520545381,
+          "burnout_orth": -1.2158114124467463,
+          "friction": 5.167926245793362
+        },
+        {
+          "start_id": 21,
+          "kind": "dispersed",
+          "sigma_rung": 0.5,
+          "reason": "objective: exp overflow: max eta 5.73e+06 > 700",
+          "eta_max": 5729920.18089072,
+          "rate_gap_bps": 0.4456706570793344,
+          "burnout_orth": -0.15906211391582842,
+          "friction": -0.2515757565138132
+        },
+        {
+          "start_id": 22,
+          "kind": "dispersed",
+          "sigma_rung": 0.5,
+          "reason": "IRLS prestep raised: ValueError('NaN, inf or invalid value detected in weights, estimation infeasible.')",
+          "eta_max": 1.349645580017806e+172,
+          "rate_gap_bps": -3.806802998394894e+164,
+          "burnout_orth": 1.866365377588735e+163,
+          "friction": -5.079729225822344e+164
+        },
+        {
+          "start_id": 23,
+          "kind": "dispersed",
+          "sigma_rung": 0.5,
+          "reason": "IRLS prestep raised: ValueError('NaN, inf or invalid value detected in weights, estimation infeasible.')",
+          "eta_max": 1.6711380978300082e+218,
+          "rate_gap_bps": -5.0693365832923193e+210,
+          "burnout_orth": 5.9521370412461705e+209,
+          "friction": -6.288491120295935e+210
+        },
+        {
+          "start_id": 25,
+          "kind": "dispersed",
+          "sigma_rung": 0.5,
+          "reason": "objective: exp overflow: max eta 5.73e+06 > 700",
+          "eta_max": 5729980.084148457,
+          "rate_gap_bps": 0.10288378913169025,
+          "burnout_orth": -0.14885759280029007,
+          "friction": -0.1331313353814097
+        },
+        {
+          "start_id": 27,
+          "kind": "dispersed",
+          "sigma_rung": 1.0,
+          "reason": "objective: exp overflow: max eta 5.73e+06 > 700",
+          "eta_max": 5729959.134772514,
+          "rate_gap_bps": -0.28915387801813897,
+          "burnout_orth": -0.2001612903118418,
+          "friction": -0.2669099432657346
+        },
+        {
+          "start_id": 29,
+          "kind": "dispersed",
+          "sigma_rung": 1.0,
+          "reason": "objective: exp overflow: max eta 5.73e+06 > 700",
+          "eta_max": 5729888.87458223,
+          "rate_gap_bps": 0.12540977276600115,
+          "burnout_orth": 0.1261014327408954,
+          "friction": -0.21147568673724434
+        },
+        {
+          "start_id": 30,
+          "kind": "dispersed",
+          "sigma_rung": 1.0,
+          "reason": "objective: exp overflow: max eta 5.593e+06 > 700",
+          "eta_max": 5592767.613315062,
+          "rate_gap_bps": -0.3458872301149931,
+          "burnout_orth": -0.7500470456444022,
+          "friction": 2.2329567424814094
+        },
+        {
+          "start_id": 31,
+          "kind": "dispersed",
+          "sigma_rung": 1.0,
+          "reason": "|macro beta| 20.3 > 20.0",
+          "eta_max": 149.9782247339529,
+          "rate_gap_bps": 1.76164841687594,
+          "burnout_orth": 20.282866315434724,
+          "friction": -0.792958293279734
+        },
+        {
+          "start_id": 34,
+          "kind": "dispersed",
+          "sigma_rung": 1.0,
+          "reason": "objective: exp overflow: max eta 5.73e+06 > 700",
+          "eta_max": 5729837.591892735,
+          "rate_gap_bps": -0.9152880251359137,
+          "burnout_orth": -0.40969126357375873,
+          "friction": -0.2191574715888795
+        },
+        {
+          "start_id": 39,
+          "kind": "dispersed",
+          "sigma_rung": 2.0,
+          "reason": "IRLS prestep raised: ValueError('NaN, inf or invalid value detected in weights, estimation infeasible.')",
+          "eta_max": 8.631006154200596,
+          "rate_gap_bps": -23.752742439717245,
+          "burnout_orth": 39.86109971380053,
+          "friction": 41.14130610272293
+        },
+        {
+          "start_id": 41,
+          "kind": "dispersed",
+          "sigma_rung": 2.0,
+          "reason": "objective: exp overflow: max eta 5.73e+06 > 700",
+          "eta_max": 5729905.849198835,
+          "rate_gap_bps": -2.837260399421405,
+          "burnout_orth": 0.010731072457256116,
+          "friction": -0.11905533872903919
+        },
+        {
+          "start_id": 43,
+          "kind": "dispersed",
+          "sigma_rung": 2.0,
+          "reason": "objective: exp overflow: max eta 5.73e+06 > 700",
+          "eta_max": 5729730.994509685,
+          "rate_gap_bps": 0.5780670392333455,
+          "burnout_orth": 0.08097869226949991,
+          "friction": 0.10073229389958223
+        },
+        {
+          "start_id": 44,
+          "kind": "dispersed",
+          "sigma_rung": 2.0,
+          "reason": "objective: exp overflow: max eta 5.73e+06 > 700",
+          "eta_max": 5729704.771505442,
+          "rate_gap_bps": 0.5243799492357687,
+          "burnout_orth": -0.18163127422643646,
+          "friction": -0.06580405833279815
+        },
+        {
+          "start_id": 45,
+          "kind": "dispersed",
+          "sigma_rung": 2.0,
+          "reason": "objective: exp overflow: max eta 5.73e+06 > 700",
+          "eta_max": 5729830.4120645225,
+          "rate_gap_bps": 0.4282662297865799,
+          "burnout_orth": -0.486986605995019,
+          "friction": -0.1785616758753487
+        },
+        {
+          "start_id": 46,
+          "kind": "dispersed",
+          "sigma_rung": 2.0,
+          "reason": "objective: exp overflow: max eta 5.73e+06 > 700",
+          "eta_max": 5729887.755168175,
+          "rate_gap_bps": 0.7254984723021292,
+          "burnout_orth": 0.47756561151727606,
+          "friction": -0.21141719966400577
+        },
+        {
+          "start_id": 48,
+          "kind": "dispersed",
+          "sigma_rung": 2.0,
+          "reason": "objective: exp overflow: max eta 5.73e+06 > 700",
+          "eta_max": 5729888.5337036885,
+          "rate_gap_bps": 0.5989422145235259,
+          "burnout_orth": 0.12583171884972566,
+          "friction": -0.21724095773209504
+        }
+      ],
+      "best_objective_found": 1920053.7607715488,
+      "production_is_best_objective": true,
+      "better_optimum_starts": [],
+      "distinct_optima": [
+        {
+          "triple": {
+            "rate_gap_bps": 0.647,
+            "burnout_orth": -0.171,
+            "friction": -0.007
+          },
+          "objective_min": 1920054.0797932579,
+          "objective_max": 1920054.0797932579,
+          "count": 1,
+          "start_ids": [
+            16
+          ]
+        },
+        {
+          "triple": {
+            "rate_gap_bps": 1.036,
+            "burnout_orth": -0.641,
+            "friction": 0.111
+          },
+          "objective_min": 19691108766106.207,
+          "objective_max": 19691108766106.207,
+          "count": 1,
+          "start_ids": [
+            15
+          ]
+        },
+        {
+          "triple": {
+            "rate_gap_bps": 0.43,
+            "burnout_orth": -0.403,
+            "friction": -0.212
+          },
+          "objective_min": 19691169786547.1,
+          "objective_max": 19691169786547.1,
+          "count": 1,
+          "start_ids": [
+            37
+          ]
+        },
+        {
+          "triple": {
+            "rate_gap_bps": 0.894,
+            "burnout_orth": -0.566,
+            "friction": 0.244
+          },
+          "objective_min": 19691684212822.074,
+          "objective_max": 19691684212822.074,
+          "count": 1,
+          "start_ids": [
+            11
+          ]
+        },
+        {
+          "triple": {
+            "rate_gap_bps": 1.029,
+            "burnout_orth": -0.611,
+            "friction": 0.21
+          },
+          "objective_min": 19692375073003.64,
+          "objective_max": 19692375073003.64,
+          "count": 1,
+          "start_ids": [
+            6
+          ]
+        },
+        {
+          "triple": {
+            "rate_gap_bps": 1.679,
+            "burnout_orth": -0.612,
+            "friction": 6.036
+          },
+          "objective_min": 19697135719695.05,
+          "objective_max": 19697135719695.05,
+          "count": 1,
+          "start_ids": [
+            28
+          ]
+        },
+        {
+          "triple": {
+            "rate_gap_bps": 0.894,
+            "burnout_orth": -0.508,
+            "friction": 0.101
+          },
+          "objective_min": 19702690356551.105,
+          "objective_max": 19702690356551.105,
+          "count": 1,
+          "start_ids": [
+            24
+          ]
+        },
+        {
+          "triple": {
+            "rate_gap_bps": 0.621,
+            "burnout_orth": -0.517,
+            "friction": 0.17
+          },
+          "objective_min": 19707024770716.145,
+          "objective_max": 19707024770716.145,
+          "count": 1,
+          "start_ids": [
+            9
+          ]
+        },
+        {
+          "triple": {
+            "rate_gap_bps": 1.862,
+            "burnout_orth": -0.42,
+            "friction": 0.114
+          },
+          "objective_min": 19721011672349.45,
+          "objective_max": 19721011672349.45,
+          "count": 1,
+          "start_ids": [
+            33
+          ]
+        },
+        {
+          "triple": {
+            "rate_gap_bps": 0.51,
+            "burnout_orth": -0.452,
+            "friction": 0.221
+          },
+          "objective_min": 19723958333448.055,
+          "objective_max": 19723958333448.055,
+          "count": 1,
+          "start_ids": [
+            17
+          ]
+        },
+        {
+          "triple": {
+            "rate_gap_bps": 1.024,
+            "burnout_orth": -0.399,
+            "friction": -0.07
+          },
+          "objective_min": 19727244497547.93,
+          "objective_max": 19727244497547.93,
+          "count": 1,
+          "start_ids": [
+            49
+          ]
+        },
+        {
+          "triple": {
+            "rate_gap_bps": 1.648,
+            "burnout_orth": -0.024,
+            "friction": 0.163
+          },
+          "objective_min": 19744824357776.32,
+          "objective_max": 19744824357776.32,
+          "count": 1,
+          "start_ids": [
+            38
+          ]
+        },
+        {
+          "triple": {
+            "rate_gap_bps": 1.531,
+            "burnout_orth": -0.202,
+            "friction": 1.531
+          },
+          "objective_min": 19752183836372.59,
+          "objective_max": 19752183836372.59,
+          "count": 1,
+          "start_ids": [
+            20
+          ]
+        },
+        {
+          "triple": {
+            "rate_gap_bps": 1.057,
+            "burnout_orth": -0.233,
+            "friction": 0.159
+          },
+          "objective_min": 19755904185639.633,
+          "objective_max": 19755904185639.633,
+          "count": 1,
+          "start_ids": [
+            4
+          ]
+        },
+        {
+          "triple": {
+            "rate_gap_bps": 1.959,
+            "burnout_orth": 0.262,
+            "friction": 0.263
+          },
+          "objective_min": 19768654722524.977,
+          "objective_max": 19768654722524.977,
+          "count": 1,
+          "start_ids": [
+            47
+          ]
+        },
+        {
+          "triple": {
+            "rate_gap_bps": 0.438,
+            "burnout_orth": -0.056,
+            "friction": 0.222
+          },
+          "objective_min": 19777792028198.152,
+          "objective_max": 19777792028198.152,
+          "count": 1,
+          "start_ids": [
+            40
+          ]
+        },
+        {
+          "triple": {
+            "rate_gap_bps": 1.056,
+            "burnout_orth": 0.242,
+            "friction": 0.199
+          },
+          "objective_min": 19782498782945.52,
+          "objective_max": 19782498782945.52,
+          "count": 1,
+          "start_ids": [
+            35
+          ]
+        },
+        {
+          "triple": {
+            "rate_gap_bps": 0.789,
+            "burnout_orth": -0.663,
+            "friction": 0.175
+          },
+          "objective_min": 19866283469971.844,
+          "objective_max": 19866283469971.844,
+          "count": 1,
+          "start_ids": [
+            42
+          ]
+        },
+        {
+          "triple": {
+            "rate_gap_bps": 2.461,
+            "burnout_orth": -0.193,
+            "friction": 0.679
+          },
+          "objective_min": 20382293849144.7,
+          "objective_max": 20382293849144.7,
+          "count": 1,
+          "start_ids": [
+            0
+          ]
+        },
+        {
+          "triple": {
+            "rate_gap_bps": 0.791,
+            "burnout_orth": -0.199,
+            "friction": -0.028
+          },
+          "objective_min": 2.955150595304547e+164,
+          "objective_max": 2.955150595304547e+164,
+          "count": 1,
+          "start_ids": [
+            32
+          ]
+        },
+        {
+          "triple": {
+            "rate_gap_bps": 0.829,
+            "burnout_orth": -0.239,
+            "friction": -0.081
+          },
+          "objective_min": 1.8286806603493962e+173,
+          "objective_max": 1.8286806603493962e+173,
+          "count": 1,
+          "start_ids": [
+            18
+          ]
+        },
+        {
+          "triple": {
+            "rate_gap_bps": 0.72,
+            "burnout_orth": -0.294,
+            "friction": 0.027
+          },
+          "objective_min": 9.525438704385475e+184,
+          "objective_max": 9.525438704385475e+184,
+          "count": 1,
+          "start_ids": [
+            36
+          ]
+        },
+        {
+          "triple": {
+            "rate_gap_bps": 0.586,
+            "burnout_orth": -0.1,
+            "friction": 0.063
+          },
+          "objective_min": 1.3149345888122734e+227,
+          "objective_max": 1.3149345888122734e+227,
+          "count": 1,
+          "start_ids": [
+            8
+          ]
+        },
+        {
+          "triple": {
+            "rate_gap_bps": 0.69,
+            "burnout_orth": -0.248,
+            "friction": -0.078
+          },
+          "objective_min": 1.9529652370284515e+232,
+          "objective_max": 1.9529652370284515e+232,
+          "count": 1,
+          "start_ids": [
+            10
+          ]
+        },
+        {
+          "triple": {
+            "rate_gap_bps": 0.505,
+            "burnout_orth": -0.095,
+            "friction": 0.043
+          },
+          "objective_min": 2.1499941011440256e+278,
+          "objective_max": 2.1499941011440256e+278,
+          "count": 1,
+          "start_ids": [
+            2
+          ]
+        },
+        {
+          "triple": {
+            "rate_gap_bps": 0.412,
+            "burnout_orth": -0.094,
+            "friction": -0.08
+          },
+          "objective_min": 4.856959246190174e+291,
+          "objective_max": 4.856959246190174e+291,
+          "count": 1,
+          "start_ids": [
+            26
+          ]
+        }
+      ],
+      "cold_start_converged": true,
+      "cold_start_on_production_branch": true,
+      "cold_start_macro": {
+        "rate_gap_bps": 0.6468566611612588,
+        "burnout_orth": -0.17126111626112517,
+        "friction": -0.007112288418868083
+      },
+      "cold_start_objective": 1920053.7607715488,
+      "cold_start_failure": "",
+      "cold_start_diverged_alone": false,
+      "by_rung": {
+        "0.25": {
+          "n": 12,
+          "n_on_production_branch": 0
+        },
+        "0.5": {
+          "n": 12,
+          "n_on_production_branch": 0
+        },
+        "1.0": {
+          "n": 12,
+          "n_on_production_branch": 0
+        },
+        "2.0": {
+          "n": 12,
+          "n_on_production_branch": 0
+        }
+      }
+    },
+    "fitbetas_warm": {
+      "n_starts": 50,
+      "n_failed": 23,
+      "n_converged": 27,
+      "n_on_production_branch": 0,
+      "anchor_valid": true,
+      "anchor_invalid_reason": "",
+      "anchor_kind": "evaluation_at_frozen_production_vector",
+      "anchor_objective": 1920053.760771551,
+      "anchor_macro": {
+        "rate_gap_bps": 0.6468884469484164,
+        "burnout_orth": -0.17126111626112517,
+        "friction": -0.007112637908483726
+      },
+      "anchor_eta_max": 22.271552736550717,
+      "anchor_unit_translation": {
+        "rate_gap_bps_factor": 1.0000491388418271,
+        "friction_factor": 1.0000491388418271,
+        "burnout_orth_factor": 1.0,
+        "exact_for_loglike": true
+      },
+      "warm_start_fit": {
+        "converged": true,
+        "objective": 1920053.9894679023,
+        "macro": {
+          "rate_gap_bps": 0.6468884469495373,
+          "burnout_orth": -0.17126111626179624,
+          "friction": -0.007112637908207292
+        },
+        "objective_minus_anchor": 0.22869635140523314,
+        "max_abs_macro_gap_vs_anchor": 1.120881165661558e-12,
+        "optimizer_converged": false,
+        "optimizer_warning": "GLM ridge optimization may have failed, |grad|=0.014021",
+        "irls_converged": true,
+        "irls_iterations": 31,
+        "failure": ""
+      },
+      "failures": [
+        {
+          "start_id": 3,
+          "kind": "dispersed",
+          "sigma_rung": 0.25,
+          "reason": "objective: exp overflow: max eta 5.73e+06 > 700",
+          "eta_max": 5729913.813355006,
+          "rate_gap_bps": 0.41122584382748095,
+          "burnout_orth": -0.11639870828260748,
+          "friction": -0.21773991464448514
+        },
+        {
+          "start_id": 5,
+          "kind": "dispersed",
+          "sigma_rung": 0.25,
+          "reason": "objective: exp overflow: max eta 5.73e+06 > 700",
+          "eta_max": 5729771.293010126,
+          "rate_gap_bps": 0.537034546343058,
+          "burnout_orth": -0.11983317805303112,
+          "friction": -0.20126572517480149
+        },
+        {
+          "start_id": 6,
+          "kind": "dispersed",
+          "sigma_rung": 0.25,
+          "reason": "|macro beta| 6.56e+21 > 20.0",
+          "eta_max": 5.303188122837896e+22,
+          "rate_gap_bps": 2.704362971042937e+21,
+          "burnout_orth": 6.558381764382749e+21,
+          "friction": 2.2438932971723414e+20
+        },
+        {
+          "start_id": 7,
+          "kind": "dispersed",
+          "sigma_rung": 0.25,
+          "reason": "objective: exp overflow: max eta 5.73e+06 > 700",
+          "eta_max": 5729508.908239945,
+          "rate_gap_bps": 0.1008253538649328,
+          "burnout_orth": -0.14515320044690777,
+          "friction": -0.15107710303931932
+        },
+        {
+          "start_id": 12,
+          "kind": "dispersed",
+          "sigma_rung": 0.25,
+          "reason": "objective: exp overflow: max eta 5.73e+06 > 700",
+          "eta_max": 5729932.39737405,
+          "rate_gap_bps": 0.2888442665944705,
+          "burnout_orth": -0.14549765662130207,
+          "friction": -0.23542803105347537
+        },
+        {
+          "start_id": 13,
+          "kind": "dispersed",
+          "sigma_rung": 0.25,
+          "reason": "objective: exp overflow: max eta 5.73e+06 > 700",
+          "eta_max": 5729851.086400623,
+          "rate_gap_bps": 0.7403460959132608,
+          "burnout_orth": -0.12696145415650584,
+          "friction": -0.2489282714718237
+        },
+        {
+          "start_id": 14,
+          "kind": "dispersed",
+          "sigma_rung": 0.5,
+          "reason": "objective: exp overflow: max eta 5.73e+06 > 700",
+          "eta_max": 5729913.907665105,
+          "rate_gap_bps": 1.045902993148259,
+          "burnout_orth": -0.18177540867447933,
+          "friction": -0.09637540997274373
+        },
+        {
+          "start_id": 19,
+          "kind": "dispersed",
+          "sigma_rung": 0.5,
+          "reason": "objective: exp overflow: max eta 5.406e+06 > 700",
+          "eta_max": 5405545.122897843,
+          "rate_gap_bps": -1.6511219121206564,
+          "burnout_orth": -1.2158989746389408,
+          "friction": 5.167530710550791
+        },
+        {
+          "start_id": 21,
+          "kind": "dispersed",
+          "sigma_rung": 0.5,
+          "reason": "objective: exp overflow: max eta 5.73e+06 > 700",
+          "eta_max": 5729920.180870383,
+          "rate_gap_bps": 0.4456821054865883,
+          "burnout_orth": -0.15906396302745066,
+          "friction": -0.2515651799215221
+        },
+        {
+          "start_id": 22,
+          "kind": "dispersed",
+          "sigma_rung": 0.5,
+          "reason": "IRLS prestep raised: ValueError('NaN, inf or invalid value detected in weights, estimation infeasible.')",
+          "eta_max": 1.3496458332561456e+172,
+          "rate_gap_bps": -3.8066104395457315e+164,
+          "burnout_orth": 1.8663143907021784e+163,
+          "friction": -5.07948058872404e+164
+        },
+        {
+          "start_id": 23,
+          "kind": "dispersed",
+          "sigma_rung": 0.5,
+          "reason": "IRLS prestep raised: ValueError('NaN, inf or invalid value detected in weights, estimation infeasible.')",
+          "eta_max": 1.6711446072002569e+218,
+          "rate_gap_bps": -5.0691133466769667e+210,
+          "burnout_orth": 5.952211454049987e+209,
+          "friction": -6.288206609740494e+210
+        },
+        {
+          "start_id": 25,
+          "kind": "dispersed",
+          "sigma_rung": 0.5,
+          "reason": "objective: exp overflow: max eta 5.73e+06 > 700",
+          "eta_max": 5729980.084092072,
+          "rate_gap_bps": 0.10289260133314959,
+          "burnout_orth": -0.14885842838082783,
+          "friction": -0.13312073442467778
+        },
+        {
+          "start_id": 27,
+          "kind": "dispersed",
+          "sigma_rung": 1.0,
+          "reason": "objective: exp overflow: max eta 5.73e+06 > 700",
+          "eta_max": 5729959.134546363,
+          "rate_gap_bps": -0.28914770670133927,
+          "burnout_orth": -0.20016086251223447,
+          "friction": -0.266899624377771
+        },
+        {
+          "start_id": 29,
+          "kind": "dispersed",
+          "sigma_rung": 1.0,
+          "reason": "objective: exp overflow: max eta 5.73e+06 > 700",
+          "eta_max": 5729888.87491404,
+          "rate_gap_bps": 0.1254180790904055,
+          "burnout_orth": 0.12610070102105,
+          "friction": -0.2114652727185571
+        },
+        {
+          "start_id": 30,
+          "kind": "dispersed",
+          "sigma_rung": 1.0,
+          "reason": "objective: exp overflow: max eta 5.593e+06 > 700",
+          "eta_max": 5592763.080355522,
+          "rate_gap_bps": -0.345697941185767,
+          "burnout_orth": -0.7501976527134103,
+          "friction": 2.2326873977995243
+        },
+        {
+          "start_id": 34,
+          "kind": "dispersed",
+          "sigma_rung": 1.0,
+          "reason": "objective: exp overflow: max eta 5.73e+06 > 700",
+          "eta_max": 5729837.589153541,
+          "rate_gap_bps": -0.915285503391599,
+          "burnout_orth": -0.40968911381867856,
+          "friction": -0.21914692365341118
+        },
+        {
+          "start_id": 39,
+          "kind": "dispersed",
+          "sigma_rung": 2.0,
+          "reason": "IRLS prestep raised: ValueError('NaN, inf or invalid value detected in weights, estimation infeasible.')",
+          "eta_max": 8.628053711726603,
+          "rate_gap_bps": -23.746611386789965,
+          "burnout_orth": 39.852558645504146,
+          "friction": 41.13248902603691
+        },
+        {
+          "start_id": 41,
+          "kind": "dispersed",
+          "sigma_rung": 2.0,
+          "reason": "objective: exp overflow: max eta 5.73e+06 > 700",
+          "eta_max": 5729905.848926293,
+          "rate_gap_bps": -2.8372602134913905,
+          "burnout_orth": 0.010731636712176348,
+          "friction": -0.11904473128144592
+        },
+        {
+          "start_id": 43,
+          "kind": "dispersed",
+          "sigma_rung": 2.0,
+          "reason": "objective: exp overflow: max eta 5.73e+06 > 700",
+          "eta_max": 5729730.980510536,
+          "rate_gap_bps": 0.5780994342104882,
+          "burnout_orth": 0.08096974781138863,
+          "friction": 0.10072283439609862
+        },
+        {
+          "start_id": 44,
+          "kind": "dispersed",
+          "sigma_rung": 2.0,
+          "reason": "objective: exp overflow: max eta 5.73e+06 > 700",
+          "eta_max": 5729704.77732006,
+          "rate_gap_bps": 0.5243936449093979,
+          "burnout_orth": -0.18163400704895388,
+          "friction": -0.06579453778926142
+        },
+        {
+          "start_id": 45,
+          "kind": "dispersed",
+          "sigma_rung": 2.0,
+          "reason": "objective: exp overflow: max eta 5.73e+06 > 700",
+          "eta_max": 5729830.41190513,
+          "rate_gap_bps": 0.42827880708913657,
+          "burnout_orth": -0.4869882833295721,
+          "friction": -0.1785510834108996
+        },
+        {
+          "start_id": 46,
+          "kind": "dispersed",
+          "sigma_rung": 2.0,
+          "reason": "objective: exp overflow: max eta 5.73e+06 > 700",
+          "eta_max": 5729887.755050944,
+          "rate_gap_bps": 0.7255101683083527,
+          "burnout_orth": 0.47756304985524894,
+          "friction": -0.21140660730877844
+        },
+        {
+          "start_id": 48,
+          "kind": "dispersed",
+          "sigma_rung": 2.0,
+          "reason": "objective: exp overflow: max eta 5.73e+06 > 700",
+          "eta_max": 5729888.533515201,
+          "rate_gap_bps": 0.5989542160180927,
+          "burnout_orth": 0.1258294077643471,
+          "friction": -0.21723036065863394
+        }
+      ],
+      "best_objective_found": 1920053.9894679023,
+      "production_is_best_objective": true,
+      "better_optimum_starts": [],
+      "distinct_optima": [
+        {
+          "triple": {
+            "rate_gap_bps": 0.647,
+            "burnout_orth": -0.171,
+            "friction": -0.007
+          },
+          "objective_min": 1920053.9894679023,
+          "objective_max": 1920053.9894679023,
+          "count": 1,
+          "start_ids": [
+            0
+          ]
+        },
+        {
+          "triple": {
+            "rate_gap_bps": 1.036,
+            "burnout_orth": -0.641,
+            "friction": 0.111
+          },
+          "objective_min": 19691108757551.117,
+          "objective_max": 19691108757551.117,
+          "count": 1,
+          "start_ids": [
+            15
+          ]
+        },
+        {
+          "triple": {
+            "rate_gap_bps": 0.321,
+            "burnout_orth": -0.403,
+            "friction": -0.318
+          },
+          "objective_min": 19691168832519.098,
+          "objective_max": 19691168832519.098,
+          "count": 1,
+          "start_ids": [
+            37
+          ]
+        },
+        {
+          "triple": {
+            "rate_gap_bps": 1.87,
+            "burnout_orth": -0.566,
+            "friction": 3.856
+          },
+          "objective_min": 19693069081572.277,
+          "objective_max": 19693069081572.277,
+          "count": 1,
+          "start_ids": [
+            11
+          ]
+        },
+        {
+          "triple": {
+            "rate_gap_bps": 1.642,
+            "burnout_orth": -0.612,
+            "friction": -0.004
+          },
+          "objective_min": 19695909803220.996,
+          "objective_max": 19695909803220.996,
+          "count": 1,
+          "start_ids": [
+            28
+          ]
+        },
+        {
+          "triple": {
+            "rate_gap_bps": 0.894,
+            "burnout_orth": -0.508,
+            "friction": 0.101
+          },
+          "objective_min": 19702692495161.785,
+          "objective_max": 19702692495161.785,
+          "count": 1,
+          "start_ids": [
+            24
+          ]
+        },
+        {
+          "triple": {
+            "rate_gap_bps": 0.757,
+            "burnout_orth": -0.517,
+            "friction": 6.039
+          },
+          "objective_min": 19707826963152.336,
+          "objective_max": 19707826963152.336,
+          "count": 1,
+          "start_ids": [
+            9
+          ]
+        },
+        {
+          "triple": {
+            "rate_gap_bps": 1.863,
+            "burnout_orth": -0.42,
+            "friction": 0.29
+          },
+          "objective_min": 19721009370448.984,
+          "objective_max": 19721009370448.984,
+          "count": 1,
+          "start_ids": [
+            33
+          ]
+        },
+        {
+          "triple": {
+            "rate_gap_bps": 0.518,
+            "burnout_orth": -0.452,
+            "friction": 0.226
+          },
+          "objective_min": 19723958142805.477,
+          "objective_max": 19723958142805.477,
+          "count": 1,
+          "start_ids": [
+            17
+          ]
+        },
+        {
+          "triple": {
+            "rate_gap_bps": 1.034,
+            "burnout_orth": -0.399,
+            "friction": -0.071
+          },
+          "objective_min": 19727243432313.14,
+          "objective_max": 19727243432313.14,
+          "count": 1,
+          "start_ids": [
+            49
+          ]
+        },
+        {
+          "triple": {
+            "rate_gap_bps": 1.648,
+            "burnout_orth": -0.024,
+            "friction": 0.163
+          },
+          "objective_min": 19744823708194.617,
+          "objective_max": 19744823708194.617,
+          "count": 1,
+          "start_ids": [
+            38
+          ]
+        },
+        {
+          "triple": {
+            "rate_gap_bps": 1.531,
+            "burnout_orth": -0.202,
+            "friction": 1.561
+          },
+          "objective_min": 19752183832870.77,
+          "objective_max": 19752183832870.77,
+          "count": 1,
+          "start_ids": [
+            20
+          ]
+        },
+        {
+          "triple": {
+            "rate_gap_bps": 1.959,
+            "burnout_orth": 0.262,
+            "friction": 0.263
+          },
+          "objective_min": 19768654558864.086,
+          "objective_max": 19768654558864.086,
+          "count": 1,
+          "start_ids": [
+            47
+          ]
+        },
+        {
+          "triple": {
+            "rate_gap_bps": 1.091,
+            "burnout_orth": -0.069,
+            "friction": 0.199
+          },
+          "objective_min": 19773130140478.695,
+          "objective_max": 19773130140478.695,
+          "count": 1,
+          "start_ids": [
+            31
+          ]
+        },
+        {
+          "triple": {
+            "rate_gap_bps": 0.438,
+            "burnout_orth": -0.056,
+            "friction": 0.222
+          },
+          "objective_min": 19777792024711.527,
+          "objective_max": 19777792024711.527,
+          "count": 1,
+          "start_ids": [
+            40
+          ]
+        },
+        {
+          "triple": {
+            "rate_gap_bps": 1.056,
+            "burnout_orth": 0.242,
+            "friction": 0.199
+          },
+          "objective_min": 19782498797115.42,
+          "objective_max": 19782498797115.42,
+          "count": 1,
+          "start_ids": [
+            35
+          ]
+        },
+        {
+          "triple": {
+            "rate_gap_bps": 1.463,
+            "burnout_orth": -0.233,
+            "friction": 0.755
+          },
+          "objective_min": 19802180842398.387,
+          "objective_max": 19802180842398.387,
+          "count": 1,
+          "start_ids": [
+            4
+          ]
+        },
+        {
+          "triple": {
+            "rate_gap_bps": 0.789,
+            "burnout_orth": -0.663,
+            "friction": 0.175
+          },
+          "objective_min": 19866283429593.484,
+          "objective_max": 19866283429593.484,
+          "count": 1,
+          "start_ids": [
+            42
+          ]
+        },
+        {
+          "triple": {
+            "rate_gap_bps": 0.983,
+            "burnout_orth": -0.157,
+            "friction": -0.096
+          },
+          "objective_min": 20604758739563.426,
+          "objective_max": 20604758739563.426,
+          "count": 1,
+          "start_ids": [
+            16
+          ]
+        },
+        {
+          "triple": {
+            "rate_gap_bps": 1.963,
+            "burnout_orth": -0.757,
+            "friction": -0.248
+          },
+          "objective_min": 20929707098456.105,
+          "objective_max": 20929707098456.105,
+          "count": 1,
+          "start_ids": [
+            1
+          ]
+        },
+        {
+          "triple": {
+            "rate_gap_bps": 0.791,
+            "burnout_orth": -0.199,
+            "friction": -0.028
+          },
+          "objective_min": 2.955337390661238e+164,
+          "objective_max": 2.955337390661238e+164,
+          "count": 1,
+          "start_ids": [
+            32
+          ]
+        },
+        {
+          "triple": {
+            "rate_gap_bps": 0.829,
+            "burnout_orth": -0.239,
+            "friction": -0.081
+          },
+          "objective_min": 1.8287967943974208e+173,
+          "objective_max": 1.8287967943974208e+173,
+          "count": 1,
+          "start_ids": [
+            18
+          ]
+        },
+        {
+          "triple": {
+            "rate_gap_bps": 0.72,
+            "burnout_orth": -0.294,
+            "friction": 0.027
+          },
+          "objective_min": 9.526013496334045e+184,
+          "objective_max": 9.526013496334045e+184,
+          "count": 1,
+          "start_ids": [
+            36
+          ]
+        },
+        {
+          "triple": {
+            "rate_gap_bps": 0.586,
+            "burnout_orth": -0.1,
+            "friction": 0.063
+          },
+          "objective_min": 1.3150021088090888e+227,
+          "objective_max": 1.3150021088090888e+227,
+          "count": 1,
+          "start_ids": [
+            8
+          ]
+        },
+        {
+          "triple": {
+            "rate_gap_bps": 0.69,
+            "burnout_orth": -0.248,
+            "friction": -0.078
+          },
+          "objective_min": 1.9530674368467204e+232,
+          "objective_max": 1.9530674368467204e+232,
+          "count": 1,
+          "start_ids": [
+            10
+          ]
+        },
+        {
+          "triple": {
+            "rate_gap_bps": 0.505,
+            "burnout_orth": -0.095,
+            "friction": 0.043
+          },
+          "objective_min": 2.150087853095613e+278,
+          "objective_max": 2.150087853095613e+278,
+          "count": 1,
+          "start_ids": [
+            2
+          ]
+        },
+        {
+          "triple": {
+            "rate_gap_bps": 0.412,
+            "burnout_orth": -0.094,
+            "friction": -0.08
+          },
+          "objective_min": 4.857102013466725e+291,
+          "objective_max": 4.857102013466725e+291,
+          "count": 1,
+          "start_ids": [
+            26
+          ]
+        }
+      ],
+      "cold_start_converged": true,
+      "cold_start_on_production_branch": false,
+      "cold_start_macro": {
+        "rate_gap_bps": 1.9625803011627854,
+        "burnout_orth": -0.7569835585320301,
+        "friction": -0.24803880583375507
+      },
+      "cold_start_objective": 20929707098456.105,
+      "cold_start_failure": "",
+      "cold_start_diverged_alone": false,
+      "by_rung": {
+        "0.25": {
+          "n": 12,
+          "n_on_production_branch": 0
+        },
+        "0.5": {
+          "n": 12,
+          "n_on_production_branch": 0
+        },
+        "1.0": {
+          "n": 12,
+          "n_on_production_branch": 0
+        },
+        "2.0": {
+          "n": 12,
+          "n_on_production_branch": 0
+        }
+      }
+    },
+    "prod_direct": {
+      "n_starts": 50,
+      "n_failed": 22,
+      "n_converged": 28,
+      "n_on_production_branch": 1,
+      "anchor_valid": true,
+      "anchor_invalid_reason": "",
+      "anchor_kind": "evaluation_at_frozen_production_vector",
+      "anchor_objective": 1920053.7607715488,
+      "anchor_macro": {
+        "rate_gap_bps": 0.6468566611612588,
+        "burnout_orth": -0.17126111626112517,
+        "friction": -0.007112288418868083
+      },
+      "anchor_eta_max": 22.271552736550717,
+      "anchor_unit_translation": {
+        "rate_gap_bps_factor": 1.0,
+        "friction_factor": 1.0,
+        "burnout_orth_factor": 1.0,
+        "exact_for_loglike": true
+      },
+      "warm_start_fit": {
+        "converged": true,
+        "objective": 20382293849144.7,
+        "macro": {
+          "rate_gap_bps": 2.461329910512011,
+          "burnout_orth": -0.19283775376907647,
+          "friction": 0.6794048232026807
+        },
+        "objective_minus_anchor": 20382291929090.938,
+        "max_abs_macro_gap_vs_anchor": 1.8144732493507525,
+        "optimizer_converged": false,
+        "optimizer_warning": "divide by zero encountered in log; invalid value encountered in multiply; divide by zero encountered in divide; overflow encountered in divide; invalid value encountered in divide; divide by zero encountered in log; invalid value encountered in multiply; divide by zero encountered in divide; overflow encountered in divide; invalid value encountered in divide; divide by zero encountered in log; inv",
+        "irls_converged": null,
+        "irls_iterations": null,
+        "failure": ""
+      },
+      "failures": [
+        {
+          "start_id": 3,
+          "kind": "dispersed",
+          "sigma_rung": 0.25,
+          "reason": "objective: exp overflow: max eta 5.73e+06 > 700",
+          "eta_max": 5729913.8134865165,
+          "rate_gap_bps": 0.41121455890513287,
+          "burnout_orth": -0.11639690172878919,
+          "friction": -0.21775051189243347
+        },
+        {
+          "start_id": 5,
+          "kind": "dispersed",
+          "sigma_rung": 0.25,
+          "reason": "objective: exp overflow: max eta 5.73e+06 > 700",
+          "eta_max": 5729771.293196176,
+          "rate_gap_bps": 0.5370222453333842,
+          "burnout_orth": -0.11983107534719376,
+          "friction": -0.20127631980693145
+        },
+        {
+          "start_id": 7,
+          "kind": "dispersed",
+          "sigma_rung": 0.25,
+          "reason": "objective: exp overflow: max eta 5.73e+06 > 700",
+          "eta_max": 5729508.903651745,
+          "rate_gap_bps": 0.10081312497610384,
+          "burnout_orth": -0.14515168529707428,
+          "friction": -0.15108595804906427
+        },
+        {
+          "start_id": 12,
+          "kind": "dispersed",
+          "sigma_rung": 0.25,
+          "reason": "objective: exp overflow: max eta 5.73e+06 > 700",
+          "eta_max": 5729932.397482132,
+          "rate_gap_bps": 0.28883382802880714,
+          "burnout_orth": -0.14549620055039436,
+          "friction": -0.23543862966942766
+        },
+        {
+          "start_id": 13,
+          "kind": "dispersed",
+          "sigma_rung": 0.25,
+          "reason": "objective: exp overflow: max eta 5.73e+06 > 700",
+          "eta_max": 5729851.08578705,
+          "rate_gap_bps": 0.7403329538054726,
+          "burnout_orth": -0.12695908922830312,
+          "friction": -0.24893848641366978
+        },
+        {
+          "start_id": 14,
+          "kind": "dispersed",
+          "sigma_rung": 0.5,
+          "reason": "objective: exp overflow: max eta 5.73e+06 > 700",
+          "eta_max": 5729913.907872858,
+          "rate_gap_bps": 1.0458885900951551,
+          "burnout_orth": -0.18177304995267876,
+          "friction": -0.09638599827707788
+        },
+        {
+          "start_id": 19,
+          "kind": "dispersed",
+          "sigma_rung": 0.5,
+          "reason": "objective: exp overflow: max eta 5.406e+06 > 700",
+          "eta_max": 5405545.010085815,
+          "rate_gap_bps": -1.6513029520545381,
+          "burnout_orth": -1.2158114124467463,
+          "friction": 5.167926245793362
+        },
+        {
+          "start_id": 21,
+          "kind": "dispersed",
+          "sigma_rung": 0.5,
+          "reason": "objective: exp overflow: max eta 5.73e+06 > 700",
+          "eta_max": 5729920.18089072,
+          "rate_gap_bps": 0.4456706570793344,
+          "burnout_orth": -0.15906211391582842,
+          "friction": -0.2515757565138132
+        },
+        {
+          "start_id": 22,
+          "kind": "dispersed",
+          "sigma_rung": 0.5,
+          "reason": "|macro beta| 5.08e+164 > 20.0",
+          "eta_max": 1.349645580017806e+172,
+          "rate_gap_bps": -3.806802998394894e+164,
+          "burnout_orth": 1.866365377588735e+163,
+          "friction": -5.079729225822344e+164
+        },
+        {
+          "start_id": 23,
+          "kind": "dispersed",
+          "sigma_rung": 0.5,
+          "reason": "|macro beta| 6.29e+210 > 20.0",
+          "eta_max": 1.6711380978300082e+218,
+          "rate_gap_bps": -5.0693365832923193e+210,
+          "burnout_orth": 5.9521370412461705e+209,
+          "friction": -6.288491120295935e+210
+        },
+        {
+          "start_id": 25,
+          "kind": "dispersed",
+          "sigma_rung": 0.5,
+          "reason": "objective: exp overflow: max eta 5.73e+06 > 700",
+          "eta_max": 5729980.084148457,
+          "rate_gap_bps": 0.10288378913169025,
+          "burnout_orth": -0.14885759280029007,
+          "friction": -0.1331313353814097
+        },
+        {
+          "start_id": 27,
+          "kind": "dispersed",
+          "sigma_rung": 1.0,
+          "reason": "objective: exp overflow: max eta 5.73e+06 > 700",
+          "eta_max": 5729959.134772514,
+          "rate_gap_bps": -0.28915387801813897,
+          "burnout_orth": -0.2001612903118418,
+          "friction": -0.2669099432657346
+        },
+        {
+          "start_id": 29,
+          "kind": "dispersed",
+          "sigma_rung": 1.0,
+          "reason": "objective: exp overflow: max eta 5.73e+06 > 700",
+          "eta_max": 5729888.87458223,
+          "rate_gap_bps": 0.12540977276600115,
+          "burnout_orth": 0.1261014327408954,
+          "friction": -0.21147568673724434
+        },
+        {
+          "start_id": 30,
+          "kind": "dispersed",
+          "sigma_rung": 1.0,
+          "reason": "objective: exp overflow: max eta 5.593e+06 > 700",
+          "eta_max": 5592767.613315062,
+          "rate_gap_bps": -0.3458872301149931,
+          "burnout_orth": -0.7500470456444022,
+          "friction": 2.2329567424814094
+        },
+        {
+          "start_id": 34,
+          "kind": "dispersed",
+          "sigma_rung": 1.0,
+          "reason": "objective: exp overflow: max eta 5.73e+06 > 700",
+          "eta_max": 5729837.591892735,
+          "rate_gap_bps": -0.9152880251359137,
+          "burnout_orth": -0.40969126357375873,
+          "friction": -0.2191574715888795
+        },
+        {
+          "start_id": 39,
+          "kind": "dispersed",
+          "sigma_rung": 2.0,
+          "reason": "|macro beta| 41.1 > 20.0",
+          "eta_max": 8.631006154200596,
+          "rate_gap_bps": -23.752742439717245,
+          "burnout_orth": 39.86109971380053,
+          "friction": 41.14130610272293
+        },
+        {
+          "start_id": 41,
+          "kind": "dispersed",
+          "sigma_rung": 2.0,
+          "reason": "objective: exp overflow: max eta 5.73e+06 > 700",
+          "eta_max": 5729905.849198835,
+          "rate_gap_bps": -2.837260399421405,
+          "burnout_orth": 0.010731072457256116,
+          "friction": -0.11905533872903919
+        },
+        {
+          "start_id": 43,
+          "kind": "dispersed",
+          "sigma_rung": 2.0,
+          "reason": "objective: exp overflow: max eta 5.73e+06 > 700",
+          "eta_max": 5729730.994509685,
+          "rate_gap_bps": 0.5780670392333455,
+          "burnout_orth": 0.08097869226949991,
+          "friction": 0.10073229389958223
+        },
+        {
+          "start_id": 44,
+          "kind": "dispersed",
+          "sigma_rung": 2.0,
+          "reason": "objective: exp overflow: max eta 5.73e+06 > 700",
+          "eta_max": 5729704.771505442,
+          "rate_gap_bps": 0.5243799492357687,
+          "burnout_orth": -0.18163127422643646,
+          "friction": -0.06580405833279815
+        },
+        {
+          "start_id": 45,
+          "kind": "dispersed",
+          "sigma_rung": 2.0,
+          "reason": "objective: exp overflow: max eta 5.73e+06 > 700",
+          "eta_max": 5729830.4120645225,
+          "rate_gap_bps": 0.4282662297865799,
+          "burnout_orth": -0.486986605995019,
+          "friction": -0.1785616758753487
+        },
+        {
+          "start_id": 46,
+          "kind": "dispersed",
+          "sigma_rung": 2.0,
+          "reason": "objective: exp overflow: max eta 5.73e+06 > 700",
+          "eta_max": 5729887.755168175,
+          "rate_gap_bps": 0.7254984723021292,
+          "burnout_orth": 0.47756561151727606,
+          "friction": -0.21141719966400577
+        },
+        {
+          "start_id": 48,
+          "kind": "dispersed",
+          "sigma_rung": 2.0,
+          "reason": "objective: exp overflow: max eta 5.73e+06 > 700",
+          "eta_max": 5729888.5337036885,
+          "rate_gap_bps": 0.5989422145235259,
+          "burnout_orth": 0.12583171884972566,
+          "friction": -0.21724095773209504
+        }
+      ],
+      "best_objective_found": 1920053.7607715488,
+      "production_is_best_objective": true,
+      "better_optimum_starts": [],
+      "distinct_optima": [
+        {
+          "triple": {
+            "rate_gap_bps": -0.038,
+            "burnout_orth": -0.403,
+            "friction": 0.205
+          },
+          "objective_min": 19690146800918.38,
+          "objective_max": 19690146800918.38,
+          "count": 1,
+          "start_ids": [
+            37
+          ]
+        },
+        {
+          "triple": {
+            "rate_gap_bps": 1.036,
+            "burnout_orth": -0.641,
+            "friction": 0.111
+          },
+          "objective_min": 19691108766106.207,
+          "objective_max": 19691108766106.207,
+          "count": 1,
+          "start_ids": [
+            15
+          ]
+        },
+        {
+          "triple": {
+            "rate_gap_bps": 0.894,
+            "burnout_orth": -0.566,
+            "friction": 0.244
+          },
+          "objective_min": 19691684212822.074,
+          "objective_max": 19691684212822.074,
+          "count": 1,
+          "start_ids": [
+            11
+          ]
+        },
+        {
+          "triple": {
+            "rate_gap_bps": 1.029,
+            "burnout_orth": -0.611,
+            "friction": 0.21
+          },
+          "objective_min": 19692375073003.64,
+          "objective_max": 19692375073003.64,
+          "count": 1,
+          "start_ids": [
+            6
+          ]
+        },
+        {
+          "triple": {
+            "rate_gap_bps": 1.326,
+            "burnout_orth": -0.612,
+            "friction": 0.2
+          },
+          "objective_min": 19695970845292.42,
+          "objective_max": 19695970845292.42,
+          "count": 1,
+          "start_ids": [
+            28
+          ]
+        },
+        {
+          "triple": {
+            "rate_gap_bps": 0.9,
+            "burnout_orth": -0.508,
+            "friction": 0.191
+          },
+          "objective_min": 19701403670435.39,
+          "objective_max": 19701403670435.39,
+          "count": 1,
+          "start_ids": [
+            24
+          ]
+        },
+        {
+          "triple": {
+            "rate_gap_bps": 0.621,
+            "burnout_orth": -0.517,
+            "friction": 0.17
+          },
+          "objective_min": 19707024770716.145,
+          "objective_max": 19707024770716.145,
+          "count": 1,
+          "start_ids": [
+            9
+          ]
+        },
+        {
+          "triple": {
+            "rate_gap_bps": 1.886,
+            "burnout_orth": -0.42,
+            "friction": 0.109
+          },
+          "objective_min": 19719812484173.293,
+          "objective_max": 19719812484173.293,
+          "count": 1,
+          "start_ids": [
+            33
+          ]
+        },
+        {
+          "triple": {
+            "rate_gap_bps": 0.5,
+            "burnout_orth": -0.452,
+            "friction": 0.196
+          },
+          "objective_min": 19722872767393.426,
+          "objective_max": 19722872767393.426,
+          "count": 1,
+          "start_ids": [
+            17
+          ]
+        },
+        {
+          "triple": {
+            "rate_gap_bps": 1.014,
+            "burnout_orth": -0.399,
+            "friction": 0.206
+          },
+          "objective_min": 19725961490437.21,
+          "objective_max": 19725961490437.21,
+          "count": 1,
+          "start_ids": [
+            49
+          ]
+        },
+        {
+          "triple": {
+            "rate_gap_bps": 1.648,
+            "burnout_orth": -0.024,
+            "friction": 0.163
+          },
+          "objective_min": 19744824357776.32,
+          "objective_max": 19744824357776.32,
+          "count": 1,
+          "start_ids": [
+            38
+          ]
+        },
+        {
+          "triple": {
+            "rate_gap_bps": 1.525,
+            "burnout_orth": -0.202,
+            "friction": 0.215
+          },
+          "objective_min": 19750779733774.145,
+          "objective_max": 19750779733774.145,
+          "count": 1,
+          "start_ids": [
+            20
+          ]
+        },
+        {
+          "triple": {
+            "rate_gap_bps": 1.057,
+            "burnout_orth": -0.233,
+            "friction": 0.159
+          },
+          "objective_min": 19755904185639.633,
+          "objective_max": 19755904185639.633,
+          "count": 1,
+          "start_ids": [
+            4
+          ]
+        },
+        {
+          "triple": {
+            "rate_gap_bps": 1.959,
+            "burnout_orth": 0.262,
+            "friction": 0.263
+          },
+          "objective_min": 19768654722524.977,
+          "objective_max": 19768654722524.977,
+          "count": 1,
+          "start_ids": [
+            47
+          ]
+        },
+        {
+          "triple": {
+            "rate_gap_bps": 1.091,
+            "burnout_orth": -0.069,
+            "friction": 0.199
+          },
+          "objective_min": 19773130173794.04,
+          "objective_max": 19773130173794.04,
+          "count": 1,
+          "start_ids": [
+            31
+          ]
+        },
+        {
+          "triple": {
+            "rate_gap_bps": 0.438,
+            "burnout_orth": -0.056,
+            "friction": 0.222
+          },
+          "objective_min": 19777792028198.152,
+          "objective_max": 19777792028198.152,
+          "count": 1,
+          "start_ids": [
+            40
+          ]
+        },
+        {
+          "triple": {
+            "rate_gap_bps": 1.056,
+            "burnout_orth": 0.242,
+            "friction": 0.199
+          },
+          "objective_min": 19782498782945.52,
+          "objective_max": 19782498782945.52,
+          "count": 1,
+          "start_ids": [
+            35
+          ]
+        },
+        {
+          "triple": {
+            "rate_gap_bps": 0.789,
+            "burnout_orth": -0.663,
+            "friction": 0.175
+          },
+          "objective_min": 19866283469971.844,
+          "objective_max": 19866283469971.844,
+          "count": 1,
+          "start_ids": [
+            42
+          ]
+        },
+        {
+          "triple": {
+            "rate_gap_bps": 2.461,
+            "burnout_orth": -0.193,
+            "friction": 0.679
+          },
+          "objective_min": 20382293849144.7,
+          "objective_max": 20382293849144.7,
+          "count": 1,
+          "start_ids": [
+            0
+          ]
+        },
+        {
+          "triple": {
+            "rate_gap_bps": 0.983,
+            "burnout_orth": -0.157,
+            "friction": -0.096
+          },
+          "objective_min": 20604764551235.688,
+          "objective_max": 20604764551235.688,
+          "count": 1,
+          "start_ids": [
+            16
+          ]
+        },
+        {
+          "triple": {
+            "rate_gap_bps": 0.791,
+            "burnout_orth": -0.199,
+            "friction": -0.028
+          },
+          "objective_min": 2.955150595304547e+164,
+          "objective_max": 2.955150595304547e+164,
+          "count": 1,
+          "start_ids": [
+            32
+          ]
+        },
+        {
+          "triple": {
+            "rate_gap_bps": 0.829,
+            "burnout_orth": -0.239,
+            "friction": -0.081
+          },
+          "objective_min": 1.8286806603493962e+173,
+          "objective_max": 1.8286806603493962e+173,
+          "count": 1,
+          "start_ids": [
+            18
+          ]
+        },
+        {
+          "triple": {
+            "rate_gap_bps": 0.72,
+            "burnout_orth": -0.294,
+            "friction": 0.027
+          },
+          "objective_min": 9.525438704385475e+184,
+          "objective_max": 9.525438704385475e+184,
+          "count": 1,
+          "start_ids": [
+            36
+          ]
+        },
+        {
+          "triple": {
+            "rate_gap_bps": 0.586,
+            "burnout_orth": -0.1,
+            "friction": 0.063
+          },
+          "objective_min": 1.3149345888122734e+227,
+          "objective_max": 1.3149345888122734e+227,
+          "count": 1,
+          "start_ids": [
+            8
+          ]
+        },
+        {
+          "triple": {
+            "rate_gap_bps": 0.69,
+            "burnout_orth": -0.248,
+            "friction": -0.078
+          },
+          "objective_min": 1.9529652370284515e+232,
+          "objective_max": 1.9529652370284515e+232,
+          "count": 1,
+          "start_ids": [
+            10
+          ]
+        },
+        {
+          "triple": {
+            "rate_gap_bps": 0.505,
+            "burnout_orth": -0.095,
+            "friction": 0.043
+          },
+          "objective_min": 2.1499941011440256e+278,
+          "objective_max": 2.1499941011440256e+278,
+          "count": 1,
+          "start_ids": [
+            2
+          ]
+        },
+        {
+          "triple": {
+            "rate_gap_bps": 0.412,
+            "burnout_orth": -0.094,
+            "friction": -0.08
+          },
+          "objective_min": 4.856959246190174e+291,
+          "objective_max": 4.856959246190174e+291,
+          "count": 1,
+          "start_ids": [
+            26
+          ]
+        }
+      ],
+      "cold_start_converged": true,
+      "cold_start_on_production_branch": true,
+      "cold_start_macro": {
+        "rate_gap_bps": 0.6468566611612588,
+        "burnout_orth": -0.17126111626112517,
+        "friction": -0.007112288418868083
+      },
+      "cold_start_objective": 1920053.7607715488,
+      "cold_start_failure": "",
+      "cold_start_diverged_alone": false,
+      "by_rung": {
+        "0.25": {
+          "n": 12,
+          "n_on_production_branch": 0
+        },
+        "0.5": {
+          "n": 12,
+          "n_on_production_branch": 0
+        },
+        "1.0": {
+          "n": 12,
+          "n_on_production_branch": 0
+        },
+        "2.0": {
+          "n": 12,
+          "n_on_production_branch": 0
+        }
+      }
+    }
+  },
+  "draws_csv": "pathA_cold_starts_draws.csv",
+  "verdict": {
+    "code": "MINORITY_PRODUCTION",
+    "adjudicated": true,
+    "n_on_production_branch": 1,
+    "n_failed": 23,
+    "distinct_optima": [
+      {
+        "triple": {
+          "rate_gap_bps": 0.647,
+          "burnout_orth": -0.171,
+          "friction": -0.007
+        },
+        "objective_min": 1920054.0797932579,
+        "objective_max": 1920054.0797932579,
+        "count": 1,
+        "start_ids": [
+          16
+        ]
+      },
+      {
+        "triple": {
+          "rate_gap_bps": 1.036,
+          "burnout_orth": -0.641,
+          "friction": 0.111
+        },
+        "objective_min": 19691108766106.207,
+        "objective_max": 19691108766106.207,
+        "count": 1,
+        "start_ids": [
+          15
+        ]
+      },
+      {
+        "triple": {
+          "rate_gap_bps": 0.43,
+          "burnout_orth": -0.403,
+          "friction": -0.212
+        },
+        "objective_min": 19691169786547.1,
+        "objective_max": 19691169786547.1,
+        "count": 1,
+        "start_ids": [
+          37
+        ]
+      },
+      {
+        "triple": {
+          "rate_gap_bps": 0.894,
+          "burnout_orth": -0.566,
+          "friction": 0.244
+        },
+        "objective_min": 19691684212822.074,
+        "objective_max": 19691684212822.074,
+        "count": 1,
+        "start_ids": [
+          11
+        ]
+      },
+      {
+        "triple": {
+          "rate_gap_bps": 1.029,
+          "burnout_orth": -0.611,
+          "friction": 0.21
+        },
+        "objective_min": 19692375073003.64,
+        "objective_max": 19692375073003.64,
+        "count": 1,
+        "start_ids": [
+          6
+        ]
+      },
+      {
+        "triple": {
+          "rate_gap_bps": 1.679,
+          "burnout_orth": -0.612,
+          "friction": 6.036
+        },
+        "objective_min": 19697135719695.05,
+        "objective_max": 19697135719695.05,
+        "count": 1,
+        "start_ids": [
+          28
+        ]
+      },
+      {
+        "triple": {
+          "rate_gap_bps": 0.894,
+          "burnout_orth": -0.508,
+          "friction": 0.101
+        },
+        "objective_min": 19702690356551.105,
+        "objective_max": 19702690356551.105,
+        "count": 1,
+        "start_ids": [
+          24
+        ]
+      },
+      {
+        "triple": {
+          "rate_gap_bps": 0.621,
+          "burnout_orth": -0.517,
+          "friction": 0.17
+        },
+        "objective_min": 19707024770716.145,
+        "objective_max": 19707024770716.145,
+        "count": 1,
+        "start_ids": [
+          9
+        ]
+      },
+      {
+        "triple": {
+          "rate_gap_bps": 1.862,
+          "burnout_orth": -0.42,
+          "friction": 0.114
+        },
+        "objective_min": 19721011672349.45,
+        "objective_max": 19721011672349.45,
+        "count": 1,
+        "start_ids": [
+          33
+        ]
+      },
+      {
+        "triple": {
+          "rate_gap_bps": 0.51,
+          "burnout_orth": -0.452,
+          "friction": 0.221
+        },
+        "objective_min": 19723958333448.055,
+        "objective_max": 19723958333448.055,
+        "count": 1,
+        "start_ids": [
+          17
+        ]
+      },
+      {
+        "triple": {
+          "rate_gap_bps": 1.024,
+          "burnout_orth": -0.399,
+          "friction": -0.07
+        },
+        "objective_min": 19727244497547.93,
+        "objective_max": 19727244497547.93,
+        "count": 1,
+        "start_ids": [
+          49
+        ]
+      },
+      {
+        "triple": {
+          "rate_gap_bps": 1.648,
+          "burnout_orth": -0.024,
+          "friction": 0.163
+        },
+        "objective_min": 19744824357776.32,
+        "objective_max": 19744824357776.32,
+        "count": 1,
+        "start_ids": [
+          38
+        ]
+      },
+      {
+        "triple": {
+          "rate_gap_bps": 1.531,
+          "burnout_orth": -0.202,
+          "friction": 1.531
+        },
+        "objective_min": 19752183836372.59,
+        "objective_max": 19752183836372.59,
+        "count": 1,
+        "start_ids": [
+          20
+        ]
+      },
+      {
+        "triple": {
+          "rate_gap_bps": 1.057,
+          "burnout_orth": -0.233,
+          "friction": 0.159
+        },
+        "objective_min": 19755904185639.633,
+        "objective_max": 19755904185639.633,
+        "count": 1,
+        "start_ids": [
+          4
+        ]
+      },
+      {
+        "triple": {
+          "rate_gap_bps": 1.959,
+          "burnout_orth": 0.262,
+          "friction": 0.263
+        },
+        "objective_min": 19768654722524.977,
+        "objective_max": 19768654722524.977,
+        "count": 1,
+        "start_ids": [
+          47
+        ]
+      },
+      {
+        "triple": {
+          "rate_gap_bps": 0.438,
+          "burnout_orth": -0.056,
+          "friction": 0.222
+        },
+        "objective_min": 19777792028198.152,
+        "objective_max": 19777792028198.152,
+        "count": 1,
+        "start_ids": [
+          40
+        ]
+      },
+      {
+        "triple": {
+          "rate_gap_bps": 1.056,
+          "burnout_orth": 0.242,
+          "friction": 0.199
+        },
+        "objective_min": 19782498782945.52,
+        "objective_max": 19782498782945.52,
+        "count": 1,
+        "start_ids": [
+          35
+        ]
+      },
+      {
+        "triple": {
+          "rate_gap_bps": 0.789,
+          "burnout_orth": -0.663,
+          "friction": 0.175
+        },
+        "objective_min": 19866283469971.844,
+        "objective_max": 19866283469971.844,
+        "count": 1,
+        "start_ids": [
+          42
+        ]
+      },
+      {
+        "triple": {
+          "rate_gap_bps": 2.461,
+          "burnout_orth": -0.193,
+          "friction": 0.679
+        },
+        "objective_min": 20382293849144.7,
+        "objective_max": 20382293849144.7,
+        "count": 1,
+        "start_ids": [
+          0
+        ]
+      },
+      {
+        "triple": {
+          "rate_gap_bps": 0.791,
+          "burnout_orth": -0.199,
+          "friction": -0.028
+        },
+        "objective_min": 2.955150595304547e+164,
+        "objective_max": 2.955150595304547e+164,
+        "count": 1,
+        "start_ids": [
+          32
+        ]
+      },
+      {
+        "triple": {
+          "rate_gap_bps": 0.829,
+          "burnout_orth": -0.239,
+          "friction": -0.081
+        },
+        "objective_min": 1.8286806603493962e+173,
+        "objective_max": 1.8286806603493962e+173,
+        "count": 1,
+        "start_ids": [
+          18
+        ]
+      },
+      {
+        "triple": {
+          "rate_gap_bps": 0.72,
+          "burnout_orth": -0.294,
+          "friction": 0.027
+        },
+        "objective_min": 9.525438704385475e+184,
+        "objective_max": 9.525438704385475e+184,
+        "count": 1,
+        "start_ids": [
+          36
+        ]
+      },
+      {
+        "triple": {
+          "rate_gap_bps": 0.586,
+          "burnout_orth": -0.1,
+          "friction": 0.063
+        },
+        "objective_min": 1.3149345888122734e+227,
+        "objective_max": 1.3149345888122734e+227,
+        "count": 1,
+        "start_ids": [
+          8
+        ]
+      },
+      {
+        "triple": {
+          "rate_gap_bps": 0.69,
+          "burnout_orth": -0.248,
+          "friction": -0.078
+        },
+        "objective_min": 1.9529652370284515e+232,
+        "objective_max": 1.9529652370284515e+232,
+        "count": 1,
+        "start_ids": [
+          10
+        ]
+      },
+      {
+        "triple": {
+          "rate_gap_bps": 0.505,
+          "burnout_orth": -0.095,
+          "friction": 0.043
+        },
+        "objective_min": 2.1499941011440256e+278,
+        "objective_max": 2.1499941011440256e+278,
+        "count": 1,
+        "start_ids": [
+          2
+        ]
+      },
+      {
+        "triple": {
+          "rate_gap_bps": 0.412,
+          "burnout_orth": -0.094,
+          "friction": -0.08
+        },
+        "objective_min": 4.856959246190174e+291,
+        "objective_max": 4.856959246190174e+291,
+        "count": 1,
+        "start_ids": [
+          26
+        ]
+      }
+    ],
+    "production_is_best_objective": true,
+    "cold_start_diverged_alone": false,
+    "manuscript_action": "(iii-b) the production point is the optimum and its basin is small. Land the honest count in the same two sentences; the exclusion is STRENGTHENED, not weakened.",
+    "propagation": "none \u2014 Path A is excluded from every headline figure (tex 290, 978, 1053); under (iii-c) nothing lands at all"
+  },
+  "runtime_s": 161.6
+}
