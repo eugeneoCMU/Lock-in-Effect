@@ -3,7 +3,8 @@
   "status": "OK",
   "spec": "SPEC_round28_C1_C2_C3_C6.md C6(ii): stage A persists the FULL params_head + standardization scales + FE block per replicate; stage B resimulates with const + age spline (+ months at v4) transferred UNRESCALED and only the 3 macro betas rescaled; tier 1 (FE at production) primary, tier 2 (mean-over-duplicates map, production fallback) secondary and non-manuscript.",
   "spec_versions": [
-    3
+    3,
+    4
   ],
   "labeled_deviations": [
     "1: per-replicate month effects are delivered through a temporary coefficient artifact because simulate_qt_window reads month_effects from coef_path, not from coefs.",
@@ -86,6 +87,40 @@
         "pass": true,
         "note": ""
       }
+    },
+    "A7_point_head_parity": {
+      "blocking": true,
+      "tol_b": 0.5,
+      "legs": {
+        "spec3": {
+          "spec_version": 3,
+          "blocking": true,
+          "got_trapped_b": 915.067027857209,
+          "want_trapped_b": 915.067027857209,
+          "abs_diff_b": 0.0,
+          "tol_b": 0.5,
+          "got_share_pct": 119.65598142932076,
+          "head_source": "hazard_coefficients_specv3.json .coefficients, 11 head entries",
+          "want_source": "bootstrap_resimulate_results.json .point_trapped_b",
+          "pass": true,
+          "note": "exercises the handoff, not the rescaling: rep_scales are the production scales, so rescale_to_production_units is the identity here by construction."
+        },
+        "spec4": {
+          "spec_version": 4,
+          "blocking": false,
+          "got_trapped_b": 928.892970289881,
+          "want_trapped_b": 928.892970289881,
+          "abs_diff_b": 0.0,
+          "tol_b": 0.5,
+          "got_share_pct": 121.46388911324269,
+          "head_source": "hazard_coefficients.json .coefficients, 22 head entries",
+          "want_source": "pathA_seasonal_adoption_results.json .v4_trapped_b",
+          "pass": true,
+          "note": "exercises the handoff, not the rescaling: rep_scales are the production scales, so rescale_to_production_units is the identity here by construction."
+        }
+      },
+      "pass": true,
+      "note": "amendment A7(2): if this fails the whole Stage B construction is void \u2014 wiring, not finding."
     }
   },
   "parity_gates_all_pass": true,
@@ -94,7 +129,8 @@
       "head_swapped": [
         "const",
         "age_spline",
-        "macro"
+        "macro",
+        "months"
       ],
       "fe": "production",
       "rescaled": "macro only (rescale_to_production_units)"
@@ -104,7 +140,10 @@
       "rule_is_arbitrary": true,
       "level_shift_not_removed": true,
       "enters_manuscript": false,
-      "mean_undrawn_share": {}
+      "mean_undrawn_share": {
+        "spec3": null,
+        "spec4": null
+      }
     }
   },
   "stage_a": {
@@ -182,7 +221,806 @@
       "runtime_s": 348.7
     }
   },
-  "results": {},
+  "results": {
+    "spec3": {
+      "tier1": {
+        "n_reps": 198,
+        "trapped_b": {
+          "mean": 1057.4586936296,
+          "se": 242.14195112856487,
+          "median": 1217.6339179089175,
+          "iqr": [
+            918.1342880487487,
+            1217.6339179089175
+          ],
+          "ci_95": [
+            688.9606042476231,
+            1217.6339179089175
+          ]
+        },
+        "share_pct": {
+          "mean": 138.2753983645466,
+          "se": 31.662962302713684,
+          "median": 159.22022871941545,
+          "iqr": [
+            120.05706246201538,
+            159.22022871941545
+          ],
+          "ci_95": [
+            90.08985654354844,
+            159.22022871941545
+          ]
+        },
+        "frac_above_benchmark": 0.9444444444444444,
+        "mean_undrawn_share": null,
+        "floor_b": 1217.6339179089177,
+        "floor_share_pct": 159.22022871941545,
+        "n_at_floor": 106,
+        "decompositions": {
+          "saturation": {
+            "rule": "|trapped_b \u2212 zero_voluntary_floor| < 1e-06 B; the floor is MEASURED by probe through stage_b's own handoff, never computed from a formula",
+            "floor_b": 1217.6339179089177,
+            "at_floor": {
+              "n": 106,
+              "share_of_draws": 0.5353535353535354,
+              "trapped_b": {
+                "mean": 1217.6339179089173,
+                "se": 2.2845384150151246e-13,
+                "median": 1217.6339179089175,
+                "iqr": [
+                  1217.6339179089175,
+                  1217.6339179089175
+                ],
+                "ci_95": [
+                  1217.6339179089175,
+                  1217.6339179089175
+                ]
+              },
+              "share_pct": {
+                "mean": 159.22022871941545,
+                "se": 0.0,
+                "median": 159.22022871941545,
+                "iqr": [
+                  159.22022871941545,
+                  159.22022871941545
+                ],
+                "ci_95": [
+                  159.22022871941545,
+                  159.22022871941545
+                ]
+              },
+              "drawn_macro_means": {
+                "rate_gap_bps": 2.231701147041945,
+                "burnout_orth": -0.14280248704470636,
+                "friction": 0.674764170684044
+              }
+            },
+            "below_floor": {
+              "n": 92,
+              "share_of_draws": 0.46464646464646464,
+              "trapped_b": {
+                "mean": 872.9089786990819,
+                "se": 250.22427113687064,
+                "median": 913.8615667609197,
+                "iqr": [
+                  863.8182699830375,
+                  943.9951472408617
+                ],
+                "ci_95": [
+                  622.1412082220909,
+                  1059.7913934033083
+                ]
+              },
+              "share_pct": {
+                "mean": 114.14331121654546,
+                "se": 32.71982251445607,
+                "median": 119.4983529429255,
+                "iqr": [
+                  112.95459209522215,
+                  123.43867975674388
+                ],
+                "ci_95": [
+                  81.35241964925665,
+                  138.5804268185349
+                ]
+              },
+              "drawn_macro_means": {
+                "rate_gap_bps": 0.6385511853516354,
+                "burnout_orth": 0.04295030921870394,
+                "friction": -0.019446449673289023
+              }
+            },
+            "empirical_mode": {
+              "value_b": 1217.6339179089175,
+              "count": 106,
+              "probe_matches_empirical_mode": true,
+              "note": "if the probe floor and the empirical pile-up disagree the saturation cut is measuring the wrong object \u2014 this is the guard the first A7 run lacked"
+            }
+          },
+          "mode": {
+            "rule": "nearest attractor in the drawn rate-gap coefficient; cutpoint = midpoint of the two attractors",
+            "attractors": {
+              "production_attractor_rate_gap": 0.6733519352905115,
+              "production_source": "hazard_coefficients_specv3.json .coefficients.rate_gap_bps",
+              "rogue_attractor_rate_gap": 1.9625812678980252,
+              "rogue_source": "ridge_reference_weighting.json .reference_swap.betas_swapped_ref.rate_gap_bps",
+              "cutpoint": 1.3179666015942684,
+              "rule": "nearest attractor in the drawn rate-gap coefficient; cutpoint = midpoint of the two attractors"
+            },
+            "production_mode": {
+              "n": 119,
+              "share_of_draws": 0.601010101010101,
+              "trapped_b": {
+                "mean": 951.123880872742,
+                "se": 263.26294508933313,
+                "median": 932.1729424699016,
+                "iqr": [
+                  886.2735108349991,
+                  1056.0277433078609
+                ],
+                "ci_95": [
+                  645.9885307591948,
+                  1217.6339179089175
+                ]
+              },
+              "share_pct": {
+                "mean": 124.37084712055797,
+                "se": 34.42478540878328,
+                "median": 121.892784787891,
+                "iqr": [
+                  115.89088397393303,
+                  138.08828445932232
+                ],
+                "ci_95": [
+                  84.47074289309664,
+                  159.22022871941545
+                ]
+              },
+              "drawn_macro_means": {
+                "rate_gap_bps": 0.7014178836840229,
+                "burnout_orth": 0.222217669412439,
+                "friction": 0.2609735265745491
+              }
+            },
+            "rogue_mode": {
+              "n": 79,
+              "share_of_draws": 0.398989898989899,
+              "trapped_b": {
+                "mean": 1217.633917908917,
+                "se": 4.576531143238139e-13,
+                "median": 1217.6339179089175,
+                "iqr": [
+                  1217.6339179089175,
+                  1217.6339179089175
+                ],
+                "ci_95": [
+                  1217.6339179089175,
+                  1217.6339179089175
+                ]
+              },
+              "share_pct": {
+                "mean": 159.22022871941547,
+                "se": 2.8603319645238366e-14,
+                "median": 159.22022871941545,
+                "iqr": [
+                  159.22022871941545,
+                  159.22022871941545
+                ],
+                "ci_95": [
+                  159.22022871941545,
+                  159.22022871941545
+                ]
+              },
+              "drawn_macro_means": {
+                "rate_gap_bps": 2.6814974997518717,
+                "burnout_orth": -0.4763232637809917,
+                "friction": 0.48962125392651573
+              }
+            }
+          },
+          "cross_tab_counts": {
+            "production_mode_at_floor": 27,
+            "production_mode_below_floor": 92,
+            "rogue_mode_at_floor": 79,
+            "rogue_mode_below_floor": 0
+          },
+          "legacy_same_data_basin_rule": {
+            "label": "same-data basin rule; too strict for resampled draws \u2014 RETIRED, non-adjudicating diagnostic (correction A7-C2)",
+            "tol": 0.02,
+            "production_values": {
+              "rate_gap_bps": 0.6733519352905115,
+              "burnout_orth": -0.13009048732147674,
+              "friction": -0.037066025306261775
+            },
+            "n_within": 13,
+            "n_outside": 185
+          }
+        }
+      },
+      "tier2": {
+        "n_reps": 198,
+        "trapped_b": {
+          "mean": 1062.4203647777529,
+          "se": 230.00090414444816,
+          "median": 1217.6339179089175,
+          "iqr": [
+            915.2447440415185,
+            1217.6339179089175
+          ],
+          "ci_95": [
+            835.6564155955415,
+            1217.6339179089175
+          ]
+        },
+        "share_pct": {
+          "mean": 138.92419633528323,
+          "se": 30.075374893006824,
+          "median": 159.22022871941545,
+          "iqr": [
+            119.67921995043679,
+            159.22022871941545
+          ],
+          "ci_95": [
+            109.27209210011655,
+            159.22022871941545
+          ]
+        },
+        "frac_above_benchmark": 0.98989898989899,
+        "mean_undrawn_share": null,
+        "floor_b": 1217.6339179089177,
+        "floor_share_pct": 159.22022871941545,
+        "n_at_floor": 106,
+        "decompositions": {
+          "saturation": {
+            "rule": "|trapped_b \u2212 zero_voluntary_floor| < 1e-06 B; the floor is MEASURED by probe through stage_b's own handoff, never computed from a formula",
+            "floor_b": 1217.6339179089177,
+            "at_floor": {
+              "n": 106,
+              "share_of_draws": 0.5353535353535354,
+              "trapped_b": {
+                "mean": 1217.6339179089173,
+                "se": 2.2845384150151246e-13,
+                "median": 1217.6339179089175,
+                "iqr": [
+                  1217.6339179089175,
+                  1217.6339179089175
+                ],
+                "ci_95": [
+                  1217.6339179089175,
+                  1217.6339179089175
+                ]
+              },
+              "share_pct": {
+                "mean": 159.22022871941545,
+                "se": 0.0,
+                "median": 159.22022871941545,
+                "iqr": [
+                  159.22022871941545,
+                  159.22022871941545
+                ],
+                "ci_95": [
+                  159.22022871941545,
+                  159.22022871941545
+                ]
+              },
+              "drawn_macro_means": {
+                "rate_gap_bps": 2.231701147041945,
+                "burnout_orth": -0.14280248704470636,
+                "friction": 0.674764170684044
+              }
+            },
+            "below_floor": {
+              "n": 92,
+              "share_of_draws": 0.46464646464646464,
+              "trapped_b": {
+                "mean": 883.5873579092371,
+                "se": 232.64922574740393,
+                "median": 912.9100057614372,
+                "iqr": [
+                  898.999117901117,
+                  925.4834548822452
+                ],
+                "ci_95": [
+                  802.0370371305427,
+                  965.6595698627716
+                ]
+              },
+              "share_pct": {
+                "mean": 115.5396372840004,
+                "se": 30.42167468405513,
+                "median": 119.3739249373076,
+                "iqr": [
+                  117.55490962060712,
+                  121.0180541089432
+                ],
+                "ci_95": [
+                  104.87595542071591,
+                  126.27156267352264
+                ]
+              },
+              "drawn_macro_means": {
+                "rate_gap_bps": 0.6385511853516354,
+                "burnout_orth": 0.04295030921870394,
+                "friction": -0.019446449673289023
+              }
+            },
+            "empirical_mode": {
+              "value_b": 1217.6339179089175,
+              "count": 106,
+              "probe_matches_empirical_mode": true,
+              "note": "if the probe floor and the empirical pile-up disagree the saturation cut is measuring the wrong object \u2014 this is the guard the first A7 run lacked"
+            }
+          },
+          "mode": {
+            "rule": "nearest attractor in the drawn rate-gap coefficient; cutpoint = midpoint of the two attractors",
+            "attractors": {
+              "production_attractor_rate_gap": 0.6733519352905115,
+              "production_source": "hazard_coefficients_specv3.json .coefficients.rate_gap_bps",
+              "rogue_attractor_rate_gap": 1.9625812678980252,
+              "rogue_source": "ridge_reference_weighting.json .reference_swap.betas_swapped_ref.rate_gap_bps",
+              "cutpoint": 1.3179666015942684,
+              "rule": "nearest attractor in the drawn rate-gap coefficient; cutpoint = midpoint of the two attractors"
+            },
+            "production_mode": {
+              "n": 119,
+              "share_of_draws": 0.601010101010101,
+              "trapped_b": {
+                "mean": 959.3794345478201,
+                "se": 247.9526139075485,
+                "median": 920.945347849314,
+                "iqr": [
+                  905.6777304668145,
+                  964.2634029354178
+                ],
+                "ci_95": [
+                  820.2710455659372,
+                  1217.6339179089175
+                ]
+              },
+              "share_pct": {
+                "mean": 125.45035971052314,
+                "se": 32.422776104771685,
+                "median": 120.42464222290002,
+                "iqr": [
+                  118.42821826009123,
+                  126.08899711401071
+                ],
+                "ci_95": [
+                  107.26027056737432,
+                  159.22022871941545
+                ]
+              },
+              "drawn_macro_means": {
+                "rate_gap_bps": 0.7014178836840229,
+                "burnout_orth": 0.222217669412439,
+                "friction": 0.2609735265745491
+              }
+            },
+            "rogue_mode": {
+              "n": 79,
+              "share_of_draws": 0.398989898989899,
+              "trapped_b": {
+                "mean": 1217.633917908917,
+                "se": 4.576531143238139e-13,
+                "median": 1217.6339179089175,
+                "iqr": [
+                  1217.6339179089175,
+                  1217.6339179089175
+                ],
+                "ci_95": [
+                  1217.6339179089175,
+                  1217.6339179089175
+                ]
+              },
+              "share_pct": {
+                "mean": 159.22022871941547,
+                "se": 2.8603319645238366e-14,
+                "median": 159.22022871941545,
+                "iqr": [
+                  159.22022871941545,
+                  159.22022871941545
+                ],
+                "ci_95": [
+                  159.22022871941545,
+                  159.22022871941545
+                ]
+              },
+              "drawn_macro_means": {
+                "rate_gap_bps": 2.6814974997518717,
+                "burnout_orth": -0.4763232637809917,
+                "friction": 0.48962125392651573
+              }
+            }
+          },
+          "cross_tab_counts": {
+            "production_mode_at_floor": 27,
+            "production_mode_below_floor": 92,
+            "rogue_mode_at_floor": 79,
+            "rogue_mode_below_floor": 0
+          },
+          "legacy_same_data_basin_rule": {
+            "label": "same-data basin rule; too strict for resampled draws \u2014 RETIRED, non-adjudicating diagnostic (correction A7-C2)",
+            "tol": 0.02,
+            "production_values": {
+              "rate_gap_bps": 0.6733519352905115,
+              "burnout_orth": -0.13009048732147674,
+              "friction": -0.037066025306261775
+            },
+            "n_within": 13,
+            "n_outside": 185
+          }
+        }
+      }
+    },
+    "spec4": {
+      "tier1": {
+        "n_reps": 199,
+        "trapped_b": {
+          "mean": 1061.9018475459225,
+          "se": 151.94829743226498,
+          "median": 1028.661523699296,
+          "iqr": [
+            927.4992274235731,
+            1217.6340112868124
+          ],
+          "ci_95": [
+            797.3954649685171,
+            1217.634032608892
+          ]
+        },
+        "share_pct": {
+          "mean": 138.85639399253247,
+          "se": 19.869061065774876,
+          "median": 134.5098232476436,
+          "iqr": [
+            121.2816405287661,
+            159.2202409296944
+          ],
+          "ci_95": [
+            104.26901422896219,
+            159.22024371781185
+          ]
+        },
+        "frac_above_benchmark": 0.9798994974874372,
+        "mean_undrawn_share": null,
+        "floor_b": 1217.6338514230454,
+        "floor_share_pct": 159.22022002559078,
+        "n_at_floor": 0,
+        "decompositions": {
+          "saturation": {
+            "rule": "|trapped_b \u2212 zero_voluntary_floor| < 1e-06 B; the floor is MEASURED by probe through stage_b's own handoff, never computed from a formula",
+            "floor_b": 1217.6338514230454,
+            "at_floor": {
+              "n": 0,
+              "share_of_draws": 0.0
+            },
+            "below_floor": {
+              "n": 199,
+              "share_of_draws": 1.0,
+              "trapped_b": {
+                "mean": 1061.9018475459225,
+                "se": 151.94829743226498,
+                "median": 1028.661523699296,
+                "iqr": [
+                  927.4992274235731,
+                  1217.6340112868124
+                ],
+                "ci_95": [
+                  797.3954649685171,
+                  1217.634032608892
+                ]
+              },
+              "share_pct": {
+                "mean": 138.85639399253247,
+                "se": 19.869061065774876,
+                "median": 134.5098232476436,
+                "iqr": [
+                  121.2816405287661,
+                  159.2202409296944
+                ],
+                "ci_95": [
+                  104.26901422896219,
+                  159.22024371781185
+                ]
+              },
+              "drawn_macro_means": {
+                "rate_gap_bps": 1.3997431360533297,
+                "burnout_orth": -0.12298168929472882,
+                "friction": 0.31560190543920774
+              }
+            },
+            "empirical_mode": {
+              "value_b": 1217.6339934627729,
+              "count": 1,
+              "probe_matches_empirical_mode": false,
+              "note": "if the probe floor and the empirical pile-up disagree the saturation cut is measuring the wrong object \u2014 this is the guard the first A7 run lacked"
+            }
+          },
+          "mode": {
+            "rule": "nearest attractor in the drawn rate-gap coefficient; cutpoint = midpoint of the two attractors",
+            "attractors": {
+              "production_attractor_rate_gap": 0.6468566611612588,
+              "production_source": "hazard_coefficients.json .coefficients.rate_gap_bps",
+              "rogue_attractor_rate_gap": 1.9625812678980252,
+              "rogue_source": "ridge_reference_weighting.json .reference_swap.betas_swapped_ref.rate_gap_bps",
+              "cutpoint": 1.304718964529642,
+              "rule": "nearest attractor in the drawn rate-gap coefficient; cutpoint = midpoint of the two attractors"
+            },
+            "production_mode": {
+              "n": 126,
+              "share_of_draws": 0.6331658291457286,
+              "trapped_b": {
+                "mean": 971.6760685536999,
+                "se": 119.17450389765375,
+                "median": 937.410148327729,
+                "iqr": [
+                  913.3536394808489,
+                  1012.7920380882931
+                ],
+                "ci_95": [
+                  763.6294905935497,
+                  1217.6340088831475
+                ]
+              },
+              "share_pct": {
+                "mean": 127.05829198811405,
+                "se": 15.58349475078164,
+                "median": 122.57761222433919,
+                "iqr": [
+                  119.43193536329314,
+                  132.43469780026564
+                ],
+                "ci_95": [
+                  99.8537083773077,
+                  159.22024061538633
+                ]
+              },
+              "drawn_macro_means": {
+                "rate_gap_bps": 0.653063877275019,
+                "burnout_orth": -0.021377625369286436,
+                "friction": 0.14993311581018667
+              }
+            },
+            "rogue_mode": {
+              "n": 73,
+              "share_of_draws": 0.36683417085427134,
+              "trapped_b": {
+                "mean": 1217.634014025649,
+                "se": 1.3936537355469296e-05,
+                "median": 1217.6340144849985,
+                "iqr": [
+                  1217.6340085853042,
+                  1217.634021924669
+                ],
+                "ci_95": [
+                  1217.6339883556839,
+                  1217.6340347645632
+                ]
+              },
+              "share_pct": {
+                "mean": 159.2202412878301,
+                "se": 1.8223692978042337e-06,
+                "median": 159.2202413478955,
+                "iqr": [
+                  159.22024057643978,
+                  159.2202423207216
+                ],
+                "ci_95": [
+                  159.22023793117447,
+                  159.2202439996917
+                ]
+              },
+              "drawn_macro_means": {
+                "rate_gap_bps": 2.6885319936706873,
+                "burnout_orth": -0.2983530873030267,
+                "friction": 0.6015507752098467
+              }
+            }
+          },
+          "cross_tab_counts": {
+            "production_mode_at_floor": 0,
+            "production_mode_below_floor": 126,
+            "rogue_mode_at_floor": 0,
+            "rogue_mode_below_floor": 73
+          },
+          "legacy_same_data_basin_rule": {
+            "label": "same-data basin rule; too strict for resampled draws \u2014 RETIRED, non-adjudicating diagnostic (correction A7-C2)",
+            "tol": 0.02,
+            "production_values": {
+              "rate_gap_bps": 0.6468566611612588,
+              "burnout_orth": -0.17126111626112517,
+              "friction": -0.007112288418868083
+            },
+            "n_within": 12,
+            "n_outside": 187
+          }
+        }
+      },
+      "tier2": {
+        "n_reps": 199,
+        "trapped_b": {
+          "mean": 1061.8496185396652,
+          "se": 145.8252394495935,
+          "median": 958.8125646993352,
+          "iqr": [
+            928.5785297811715,
+            1217.6340112868124
+          ],
+          "ci_95": [
+            875.0512067469612,
+            1217.634032608892
+          ]
+        },
+        "share_pct": {
+          "mean": 138.84956442397353,
+          "se": 19.068397846621583,
+          "median": 125.37623468361453,
+          "iqr": [
+            121.42277224800179,
+            159.2202409296944
+          ],
+          "ci_95": [
+            114.4234332094826,
+            159.22024371781185
+          ]
+        },
+        "frac_above_benchmark": 1.0,
+        "mean_undrawn_share": null,
+        "floor_b": 1217.6338514230454,
+        "floor_share_pct": 159.22022002559078,
+        "n_at_floor": 0,
+        "decompositions": {
+          "saturation": {
+            "rule": "|trapped_b \u2212 zero_voluntary_floor| < 1e-06 B; the floor is MEASURED by probe through stage_b's own handoff, never computed from a formula",
+            "floor_b": 1217.6338514230454,
+            "at_floor": {
+              "n": 0,
+              "share_of_draws": 0.0
+            },
+            "below_floor": {
+              "n": 199,
+              "share_of_draws": 1.0,
+              "trapped_b": {
+                "mean": 1061.8496185396652,
+                "se": 145.8252394495935,
+                "median": 958.8125646993352,
+                "iqr": [
+                  928.5785297811715,
+                  1217.6340112868124
+                ],
+                "ci_95": [
+                  875.0512067469612,
+                  1217.634032608892
+                ]
+              },
+              "share_pct": {
+                "mean": 138.84956442397353,
+                "se": 19.068397846621583,
+                "median": 125.37623468361453,
+                "iqr": [
+                  121.42277224800179,
+                  159.2202409296944
+                ],
+                "ci_95": [
+                  114.4234332094826,
+                  159.22024371781185
+                ]
+              },
+              "drawn_macro_means": {
+                "rate_gap_bps": 1.3997431360533297,
+                "burnout_orth": -0.12298168929472882,
+                "friction": 0.31560190543920774
+              }
+            },
+            "empirical_mode": {
+              "value_b": 1217.6339934627729,
+              "count": 1,
+              "probe_matches_empirical_mode": false,
+              "note": "if the probe floor and the empirical pile-up disagree the saturation cut is measuring the wrong object \u2014 this is the guard the first A7 run lacked"
+            }
+          },
+          "mode": {
+            "rule": "nearest attractor in the drawn rate-gap coefficient; cutpoint = midpoint of the two attractors",
+            "attractors": {
+              "production_attractor_rate_gap": 0.6468566611612588,
+              "production_source": "hazard_coefficients.json .coefficients.rate_gap_bps",
+              "rogue_attractor_rate_gap": 1.9625812678980252,
+              "rogue_source": "ridge_reference_weighting.json .reference_swap.betas_swapped_ref.rate_gap_bps",
+              "cutpoint": 1.304718964529642,
+              "rule": "nearest attractor in the drawn rate-gap coefficient; cutpoint = midpoint of the two attractors"
+            },
+            "production_mode": {
+              "n": 126,
+              "share_of_draws": 0.6331658291457286,
+              "trapped_b": {
+                "mean": 971.593579885087,
+                "se": 106.2989779613458,
+                "median": 932.4733132231945,
+                "iqr": [
+                  921.9522707070644,
+                  952.4617543824723
+                ],
+                "ci_95": [
+                  870.2414409164746,
+                  1217.6340088831475
+                ]
+              },
+              "share_pct": {
+                "mean": 127.04750560602487,
+                "se": 13.899865414977386,
+                "median": 121.93206186397809,
+                "iqr": [
+                  120.55630945502601,
+                  124.54579011703979
+                ],
+                "ci_95": [
+                  113.79449867969218,
+                  159.22024061538633
+                ]
+              },
+              "drawn_macro_means": {
+                "rate_gap_bps": 0.653063877275019,
+                "burnout_orth": -0.021377625369286436,
+                "friction": 0.14993311581018667
+              }
+            },
+            "rogue_mode": {
+              "n": 73,
+              "share_of_draws": 0.36683417085427134,
+              "trapped_b": {
+                "mean": 1217.634014025649,
+                "se": 1.3936537355469296e-05,
+                "median": 1217.6340144849985,
+                "iqr": [
+                  1217.6340085853042,
+                  1217.634021924669
+                ],
+                "ci_95": [
+                  1217.6339883556839,
+                  1217.6340347645632
+                ]
+              },
+              "share_pct": {
+                "mean": 159.2202412878301,
+                "se": 1.8223692978042337e-06,
+                "median": 159.2202413478955,
+                "iqr": [
+                  159.22024057643978,
+                  159.2202423207216
+                ],
+                "ci_95": [
+                  159.22023793117447,
+                  159.2202439996917
+                ]
+              },
+              "drawn_macro_means": {
+                "rate_gap_bps": 2.6885319936706873,
+                "burnout_orth": -0.2983530873030267,
+                "friction": 0.6015507752098467
+              }
+            }
+          },
+          "cross_tab_counts": {
+            "production_mode_at_floor": 0,
+            "production_mode_below_floor": 126,
+            "rogue_mode_at_floor": 0,
+            "rogue_mode_below_floor": 73
+          },
+          "legacy_same_data_basin_rule": {
+            "label": "same-data basin rule; too strict for resampled draws \u2014 RETIRED, non-adjudicating diagnostic (correction A7-C2)",
+            "tol": 0.02,
+            "production_values": {
+              "rate_gap_bps": 0.6468566611612588,
+              "burnout_orth": -0.17126111626112517,
+              "friction": -0.007112288418868083
+            },
+            "n_within": 12,
+            "n_outside": 187
+          }
+        }
+      }
+    }
+  },
   "comparison_vs_committed": {
     "committed_ci_95_b": [
       -4459.7936261770865,
@@ -191,17 +1029,97 @@
     "committed_width_b": 5649.929138871853,
     "committed_point_trapped_b": 915.067027857209,
     "committed_frac_above_benchmark": 0.8383838383838383,
-    "joint_ci_95_b": null,
-    "width_ratio": null,
+    "joint_ci_95_b": [
+      688.9606042476231,
+      1217.6339179089175
+    ],
+    "width_ratio": 0.09357167154964655,
     "narrow_threshold": 0.8
   },
   "verdict": {
-    "code": "INCOMPLETE",
-    "v4_n_failed": null,
+    "code": "NARROWS",
+    "adjudicated_on": "full sample (pre-committed codes, unchanged)",
+    "v4_n_failed": 1,
+    "v4_n_failed_source": "pathA_bootstrap_fullvec_draws_specv4.csv",
     "v4_failure_material_threshold": 10,
     "v4_unstable": false,
-    "manuscript_action": "run all stages before landing anything",
+    "v4_expectation_fired": false,
+    "floor_disclosure": "MANDATORY DISCLOSURE (amendment A7, corrections A7-C1/A7-C2): the narrowing is partly MECHANICAL. 106 of 198 spec-v3 tier-1 draws sit at EXACTLY the ZERO-VOLUNTARY-PREPAYMENT FLOOR $1217.6339179B \u2014 the trapped figure a pool returns when voluntary prepayment is switched off and only scheduled amortization rolls off, measured by probe through the same coefficient handoff, not a formula. The interval's upper edge and its median therefore sit at that floor, reached by the rogue-mode replicates (79 of the 79 rogue-mode draws are saturated), and are not a sampling statement about the estimand. The committed 3-beta rendering of the same rogue draws produced the -$4,460B tail; the joint rendering piles them on the floor instead \u2014 two renderings of one optimizer pathology, not two findings.",
+    "floor_driven": true,
+    "production_mode_only": {
+      "label": "spec v3, tier 1, PRODUCTION-MODE DRAWS ONLY (drawn rate-gap coefficient nearer the production attractor 0.673352 than the rogue attractor 1.962581; cutpoint 1.317967). Reported as a labeled sub-population for diagnosis: it is NOT the pre-committed estimand, NOT the quoted interval, and NOT a substitute for the full-sample numbers above.",
+      "n": 119,
+      "share_of_draws": 0.601010101010101,
+      "ci_95_b": [
+        645.9885307591948,
+        1217.6339179089175
+      ],
+      "median_b": 932.1729424699016,
+      "mean_b": 951.123880872742,
+      "share_pct_ci_95": [
+        84.47074289309664,
+        159.22022871941545
+      ],
+      "width_b": 571.6453871497228,
+      "width_ratio_vs_committed": 0.10117744366327855,
+      "n_at_floor": 27,
+      "drawn_macro_means": {
+        "rate_gap_bps": 0.7014178836840229,
+        "burnout_orth": 0.222217669412439,
+        "friction": 0.2609735265745491
+      }
+    },
+    "manuscript_action": "[posture] NOT ADJUDICABLE AS IT STANDS (amendment A7): the NARROWS code is driven by floor saturation. (ii-b) DO NOT adopt the joint interval as the headline Path A interval. Report both; keep the wider committed interval as the quoted one; state that the joint construction is narrower. [posture] flag to Eugene.",
     "propagation": "none \u2014 Path A is excluded from every headline figure (tex 290, 978, 1053)"
   },
-  "runtime_s": 358.3
+  "runtime_s": 2.7,
+  "zero_voluntary_floor": {
+    "spec3": {
+      "spec_version": 3,
+      "floor_b": 1217.6339179089177,
+      "floor_share_pct": 159.22022871941545,
+      "probe_const_coefficient": -1000000.0,
+      "route": "stage_b(spec, tier=1) with the production head and rate_gap_bps := +50.0; production scales, production FE, months at production",
+      "scheduled_amortization_b": 199.86608209108226,
+      "sum_of_targets_audit": {
+        "neg_sum_targets_b": 1417.5,
+        "neg_sum_targets_share_pct": 185.3551144479978,
+        "sum_abs_targets_b": 1417.5,
+        "empirical_trapped_b": 764.7482532227002,
+        "n_months": 42,
+        "targets_all_nonpositive": true,
+        "adjudicates": "nothing \u2014 audit only (correction A7-C1)"
+      },
+      "mechanism": "predict_hazard clips log_mu at -20, so every sufficiently rogue draw shares the identical hazard path and lands on this exact value"
+    },
+    "spec4": {
+      "spec_version": 4,
+      "floor_b": 1217.6338514230454,
+      "floor_share_pct": 159.22022002559078,
+      "probe_const_coefficient": -1000000.0,
+      "route": "stage_b(spec, tier=1) with the production head and rate_gap_bps := +50.0; production scales, production FE, months at production",
+      "scheduled_amortization_b": 199.86614857695463,
+      "sum_of_targets_audit": {
+        "neg_sum_targets_b": 1417.5,
+        "neg_sum_targets_share_pct": 185.3551144479978,
+        "sum_abs_targets_b": 1417.5,
+        "empirical_trapped_b": 764.7482532227002,
+        "n_months": 42,
+        "targets_all_nonpositive": true,
+        "adjudicates": "nothing \u2014 audit only (correction A7-C1)"
+      },
+      "mechanism": "predict_hazard clips log_mu at -20, so every sufficiently rogue draw shares the identical hazard path and lands on this exact value"
+    }
+  },
+  "stage_a_recovered": {
+    "spec4": {
+      "n_reps": 200,
+      "n_converged": 199,
+      "n_failed": 1,
+      "recovered_from": "pathA_bootstrap_fullvec_draws_specv4.csv",
+      "counts_only": true,
+      "note": "counts only; the Stage-A summary was never written for this spec (A7(1) aggregation crash). point_native_units is not recoverable, so P3 for this spec stays PENDING."
+    }
+  },
+  "parity_gates_pending": []
 }
