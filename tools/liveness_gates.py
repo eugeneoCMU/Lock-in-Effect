@@ -250,9 +250,11 @@ ABSTRACT_HEDGES = {
     # "...projection is described in the appendix. My model anticipated the large
     # majority of the realized shortfall." -- with both fragments still present.
     # That is the exact defect this gate was written to kill, and it passed.
-    "fed_projection_attributed_and_hedged":
-        "The Federal Reserve's own ex-ante projection anticipated the large "
-        "majority of the realized shortfall",
+    # ROUND-27 option-2 cut: the expectations pair (attribution + denominator
+    # switch) LEFT the abstract with its hedges; both are body-pinned below
+    # (fed_projection_body, surprise_denominator_body), each a SINGLE span
+    # joining attribution/switch to its hedge so the seam attack the round-24
+    # battery documented has no boundary to open.
     # the denominator switch, and the allocation the half-share is conditional on
     # ROUND-23: extended. The old surprise_share_allocated span carried
     # "genuine surprise" and moved to the body with the allocation detail, which
@@ -260,9 +262,6 @@ ABSTRACT_HEDGES = {
     # -- an abstract could have said "...rather than the never-binding cap,
     # lock-in accounts for roughly a quarter to a half of the shortfall" and
     # passed. The span now runs to the object.
-    "surprise_denominator": "Measured against that projection rather than the "
-                            "never-binding cap, lock-in accounts for roughly a "
-                            "quarter to a half of the genuine surprise",
     # "small" scopes to the institutional cash-flow cost only; the mobility cost
     # is real, and the abstract must not let the two be read as one
     "cost_scoped_institutional": "The institutional cash-flow cost is small",
@@ -331,6 +330,17 @@ RELOCATED_TO_BODY = {
     "crossdesign_seed_body": "60.2\\% averaged over fifty seeds---above the "
                              "50\\% threshold",
     "crossdesign_reweight_body": "76.3\\% at the book's composition",
+    # ROUND-27 option-2 cut: the expectations pair's body pins. Each joins
+    # the attribution (resp. the denominator switch) to its hedge in ONE
+    # span, so a seam attack that opens a sentence boundary between them
+    # deletes the span and is caught by span presence.
+    "fed_projection_body": "The New York Fed's May 2022 staff baseline "
+                           "already anticipated the large majority of the "
+                           "realized cap-shortfall",
+    "surprise_denominator_body": "projection rather than the non-binding cap, "
+                                 "the lock-in channel accounts for roughly "
+                                 "half the genuine surprise under the central "
+                                 "allocation",
     # the quarter/half split is allocation-conditional, and both are named
     "surprise_share_allocated_body": "they require the uniform-spread "
                                      "allocation, because the settlement-aware "

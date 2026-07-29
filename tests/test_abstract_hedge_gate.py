@@ -101,22 +101,15 @@ def test_every_handoff_phrase_is_covered_by_a_span(phrase: str) -> None:
 def _mutations(abstract: str) -> dict[str, str]:
     """Each entry must flip the gate to FAIL."""
     return {
-        # --- the two that found real holes -------------------------------
-        # SEAM: both fragments still present, but a sentence boundary opened
-        # between them reattributes the projection to the author. This passed
-        # the split-span version of the gate.
-        "seam_reattribution_to_author": abstract.replace(
-            "The Federal Reserve's own ex-ante projection anticipated the large "
-            "majority of the realized shortfall.",
-            "The Federal Reserve's own ex-ante projection is described in the "
-            "appendix. My model anticipated the large majority of the realized "
-            "shortfall."),
-        "seam_reattribution_to_consensus": abstract.replace(
-            "The Federal Reserve's own ex-ante projection anticipated the large "
-            "majority of the realized shortfall.",
-            "The Federal Reserve's own ex-ante projection appears below. The "
-            "prevailing consensus anticipated the large majority of the "
-            "realized shortfall."),
+        # --- ROUND-27 option-2 cut: the SEAM attack's abstract target (the
+        # fed-projection sentence) left the abstract with the expectations
+        # pair. The seam lesson survives structurally: the pair's body pins
+        # (fed_projection_body, surprise_denominator_body) each join
+        # attribution/switch to hedge in ONE span, so opening a boundary
+        # between them deletes the span and the body-mutation battery below
+        # catches it. The two seam cases, the two projection-misattribution
+        # cases, drops_large_majority, and drops_denominator_switch are
+        # retired with the sentences they mutated.
         # COMMENT: the hedge survives in the source but not in the PDF. This
         # passed while the gate read raw tex instead of comment-stripped text.
         "comment_smuggled_hedge": abstract.replace(
@@ -124,20 +117,7 @@ def _mutations(abstract: str) -> dict[str, str]:
             "The cash-flow cost is large\n% The institutional cash-flow cost is small"),
         "whole_abstract_commented_out": "\n".join(
             "% " + line for line in abstract.splitlines()),
-        # --- misattribution ----------------------------------------------
-        "projection_claimed_by_author": abstract.replace(
-            "The Federal Reserve's own ex-ante projection anticipated",
-            "My own ex-ante projection anticipated"),
-        "projection_attributed_to_consensus": abstract.replace(
-            "The Federal Reserve's own ex-ante projection",
-            "The prevailing ex-ante consensus projection"),
         # --- dropped hedges ----------------------------------------------
-        "drops_large_majority": abstract.replace(
-            "anticipated the large majority of the realized shortfall",
-            "anticipated the realized shortfall"),
-        "drops_denominator_switch": abstract.replace(
-            "Measured against that projection rather than the never-binding cap, "
-            "lock-in", "Lock-in"),
         "drops_institutional_scope": abstract.replace(
             "The institutional cash-flow cost is small", "The cost is small"),
         "drops_involuntary_turnover": abstract.replace(
@@ -163,14 +143,8 @@ def _mutations(abstract: str) -> dict[str, str]:
 
 
 MUTATION_NAMES = [
-    "seam_reattribution_to_author",
-    "seam_reattribution_to_consensus",
     "comment_smuggled_hedge",
     "whole_abstract_commented_out",
-    "projection_claimed_by_author",
-    "projection_attributed_to_consensus",
-    "drops_large_majority",
-    "drops_denominator_switch",
     "drops_institutional_scope",
     "drops_involuntary_turnover",
     "abstract_emptied_body_intact",
@@ -261,8 +235,8 @@ BENIGN = {
         "The cost to households who could not move is real.",
         "The cost to households who could not move is real and large."),
     "reword_unrelated_lead": (
-        "Both readings are upper limits.",
-        "Both readings are upper bounds."),
+        "locks households into old, cheap loans",
+        "locks households into old and cheap loans"),
 }
 
 
