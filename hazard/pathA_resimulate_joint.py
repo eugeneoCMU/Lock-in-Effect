@@ -358,7 +358,7 @@ COMMITTED_POINT_B = {
 POINT_PARITY_BLOCKING_SPECS = (3,)   # A7 mandates v3; v4 recorded, non-blocking
 # A7(3), as CORRECTED after the first A7 rerun (see A7-C1/A7-C2 in the header).
 SATURATION_TOL_B = 1e-6              # |trapped − floor| < 1e-6 ⇒ saturated
-FLOOR_PROBE_RATE_GAP = 50.0          # drives every OTM month past predict_hazard's clip
+FLOOR_PROBE_CONST = -1e6            # A7-C1b: clip-everywhere probe          # drives every OTM month past predict_hazard's clip
 LEGACY_BASIN_TOL = 0.02              # retired same-data basin rule, diagnostic only
 RIDGE_REF_JSON = DATA_DIR / "ridge_reference_weighting.json"   # frozen, read-only
 
@@ -801,14 +801,19 @@ def zero_voluntary_floor_probe(spec: int, panel, trans, empirical,
     """The ZERO-VOLUNTARY-PREPAYMENT FLOOR, measured THROUGH THE SAME HANDOFF
     (correction A7-C1).
 
-    One probe simulation through stage_b's own machinery: the production head
-    with its rate-gap coefficient replaced by +50.0. At QT-era gaps the
-    standardized rate gap is large and negative on every out-of-the-money
-    cohort-month, so +50 drives the linear predictor far past the lower clip in
-    hazard_fit.predict_hazard (`np.exp(np.clip(log_mu, -20, 0))`); voluntary
-    prepayment is switched off and only scheduled amortization rolls off. The
-    probe's trapped_b IS the floor, by construction — not a formula, not a
-    hard-coded constant.
+    CORRECTION A7-C1b (labeled; the rate-gap route measured the wrong path).
+    The first probe replaced the rate-gap coefficient with +50.0 and landed
+    $1140.46B — BELOW the draws' pile at $1217.6339B, because early-window
+    months have near-zero standardized gaps, so the rate-gap term alone
+    cannot push log_mu under the -20 clip there and the probe still prepays
+    early. The pile is the CLIP-EVERYWHERE path. The corrected probe forces
+    that path unconditionally: the production head with its INTERCEPT
+    replaced by -1e6, so log_mu < -20 in every month and every cohort, and
+    hazard_fit.predict_hazard (`np.exp(np.clip(log_mu, -20, 0))`) returns the
+    identical exp(-20) hazard everywhere — the exact path every fully-clipped
+    draw realizes. The probe's trapped_b IS the floor, by construction, and
+    the empirical-mode audit must now MATCH (it is a blocking expectation of
+    this probe at spec v3, where 106 draws sit on the pile).
 
     WHY SATURATED DRAWS ARE EXACTLY EQUAL. It is the CLIP, not underflow, that
     makes the pile-up exact: every draw whose log-hazard sits below -20 on the
@@ -819,7 +824,7 @@ def zero_voluntary_floor_probe(spec: int, panel, trans, empirical,
     base_art = json.loads(COEF_PATH[spec].read_text())
     names = HEAD_NAMES[spec]
     head = np.array([float(base_art["coefficients"][n]) for n in names])
-    head[names.index("rate_gap_bps")] = FLOOR_PROBE_RATE_GAP
+    head[names.index("const")] = FLOOR_PROBE_CONST  # A7-C1b
     heads = pd.DataFrame([{
         "rep": 0,
         "gap_std": prod_scales["gap_std"],
@@ -835,7 +840,7 @@ def zero_voluntary_floor_probe(spec: int, panel, trans, empirical,
         "spec_version": spec,
         "floor_b": floor_b,
         "floor_share_pct": float(out["df"]["share_pct"].iloc[0]),
-        "probe_rate_gap_coefficient": FLOOR_PROBE_RATE_GAP,
+        "probe_const_coefficient": FLOOR_PROBE_CONST,
         "route": ("stage_b(spec, tier=1) with the production head and "
                   "rate_gap_bps := +50.0; production scales, production FE, "
                   "months at production"),
@@ -1217,7 +1222,7 @@ def main() -> None:
                     floors[f"spec{spec}"] = fl
                     att = attractors_for(spec)
                     print(f"  spec v{spec} zero-voluntary floor (probe, "
-                          f"rate_gap:=+{FLOOR_PROBE_RATE_GAP:g}): "
+                          f"const:={FLOOR_PROBE_CONST:g}): "
                           f"${fl['floor_b']:.7f}B "
                           f"({fl['floor_share_pct']:.2f}%); scheduled "
                           f"amortization ${fl['scheduled_amortization_b']:.1f}B; "
