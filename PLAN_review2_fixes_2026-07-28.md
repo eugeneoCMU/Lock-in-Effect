@@ -104,3 +104,9 @@ Sequence matters: **G1 (internal check, no edit)** — determine from the SOMA C
 **Your decision points, collected:** (1) floor rename now vs at venue revision; (2) abstract policy-sentence form caveat; (3) posture: retire / restate / defend-s≈1; (4) convolved vs partial-identification presentation; (5) mixture-curve headline disposition; (6) results-section rework scope and the Danish split (re-raised by the panel; standing decision is yours); (7) drop vs restate the expectations ratios; (8) scaled-null variant in lieu of a housing-activity term; (9) OK for the Danish external data pull.
 
 **What this plan does not do:** change any committed number outside a pre-committed landing rule; re-litigate the length decision beyond the one required flag; touch anything the panel did not raise.
+
+---
+
+## Decision record (Eugene, 2026-07-28: "I think we can do all of them" + agent/verify architecture)
+
+All eight decision points taken per coordinator recommendation, vetoable individually: (1) posture RETIRED — range + symmetric assembly carry; (2) abstract form caveat YES; (3) floor rename INTERIM (definitional sentence now, global rename at venue revision); (4) convolution as labeled second line; (5) mixture curve RUNS, headline anchor unchanged this round, interior value named in form-conditionality statements; (6) in-paper results rework YES, Danish SPLIT DEFERRED to venue decision; (7) expectations ratios RESTATED as upper bounds; (8) scaled-null variant YES. Execution architecture per Eugene: opus agents draft each subsection; Fable verifies every span/count/claim and applies; ALL runs executed by the coordinator in-session under committed specs (agents never near a run). Recon snapshot at execution start: gates ALL PASS, 431 tests/3.2s, binding ×7 + and-form ×2, percentile ×4, hull ×7, 11.06 ×5, positive-at-every ×6, 9.17 ×7, letter claim 226.
