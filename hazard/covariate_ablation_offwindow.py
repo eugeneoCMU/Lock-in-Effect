@@ -280,8 +280,12 @@ def main() -> None:
         "landing_branch": branch,
         "runtime_s": round(time.perf_counter() - t0, 1),
     }
+    def _np(o):
+        if hasattr(o, "item"):
+            return o.item()
+        raise TypeError(f"not serializable: {type(o)}")
     with open(RESULTS_JSON, "w") as f:
-        json.dump(payload, f, indent=2)
+        json.dump(payload, f, indent=2, default=_np)
         f.write("\n")
     print(f"\nstatus {status}; swing in-sample {b40['total_swing_pp']:.2f}pp "
           f"-> off-window {b49['total_swing_pp']:.2f}pp "
