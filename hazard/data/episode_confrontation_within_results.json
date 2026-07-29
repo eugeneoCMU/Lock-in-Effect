@@ -1,0 +1,822 @@
+{
+  "mode": "episode_confrontation_within",
+  "status": "OK",
+  "spec": {
+    "purpose": "round-28 WP-I1: the composition-controlled version of the tex-292 episode gradient three referees ask for; design frozen in the module docstring before the run (specs/SPEC_round28_D_F1_I1_I3_J2_S8.md SPEC I1)",
+    "structural_finding": "the stratum id CONTAINS coupon and the bucket is a function of the stratum's window-mean gap, so every stratum lives in exactly one bucket: a literal within-stratum gradient is NOT COMPUTABLE, EVER. What is computable is composition control on the non-coupon axes.",
+    "composition_cell": "(vintage, fico_bucket, ltv_bucket) \u2014 the stratum id with the coupon dimension removed",
+    "limb_a": "direct standardization, floor_uncertainty.py:478-521 template (shallow-bucket weights, observed / ratio-imputed / flat-fallback reads, imputed weight share reported); joint stratum-cluster bootstrap, 1000 reps, seed 42",
+    "limb_b": "exact within/between decomposition of the committed gradient; telescoping counterfactual CPR(SMM_deep under shallow mix); identity_residual zero by construction and asserted",
+    "limb_c": "stratum-FE within estimator on monthly SMM vs monthly gap, exposure-weighted, stratum-clustered SE; SECONDARY \u2014 reported, never primary",
+    "feasibility_gate": "FG-1 coverage >= 30% and >= 10 common cells on (vintage, fico, ltv); FG-2 falls back to (fico, ltv); FG-3 NOT_COMPUTABLE (a landing, not a failure). Evaluated from exposure_upb and cell counts ONLY, before any outcome is read.",
+    "held_at_production": "window 202206..202509 (40 months, asserted); coupon>0 & exposure_upb>0; gap on the calendar-month FRED ME-mean; buckets [-1,0)/[-2,-1)/[-3,-2)/<=-3 with gap>=0 excluded; age0 >= 24; endpoint support >= 1% exposure AND >= 10 strata; pooled dollar SMM -> CPR = 1-(1-SMM)^12; analytic model counterpart, covariate multiplier 1; seed 42",
+    "gates": "G0-G4 are episode_confrontation.py's own gates, replicated line-for-line from its main() (the committed main() is never called: it would rewrite the frozen artifact); G5 is this run's new frozen-artifact reproduction gate",
+    "must_not_change": "episode_confrontation.py and its committed artifact; matched_depth_reconciliation.build_panel; floor_uncertainty.cluster_bootstrap_cpr; the bucket rule, age cut and support rule; +4.20, [+3.59,+4.66], +0.94, 0.68, p = 0.005 at tex 292 and liveness_gates.py:4396-4406; config.py; any .tex file"
+  },
+  "parity_gates": {
+    "G0_production_constants": {
+      "floor_mode_max": true,
+      "involuntary_cpr_4pct": true,
+      "baseline_psa": true,
+      "psa_speed_100": true,
+      "p_q_baseline_0.06": true,
+      "declines_5.5_6.5_7.7": true,
+      "beta1_low_0.0577": true,
+      "beta1_mid_rounds_to_0.069": true,
+      "beta1_high_0.0817": true,
+      "beta1_signed": {
+        "low": -0.05772290851408145,
+        "mid": -0.06857052676484808,
+        "high": -0.08173874960915711
+      },
+      "pass": true
+    },
+    "G1_e3_pooled_velocity": {
+      "got": -0.07438857974396679,
+      "want": -0.07438857974396679,
+      "n": 39,
+      "zero_band": 0.32025630761017426,
+      "tol": 1e-09,
+      "pass": true
+    },
+    "G2_e3_cohort_lag0": {
+      "cells": {
+        "2.0": {
+          "got": -0.08923910432952191,
+          "want": -0.08923910432952191,
+          "n": 39,
+          "pass": true
+        },
+        "2.5": {
+          "got": -0.05738215063977279,
+          "want": -0.05738215063977279,
+          "n": 39,
+          "pass": true
+        },
+        "3.0": {
+          "got": -0.047200878876133945,
+          "want": -0.047200878876133945,
+          "n": 39,
+          "pass": true
+        },
+        "3.5": {
+          "got": -0.0871594360120068,
+          "want": -0.0871594360120068,
+          "n": 39,
+          "pass": true
+        },
+        "4.0": {
+          "got": -0.12512233533245845,
+          "want": -0.12512233533245845,
+          "n": 39,
+          "pass": true
+        },
+        "4.5": {
+          "got": -0.16419433385089685,
+          "want": -0.16419433385089685,
+          "n": 39,
+          "pass": true
+        }
+      },
+      "tol": 1e-09,
+      "pass": true
+    },
+    "G3_vrb_pooled_smm_anchor": {
+      "got_cpr_pct": 4.302657826519651,
+      "want_cpr_pct": 4.302657826519651,
+      "tol_pp": 1e-06,
+      "pass": true
+    },
+    "G4_floor_uncertainty_R2": {
+      "got_cpr_pct": 4.990624060575566,
+      "want_cpr_pct": 4.990624060575566,
+      "got_n": 137,
+      "want_n": 137,
+      "got_clusters": 31,
+      "want_clusters": 31,
+      "tol_pp": 0.001,
+      "pass": true
+    },
+    "G5_frozen_artifact_reproduction": {
+      "got": {
+        "realized_gradient_pp": 4.198179219676357,
+        "gradient_ci95_pp": [
+          3.5852591750975797,
+          4.656477952145319
+        ],
+        "gradient_se_pp": 0.2841227534531014,
+        "implied_gradient_pp_at_0.069": 0.9371125522400376,
+        "b2_vs_b4_gradient_pp": 2.414104180240706,
+        "power_injected_at_0.069": 0.675,
+        "power_normal_approx": 0.9508765650036622,
+        "permutation_crit95_pp": 0.7871113513102007,
+        "permutation_p_one_sided": 0.004975124378109453
+      },
+      "want": {
+        "realized_gradient_pp": 4.198179219676357,
+        "gradient_ci95_pp": [
+          3.5852591750975797,
+          4.656477952145319
+        ],
+        "implied_gradient_pp_at_0.069": 0.9371125522400376,
+        "b2_vs_b4_gradient_pp": 2.414104180240706,
+        "power_injected_at_0.069": 0.675
+      },
+      "tol": {
+        "values": 1e-09,
+        "power": 0.001
+      },
+      "checks": {
+        "raw_gradient": true,
+        "ci_low": true,
+        "ci_high": true,
+        "implied_mid": true,
+        "b2_vs_b4": true,
+        "power_at_0.069": true
+      },
+      "pass": true
+    }
+  },
+  "parity_gates_all_pass": true,
+  "selection": {
+    "n_strata_total": 290,
+    "n_strata_excluded_gap_ge0": 14,
+    "n_strata_bucketed": 276,
+    "n_strata_primary": 159,
+    "n_rows_primary": 6346,
+    "n_rows_full": 10982,
+    "endpoints": {
+      "shallow": "[-1,0)",
+      "deep": "<=-3"
+    },
+    "qualified_buckets": [
+      "[-1,0)",
+      "[-2,-1)",
+      "[-3,-2)",
+      "<=-3"
+    ],
+    "endpoint_mean_gap_delta_pp": 2.650546058400017
+  },
+  "feasibility_gate": {
+    "branch": "FG-1",
+    "standardization_axis": "vintage_fico_ltv",
+    "common_cells_n": 18,
+    "shallow_exposure_covered_share": 0.9972496027217213,
+    "deep_exposure_covered_share": 1.0,
+    "endpoints": {
+      "shallow": "[-1,0)",
+      "deep": "<=-3"
+    },
+    "thresholds": {
+      "min_coverage": 0.3,
+      "min_cells_full_axis": 10,
+      "min_cells_fallback_axis": 2,
+      "adaptation_note": "the fallback axis carries at most 3 FICO x 2 LTV = 6 cells, so a literal >=10 there would make FG-2 unreachable and delete the branch; the 30% coverage bar is carried across unchanged and the fallback cell bar is 2. Disclosed, fixed ex ante.",
+      "literal_10cell_at_fallback_would_give": "FG-1"
+    },
+    "axis_full": {
+      "axis": "vintage_fico_ltv",
+      "common_cells_n": 18,
+      "cells_shallow_n": 22,
+      "cells_deep_n": 18,
+      "shallow_exposure_covered_share": 0.9972496027217213,
+      "deep_exposure_covered_share": 1.0,
+      "common_cells": [
+        "2017|680-740|>80",
+        "2017|680-740|\u226480",
+        "2017|740+|>80",
+        "2017|740+|\u226480",
+        "2017|<680|>80",
+        "2017|<680|\u226480",
+        "2018|680-740|>80",
+        "2018|680-740|\u226480",
+        "2018|740+|>80",
+        "2018|740+|\u226480",
+        "2018|<680|>80",
+        "2018|<680|\u226480",
+        "2019|680-740|>80",
+        "2019|680-740|\u226480",
+        "2019|740+|>80",
+        "2019|740+|\u226480",
+        "2019|<680|>80",
+        "2019|<680|\u226480"
+      ],
+      "per_cell_support": [
+        {
+          "cell": "2017|680-740|>80",
+          "in_both": true,
+          "exposure_shallow": 85694323.1,
+          "exposure_deep": 8664636158.64,
+          "shallow_weight": 0.0008797369602981112,
+          "n_strata_shallow": 1,
+          "n_strata_deep": 3
+        },
+        {
+          "cell": "2017|680-740|\u226480",
+          "in_both": true,
+          "exposure_shallow": 191786447.07,
+          "exposure_deep": 63257527966.38,
+          "shallow_weight": 0.0019688775156651702,
+          "n_strata_shallow": 1,
+          "n_strata_deep": 3
+        },
+        {
+          "cell": "2017|740+|>80",
+          "in_both": true,
+          "exposure_shallow": 20772369.830000002,
+          "exposure_deep": 19402192079.3,
+          "shallow_weight": 0.00021324891581333226,
+          "n_strata_shallow": 1,
+          "n_strata_deep": 3
+        },
+        {
+          "cell": "2017|740+|\u226480",
+          "in_both": true,
+          "exposure_shallow": 76653898.97,
+          "exposure_deep": 177175693728.58,
+          "shallow_weight": 0.0007869280675240705,
+          "n_strata_shallow": 1,
+          "n_strata_deep": 4
+        },
+        {
+          "cell": "2017|<680|>80",
+          "in_both": true,
+          "exposure_shallow": 209875664.95,
+          "exposure_deep": 2616683806.06,
+          "shallow_weight": 0.0021545812236383466,
+          "n_strata_shallow": 1,
+          "n_strata_deep": 2
+        },
+        {
+          "cell": "2017|<680|\u226480",
+          "in_both": true,
+          "exposure_shallow": 684363323.06,
+          "exposure_deep": 19531870727.65,
+          "shallow_weight": 0.007025666202716276,
+          "n_strata_shallow": 1,
+          "n_strata_deep": 3
+        },
+        {
+          "cell": "2018|680-740|>80",
+          "in_both": true,
+          "exposure_shallow": 7180026761.32,
+          "exposure_deep": 1017040701.35,
+          "shallow_weight": 0.07371007424251128,
+          "n_strata_shallow": 2,
+          "n_strata_deep": 2
+        },
+        {
+          "cell": "2018|680-740|\u226480",
+          "in_both": true,
+          "exposure_shallow": 13038830162.93,
+          "exposure_deep": 7225576130.07,
+          "shallow_weight": 0.13385648428535593,
+          "n_strata_shallow": 2,
+          "n_strata_deep": 3
+        },
+        {
+          "cell": "2018|740+|>80",
+          "in_both": true,
+          "exposure_shallow": 3187859998.71,
+          "exposure_deep": 2013413981.31,
+          "shallow_weight": 0.03272653501035795,
+          "n_strata_shallow": 2,
+          "n_strata_deep": 3
+        },
+        {
+          "cell": "2018|740+|\u226480",
+          "in_both": true,
+          "exposure_shallow": 11060115378.18,
+          "exposure_deep": 21882073517.41,
+          "shallow_weight": 0.11354302048680828,
+          "n_strata_shallow": 2,
+          "n_strata_deep": 3
+        },
+        {
+          "cell": "2018|<680|>80",
+          "in_both": true,
+          "exposure_shallow": 7445880098.15,
+          "exposure_deep": 254905017.21,
+          "shallow_weight": 0.07643932161815142,
+          "n_strata_shallow": 2,
+          "n_strata_deep": 3
+        },
+        {
+          "cell": "2018|<680|\u226480",
+          "in_both": true,
+          "exposure_shallow": 15609496155.4,
+          "exposure_deep": 2083330160.36,
+          "shallow_weight": 0.1602469125464934,
+          "n_strata_shallow": 2,
+          "n_strata_deep": 2
+        },
+        {
+          "cell": "2019|680-740|>80",
+          "in_both": true,
+          "exposure_shallow": 3149879933.19,
+          "exposure_deep": 67549944615.62,
+          "shallow_weight": 0.03233663208349199,
+          "n_strata_shallow": 2,
+          "n_strata_deep": 3
+        },
+        {
+          "cell": "2019|680-740|\u226480",
+          "in_both": true,
+          "exposure_shallow": 10226266828.51,
+          "exposure_deep": 166530533763.38,
+          "shallow_weight": 0.10498274062346603,
+          "n_strata_shallow": 2,
+          "n_strata_deep": 4
+        },
+        {
+          "cell": "2019|740+|>80",
+          "in_both": true,
+          "exposure_shallow": 1834933692.74,
+          "exposure_deep": 230043565926.83002,
+          "shallow_weight": 0.018837408719781065,
+          "n_strata_shallow": 2,
+          "n_strata_deep": 2
+        },
+        {
+          "cell": "2019|740+|\u226480",
+          "in_both": true,
+          "exposure_shallow": 7719866071.21,
+          "exposure_deep": 656569455398.1901,
+          "shallow_weight": 0.07925205854616066,
+          "n_strata_shallow": 2,
+          "n_strata_deep": 3
+        },
+        {
+          "cell": "2019|<680|>80",
+          "in_both": true,
+          "exposure_shallow": 3213317131.21,
+          "exposure_deep": 5048058599.2300005,
+          "shallow_weight": 0.0329878776472246,
+          "n_strata_shallow": 2,
+          "n_strata_deep": 3
+        },
+        {
+          "cell": "2019|<680|\u226480",
+          "in_both": true,
+          "exposure_shallow": 12205497258.11,
+          "exposure_deep": 29986453686.5,
+          "shallow_weight": 0.12530149802626334,
+          "n_strata_shallow": 2,
+          "n_strata_deep": 3
+        },
+        {
+          "cell": "2020|680-740|\u226480",
+          "in_both": false,
+          "exposure_shallow": 1737871.45,
+          "exposure_deep": 0.0,
+          "shallow_weight": 1.7840968823894836e-05,
+          "n_strata_shallow": 1,
+          "n_strata_deep": 0
+        },
+        {
+          "cell": "2020|740+|>80",
+          "in_both": false,
+          "exposure_shallow": 156399308.79,
+          "exposure_deep": 0.0,
+          "shallow_weight": 0.0016055935507779309,
+          "n_strata_shallow": 2,
+          "n_strata_deep": 0
+        },
+        {
+          "cell": "2020|<680|>80",
+          "in_both": false,
+          "exposure_shallow": 98098289.11,
+          "exposure_deep": 0.0,
+          "shallow_weight": 0.0010070759363064122,
+          "n_strata_shallow": 1,
+          "n_strata_deep": 0
+        },
+        {
+          "cell": "2020|<680|\u226480",
+          "in_both": false,
+          "exposure_shallow": 11678058.959999999,
+          "exposure_deep": 0.0,
+          "shallow_weight": 0.00011988682237053018,
+          "n_strata_shallow": 1,
+          "n_strata_deep": 0
+        }
+      ]
+    },
+    "axis_fallback": null,
+    "prepaid_upb_untouched_on_this_selection": true,
+    "convention_note": "episode_confrontation.py:102-110 convention: this gate is computed from exposure_upb sums and cell/stratum counts on the in-window bucketed selection ONLY. That selection's prepaid_upb is first read in G5, which runs AFTER this gate, so no threshold here can have been tuned on an outcome. (G0-G4 do read prepaid_upb \u2014 but only on the committed parity objects: the 2018 off-window leg, the Fannie panel, and the E3 series \u2014 never on this run's endpoint buckets.)"
+  },
+  "limb_a": {
+    "status": "OK",
+    "standardization_axis": "vintage_fico_ltv",
+    "standardized_gradient_pp": 3.4409160684432125,
+    "ci95_pp": [
+      1.1698156633697476,
+      5.140403332533121
+    ],
+    "se_pp": 0.9314370587782016,
+    "imputed_weight_share": 0.0027503972782787684,
+    "per_cell_table": [
+      {
+        "cell_index": 0,
+        "weight": 0.0008797369602981112,
+        "shallow_cpr_pct": 4.14292116346685,
+        "deep_cpr_pct": 6.716505654322836,
+        "used_pct": 6.716505654322836,
+        "source": "observed_deep",
+        "imputed": false,
+        "exposure_shallow": 85694323.1,
+        "exposure_deep": 8664636158.64,
+        "cell": "2017|680-740|>80"
+      },
+      {
+        "cell_index": 1,
+        "weight": 0.0019688775156651702,
+        "shallow_cpr_pct": 6.395303958233711,
+        "deep_cpr_pct": 5.796422479592023,
+        "used_pct": 5.796422479592023,
+        "source": "observed_deep",
+        "imputed": false,
+        "exposure_shallow": 191786447.07,
+        "exposure_deep": 63257527966.38,
+        "cell": "2017|680-740|\u226480"
+      },
+      {
+        "cell_index": 2,
+        "weight": 0.00021324891581333226,
+        "shallow_cpr_pct": 22.1070359001202,
+        "deep_cpr_pct": 6.287641614161943,
+        "used_pct": 6.287641614161943,
+        "source": "observed_deep",
+        "imputed": false,
+        "exposure_shallow": 20772369.830000002,
+        "exposure_deep": 19402192079.3,
+        "cell": "2017|740+|>80"
+      },
+      {
+        "cell_index": 3,
+        "weight": 0.0007869280675240705,
+        "shallow_cpr_pct": 21.04131031358698,
+        "deep_cpr_pct": 5.798248902086045,
+        "used_pct": 5.798248902086045,
+        "source": "observed_deep",
+        "imputed": false,
+        "exposure_shallow": 76653898.97,
+        "exposure_deep": 177175693728.58,
+        "cell": "2017|740+|\u226480"
+      },
+      {
+        "cell_index": 4,
+        "weight": 0.0021545812236383466,
+        "shallow_cpr_pct": 9.738987788984865,
+        "deep_cpr_pct": 7.854941567777896,
+        "used_pct": 7.854941567777896,
+        "source": "observed_deep",
+        "imputed": false,
+        "exposure_shallow": 209875664.95,
+        "exposure_deep": 2616683806.06,
+        "cell": "2017|<680|>80"
+      },
+      {
+        "cell_index": 5,
+        "weight": 0.007025666202716276,
+        "shallow_cpr_pct": 8.192794680262605,
+        "deep_cpr_pct": 6.139136359218744,
+        "used_pct": 6.139136359218744,
+        "source": "observed_deep",
+        "imputed": false,
+        "exposure_shallow": 684363323.06,
+        "exposure_deep": 19531870727.65,
+        "cell": "2017|<680|\u226480"
+      },
+      {
+        "cell_index": 6,
+        "weight": 0.07371007424251128,
+        "shallow_cpr_pct": 8.328138201723235,
+        "deep_cpr_pct": 7.43031739463108,
+        "used_pct": 7.43031739463108,
+        "source": "observed_deep",
+        "imputed": false,
+        "exposure_shallow": 7180026761.32,
+        "exposure_deep": 1017040701.35,
+        "cell": "2018|680-740|>80"
+      },
+      {
+        "cell_index": 7,
+        "weight": 0.13385648428535593,
+        "shallow_cpr_pct": 9.936610863954842,
+        "deep_cpr_pct": 5.964879159099201,
+        "used_pct": 5.964879159099201,
+        "source": "observed_deep",
+        "imputed": false,
+        "exposure_shallow": 13038830162.93,
+        "exposure_deep": 7225576130.07,
+        "cell": "2018|680-740|\u226480"
+      },
+      {
+        "cell_index": 8,
+        "weight": 0.03272653501035795,
+        "shallow_cpr_pct": 9.724773254812046,
+        "deep_cpr_pct": 7.868960952726578,
+        "used_pct": 7.868960952726578,
+        "source": "observed_deep",
+        "imputed": false,
+        "exposure_shallow": 3187859998.71,
+        "exposure_deep": 2013413981.31,
+        "cell": "2018|740+|>80"
+      },
+      {
+        "cell_index": 9,
+        "weight": 0.11354302048680828,
+        "shallow_cpr_pct": 9.518949880386995,
+        "deep_cpr_pct": 5.708652928215329,
+        "used_pct": 5.708652928215329,
+        "source": "observed_deep",
+        "imputed": false,
+        "exposure_shallow": 11060115378.18,
+        "exposure_deep": 21882073517.41,
+        "cell": "2018|740+|\u226480"
+      },
+      {
+        "cell_index": 10,
+        "weight": 0.07643932161815142,
+        "shallow_cpr_pct": 8.472444804977231,
+        "deep_cpr_pct": 9.40066167318614,
+        "used_pct": 9.40066167318614,
+        "source": "observed_deep",
+        "imputed": false,
+        "exposure_shallow": 7445880098.15,
+        "exposure_deep": 254905017.21,
+        "cell": "2018|<680|>80"
+      },
+      {
+        "cell_index": 11,
+        "weight": 0.1602469125464934,
+        "shallow_cpr_pct": 9.48552931473735,
+        "deep_cpr_pct": 5.178232790356418,
+        "used_pct": 5.178232790356418,
+        "source": "observed_deep",
+        "imputed": false,
+        "exposure_shallow": 15609496155.4,
+        "exposure_deep": 2083330160.36,
+        "cell": "2018|<680|\u226480"
+      },
+      {
+        "cell_index": 12,
+        "weight": 0.03233663208349199,
+        "shallow_cpr_pct": 7.9154589489628275,
+        "deep_cpr_pct": 5.898179295353023,
+        "used_pct": 5.898179295353023,
+        "source": "observed_deep",
+        "imputed": false,
+        "exposure_shallow": 3149879933.19,
+        "exposure_deep": 67549944615.62,
+        "cell": "2019|680-740|>80"
+      },
+      {
+        "cell_index": 13,
+        "weight": 0.10498274062346603,
+        "shallow_cpr_pct": 9.825475889208779,
+        "deep_cpr_pct": 4.894766605005896,
+        "used_pct": 4.894766605005896,
+        "source": "observed_deep",
+        "imputed": false,
+        "exposure_shallow": 10226266828.51,
+        "exposure_deep": 166530533763.38,
+        "cell": "2019|680-740|\u226480"
+      },
+      {
+        "cell_index": 14,
+        "weight": 0.018837408719781065,
+        "shallow_cpr_pct": 9.345041395984833,
+        "deep_cpr_pct": 5.567564601868558,
+        "used_pct": 5.567564601868558,
+        "source": "observed_deep",
+        "imputed": false,
+        "exposure_shallow": 1834933692.74,
+        "exposure_deep": 230043565926.83002,
+        "cell": "2019|740+|>80"
+      },
+      {
+        "cell_index": 15,
+        "weight": 0.07925205854616066,
+        "shallow_cpr_pct": 10.881755751528743,
+        "deep_cpr_pct": 4.777873715532155,
+        "used_pct": 4.777873715532155,
+        "source": "observed_deep",
+        "imputed": false,
+        "exposure_shallow": 7719866071.21,
+        "exposure_deep": 656569455398.1901,
+        "cell": "2019|740+|\u226480"
+      },
+      {
+        "cell_index": 16,
+        "weight": 0.0329878776472246,
+        "shallow_cpr_pct": 9.371094013543402,
+        "deep_cpr_pct": 5.425323129578596,
+        "used_pct": 5.425323129578596,
+        "source": "observed_deep",
+        "imputed": false,
+        "exposure_shallow": 3213317131.21,
+        "exposure_deep": 5048058599.2300005,
+        "cell": "2019|<680|>80"
+      },
+      {
+        "cell_index": 17,
+        "weight": 0.12530149802626334,
+        "shallow_cpr_pct": 9.205224373670218,
+        "deep_cpr_pct": 5.8281084109152665,
+        "used_pct": 5.8281084109152665,
+        "source": "observed_deep",
+        "imputed": false,
+        "exposure_shallow": 12205497258.11,
+        "exposure_deep": 29986453686.5,
+        "cell": "2019|<680|\u226480"
+      },
+      {
+        "cell_index": 18,
+        "weight": 1.7840968823894836e-05,
+        "shallow_cpr_pct": 24.712428977988733,
+        "deep_cpr_pct": null,
+        "used_pct": 12.311014087662675,
+        "source": "IMPUTED: deep read in nearest common cell #13 (4.895%) x shallow ratio 24.712/9.825",
+        "imputed": true,
+        "exposure_shallow": 1737871.45,
+        "exposure_deep": 0.0,
+        "cell": "2020|680-740|\u226480"
+      },
+      {
+        "cell_index": 19,
+        "weight": 0.0016055935507779309,
+        "shallow_cpr_pct": 6.94562725611495,
+        "deep_cpr_pct": null,
+        "used_pct": 4.138047849154953,
+        "source": "IMPUTED: deep read in nearest common cell #14 (5.568%) x shallow ratio 6.946/9.345",
+        "imputed": true,
+        "exposure_shallow": 156399308.79,
+        "exposure_deep": 0.0,
+        "cell": "2020|740+|>80"
+      },
+      {
+        "cell_index": 20,
+        "weight": 0.0010070759363064122,
+        "shallow_cpr_pct": 4.373962790764308,
+        "deep_cpr_pct": null,
+        "used_pct": 2.5322722685690877,
+        "source": "IMPUTED: deep read in nearest common cell #16 (5.425%) x shallow ratio 4.374/9.371",
+        "imputed": true,
+        "exposure_shallow": 98098289.11,
+        "exposure_deep": 0.0,
+        "cell": "2020|<680|>80"
+      },
+      {
+        "cell_index": 21,
+        "weight": 0.00011988682237053018,
+        "shallow_cpr_pct": 0.0,
+        "deep_cpr_pct": null,
+        "used_pct": 0.0,
+        "source": "IMPUTED: deep read in nearest common cell #17 (5.828%) x shallow ratio 0.000/9.205",
+        "imputed": true,
+        "exposure_shallow": 11678058.959999999,
+        "exposure_deep": 0.0,
+        "cell": "2020|<680|\u226480"
+      }
+    ],
+    "shallow_standardized_cpr_pct": 9.431183631612338,
+    "deep_standardized_cpr_pct": 5.990267563169126,
+    "shallow_pooled_cpr_pct": 9.434813556058518,
+    "deep_pooled_cpr_pct": 5.236634336382162,
+    "gradient_vs_pooled_shallow_pp": 3.4445459928893927,
+    "raw_gradient_pp": 4.198179219676357,
+    "n_cells": 22,
+    "n_common_cells": 18,
+    "bootstrap": {
+      "n_reps": 1000,
+      "seed": 42,
+      "convention": "joint_gradient_bootstrap's resampling convention \u2014 ONE default_rng(42) stream, shallow cluster indices then deep per replicate block; weights resampled with the data; imputation re-applied per replicate",
+      "stream_parity_vs_joint_gradient_bootstrap_max_abs": 0.0,
+      "mean_imputed_weight_share": 0.06158070457011667,
+      "n_degenerate_reps": 0,
+      "draws_min_pp": -0.8801881255946853,
+      "draws_max_pp": 6.365114268789636
+    }
+  },
+  "limb_b": {
+    "axis": "vintage_fico_ltv",
+    "total_pp": 4.198179219676357,
+    "between_composition_pp": 0.7679069252018227,
+    "within_composition_pp": 3.430272294474534,
+    "identity_residual": 0.0,
+    "smm_shallow_pooled": 0.0082243519652044,
+    "smm_deep_pooled": 0.004472243731328776,
+    "smm_deep_standardized_to_shallow_mix": 0.0051470181561660226,
+    "n_cells": 22,
+    "unmatched_exposure_share_shallow": 0.002750397278278768,
+    "unmatched_exposure_share_deep": 0.0,
+    "symmetric_split": {
+      "between_pp": -0.6882511217169235,
+      "within_pp": 4.8864303413932815,
+      "identity_residual_smm": -8.673617379884035e-19,
+      "note": "average-weight (Oaxaca two-fold) split computed in SMM space \u2014 exact there \u2014 and rescaled to pp by the CPR/SMM ratio of the total; the telescoping split above is the one that is exact in pp"
+    },
+    "between_by_axis": {
+      "full_cell": {
+        "between_composition_pp": 0.7679069252018227,
+        "within_composition_pp": 3.430272294474534,
+        "n_cells": 22
+      },
+      "vintage_only": {
+        "between_composition_pp": 0.3504588404194209,
+        "within_composition_pp": 3.847720379256936,
+        "n_cells": 4
+      },
+      "fico_ltv_only": {
+        "between_composition_pp": 0.37292703507091396,
+        "within_composition_pp": 3.825252184605443,
+        "n_cells": 6
+      }
+    }
+  },
+  "limb_c": {
+    "computable": true,
+    "coef_per_100bp": 0.0025651912193149677,
+    "se": 0.00011066276139632524,
+    "t_stat": 23.180256727265707,
+    "n_strata": 159,
+    "n_obs": 6346,
+    "r2_within": 0.3531054894465562,
+    "implied_cpr_per_point_pp": 2.8966198255559226,
+    "mean_smm": 0.005512938788017843,
+    "equivalent_endpoint_gradient_pp": 7.677624261310596,
+    "month_variance_share_of_within_regressor": 0.9999457579182746,
+    "variants": {
+      "unweighted_primary": {
+        "computable": true,
+        "coef_per_100bp": 0.003107826972315764,
+        "se": 0.0008973987349812278,
+        "t_stat": 3.4631506053780825,
+        "n_strata": 159,
+        "n_obs": 6346,
+        "r2_within": 0.0053796752742409915,
+        "implied_cpr_per_point_pp": 3.509365366068619,
+        "mean_smm": 0.005512938788017843
+      },
+      "exposure_weighted_full_sample": {
+        "computable": true,
+        "coef_per_100bp": 0.0010003215581797017,
+        "se": 0.00012294206445213104,
+        "t_stat": 8.136528068220205,
+        "n_strata": 276,
+        "n_obs": 10982,
+        "r2_within": 0.17127600668679843,
+        "implied_cpr_per_point_pp": 1.1535299739842928,
+        "mean_smm": 0.0036131187159509576
+      }
+    },
+    "confounds_note": "Within a stratum the coupon is constant, so gap_it = coupon_i - r_t is a deterministic function of calendar time; the within regressor is identified ONLY off the unbalanced panel (which months a stratum is observed in, and with what exposure weight). Seasoning and seasonality therefore load onto this coefficient in full, and the two-way (stratum + month) FE version is EXACTLY unidentified and is not run. Reported for the practitioners who will ask for it; a near-zero within-stratum response is consistent with \u2014 and strengthens \u2014 this paper's own monthly-timing nulls. NEVER PRIMARY."
+  },
+  "committed_reference": {
+    "realized_gradient_pp": 4.198179219676357,
+    "gradient_ci95_pp": [
+      3.5852591750975797,
+      4.656477952145319
+    ],
+    "implied_gradient_pp_at_0.069": 0.9371125522400376,
+    "power_injected_at_0.069": 0.675,
+    "b2_vs_b4_gradient_pp": 2.414104180240706,
+    "verdict_branch": "T5",
+    "source": "episode_confrontation_results.json",
+    "reproduced_here": {
+      "realized_gradient_pp": 4.198179219676357,
+      "gradient_ci95_pp": [
+        3.5852591750975797,
+        4.656477952145319
+      ],
+      "gradient_se_pp": 0.2841227534531014,
+      "implied_gradient_pp_at_0.069": 0.9371125522400376,
+      "b2_vs_b4_gradient_pp": 2.414104180240706,
+      "power_injected_at_0.069": 0.675,
+      "power_normal_approx": 0.9508765650036622,
+      "permutation_crit95_pp": 0.7871113513102007,
+      "permutation_p_one_sided": 0.004975124378109453
+    }
+  },
+  "verdict": {
+    "branch": "a",
+    "subcase": null,
+    "sentence": "(a) GAP PERSISTS: standardizing the deep bucket to the shallow bucket's vintage x FICO x LTV composition leaves the gradient at +3.441 points (95% CI [+1.170, +5.140], imputed weight share 0.3%), against the production hazard's implied +0.937: the excess is NOT composition in the dimensions the panel can hold fixed. The tex-292 composition-confounding defence falls as stated; the finding enters tab:assembly as an UPWARD entry labelled 'directional; not a marginal re-estimate'. What remains unresolved is within-window refinancing on the high-coupon shallow buckets, which no field in this design separates from moving. [posture] Eugene signs.",
+    "inputs": {
+      "standardized_gradient_pp": 3.4409160684432125,
+      "standardized_ci95_pp": [
+        1.1698156633697476,
+        5.140403332533121
+      ],
+      "model_implied_gradient_pp_at_0.069": 0.9371125522400376,
+      "raw_committed_gradient_pp": 4.198179219676357,
+      "half_raw_bar_pp": 2.0990896098381784,
+      "fg_branch": "FG-1"
+    },
+    "landing": "tex 292 rewritten to the tested version; UPWARD entry in tab:assembly (tex 313-334) with Status 'directional; not a marginal re-estimate'. [posture] Eugene signs."
+  },
+  "runtime_s": 0.5
+}
