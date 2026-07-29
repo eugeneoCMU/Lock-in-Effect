@@ -457,7 +457,13 @@ ABSTRACT_POSTURE = {
     # ROUND-26 full restatement: the binding layer is the wild-cluster
     # bootstrap-t interval from run floor_inference_correction; the percentile
     # read is demoted to a labeled mention inside the same parenthetical.
-    "interval": "The design pins it between $+2.8$ and $+8.7$ points",
+    "interval": "The design bounds it between $+2.8$ and $+8.7$ points",
+    # ROUND-28 (DA-C3): the abstract must say WHAT the interval bounds. "pins"
+    # claimed the design pinned the elasticity's contribution; the interval is
+    # the floor read's sampling error at a FIXED elasticity, which contributes
+    # zero width. Pinned as its own span so a concision pass cannot delete the
+    # referent while keeping the interval.
+    "interval_referent": "the floor read's sampling error at my central elasticity",
     "point_named_inside": "Inside that range, $+5.6$ points, or \\$42.6 billion, is the "
                           "value at the calibration I headline",
     # the frame is not decoration: WITHOUT it the claim is false, because the

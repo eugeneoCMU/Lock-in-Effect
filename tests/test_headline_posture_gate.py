@@ -76,8 +76,9 @@ def test_point_before_range_fails(tex, abstract):
         "partly behavioral turnover) sets the floor. "
         "Lock-in itself adds $+5.6$ points, or \\$42.6 billion. "
         "What lock-in itself adds is a range rather than a number. "
-        "The design pins it between $+2.8$ and $+8.7$ points under its "
-        "production floor form (a wild-cluster interval on 31 clusters; the "
+        "The design bounds it between $+2.8$ and $+8.7$ points under its "
+        "production floor form (the floor read's sampling error at my "
+        "central elasticity; a wild-cluster interval on 31 clusters; the "
         "percentile read under-covers), with a "
         "form-conditional hull of $+3.5$ to $+13.1$ points, and it identifies "
         "levels only. Inside that range, $+5.6$ points, or \\$42.6 billion, is "
@@ -129,8 +130,8 @@ def test_commented_out_posture_fails(tex, abstract):
 # claim.
 # --------------------------------------------------------------------------
 @pytest.mark.parametrize("old,new", [
-    ("however households react to rates",
-     "however households respond to rates"),
+    ("however the rate-responsive margin behaves",
+     "however the rate-responsive margin moves"),
     ("The cost to households who could not move is real.",
      "The cost to households who could not move is real and unevenly borne."),
 ])
