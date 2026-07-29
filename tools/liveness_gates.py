@@ -392,12 +392,12 @@ ASSEMBLY_SPANS = {
                        "\\texttt{b5\\_joint\\_cell}) and measures $+2.9$ points",
     # (b) the posture, bound to the interval it is a posture about.
     #     ROUND-26 re-derivation: the corrected interval's midpoint is 5.76,
-    #     so +5.57 sits just BELOW it and "upper-middle" would overstate;
-    #     the commitment's surviving content is that the measured corrections
-    #     concentrate below the point, and the span pins exactly that.
-    "posture_middle_member": "I therefore read $+5.6$ as a middle member of an "
-                             "interval whose measured corrections concentrate "
-                             "below it",
+    #     so +5.57 sits just BELOW it; ROUND-28 (DA-C2) RETIRED the posture:
+    #     the symmetric assembly lines downward specification variants up
+    #     beside the upward counterweights, and the pinned claim is now that
+    #     no interior member is privileged (the range carries).
+    "posture_retired_range_carries": "no interior member is privileged, and the range "
+                                     "rather than any point is what the design delivers",
     "posture_binding_layer": "the binding layer is the floor reads' own sampling error, "
                              "$+2.8$ to $+8.7$ points after wild-cluster correction",
     "posture_lower_half": "every correction listed above falls in its lower half",

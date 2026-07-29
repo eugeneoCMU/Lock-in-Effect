@@ -114,7 +114,7 @@ def test_relocating_the_posture_into_a_neighbouring_paragraph_fails(tex):
     """Move the commitment out of the assembly and into its own paragraph. A
     proximity gate would accept this; the claim it concludes would be gone."""
     para = _para(tex)
-    posture = ASSEMBLY_SPANS["posture_middle_member"]
+    posture = ASSEMBLY_SPANS["posture_retired_range_carries"]
     mutated = tex.replace(para, para.replace(posture, "") + "\n\n" + posture + ".", 1)
     ok, _ = assembly_check(mutated)
     assert not ok
@@ -145,8 +145,8 @@ def test_posture_softened_to_a_centre_claim_fails(tex):
     """`+5.6 is the center of the interval` is the reading the round rejected;
     it keeps every ladder rung and reverses the conclusion drawn from them."""
     mutated = _mutate_para(
-        tex, "a middle member of an interval whose measured corrections concentrate below it",
-        "the center of that interval")
+        tex, "no interior member is privileged, and the range rather than any point is what the design delivers",
+        "the center of the interval is the best single reading, and the point rather than the range is what the design delivers")
     assert mutated != tex
     ok, _ = assembly_check(mutated)
     assert not ok

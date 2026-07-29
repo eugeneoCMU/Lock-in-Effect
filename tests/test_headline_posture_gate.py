@@ -150,5 +150,5 @@ def test_abstract_posture_agrees_with_section_ve(tex):
     ve = [ln for ln in tex.split("\n") if ln.startswith("A seventh qualification")]
     assert len(ve) == 1, "Section V.E's assembly paragraph is missing or duplicated"
     assert "$+2.8$ to $+8.7$ points" in ve[0], "V.E no longer quotes the binding interval"
-    assert "middle member of an interval whose measured corrections concentrate below it" in ve[0], (
-        "V.E no longer states the posture the abstract now leads with")
+    assert "no interior member is privileged, and the range rather than any point is what the design delivers" in ve[0], (
+        "V.E no longer states the range-carries reading of Section V.E")
