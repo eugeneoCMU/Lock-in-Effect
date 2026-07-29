@@ -73,7 +73,7 @@ Object & Headline value & Uncertainty / bounds \\
 Cap-relative benchmark, June 2022--November 2025 (Section~\ref{sec:method-benchmark}) & \$764.7 billion & -- \\
 Expectations-based complement (Section~\ref{sec:method-benchmark}) & \$87.8 billion, 11.5\% of the cap-relative benchmark & Fed's ex-ante projection implied 75.6--88.5\% of the cap-shortfall, by intra-2022 allocation \\
 Mechanical null, $\beta_1 = 0$ (Section~\ref{sec:identification}; Table~\ref{tab:bases}) & 85.7\% of benchmark at the headline off-window floor; 88.7\% in-sample & 83.9--86.9\% across the off-window floor range; moves one-for-one with the floor level \\
-Lock-in marginal, off-window floor (Sections~\ref{sec:identification} and~\ref{sec:robustness-floor}; Table~\ref{tab:oosfloor}) & $+2.9$ to $+8.7$ points, basis-invariant --- the floor read's own sampling error propagated at the central elasticity (the 6.5\% mid-band value), not an interval on the elasticity, whose dimension Table~\ref{tab:lowband} sweeps; $+5.6$ points $= +\$42.6$ billion at the mid-grid anchor inside it, an anchor convention rather than a central tendency; the range carries the identified content (Section~\ref{sec:identification}) & floor-read wild-cluster bootstrap-$t$ $[+2.9, +8.7]$, the binding layer (31 clusters; percentile read $[+3.0, +8.0]$, under-covering); off-window floor range $+4.3$ to $+6.8$ (max form; $+3.9$ to $+7.5$ joint with the band); additive form $+11.2$, floor-invariant; form-conditional hull $+3.5$ to $+13.1$, upper end from a 61.2\%-recovery cell and not read as an equally credentialed member (the concave transform and the additive form do not compose additively: jointly $+9.2$, interaction $-1.47$); mixture curve in the floor's involuntary share: $+9.7$ at $s{=}0.25$, $+10.7$ at $s{=}0.4$ (run \texttt{floor\_form\_mixture}); Ginnie overlay $+4.4$ (conventional-share scaling $0.797\times$); floor-stability check $+\$45.1$ billion \\
+Lock-in marginal, off-window floor (Sections~\ref{sec:identification} and~\ref{sec:robustness-floor}; Table~\ref{tab:oosfloor}) & $+2.9$ to $+8.7$ points, basis-invariant --- the floor read's own sampling error propagated at the central elasticity (the 6.5\% mid-band value), not an interval on the elasticity, whose dimension Table~\ref{tab:lowband} sweeps; $+5.6$ points $= +\$42.6$ billion at the mid-grid anchor inside it, an anchor convention rather than a central tendency; the range carries the identified content (Section~\ref{sec:identification}) & floor-read wild-cluster bootstrap-$t$ $[+2.9, +8.7]$, the binding layer (31 clusters; percentile read $[+3.0, +8.0]$, under-covering; the corrected ladder and its degrees of freedom are Table~\ref{tab:ladder})\tnote{a} \\
 \addlinespace
 Lock-in marginal, in-sample calibration point (Section~\ref{sec:identification}; Table~\ref{tab:uncertainty}) & $+9.2$ points $= +\$70.3$ billion, basis-invariant & sampling: within-stratum $[+9.17, +9.23]$, stratum-cluster $[+8.27, +10.19]$ (the operative scheme); calibration box $+2.1$ to $+13.2$; Fannie replication $+8.68$ (Section~\ref{sec:pathb-fannie}) \\
 Path B central level (Table~\ref{tab:estimators}) & 91.3\% at the headline off-window floor; 97.9\% in-sample (100.0\% composed as committed, 98.1\% on a single coupon convention) & 88.2--93.7\% across the off-window floor range; covariate priors 92.2--99.2\% (in-sample); Ginnie-speed overlay at the headline floor 84.0\% central against a 79.5\% null, and 89.3\% at the in-sample point (raw; of the \$66.3B raw adjustment the Ginnie-specific piece is $+\$38.5$B, within the \$20--47B bound) \\
@@ -82,6 +82,9 @@ Cross-design ABM, real covariates (Table~\ref{tab:crossdesign}) & 59.3\% recalib
 Danish rule-only counterfactual (Table~\ref{tab:danish}) & $+\$61.2$ billion & positivity is forced by the zero-gap anchor, so the refinancing sweep cannot flip it; the Danish-level bracketing anchor does, at $-\$99.9$ billion. The gap is incidence-conditional: $+\$61.2$ billion under face accounting (the benchmark's own denomination), reversing to $-\$89.4$ to $-\$117.7$ billion under cash accounting at the committed proxy discounts (run \texttt{buyback\_credit\_bracket}; Section~\ref{sec:pathb}) \\
 \bottomrule
 \end{tabular}
+\begin{tablenotes}[flushleft]\footnotesize
+\item[a] Sensitivity catalogue for the headline marginal, each entry a committed figure derived where it is cited and none of them a sampling interval: off-window floor range $+4.3$ to $+6.8$ (max form; $+3.9$ to $+7.5$ joint with the band); additive form $+11.2$, floor-invariant; form-conditional hull $+3.5$ to $+13.1$, upper end from a 61.2\%-recovery cell and not read as an equally credentialed member (the concave transform and the additive form do not compose additively: jointly $+9.2$, interaction $-1.47$); mixture curve in the floor's involuntary share: $+9.7$ at $s{=}0.25$, $+10.7$ at $s{=}0.4$ (run \texttt{floor\_form\_mixture}); Ginnie overlay $+4.4$ (conventional-share scaling $0.797\times$); floor-stability check $+\$45.1$ billion.
+\end{tablenotes}
 \end{threeparttable}
 \end{table}
 
@@ -252,6 +255,35 @@ where $\sigma_{i,t}$ is rate stress ($\tilde g_{i,t} = g_{i,t}/100$ is the rate 
 \end{equation}
 where $\delta$ is the proportional quarterly mobility decline per 100 bp of rate gap, $P_q = 0.06$ a reference baseline turnover probability occupying the transform's quarterly slot---a conversion auxiliary rather than a measured quarterly mobility rate, well above \citepos{liebersohn2024} own 1.5\% zero-gap quarterly moving level (Section~\ref{sec:robustness-crossdesign}), and retained because the conversion is nearly insensitive to it over $P_q \in (0, 0.12]$ (Appendix~\ref{app:params})---and the inner terms are the monthly single-month mortalities implied by constant-hazard compounding within the quarter, $1 - P_q = (1 - h_m)^3$. Equation~\eqref{eq:beta1} is the transform implemented in the codebase: at the central $\delta = 0.065$ it evaluates to $\beta_1 = 0.0686$ (unrounded $0.068571$), the value carried in the production configuration and rounded to $0.069$ in Table~\ref{tab:params}. The superseded $0.0693$ is a distinct object, the continuous-hazard variant $-\ln\!\big[\ln(1-(1-\delta)P_q)/\ln(1-P_q)\big] = 0.0693$ (unrounded $0.069258$), which the simulation does not use; the two forms differ by $0.0007$ and both round to $0.069$, but only \eqref{eq:beta1} reproduces the reported results. The transform yields the dimensionless log-hazard-ratio implied by a quarterly probability decline (it replaces a divide-by-three approximation, not a hazard itself), and \eqref{eq:pathB} then applies $\beta_1$ linearly per 100 bp of gap. At QT-era gaps of roughly $-380$ bp this compounds the local quarterly estimate to a hazard ratio of about $0.77$ ($\approx e^{3.8 \times -0.069}$), a log-linear extrapolation beyond the range in which the source elasticity was estimated. I flag it as a functional-form assumption and test it directly: a piecewise-concave transform (full marginal effect over the first 200 bp of lock-in, half beyond) moves the recovery from 107.0\% to 105.7\% (\$808.4 billion) and slightly improves the contemporaneous path correlation ($+0.281$ versus $+0.190$, peak lag unchanged at $-3$). The log-linear extrapolation is not load-bearing for the level, and is for the marginal---but the asymmetry is one of proportion, not of magnitude, and the same absolute $\pm 1$-point convention cannot support both readings. A pre-committed rerun of the paired legs under the concave transform (run \texttt{concave\_marginal}) puts the concave marginal at $+7.87$ points against the production $+9.20$ at the in-sample floor, and at $+5.06$ against $+5.57$ at the off-window point floor. At the in-sample floor the concave null is bit-identical to the production null (\$748.185 billion on both legs, because $\beta_1 = 0$ leaves nothing for the transform to act on), so the level move and the marginal move are numerically the \emph{same} 1.32 points. That 1.32 points is 1.2\% of a 107.0\% recovery and 14\% of a $+9.20$-point marginal, and it is that relative reading, not the absolute one, on which the transform is immaterial to the level and material to the marginal; on the absolute $\pm 1$-point materiality threshold the floor-form test of Section~\ref{sec:robustness-floor} applies, both moves clear it, and the transform dimension travels with the marginal's operative uncertainty in Table~\ref{tab:uncertainty}. One more assumption travels with the import, and nothing here tests it. The decline \citet{liebersohn2024} estimate is a proportional fall in a quarterly ZIP-code moving probability, while \eqref{eq:pathB} applies it to a loan's total prepayment hazard, which contains refinancing as well as moving and which is floored at a turnover level that, as noted above, itself mixes discretionary life-cycle moves and cash-out refinancings. No split of realized prepayment into moving and refinancing components exists in this design, so treating the two objects as one is a specification assumption rather than a result. Two further transport assumptions travel with the import and are named here rather than left implicit: the source estimand is a ZIP-code-level moving hazard applied as a loan-level log-hazard coefficient, an aggregation transport that assumes response homogeneity; and it is estimated on a population not conditioned on mortgage survival, while \eqref{eq:pathB} applies it to a pool from which 34,734 of the 75,000 sampled loans had already prepaid before the window opened --- a survival-selected pool depleted of the rate-responsive, so this transport's direction is signed toward attenuation rather than amplification, and priced: under the gamma-frailty selection identity the attenuation is $a = S^{\theta}$ at the measured pre-window survival share, and the off-window marginal reads $+5.1$/$+4.6$/$+3.7$ points at $\theta = 0.25/0.5/1$ (run \texttt{attenuation\_sensitivity}; $\theta$ is not estimable in this design and is displayed as the free parameter --- Path A's burnout coefficient, the one object that speaks to it, is not distinguishable from zero under either bootstrap scheme). Each month, both hazards are evaluated for every active loan. In the production configuration prepayment is fractional: each active loan's balance is drained deterministically by $h^{\mathrm{prep}}$ (a per-loan uniform draw for prepayment is a non-production discrete branch), while a uniform draw governs the default hazard, sending hits into the delinquency pipeline (current loans to D30, already-delinquent loans to default), where they transition through the Markov delinquency-resolution matrix of Appendix~\ref{app:params}. A proportional rescaling guards the case $h^{\mathrm{prep}} + h^{\mathrm{def}} > 1$. It is a safety clamp, not a competing-risks construction. It never binds in production: across all 1,683,124 evaluated loan-months per regime the maximum hazard sum is 0.016, two orders of magnitude below the threshold, at which level the exact exponential cause-allocation construction $1-\exp(-(\lambda_p+\lambda_d))$ with shares $\lambda_p/(\lambda_p+\lambda_d)$ differs from mine only at second order in the hazards. In the taxonomy of standard competing-risks formulations \citep{putter2007}, Path B is a discrete-time multi-state model parameterized entirely through cause-specific hazards: Equations~\eqref{eq:pathB} and \eqref{eq:default} are monthly event probabilities conditional on the loan remaining active (the estimand of discrete-time cause-specific regression, as implemented in open-source packages such as PyDTS \citep{meir2025}), with the delinquency pipeline of Appendix~\ref{app:params} extending the two-cause structure to a multi-state process with cures rather than an immediately absorbing default. No subdistribution (Fine--Gray) hazard \citep{fine1999} appears in the specification, and none is needed: that device places covariate effects directly on cumulative incidence functions, whereas the simulation obtains every cumulative-incidence functional (prepaid UPB, the delinquency stock, trapped liquidity) by forward composition of the cause-specific hazards. One caveat qualifies the mapping: in production, prepayment is a fractional balance-flow intensity rather than a per-loan absorbing transition, so the cause-specific reading is exact for default and holds at the balance-aggregate level for prepayment. Prepaid balances settle to simulated SOMA cash flow in the month they occur; no settlement delay is modeled on this path.
 
+\begin{table}[H]
+\centering
+\footnotesize
+\setlength{\tabcolsep}{4pt}
+\begin{threeparttable}
+\caption{Path B parameters.}
+\label{tab:params}
+\begin{tabular}{@{}llll@{}}
+\toprule
+Parameter & Value & Units & Provenance \\
+\midrule
+$\beta_1$ (central) & $0.069$ & per 100 bp gap & \eqref{eq:beta1} at $\delta = 0.065$ \citep{liebersohn2024} \\
+$\delta$ band & $0.055$--$0.077$ & quarterly decline & \citet{liebersohn2024} \\
+$P_q$ & $0.06$ & quarterly slot & turnover proxy (conversion auxiliary; not a measured quarterly mobility rate) \\
+$\beta_F$ (FICO, z) & $-0.15$ & per SD & calibration prior; panel estimate $-0.39$ (see text) \\
+$\beta_L$ (LTV, z) & $+0.10$ & per SD & calibration prior; panel estimate $+0.21$ (see text) \\
+$\beta_B$ (burnout) & $-0.5$ & per unit of $B \in [0,1]$ & calibration prior \\
+$\underline{h}$ (floor) & $0.0034$ & monthly SMM & 4\% annual CPR (involuntary turnover) \\
+PSA speed & 100 & -- & industry seasoning convention \\
+$h^{\mathrm{def}}_0$ & $3\times10^{-4}$ & monthly & calibration prior \\
+$\gamma_r$ (rate stress) & $2.0$ & per decimal unit & calibration prior ($\approx$2\% per 100 bp) \\
+$\gamma_F$ (FICO, z) & $-0.20$ & per SD & calibration prior \\
+$\gamma_L$ (LTV, z) & $+0.25$ & per SD & calibration prior \\
+\bottomrule
+\end{tabular}
+\end{threeparttable}
+\end{table}
+
+
 The transform above prices how the elasticity extrapolates in the gap; a second mapping assumption is what the elasticity applies to. \citepos{liebersohn2024} estimand is a moving probability, and \eqref{eq:pathB} applies the implied $\beta_1$ to the entire voluntary hazard, moving and refinancing alike. A pre-committed bracket prices that convention (run \texttt{moving\_share\_bracket}; the gap response enters through a mixture, with $1-s$ of the voluntary hazard held at its no-response level and $s$ of it carrying the full response, the involuntary floor unscaled, and parity at $s = 1$ against the committed central leg plus an algebraic identity probe fixed in the script header before any run): at the production calibration the marginal is $+\$37.7$ billion ($+4.9$ points) at $s = 0.5$ and $+\$19.2$ billion ($+2.5$ points) at $s = 0.25$, against the production $+\$70.3$ billion at $s = 1$, close to proportional in $s$. Re-run at the 4.991\% off-window floor the paper headlines, the bracket is $+\$25.7$ billion ($+3.36$ points) at $s = 0.5$ and $+\$13.9$ billion ($+1.82$ points) at $s = 0.25$ against $+\$42.6$ billion at $s = 1$ (run \texttt{moving\_share\_bracket\_offwindow}), mildly super-proportional because the higher floor censors the elasticity in more loan-months and censored contributions do not scale with $s$. For this book's rate configuration the convention is therefore signed: applying the imported elasticity to less of the hazard can only shrink the marginal, and by roughly its share. No loan-purpose field exists in the ingested data, so $s$ is a bracketing parameter rather than an estimate, and the production convention $s = 1$ remains the reported form. \citet{graybill2026} corroborate the imported band on exactly this margin: their transaction-record estimate of the sale-hazard response --- roughly 7--11\% per percentage point of rate gap, from records that touch no credit file --- is an estimate of the moving component that $s$ varies.
 
 The floor enters \eqref{eq:pathB} as a single constant $\underline{h}$ broadcast to every loan-month, carrying no rate-gap, calendar-time, or covariate argument, so the specification treats involuntary turnover as acyclical and assigns every rate-responsive movement in prepayment to the elastic channel. The marginal-over-null design cancels the floor's level, since both the central and the $\beta_1 = 0$ legs carry the identical constant, but it does not cancel a floor that itself co-varies with the rate cycle: to the extent that involuntary moves are themselves suppressed when a household is locked in, that co-movement is absorbed into the estimated elastic marginal. The identified marginal at the in-window calibration is therefore best read as total rate-attributable prepayment suppression, an upper bound on the strictly-voluntary elasticity's contribution rather than a clean voluntary-versus-involuntary decomposition. At the off-window calibration the ordering reverses: the demotion's window component (roughly \$20.9 billion; Section~\ref{sec:robustness-floor}) is in-window involuntary turnover that the off-window floor classifies as rate-suppressed and the marginal no longer counts, so the off-window $+\$42.6$ billion bounds total rate-attributable suppression from below (the matched-depth $+\$63.5$ billion restores that component), and the two calibrations bracket two estimands rather than conservative and liberal readings of one. The level sweep of Section~\ref{sec:robustness-floor} already brackets any plausible constant-floor excursion (the 3--5\% range keeps the marginal within $+10.8$ to $+5.5$ points at the central elasticity), and the within-run cyclical variant is now tested directly: replacing the constant with $\underline{h}_t = 4\% \times (1 + \kappa z_t)$, where $z_t$ is the window-standardized 30-year mortgage rate and $\kappa = 0$ nests (and in the run exactly reproduces) the production specification, moves the marginal between $+7.1$ and $+9.4$ points across $\kappa \in [-0.5, +0.5]$, every cell inside the level sweep's bracket.
@@ -277,6 +309,26 @@ Importing Path B's elasticity unmodified, rather than fitting it to the benchmar
 \caption{Path B trapped liquidity across the Liebersohn--Rothstein elasticity band. The quarterly mobility-decline parameter $\delta$ is swept across its published 5.5\%--7.7\% range (central 6.5\% marked), mapping monotonically to recovered trapped liquidity of \$809.9--\$827.7 billion on the standalone-scorer basis (shared-basis equivalents in Table~\ref{tab:bases}) against the \$764.7 billion benchmark line: stronger assumed mobility suppression yields more trapped liquidity, with the peak cross-correlation lag stable at $-3$ across the entire band. Table~\ref{tab:floorband} extends this band across the involuntary-turnover-floor grid.}
 \label{fig:band}
 \end{figure}
+
+\begin{table}[!t]
+\centering
+\caption{The calibration box: lock-in marginal over the $\beta_1 = 0$ null, in percentage points of the \$764.7 billion benchmark, across the involuntary-turnover floor and the Liebersohn--Rothstein band $\delta$. The 6.0\% row's level is reached only by the refi-contaminated pooled and 2019 anchors that Section~\ref{sec:robustness-floor} disqualifies; it is retained as a grid point, not a defensible anchor, and the box's lower edge should be read from the defensible off-window rows of Table~\ref{tab:oosfloor}. The bind column is the share of evaluated U.S. loan-months at which the floor lifts the hazard (central elasticity). Every marginal is basis-invariant (the underlying levels are standalone-scorer figures; both bases in Table~\ref{tab:bases}). Pre-committed runs; artifacts catalogued in Appendix~\ref{app:ledger}.}
+\label{tab:floorband}
+\begin{tabular}{lcccc}
+\toprule
+Floor (annual CPR) & $\delta = 5.5\%$ & $\delta = 6.5\%$ & $\delta = 7.7\%$ & Floor binds \\
+\midrule
+2.0\% & $+9.7$ & $+11.3$ & $+13.2$ & 3.9\% \\
+3.0\% & $+9.3$ & $+10.8$ & $+12.6$ & 12.1\% \\
+3.5\% & $+8.9$ & $+10.3$ & $+11.8$ & 21.6\% \\
+4.0\% (production) & $+8.1$ & $+9.2$ & $+10.4$ & 36.3\% \\
+4.5\% & $+6.7$ & $+7.5$ & $+8.4$ & 53.5\% \\
+5.0\% & $+5.0$ & $+5.5$ & $+6.0$ & 69.1\% \\
+6.0\% & $+2.1$ & $+2.3$ & $+2.4$ & 88.7\% \\
+\bottomrule
+\end{tabular}
+\end{table}
+
 
 The peak alignment does \emph{not} show the simulated path leading SOMA cash flow. The empirical path moves first: a settlement-delay mechanism, in which loan-level prepayment decisions show up in SOMA cash two to three months later, predicts the \emph{opposite} direction of offset. I therefore attach no settlement interpretation to the timing alignment. The direct input-timing diagnosis behind that reading is in Appendix~\ref{app:patha-detail}.
 
@@ -333,6 +385,61 @@ Fonseca--Liu anchor & $+11.5$ & above & counterweight, conservative-band evidenc
 \end{tabular}
 \end{table}
 
+\begin{table}[!t]
+\centering
+\footnotesize
+\begin{threeparttable}
+\caption{Out-of-sample floor anchors and the lock-in marginal each implies, in percentage points of the \$764.7 billion benchmark. Floors are exposure-weighted annualized turnover CPR on out-of-the-money cohort-months measured \emph{outside} the June 2022--November 2025 evaluation window (2017--2019 performance), except the final row, whose floor is calibrated on the window's own first nineteen months. Every row, that one included, reports its floor's \emph{full-window} marginal on a common basis; the held-out-months evaluation is given in the note. Contaminated anchors are reported for completeness and are not this paper's off-window anchor; the pooled anchor's 6.07\% measurement is evaluated at the box's adjacent 6.0\% grid row. Every marginal is basis-invariant and reproduces the committed production artifacts exactly at the 4\% row. Pre-committed run \texttt{oos\_identification}; artifact catalogued in Appendix~\ref{app:ledger}.}
+\label{tab:oosfloor}
+\begin{tabular}{llcccc}
+\toprule
+Floor anchor & Status & Floor & $\delta = 5.5\%$ & $\delta = 6.5\%$ & $\delta = 7.7\%$ \\
+\midrule
+2018 leg, gap $\leq -0.005$ & defensible & 4.70\% & $+6.1$ & $+6.8$ & $+7.5$ \\
+2018 leg, gap $\leq -0.0025$ & defensible & 4.99\% & $+5.0$ & $+5.6$ & $+6.1$ \\
+2018 leg, gap $\leq 0$ & defensible & 5.33\% & $+3.9$ & $+4.3$ & $+4.6$ \\
+\midrule
+Pooled 2017--2019 & refi-contaminated & 6.07\% & $+2.1$ & $+2.3$ & $+2.4$ \\
+2019 leg, gap $\leq 0$ & refi-contaminated & 6.91\% & $+0.7$ & $+0.7$ & $+0.8$ \\
+\midrule
+In-window (production) & in-sample point & 4.00\% & $+8.1$ & $+9.2$ & $+10.4$ \\
+Early-window calibration & full window\tnote{a} & 3.97\% & $+8.1$ & $+9.3$ & $+10.5$ \\
+\bottomrule
+\end{tabular}
+\begin{tablenotes}[flushleft]\footnotesize
+\item[a] Temporal holdout. The 3.97\% floor is calibrated on deeply out-of-the-money turnover in the window's first nineteen months (June 2022--December 2023). Summed over the strictly held-out remaining twenty-three months (January 2024--November 2025), which enter that calibration nowhere, the central-minus-null marginal is $+\$45.1$ billion at the central elasticity, against $+\$44.8$ billion at the production floor over the identical months. The table row above reports the same floor's full-window marginal, so that every row is comparable; the two quantities are different objects and should not be read off one another.
+\end{tablenotes}
+\end{threeparttable}
+\end{table}
+
+\begin{table}[!t]
+\centering
+\caption{The lock-in marginal as a curve in the imported elasticity. Paired central-minus-null runs at each quarterly mobility decline $\delta$ (the elasticity import of Section~\ref{sec:pathb}, mapped to $\beta_1$ via \eqref{eq:beta1}), with the floor and every other production convention held fixed, at the in-sample 4.0\% floor and the off-window 4.991\% headline floor (run \texttt{band\_low\_extension}; the band-cell rows reproduce the committed production and off-window cells within the sweep tolerance of $\pm\$0.01$ billion). The $\delta = 0$ rows are the $\beta_1 = 0$ nulls, so their marginal is zero by construction; $\delta = 3.25\%$ is half the adopted central; $\{5.5, 6.5, 7.7\}\%$ is the adopted Liebersohn--Rothstein band.}
+\label{tab:lowband}
+\footnotesize
+\begin{threeparttable}
+\begin{tabular}{@{}rrrrrr@{}}
+\toprule
+& & \multicolumn{2}{c}{In-sample floor (4.0\%)} & \multicolumn{2}{c}{Off-window floor (4.991\%)} \\
+\cmidrule(lr){3-4}\cmidrule(lr){5-6}
+$\delta$ (\%) & $\beta_1$ & marginal (\$B) & (pp) & marginal (\$B) & (pp) \\
+\midrule
+0.00 & $0.0000$ & $0.0$ & $0.00$ & $0.0$ & $0.00$ \\
+1.00 & $-0.0103$ & $+12.8$ & $+1.67$ & $+9.4$ & $+1.23$ \\
+2.00 & $-0.0206$ & $+24.9$ & $+3.26$ & $+17.7$ & $+2.31$ \\
+3.00 & $-0.0311$ & $+36.4$ & $+4.76$ & $+24.9$ & $+3.25$ \\
+3.25 & $-0.0337$ & $+39.1$ & $+5.12$ & $+26.5$ & $+3.47$ \\
+4.00 & $-0.0417$ & $+47.1$ & $+6.16$ & $+31.0$ & $+4.06$ \\
+5.00 & $-0.0523$ & $+57.1$ & $+7.46$ & $+36.3$ & $+4.74$ \\
+5.50 & $-0.0577$ & $+61.7$ & $+8.07$ & $+38.6$ & $+5.05$ \\
+6.50 & $-0.0686$ & $+70.3$ & $+9.20$ & $+42.6$ & $+5.57$ \\
+7.70 & $-0.0817$ & $+79.5$ & $+10.39$ & $+46.6$ & $+6.09$ \\
+\bottomrule
+\end{tabular}
+\end{threeparttable}
+\end{table}
+
+
 \begin{figure}[H]
 \centering
 \includegraphics[width=0.78\textwidth]{fig11_marginal_decomposition}
@@ -361,11 +468,38 @@ Lock-in marginal, in-sample point & $+9.2$pp (basis-invariant) & within-stratum 
 \end{tabular}
 \begin{tablenotes}[flushleft]\footnotesize
 \item Seed noise: the marginal varies by less than \$0.01 billion across ten paired draw seeds (Section~\ref{sec:hazard-interp}). The Fannie Mae external replication reproduces the marginal at $+8.68$ points against Freddie's $+9.20$; it clears the pre-committed envelope, but that envelope is 11.06 points wide and the agreement, not the gate, is what carries the information (Section~\ref{sec:pathb-fannie}).
-\item Both cluster bootstraps above rest on few clusters: 31 carry the floor read, and the loan/stratum scheme's 130 strata are unequal enough to be worth 25.8 effective ones. Percentile cluster bootstraps are known to under-cover at cluster counts in that range; run \texttt{floor\_inference\_correction} reports the corrections for the floor read (CR2/CR3 $t(30)$ intervals and a Rademacher wild-cluster bootstrap-$t$), and the headline row quotes the wild-$t$ interval as the binding layer. That interval prices one layer: the floor read's own sampling error, propagated through the frozen floor-to-marginal grid at the central elasticity $\delta = 6.5\%$, so none of its width comes from the elasticity, which is swept separately in the calibration column and in Table~\ref{tab:lowband}. No such correction is run for the loan/stratum scheme, whose interval is still better read as a lower bound on sampling uncertainty than as calibrated 95\% coverage; one input to the convolved line being a lower bound makes the convolved line a lower bound as well. The secondary corrected reads agree with the wild-$t$ layer: under the Webb-weight primary construction of run \texttt{floor\_inference\_correction\_v2}: the Rademacher construction reads $+2.8$ to $+8.7$, the Webb re-read $+2.9$ to $+8.7$ --- both endpoints within a tenth of a point, a re-printing rather than a substantive move --- while the secondary reads at the small-sample Bell--McCaffrey degrees of freedom (5.1, against $t(30)$; effective cluster count 5.9 by the same Herfindahl-inverse convention as the loan/stratum scheme's 25.8) are wider: CR2 $+2.4$ to $+9.2$, CR3 $+2.3$ to $+9.6$, and the restricted wild-cluster inversion $+2.3$ to $+9.1$, all agreeing in location and none crossing zero. The bootstrap imposes the point estimate as the data-generating truth over unrestricted residuals (B $= 9{,}999$), studentizes on the floor's own scale, and maps endpoints through the frozen floor-to-marginal grid. Leverage is concentrated rather than diffuse: the run's recorded maximum single-cluster leverage is 0.33, ten times an equal 31-cluster share. That concentration is why the wild-cluster correction is applied and the percentile read demoted.
+\item Both cluster bootstraps above rest on few clusters: 31 carry the floor read, and the loan/stratum scheme's 130 strata are unequal enough to be worth 25.8 effective ones. Percentile cluster bootstraps are known to under-cover at cluster counts in that range; run \texttt{floor\_inference\_correction} and its Webb-weight successor \texttt{floor\_inference\_correction\_v2} correct the floor read, Table~\ref{tab:ladder} sets the corrected ladder out layer by layer with its degrees of freedom, and the headline row quotes the wild-$t$ interval as the binding layer. That interval prices one layer: the floor read's own sampling error, propagated through the frozen floor-to-marginal grid at the central elasticity $\delta = 6.5\%$, so none of its width comes from the elasticity, which is swept separately in the calibration column and in Table~\ref{tab:lowband}. No such correction is run for the loan/stratum scheme, whose interval is still better read as a lower bound on sampling uncertainty than as calibrated 95\% coverage; one input to the convolved line being a lower bound makes the convolved line a lower bound as well. The ladder's reads agree: the Rademacher and Webb constructions land with both endpoints within a tenth of a point, a re-printing rather than a substantive move, while the small-sample degrees of freedom and the restricted inversion are wider, all agreeing in location and none crossing zero. The bootstrap imposes the point estimate as the data-generating truth over unrestricted residuals (B $= 9{,}999$), studentizes on the floor's own scale, and maps endpoints through the frozen floor-to-marginal grid.
 \item The within-run floor dispersion range is the $\kappa$ grid of Section~\ref{sec:pathb}. It bounds the marginal's sensitivity to floor variation within the window; it does not bracket floor cyclicality, and should not be read as doing so. Scrambling the floor path's time order leaves 85.0\% of its span standing, and switching the combination rule from the hard maximum to the additive form eliminates 98.0\% of it (the $\kappa$ grid then spans $+11.22$ to $+11.27$ points). Appendix~\ref{sec:robustness-seasonalfloor} diagnoses the Jensen mechanism responsible. The co-movement component that does survive is monotone in $|\kappa|$ and sign-consistent, but reaches at most \$5.29 billion in any cell.
 \end{tablenotes}
 \end{threeparttable}
 \end{table}
+
+\begin{table}[!t]
+\centering
+\caption{The inference ladder on the binding layer. Every row prices one layer --- the floor read's own sampling error, propagated through the frozen floor-to-marginal grid at the central elasticity $\delta = 6.5\%$ --- so no row's width comes from the elasticity, which is swept separately in Table~\ref{tab:lowband}. All reads are on the 2018 leg's mid-grid anchor, which 31 stratum clusters carry. The Webb-weight wild-cluster bootstrap-$t$ is the primary construction and the interval this paper quotes; the percentile read is reported demoted rather than as a competing interval. Runs \texttt{floor\_uncertainty} (percentile), \texttt{floor\_inference\_correction} (Rademacher wild-$t$; CR2/CR3 at $t(30)$), and \texttt{floor\_inference\_correction\_v2} (Webb primary, Bell--McCaffrey degrees of freedom, restricted inversion).}
+\label{tab:ladder}
+\footnotesize
+\begin{threeparttable}
+\begin{tabular}{@{}llll@{}}
+\toprule
+Layer & Marginal (pp) & Degrees of freedom & Status \\
+\midrule
+Percentile cluster bootstrap & $+3.0$ to $+8.0$ & --- (1000-replicate) & demoted; under-covers at 31 clusters \\
+CR2 $t$ & $+3.0$ to $+8.6$ & $t(30)$, $G-1$ & conventional df \\
+CR3 $t$ & $+2.8$ to $+8.8$ & $t(30)$, $G-1$ & conventional df \\
+Wild-$t$, Rademacher & $+2.8$ to $+8.7$ & bootstrap, $B = 9{,}999$ & the committed construction, replayed \\
+Wild-$t$, Webb & $+2.9$ to $+8.7$ & bootstrap, $B = 9{,}999$ & primary; the binding layer \\
+CR2 $t$, Bell--McCaffrey & $+2.4$ to $+9.2$ & $t(5.1)$, data-driven & small-sample df \\
+CR3 $t$, Bell--McCaffrey & $+2.3$ to $+9.6$ & data-driven, CR3's own & small-sample df \\
+Restricted wild-cluster inversion & $+2.3$ to $+9.1$ & 401-point grid inversion & agrees in location \\
+\bottomrule
+\end{tabular}
+\begin{tablenotes}[flushleft]\footnotesize
+\item The Bell--McCaffrey degrees of freedom are data-driven and estimator-specific, so one value cannot serve both cluster-robust variants: the 5.1 shown is CR2's, and CR3's own is smaller. The effective cluster count is 5.9 by the same Herfindahl-inverse convention as the loan/stratum scheme's 25.8, against 31 nominal clusters, and the run's recorded maximum single-cluster leverage is 0.33, ten times an equal 31-cluster share. That concentration is why the wild-cluster correction is applied and the percentile read demoted.
+\end{tablenotes}
+\end{threeparttable}
+\end{table}
+
 
 \subsection{Interpretation}\label{sec:hazard-interp}
 
@@ -583,7 +717,7 @@ The second check reweights the sample to the book. The Path A and Path B headlin
 
 Path B's dominant level-setter is the involuntary-turnover floor, and Section~\ref{sec:pathb} concedes that its 4\% calibration is measured inside the evaluation window. To quantify what rides on that choice, I swept the floor across seven values from 2\% to 6\% annual CPR jointly with the full Liebersohn--Rothstein elasticity band (5.5\%, 6.5\%, 7.7\%), rerunning the production central and $\beta_1 = 0$ null legs at every floor under the production convention: same committed 75,000-loan sample, same seed and regime tuple, one shared macro frame. Both sweeps were pre-committed: grid, parity gates, and interpretive thresholds entered the repository before any run executed (commit ordering recorded in Appendix~\ref{app:ledger}); the fresh runs at the production point reproduce the committed artifacts exactly (central \$818.530 billion, null \$748.185 billion, marginal $+\$70.345$ billion), and the instrumented floor-bind share reproduces the 36\% of 1,683,124 evaluated loan-months quoted in Section~\ref{sec:pathb}.
 
-The sweep mechanics, the marginal-as-a-curve exhibit, the contamination separation behind the off-window anchors, and the full calibration-box tables are collected in Appendix~\ref{app:floormech}; what follows are the readings the headline interval rests on.
+The sweep mechanics and the contamination separation behind the off-window anchors are collected in Appendix~\ref{app:floormech}; the exhibits they produce --- the calibration box (Table~\ref{tab:floorband}), the marginal as a curve in the elasticity (Table~\ref{tab:lowband}), and the out-of-sample anchors (Table~\ref{tab:oosfloor}) --- are in Section~\ref{sec:hazard}, and what follows are the readings the headline interval rests on.
 
 The box sweeps the floor's level but never its functional form---the choice that censors the elasticity. A form test specified ex ante (spec and interpretive threshold fixed in the script's header before its runs executed, the ex-ante convention Appendix~\ref{app:ledger} records, with the script and its artifact entering the repository in one revision; the max-form pair at the production floor reproduces the committed artifacts exactly, as its parity gate) reran the central and null legs with the hard maximum of \eqref{eq:pathB} replaced by a competing-risks combination on the survival scale, $h = 1 - (1 - \underline{h})(1 - h^{\mathrm{vol}})$, under which involuntary and voluntary hazards add and the elasticity is never inert. The result changes the reading in two ways. The marginal moves to $+11.25$ points at the production floor, a $+2.05$-point shift that exceeds the $\pm 1$-point immateriality threshold fixed ex ante, so the form-dependence is real. But under the additive form the marginal is nearly floor-invariant, spanning only $+11.29$ to $+11.21$ points across the 3--5\% floors whose max-form span ($+10.8$ to $+5.5$) failed the stability threshold of Appendix~\ref{app:floormech}: the failed gate was measuring the censoring mechanics of the max form, not instability in the elasticity's contribution. The aggregate level, by contrast, is strongly form-dependent (the additive central leg recovers 67.2\% at the production floor, versus 107.0\% under the max form, because adding a 4\% involuntary hazard to moderate voluntary hazards raises book-wide prepayment), and the max form remains production because its floor semantics, a minimum total turnover matching the observed 4--5\% on deep-discount cohorts where the voluntary hazard is near zero, is the reading the calibration anchor supports; at that anchor the two forms nearly coincide. A pre-committed completion of this design (run \texttt{floor\_form\_offwindow}) runs the additive form at the off-window anchors themselves: the additive marginal is $+11.22$/$+11.21$/$+11.19$ points at the 4.695/4.991/5.334\% floors, within 0.06 points of its production-floor value, so the entire in-window-to-off-window demotion of the max-form marginal operates through the censoring channel this paragraph diagnoses, and the near-coincidence defense of the max form at the deep-discount anchor does not extend to the shallow-gap off-window anchors. The form dimension is now a measured curve rather than a two-point hull (run \texttt{floor\_form\_mixture}; both endpoints reproduce the committed forms bit-exactly). Let $s$ be the share of the measured floor entering as an additive competing involuntary cause, with $1-s$ remaining a floor on total turnover: $s = 0$ is the production hard maximum and $s = 1$ the additive form. The curve rises steeply and plateaus --- at the off-window anchors the marginal is $+7.5$ points by $s = 0.1$, $+9.7$ at $s = 0.25$, $+10.7$ at $s = 0.4$, and flat near $+11.2$ from $s = 0.6$ up (peak $+11.24$ at $s = 0.8$, a 0.03-point plateau dip to the additive endpoint) --- while the central leg's recovery falls from 91.3\% to 55.9\% along the way, the level cost the additive end pays. Section~\ref{sec:pathb}'s reading that the strictly-involuntary share is plausibly well under half therefore does \emph{not} pull the marginal toward the max end: even modest additive shares close most of the gap to the additive form, because an additive component acts wherever the max form censors. What keeps the headline at the $s = 0$ endpoint is the max form's semantics, now displayed as the conservative endpoint of a measured curve rather than defended by fit. The level cost of that form-robustness carries over to the off-window anchors too, and it is large enough to report beside the hull rather than only at the production floor: at the 4.991\% headline anchor the additive central leg recovers 55.9\% of the benchmark against a 44.7\% null, and at the 4.695\% and 5.334\% anchors 59.3\% and 52.0\% at the central band point, so the additive form undershoots the max form's aggregate level by 43.5 to 45.3 points at every off-window anchor. The hull's upper endpoint is produced by the least accurate of these cells: $+13.10$ points comes from the additive form at the 4.695\% floor and the band's 7.7\% high edge, whose central leg recovers 61.2\% of the benchmark it is scored against. The form-conditional range is therefore a range over specifications that differ sharply in aggregate fit, and its upper end should not be read as an equally credentialed member. The max form remains production for its semantics --- the floor as a minimum on \emph{total} turnover, the reading the deep-discount calibration anchors --- and because it is the measured form curve's conservative endpoint (below); the aggregate-level comparison is context for the level, not the selection rule for the marginal's form, since the design does not identify levels. One further run measures the cell the hull leaves implicit. The form and transform dimensions were reported side by side without being crossed, which presumes they add. A pre-committed run of the joint cell (\texttt{concave\_additive\_marginal}) shows they do not. The concave transform under the additive form puts the marginal at $+9.25$ points at the production floor and $+9.22$ at the 4.991\% anchor---inside the hull at both, so the range itself stands---but the interaction is $-1.47$ points at the headline anchor, past the same $\pm 1$-point convention used throughout. The reason is the censoring this paragraph describes: the concave transform costs only $-0.52$ points under the max form, which absorbs most of it into the floor, against $-1.99$ under the additive form, which never censors and so passes the whole transform effect through. Two consequences. A successor run closes that grid (run \texttt{concave\_hull\_band\_ends}): the concave transform's remaining sixteen off-window cells put the form $\times$ transform product at thirty-six of thirty-six, and the hull does not survive intact. Seventeen of the eighteen concave cells fall inside it, but concave under the max form at the highest defensible floor and the band's low edge returns $+3.53$ points, below the $+3.89$ lower edge the log-linear cells set, so the form-conditional hull widens at the bottom to $+3.5$ to $+13.1$ points. Its upper edge is unchanged, because the concave transform is signed downward and its highest cell reaches only $+10.83$. Any reading that composes a form adjustment with a transform adjustment additively is unsupported at the calibration this paper headlines. The form-robust statement of the paper's identified quantity is a lock-in marginal of roughly $+9$ to $+11$ points at the production floor, positive under every level, band, and form combination tested.
 
@@ -920,33 +1054,7 @@ $\gamma_r,\ \gamma_F,\ \gamma_L$ & default-hazard coefficients & log-hazard & B 
 
 Table~\ref{tab:params} collects every Path B parameter. All values are fixed a priori in the configuration; none is estimated on, or tuned to, the \$764.7 billion benchmark. One parameter is nonetheless measured inside the evaluation window, and benchmark-independence should not be read as window-independence: the 4\% involuntary-turnover floor is anchored to turnover observed on discount cohorts during 2023--2024 (Appendix~\ref{sec:method-frictions} and Section~\ref{sec:pathb}), so the floor (which sets much of the aggregate level, binding in 36\% of loan-months) is in-sample with respect to the QT window even though it never touches the benchmark dollar figure. Section~\ref{sec:robustness-floor} sweeps the floor jointly with the elasticity band: the aggregate level and the lock-in marginal both move materially with the floor, within the bounded interval that section reports; the marginal's sign does not move, but under this window's rate configuration it could not (Section~\ref{sec:identification}). The covariate and default-hazard coefficients are round calibration priors. The two prepayment covariates' signs run opposite the canonical credit-risk direction (higher FICO $\Rightarrow$ better refinancing access $\Rightarrow$ faster prepayment; higher LTV $\Rightarrow$ less equity $\Rightarrow$ slower prepayment): in the deeply out-of-the-money 2022--2025 window the refinancing channel is shut and prepayment is turnover-dominated, so credit covariates proxy mobility rather than refinancing access; high-LTV loans are disproportionately recent purchases that churn. A Path-A-style estimation on the same stratum-month panel (Poisson PML with vintage-by-coupon fixed effects, so the credit buckets are identified from cross-bucket variation; bucket-mean covariates z-scored to the microsim pool's own moments) yields point estimates consistent with the priors' direction (and, taken at face value, roughly double their magnitudes), but with intervals that reject neither zero nor the opposite signs: $\hat{\beta}_F = -0.39$ (stratum-cluster bootstrap 95\% CI $[-1.51, +0.65]$) and $\hat{\beta}_L = +0.21$ ($[-0.59, +1.00]$). The estimation does not settle the sign question; it fails to contradict the priors while quantifying their sensitivity. The sensitivity brackets are correspondingly modest: a $\beta_F = \beta_L = 0$ rerun moves the recovery from 107.0\% to 108.3\%, and the panel-estimated pair moves it to 101.3\% --- in-window figures; at the off-window floor the same endpoints span 8.2 points and `modest' does not carry over to the level, while the marginal's covariate sensitivity shrinks to $+0.1$ points (run \texttt{covariate\_ablation\_offwindow}); benchmark-independence is unaffected, since the estimation touches only the Freddie panel. The $\beta_B = 0$ rerun of Section~\ref{sec:pathb} quantifies the burnout channel the same way.
 
-\begin{table}[H]
-\centering
-\footnotesize
-\setlength{\tabcolsep}{4pt}
-\begin{threeparttable}
-\caption{Path B parameters.}
-\label{tab:params}
-\begin{tabular}{@{}llll@{}}
-\toprule
-Parameter & Value & Units & Provenance \\
-\midrule
-$\beta_1$ (central) & $0.069$ & per 100 bp gap & \eqref{eq:beta1} at $\delta = 0.065$ \citep{liebersohn2024} \\
-$\delta$ band & $0.055$--$0.077$ & quarterly decline & \citet{liebersohn2024} \\
-$P_q$ & $0.06$ & quarterly slot & turnover proxy (conversion auxiliary; not a measured quarterly mobility rate) \\
-$\beta_F$ (FICO, z) & $-0.15$ & per SD & calibration prior; panel estimate $-0.39$ (see text) \\
-$\beta_L$ (LTV, z) & $+0.10$ & per SD & calibration prior; panel estimate $+0.21$ (see text) \\
-$\beta_B$ (burnout) & $-0.5$ & per unit of $B \in [0,1]$ & calibration prior \\
-$\underline{h}$ (floor) & $0.0034$ & monthly SMM & 4\% annual CPR (involuntary turnover) \\
-PSA speed & 100 & -- & industry seasoning convention \\
-$h^{\mathrm{def}}_0$ & $3\times10^{-4}$ & monthly & calibration prior \\
-$\gamma_r$ (rate stress) & $2.0$ & per decimal unit & calibration prior ($\approx$2\% per 100 bp) \\
-$\gamma_F$ (FICO, z) & $-0.20$ & per SD & calibration prior \\
-$\gamma_L$ (LTV, z) & $+0.25$ & per SD & calibration prior \\
-\bottomrule
-\end{tabular}
-\end{threeparttable}
-\end{table}
+
 
 Delinquent loans transition monthly through the matrix of Table~\ref{tab:delinq}, estimated from consecutive stratum-month \emph{modal} servicer states in the Freddie cohort panel, exposure-UPB weighted (committed as an artifact in the replication package). The division of labor with the hazard draws: the default-hazard draw moves loans \emph{into} the pipeline (Current $\to$ D30) and terminates already-delinquent loans it hits, while the matrix governs month-to-month movement \emph{within} the pipeline; the matrix runs after the draw each month, so a loan entering D30 via the draw can also take a matrix transition in its entry month, an overlap bounded along with everything else by the \$0.39 billion extreme-matrix test below. Only the delinquency rows are used in simulation, terminal states are absorbing by construction, and the forbearance state is unpopulated in the estimation panel and never entered in production runs.
 I publish the full crosstab. D30 row (21 transitions, \$58.3M row exposure): 13 cures carrying 95.6\% of the exposure weight, two D30 continuations (0.8\%), five D60 progressions (3.1\%), and one Defaulted transition (0.4\%); the printed 0.004 is the exposure share of that single event, whose count share would be $1/21 = 0.048$. D60 row (9 transitions, \$3.1M): six cures carrying 56.8\% and three D90+ progressions carrying 43.2\%; the count shares are $6/9$ and $3/9$; the divergence between count and exposure shares means that a few larger-balance stratum-months drive the matrix, which is what an exposure-weighted estimator is designed to do. D90+ row (38 transitions, \$76.2M): seven cures (30.3\%), one D30 (0.8\%), thirty self-continuations (68.9\%), and zero Defaulted events; the ``--'' cells are observed zeros in a thin panel, not structural zeros, which is why serious delinquency shows no direct default exit while D30 shows one. Probabilities are printed to three decimals from these exposure shares and rows may not sum to exactly one. The matrix is accordingly reported for completeness, not precision: with cells this thin it describes the estimation panel rather than estimating a transition law, and the paper's estimates rely on the materiality bound below, not on the matrix's point values.
@@ -1191,38 +1299,13 @@ LTV & \multicolumn{2}{l}{PSI 0.000} & negligible \\
 
 \section{Floor-Sweep and Contamination Mechanics}\label{app:floormech}
 
-This appendix collects the sweep mechanics and full tables of the calibration box of Section~\ref{sec:robustness-floor}: the floor-level sweep, the marginal as a curve in the imported elasticity, the separation of the two refinance contaminations behind the off-window floor anchors, and the out-of-sample anchor table.
+This appendix collects the mechanics behind the calibration box of Section~\ref{sec:robustness-floor}: the floor-level sweep, the marginal as a curve in the imported elasticity, the separation of the two refinance contaminations behind the off-window floor anchors, and the out-of-sample anchor construction. The three exhibits themselves are read where the headline is set, in Section~\ref{sec:hazard} (Tables~\ref{tab:floorband}, \ref{tab:lowband}, and~\ref{tab:oosfloor}).
 
 Table~\ref{tab:floorband} reports the lock-in marginal at every cell of the resulting calibration box. Three facts shape the reading. First, the pre-committed stability threshold ($\pm 2$ points across the empirically plausible 3--5\% floor range) fails: at the central elasticity the marginal spans $+10.8$ to $+5.5$ points across that range. The mechanism is structural rather than statistical: the hazard specification takes a maximum against the floor, so wherever the floor binds the elasticity is inert, and raising the floor mechanically crowds out the lock-in channel. Second, both pre-committed monotonicities hold, the marginal decreasing in the floor within every band row and increasing in the band at every floor, and the box maximum lands at the predicted corner: $+13.2$ points ($+\$100.7$ billion) at a 2\% floor on the 7.7\% band edge. Third, every cell is positive, with a minimum of $+2.1$ points at a 6\% floor on the 5.5\% band edge---a consistency check on the specification, not an identifying result, since the window's rate configuration fixes the sign before any floor or band is chosen (Section~\ref{sec:identification})---and every marginal in the box is basis-invariant because the shared-accounting netting is common to the central and null legs of each cell (Section~\ref{sec:robustness-hybrid}). The verification reading of Section~\ref{sec:pathb} accordingly weakens from a point to a bounded interval: the lock-in elasticity's identified contribution is $+9.2$ points at the production calibration, $+5.0$ to $+12.6$ points across the empirically plausible floor range, and $+2.1$ to $+13.2$ points across the full box, with the off-window re-measurement below placing the headline reading at $+4.3$ to $+6.8$ points, while the aggregate level remains floor-dominated throughout.
 
 The box sweeps the elasticity only over its published band, and the band's lower edge is a literature boundary rather than an evidential one: the in-sample estimates cannot reject zero for the elasticity (Section~\ref{sec:pathb}), so a reader who weighs that non-rejection over the imported band needs the marginal at values the box never visits. A pre-committed extension (run \texttt{band\_low\_extension}; grid, parity gates against the committed production and off-window cells, and a monotonicity check fixed in the script header before any run) re-runs the paired legs at quarterly-decline values $\delta \in \{0, 1.0, 2.0, 3.0, 3.25, 4.0, 5.0\}\%$ below the band at both anchor floors, and Table~\ref{tab:lowband} reports the resulting curve beside the band's own cells. The curve is monotone at both floors, passes through zero at $\delta = 0$ by construction, and is concave at the off-window floor through the censoring mechanism of Section~\ref{sec:identification}: raising the response crowds the hazard into the floor (the bind share climbs from 35.8\% to 73.5\% along that curve), so each increment of elasticity buys less marginal. At half the adopted central, $\delta = 3.25\%$, the marginal is $+5.1$ points ($+\$39.1$ billion) at the in-sample floor and $+3.5$ points ($+\$26.5$ billion) at the headline off-window floor. This curve prices the dependence on the imported elasticity rather than identifying it: how small the marginal could be, if the moving response is weaker than the literature band, is read off the curve, and the identified content remains the bounded range stated in Section~\ref{sec:identification}.
 
-\begin{table}[H]
-\centering
-\caption{The lock-in marginal as a curve in the imported elasticity. Paired central-minus-null runs at each quarterly mobility decline $\delta$ (the elasticity import of Section~\ref{sec:pathb}, mapped to $\beta_1$ via \eqref{eq:beta1}), with the floor and every other production convention held fixed, at the in-sample 4.0\% floor and the off-window 4.991\% headline floor (run \texttt{band\_low\_extension}; the band-cell rows reproduce the committed production and off-window cells within the sweep tolerance of $\pm\$0.01$ billion). The $\delta = 0$ rows are the $\beta_1 = 0$ nulls, so their marginal is zero by construction; $\delta = 3.25\%$ is half the adopted central; $\{5.5, 6.5, 7.7\}\%$ is the adopted Liebersohn--Rothstein band.}
-\label{tab:lowband}
-\footnotesize
-\begin{threeparttable}
-\begin{tabular}{@{}rrrrrr@{}}
-\toprule
-& & \multicolumn{2}{c}{In-sample floor (4.0\%)} & \multicolumn{2}{c}{Off-window floor (4.991\%)} \\
-\cmidrule(lr){3-4}\cmidrule(lr){5-6}
-$\delta$ (\%) & $\beta_1$ & marginal (\$B) & (pp) & marginal (\$B) & (pp) \\
-\midrule
-0.00 & $0.0000$ & $0.0$ & $0.00$ & $0.0$ & $0.00$ \\
-1.00 & $-0.0103$ & $+12.8$ & $+1.67$ & $+9.4$ & $+1.23$ \\
-2.00 & $-0.0206$ & $+24.9$ & $+3.26$ & $+17.7$ & $+2.31$ \\
-3.00 & $-0.0311$ & $+36.4$ & $+4.76$ & $+24.9$ & $+3.25$ \\
-3.25 & $-0.0337$ & $+39.1$ & $+5.12$ & $+26.5$ & $+3.47$ \\
-4.00 & $-0.0417$ & $+47.1$ & $+6.16$ & $+31.0$ & $+4.06$ \\
-5.00 & $-0.0523$ & $+57.1$ & $+7.46$ & $+36.3$ & $+4.74$ \\
-5.50 & $-0.0577$ & $+61.7$ & $+8.07$ & $+38.6$ & $+5.05$ \\
-6.50 & $-0.0686$ & $+70.3$ & $+9.20$ & $+42.6$ & $+5.57$ \\
-7.70 & $-0.0817$ & $+79.5$ & $+10.39$ & $+46.6$ & $+6.09$ \\
-\bottomrule
-\end{tabular}
-\end{threeparttable}
-\end{table}
+
 
 Those two checks vary the floor's level and its functional form; a third pre-committed check interrogates the level's provenance---whether the 4\% figure is an artifact of being measured in-window on the locked-in cohorts the marginal later decomposes (runs \texttt{out\_of\_window\_floor} and \texttt{oos\_identification}; spec, anchor definitions, acceptance thresholds, and parity gate fixed in each script header before its runs, the ex-ante convention Appendix~\ref{app:ledger} records). Run in-window on the deeply out-of-the-money 2023--24 discount cohorts, the identical exposure-weighted-CPR procedure reproduces the production floor at 3.8--3.9\% annual CPR, flat across seasoning cuts and validating the measurement where it is used. Applied out-of-window to pooled 2017--2019 discount-cohort turnover, before both the QT window and the 2020--21 refinancing wave, it recovers a materially higher 6.1\%. That pooled reading, however, does not survive its own diagnostics, and I do not take it as the operative off-window anchor.
 
@@ -1230,51 +1313,9 @@ Two contaminations are separable, and separating them is what changes the readin
 
 What remains is the 2018 rising-rate leg, and its status must be stated precisely because the paper's off-window anchor now rests on it. Its mature-age seasoning test is \emph{not computable}: the leg contains no out-of-the-money cohort-months at all past the twenty-four-month age cut, because a loan that is out of the money while rates are rising is necessarily a recent, low-coupon origination and therefore young. The 2018 leg is thus clean by rate-regime construction rather than clean by test, and its one computable age contrast (3.78\% to 5.33\% across the twelve-month cut) is confounded by the PSA ramp, on which young loans genuinely turn over less. A second limitation concerns depth rather than age. The gap-$\leq$-two-point cell at which the in-window anchor is measured does exist off-window: the 2018 leg's gap runs to $-2.87$ points, and it holds 35 cohort-months reading 3.440\% annual CPR. Grids that stop at half a point do so because their thresholds were fixed at zero, a quarter point, and half a point in the script header, not because the rate history forbade anything deeper. The true limitation is exposure collapse, and a matched-depth run (\texttt{matched\_depth\_reconciliation}) measures it: down the 2018 leg's depth ladder the share of its gap-$\leq$-0 exposure that survives runs 100\%, 83.7\%, 72.9\%, 35.9\%, 11.3\%, 3.9\%, and 0.02\%, so the two-point cell carries \$0.282 billion of \$1{,}264.5 billion. That cell is present and worthless, and an ex-ante support rule---a depth is admissible for a leg only if the leg retains at least 10\% of its gap-$\leq$-0 exposure there---excludes it before any reading is taken. These are the reasons the off-window floor resolves to a \emph{range} rather than a point, and I report it as one.
 
-\begin{table}[H]
-\centering
-\caption{The calibration box: lock-in marginal over the $\beta_1 = 0$ null, in percentage points of the \$764.7 billion benchmark, across the involuntary-turnover floor and the Liebersohn--Rothstein band $\delta$. The 6.0\% row's level is reached only by the refi-contaminated pooled and 2019 anchors that Section~\ref{sec:robustness-floor} disqualifies; it is retained as a grid point, not a defensible anchor, and the box's lower edge should be read from the defensible off-window rows of Table~\ref{tab:oosfloor}. The bind column is the share of evaluated U.S. loan-months at which the floor lifts the hazard (central elasticity). Every marginal is basis-invariant (the underlying levels are standalone-scorer figures; both bases in Table~\ref{tab:bases}). Pre-committed runs; artifacts catalogued in Appendix~\ref{app:ledger}.}
-\label{tab:floorband}
-\begin{tabular}{lcccc}
-\toprule
-Floor (annual CPR) & $\delta = 5.5\%$ & $\delta = 6.5\%$ & $\delta = 7.7\%$ & Floor binds \\
-\midrule
-2.0\% & $+9.7$ & $+11.3$ & $+13.2$ & 3.9\% \\
-3.0\% & $+9.3$ & $+10.8$ & $+12.6$ & 12.1\% \\
-3.5\% & $+8.9$ & $+10.3$ & $+11.8$ & 21.6\% \\
-4.0\% (production) & $+8.1$ & $+9.2$ & $+10.4$ & 36.3\% \\
-4.5\% & $+6.7$ & $+7.5$ & $+8.4$ & 53.5\% \\
-5.0\% & $+5.0$ & $+5.5$ & $+6.0$ & 69.1\% \\
-6.0\% & $+2.1$ & $+2.3$ & $+2.4$ & 88.7\% \\
-\bottomrule
-\end{tabular}
-\end{table}
 
-\begin{table}[H]
-\centering
-\footnotesize
-\begin{threeparttable}
-\caption{Out-of-sample floor anchors and the lock-in marginal each implies, in percentage points of the \$764.7 billion benchmark. Floors are exposure-weighted annualized turnover CPR on out-of-the-money cohort-months measured \emph{outside} the June 2022--November 2025 evaluation window (2017--2019 performance), except the final row, whose floor is calibrated on the window's own first nineteen months. Every row, that one included, reports its floor's \emph{full-window} marginal on a common basis; the held-out-months evaluation is given in the note. Contaminated anchors are reported for completeness and are not this paper's off-window anchor; the pooled anchor's 6.07\% measurement is evaluated at the box's adjacent 6.0\% grid row. Every marginal is basis-invariant and reproduces the committed production artifacts exactly at the 4\% row. Pre-committed run \texttt{oos\_identification}; artifact catalogued in Appendix~\ref{app:ledger}.}
-\label{tab:oosfloor}
-\begin{tabular}{llcccc}
-\toprule
-Floor anchor & Status & Floor & $\delta = 5.5\%$ & $\delta = 6.5\%$ & $\delta = 7.7\%$ \\
-\midrule
-2018 leg, gap $\leq -0.005$ & defensible & 4.70\% & $+6.1$ & $+6.8$ & $+7.5$ \\
-2018 leg, gap $\leq -0.0025$ & defensible & 4.99\% & $+5.0$ & $+5.6$ & $+6.1$ \\
-2018 leg, gap $\leq 0$ & defensible & 5.33\% & $+3.9$ & $+4.3$ & $+4.6$ \\
-\midrule
-Pooled 2017--2019 & refi-contaminated & 6.07\% & $+2.1$ & $+2.3$ & $+2.4$ \\
-2019 leg, gap $\leq 0$ & refi-contaminated & 6.91\% & $+0.7$ & $+0.7$ & $+0.8$ \\
-\midrule
-In-window (production) & in-sample point & 4.00\% & $+8.1$ & $+9.2$ & $+10.4$ \\
-Early-window calibration & full window\tnote{a} & 3.97\% & $+8.1$ & $+9.3$ & $+10.5$ \\
-\bottomrule
-\end{tabular}
-\begin{tablenotes}[flushleft]\footnotesize
-\item[a] Temporal holdout. The 3.97\% floor is calibrated on deeply out-of-the-money turnover in the window's first nineteen months (June 2022--December 2023). Summed over the strictly held-out remaining twenty-three months (January 2024--November 2025), which enter that calibration nowhere, the central-minus-null marginal is $+\$45.1$ billion at the central elasticity, against $+\$44.8$ billion at the production floor over the identical months. The table row above reports the same floor's full-window marginal, so that every row is comparable; the two quantities are different objects and should not be read off one another.
-\end{tablenotes}
-\end{threeparttable}
-\end{table}
+
+
 
 \section{Behavioral Extension Mechanics}\label{sec:robustness-extensions}
 
