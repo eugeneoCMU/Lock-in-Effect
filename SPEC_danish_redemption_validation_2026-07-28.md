@@ -50,3 +50,9 @@ No manuscript, gate, test, or letter edit. The dispositions above are the pre-co
 - **Scheduled allowance, fixed now**: extraordinary redemptions ≥ total-redemption rate − **4pp/yr**. (Danish 30y annuity amortization runs ~1.5–2.5%/yr early-life; the interest-only share lowers it; 4pp is deliberately generous, which makes the test conservative against firing RULE-A.)
 - **Read-rule mapping onto the derived space** (thresholds unchanged in extraordinary space): RULE-A fires if the ≤2%-coupon FKE total-redemption rate averaged over 2022M07–2023M12 exceeds **8%/yr** (⇒ extraordinary > 4% under the allowance); RULE-A′ if it exceeds **12%/yr**; RULE-B if ≤ 8%/yr; boundary band ±0.25pp maps to 8%±0.25pp.
 - **Deviation label**: this is a derived lower-bound construction, not the direct series; every use of the result carries that label. The direct series exists in Finance Denmark's published XLSX statistics and can replace this construction later; the derived read is committed first so the threshold precedes any sighting of either source's values.
+
+---
+
+## Execution log (post-data, 2026-07-28)
+
+Fetched and scored same session; artifacts + SHA-256 in `hazard/data/danish_external_validation/` (commit 9cd4e91). The committed FKE construction returned R=26.68% but FAILED its own cross-check (644bn DKK reclassification leakage, FKU→FKE closed-for-issue migration in-window) — reported, not used. Labeled refinement on FK×coupon≤2% (attribute cannot migrate; ≤2% issuance ≈0 in-window, conservative direction): cross-check passes exactly (2m DKK on 1,202bn), **R = 26.42%/yr**, extraordinary lower bound 22.4%/yr after the 4pp allowance. **VERDICT: RULE-A′ — strongly falsified, >2× the 12% threshold.** Deep-discount stock fell 1,202→747bn DKK over the load-bearing window. Dispositions (i)–(iii) of RULE-A′ are now active for WP-F; no manuscript edit made.
