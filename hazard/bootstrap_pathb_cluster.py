@@ -143,6 +143,11 @@ DEFAULT_FLOOR_PCT = 4.991
 ANCHORS_BY_FLOOR = {
     4.991: (767.5264524465003, 724.9180585654117, 5.5715581829),
     4.0: (818.5300844066606, 748.1850239867648, 9.198459770709789),
+    # ROUND-28 C2 amendment A3: band-end anchors for the P4 floor-invariance
+    # probe, committed band-6.5 cells of oos_identification_results.json
+    # .instrument1_marginal_table (the 4.991 row bit-matches the line above).
+    4.695: (785.7883567116477, 734.0068506865199, 6.771052540089784),
+    5.334: (743.8451864084004, 711.2235461485112, 4.265670450690081),
 }
 COMMITTED_CENTRAL_B, COMMITTED_NULL_B, COMMITTED_MARGINAL_PP = \
     ANCHORS_BY_FLOOR[DEFAULT_FLOOR_PCT]
