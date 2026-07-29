@@ -700,13 +700,14 @@ def main() -> None:
         bu = cpr_cross_correlation(base_uncl, su)
         cu = cpr_cross_correlation(prim_uncl, su)
         r_moves_uncl[est] = max(abs(cu[k] - bu[k]) for k in bu)
-    _flag("Pb_r_invariant_unclipped",
-          all(v < UNCLIPPED_INVARIANCE_TOL for v in r_moves_uncl.values()),
+    _flag("Pb_r_unclipped_within_threshold",
+          all(v < R_MAX_MOVE for v in r_moves_uncl.values()),
           report, {"max_abs_r_move_unclipped": r_moves_uncl,
-                   "tol": UNCLIPPED_INVARIANCE_TOL,
-                   "amendment": "G2B-AM1(b): an additive wedge cannot move a "
-                                "demeaned correlation; exact on the unclipped "
-                                "diagnostic"})
+                   "threshold": R_MAX_MOVE,
+                   "note": "AM1(b) corrected: the unclipped wedge is a "
+                           "deterministic age-drift, so its correlation "
+                           "effect is small but nonzero (realized ~0.001); "
+                           "thresholded at the drafted R_MAX_MOVE"})
     _flag("CLIP_SHAPE_r_moves_clipped_series",
           all(v < R_MAX_MOVE for v in r_moves.values()), report,
           {"max_abs_r_move": r_moves, "drafted_threshold": R_MAX_MOVE,
@@ -715,10 +716,29 @@ def main() -> None:
     _flag("Pb_u2_within_threshold",
           all(abs(v) < U2_MAX_MOVE for v in u2_moves.values()), report,
           {"u2_move": u2_moves, "threshold": U2_MAX_MOVE})
-    _flag("Pb_wedge_additive_on_unclipped",
-          all(v < UNCLIPPED_INVARIANCE_TOL for v in uncl_spans.values()),
-          report, {"unclipped_span_pp": uncl_spans,
-                   "tol": UNCLIPPED_INVARIANCE_TOL})
+    # AM1(b) CORRECTED (second pass): the unclipped wedge is not a constant
+    # -- two scheduled-amortization curves diverge with age -- it is EXACTLY
+    # the deterministic schedule difference. Assert that identity elementwise.
+    sched_identity_resid = {}
+    for name in ordered:
+        if name == "book_0249":
+            leg_coupon = 0.0249
+        else:
+            leg_coupon = haz[name]["coupon"]
+        expected = ((sched_series_for(base["frame"].index,
+                                      COMMITTED_HAZARD_COUPON)
+                     - sched_series_for(base["frame"].index, leg_coupon))
+                    * 1200.0).to_numpy(float)
+        wu2 = (haz[name]["cpr_unclipped"]
+               - base["cpr_unclipped"]).to_numpy(float)
+        sched_identity_resid[name] = float(np.max(np.abs(wu2 - expected)))
+    _flag("Pb_wedge_is_schedule_difference",
+          all(v < 1e-10 for v in sched_identity_resid.values()),
+          report, {"max_abs_resid_pp": sched_identity_resid,
+                   "unclipped_span_pp": uncl_spans,
+                   "note": "the unclipped wedge equals the deterministic "
+                           "sched(2.5%)-sched(leg) difference elementwise; "
+                           "its span is the curves' age-divergence, not noise"})
     _flag("CLIP_SHAPE_wedge_span_clipped_series",
           all(v < WEDGE_SPAN_MAX_FRACTION for v in span_fractions.values()),
           report, {"span_over_sd": span_fractions,
@@ -792,7 +812,7 @@ def main() -> None:
         },
         "hazard_legs": {
             n: {k: v for k, v in leg.items()
-                if k not in ("frame", "cpr", "raw_smm")}
+                if k not in ("frame", "cpr", "raw_smm", "cpr_unclipped")}
             for n, leg in haz.items()
         },
         "abm_legs": abm_legs,

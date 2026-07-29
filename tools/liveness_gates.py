@@ -1131,11 +1131,20 @@ def main() -> int:
     thl = json.loads(THEIL_RESULTS.read_text())
     est = thl["estimators"]
     claims = tex.count("\\texttt{make\\_theil\\_data}")
-    lit_u1_pathb = f"{est['path_b']['u1_levels']:.3f}"
+    # ROUND-28 G2-B: tab:theil's Path A/B columns are refreshed to the
+    # note-rate-WAC amortization basis (run coupon_convention_amortization,
+    # pre-committed sub-branch of landing (i)); the Path B literals now come
+    # from that artifact's converted block, the ABM column stays committed.
+    cca = json.loads((ROOT / "hazard" / "data"
+                      / "coupon_convention_amortization_results.json").read_text())
+    ccb = cca["timing"]["path_b"]["theil_converted"]
+    lit_u1_pathb = f"{ccb['u1_levels']:.3f}"
     lit_u2_abm = f"{est['abm']['u2_diffs']:.3f}"
-    lit_pathb_var = f"{est['path_b']['decomp']['levels']['var_share']:.1f}\\%"
+    lit_pathb_var = f"{ccb['decomp']['levels']['var_share']:.1f}\\%"  # stored in percent
     lit_abm_bias_tbl = f"{est['abm']['decomp']['levels']['bias_share']:.1f}"
     ok = (all(bool(g["pass"]) for g in thl["gates"].values())
+          and cca.get("status") == "OK" and cca.get("gates_all_pass") is True
+          and tex.count("\\texttt{coupon\\_convention\\_amortization}") >= 2
           and claims >= 1
           and lit_u1_pathb in tex and lit_u2_abm in tex
           and lit_pathb_var in tex and lit_abm_bias_tbl in tex)

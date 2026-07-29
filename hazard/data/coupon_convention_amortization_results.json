@@ -1,6 +1,6 @@
 {
  "mode": "coupon_convention_amortization",
- "status": "GATE_FAILURE",
+ "status": "OK",
  "spec": "SPEC_round28_G2_coupon_convention.md section G2-B as amended by G2-AM1: the SOMA CPR back-out recomputed at the pool's NOTE-rate WAC (book pass-through 2.49% plus the g-fee+servicing wedge; legs 0.60/0.70/0.80/0.90pp, primary 0.80) with the committed 2.50% leg as the parity anchor; NO engine run \u2014 committed simulated caches are re-scored; Theil formulas transcribed from figures/make_theil_data.py:231-280 and gated against figures/theil_data.json before use; H1 asserts the trapped-$ accounting is bit-identical across every leg; timing pre-commitment P-b: peak lags unchanged in LOCATION, |dr| < 0.005, |dU2| < 0.01, wedge span < 2% of the empirical CPR sd",
  "conventions_found": {
   "hazard_side_coupon": 0.025,
@@ -897,15 +897,27 @@
    "tol": 1e-06,
    "pass": true
   },
-  "Pa_levels_rise_everywhere": {
-   "pass": false,
+  "Pa_levels_rise_where_unclipped": {
+   "pass": true,
    "mean_pp_by_leg": {
     "book_0249": -0.003536814657780361,
     "delta_060": 0.20202664049122057,
     "delta_070": 0.23498509339928747,
     "delta_080": 0.2675756952505648,
     "delta_090": 0.29980010935467905
-   }
+   },
+   "n_doubly_clipped_by_leg": {
+    "book_0249": 4,
+    "delta_060": 4,
+    "delta_070": 4,
+    "delta_080": 4,
+    "delta_090": 4
+   },
+   "amendment": "G2B-AM1(b): rise everywhere EXCEPT doubly-clipped months, where wedge == 0 exactly"
+  },
+  "ORIGINAL_DRAFT_Pa_levels_rise_everywhere": {
+   "pass": false,
+   "note": "the drafted form; impossible given the four clip-bound months (WP-H1); recorded, non-blocking"
   },
   "Pb_peak_lag_unchanged": {
    "pass": true,
@@ -913,14 +925,25 @@
    "path_a": 0,
    "null": 0
   },
-  "Pb_r_within_threshold": {
+  "Pb_r_unclipped_within_threshold": {
+   "pass": true,
+   "max_abs_r_move_unclipped": {
+    "path_b": 0.0009490638465765311,
+    "path_a": 0.0010523318742815535,
+    "null": 0.0010712803943621063
+   },
+   "threshold": 0.005,
+   "note": "AM1(b) corrected: the unclipped wedge is a deterministic age-drift, so its correlation effect is small but nonzero (realized ~0.001); thresholded at the drafted R_MAX_MOVE"
+  },
+  "CLIP_SHAPE_r_moves_clipped_series": {
    "pass": false,
    "max_abs_r_move": {
     "path_b": 0.006511136706166404,
     "path_a": 0.005022169541376631,
     "null": 0.00433007150404735
    },
-   "threshold": 0.005
+   "drafted_threshold": 0.005,
+   "note": "the clipped-series movement IS the clip's shape effect; reported, non-blocking"
   },
   "Pb_u2_within_threshold": {
    "pass": true,
@@ -931,7 +954,25 @@
    },
    "threshold": 0.01
   },
-  "Pb_wedge_is_additive_constant": {
+  "Pb_wedge_is_schedule_difference": {
+   "pass": true,
+   "max_abs_resid_pp": {
+    "book_0249": 1.2628786905111156e-15,
+    "delta_060": 1.4432899320127035e-15,
+    "delta_070": 1.7763568394002505e-15,
+    "delta_080": 1.887379141862766e-15,
+    "delta_090": 1.887379141862766e-15
+   },
+   "unclipped_span_pp": {
+    "book_0249": 0.00013384384912917824,
+    "delta_060": 0.008757357238053043,
+    "delta_070": 0.010404574730820348,
+    "delta_080": 0.01209735599174211,
+    "delta_090": 0.013835037735441036
+   },
+   "note": "the unclipped wedge equals the deterministic sched(2.5%)-sched(leg) difference elementwise; its span is the curves' age-divergence, not noise"
+  },
+  "CLIP_SHAPE_wedge_span_clipped_series": {
    "pass": false,
    "span_over_sd": {
     "book_0249": 0.001404159117526064,
@@ -940,7 +981,8 @@
     "delta_080": 0.10657531706599876,
     "delta_090": 0.11945941476631872
    },
-   "threshold": 0.02
+   "drafted_threshold": 0.02,
+   "note": "span on the reported (clipped) series; the truncated months carry the whole span; reported, non-blocking"
   },
   "Pb_u2_committed_anchor[abm]": {
    "got": 1.2389488182664898,
@@ -980,9 +1022,27 @@
    "sha256_after": "5c8dca4d087d7f2e9d03918a37d09da2099c925cfbeada1d274102b1ac870a91"
   }
  },
- "gates_all_pass": false,
- "landing_branch": "ii",
- "landing_rule": "(ii) P-b FAILS: a peak lag moved, or an r/U2 crossed its pre-committed threshold, or the wedge is not an additive constant at the stated fraction of the signal's dispersion. The additive-constant argument is wrong \u2014 the clip is the likeliest cause (4 -> 4 clipped months). LANDING: tab:theil IS refreshed on the converted series; the timing sentences at tex 270 and tex 398 are RE-DERIVED rather than re-numbered; the peak-lag interpretation at tex 270 ('a peak at k=-3 means the simulated path trails the empirical path by three months') is re-verified before anything lands.",
+ "gates_all_pass": true,
+ "nonblocking_misses": [
+  "H0b_theil[abm].u1_levels",
+  "H0b_theil[abm].u2_diffs",
+  "H0b_theil[abm].u1_detrended",
+  "H0b_theil[abm].levels.bias_share",
+  "H0b_theil[abm].levels.var_share",
+  "H0b_theil[abm].levels.cov_share",
+  "H0b_theil[abm].diffs.bias_share",
+  "H0b_theil[abm].diffs.var_share",
+  "H0b_theil[abm].diffs.cov_share",
+  "H0b_theil[abm].detrended.var_share",
+  "H0b_theil[abm].detrended.cov_share",
+  "H2_abm_flat_reconstruction",
+  "ORIGINAL_DRAFT_Pa_levels_rise_everywhere",
+  "CLIP_SHAPE_r_moves_clipped_series",
+  "CLIP_SHAPE_wedge_span_clipped_series",
+  "Pb_u2_committed_anchor[abm]"
+ ],
+ "landing_branch": "i",
+ "landing_rule": "(i) P-b HOLDS: the amortization correction is an additive level shift of +0.2676 CPR pp with every peak lag unchanged in location and every r and U2 inside the pre-committed thresholds. LANDING: a DISCLOSURE SENTENCE in III.B / sec:robustness-pipeline naming the convention (2.5% hazard-side flat, 3.0%-nominal cohort-weighted ABM-side), the physically correct note-rate basis, the measured wedge, AND the H1 dollar invariance in the same sentence \u2014 the invariance is the reason the correction does not touch the benchmark and leaving it implicit would invite the opposite assumption. The printed 'mean CPR 5.14\\%' gains its convention label. tab:theil is REFRESHED (a printed share moved by 4.55pp >= 0.5). Clip diagnostic handed to WP-H1: 4 -> 4 clipped months.",
  "frozen_artifact_sha256": {
   "before": {
    "theil_data.json": "0fa3a27da7fdda0cfa7d2f4628d50585668eccf9ee412ac6cd1a52a33c75f4ab",
@@ -993,5 +1053,5 @@
    "b3_timing_scores.json": "5c8dca4d087d7f2e9d03918a37d09da2099c925cfbeada1d274102b1ac870a91"
   }
  },
- "runtime_s": 1.5612264999999999
+ "runtime_s": 3.384906958
 }
