@@ -398,8 +398,12 @@ ASSEMBLY_SPANS = {
     #     no interior member is privileged (the range carries).
     "posture_retired_range_carries": "no interior member is privileged, and the range "
                                      "rather than any point is what the design delivers",
-    "posture_binding_layer": "the binding layer is the floor reads' own sampling error, "
-                             "$+2.8$ to $+8.7$ points after wild-cluster correction",
+    # ROUND-28 (R1-W1 / C3 branch a): the ranking is now scoped — the PSA
+    # baseline-level convention spans wider but has no coverage property; the
+    # floor read is the widest layer WITH one, and that scoping is pinned.
+    "posture_binding_layer": "The widest layer that does have a coverage property is the "
+                             "floor reads' own sampling error, $+2.8$ to $+8.7$ points "
+                             "after wild-cluster correction",
     "posture_lower_half": "every correction listed above falls in its lower half",
     # (c) the censoring share (HANDOFF_round24 §4) and the framing that
     #     HANDOFF_round22 §8.2 exists to protect. The share and its framing are
