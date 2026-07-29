@@ -293,13 +293,12 @@ ABSTRACT_HEDGES = {
     # therefore open a sentence boundary at that seam. The seam mutation in
     # tests/test_abstract_hedge_gate.py exists so this is a known, tested limit
     # and not a discovery for a later round.
-    "abm_seed_averaged": "recovers 13.6\\% averaged across seeds",
-    "crossdesign_recalibrated": "cross-design variant recalibrated on real loan "
-                                "covariates recovers",
-    "crossdesign_seed_and_reweight": "60.2\\% averaged over fifty seeds (76.3\\% "
-                                     "reweighted to the book's composition)",
-    "paradigm_attribution_hedged": "contrast cannot be cleanly attributed to "
-                                   "modeling paradigm",
+    # ROUND-27 abstract cut (author-directed): the ABM and cross-design
+    # readings LEFT the abstract with their hedges, per the round-23
+    # hedges-travel-with-claims rule. Their four abstract-scoped spans
+    # (abm_seed_averaged, crossdesign_recalibrated,
+    # crossdesign_seed_and_reweight, paradigm_attribution_hedged) moved to
+    # RELOCATED_TO_BODY twins -- see that dict below.
 }
 
 # ROUND-23: the abstract was cut from 574 to 263 words and five claims LEFT it
@@ -326,6 +325,12 @@ RELOCATED_TO_BODY = {
     "paradigm_attribution_hedged_body": "be cleanly attributed to modeling "
                                         "paradigm rather than to calibration "
                                         "and data source",
+    # ROUND-27 abstract cut: the cross-design seed hedge and the book-
+    # composition reweight left the abstract with their claims; each is
+    # pinned against its body statement (SS IV lead; tab:headline caption).
+    "crossdesign_seed_body": "60.2\\% averaged over fifty seeds---above the "
+                             "50\\% threshold",
+    "crossdesign_reweight_body": "76.3\\% at the book's composition",
     # the quarter/half split is allocation-conditional, and both are named
     "surprise_share_allocated_body": "they require the uniform-spread "
                                      "allocation, because the settlement-aware "
@@ -459,10 +464,13 @@ ABSTRACT_POSTURE = {
     # interval sentence, and the hull span keeps the form dimension stated
     # where the max-form interval is stated. Canonical-scoped like the rest
     # of this dict (the archived variant predates both).
-    "interval_qualifier": "a wild-cluster interval on the involuntary-turnover "
-                          "floor's 31 clusters (the narrower percentile read, "
-                          "$+3.0$ to $+8.0$, under-covers",
-    "hull_in_abstract": "The form-conditional hull is wider, $+3.5$ to $+13.1$ points",
+    # ROUND-27 abstract cut: qualifier compressed (wild-cluster status and
+    # under-coverage kept; the demoted percentile literal now lives in the
+    # body only, x4), hull restored to the of-form inside the interval
+    # sentence.
+    "interval_qualifier": "a wild-cluster interval on 31 clusters; the "
+                          "percentile read under-covers",
+    "hull_in_abstract": "form-conditional hull of $+3.5$ to $+13.1$ points",
     # ROUND-26 B8 (DA-M3): the abstract's mechanical-null sentence scoped
     # "however households react to rates" without marking that the floor it
     # rests on is itself calibrated from realized -- partly behavioral --

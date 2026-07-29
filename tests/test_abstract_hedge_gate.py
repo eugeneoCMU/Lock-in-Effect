@@ -150,21 +150,15 @@ def _mutations(abstract: str) -> dict[str, str]:
         "abstract_emptied_body_intact": " ",
         "abstract_reduced_to_stub": " Lock-in raised the Federal Reserve's QT "
                                     "shortfall. ",
-        # --- ROUND-24: the ABM returned to the abstract -------------------
-        # Its three hedges came back with it. Each must bite in the abstract,
-        # independently of the body pins that already cover the same claims.
-        "abm_drops_seed_averaging": abstract.replace(
-            "recovers 13.6\\% averaged across seeds", "recovers 13.6\\%"),
-        "abm_drops_recalibration": abstract.replace(
-            "cross-design variant recalibrated on real loan covariates recovers",
-            "cross-design variant recovers"),
-        "abm_drops_reweighting": abstract.replace(
-            "60.2\\% averaged over fifty seeds (76.3\\% reweighted to the "
-            "book's composition)",
-            "60.2\\% averaged over fifty seeds, and 76.3\\%"),
-        "abm_asserts_paradigm_effect": abstract.replace(
-            "the contrast cannot be cleanly attributed to modeling paradigm",
-            "the contrast is a modeling-paradigm effect"),
+        # --- ROUND-27: the ABM and cross-design readings LEFT the abstract
+        # again (author-directed cut), taking their four hedges with them
+        # under the round-23 hedges-travel-with-claims rule. The four
+        # ROUND-24 abstract mutation cases that lived here are retired with
+        # the claims; the same hedges are now body-pinned
+        # (RELOCATED_TO_BODY: abm_seed_averaged_body,
+        # crossdesign_recalibrated_body, crossdesign_seed_body,
+        # crossdesign_reweight_body, paradigm_attribution_hedged_body) and
+        # exercised by the body-mutation battery below.
     }
 
 
@@ -181,10 +175,6 @@ MUTATION_NAMES = [
     "drops_involuntary_turnover",
     "abstract_emptied_body_intact",
     "abstract_reduced_to_stub",
-    "abm_drops_seed_averaging",
-    "abm_drops_recalibration",
-    "abm_drops_reweighting",
-    "abm_asserts_paradigm_effect",
 ]
 
 
@@ -271,8 +261,8 @@ BENIGN = {
         "The cost to households who could not move is real.",
         "The cost to households who could not move is real and large."),
     "reword_unrelated_lead": (
-        "It cost less than that gap suggests",
-        "The cost is smaller than that gap suggests"),
+        "Both readings are upper limits.",
+        "Both readings are upper bounds."),
 }
 
 
@@ -285,33 +275,8 @@ def test_benign_rewrite_still_passes(name: str, tex: str, abstract: str) -> None
     assert ok, f"gate #68 false-alarmed on benign rewrite {name!r}: {info}"
 
 
-# ROUND-24: a KNOWN, MEASURED HOLE, recorded here rather than discovered later.
-#
-# The recalibration hedge and the two recovery numbers cannot be joined into one
-# span, because the archived long-abstract variant carries a frozen-seed clause
-# between them and gate C4 applies ABSTRACT_HEDGES to every manuscript on disk.
-# The widest binding available in BOTH abstracts therefore leaves a seam, and an
-# adversary can open a sentence boundary at it: both fragments survive, and the
-# 60.2/76.3 recoveries get reattributed to the production ABM.
-#
-# This test asserts the hole is still there. It is not an endorsement -- it
-# fails the moment someone widens the span, which is the point: closing it
-# should be a deliberate act with this test updated, not a silent one. Closing
-# it requires either rewriting the archived variant's abstract (which would
-# destroy an archive) or per-file span scoping (which reopens exactly the
-# ungated-variant hole C4 was written to close). Neither is obviously right, so
-# the seam stays open and stays measured.
-def test_known_seam_between_recalibration_and_the_numbers_is_not_caught(
-        tex: str, abstract: str) -> None:
-    mutated = abstract.replace(
-        "A cross-design variant recalibrated on real loan covariates recovers "
-        "60.2\\% averaged over fifty seeds (76.3\\% reweighted to the book's "
-        "composition)",
-        "A cross-design variant recalibrated on real loan covariates recovers "
-        "little more. The production model reaches 60.2\\% averaged over fifty "
-        "seeds (76.3\\% reweighted to the book's composition)")
-    assert mutated != abstract, "seam fixture is stale -- the abstract changed"
-    ok, info = abstract_hedge_check(_swap(tex, abstract, mutated))
-    assert ok, (
-        "the recalibration/number seam is now CAUGHT. That is an improvement, "
-        "not a failure -- delete this test and record the change. info=" + str(info))
+# ROUND-27: the ROUND-24 known seam (recalibration hedge vs the 60.2/76.3
+# numbers, unjoinable across the archived variant) is RETIRED, per the old
+# test's own instruction: the cross-design sentences left the abstract in
+# the author-directed cut, so the seam no longer exists to measure. The
+# claims are body-pinned (RELOCATED_TO_BODY) and exercised above.

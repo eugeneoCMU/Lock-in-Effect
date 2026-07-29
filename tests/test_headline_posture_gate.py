@@ -77,10 +77,9 @@ def test_point_before_range_fails(tex, abstract):
         "Lock-in itself adds $+5.6$ points, or \\$42.6 billion. "
         "What lock-in itself adds is a range rather than a number. "
         "The design pins it between $+2.8$ and $+8.7$ points under its "
-        "production floor form: a wild-cluster interval on the "
-        "involuntary-turnover floor's 31 clusters (the narrower percentile "
-        "read, $+3.0$ to $+8.0$, under-covers). The form-conditional hull is "
-        "wider, $+3.5$ to $+13.1$ points, and it identifies "
+        "production floor form (a wild-cluster interval on 31 clusters; the "
+        "percentile read under-covers), with a "
+        "form-conditional hull of $+3.5$ to $+13.1$ points, and it identifies "
         "levels only. Inside that range, $+5.6$ points, or \\$42.6 billion, is "
         "the value at the calibration I headline, and every correction I can "
         "measure to the involuntary-turnover floor or to the accounting basis "
@@ -130,8 +129,8 @@ def test_commented_out_posture_fails(tex, abstract):
 # claim.
 # --------------------------------------------------------------------------
 @pytest.mark.parametrize("old,new", [
-    ("no claim about month-to-month timing survives its own placebo tests",
-     "no claim about month-to-month timing survives the placebo tests I run"),
+    ("however households react to rates",
+     "however households respond to rates"),
     ("The cost to households who could not move is real.",
      "The cost to households who could not move is real and unevenly borne."),
 ])
