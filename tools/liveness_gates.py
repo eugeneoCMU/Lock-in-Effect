@@ -705,6 +705,50 @@ CONVOLVED_LINE_SPANS = {
 }
 
 
+COUPON_CONVENTION_SPANS = {
+    # ROUND-28 G2 (gate #106): the composed cell is basis-dependent and the
+    # manuscript now says so everywhere it prints it. What the gate protects:
+    # (a) the corrected companion 98.1 with its run tag; (b) the mixed-basis
+    # labeling of the committed 100.0/100.04 (without it the old reading
+    # returns); (c) the not-the-corrected-number clause; (d) the tightened
+    # coupon bound; (e) the marginal's bit-invariance claim.
+    "companion": "98.1\\% (97.6--99.1 across the legs; run "
+                 "\\texttt{coupon\\_convention\\_reweight})",
+    "mixed_basis_label": "That is a mixed-basis measurement",
+    "not_corrected": "not the corrected number",
+    "bound_tightens": "the bound tightens by an order of magnitude",
+    "marginal_invariant": "the identified marginal bit-invariant",
+    "conversion_def": "note rate less the vintage guarantee fee and base "
+                      "servicing, $\\Delta = 0.80$ points",
+}
+
+
+def coupon_convention_check(tex: str) -> tuple[bool, dict]:
+    """Gate #106's rule, as a function so a battery can exercise it."""
+    tex_nc = re.sub(r"(?<!\\)%.*", "", tex)
+    missing = sorted(k for k, v in COUPON_CONVENTION_SPANS.items()
+                     if v not in tex_nc)
+    info: dict = {"missing": missing}
+    art = ROOT / "hazard" / "data" / "coupon_convention_reweight_results.json"
+    if not art.exists():
+        return False, {**info, "artifact": "MISSING"}
+    cc = json.loads(art.read_text())
+    legs = cc.get("legs", {})
+    p0 = legs.get("central_phi_0", {})
+    art_ok = (
+        cc.get("status") == "OK"
+        and cc.get("parity_gates_all_pass") is True
+        and abs(p0.get("share_pct_shared", 0) - 98.1131) < 0.01
+        and all(v.get("pass") is True
+                for k, v in cc.get("parity_gates", {}).items()
+                if k.startswith("G3c_invariance"))
+        and any(k.startswith("G3c_invariance")
+                for k in cc.get("parity_gates", {}))
+    )
+    info["artifact_ok"] = art_ok
+    return (not missing) and art_ok, info
+
+
 def convolved_line_check(tex: str) -> tuple[bool, dict]:
     """Gate #105's rule, as a function so a battery can exercise it."""
     tex_nc = re.sub(r"(?<!\\)%.*", "", tex)
@@ -4716,6 +4760,13 @@ def main() -> int:
     failures += 0 if bb_ok else 1
     cl_ok, _cl = convolved_line_check(tex)
     failures += 0 if cl_ok else 1
+    cc_ok, _cc = coupon_convention_check(tex)
+    failures += 0 if cc_ok else 1
+    print(f"[{'PASS' if cc_ok else 'FAIL'}] coupon-convention companion (gate #106): "
+          f"{len(COUPON_CONVENTION_SPANS) - len(_cc['missing'])}/"
+          f"{len(COUPON_CONVENTION_SPANS)} spans present, "
+          f"artifact_ok={_cc.get('artifact_ok')}, "
+          f"missing={_cc['missing'] or 'none'}")
     print(f"[{'PASS' if cl_ok else 'FAIL'}] convolved sampling line (gate #105): "
           f"{len(CONVOLVED_LINE_SPANS) - len(_cl['missing'])}/"
           f"{len(CONVOLVED_LINE_SPANS)} spans present, "
