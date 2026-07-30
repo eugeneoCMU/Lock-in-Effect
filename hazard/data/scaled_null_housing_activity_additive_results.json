@@ -105,57 +105,73 @@
   "roots_additive": {
     "4": {
       "no_root": false,
-      "phi_star": 0.7559570312499999,
-      "psa_speed_effective": 75.59570312499999,
-      "iterations": 10,
-      "residual_b": 0.1705960189481459,
-      "converged": false,
+      "phi_star": 0.75625,
+      "psa_speed_effective": 75.625,
+      "iterations": 3,
+      "residual_b": 0.03915970510334432,
+      "converged": true,
       "tolerance_b": 0.05,
       "max_iters": 10,
       "bracket_final": [
-        0.7559570312499999,
-        0.756640625
+        0.75,
+        0.7625
       ],
       "bracket_drafted": [
         0.3,
         1.0
       ],
+      "bracket_seeded_from_ladder": true,
+      "ladder_null_lift_b": {
+        "0.70": 134.74994258036315,
+        "0.75": 112.32620848834142,
+        "0.80": 89.88937051001813,
+        "0.90": 44.97418011788159,
+        "1.00": 0.0
+      },
       "required_lift_b": 109.48317200074607,
-      "realized_lift_b": 109.65376801969421,
-      "null_trapped_b": 537.3578680082469,
-      "central_trapped_b": 602.5096583017993,
-      "null_mean_cpr_pct": 7.328603179957254,
-      "marginal_b": 65.15179029355238,
-      "marginal_pp": 8.51937745774487,
-      "floor_bind_share": 0.772666779155903,
+      "realized_lift_b": 109.52233170584941,
+      "null_trapped_b": 537.2264316944021,
+      "central_trapped_b": 602.4033076096173,
+      "null_mean_cpr_pct": 7.32986404518219,
+      "marginal_b": 65.17687591521519,
+      "marginal_pp": 8.522657703441032,
+      "floor_bind_share": 0.7722520741193162,
       "additive_marginal_at_phi1_b": 86.02249228630046,
       "additive_marginal_at_phi1_pp": 11.24847188912115
     },
     "4.991": {
       "no_root": false,
-      "phi_star": 0.7559570312499999,
-      "psa_speed_effective": 75.59570312499999,
-      "iterations": 10,
-      "residual_b": 0.2135495220865664,
-      "converged": false,
+      "phi_star": 0.7564453124999999,
+      "psa_speed_effective": 75.64453124999999,
+      "iterations": 8,
+      "residual_b": -0.00476369996243875,
+      "converged": true,
       "tolerance_b": 0.05,
       "max_iters": 10,
       "bracket_final": [
-        0.7559570312499999,
+        0.75625,
         0.756640625
       ],
       "bracket_drafted": [
         0.3,
         1.0
       ],
+      "bracket_seeded_from_ladder": true,
+      "ladder_null_lift_b": {
+        "0.70": 134.30305873160228,
+        "0.75": 111.95658574095592,
+        "0.80": 89.59587294560839,
+        "0.90": 44.82959718545726,
+        "1.00": 0.0
+      },
       "required_lift_b": 109.07972459883626,
-      "realized_lift_b": 109.29327412092283,
-      "null_trapped_b": 451.1326638690916,
-      "central_trapped_b": 516.0275591556735,
-      "null_mean_cpr_pct": 8.345714109349691,
-      "marginal_b": 64.89489528658197,
-      "marginal_pp": 8.485785356568067,
-      "floor_bind_share": 0.9482379194878096,
+      "realized_lift_b": 109.07496089887383,
+      "null_trapped_b": 450.91435064704257,
+      "central_trapped_b": 515.8509251144648,
+      "null_mean_cpr_pct": 8.347804285430486,
+      "marginal_b": 64.93657446742219,
+      "marginal_pp": 8.491235409008798,
+      "floor_bind_share": 0.9479515472419144,
       "additive_marginal_at_phi1_b": 85.70549789908563,
       "additive_marginal_at_phi1_pp": 11.207021073656191
     }
@@ -164,14 +180,14 @@
     "E2_root_exists_both_floors": true,
     "E3_bar_pp": 4.0,
     "E3_marginal_pp_by_floor": {
-      "4": 8.51937745774487,
-      "4.991": 8.485785356568067
+      "4": 8.522657703441032,
+      "4.991": 8.491235409008798
     },
     "E3_pass": true,
     "E4_phi_star_direction_deliberately_not_predicted": {
       "additive": {
-        "4": 0.7559570312499999,
-        "4.991": 0.7559570312499999
+        "4": 0.75625,
+        "4.991": 0.7564453124999999
       },
       "max_committed": {
         "4": 0.75625,
@@ -180,5 +196,5 @@
       "note": "either direction lands and neither is scored as a miss; the spec declined to guess a direction it could not derive"
     }
   },
-  "runtime_s": 402.647
+  "runtime_s": 394.006
 }
