@@ -4333,3 +4333,54 @@ committed comparator pair and the *stated difference* are all rebuilt from the a
 a live cross-artifact tie binds the CPR to the coupon-convention run's own note-rate leg. The
 difference is bound from **both** sides, because a comparison is what drifts silently when one
 side moves.
+
+## 47. Round-32 / SS5.4: the Danish group and the cap result in decision units (2026-07-30)
+
+**C-48** adds the duration reading at the Danish result's own site (SS VI.D), which previously
+quoted dollars only. Feeding each leg's mean CPR through the identical `wal_table` calculator,
+the rule-only transplant shortens the book 9.7 -> 9.1 years at the window's open and 8.7 -> 8.2
+at its close (~0.6 years), while the Danish-level bracketing leg runs the *other* way, to 10.8
+and 9.6. The point of the metric is that it is invariant to the face-versus-cash incidence
+question the dollar figure cannot settle, and the text says so. T1's limb of C-48 was already
+discharged by the C-83 duration row landed earlier this round.
+
+**C-49** makes T1's Danish cell lead with the band `+$61.2` to `+$256.8` billion over 0--3%
+refinance-in-place, with `+$61.2` labelled as the *zero-refinance edge rather than a central
+value* — the same range-not-point posture the paper applies to its own marginal. Gate-delicate
+and handled as such: gate #71 pins an exact T1 substring (`positivity is forced by the zero-gap
+anchor ... at $-$99.9$ billion`) and a FIRST-MENTION ordering property (the first line carrying
+`$+\$61.2$ billion` must also carry `forced rather than found`). The band was added *around*
+both, byte-preserving, and the apply script re-asserted the pinned substring count and re-derived
+the first-mention line after the edit (still line 52, the introduction).
+
+**C-115** — which is OPEN in the ledger but absent from the continuation handoff's own SS5
+ordering — is landed with the axis named. The sweep parameterizes refinance-in-place CPR, *not*
+a tax code, so a tax regime enters only through the refinancing it induces. Read at the two
+named points: the U.S.-tax regime at Berger et al.'s GE best estimate of ~0% gives `+$61.2`
+billion; the Danish-tax realization at the realized-implied 22.4%/yr gives `+$1,212` billion and
+lies above the swept range entirely. Stated as *not equally credentialed* — the second carries
+the four confounds already listed and is an upper anchor, not an estimate.
+
+**C-54** restates SS VI.B in the units a cap is actually set in. Over the 42 window months the
+phased ceilings averaged **$33.75 billion per month**; the passive principal the book could
+deliver averaged **$17.6 billion per month** (uniform-spread) and **$20.0 billion per month**
+(settlement-aware) — ratios **1.91** and **1.69**. The ceiling was set near twice a rate the book
+could not passively reach under either allocation, which is what "the caps never bound" means in
+decision units.
+
+*A deviation from the condition's own arithmetic, made deliberately.* C-54 (via R3) proposed a
+±$3.6bn/month band computed as the 1.623-CPR-point floor interval on a **$2.70 trillion** book.
+That denominator is not a committed quantity of this paper — the paper's own audit parse is
+**$1,940.9 billion** — so importing it would have printed a figure the repository cannot
+reproduce. The band is instead built from committed quantities only: the binding interval
+`+2.9` to `+8.7` points propagated through the committed floor-to-marginal grid on the $764.7bn
+benchmark, giving **$0.53 to $1.58 billion per month** of foregone passive principal. The text
+states explicitly that this band attaches to the *identified marginal* and not to the two
+projection levels, which are accounting constructions with no sampling interval — without that
+sentence the paragraph would read as though a projection carried a confidence interval.
+
+**GATE #111** + an 11-test battery. Every literal (ceiling, both achievable rates, both ratios,
+both band ends) is *derived inside the gate* from `expectation_benchmark_results.json` and the
+binding interval; none is written into the gate. The battery moves each side of the comparison
+independently, because the claim is comparative and a ratio goes stale silently when one side
+moves. 521 -> 532 tests.

@@ -902,6 +902,43 @@ def wal_normal_turnover_check(tex, wnt, oos):
 
 
 
+def cap_monthly_units_check(tex, eb, bench, binding_lo_pp, binding_hi_pp):
+    """Gate #111's rule (R32, C-54): SS VI.B's result in the units of a cap decision.
+
+    C-54 asked for the cap result restated in $bn/month with a band, because a
+    cap is set in $bn/month and the paper stated it only in window totals. Every
+    literal below is DERIVED here from the committed benchmark artifact and the
+    binding interval -- none is written into this gate -- so a rerun that moved
+    the projections cannot leave a stale monthly figure standing in SS VI.B.
+
+    Two things beyond arithmetic are bound. (i) The RATIOS, because "the ceiling
+    was near twice the achievable rate" is the sentence's claim and a ratio drifts
+    silently when either side moves. (ii) The scope disclaimer: the band belongs
+    to the identified marginal, NOT to the two projection levels, which are
+    accounting constructions with no sampling interval. Without that sentence the
+    paragraph reads as though a projection had a confidence interval.
+    """
+    M = 42
+    proj = eb["window"]["projected_runoff_window_b"] / M
+    sett = eb["settlement_aware_allocation"]["projected_runoff_window_b"] / M
+    cap = eb["supplementary_projection_wedge"]["cap_target_window_b"] / M
+    lo = bench * binding_lo_pp / 100.0 / M
+    hi = bench * binding_hi_pp / 100.0 / M
+    lits = {
+        "cap_ceiling": f"\\${cap:.2f} billion per month" in tex,
+        "uniform_spread": f"\\${proj:.1f} billion per month" in tex,
+        "settlement_aware": f"\\${sett:.1f} billion per month" in tex,
+        "ratios": f"ratios of {cap / proj:.2f} and {cap / sett:.2f}" in tex,
+        "marginal_band": f"\\${lo:.2f} to \\${hi:.2f} billion per month" in tex,
+        "band_scope_disclaimer": (
+            "That band attaches to the identified marginal, not to the two "
+            "projection levels") in tex,
+    }
+    return all(lits.values()), {"missing": sorted(k for k, v in lits.items() if not v),
+                                "cap_per_month": round(cap, 2),
+                                "achievable_per_month": (round(proj, 1), round(sett, 1))}
+
+
 def wal_note_rate_basis_check(tex, wnrb, amort):
     """Gate #110's rule (R32, C-94), as a function so a battery can exercise it.
 
@@ -5023,6 +5060,13 @@ def main() -> int:
           f"row_present={_wn['present']}, tag_citations={_wn['tag_citations']}, "
           f"anchor_pct={_wn['anchor_pct']}, "
           f"stale_sentence_gone={_wn['stale_sentence_gone']}")
+    _eb_cap = json.loads(EXPECT_RESULTS.read_text())
+    cmu_ok, _cmu = cap_monthly_units_check(tex, _eb_cap, _eb_cap["cap_benchmark_b"], 2.9, 8.7)
+    failures += 0 if cmu_ok else 1
+    print(f"[{'PASS' if cmu_ok else 'FAIL'}] cap result in $bn/month (gate #111): "
+          f"ceiling={_cmu['cap_per_month']}, "
+          f"achievable={_cmu['achievable_per_month']}, "
+          f"missing={_cmu['missing'] or 'none'}")
     _wnrb = json.loads(WALNRB_RESULTS.read_text())
     _amort = json.loads(COUPONAMORT_RESULTS.read_text())
     wnrb_ok, _wb = wal_note_rate_basis_check(tex, _wnrb, _amort)
