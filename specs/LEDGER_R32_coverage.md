@@ -109,7 +109,7 @@ No condition may be left unclassified. Generated from the inventory and the comm
 | C-102 | MINOR | 5 | WORDING | **OPEN** | wave 5 | Print beta_1(P_q) at {0.015, 0.03, 0.06, 0.12} in tab:params |
 | C-103 | MINOR | 5 | WORDING | **SATISFIED** | da6de61 | Concede that the cluster bootstrap is a ratio estimator with random de |
 | C-104 | MINOR | 5 | WORDING | **SATISFIED** | da6de61 | Drop the zero-exclusion clause from the "three things" list |
-| C-105 | MINOR | 5 | WORDING | **OPEN** | wave 5 | Print the unrounded CR1-BM and CR3-conventional pairs in the ladder no |
+| C-105 | MINOR | 5 | WORDING | **SATISFIED** | c889ed9 | Print the unrounded CR1-BM and CR3-conventional pairs in the ladder no |
 | C-106 | MINOR | 5 | META | **OPEN** | wave 5 | Make the spec-before-run ordering checkable from the paper, or say it |
 | C-107 | MINOR | 5 | META | **OPEN** | wave 5 | Optional: own the consequence that the ABM headline is not commit-addr |
 | C-108 | MINOR | 5 | WORDING | **SATISFIED** | da6de61 | Repair the §III.B coupon-convention sentence |
@@ -117,10 +117,10 @@ No condition may be left unclassified. Generated from the inventory and the comm
 | C-110 | MINOR | 5 | WORDING | **SATISFIED** | da6de61 | State how burnout is initialized |
 | C-111 | MINOR | 5 | WORDING | **SATISFIED** | da6de61 | Take the default baseline's free external corroboration |
 | C-112 | MINOR | 5 | WORDING | **SATISFIED** | 7b13504 | Derive the "$83 billion per CPR point" coefficient at first use |
-| C-113 | MINOR | 5 | WORDING | **OPEN** | wave 5 | Quote the six extension-years against the normal-turnover row as well |
+| C-113 | MINOR | 5 | WORDING | **SATISFIED** | c889ed9 | Quote the six extension-years against the normal-turnover row as well |
 | C-114 | MINOR | 5 | CHECK | **OPEN** | wave 5 | Retire the superseded lag interpretation carried in a committed artifa |
 | C-115 | MINOR | 5 | CHECK | **OPEN** | wave 5 | Read the Danish sweep at two named tax-regime points |
-| C-116 | MINOR | 5 | WORDING | **OPEN** | wave 5 | Connect §VI.C to the paper's own 20.4% share and take-up concession |
+| C-116 | MINOR | 5 | WORDING | **SATISFIED** | c889ed9 | Connect §VI.C to the paper's own 20.4% share and take-up concession |
 | C-117 | MINOR | 5 | WORDING | **OPEN** | wave 5 | Prefer "cap shortfall" in headline sentences |
 | C-118 | MINOR | 5 | REFERENCE | **SATISFIED** | 7b13504 | Say that the labor-reallocation leg is unquantified in this design |
 | C-119 | MINOR | 5 | REFERENCE | **OPEN** | wave 5 | Connect the mobility constraint to the inventory channel and its incid |
@@ -141,8 +141,8 @@ No condition may be left unclassified. Generated from the inventory and the comm
 
 ## Counts
 
-- SATISFIED: **73**
-- OPEN: **50**
+- SATISFIED: **76**
+- OPEN: **47**
 - DEFERRED-EUGENE: **7**
 - CLOSED-REFUTED: **1**
 - DECLINED: **1**
