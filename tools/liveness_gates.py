@@ -1774,6 +1774,182 @@ def episode_age_bands_check(tex: str, a: dict, w: dict) -> tuple[bool, dict]:
         "age_only_share_pct": round(age_b / total * 100, 2),
     }
 
+
+# --- R32 / C-77 artifacts (gate #118). TWO of them on purpose: the committed
+# max-form run is read SEPARATELY so the new artifact cannot certify its own
+# comparator. These may sit with the other *_RESULTS constants (after
+# DLS_RESULTS, tools/liveness_gates.py:63) or here; both are module level and
+# evaluated before main() either way.
+SNHAADD_RESULTS = (ROOT / "hazard" / "data"
+                   / "scaled_null_housing_activity_additive_results.json")
+SNHAMAX_RESULTS = (ROOT / "hazard" / "data"
+                   / "scaled_null_housing_activity_results.json")
+
+
+# --- R32 / C-77 (gate #118): THE ALADANGADY CALIBRATION IS FORM-CONDITIONAL --
+# The housing-activity reconciliation was solved only under the production
+# hard-maximum floor form, and the tab:assembly row carried its +0.9 as though
+# the reading were form-invariant. Re-solved under the additive form (run
+# scaled_null_housing_activity_additive) the root barely moves at the headline
+# floor -- 0.756 against 0.754 -- while the surviving marginal lands at +8.5
+# points at BOTH anchors (8.4912 and 8.5227). So the calibration documents an
+# upward bias under either form, and only WHERE the corrected member falls is a
+# form choice.
+#
+# Four things this gate binds past presence, because each is a way this landing
+# could go wrong quietly:
+#
+# (i)   PLACEMENT. +8.5 sits in the UPPER half of the +2.9 to +8.7 binding
+#       interval -- INSIDE it, about 0.2 below the upper edge, NOT above it.
+#       Gate #98 pins "every correction listed above falls in its lower half",
+#       a claim scoped to the ladder ABOVE the binding-interval sentence, so
+#       writing this member up into that ladder would falsify a pinned sentence
+#       without editing it. The ordering assert requires the passage to appear
+#       AFTER the lower-half sentence and AFTER the counterweight clause it
+#       belongs with; in_paragraph requires it to stay inside the seventh-
+#       qualification paragraph rather than escape into a new one.
+# (ii)  THE MECHANISM. What separates the forms is censoring, not a slacker
+#       floor: the floor exceeds the volitional hazard NO LESS OFTEN at the
+#       additive root (0.9480) than at the max root (0.9444) -- it simply stops
+#       truncating. That comparison is asserted against the two artifacts
+#       rather than printed, because "94.8\%" already denotes the null leg's
+#       100-PSA recovery share in this same paragraph and a second referent for
+#       it would be a trap for a later reader.
+# (iii) NO BARE NUMERALS. Every printed literal is checked inside the clause it
+#       belongs to. "$+0.9$", "$+3.5$", "$+5.6$" and "$+11.2$" each already
+#       occur at unrelated sites ("$+0.9$ to $+15.6$", "$+3.5$ to $+13.1$", the
+#       headline, the tab:uncertainty note at .tex:474), so a bare-numeral
+#       check would pass on a manuscript that had lost the sentence it was
+#       meant to pin. That is the hole the C-77 verifier found in the draft.
+# (iv)  THE COMPARATOR. The max-form legs are read from the COMMITTED max run,
+#       never from the additive run's copy of them; the copy is checked against
+#       it to the bit, and the committed file's BYTES are checked against the
+#       sha the additive run recorded for what it was scored against. If the
+#       max run is ever re-run this gate fails loudly rather than silently
+#       comparing a stale +0.9.
+#
+# NOTE: the additive run tag CONTAINS the max tag as a stem, so every tag
+# comparison here closes the brace -- "...activity\_additive}" does not contain
+# "...activity}". A battery test asserts that property, because the next gate to
+# count either tag will get it wrong otherwise.
+SNHA_ADDITIVE_PROSE = "Re-solving the same condition under the additive form"
+
+
+def snha_additive_check(tex, a, mx, max_bytes):
+    """Gate #118's rule (R32, C-77), as a function so the battery exercises THE
+    SHIPPED RULE rather than a copy of it (gate #68's header explains why that
+    distinction is not pedantry).
+
+    a         -- the additive re-solve's artifact.
+    mx        -- the COMMITTED max-form artifact, parsed from max_bytes.
+    max_bytes -- its raw bytes, so the comparator can be sha-pinned against the
+                 additive run's own P0 record of what it was scored against.
+
+    hashlib is imported locally rather than at module scope on purpose: this
+    landing is one of six applied in the same wave and the shared import block
+    is the one place they would collide.
+    """
+    import hashlib
+    tex = re.sub(r"(?<!\\)%.*", "", tex)
+    r4, r5 = a["roots_additive"]["4"], a["roots_additive"]["4.991"]
+    c4, c5 = a["committed_max_form"]["4"], a["committed_max_form"]["4.991"]
+    m4, m5 = mx["root"]["4"], mx["root"]["4.991"]
+    prod_phi1_pp = mx["ladder"]["4.991|1"]["marginal_pp"]
+    add_phi1_pp = r5["additive_marginal_at_phi1_pp"]
+    lits = {
+        # the PRE-EXISTING production pair the landing now leans on
+        "max_pair": (f"the marginal at $+{m5['marginal_pp']:.1f}$ points at the "
+                     f"headline floor and $+{m4['marginal_pp']:.1f}$ at the "
+                     "in-sample calibration") in tex,
+        # the landing's own passage
+        "both_anchors": f"$+{r5['marginal_pp']:.1f}$ points at both anchors" in tex,
+        "roots_pair": (f"$\\phi^{{*}} = {r5['phi_star']:.3f}$ against "
+                       f"${m5['phi_star']:.3f}$ at the headline floor") in tex,
+        "e3_bar": (f"clearing the $+{a['expectations']['E3_bar_pp']:.1f}$-point "
+                   "bar fixed before the run") in tex,
+        "cut_additive": (f"cuts the additive form's own $+{add_phi1_pp:.1f}$ to "
+                         f"$+{r5['marginal_pp']:.1f}$") in tex,
+        "cut_production": (f"the production form's $+{prod_phi1_pp:.1f}$ to "
+                           f"$+{m5['marginal_pp']:.1f}$") in tex,
+        "where_it_lands": ("above the headline at both anchors and near the top "
+                           "of the quoted interval under the additive form") in tex,
+        "censoring_share": (f"pinned to the floor in "
+                            f"{m5['floor_bind_share'] * 100:.1f}\\% of evaluated "
+                            "loan-months and the maximum truncates") in tex,
+        "never_truncates": "combines the two hazards on the survival scale" in tex,
+        "dominates_no_less": "dominates no less often at the additive root" in tex,
+        "placement": ("belongs with the counterweights above rather than with "
+                      "the ladder") in tex,
+        # the scope repairs a landing may not lose
+        "both_forms_biased": "documents an upward bias under both forms" in tex,
+        "production_scoped": ("under the production form the corrected member "
+                              "lies below the headline") in tex,
+        "intro_counterpart": ("re-solved under the additive form, the calibrated "
+                              "companion below moves it up instead") in tex,
+        "counterweight_pointer": ("the housing-activity calibration below, "
+                                  "re-solved under that form, joins them") in tex,
+        # +8.5 is INSIDE the interval, so the paragraph's closing clause had to
+        # stop saying the counterweights sit above it
+        "closing_scoped": ("the form-side counterweights sit at its top or "
+                           "above it") in tex,
+        # the tab:assembly row -- the edit the condition names, in three cells
+        "row_both_numbers": (f"$+{m5['marginal_pp']:.1f}$ (max) / "
+                             f"$+{r5['marginal_pp']:.1f}$ (additive)") in tex,
+        "row_vs_cell": "below the interval / above the headline" in tex,
+        "row_form_conditional": ("form-conditional scaled-null variant; "
+                                 "upward-bias entry under both forms") in tex,
+        "row_roots": (f"roots $\\phi^{{*}} = {m5['phi_star']:.3f}$ and "
+                      f"${r5['phi_star']:.3f}$ at the headline floor") in tex,
+        "run_tag": "\\texttt{scaled\\_null\\_housing\\_activity\\_additive}" in tex,
+    }
+    # (i) the additive member is written WITH the counterweights, after the
+    #     lower-half posture it would otherwise falsify
+    i_low = tex.find("every correction listed above falls in its lower half")
+    i_ctr = tex.find("the housing-activity calibration below, re-solved under "
+                     "that form, joins them")
+    i_add = tex.find(SNHA_ADDITIVE_PROSE)
+    ordered = -1 < i_low < i_ctr < i_add
+    paras = [ln for ln in tex.split("\n") if ln.startswith(ASSEMBLY_OPENER)]
+    in_paragraph = (len(paras) == 1 and SNHA_ADDITIVE_PROSE in paras[0]
+                    and ("belongs with the counterweights above rather than "
+                         "with the ladder") in paras[0])
+    # the run's own gates: a landing may not survive its own failures
+    roots_ok = all((not r["no_root"]) and r["converged"]
+                   and abs(r["residual_b"]) <= r["tolerance_b"]
+                   for r in (r4, r5))
+    pg = a["parity_gates"]
+    parity_ok = (
+        all(v["pass"] for v in pg["P1_additive_endpoint_parity"].values())
+        and all(v["pass"] for v in pg["P2_max_form_parity"].values())
+        and pg["P3_baseline_identity"]["vs_h0_psa"] == 0.0
+        and pg["P3_baseline_identity"]["vs_baseline_hazard"] == 0.0
+        and pg["P4_restoration_and_bind_anchor"]["restored"] is True
+        and abs(pg["P5_ratio_recomputed"] - 1.272727272727273) < 1e-12
+        and abs(pg["P5_floor_read_live_pct"] - 4.991) < 1e-9)
+    # (iv) the comparator is the COMMITTED max run, by value AND by bytes
+    tie = all(abs(c[k] - m[k]) < 1e-12
+              for c, m in ((c4, m4), (c5, m5))
+              for k in ("phi_star", "marginal_pp", "floor_bind_share",
+                        "required_lift_b"))
+    sha_ok = (hashlib.sha256(max_bytes).hexdigest()
+              == pg["P0_sha_pins"]["hazard/data/"
+                                   "scaled_null_housing_activity_results.json"])
+    # (ii) the two claims that are arguments rather than literals
+    floor_invariant = f"{r4['marginal_pp']:.1f}" == f"{r5['marginal_pp']:.1f}"
+    no_less_often = r5["floor_bind_share"] >= m5["floor_bind_share"]
+    ok = (all(lits.values()) and ordered and in_paragraph and roots_ok
+          and parity_ok and tie and sha_ok and floor_invariant and no_less_often
+          and bool(a["expectations"]["E2_root_exists_both_floors"])
+          and bool(a["expectations"]["E3_pass"]))
+    return ok, {"missing": sorted(k for k, v in lits.items() if not v),
+                "ordered": ordered, "in_paragraph": in_paragraph,
+                "cross_artifact_tie": tie, "comparator_sha_ok": sha_ok,
+                "floor_invariant": floor_invariant,
+                "additive_pp": (round(r4["marginal_pp"], 4),
+                                round(r5["marginal_pp"], 4)),
+                "bind_max_then_additive": (round(m5["floor_bind_share"], 4),
+                                           round(r5["floor_bind_share"], 4))}
+
 def main() -> int:
     tex = TEX.read_text()
     failures = 0
@@ -5716,6 +5892,18 @@ def main() -> int:
     print(f"[{'PASS' if dls_ok else 'FAIL'}] 2018 depth ladder shape (gate #114): "
           f"plateau_cov={_dl['plateau_cov_pct']}%, tail_cov={_dl['tail_cov_pct']}%, "
           f"missing={_dl['missing'] or 'none'}")
+    _snha_max_bytes = SNHAMAX_RESULTS.read_bytes()
+    _snha = json.loads(SNHAADD_RESULTS.read_text())
+    _snha_max = json.loads(_snha_max_bytes)
+    snha_ok, _sn = snha_additive_check(tex, _snha, _snha_max, _snha_max_bytes)
+    failures += 0 if snha_ok else 1
+    print(f"[{'PASS' if snha_ok else 'FAIL'}] Aladangady calibration is "
+          f"form-conditional (gate #118): additive {_sn['additive_pp']}pp at the "
+          f"two anchors, bind (max, additive)={_sn['bind_max_then_additive']}, "
+          f"ordered={_sn['ordered']}, in_paragraph={_sn['in_paragraph']}, "
+          f"cross_artifact_tie={_sn['cross_artifact_tie']}, "
+          f"comparator_sha_ok={_sn['comparator_sha_ok']}, "
+          f"missing={_sn['missing'] or 'none'}")
     _mtc = json.loads(MTC_RESULTS.read_text())
     mtc_ok, _mt = marginal_transaction_counts_check(tex, _mtc)
     failures += 0 if mtc_ok else 1
