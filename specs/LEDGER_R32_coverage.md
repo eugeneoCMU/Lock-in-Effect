@@ -52,13 +52,13 @@ No condition may be left unclassified. Generated from the inventory and the comm
 | C-45 | MAJOR | 2 | WORDING | **SATISFIED** | 287e266 | Name the fiscal incidence of the 1-P wedge |
 | C-46 | MAJOR | 2 | REFERENCE | **SATISFIED** | 287e266 | Add the missing ex-ante primary-rate offset to §VI.D's omission list |
 | C-47 | MAJOR | 2 | WORDING | **SATISFIED** | 70024c8 | State that the Danish magnitude inherits every conditionality the marg |
-| C-48 | MAJOR | 2 | STRUCTURE | **OPEN** | wave 2 | Report the Danish counterfactual in duration units at its own sites |
-| C-49 | MAJOR | 2 | WORDING | **OPEN** | wave 2 | T1's Danish cell must lead with the band |
+| C-48 | MAJOR | 2 | STRUCTURE | **SATISFIED** | 8036fd3 (SS VI.D duration reading; T1 limb already met by the C-83 row) | Report the Danish counterfactual in duration units at its own sites |
+| C-49 | MAJOR | 2 | WORDING | **SATISFIED** | 8036fd3 (T1 leads with the band; gate #71 substring + first-mention ordering preserved) | T1's Danish cell must lead with the band |
 | C-50 | MAJOR | 2 | WORDING | **SATISFIED** | 70024c8 | Promote the realized-implied Danish anchor and its four confounds out |
 | C-51 | MAJOR | 2 | WORDING | **SATISFIED** | 38db980 (both limbs: BIS-sourced mechanics + the par-cap consequence) | State the Danish execution mechanics (open-market repurchase and deliv |
 | C-52 | MAJOR | 2 | WORDING | **SATISFIED** | 70024c8 | State the objective a redemption cap serves, and open §VI.B with §III. |
 | C-53 | MAJOR | 2 | WORDING | **SATISFIED** | 70024c8 | Make the substitution instrument the stated design implication |
-| C-54 | MAJOR | 2 | STRUCTURE | **OPEN** | wave 2 | Restate §VI.B's result in $bn/month with a band |
+| C-54 | MAJOR | 2 | STRUCTURE | **SATISFIED** | 8036fd3 (decision units + GATE #111; band rebuilt from committed quantities, R3's $2.70trn denominator declined) | Restate §VI.B's result in $bn/month with a band |
 | C-55 | MAJOR | 2 | WORDING | **SATISFIED** | 70024c8 (body limb already satisfied by the 59d81c1 split; abstract limb held for the abstract batch) | State the marginal's share of the duration extension where the fragili |
 | C-56 | MAJOR | 2 | WORDING | **SATISFIED** | 70024c8 | Restrict the institutional-cost claim to cash-flow timing (or price th |
 | C-57 | MAJOR | 2 | WORDING | **SATISFIED** | 70024c8 | Label the recurrence claim as outside what the design tests |
@@ -119,7 +119,7 @@ No condition may be left unclassified. Generated from the inventory and the comm
 | C-112 | MINOR | 5 | WORDING | **SATISFIED** | 7b13504 | Derive the "$83 billion per CPR point" coefficient at first use |
 | C-113 | MINOR | 5 | WORDING | **SATISFIED** | c889ed9 | Quote the six extension-years against the normal-turnover row as well |
 | C-114 | MINOR | 5 | CHECK | **SATISFIED** | e96cb1d | Retire the superseded lag interpretation carried in a committed artifa |
-| C-115 | MINOR | 5 | CHECK | **OPEN** | wave 5 | Read the Danish sweep at two named tax-regime points |
+| C-115 | MINOR | 5 | CHECK | **SATISFIED** | 8036fd3 (both regimes named, axis stated as refi-in-place CPR) | Read the Danish sweep at two named tax-regime points |
 | C-116 | MINOR | 5 | WORDING | **SATISFIED** | c889ed9 | Connect §VI.C to the paper's own 20.4% share and take-up concession |
 | C-117 | MINOR | 5 | WORDING | **OPEN** | wave 5 | Prefer "cap shortfall" in headline sentences |
 | C-118 | MINOR | 5 | REFERENCE | **SATISFIED** | 7b13504 | Say that the labor-reallocation leg is unquantified in this design |
@@ -141,8 +141,8 @@ No condition may be left unclassified. Generated from the inventory and the comm
 
 ## Counts
 
-- SATISFIED: **99**
-- OPEN: **22**
+- SATISFIED: **103**
+- OPEN: **18**
 - DEFERRED-EUGENE: **7**
 - DECLINED: **3**
 - CLOSED-REFUTED: **1**
