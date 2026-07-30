@@ -1,0 +1,147 @@
+{
+ "mode": "episode_gradient_recompute",
+ "spec": "specs/SPEC_R32_c73_gradient_recompute.md",
+ "spec_sha256": "9e4269c6bbf2528ece936d1212a89040658cb3771e22e1611f4a3fa798b59220",
+ "committed_reference": {
+  "realized_gradient_pp": 4.198179219676357,
+  "implied_at_production": 0.9371125522400376,
+  "realized_over_implied_committed": 4.479909280524726
+ },
+ "endpoints": {
+  "shallow": "[-1,0)",
+  "deep": "<=-3",
+  "qualified": [
+   "[-1,0)",
+   "[-2,-1)",
+   "[-3,-2)",
+   "<=-3"
+  ]
+ },
+ "grid": {
+  "production_4pct|max|75": {
+   "implied_gradient_pp": 0.3300132877053885,
+   "realized_over_implied": 12.721242980446839,
+   "bind_share_shallow": 0.0004605105371547257,
+   "bind_share_deep": 0.9782897968364724
+  },
+  "production_4pct|max|100": {
+   "implied_gradient_pp": 0.9371125522400376,
+   "realized_over_implied": 4.479909280524726,
+   "bind_share_shallow": 8.994419693636297e-05,
+   "bind_share_deep": 0.0
+  },
+  "production_4pct|max|125": {
+   "implied_gradient_pp": 1.16471351982318,
+   "realized_over_implied": 3.6044736737611665,
+   "bind_share_shallow": 0.0,
+   "bind_share_deep": 0.0
+  },
+  "production_4pct|additive|75": {
+   "implied_gradient_pp": 0.6785105160784006,
+   "realized_over_implied": 6.18734584091732,
+   "bind_share_shallow": 0.0,
+   "bind_share_deep": 0.0
+  },
+  "production_4pct|additive|100": {
+   "implied_gradient_pp": 0.8996249260134981,
+   "realized_over_implied": 4.66658837286748,
+   "bind_share_shallow": 0.0,
+   "bind_share_deep": 0.0
+  },
+  "production_4pct|additive|125": {
+   "implied_gradient_pp": 1.1181249790302772,
+   "realized_over_implied": 3.7546600768344667,
+   "bind_share_shallow": 0.0,
+   "bind_share_deep": 0.0
+  },
+  "headline_4.991pct|max|75": {
+   "implied_gradient_pp": 0.0,
+   "realized_over_implied": null,
+   "bind_share_shallow": 1.0,
+   "bind_share_deep": 1.0
+  },
+  "headline_4.991pct|max|100": {
+   "implied_gradient_pp": 0.7598833115157966,
+   "realized_over_implied": 5.524768284885652,
+   "bind_share_shallow": 0.0003137402785543851,
+   "bind_share_deep": 0.8717201812670191
+  },
+  "headline_4.991pct|max|125": {
+   "implied_gradient_pp": 1.1647167041011208,
+   "realized_over_implied": 3.604463819308176,
+   "bind_share_shallow": 8.994419693636297e-05,
+   "bind_share_deep": 0.0
+  },
+  "headline_4.991pct|additive|75": {
+   "implied_gradient_pp": 0.6715063085633641,
+   "realized_over_implied": 6.251883513437181,
+   "bind_share_shallow": 0.0,
+   "bind_share_deep": 0.0
+  },
+  "headline_4.991pct|additive|100": {
+   "implied_gradient_pp": 0.8903381728709192,
+   "realized_over_implied": 4.7152636465526525,
+   "bind_share_shallow": 0.0,
+   "bind_share_deep": 0.0
+  },
+  "headline_4.991pct|additive|125": {
+   "implied_gradient_pp": 1.1065826680488051,
+   "realized_over_implied": 3.7938233996370516,
+   "bind_share_shallow": 0.0,
+   "bind_share_deep": 0.0
+  }
+ },
+ "ratio_min": 3.604463819308176,
+ "ratio_max": 12.721242980446839,
+ "all_finite_ratios_above_one": true,
+ "degenerate_cells_implied_gradient_zero": [
+  "headline_4.991pct|max|75"
+ ],
+ "degenerate_note": "cells where the implied gradient is EXACTLY zero because the floor censors BOTH endpoint buckets, so the model implies no cross-sectional gradient at all and realized/implied is undefined rather than large",
+ "gates": {
+  "E1_panel_bucket_parity": {
+   "pass": true,
+   "realized_gradient_got": 4.198179219676357,
+   "want": 4.198179219676357,
+   "qualified_got": [
+    "[-1,0)",
+    "[-2,-1)",
+    "[-3,-2)",
+    "<=-3"
+   ],
+   "qualified_want": [
+    "[-1,0)",
+    "[-2,-1)",
+    "[-3,-2)",
+    "<=-3"
+   ],
+   "endpoints": {
+    "shallow": "[-1,0)",
+    "deep": "<=-3"
+   }
+  },
+  "E2_implied_parity": {
+   "pass": true,
+   "got": 0.9371125522400376,
+   "want": 0.9371125522400376
+  },
+  "E3_censoring_monotone": {
+   "pass": true
+  },
+  "E4_additive_never_binds": {
+   "pass": true
+  },
+  "E5_frozen_artifacts": {
+   "pass": true,
+   "changed": [],
+   "added": []
+  }
+ },
+ "gates_all_pass": true,
+ "prediction": "under the MAX form at the 4.991% headline floor the implied gradient FALLS below the committed 0.9371 and realized/implied RISES above 4.48 (a higher floor censors more deep-gap exposure, and censored cells contribute zero gradient); under the ADDITIVE form at the same floor the implied gradient RISES above 0.9371 (that form never clips the voluntary term). Signs only -- no band is committed.",
+ "prediction_held": {
+  "max_form_falls": true,
+  "additive_form_rises": false
+ },
+ "runtime_s": 0.5173981670000001
+}

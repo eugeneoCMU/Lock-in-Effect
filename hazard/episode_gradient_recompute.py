@@ -128,11 +128,11 @@ def main() -> None:
     g_real = per[shallow]["st"]["cpr_pct"] - per[deep]["st"]["cpr_pct"]
 
     e1 = (abs(g_real - G_REAL) < TOL
-          and qualified == committed["part_a_primary"]["qualified_buckets"])
+          and qualified == committed["part_a"]["primary_age_matched"]["qualified_buckets"])
     gates["E1_panel_bucket_parity"] = {
         "pass": bool(e1), "realized_gradient_got": g_real, "want": G_REAL,
         "qualified_got": qualified,
-        "qualified_want": committed["part_a_primary"]["qualified_buckets"],
+        "qualified_want": committed["part_a"]["primary_age_matched"]["qualified_buckets"],
         "endpoints": {"shallow": shallow, "deep": deep}}
     print("  E1 %s  realized gradient %.15f" % ("PASS" if e1 else "FAIL", g_real))
     if not e1:
@@ -165,9 +165,10 @@ def main() -> None:
                     "bind_share_shallow": s["floor_bind_exposure_share"],
                     "bind_share_deep": d["floor_bind_exposure_share"]}
                 binds[key] = d["floor_bind_exposure_share"]
-                print("   %-34s implied %7.4f  ratio %7.3f  bind(deep) %.4f"
-                      % (key, g, grid[key]["realized_over_implied"],
-                         d["floor_bind_exposure_share"]))
+                r = grid[key]["realized_over_implied"]
+                print("   %-34s implied %7.4f  ratio %9s  bind(deep) %.4f  bind(shallow) %.4f"
+                      % (key, g, ("%.3f" % r) if r is not None else "UNDEFINED",
+                         d["floor_bind_exposure_share"], s["floor_bind_exposure_share"]))
 
     # E3: under max, deep-bucket bind share non-decreasing in the floor
     e3 = all(binds["headline_4.991pct|max|%g" % p] >= binds["production_4pct|max|%g" % p]
@@ -185,7 +186,10 @@ def main() -> None:
     g_add = grid["headline_4.991pct|additive|100"]["implied_gradient_pp"]
     held = {"max_form_falls": bool(g_max < G_IMPL),
             "additive_form_rises": bool(g_add > G_IMPL)}
-    ratios = [v["realized_over_implied"] for v in grid.values()]
+    ratios = [v["realized_over_implied"] for v in grid.values()
+              if v["realized_over_implied"] is not None]
+    degenerate = sorted(k for k, v in grid.items()
+                        if v["realized_over_implied"] is None)
 
     out = {
         "mode": "episode_gradient_recompute",
@@ -195,11 +199,16 @@ def main() -> None:
                                 "implied_at_production": G_IMPL,
                                 "realized_over_implied_committed": cv.get(
                                     "realized_over_implied_mid",
-                                    committed["part_a_primary"]["realized_over_implied_mid"])},
+                                    committed["part_a"]["primary_age_matched"]["realized_over_implied_mid"])},
         "endpoints": {"shallow": shallow, "deep": deep, "qualified": qualified},
         "grid": grid,
         "ratio_min": min(ratios), "ratio_max": max(ratios),
-        "all_ratios_above_one": bool(min(ratios) > 1.0),
+        "all_finite_ratios_above_one": bool(min(ratios) > 1.0),
+        "degenerate_cells_implied_gradient_zero": degenerate,
+        "degenerate_note": ("cells where the implied gradient is EXACTLY zero because the "
+                            "floor censors BOTH endpoint buckets, so the model implies no "
+                            "cross-sectional gradient at all and realized/implied is "
+                            "undefined rather than large"),
         "gates": gates,
         "gates_all_pass": all(g.get("pass") for g in gates.values()),
         "prediction": PREDICTION,
@@ -207,8 +216,9 @@ def main() -> None:
         "runtime_s": time.perf_counter() - t0,
     }
     RESULTS_JSON.write_text(json.dumps(out, indent=1))
-    print("\nwrote %s  gates_all_pass=%s  ratios %.3f..%.3f  prediction %s"
-          % (RESULTS_JSON, out["gates_all_pass"], out["ratio_min"], out["ratio_max"], held))
+    print("\nwrote %s  gates_all_pass=%s  finite ratios %.3f..%.3f  degenerate cells %d  prediction %s"
+          % (RESULTS_JSON, out["gates_all_pass"], out["ratio_min"], out["ratio_max"],
+             len(degenerate), held))
 
 
 if __name__ == "__main__":
