@@ -184,8 +184,23 @@ def main() -> None:
     leg_months = [(2018, m) for m in (7, 8, 9, 10, 11, 12)]
     legb = {}
 
-    # (b1) the repo's own ACTLISCOUUS, already baselined on 2017-19 in macro.py
-    act = macro["ACTLISCOUUS"]
+    # (b1) the repo's own ACTLISCOUUS measure, the one macro.py baselines on 2017-19.
+    # It must be fetched DIRECTLY rather than read off `macro`: fetch_data() returns a
+    # frame trimmed to START_DATE (2021-01 onward), so the 2018 leg months are absent
+    # from it even though macro.py itself computes its 2017-19 inventory baseline from
+    # the untrimmed series. Reading the trimmed frame returned a NaN 2018-leg mean on
+    # the first attempt; this is the same series, over its full history.
+    def fred_series(sid):
+        from fredapi import Fred
+        import os
+        key = os.environ.get("FRED_API_KEY")
+        if not key:
+            for line in open(Path(__file__).parent.parent / ".env"):
+                if line.startswith("FRED_API_KEY="):
+                    key = line.split("=", 1)[1].strip()
+        return Fred(api_key=key).get_series(sid, observation_start="2016-01-01")
+
+    act = retrying(lambda: fred_series("ACTLISCOUUS"), "ACTLISCOUUS")
     b1_leg = window_mean(act, leg_months)
     b1_qt = window_mean(act, QT_MONTHS)
     b1_ratio = b1_qt / b1_leg
@@ -195,30 +210,50 @@ def main() -> None:
     print(f"(b1) ACTLISCOUUS: 2018-leg {b1_leg:,.0f}  QT {b1_qt:,.0f}  "
           f"ratio {b1_ratio:.5f} -> floor {BASE_FLOOR_PCT*b1_ratio:.4f}%")
 
-    # (b2) existing-home SALES, which is what R2:M3's argument is actually about
-    try:
-        from fredapi import Fred
-        import os
-        key = os.environ.get("FRED_API_KEY")
-        if not key:
-            for line in open(Path(__file__).parent.parent / ".env"):
-                if line.startswith("FRED_API_KEY="):
-                    key = line.split("=", 1)[1].strip()
-        s = retrying(lambda: Fred(api_key=key).get_series("EXHOSLUSM545S"),
-                     "EXHOSLUSM545S")
-        b2_leg = window_mean(s, leg_months)
-        b2_qt = window_mean(s, QT_MONTHS)
-        b2_ratio = b2_qt / b2_leg
-        legb["b2_sales"] = {"series": "EXHOSLUSM545S", "leg_mean": b2_leg,
-                            "qt_mean": b2_qt, "ratio": b2_ratio,
-                            "floor_pct": BASE_FLOOR_PCT * b2_ratio,
-                            "computable": True}
-        print(f"(b2) EXHOSLUSM545S: 2018-leg {b2_leg:,.0f}  QT {b2_qt:,.0f}  "
-              f"ratio {b2_ratio:.5f} -> floor {BASE_FLOOR_PCT*b2_ratio:.4f}%")
-    except Exception as e:                                       # noqa: BLE001
-        legb["b2_sales"] = {"series": "EXHOSLUSM545S", "computable": False,
-                            "reason": f"{type(e).__name__}: {e}"}
-        print(f"(b2) NOT_COMPUTABLE: {e}")
+    # (b2) existing-home SALES, which is what R2:M3's argument is actually about.
+    # The spec names FRED EXHOSLUSM545S. That id DOES NOT EXIST on FRED ("Bad Request.
+    # The series does not exist."), so the spec's own identifier is wrong. Rather than
+    # silently drop the leg, the two nearest existing-home-sales/supply series are tried
+    # in turn; each is recorded with what it actually returned. A candidate counts only
+    # if it covers the 2018 leg months, since without them there is nothing to compare
+    # the QT window against.
+    b2_tried = []
+    b2_done = False
+    for sid in ("EXHOSLUSM545S", "EXHOSLUSM495S", "HOSSUPUSM673N"):
+        try:
+            s = fred_series(sid)
+            leg_n = int(sum(1 for (y, m) in leg_months
+                            if ((s.index.year == y) & (s.index.month == m)).any()))
+            rec = {"id": sid, "n_obs": int(len(s)),
+                   "first": str(s.index.min().date()), "last": str(s.index.max().date()),
+                   "leg_months_covered": leg_n}
+            b2_tried.append(rec)
+            if leg_n == 0:
+                print(f"(b2) {sid}: {len(s)} obs {rec['first']}..{rec['last']}, "
+                      f"NO 2018-leg coverage")
+                continue
+            b2_leg, b2_qt = window_mean(s, leg_months), window_mean(s, QT_MONTHS)
+            b2_ratio = b2_qt / b2_leg
+            legb["b2_sales"] = {"series": sid, "leg_mean": b2_leg, "qt_mean": b2_qt,
+                                "ratio": b2_ratio,
+                                "floor_pct": BASE_FLOOR_PCT * b2_ratio,
+                                "computable": True, "candidates_tried": b2_tried}
+            print(f"(b2) {sid}: 2018-leg {b2_leg:,.0f}  QT {b2_qt:,.0f}  "
+                  f"ratio {b2_ratio:.5f} -> floor {BASE_FLOOR_PCT*b2_ratio:.4f}%")
+            b2_done = True
+            break
+        except Exception as e:                                   # noqa: BLE001
+            b2_tried.append({"id": sid, "error": f"{type(e).__name__}: {e}"})
+            print(f"(b2) {sid}: {e}")
+    if not b2_done:
+        legb["b2_sales"] = {
+            "computable": False, "candidates_tried": b2_tried,
+            "reason": ("the spec's series id EXHOSLUSM545S does not exist on FRED, and "
+                       "the nearest existing-home-sales and months-supply series "
+                       "available on this account return only a short recent history "
+                       "with NO coverage of the 2018 leg months, so no 2018-vs-window "
+                       "sales comparison is constructible")}
+        print("(b2) NOT_COMPUTABLE:", legb["b2_sales"]["reason"])
 
     # primary specification is b1 (committed, needs no external input)
     floor_b = legb["b1_listings"]["floor_pct"]
