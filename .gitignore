@@ -1,3 +1,19 @@
+# Session working notes and tooling — kept on disk, not published.
+# Coordination artifacts, not the research record. Deliberately NOT ignored:
+# specs/ (the paper's App. A cites it by name), TECHNICAL.md,
+# SPEC_danish_redemption_validation_*.md, OOS_IDENTIFICATION.md.
+HANDOFF_*.md
+PLAN_*.md
+REVIEW_*.md
+REVIEW2_*.md
+REVIEW3_*.md
+REREVIEW_*.md
+revision_roadmap_*.md
+timing_sweep_log.md
+docs/carroll_round_qa_prep.md
+docs/superpowers/
+tools/purge_from_published_history.sh
+
 # Freddie Mac raw loan-level files (large; user-downloaded)
 hazard/data/raw/
 Historic Freddie/
