@@ -92,10 +92,10 @@ No condition may be left unclassified. Generated from the inventory and the comm
 | C-85 | MAJOR | 5 | REFERENCE | **SATISFIED** | 38db980 (10 entries, each source-verified; fonseca2026 checked distinct from fonseca2024) | Add the missing references |
 | C-86 | MAJOR | 5 | REFERENCE | **SATISFIED** | 38db980 (HUD 4000.1 + 38 USC 3714; FHFA limb re-characterized; volume limb negative, stated) | Give §VI.C's assumability claims a cited basis |
 | C-87 | MAJOR | 6 | STRUCTURE | **SATISFIED** | 59d81c1 | Split the oversized paragraphs at their own topic boundaries |
-| C-88 | MAJOR | 6 | STRUCTURE | **OPEN** | wave 6 | Bring §IV + §VII.A/§VII.C/§VII.D down to ~2pp |
-| C-89 | MAJOR | 6 | STRUCTURE | **OPEN** | wave 6 | Bring §V.B down to ~2,500 words |
-| C-90 | MAJOR | 6 | STRUCTURE | **OPEN** | wave 6 | Bring §V.E down to ~2,500 words |
-| C-91 | MAJOR | 6 | STRUCTURE | **OPEN** | wave 6 | Bring §VI.D down to ~3pp |
+| C-88 | MAJOR | 6 | STRUCTURE | **DECLINED** | Eugene 2026-07-30, "i don't think you need to cut" — the length premise is withdrawn, not the section | Bring §IV + §VII.A/§VII.C/§VII.D down to ~2pp |
+| C-89 | MAJOR | 6 | STRUCTURE | **DECLINED** | Eugene 2026-07-30, same instruction | Bring §V.B down to ~2,500 words |
+| C-90 | MAJOR | 6 | STRUCTURE | **DECLINED** | Eugene 2026-07-30, same instruction (this also releases C-96's sequencing note) | Bring §V.E down to ~2,500 words |
+| C-91 | MAJOR | 6 | STRUCTURE | **DECLINED** | Eugene 2026-07-30, same instruction | Bring §VI.D down to ~3pp |
 | C-92 | MINOR | 3 | RUN | **OPEN** | wave 3 | RUN or flag: the floor's flatness in loan age |
 | C-93 | MINOR | 4 | STRUCTURE | **SATISFIED** | 8255e0d (cell 1,627 -> 313 chars; verbatim move, 15 gate literals delta-0) | Move Table 8's oversized calibration cell into its tablenote |
 | C-94 | MINOR | 4 | STRUCTURE | **SATISFIED** | ee7c5fb (Branch A; E1 and E2 both HELD; basis effect 0.5yr = same order as the 0.6yr rule-only effect) | Give tab:wal a note-rate-basis row for the empirical path |
@@ -126,7 +126,7 @@ No condition may be left unclassified. Generated from the inventory and the comm
 | C-119 | MINOR | 5 | REFERENCE | **SATISFIED** | e96cb1d | Connect the mobility constraint to the inventory channel and its incid |
 | C-120 | MINOR | 5 | WORDING | **SATISFIED** | 7b13504 | Name distributional silence about Ginnie Mae borrowers as a limitation |
 | C-121 | MINOR | 6 | WORDING | **OPEN (PARTIAL)** | fbf7b33 de-nested the worst site (10 parens -> 1); ~30 remain, wave-6, entangled with C-130 | De-nest the sentences carrying four or more parentheticals |
-| C-122 | MINOR | 6 | STRUCTURE | **OPEN** | wave 6 | Fold §VI.C into §VI.B |
+| C-122 | MINOR | 6 | STRUCTURE | **DECLINED** | Eugene 2026-07-30 — its purpose is length consolidation, which the same instruction withdraws | Fold §VI.C into §VI.B |
 | C-123 | MINOR | 6 | WORDING | **DECLINED** | collides with C-04/C-10/C-33/C-34/C-35, all upheld and all adding abstract content; the two-paragraph structure is correct per anti-condition A-02. Venue-scoped, Eugene's | Abstract length and structure |
 | C-124 | MINOR | 6 | WORDING | **DECLINED** | the parenthetical it would move is ABSTRACT_POSTURE['interval_qualifier'], a Wave-1 landing for C-01; moving it would undo an upheld condition to satisfy a MINOR one | Move the inference-machinery detail out of the abstract into T1's note |
 | C-125 | MAJOR | CLOSE | CHECK | **SATISFIED** | c3f37a7 (abstract recounted with the gate's own function: 323 -> 341; files identical outside line 31) | CLOSE: re-count the abstract and confirm the two abstract files stay i |
@@ -142,9 +142,9 @@ No condition may be left unclassified. Generated from the inventory and the comm
 ## Counts
 
 - SATISFIED: **104**
-- OPEN: **17**
+- OPEN: **12**
 - DEFERRED-EUGENE: **7**
-- DECLINED: **3**
+- DECLINED: **8**
 - CLOSED-REFUTED: **1**
 - MOOT: **1**
 - TOTAL: **133**
@@ -206,3 +206,11 @@ No condition may be left unclassified. Generated from the inventory and the comm
   §4.9.1 no longer exists). The manuscript prints "about one basis point … economically
   negligible". This is Eugene's call because it is a posture question about a load-bearing
   import, not a repo defect. A second, minor finding: the `\S3.2.3` pin belongs on `\S3.3`.
+
+- **The five length conditions are DECLINED on Eugene's instruction, not abandoned.** Asked
+  directly on 2026-07-30 he said *"i don't think you need to cut"*. C-88--C-91 and C-122 all
+  exist only to reduce length, so the premise is withdrawn rather than the sections being
+  defended one by one. Two consequences worth recording: (i) C-96's landing carried a note that
+  it was sequenced with C-90, and that sequencing constraint is now released; (ii) the paper
+  stands at 152pp, up from 148 at the start of this session, and every added page is a condition
+  being satisfied — if the venue decision (C-130) later forces a length, these five come back.
