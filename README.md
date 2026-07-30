@@ -25,8 +25,26 @@ export FRED_API_KEY="your_key"
 # Get a free key: https://fred.stlouisfed.org/docs/api/api_key.html
 ```
 
-### 3. Set up Google Drive (for Freddie Mac & SOMA data)
-If using Freddie Mac loan-level or SOMA data from Google Drive:
+### 3. Obtain the Freddie Mac loan-level data (not redistributed here)
+
+The Freddie Mac Single-Family Loan-Level Dataset is **not shipped with this repository**.
+Freddie Mac's Additional Terms permit publishing derived products only where they cannot be
+used to derive or recreate any part of the dataset, so neither the raw files nor the derived
+`hazard/data/loan_sample.parquet` (loan-grain) and `hazard/data/cohort_month_panel.parquet`
+(smallest cells hold a single loan) are distributed. Fannie Mae inputs are code-only for the
+same reason.
+
+To reproduce:
+
+1. Register with Freddie Mac (free) and download the Single-Family Loan-Level Dataset:
+   <https://www.freddiemac.com/research/datasets/sf-loanlevel-dataset>
+2. Place the origination and performance files in `hazard/data/raw/`.
+3. The first pipeline run rebuilds both derived objects under fixed seeds
+   (`RNG_SEED`, `N_LOANS` in `hazard/config.py`); nothing else is required.
+
+### 3a. Optional: your own Google Drive mirror (for Freddie & SOMA caches)
+If you keep *your own* copies on Drive, the loader can pull them from **your** folder.
+No folder of ours is published, and no Freddie data is distributed by this repository:
 
 1. **Get a Google Drive API key:**
    - Go to [Google Cloud Console](https://console.cloud.google.com)
@@ -56,7 +74,7 @@ python3 hazard/extension_risk.py
 python3 hazard/extension_risk.py --mode literature
 ```
 
-**Note:** If Freddie Mac files are not found locally, they will be automatically downloaded from Google Drive on first use. Subsequent runs use the cached copies. To force a fresh download, run with the environment variable `FORCE_REFRESH=1` or manually clear the cache in `./data/cache/`.
+**Note:** If Freddie Mac files are not found locally, the loader looks in the Google Drive folder *you* configured in step 3a. There is no public mirror: if you have not obtained the dataset from Freddie Mac yourself (step 3), the build will not proceed. Subsequent runs use the cached copies. To force a fresh download, run with the environment variable `FORCE_REFRESH=1` or manually clear the cache in `./data/cache/`.
 
 ## Layout
 

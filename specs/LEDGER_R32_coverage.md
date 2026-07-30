@@ -136,7 +136,7 @@ No condition may be left unclassified. Generated from the inventory and the comm
 | C-129 | MINOR | EUGENE | STRUCTURE | **DEFERRED-EUGENE** | his call | EUGENE: anonymized master and an archived DOI in place of the GitHub U |
 | C-130 | MAJOR | EUGENE | META | **DEFERRED-EUGENE** | his call | EUGENE: length and venue scope |
 | C-131 | MINOR | EUGENE | META | **DEFERRED-EUGENE** | his call | EUGENE: the adverse-findings register as a standalone methods note |
-| C-132 | CRITICAL | EUGENE | META | **DEFERRED-EUGENE (basis now supplied)** | specs/RECORD_R32_citation_factcheck_2026-07-30.md finding 4: SFLLD terms verified verbatim (Nov-2025 version); loan_sample.parquet is loan-grain, 75k rows, and is ALREADY on the public origin/main. Judgment + any history rewrite remain his | EUGENE: the public Freddie loan-level parquet licensing question |
+| C-132 | CRITICAL | EUGENE | META | **PARTIALLY ADDRESSED — forward-looking limb DONE, history limb RESERVED** | 2 Freddie-derived files untracked + gitignored + paper/README restated to code-only (this commit). They REMAIN in origin/main history; un-publishing needs a history rewrite + force-push, which is Eugene's and which no agent may attempt |
 | C-133 | MINOR | EUGENE | META | **DEFERRED-EUGENE** | his call | EUGENE: the push |
 
 ## Counts
