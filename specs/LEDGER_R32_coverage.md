@@ -51,28 +51,28 @@ No condition may be left unclassified. Generated from the inventory and the comm
 | C-44 | MAJOR | 2 | WORDING | **SATISFIED** | 287e266 | Scope the "no outcome-holdout months exist anywhere, without exception |
 | C-45 | MAJOR | 2 | WORDING | **SATISFIED** | 287e266 | Name the fiscal incidence of the 1-P wedge |
 | C-46 | MAJOR | 2 | REFERENCE | **SATISFIED** | 287e266 | Add the missing ex-ante primary-rate offset to §VI.D's omission list |
-| C-47 | MAJOR | 2 | WORDING | **OPEN** | wave 2 | State that the Danish magnitude inherits every conditionality the marg |
+| C-47 | MAJOR | 2 | WORDING | **SATISFIED** | 70024c8 | State that the Danish magnitude inherits every conditionality the marg |
 | C-48 | MAJOR | 2 | STRUCTURE | **OPEN** | wave 2 | Report the Danish counterfactual in duration units at its own sites |
 | C-49 | MAJOR | 2 | WORDING | **OPEN** | wave 2 | T1's Danish cell must lead with the band |
-| C-50 | MAJOR | 2 | WORDING | **OPEN** | wave 2 | Promote the realized-implied Danish anchor and its four confounds out |
+| C-50 | MAJOR | 2 | WORDING | **SATISFIED** | 70024c8 | Promote the realized-implied Danish anchor and its four confounds out |
 | C-51 | MAJOR | 2 | WORDING | **OPEN** | wave 2 | State the Danish execution mechanics (open-market repurchase and deliv |
-| C-52 | MAJOR | 2 | WORDING | **OPEN** | wave 2 | State the objective a redemption cap serves, and open §VI.B with §III. |
-| C-53 | MAJOR | 2 | WORDING | **OPEN** | wave 2 | Make the substitution instrument the stated design implication |
+| C-52 | MAJOR | 2 | WORDING | **SATISFIED** | 70024c8 | State the objective a redemption cap serves, and open §VI.B with §III. |
+| C-53 | MAJOR | 2 | WORDING | **SATISFIED** | 70024c8 | Make the substitution instrument the stated design implication |
 | C-54 | MAJOR | 2 | STRUCTURE | **OPEN** | wave 2 | Restate §VI.B's result in $bn/month with a band |
-| C-55 | MAJOR | 2 | WORDING | **OPEN** | wave 2 | State the marginal's share of the duration extension where the fragili |
-| C-56 | MAJOR | 2 | WORDING | **OPEN** | wave 2 | Restrict the institutional-cost claim to cash-flow timing (or price th |
-| C-57 | MAJOR | 2 | WORDING | **OPEN** | wave 2 | Label the recurrence claim as outside what the design tests |
-| C-58 | MAJOR | 2 | STRUCTURE | **OPEN** | wave 2 | Ask the cross-country generalization question using Du et al.'s record |
-| C-59 | MAJOR | 2 | WORDING | **OPEN** | wave 2 | Make the assumability bound two-sided in one edit |
-| C-60 | MAJOR | 2 | WORDING | **OPEN** | wave 2 | Concede that the investor-side cost of the Danish transplant is unpric |
-| C-61 | MAJOR | 2 | REFERENCE | **OPEN** | wave 2 | Name the housing-supply/inventory channel as an unmodelled competing c |
+| C-55 | MAJOR | 2 | WORDING | **SATISFIED** | 70024c8 (body limb already satisfied by the 59d81c1 split; abstract limb held for the abstract batch) | State the marginal's share of the duration extension where the fragili |
+| C-56 | MAJOR | 2 | WORDING | **SATISFIED** | 70024c8 | Restrict the institutional-cost claim to cash-flow timing (or price th |
+| C-57 | MAJOR | 2 | WORDING | **SATISFIED** | 70024c8 | Label the recurrence claim as outside what the design tests |
+| C-58 | MAJOR | 2 | STRUCTURE | **SATISFIED** | 946b392 | Ask the cross-country generalization question using Du et al.'s record |
+| C-59 | MAJOR | 2 | WORDING | **SATISFIED** | 946b392 | Make the assumability bound two-sided in one edit |
+| C-60 | MAJOR | 2 | WORDING | **SATISFIED** | 946b392 | Concede that the investor-side cost of the Danish transplant is unpric |
+| C-61 | MAJOR | 2 | REFERENCE | **SATISFIED** | 946b392 | Name the housing-supply/inventory channel as an unmodelled competing c |
 | C-62 | MAJOR | 2 | WORDING | **SATISFIED** | 287e266 | Recast the open timing question as possibly ill-posed |
 | C-63 | MAJOR | 2 | WORDING | **SATISFIED** | 2ec6a8e | Name the object behind §VII.E's 3.9% origin |
 | C-64 | MAJOR | 2 | STRUCTURE | **SATISFIED** | 2ec6a8e | T25 must stop presenting two populations as one row, and must show the |
-| C-65 | MAJOR | 2 | WORDING | **OPEN** | wave 2 | Fallback: state the headline as conditional on the draw's composition |
+| C-65 | MAJOR | 2 | WORDING | **MOOT** | superseded by C-07: it is explicitly the fallback 'absent C-07', and C-07 ran and landed at 00bb203 | Fallback: state the headline as conditional on the draw's composition |
 | C-66 | MAJOR | 2 | WORDING | **OPEN** | wave 2 | Scope the "Two Structurally Distinct Estimators" framing |
 | C-67 | MAJOR | 2 | WORDING | **OPEN** | A-posture: draft only, never adversarially verified -> not applied | State the design's resolution once and stop leaning on one-decimal end |
-| C-68 | MAJOR | 2 | REFERENCE | **OPEN** | wave 2 | Recast the U.S. tax override as one reading, with the §108 exclusions |
+| C-68 | MAJOR | 2 | REFERENCE | **SATISFIED** | 946b392 | Recast the U.S. tax override as one reading, with the §108 exclusions |
 | C-69 | MAJOR | 2 | WORDING | **SATISFIED** | 8e94534 | Say that a pre-committed externally-anchored member lies outside the q |
 | C-70 | MAJOR | 3 | RUN | **SATISFIED** | 41bf991 + c3f37a7 (Task 11 leg a: floor 5.2156%, marginal +4.70, in band) | RUN: calendar-standardize the off-window floor read to the QT window's |
 | C-71 | MAJOR | 3 | RUN | **SATISFIED** | 41bf991 + c3f37a7 (Task 11 leg b1: floor 3.1533%, marginal +10.69; b2 NOT_COMPUTABLE, reason recorded) | RUN: measure the floor read's dependence on housing-activity level and |
@@ -107,15 +107,15 @@ No condition may be left unclassified. Generated from the inventory and the comm
 | C-100 | MINOR | 5 | WORDING | **SATISFIED** | 7b13504 | Name the percentile rung's grid-exclusion convention and its 26/1,000 |
 | C-101 | MINOR | 5 | WORDING | **SATISFIED** | 592f16d | Name the denominator of the width ratio |
 | C-102 | MINOR | 5 | WORDING | **OPEN** | wave 5 | Print beta_1(P_q) at {0.015, 0.03, 0.06, 0.12} in tab:params |
-| C-103 | MINOR | 5 | WORDING | **OPEN** | wave 5 | Concede that the cluster bootstrap is a ratio estimator with random de |
-| C-104 | MINOR | 5 | WORDING | **OPEN** | wave 5 | Drop the zero-exclusion clause from the "three things" list |
+| C-103 | MINOR | 5 | WORDING | **SATISFIED** | da6de61 | Concede that the cluster bootstrap is a ratio estimator with random de |
+| C-104 | MINOR | 5 | WORDING | **SATISFIED** | da6de61 | Drop the zero-exclusion clause from the "three things" list |
 | C-105 | MINOR | 5 | WORDING | **OPEN** | wave 5 | Print the unrounded CR1-BM and CR3-conventional pairs in the ladder no |
 | C-106 | MINOR | 5 | META | **OPEN** | wave 5 | Make the spec-before-run ordering checkable from the paper, or say it |
 | C-107 | MINOR | 5 | META | **OPEN** | wave 5 | Optional: own the consequence that the ABM headline is not commit-addr |
-| C-108 | MINOR | 5 | WORDING | **OPEN** | wave 5 | Repair the §III.B coupon-convention sentence |
+| C-108 | MINOR | 5 | WORDING | **SATISFIED** | da6de61 | Repair the §III.B coupon-convention sentence |
 | C-109 | MINOR | 5 | WORDING | **OPEN** | wave 5 | Label the comparator basis at every simulated-vs-empirical CPR compari |
-| C-110 | MINOR | 5 | WORDING | **OPEN** | wave 5 | State how burnout is initialized |
-| C-111 | MINOR | 5 | WORDING | **OPEN** | wave 5 | Take the default baseline's free external corroboration |
+| C-110 | MINOR | 5 | WORDING | **SATISFIED** | da6de61 | State how burnout is initialized |
+| C-111 | MINOR | 5 | WORDING | **SATISFIED** | da6de61 | Take the default baseline's free external corroboration |
 | C-112 | MINOR | 5 | WORDING | **SATISFIED** | 7b13504 | Derive the "$83 billion per CPR point" coefficient at first use |
 | C-113 | MINOR | 5 | WORDING | **OPEN** | wave 5 | Quote the six extension-years against the normal-turnover row as well |
 | C-114 | MINOR | 5 | CHECK | **OPEN** | wave 5 | Retire the superseded lag interpretation carried in a committed artifa |
@@ -141,11 +141,12 @@ No condition may be left unclassified. Generated from the inventory and the comm
 
 ## Counts
 
-- OPEN: **68**
-- SATISFIED: **56**
+- SATISFIED: **73**
+- OPEN: **50**
 - DEFERRED-EUGENE: **7**
 - CLOSED-REFUTED: **1**
 - DECLINED: **1**
+- MOOT: **1**
 - TOTAL: **133**
 
 ## CRITICALs (13)
