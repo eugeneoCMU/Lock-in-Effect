@@ -1,0 +1,610 @@
+{
+  "mode": "buyback_discount_rederived",
+  "run_tag": "buyback_discount_rederived",
+  "spec": {
+    "spec_file": "specs/SPEC_R32_c75_buyback_discount.md",
+    "method": "each month's retired face priced at its own prepayment-consistent PV: the book aged to that month on wal_table's single-pool tabulation, coupon at the 2.49% WAC, level-payment with SMM from that month's CPR_Danish, discounted at that month's market_rate_pct",
+    "basis_note": "E nets the Danish leg's total roll-off against the U.S. leg's scheduled path -- the manuscript's own netting convention, which buyback_credit_bracket.py computes the same way. Reproduced here, not repaired, so the re-derived D is the only thing that changes.",
+    "grain_note": "D_t is priced on the SOMA book's single-pool vintage tabulation while F_t comes from the microsimulated Freddie panel's roll-off; two populations, the seam inherited from the committed E.",
+    "scheduled_carries_no_discount": true,
+    "no_engine_runs": true,
+    "window_months": 42
+  },
+  "parity": {
+    "P0_sha_pins": {
+      "hazard/wal_table.py": "26308a9ff7de7ca86f5753ba63129758cdf2b76907d84e5a6f30a16bfce70b32",
+      "hazard/buyback_credit_bracket.py": "0cb900263d9d6a4f093e6aae1408b5cc55a52fee40771d008bf95a7127d2e7dc",
+      "hazard/data/microsim_results_us_intercept.parquet": "38041df75a57ff1e86f224e7085b5465e521f0b07b861ffcc9427139aa44b28a",
+      "hazard/data/danish_us_intercept_results.json": "b810a1dae636617f9417c6a343c55d67ec6c8659b7a3dfcb55e134b804e1aca7",
+      "hazard/data/buyback_credit_bracket_results.json": "dba71c544f9b116848731d12983258538e697813388f7632887e1eaa84c35881"
+    },
+    "P0a_wal_table_import_safe": true,
+    "P0b_artifacts_byte_identical_after_import": true,
+    "P1_schedule_wal_equals_cell_wal": {
+      "cells": "all (vintage x term x 5 CPR x 2 ages)",
+      "max_abs_diff": 0.0
+    },
+    "P1_v15_printed": {
+      "scheduled_only": {
+        "got": [
+          14.7,
+          12.6
+        ],
+        "want": [
+          14.7,
+          12.6
+        ],
+        "pass": true
+      },
+      "empirical": {
+        "got": [
+          9.4,
+          8.5
+        ],
+        "want": [
+          9.4,
+          8.5
+        ],
+        "pass": true
+      },
+      "abm": {
+        "got": [
+          6.0,
+          5.6
+        ],
+        "want": [
+          6.0,
+          5.6
+        ],
+        "pass": true
+      },
+      "path_a_specv3": {
+        "got": [
+          10.7,
+          9.5
+        ],
+        "want": [
+          10.7,
+          9.5
+        ],
+        "pass": true
+      },
+      "path_b": {
+        "got": [
+          9.7,
+          8.7
+        ],
+        "want": [
+          9.7,
+          8.7
+        ],
+        "pass": true
+      }
+    },
+    "P2_committed_constants": {
+      "gap_par": {
+        "got": 61.18833737010482,
+        "want": 61.18833737010482
+      },
+      "us_shared": {
+        "got": 748.9678825340305,
+        "want": 748.9678825340305
+      },
+      "dk_shared": {
+        "got": 687.7795451639257,
+        "want": 687.7795451639257
+      },
+      "mean_danish_cpr_pct": {
+        "got": 5.613626373336359,
+        "want": 5.613626373336359
+      }
+    },
+    "P2_E_b": 470.65325285410216,
+    "P3_chain_bit_identical": {
+      "D_0.32": {
+        "got": -89.42070354320788,
+        "committed": -89.42070354320788,
+        "exact": true
+      },
+      "D_0.34": {
+        "got": -98.83376860028991,
+        "committed": -98.83376860028991,
+        "exact": true
+      },
+      "D_0.36": {
+        "got": -108.24683365737195,
+        "committed": -108.24683365737195,
+        "exact": true
+      },
+      "D_0.38": {
+        "got": -117.65989871445402,
+        "committed": -117.65989871445402,
+        "exact": true
+      }
+    },
+    "P4_provenance_anchor": {
+      "state": {
+        "coupon": 0.03,
+        "market": 0.068,
+        "cpr": 0.0,
+        "term": 360,
+        "age": 0
+      },
+      "price": 0.6467061579814288,
+      "discount": 0.35329384201857117,
+      "committed_grid_span": [
+        0.32,
+        0.38
+      ]
+    },
+    "P5_mean_danish_cpr_pct": 5.613626373336359,
+    "P5_market_rate_pct": {
+      "min": 5.231111111111111,
+      "max": 7.5600000000000005,
+      "mean": 6.607295823885109
+    }
+  },
+  "committed_bracket": {
+    "D_GRID": [
+      0.32,
+      0.34,
+      0.36,
+      0.38
+    ],
+    "gap_cash_range_b": [
+      -117.65989871445402,
+      -89.42070354320788
+    ],
+    "code": "REVERSES",
+    "provenance": "asserted, never derived: buyback_credit_bracket.py:107 hard-codes the grid and calls it 'the manuscript's committed proxy range'"
+  },
+  "rederived": {
+    "gap_face_b": 61.18833737010482,
+    "gap_face_note": "identity, not a computation; this run cannot and does not move it",
+    "early_face_E_b": 470.65325285410216,
+    "haircut_b": 112.20948771647404,
+    "face_weighted_mean_discount": 0.2384122218130252,
+    "gap_cash_b": -51.021150346369225,
+    "verdict_code": "REVERSES",
+    "D_crit": 0.13000725480818595,
+    "D_crit_note": "gap_par / E; the verdict is REVERSES only above it. Stated in the spec before the run so E4 is falsifiable rather than retrofitted.",
+    "monthly_D_min": 0.18391516764246985,
+    "monthly_D_max": 0.28095670536995776,
+    "months_at_or_above_committed_floor": 0
+  },
+  "expectations": {
+    "E1_monthly_face_positive_and_telescopes": true,
+    "E2_pv_monotone": true,
+    "E3_every_month_below_committed_grid_floor": true,
+    "E4_band": [
+      0.13,
+      0.32
+    ],
+    "E4_dbar": 0.2384122218130252,
+    "E4_pass": true,
+    "E5_reverses_and_smaller": true
+  },
+  "months": [
+    {
+      "period": "2022-06-30",
+      "market_rate_pct": 5.462,
+      "cpr_danish_pct": 4.833190971574643,
+      "book_price": 0.8018083796790684,
+      "discount_D": 0.19819162032093163,
+      "early_face_b": 10.956670596866523,
+      "haircut_b": 2.171520298915685,
+      "below_committed_grid_floor": true
+    },
+    {
+      "period": "2022-07-31",
+      "market_rate_pct": 5.4625,
+      "cpr_danish_pct": 4.868268757090996,
+      "book_price": 0.8025064761516351,
+      "discount_D": 0.19749352384836494,
+      "early_face_b": 11.068992862929175,
+      "haircut_b": 2.186054405952284,
+      "below_committed_grid_floor": true
+    },
+    {
+      "period": "2022-08-31",
+      "market_rate_pct": 5.231111111111111,
+      "cpr_danish_pct": 4.90596687075122,
+      "book_price": 0.8160848323575302,
+      "discount_D": 0.18391516764246985,
+      "early_face_b": 11.121837605315203,
+      "haircut_b": 2.045474627673871,
+      "below_committed_grid_floor": true
+    },
+    {
+      "period": "2022-09-30",
+      "market_rate_pct": 6.046666666666667,
+      "cpr_danish_pct": 4.946326061438517,
+      "book_price": 0.7732976668068472,
+      "discount_D": 0.2267023331931528,
+      "early_face_b": 11.16765134733448,
+      "haircut_b": 2.5317326167283833,
+      "below_committed_grid_floor": true
+    },
+    {
+      "period": "2022-10-31",
+      "market_rate_pct": 6.8525,
+      "cpr_danish_pct": 4.990411262440545,
+      "book_price": 0.7352226146701816,
+      "discount_D": 0.2647773853298184,
+      "early_face_b": 11.185607574302292,
+      "haircut_b": 2.9616959268491736,
+      "below_committed_grid_floor": true
+    },
+    {
+      "period": "2022-11-30",
+      "market_rate_pct": 6.8637500000000005,
+      "cpr_danish_pct": 5.037816648171087,
+      "book_price": 0.7357882375066043,
+      "discount_D": 0.26421176249339573,
+      "early_face_b": 11.20900572539471,
+      "haircut_b": 2.9615511585051,
+      "below_committed_grid_floor": true
+    },
+    {
+      "period": "2022-12-31",
+      "market_rate_pct": 6.357777777777778,
+      "cpr_danish_pct": 5.08689829907649,
+      "book_price": 0.7607773796320852,
+      "discount_D": 0.23922262036791475,
+      "early_face_b": 11.24479426556914,
+      "haircut_b": 2.690009149707551,
+      "below_committed_grid_floor": true
+    },
+    {
+      "period": "2023-01-31",
+      "market_rate_pct": 6.308750000000001,
+      "cpr_danish_pct": 5.139039257608201,
+      "book_price": 0.7642237087899713,
+      "discount_D": 0.23577629121002874,
+      "early_face_b": 11.288855164289052,
+      "haircut_b": 2.6616444026432524,
+      "below_committed_grid_floor": true
+    },
+    {
+      "period": "2023-02-28",
+      "market_rate_pct": 6.21125,
+      "cpr_danish_pct": 5.193715078076871,
+      "book_price": 0.7700659701346748,
+      "discount_D": 0.22993402986532518,
+      "early_face_b": 11.38996001014313,
+      "haircut_b": 2.6189394051371098,
+      "below_committed_grid_floor": true
+    },
+    {
+      "period": "2023-03-31",
+      "market_rate_pct": 6.561999999999999,
+      "cpr_danish_pct": 5.249481950866956,
+      "book_price": 0.7543344183785591,
+      "discount_D": 0.24566558162144092,
+      "early_face_b": 11.39955872373104,
+      "haircut_b": 2.8004792240931566,
+      "below_committed_grid_floor": true
+    },
+    {
+      "period": "2023-04-30",
+      "market_rate_pct": 6.328749999999999,
+      "cpr_danish_pct": 5.307528474095557,
+      "book_price": 0.7665584712683777,
+      "discount_D": 0.23344152873162227,
+      "early_face_b": 11.443049795682454,
+      "haircut_b": 2.67128303765619,
+      "below_committed_grid_floor": true
+    },
+    {
+      "period": "2023-05-31",
+      "market_rate_pct": 6.4255555555555555,
+      "cpr_danish_pct": 5.367353408946964,
+      "book_price": 0.7630854048583476,
+      "discount_D": 0.23691459514165236,
+      "early_face_b": 11.493778617798341,
+      "haircut_b": 2.7230439078834747,
+      "below_committed_grid_floor": true
+    },
+    {
+      "period": "2023-06-30",
+      "market_rate_pct": 6.714444444444443,
+      "cpr_danish_pct": 5.427417442104836,
+      "book_price": 0.7508179457495557,
+      "discount_D": 0.24918205425044426,
+      "early_face_b": 11.531646127881698,
+      "haircut_b": 2.8734792710347428,
+      "below_committed_grid_floor": true
+    },
+    {
+      "period": "2023-07-31",
+      "market_rate_pct": 6.827500000000001,
+      "cpr_danish_pct": 5.487517272189257,
+      "book_price": 0.7468905795783688,
+      "discount_D": 0.2531094204216312,
+      "early_face_b": 11.565362538410678,
+      "haircut_b": 2.927302209063172,
+      "below_committed_grid_floor": true
+    },
+    {
+      "period": "2023-08-31",
+      "market_rate_pct": 7.034999999999999,
+      "cpr_danish_pct": 5.5477179950299025,
+      "book_price": 0.7388932968496053,
+      "discount_D": 0.26110670315039475,
+      "early_face_b": 11.606003843696016,
+      "haircut_b": 3.030405400378276,
+      "below_committed_grid_floor": true
+    },
+    {
+      "period": "2023-09-30",
+      "market_rate_pct": 7.18375,
+      "cpr_danish_pct": 5.60685185995468,
+      "book_price": 0.7336556692251733,
+      "discount_D": 0.26634433077482667,
+      "early_face_b": 11.640406257624392,
+      "haircut_b": 3.1003562146340733,
+      "below_committed_grid_floor": true
+    },
+    {
+      "period": "2023-10-31",
+      "market_rate_pct": 7.5600000000000005,
+      "cpr_danish_pct": 5.664332036328848,
+      "book_price": 0.7190432946300422,
+      "discount_D": 0.28095670536995776,
+      "early_face_b": 11.680526892259767,
+      "haircut_b": 3.2817223526344956,
+      "below_committed_grid_floor": true
+    },
+    {
+      "period": "2023-11-30",
+      "market_rate_pct": 7.5055555555555555,
+      "cpr_danish_pct": 5.719299267823653,
+      "book_price": 0.7224913814101735,
+      "discount_D": 0.27750861858982645,
+      "early_face_b": 11.718397112883107,
+      "haircut_b": 3.2519561948832014,
+      "below_committed_grid_floor": true
+    },
+    {
+      "period": "2023-12-31",
+      "market_rate_pct": 6.89125,
+      "cpr_danish_pct": 5.769640729673381,
+      "book_price": 0.7497559315947341,
+      "discount_D": 0.2502440684052659,
+      "early_face_b": 11.74828685698055,
+      "haircut_b": 2.9399390998829276,
+      "below_committed_grid_floor": true
+    },
+    {
+      "period": "2024-01-31",
+      "market_rate_pct": 6.638888888888888,
+      "cpr_danish_pct": 5.815363118312217,
+      "book_price": 0.7619439418684121,
+      "discount_D": 0.23805605813158792,
+      "early_face_b": 11.770721404886206,
+      "haircut_b": 2.802091539012317,
+      "below_committed_grid_floor": true
+    },
+    {
+      "period": "2024-02-29",
+      "market_rate_pct": 6.757777777777778,
+      "cpr_danish_pct": 5.8563967533757495,
+      "book_price": 0.7575234619161958,
+      "discount_D": 0.2424765380838042,
+      "early_face_b": 11.785825971253995,
+      "haircut_b": 2.857786279967858,
+      "below_committed_grid_floor": true
+    },
+    {
+      "period": "2024-03-31",
+      "market_rate_pct": 6.83875,
+      "cpr_danish_pct": 5.890713071200657,
+      "book_price": 0.7547643850549063,
+      "discount_D": 0.24523561494509372,
+      "early_face_b": 11.782203092433804,
+      "haircut_b": 2.8894158207809886,
+      "below_committed_grid_floor": true
+    },
+    {
+      "period": "2024-04-30",
+      "market_rate_pct": 6.944999999999999,
+      "cpr_danish_pct": 5.918850329318658,
+      "book_price": 0.7508734044985262,
+      "discount_D": 0.24912659550147376,
+      "early_face_b": 11.820334531269232,
+      "haircut_b": 2.9447596994636123,
+      "below_committed_grid_floor": true
+    },
+    {
+      "period": "2024-05-31",
+      "market_rate_pct": 7.074,
+      "cpr_danish_pct": 5.940073598041086,
+      "book_price": 0.7459884577222172,
+      "discount_D": 0.2540115422777828,
+      "early_face_b": 11.71329749223424,
+      "haircut_b": 2.9753127611609047,
+      "below_committed_grid_floor": true
+    },
+    {
+      "period": "2024-06-30",
+      "market_rate_pct": 6.938750000000001,
+      "cpr_danish_pct": 5.953726697738425,
+      "book_price": 0.7523389672533468,
+      "discount_D": 0.2476610327466532,
+      "early_face_b": 11.647380932332545,
+      "haircut_b": 2.8846023904951545,
+      "below_committed_grid_floor": true
+    },
+    {
+      "period": "2024-07-31",
+      "market_rate_pct": 6.847500000000001,
+      "cpr_danish_pct": 5.959232829769786,
+      "book_price": 0.7567306242342422,
+      "discount_D": 0.2432693757657578,
+      "early_face_b": 11.569328026036667,
+      "haircut_b": 2.814463206923227,
+      "below_committed_grid_floor": true
+    },
+    {
+      "period": "2024-08-31",
+      "market_rate_pct": 6.516666666666667,
+      "cpr_danish_pct": 5.957470797062602,
+      "book_price": 0.7717031214516293,
+      "discount_D": 0.22829687854837066,
+      "early_face_b": 11.474113555165337,
+      "haircut_b": 2.6195043087537946,
+      "below_committed_grid_floor": true
+    },
+    {
+      "period": "2024-09-30",
+      "market_rate_pct": 6.21375,
+      "cpr_danish_pct": 5.948993158486358,
+      "book_price": 0.7857900417634632,
+      "discount_D": 0.21420995823653677,
+      "early_face_b": 11.369401333012348,
+      "haircut_b": 2.4354389847190006,
+      "below_committed_grid_floor": true
+    },
+    {
+      "period": "2024-10-31",
+      "market_rate_pct": 6.364,
+      "cpr_danish_pct": 5.9402572093753605,
+      "book_price": 0.7791135422537416,
+      "discount_D": 0.22088645774625837,
+      "early_face_b": 11.272437997464856,
+      "haircut_b": 2.489928899424338,
+      "below_committed_grid_floor": true
+    },
+    {
+      "period": "2024-11-30",
+      "market_rate_pct": 6.7871428571428565,
+      "cpr_danish_pct": 5.931404797765436,
+      "book_price": 0.7604768561823023,
+      "discount_D": 0.23952314381769768,
+      "early_face_b": 11.171198667039112,
+      "haircut_b": 2.6757606249412818,
+      "below_committed_grid_floor": true
+    },
+    {
+      "period": "2024-12-31",
+      "market_rate_pct": 6.709999999999999,
+      "cpr_danish_pct": 5.9225579902935825,
+      "book_price": 0.7641147799335486,
+      "discount_D": 0.2358852200664514,
+      "early_face_b": 11.137070015194965,
+      "haircut_b": 2.6270702114297415,
+      "below_committed_grid_floor": true
+    },
+    {
+      "period": "2025-01-31",
+      "market_rate_pct": 6.948,
+      "cpr_danish_pct": 5.913785831792719,
+      "book_price": 0.7540487446450277,
+      "discount_D": 0.2459512553549723,
+      "early_face_b": 10.982217222462587,
+      "haircut_b": 2.7010901124456708,
+      "below_committed_grid_floor": true
+    },
+    {
+      "period": "2025-02-28",
+      "market_rate_pct": 6.86625,
+      "cpr_danish_pct": 5.905103213298305,
+      "book_price": 0.7578373601127208,
+      "discount_D": 0.24216263988727915,
+      "early_face_b": 10.895540073718433,
+      "haircut_b": 2.6384927472492956,
+      "below_committed_grid_floor": true
+    },
+    {
+      "period": "2025-03-31",
+      "market_rate_pct": 6.66375,
+      "cpr_danish_pct": 5.896510586448592,
+      "book_price": 0.7669431056952593,
+      "discount_D": 0.23305689430474075,
+      "early_face_b": 10.808937524933139,
+      "haircut_b": 2.5190974102948887,
+      "below_committed_grid_floor": true
+    },
+    {
+      "period": "2025-04-30",
+      "market_rate_pct": 6.716666666666667,
+      "cpr_danish_pct": 5.88800546777944,
+      "book_price": 0.7648897701826115,
+      "discount_D": 0.2351102298173885,
+      "early_face_b": 10.714104702354422,
+      "haircut_b": 2.518995618858111,
+      "below_committed_grid_floor": true
+    },
+    {
+      "period": "2025-05-31",
+      "market_rate_pct": 6.807777777777776,
+      "cpr_danish_pct": 5.879587122418702,
+      "book_price": 0.7611972283038375,
+      "discount_D": 0.23880277169616249,
+      "early_face_b": 10.616071308045722,
+      "haircut_b": 2.5351472528854235,
+      "below_committed_grid_floor": true
+    },
+    {
+      "period": "2025-06-30",
+      "market_rate_pct": 6.831428571428572,
+      "cpr_danish_pct": 5.871253261657987,
+      "book_price": 0.7604568792810787,
+      "discount_D": 0.23954312071892125,
+      "early_face_b": 10.514717408000347,
+      "haircut_b": 2.51872822138997,
+      "below_committed_grid_floor": true
+    },
+    {
+      "period": "2025-07-31",
+      "market_rate_pct": 6.724999999999999,
+      "cpr_danish_pct": 5.8630127807652315,
+      "book_price": 0.7653653896732389,
+      "discount_D": 0.23463461032676114,
+      "early_face_b": 10.41175146204905,
+      "haircut_b": 2.4429572471169645,
+      "below_committed_grid_floor": true
+    },
+    {
+      "period": "2025-08-31",
+      "market_rate_pct": 6.6075,
+      "cpr_danish_pct": 5.854847147275677,
+      "book_price": 0.7708092430877502,
+      "discount_D": 0.22919075691224977,
+      "early_face_b": 10.309774504258435,
+      "haircut_b": 2.3629050222256054,
+      "below_committed_grid_floor": true
+    },
+    {
+      "period": "2025-09-30",
+      "market_rate_pct": 6.385000000000001,
+      "cpr_danish_pct": 5.846763167083018,
+      "book_price": 0.7810247179040299,
+      "discount_D": 0.21897528209597006,
+      "early_face_b": 10.277680798544377,
+      "haircut_b": 2.2505580521535897,
+      "below_committed_grid_floor": true
+    },
+    {
+      "period": "2025-10-31",
+      "market_rate_pct": 6.267,
+      "cpr_danish_pct": 5.83875816363154,
+      "book_price": 0.7866604941335738,
+      "discount_D": 0.21333950586642625,
+      "early_face_b": 10.121403538163168,
+      "haircut_b": 2.1592952295064287,
+      "below_committed_grid_floor": true
+    },
+    {
+      "period": "2025-11-30",
+      "market_rate_pct": 6.225714285714285,
+      "cpr_danish_pct": 5.830866943993337,
+      "book_price": 0.7888278255790121,
+      "discount_D": 0.2111721744209879,
+      "early_face_b": 10.027349374157488,
+      "haircut_b": 2.1174971710197688,
+      "below_committed_grid_floor": true
+    }
+  ],
+  "runtime_s": 0.109
+}
