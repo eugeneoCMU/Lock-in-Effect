@@ -1,0 +1,132 @@
+{
+  "mode": "danish_interest_only_share",
+  "run_tag": "danish_interest_only_share",
+  "spec": {
+    "spec_file": "specs/SPEC_R32_c79_danish_interest_only_share.md",
+    "chain": "gap(sigma) = gap_par - sigma * sum_t sched_t  (first order)",
+    "danish_leg_only": "the IO share is a feature of the DANISH product mix and applies to the Danish leg only; applying it to both legs would EXACTLY neutralize it, the same defect C-74 identifies in the Ginnie overlay. The U.S. leg's effective zero IO share stays a disclosed held-fixed feature.",
+    "basis_note": "sum weighted_sched_b is the U.S. leg's scheduled path -- the manuscript's own proxy for the scheduled component, the same convention buyback_credit_bracket.py uses to form E.",
+    "direction_is_the_manuscripts_own": ".tex:627 already states the IO share moves the shortfall 'in the opposite direction from the payoff rule', so this run gets NO CREDIT for the sign. What is new is the magnitude and the crossing.",
+    "accounting_layer_only": "the hazard is untouched; only the amortization path moves. A full re-simulation with a genuinely IO-amortizing book is out of scope (single-tenant engine, no Danish loan panel exists in this design).",
+    "no_engine_runs": true,
+    "window_months": 42
+  },
+  "parity": {
+    "P0_sha_pins": {
+      "hazard/data/microsim_results_us_intercept.parquet": "38041df75a57ff1e86f224e7085b5465e521f0b07b861ffcc9427139aa44b28a",
+      "hazard/data/danish_us_intercept_results.json": "b810a1dae636617f9417c6a343c55d67ec6c8659b7a3dfcb55e134b804e1aca7",
+      "hazard/data/buyback_credit_bracket_results.json": "dba71c544f9b116848731d12983258538e697813388f7632887e1eaa84c35881"
+    },
+    "P0b_artifacts_byte_identical": true,
+    "P1_gap_par": 61.18833737010482,
+    "P1_sched_total_b": 198.66568741255054,
+    "P1_buyback_identity_E_b": 470.65325285410216,
+    "P3_mean_danish_cpr_pct": 5.613626373336359,
+    "P3_sched_positive_every_month": true,
+    "P4_second_order_reported_separately": true
+  },
+  "source": {
+    "sourced": true,
+    "url": "https://www.nationalbanken.dk/en/news-and-knowledge/publications-and-speeches/archive-publications/2020/expiring-interest-only-mortgages-have-implications-for-household-expenditure",
+    "publication_date": "2020-02-04",
+    "publisher": "Danmarks Nationalbank",
+    "title": "Expiring interest-only mortgages have implications for household expenditure",
+    "verbatim": "currently making up 45 per cent of outstanding mortgage volumes",
+    "io_share": 0.45,
+    "limits": [
+      "PRE-WINDOW: 2020-02 against a 2022-06..2025-11 evaluation window",
+      "DEFERRED AMORTISATION (afdragsfrihed), conventionally capped at ten years -- the share currently IN an interest-only period, NOT a permanent product feature",
+      "population is whole-market outstanding mortgage volumes, not the owner-occupied 30-year callable segment the transplant models"
+    ]
+  },
+  "break_even": {
+    "first_order": 0.3079965049175336,
+    "second_order": 0.34272186903234003,
+    "note": "the first-order break-even needs NO external input and is the primary deliverable; the second-order one corrects it upward because deferring amortization leaves a higher surviving balance that prepays at the leg's own speed"
+  },
+  "at_sourced_share": {
+    "io_share": 0.45,
+    "gap_first_order_b": -28.211221965542933,
+    "second_order_offset_b": 9.05816794941868,
+    "gap_second_order_b": -19.15305401612425,
+    "reverses": true
+  },
+  "expectations": {
+    "E1_anchor_exact": true,
+    "E2_monotone_both_orders": true,
+    "E3_band": [
+      0.3079965049175336,
+      0.4
+    ],
+    "E3_sigma_star_second_order": 0.34272186903234003,
+    "E3_pass": true,
+    "E4_sourced_share_reverses_under_face_accounting": true
+  },
+  "cells": {
+    "sigma_0.000000": {
+      "io_share": 0.0,
+      "gap_first_order_b": 61.18833737010482,
+      "second_order_offset_b": 0.0,
+      "gap_second_order_b": 61.18833737010482,
+      "reverses_first_order": false,
+      "reverses_second_order": false
+    },
+    "sigma_0.100000": {
+      "io_share": 0.1,
+      "gap_first_order_b": 41.32176862884977,
+      "second_order_offset_b": 2.0129262109819286,
+      "gap_second_order_b": 43.3346948398317,
+      "reverses_first_order": false,
+      "reverses_second_order": false
+    },
+    "sigma_0.200000": {
+      "io_share": 0.2,
+      "gap_first_order_b": 21.45519988759471,
+      "second_order_offset_b": 4.025852421963857,
+      "gap_second_order_b": 25.481052309558567,
+      "reverses_first_order": false,
+      "reverses_second_order": false
+    },
+    "sigma_0.300000": {
+      "io_share": 0.3,
+      "gap_first_order_b": 1.588631146339658,
+      "second_order_offset_b": 6.038778632945785,
+      "gap_second_order_b": 7.627409779285443,
+      "reverses_first_order": false,
+      "reverses_second_order": false
+    },
+    "sigma_0.307997": {
+      "io_share": 0.307996504918,
+      "gap_first_order_b": -9.265477274311706e-11,
+      "second_order_offset_b": 6.199742376402664,
+      "gap_second_order_b": 6.1997423763100095,
+      "reverses_first_order": true,
+      "reverses_second_order": false
+    },
+    "sigma_0.342722": {
+      "io_share": 0.342721869032,
+      "gap_first_order_b": -6.898738332451586,
+      "second_order_offset_b": 6.898738332512286,
+      "gap_second_order_b": 6.069988955914596e-11,
+      "reverses_first_order": true,
+      "reverses_second_order": false
+    },
+    "sigma_0.450000": {
+      "io_share": 0.45,
+      "gap_first_order_b": -28.211221965542933,
+      "second_order_offset_b": 9.05816794941868,
+      "gap_second_order_b": -19.15305401612425,
+      "reverses_first_order": true,
+      "reverses_second_order": true
+    },
+    "sigma_0.500000": {
+      "io_share": 0.5,
+      "gap_first_order_b": -38.14450633617045,
+      "second_order_offset_b": 10.064631054909643,
+      "gap_second_order_b": -28.079875281260808,
+      "reverses_first_order": true,
+      "reverses_second_order": true
+    }
+  },
+  "runtime_s": 1.049
+}
