@@ -77,7 +77,7 @@ No condition may be left unclassified. Generated from the inventory and the comm
 | C-70 | MAJOR | 3 | RUN | **SATISFIED** | 41bf991 + c3f37a7 (Task 11 leg a: floor 5.2156%, marginal +4.70, in band) | RUN: calendar-standardize the off-window floor read to the QT window's |
 | C-71 | MAJOR | 3 | RUN | **SATISFIED** | 41bf991 + c3f37a7 (Task 11 leg b1: floor 3.1533%, marginal +10.69; b2 NOT_COMPUTABLE, reason recorded) | RUN: measure the floor read's dependence on housing-activity level and |
 | C-72 | MAJOR | 3 | RUN | **OPEN** | wave 3 | RUN: add a month-clustered rung and a two-way (stratum x month) rung t |
-| C-73 | MAJOR | 3 | RUN | **OPEN** | wave 3 | RUN (analytic): recompute the implied cross-sectional gradient at the |
+| C-73 | MAJOR | 3 | RUN | **SATISFIED** | 2ae04e3 | RUN (analytic): recompute the implied cross-sectional gradient at the |
 | C-74 | MAJOR | 3 | RUN | **OPEN** | wave 3 | RUN: score the Ginnie leg with the elasticity attenuated by the measur |
 | C-75 | MAJOR | 3 | RUN | **OPEN** | wave 3 | RUN: re-derive the Danish buyback discount D from the leg's own prepay |
 | C-76 | MAJOR | 3 | RUN | **OPEN** | wave 3 | RUN: express the marginal in transaction counts and set it against rea |
@@ -141,8 +141,8 @@ No condition may be left unclassified. Generated from the inventory and the comm
 
 ## Counts
 
-- SATISFIED: **76**
-- OPEN: **47**
+- SATISFIED: **77**
+- OPEN: **46**
 - DEFERRED-EUGENE: **7**
 - CLOSED-REFUTED: **1**
 - DECLINED: **1**
