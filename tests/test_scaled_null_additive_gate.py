@@ -436,5 +436,11 @@ def test_tag_counting_is_prefix_safe():
     keeps a max-tag count from silently absorbing the additive sites. No gate
     counts either tag today, but the next one to try will get this wrong."""
     assert MAX_TAG not in ADD_TAG
-    assert TEXT.count(ADD_TAG) == 3 and VARIANT.count(ADD_TAG) == 3
+    # Two sites, not three: the tab:assembly row's own run credit was dropped
+    # when the rebuild showed the grown row pushed that page 4.48pt over an
+    # overfull \vbox. The credit was the most redundant part of the cell -- the
+    # run is cited in the §V.E prose and carries its own tab:runindex row -- and
+    # gate #118's run_tag conjunct is a whole-file presence check, so it still
+    # sees both. The counts stay pinned so the next pass notices if a site moves.
+    assert TEXT.count(ADD_TAG) == 2 and VARIANT.count(ADD_TAG) == 2
     assert TEXT.count(MAX_TAG) == 5 and VARIANT.count(MAX_TAG) == 5
