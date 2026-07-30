@@ -4286,3 +4286,50 @@ precision-fragile: 2dp vs full precision differ by 0.1yr at Nov-2025 — recorde
 per-row in `precision_agreement_2dp_vs_full`). Verdicts row: none (clean E1
 pass, no post-run judgment — the spec's default). Note: the spec numbered its
 gate #107; D1 (E7+CR1) took that slot in the same round, so this landed as #108.
+
+## 46. Round-32 / C-94: the note-rate-basis WAL row — run `wal_note_rate_basis`, LANDS (2026-07-30)
+
+**The defect.** `tab:estimators` already disclosed three bases for the empirical SOMA CPR —
+5.14% (ABM-basis back-out), 5.52% (hazard-basis), 5.79% (note-rate WAC) — while `tab:wal`'s
+empirical row used **5.14% alone**. The corrected amortization basis was therefore disclosed
+and never became the comparator, so every duration statement in the paper was read off the
+uncorrected convention. The note rate is what amortizes the loan, and the calculator
+amortizes at a 2.49% *pass-through* WAC.
+
+**Spec before runner before run.** `specs/SPEC_R32_c94_wal_note_rate_basis.md` (dd769f8),
+then `tools/wal_note_rate_basis_run.py` (057b336), then the run. Three sha pins: the
+calculator `26308a9f…`, its frozen companion `1aeaf45b…`, and the basis artifact
+`coupon_convention_amortization_results.json` `70048945…`. The calculator is imported and
+never executed as a program (`main()` is its only writer); an AST check asserts its module
+body only binds names, and both read artifacts are re-hashed after the import and at exit.
+The nine committed rows are re-derived and asserted bit-identical before the new row is
+allowed to exist. The CPR is read **live** from the artifact and only asserted against the
+pinned digits, so the artifact stays the authority.
+
+**Pre-commitments and how they fell.** Derived by interpolation from committed printed rows
+only (local slope −0.64 yr per CPR point from `empirical` 5.14%→9.4 and `danish_us_intercept`
+5.61%→9.1): E1 June-2022 ∈ [8.8, 9.2] and Nov-2025 ∈ [7.9, 8.3], central 9.0/8.1; E2 basis
+effect ≈ 0.4yr in [0.2, 0.6], pre-committed as "the same order as" the 0.6-year Danish
+rule-only effect; E3 strict monotonicity, STOP-class.
+
+**Result — Branch A, both predictions HELD.** Note-rate basis (5.79%) **8.9 / 8.1** against
+the committed 5.14% row's 9.4 / 8.5; the hazard basis (5.52%) sits between at 9.1 / 8.3.
+E1 PASS at both dates. E2 **0.5 years** at the window's open (0.4 at its close) — inside
+[0.2, 0.6] and, as pre-committed, the same order as the 0.6-year rule-only effect, so C-94's
+stake claim is vindicated rather than merely asserted. E3 held (strictly shorter at both
+dates, and the three bases order monotonically in CPR).
+
+**A limitation committed to IN ADVANCE, in the spec, and landed.** The 6.0-year extension is
+**not** restated on this basis. The no-shock row's 22.81% is a 2021 FRED/SOMA back-out on the
+ABM basis with no committed note-rate counterpart, so differencing a note-rate WAL against it
+would mix conventions inside a single statistic — the exact defect C-94 exists to remove. The
+tablenote says so, and gate #110 asserts the disclaimer is present.
+
+**Landed.** Two labelled empirical rows in `tab:wal` (each basis named in the row itself), a
+new tablenote item stating which basis every row uses and that all other rows are simulated
+means carrying no back-out convention, a `tab:runindex` row, **GATE #110** and a **16-test
+battery** (504 → 520 tests). The gate writes no literal of its own: the printed pair, the
+committed comparator pair and the *stated difference* are all rebuilt from the artifacts, and
+a live cross-artifact tie binds the CPR to the coupon-convention run's own note-rate leg. The
+difference is bound from **both** sides, because a comparison is what drifts silently when one
+side moves.

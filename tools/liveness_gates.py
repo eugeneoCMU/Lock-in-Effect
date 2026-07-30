@@ -57,6 +57,9 @@ INTERP_RESULTS = ROOT / "abm" / "data" / "interp_spot_check_results.json"
 SMD_RESULTS = ROOT / "abm" / "data" / "smd_two_moment_results.json"
 WALTAB_RESULTS = ROOT / "hazard" / "data" / "wal_table_results.json"
 WALNT_RESULTS = ROOT / "hazard" / "data" / "wal_normal_turnover_results.json"
+WALNRB_RESULTS = ROOT / "hazard" / "data" / "wal_note_rate_basis_results.json"
+COUPONAMORT_RESULTS = (ROOT / "hazard" / "data"
+                       / "coupon_convention_amortization_results.json")
 CURTDEMO_RESULTS = ROOT / "hazard" / "data" / "curtailment_profile_demo_results.json"
 SPREADVAR_RESULTS = ROOT / "hazard" / "data" / "expectation_spread_variants_results.json"
 DANBOUND_RESULTS = ROOT / "hazard" / "data" / "danish_discount_bound.json"
@@ -896,6 +899,58 @@ def wal_normal_turnover_check(tex, wnt, oos):
                 "stale_sentence_gone":
                     "No row is printed at a normal-turnover speed." not in tex}
 
+
+
+def wal_note_rate_basis_check(tex, wnrb, amort):
+    """Gate #110's rule (R32, C-94), as a function so a battery can exercise it.
+
+    tab:wal used to print the empirical path on ONE basis (the 5.14% ABM-basis
+    back-out) while tab:estimators disclosed three, so the corrected amortization
+    basis was disclosed and never became the comparator. The note-rate row now
+    closes that, and this gate binds four things.
+
+    (i) The printed row is the artifact's, built here from the artifact rather
+    than written as a literal, so a rerun that moved the row cannot leave a stale
+    pair standing in the table. (ii) The BASIS EFFECT stated in the tablenote is
+    re-derived from the committed empirical row and the new one, because that
+    difference -- not either level -- is the quantity C-94 is about, and a
+    comparison is exactly what drifts silently when one side moves. (iii) A live
+    cross-artifact tie: the CPR this run used must still be the coupon-convention
+    run's own note-rate leg, so the two artifacts cannot drift apart unnoticed.
+    (iv) The parity and monotonicity flags the runner set.
+
+    The mixed-basis extension disclaimer is asserted present: it is the sentence
+    that stops a reader differencing the note-rate row against the ABM-basis
+    no-shock row, which would reintroduce the defect this row removes.
+    """
+    nr = wnrb["rows"]["empirical_note_rate_basis"]
+    emp = wnrb["comparators"]["empirical_abm_basis_committed"]
+    lit_row = (f"({nr['mean_cpr_pct']:.2f}\\%) & {nr['wal_june_2022']:.1f} & "
+               f"{nr['wal_nov_2025']:.1f}")
+    lit_emp = (f"({emp['mean_cpr_pct']:.2f}\\%) & {emp['wal_june_2022']:.1f} & "
+               f"{emp['wal_nov_2025']:.1f}")
+    d_june = round(emp["wal_june_2022"] - nr["wal_june_2022"], 1)
+    d_nov = round(emp["wal_nov_2025"] - nr["wal_nov_2025"], 1)
+    lit_effect = (f"shortens the empirical path by {d_june:.1f} years at the "
+                  f"window's open and {d_nov:.1f} at its close")
+    par, exp = wnrb["parity"], wnrb["expectations"]
+    live_cpr = amort["hazard_legs"]["delta_080"]["mean_cpr_pct"]
+    tie_ok = wnrb["spec"]["note_rate_cpr_full_precision_pct"] == live_cpr
+    disclaimer = ("no committed note-rate", "mix conventions inside one statistic")
+    disc_ok = all(s in tex for s in disclaimer)
+    ok = (bool(par["nine_rows_bit_identical"])
+          and bool(par["read_artifacts_untouched"])
+          and bool(par["printed_row_precision_insensitive"])
+          and bool(exp["E3_strictly_shorter_than_5p14_row"])
+          and tie_ok and disc_ok
+          and lit_row in tex and lit_emp in tex
+          and lit_effect in tex
+          and tex.count("\\texttt{wal\\_note\\_rate\\_basis}") >= 1)
+    return ok, {"lit_row": lit_row, "row_present": lit_row in tex,
+                "abm_row_present": lit_emp in tex,
+                "effect_present": lit_effect in tex, "lit_effect": lit_effect,
+                "cross_artifact_tie": tie_ok, "disclaimer_present": disc_ok,
+                "tag_citations": tex.count("\\texttt{wal\\_note\\_rate\\_basis}")}
 
 
 def beta1_sign_check(tex: str) -> tuple[bool, dict]:
@@ -4967,6 +5022,17 @@ def main() -> int:
           f"row_present={_wn['present']}, tag_citations={_wn['tag_citations']}, "
           f"anchor_pct={_wn['anchor_pct']}, "
           f"stale_sentence_gone={_wn['stale_sentence_gone']}")
+    _wnrb = json.loads(WALNRB_RESULTS.read_text())
+    _amort = json.loads(COUPONAMORT_RESULTS.read_text())
+    wnrb_ok, _wb = wal_note_rate_basis_check(tex, _wnrb, _amort)
+    failures += 0 if wnrb_ok else 1
+    print(f"[{'PASS' if wnrb_ok else 'FAIL'}] note-rate-basis WAL row (gate #110): "
+          f"row_present={_wb['row_present']}, "
+          f"abm_row_present={_wb['abm_row_present']}, "
+          f"basis_effect_present={_wb['effect_present']}, "
+          f"cross_artifact_tie={_wb['cross_artifact_tie']}, "
+          f"disclaimer={_wb['disclaimer_present']}, "
+          f"tag_citations={_wb['tag_citations']}")
     print(f"[{'PASS' if cl_ok else 'FAIL'}] convolved sampling line (gate #105): "
           f"{len(CONVOLVED_LINE_SPANS) - len(_cl['missing'])}/"
           f"{len(CONVOLVED_LINE_SPANS)} spans present, "

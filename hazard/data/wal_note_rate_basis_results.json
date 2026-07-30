@@ -1,0 +1,101 @@
+{
+  "mode": "wal_note_rate_basis",
+  "run_tag": "wal_note_rate_basis",
+  "spec": {
+    "spec_file": "specs/SPEC_R32_c94_wal_note_rate_basis.md",
+    "question": "the SOMA book's approximate WAL for the empirical path at the note-rate WAC, the corrected amortization basis",
+    "calculator": "hazard/wal_table.py (imported; main() never called)",
+    "calculator_sha256": "26308a9ff7de7ca86f5753ba63129758cdf2b76907d84e5a6f30a16bfce70b32",
+    "frozen_companion": "hazard/data/wal_table_results.json",
+    "frozen_companion_sha256": "1aeaf45b47e6622d02dcf55470ca740902beb45292454726c9d859a9cc2bf18a",
+    "basis_source": "hazard/data/coupon_convention_amortization_results.json:hazard_legs",
+    "basis_source_sha256": "700489452b691f8ad0235ccb6a3af2c52089fca19fe267faf36ece0184926174",
+    "note_rate_leg": "delta_080 (0.80pp g-fee+servicing wedge, that run's primary)",
+    "note_rate_cpr_full_precision_pct": 5.785664704297843,
+    "hazard_basis_cpr_full_precision_pct": 5.518089009047279,
+    "cpr_precision_convention": "2-decimal percent, as all nine committed scenarios",
+    "nov_2025_extra_age_months": 42,
+    "printed_row": "empirical_note_rate_basis"
+  },
+  "parity": {
+    "nine_rows_bit_identical": true,
+    "extension_years_vs_no_shock": 6.0,
+    "rule_only_wal_shortening_years": 0.6,
+    "read_artifacts_untouched": true,
+    "import_side_effect_free": true,
+    "printed_row_precision_insensitive": true
+  },
+  "expectations": {
+    "E1_june_band": [
+      8.8,
+      9.2
+    ],
+    "E1_june_value": 8.9,
+    "E1_june_pass": true,
+    "E1_nov_band": [
+      7.9,
+      8.3
+    ],
+    "E1_nov_value": 8.1,
+    "E1_nov_pass": true,
+    "E2_band": [
+      0.2,
+      0.6
+    ],
+    "E2_basis_effect_june_2022_years": 0.5,
+    "E2_basis_effect_nov_2025_years": 0.4,
+    "E2_pass": true,
+    "E2_same_order_as_rule_only_0p6": true,
+    "E3_strictly_shorter_than_5p14_row": true
+  },
+  "comparators": {
+    "empirical_abm_basis_committed": {
+      "mean_cpr_pct": 5.140000000000001,
+      "wal_june_2022": 9.4,
+      "wal_nov_2025": 8.5
+    },
+    "note_rate_minus_abm_basis_cpr_pp": 0.645665
+  },
+  "limitation": "The 6.0-year extension is NOT recomputed on this basis. The no-shock row's 22.81% is a 2021 FRED/SOMA back-out on the ABM basis and has no committed note-rate counterpart, so differencing a note-rate WAL against it would mix conventions inside one statistic -- the defect C-94 exists to remove. What this row licenses is the like-for-like basis sensitivity of the empirical row itself.",
+  "rows": {
+    "empirical_note_rate_basis": {
+      "cpr": 0.0579,
+      "mean_cpr_pct": 5.79,
+      "wal_june_2022": 8.9,
+      "wal_nov_2025": 8.1,
+      "raw_june_2022": 8.935916494105207,
+      "raw_nov_2025": 8.104731231985053
+    },
+    "empirical_hazard_basis": {
+      "cpr": 0.0552,
+      "mean_cpr_pct": 5.52,
+      "wal_june_2022": 9.1,
+      "wal_nov_2025": 8.3,
+      "raw_june_2022": 9.123159905040044,
+      "raw_nov_2025": 8.257586330571879
+    }
+  },
+  "full_precision_rows": {
+    "empirical_note_rate_basis": {
+      "cpr": 0.05785664704297843,
+      "mean_cpr_pct": 5.785664704297843,
+      "wal_june_2022": 8.9,
+      "wal_nov_2025": 8.1,
+      "raw_june_2022": 8.938876425961327,
+      "raw_nov_2025": 8.107151829724298
+    },
+    "empirical_hazard_basis": {
+      "cpr": 0.05518089009047279,
+      "mean_cpr_pct": 5.518089009047279,
+      "wal_june_2022": 9.1,
+      "wal_nov_2025": 8.3,
+      "raw_june_2022": 9.124506449441808,
+      "raw_nov_2025": 8.258683597030513
+    }
+  },
+  "precision_agreement_2dp_vs_full": {
+    "empirical_note_rate_basis": true,
+    "empirical_hazard_basis": true
+  },
+  "runtime_s": 0.011
+}
