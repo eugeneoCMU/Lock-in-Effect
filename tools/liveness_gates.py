@@ -1735,7 +1735,14 @@ def episode_age_bands_check(tex: str, a: dict, w: dict) -> tuple[bool, dict]:
             f"age-augmented interval that covers the model-implied "
             f"${impl:+.2f}$") in tex_nc,
         # two sites: the .tex:331 prose and the tab:runindex row
-        "run_tag": tex_nc.count("\\texttt{episode\\_gradient\\_age\\_bands}") >= 2,
+        # SCOPED, not counted. This was count(tag) >= 2, calibrated when the tag
+        # sat at exactly two sites; a third citation (the tab:assembly Status
+        # cell) made removing any ONE of them leave the threshold satisfied, so
+        # the removal test stopped biting. The prose/assembly citation form and
+        # the tab:runindex row are now checked separately -- runindex_row pins
+        # the row's own text -- so neither can be dropped behind the other and
+        # the rule survives a fourth citation.
+        "run_tag": "(run \\texttt{episode\\_gradient\\_age\\_bands})" in tex_nc,
     }
     missing += sorted(k for k, v in lits.items() if not v)
 
@@ -2134,7 +2141,12 @@ def ginnie_attenuated_check(tex, g, ov, gof):
         "window_months": f"the window's {p['P2_window_months']} months" in line,
         "forced_scale_literal": (f"rises above the committed ${scale_ins0:.3f}\\times$ "
                                  "at every positive response") in line,
-        "run_tag_indexed": tex_nc.count(tag) >= 2,
+        # SCOPED to the index row itself. In tab:runindex a row OPENS with the
+        # tag followed by " & "; in prose and in tab:assembly the tag appears as
+        # "(run <tag>)". So this binds the index entry regardless of how many
+        # times the run is cited elsewhere -- the count >= 2 it replaces went
+        # blind the moment a third citation landed.
+        "run_tag_indexed": (tag + " & ") in tex_nc,
     })
 
     # the printed differential and ratio must fall out of the window means the

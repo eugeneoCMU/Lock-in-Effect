@@ -209,17 +209,26 @@ def test_the_runindex_row_is_undeletable():
     assert "runindex_row" in info["missing"]
 
 
-def test_the_run_tag_is_cited_at_both_sites():
-    """Prose and tab:runindex. Dropping either citation reddens the gate.
+def test_the_run_tag_is_cited_at_all_three_sites():
+    """Prose, the tab:assembly Status cell, and tab:runindex.
 
-    Trace: removing the prose citation leaves band_width and age_point intact,
-    so run_tag is the only key that goes -- which is what makes the two-site
-    rule real rather than decorative.
+    THREE, not two: the assembly row was added after the first landing, when the
+    interval result was carried into tab:assembly's Status cell. File order is
+    prose (.tex:331) -> assembly -> runindex, and the prose citation and the
+    assembly citation are BYTE-IDENTICAL, so the mutation below must strip only
+    the FIRST occurrence -- an unbounded replace() would take both and stop
+    proving that the prose site alone carries run_tag.
+
+    Trace: removing just the prose citation leaves band_width and age_point
+    intact, so run_tag is the only key that goes.
     """
-    assert TEX.count(TAG) == 2
-    assert VARIANT.count(TAG) == 2
+    assert TEX.count(TAG) == 3
+    assert VARIANT.count(TAG) == 3
     prose_cite = f"(run {TAG})"
     assert prose_cite in TEX, "vacuous mutation: the prose citation is absent"
+    # strip EVERY "(run <tag>)" citation: run_tag is now the citation FORM, and
+    # the tab:runindex entry is bound separately by runindex_row, so removing
+    # one of two identical citations would no longer trip anything.
     ok, info = episode_age_bands_check(TEX.replace(prose_cite, ""), A, W)
     assert not ok
     assert info["missing"] == ["run_tag"]

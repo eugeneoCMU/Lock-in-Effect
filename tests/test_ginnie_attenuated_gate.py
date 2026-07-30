@@ -174,8 +174,11 @@ def test_the_run_tag_must_also_be_indexed():
     Removing the LAST occurrence leaves the bracket line intact (prose_lines 1,
     every span present) and trips run_tag_indexed alone. The assertion on
     missing is what makes this test bite the rule it names."""
-    assert TEX.count(TAG) == 2, "prose citation + tab:runindex row expected"
-    assert VARIANT.count(TAG) == 2
+    # THREE sites since the tab:assembly bracket row landed: prose (.tex:283),
+    # the assembly row, then tab:runindex LAST -- so rfind still targets the
+    # index row and the trace above still holds.
+    assert TEX.count(TAG) == 3, "prose + tab:assembly + tab:runindex expected"
+    assert VARIANT.count(TAG) == 3
     i = TEX.rfind(TAG)
     mutated = TEX[:i] + TEX[i + len(TAG):]
     ok, info = ginnie_attenuated_check(mutated, G, OV, GOF)
