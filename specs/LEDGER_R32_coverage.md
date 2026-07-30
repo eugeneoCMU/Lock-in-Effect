@@ -23,7 +23,7 @@ No condition may be left unclassified. Generated from the inventory and the comm
 | C-16 | CRITICAL | 1 | META | **SATISFIED** | 7189c8e | Carroll-Round preparation deliverables — SATISFIED |
 | C-17 | CRITICAL | 2 | WORDING | **SATISFIED** | d1bf578 | Settle the +5.6 posture: drop the point and print the range, or state |
 | C-18 | MAJOR | 2 | CHECK | **SATISFIED** | 09bfad2 | State the anchor-selection rule and show it against the five-read exte |
-| C-19 | MAJOR | 2 | WORDING | **OPEN** | A-posture: draft only, never adversarially verified -> not applied | Promote the measured composed +2.9 cell into T1 and the abstract, or d |
+| C-19 | MAJOR | 2 | WORDING | **SATISFIED** | b1d4b2d | Promote the measured composed +2.9 cell into T1 and the abstract, or d |
 | C-20 | MAJOR | 2 | WORDING | **SATISFIED** | 8e94534 | The ladder's stated selection rule selects a wider coverage-bearing ru |
 | C-21 | MAJOR | 2 | WORDING | **SATISFIED** | 8e94534 | The Rademacher–Webb near-identity is not evidence of robustness |
 | C-22 | MAJOR | 2 | CHECK | **CLOSED-REFUTED** | 80a109f: the rule IS stated, SS VII.F; option (ii) is a posture change -> Eugene | Resolve the floor-form fork with a stated selection rule, and settle t |
@@ -37,9 +37,9 @@ No condition may be left unclassified. Generated from the inventory and the comm
 | C-30 | MAJOR | 2 | WORDING | **SATISFIED** | 1fe5bb6 | Define the partition where the word is first used |
 | C-31 | MAJOR | 2 | WORDING | **DECLINED** | 287e266: already carried by tab:headline row 3 + SS III.B; text kept in CORRECTED_w2_G DROPPED #2 | Quote both denominators (the cap gap and the ex-ante expectations benc |
 | C-32 | MAJOR | 2 | WORDING | **SATISFIED** | 80a109f | Name the mechanical-majority result as a fact about cap placement |
-| C-33 | MAJOR | 2 | WORDING | **OPEN** | wave 2 | Add the expectations complement ($87.8bn / 11.5%) to the abstract |
-| C-34 | MAJOR | 2 | WORDING | **OPEN** | wave 2 | The abstract's 85.7%/91.3% must be stated as composition and fit, not |
-| C-35 | MAJOR | 2 | WORDING | **OPEN** | wave 2 | Attach floor and basis labels to both abstract figures |
+| C-33 | MAJOR | 2 | WORDING | **SATISFIED** | b1d4b2d | Add the expectations complement ($87.8bn / 11.5%) to the abstract |
+| C-34 | MAJOR | 2 | WORDING | **SATISFIED** | b1d4b2d | The abstract's 85.7%/91.3% must be stated as composition and fit, not |
+| C-35 | MAJOR | 2 | WORDING | **SATISFIED** | b1d4b2d | Attach floor and basis labels to both abstract figures |
 | C-36 | MAJOR | 2 | WORDING | **SATISFIED** | 287e266 | State the scope condition the forced sign implies |
 | C-37 | MAJOR | 2 | WORDING | **SATISFIED** | a978da7 | State the gate suite's domain in Appendix O ¶1 |
 | C-38 | MAJOR | 2 | WORDING | **SATISFIED** | 8e94534 | Strike "the monotone response across the Liebersohn–Rothstein band" fr |
@@ -127,8 +127,8 @@ No condition may be left unclassified. Generated from the inventory and the comm
 | C-120 | MINOR | 5 | WORDING | **SATISFIED** | 7b13504 | Name distributional silence about Ginnie Mae borrowers as a limitation |
 | C-121 | MINOR | 6 | WORDING | **OPEN** | wave 6 | De-nest the sentences carrying four or more parentheticals |
 | C-122 | MINOR | 6 | STRUCTURE | **OPEN** | wave 6 | Fold §VI.C into §VI.B |
-| C-123 | MINOR | 6 | WORDING | **OPEN** | wave 6 | Abstract length and structure |
-| C-124 | MINOR | 6 | WORDING | **OPEN** | wave 6 | Move the inference-machinery detail out of the abstract into T1's note |
+| C-123 | MINOR | 6 | WORDING | **DECLINED** | collides with C-04/C-10/C-33/C-34/C-35, all upheld and all adding abstract content; the two-paragraph structure is correct per anti-condition A-02. Venue-scoped, Eugene's | Abstract length and structure |
+| C-124 | MINOR | 6 | WORDING | **DECLINED** | the parenthetical it would move is ABSTRACT_POSTURE['interval_qualifier'], a Wave-1 landing for C-01; moving it would undo an upheld condition to satisfy a MINOR one | Move the inference-machinery detail out of the abstract into T1's note |
 | C-125 | MAJOR | CLOSE | CHECK | **SATISFIED** | c3f37a7 (abstract recounted with the gate's own function: 323 -> 341; files identical outside line 31) | CLOSE: re-count the abstract and confirm the two abstract files stay i |
 | C-126 | MAJOR | EUGENE | WORDING | **SATISFIED** | d1bf578 | EUGENE: retitle to the claim the paper establishes |
 | C-127 | MINOR | EUGENE | CHECK | **DEFERRED-EUGENE** | his call | EUGENE: whether the benchmark's monthly series should be rebuilt at mo |
@@ -141,11 +141,11 @@ No condition may be left unclassified. Generated from the inventory and the comm
 
 ## Counts
 
-- SATISFIED: **82**
-- OPEN: **41**
+- SATISFIED: **86**
+- OPEN: **35**
 - DEFERRED-EUGENE: **7**
+- DECLINED: **3**
 - CLOSED-REFUTED: **1**
-- DECLINED: **1**
 - MOOT: **1**
 - TOTAL: **133**
 
