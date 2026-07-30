@@ -62,23 +62,41 @@ the marginal against the headline, that result lands and gets reported.
 **Correct, and own the table before being asked.** There are **three different
 objects** here, and conflating any two of them produces a wrong number:
 
-| Vintage | The draw (by count) | Estimation universe (exposure-wtd) | SOMA book face |
-|---|---|---|---|
-| pre-2017 | 0% | 0% | 10.6% |
-| 2017–19 | **60.0%** | 12.5% | **6.0%** |
-| 2020 | 20.0% | 37.3% | 16.3% |
-| 2021 | 20.0% | 50.2% | **43.9%** |
-| 2022 | **0%** | 0% | **23.1%** |
+| Vintage | Draw, by count | Draw, orig. balance | **Draw, surviving balance** | Estimation universe | SOMA book face |
+|---|---|---|---|---|---|
+| pre-2017 | 0% | 0% | **0%** | 0% | 10.6% |
+| 2017–19 | 60.0% | 55.5% | **27.0%** | 12.5% | 6.0% |
+| 2020 | 20.0% | 22.2% | **30.7%** | 37.3% | 16.3% |
+| 2021 | 20.0% | 22.3% | **42.3%** | 50.2% | 43.9% |
+| 2022 | 0% | 0% | **0%** | 0% | 23.1% |
 
-Draw shares read directly from `loan_sample.parquet` (15,002 / 14,999 / 15,001 /
-14,997 / 15,001 — an equal-allocation stratified design, ~15,000 per vintage, all
-weights 1.0, `weight_sum` = 75,000). Book face from
-`composition_shift_results.json` → `committed_anchors.vintage_shares`.
+**Quote the bold column.** Surviving balance at the window open is the weighting
+the aggregation actually applies (§V.B: "Aggregation from the 75,000-loan sample to
+the SOMA book applies balance weights"), and it is the only column that answers the
+question. Computed over the 40,077 loans with `balance > 0` in
+`loan_sample.parquet`; count shares from the same file (15,002 / 14,999 / 15,001 /
+14,997 / 15,001 — an equal-allocation design, ~15,000 per vintage, all weights
+1.0); book face from `composition_shift_results.json` →
+`committed_anchors.vintage_shares`.
 
-So: 2017–19 is **60% of the draw against 6.0% of book face** — a 10× overweight by
-count. The 2021 vintage carries **43.9% of book face on 20% of the draw**. And
-2022, **23.1% of book face**, is absent by construction — the sampler's vintage
-range is `[2017, 2021]`.
+**Do not lead with the count basis, even though it is the more damaging number.**
+By count, 2017–19 is 60.0% of the draw against 6.0% of book face — a 10×
+overweight — and it is tempting to concede that. But the count basis is not what
+the aggregation weights by, and on the operative basis the picture is different in
+a way a prepared questioner will know: 2017–19 is **4.5×** over, not 10×, and 2021
+sits at **42.3% against 43.9% of face — near parity, 0.96×**. Conceding a 2.2×
+under-weight on 2021 would be conceding something that is not true of the object
+the paper aggregates.
+
+**The fact that does bind is out-of-support mass, not the 2021 comparison.** The
+draw's vintage range is `[2017, 2021]`, so pre-2017 (10.6% of book face) and 2022
+(23.1%) have **zero** support on any weighting — **33.7% of face, which is the
+paper's own printed figure**: "33.7\% of face lies in out-of-window vintages (the
+2022 cohort 23.1\%, pre-2017 10.6\%)". That is the disclosure to lead with, and it
+does not depend on which basis anyone prefers. If pressed on how it combines with
+the Ginnie exclusion, the paper's own answer is in the same sentence: the two "must
+be netted on the book's own joint cells rather than counted separately", because
+the 20.4% Ginnie face share cuts across vintages — so do **not** add 33.7 and 20.4.
 
 **Why this is not a composition footnote.** Under the max form the marginal is
 zero wherever the baseline sits below the floor. Vintage weighting therefore
