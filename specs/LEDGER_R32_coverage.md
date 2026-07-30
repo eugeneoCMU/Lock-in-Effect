@@ -55,7 +55,7 @@ No condition may be left unclassified. Generated from the inventory and the comm
 | C-48 | MAJOR | 2 | STRUCTURE | **OPEN** | wave 2 | Report the Danish counterfactual in duration units at its own sites |
 | C-49 | MAJOR | 2 | WORDING | **OPEN** | wave 2 | T1's Danish cell must lead with the band |
 | C-50 | MAJOR | 2 | WORDING | **SATISFIED** | 70024c8 | Promote the realized-implied Danish anchor and its four confounds out |
-| C-51 | MAJOR | 2 | WORDING | **OPEN** | wave 2 | State the Danish execution mechanics (open-market repurchase and deliv |
+| C-51 | MAJOR | 2 | WORDING | **SATISFIED** | 38db980 (both limbs: BIS-sourced mechanics + the par-cap consequence) | State the Danish execution mechanics (open-market repurchase and deliv |
 | C-52 | MAJOR | 2 | WORDING | **SATISFIED** | 70024c8 | State the objective a redemption cap serves, and open §VI.B with §III. |
 | C-53 | MAJOR | 2 | WORDING | **SATISFIED** | 70024c8 | Make the substitution instrument the stated design implication |
 | C-54 | MAJOR | 2 | STRUCTURE | **OPEN** | wave 2 | Restate §VI.B's result in $bn/month with a band |
@@ -89,8 +89,8 @@ No condition may be left unclassified. Generated from the inventory and the comm
 | C-82 | MAJOR | 4 | STRUCTURE | **OPEN** | wave 4 | Add a household-side row to Table 1 |
 | C-83 | MAJOR | 4 | STRUCTURE | **SATISFIED** | 8255e0d (row quotes BOTH comparators: 6.0yr vs 2021 refi-boom, ~0 vs the turnover floor) | Add a duration row to Table 1 |
 | C-84 | CRITICAL | 4 | STRUCTURE | **SATISFIED** | 6a34d5c | Give the 5.51% age-standardized and 5.52% Fannie reads their own label |
-| C-85 | MAJOR | 5 | REFERENCE | **OPEN** | wave 5 | Add the missing references |
-| C-86 | MAJOR | 5 | REFERENCE | **OPEN** | wave 5 | Give §VI.C's assumability claims a cited basis |
+| C-85 | MAJOR | 5 | REFERENCE | **SATISFIED** | 38db980 (10 entries, each source-verified; fonseca2026 checked distinct from fonseca2024) | Add the missing references |
+| C-86 | MAJOR | 5 | REFERENCE | **SATISFIED** | 38db980 (HUD 4000.1 + 38 USC 3714; FHFA limb re-characterized; volume limb negative, stated) | Give §VI.C's assumability claims a cited basis |
 | C-87 | MAJOR | 6 | STRUCTURE | **SATISFIED** | 59d81c1 | Split the oversized paragraphs at their own topic boundaries |
 | C-88 | MAJOR | 6 | STRUCTURE | **OPEN** | wave 6 | Bring §IV + §VII.A/§VII.C/§VII.D down to ~2pp |
 | C-89 | MAJOR | 6 | STRUCTURE | **OPEN** | wave 6 | Bring §V.B down to ~2,500 words |
@@ -141,8 +141,8 @@ No condition may be left unclassified. Generated from the inventory and the comm
 
 ## Counts
 
-- SATISFIED: **96**
-- OPEN: **25**
+- SATISFIED: **99**
+- OPEN: **22**
 - DEFERRED-EUGENE: **7**
 - DECLINED: **3**
 - CLOSED-REFUTED: **1**
