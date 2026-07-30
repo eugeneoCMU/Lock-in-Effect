@@ -192,3 +192,65 @@ figures are from committed artifacts.
   estimated ramp" when half the replicates are degenerate. The upside if (a)
   holds is real: the bootstrap draws would give the ramp layer a **coverage
   property**, which is exactly what the CRITICAL asks for.
+
+---
+
+## WAVE 2 — reordered to a readability/framing priority (Eugene's call, 2026-07-29)
+
+The plan's wave order was set aside for a priority argued from the panel's own score
+sheet: **Writing scored 56, the lowest dimension, and no round from 28 to 31 touched
+it.** Order run: paragraph architecture, then the gate suite's domain, then the
+partition definition, then the headline posture, with the retitle surfaced for Eugene.
+
+| item | condition | commit | note |
+|---|---|---|---|
+| composition | C-06, C-63, C-64 | `2ec6a8e` | draw disclosed on the aggregation's own weighting |
+| paragraph architecture | C-R11 | `59d81c1` | 4 worst paragraphs split, zero words moved |
+| gate-suite domain | C-37 | `a978da7` | + the render failure, disclosed nowhere before |
+| partition definition | C-29, C-30 | `1fe5bb6` | defined WITH the behavioral concession |
+| headline posture | C-17, C-19, C-67 | OPEN | 4 HIGH verifier findings to rewrite first |
+| retitle | C-X4 | EUGENE | options surfaced, not applied |
+
+### What the adversarial verification bought
+
+Seven clusters drafted, **every one returned APPLY_WITH_LISTED_FIXES — none clean**.
+65 refuted claims, 18 count mismatches, 27 pin violations, 32 collisions. The catches
+that would have reached print:
+
+- **A real econometric error**: a draft wrote that the wild rows "build their
+  reference distribution by re-drawing the leverage profile." A wild-cluster
+  bootstrap holds leverage FIXED and re-draws cluster-level weights.
+- **The grid-truncation direction inverted in two independent drafts**, both framing
+  CR3-BM/WCR reaching $+2.3$ as an artifact that made them merely *look* wide. The
+  artifact says the opposite: the unclipped lower endpoints lie BELOW $+2.28$, so the
+  true spread is wider than printed.
+- **A live disclosure being demoted** ("I retain the band sweep as a wiring check,
+  not as identified content") when only its monotonicity is forced — anti-gaming
+  rule 1.
+- **An inconsistency about to enter the gate-pinned abstract**: two drafts called the
+  composed cell "a pair of corrections" while `tab:assembly` classifies one member,
+  the Ginnie overlay, as "change of estimand … not a correction".
+
+### Two errors of mine the chain caught
+
+1. **The dangling-`\tnote` audit encoded the wrong convention** (`3a81e71`, reverted
+   by `d2c0c67`). Round 31 deliberately moved CLASS_B notes OUT of their floats; both
+   "defects" were false positives and my fix duplicated notes that already existed.
+   Ironically the same convention then turned out to be the correct remedy when my
+   own cluster-E note pushed `tab:composition` 87.6pt over its page.
+2. **I doubted a draft's coupon cells and was wrong.** The paper's `3.0--4.0\%`
+   bucket is rounded keys 3.0+3.5 with the 4.0 key in `>=4.0`; on that convention the
+   committed shares reproduce the draft exactly. I went to the artifact rather than
+   trusting either of us, which is the only reason this is a footnote.
+
+Also corrected in my own landed work: the Carroll Round prep quoted the draw on a
+COUNT basis (`3757e03`). The aggregation applies **surviving-balance** weights, on
+which 2021 is 42.3% against 43.9% of face — near parity — and 2017--19 is 4.5x over,
+not 10x. Four distinct objects, not three: count, origination balance, surviving
+balance, book face.
+
+### Readability, measured
+
+Max paragraph **1,865 -> 1,054 words**; paragraphs over 900 words 8 -> 6; page count
+unchanged at 142/143 through all four landings, so the readability work cost nothing
+in length against a round already carrying +3 pages of required disclosure.
