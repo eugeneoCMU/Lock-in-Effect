@@ -16,11 +16,14 @@ variant | split main 1–94, online appendix 95–139 | 0 undefined refs | 0 err
 |---|---|---|---|
 | 1 | C-R1a/b/c — abstract | `66df169` | LANDED |
 | 2 | C-R2 — basis mix at the form fork | `c2e505e` | LANDED |
-| 3 | C-DA-C1 — floor read's true support | — | drafting |
+| 3 | C-DA-C1 — floor read's true support | `6a34d5c` | LANDED |
 | 4 | C-R4 — β₁ sign | `d22b265` | LANDED |
 | 5 | Carroll Round Q&A prep | `7189c8e` | LANDED |
 
-Gate/test count after Wave 1 so far: **109 gates (was 108), 501 tests (was 495)**.
+**WAVE 1 COMPLETE.** Gate/test count: **109 gates (was 108), 501 tests (was 495)**.
+Page count moved **139 -> 140** canonical / **140 -> 141** variant at Task 3, split
+recut **1-95 + 96-140**; that is the cost of Task 3's added rows and support
+statements, and Task 18's bundle notes must carry it.
 
 ### What each landing changed, and what it cost elsewhere
 
@@ -123,9 +126,69 @@ defects. All were derived from source, not taken from an agent's word.
    The body already makes the layer claim verbatim. Z13 — which rung to quote
    inside that layer — remains open and is Task 6's.
 
-## Defects found in passing, not raised by any reviewer
+## A mistake I made, and what it cost
 
-- **`tab:oosfloor` has a `\tnote{a}` marker and no `tablenotes` environment.** Its
-  caption promises "the held-out-months evaluation is given in the note" and no
-  note exists in the float. The render gate cannot catch this (it checks off-page
-  items, not dangling notes). Being repaired in Task 3.
+`3a81e71`, reverted by `d2c0c67`. I audited every float for `\tnote{x}` markers
+lacking a matching `\item[x]` **inside the float**, found `tab:oosfloor` (one
+marker) and `tab:danish` (four), and committed four new in-float notes for the
+latter. Both were false positives: round 31's `tools/render_fix_r31.py` lists
+`tab:bases, tab:estimators, tab:danish, tab:ladder, tab:oosfloor` as **CLASS_B —
+"tablenotes push the float over"** — and moved their notes into post-float
+`\noindent{\footnotesize \emph{Notes to Table~\ref{…}.} …}` paragraphs. That *is*
+the ~919-off-page-item repair this round must preserve. Both tables' markers were
+already paired there, and `tab:danish`'s existing note defines a–d more fully than
+what I wrote. So the commit added duplicates and re-floated a CLASS_B table.
+
+It passed 109 gates, 501 tests and the render gate. Green was necessary and not
+sufficient — this time against me. Two lessons:
+
+1. **A structural audit must encode the repo's actual convention, not the
+   language's default one.** Mine encoded "notes live inside floats", which this
+   paper deliberately stopped doing in round 31.
+2. **"No reviewer raised it and no gate caught it" is not evidence of a defect.**
+   It was true here only because there was nothing to catch.
+
+Caught by the Task-3 drafting agent, which found the same CLASS_B fact
+independently and flagged my commit as a concurrent edit. Its Edit 3-ALT would
+have reversed the round-31 repair a second time; Edit 3 (extend the existing
+post-float paragraph) is what landed.
+
+## Task 9 (R5, the h₀ re-anchor) — feasibility scouted read-only, NOT yet run
+
+Groundwork so the spec is written against measured facts. Nothing executed; all
+figures are from committed artifacts.
+
+- **The transport target exists.** Path A fits
+  `log h = spline(loan_age) + β₁·gap + β₂·burnout_orth + β₃·friction + FE(stratum)`
+  with `AGE_SPLINE_KNOTS = [12, 24, 36, 60, 84, 120]` and a truncated power basis
+  `[age, (age−k)²₊ …]` (`hazard/hazard_fit.py:58`).
+- **The substitution mechanism is settled precedent, not invention.**
+  `PSA_SPEED` binds at **def time** (`h0_psa(age, psa_speed=PSA_SPEED)`, called by
+  `baseline_hazard` without the argument), so mutating `config.PSA_SPEED` at
+  runtime is a silent no-op. `hazard/psa_level_sweep.py` already solves this: it
+  patches `fs._ORIG_PREPAY` with a closure passing `psa_speed` explicitly, and
+  gates it with (i) the patched PSA-100 leg reproducing the unpatched one to
+  `<1e-9 $B`, (ii) `max|h0_psa(age,100) − baseline_hazard(age)| == 0` on age
+  0–360, and (iii) **a no-op patch counting as GATE_FAILURE**. Task 9's spec
+  should reuse all three.
+- **But the spline is not usable as-is, and this is the finding that matters.**
+  `baseline_hazard` supports only `"psa"` and `"weibull"` — there is no
+  spline/tabulated mode, so a transport must be built. Worse, of the 200 committed
+  bootstrap replicates in `pathA_bootstrap_fullvec_draws_specv4.csv` (which *do*
+  carry `head_age_spline_*`), 199 are flagged converged but only **98 (49%)**
+  imply a monthly hazard inside (1e-6, 0.5) across ages 18–107, the band Path B's
+  population actually occupies. The truncated-power basis extrapolates
+  explosively: the median linear predictor reaches **+97 at age 360** (i.e.
+  `exp` overflow), and even normalised to its own mean the surviving shape spans
+  p05 0.88 to p95 9.80 at age 107. The **point-estimate** spline is in no
+  committed artifact — `pathA_resimulate_joint_pointhead_spec4.csv` carries only
+  the three betas — so "Path A's estimated spline" is not a single object one can
+  simply substitute.
+- **Consequence for the spec:** Task 9 must either (a) restrict the transport to a
+  usable age band with a stated replicate-exclusion rule and report the resulting
+  interval as conditional on it, or (b) be recorded INFEASIBLE with this reason
+  and the strongest honest alternative in its place. Either is a legitimate
+  outcome under the plan; what is not legitimate is presenting a re-anchor as "the
+  estimated ramp" when half the replicates are degenerate. The upside if (a)
+  holds is real: the bootstrap draws would give the ramp layer a **coverage
+  property**, which is exactly what the CRITICAL asks for.
