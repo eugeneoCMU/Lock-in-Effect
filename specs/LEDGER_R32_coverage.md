@@ -98,7 +98,7 @@ No condition may be left unclassified. Generated from the inventory and the comm
 | C-91 | MAJOR | 6 | STRUCTURE | **OPEN** | wave 6 | Bring §VI.D down to ~3pp |
 | C-92 | MINOR | 3 | RUN | **OPEN** | wave 3 | RUN or flag: the floor's flatness in loan age |
 | C-93 | MINOR | 4 | STRUCTURE | **SATISFIED** | 8255e0d (cell 1,627 -> 313 chars; verbatim move, 15 gate literals delta-0) | Move Table 8's oversized calibration cell into its tablenote |
-| C-94 | MINOR | 4 | STRUCTURE | **OPEN** | wave 4 | Give tab:wal a note-rate-basis row for the empirical path |
+| C-94 | MINOR | 4 | STRUCTURE | **SATISFIED** | ee7c5fb (Branch A; E1 and E2 both HELD; basis effect 0.5yr = same order as the 0.6yr rule-only effect) | Give tab:wal a note-rate-basis row for the empirical path |
 | C-95 | MINOR | 4 | STRUCTURE | **SATISFIED** | 8255e0d (both spec-v3 rows + row 4's spec-v3 parenthetical demoted to the note) | Make tab:pathadiag single-spec |
 | C-96 | MINOR | 4 | STRUCTURE | **SATISFIED** | 8255e0d (named paragraph; sequenced with C-90, which is Eugene's) | Promote the distributional-incidence result out of the homogeneity che |
 | C-97 | MINOR | 4 | STRUCTURE | **SATISFIED** | 8255e0d (doubling verified anchor-specific against the artifact; both anchors stated) | Give the transportable methodological lesson its own named paragraph |
@@ -141,8 +141,8 @@ No condition may be left unclassified. Generated from the inventory and the comm
 
 ## Counts
 
-- SATISFIED: **91**
-- OPEN: **30**
+- SATISFIED: **92**
+- OPEN: **29**
 - DEFERRED-EUGENE: **7**
 - DECLINED: **3**
 - CLOSED-REFUTED: **1**
