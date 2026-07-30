@@ -96,7 +96,7 @@ No condition may be left unclassified. Generated from the inventory and the comm
 | C-89 | MAJOR | 6 | STRUCTURE | **DECLINED** | Eugene 2026-07-30, same instruction | Bring §V.B down to ~2,500 words |
 | C-90 | MAJOR | 6 | STRUCTURE | **DECLINED** | Eugene 2026-07-30, same instruction (this also releases C-96's sequencing note) | Bring §V.E down to ~2,500 words |
 | C-91 | MAJOR | 6 | STRUCTURE | **DECLINED** | Eugene 2026-07-30, same instruction | Bring §VI.D down to ~3pp |
-| C-92 | MINOR | 3 | RUN | **OPEN** | wave 3 | RUN or flag: the floor's flatness in loan age |
+| C-92 | MINOR | 3 | RUN | **SATISFIED (by the condition's own stated minimum)** | (this commit) the flag lands at the floor's definition site with the reason the sweep is declined: the age ladder's rise is refi-contaminated, so an age-varying floor built from it would inherit the contamination | RUN or flag: the floor's flatness in loan age |
 | C-93 | MINOR | 4 | STRUCTURE | **SATISFIED** | 8255e0d (cell 1,627 -> 313 chars; verbatim move, 15 gate literals delta-0) | Move Table 8's oversized calibration cell into its tablenote |
 | C-94 | MINOR | 4 | STRUCTURE | **SATISFIED** | ee7c5fb (Branch A; E1 and E2 both HELD; basis effect 0.5yr = same order as the 0.6yr rule-only effect) | Give tab:wal a note-rate-basis row for the empirical path |
 | C-95 | MINOR | 4 | STRUCTURE | **SATISFIED** | 8255e0d (both spec-v3 rows + row 4's spec-v3 parenthetical demoted to the note) | Make tab:pathadiag single-spec |
@@ -141,8 +141,8 @@ No condition may be left unclassified. Generated from the inventory and the comm
 
 ## Counts
 
-- SATISFIED: **107**
-- OPEN: **9**
+- SATISFIED: **108**
+- OPEN: **8**
 - DEFERRED-EUGENE: **7**
 - DECLINED: **8**
 - CLOSED-REFUTED: **1**
