@@ -114,6 +114,8 @@ DANUSINT_RESULTS = ROOT / "hazard" / "data" / "danish_us_intercept_results.json"
 BBCB_RESULTS = ROOT / "hazard" / "data" / "buyback_credit_bracket_results.json"
 BDR_RESULTS = (ROOT / "hazard" / "data"
                / "buyback_discount_rederived_results.json")
+DIOS_RESULTS = (ROOT / "hazard" / "data"
+                / "danish_interest_only_share_results.json")
 REFISWEEP_RESULTS = ROOT / "abm" / "data" / "refi_sweep_results.json"
 SHAREDLAYER_RESULTS = ROOT / "hazard" / "data" / "shared_layer_scoring_results.json"
 MARGDECOMP_RESULTS = ROOT / "hazard" / "data" / "marginal_decomposition_results.json"
@@ -2399,6 +2401,271 @@ def buyback_discount_rederived_check(tex, d, cb_art, dan):
              "cross_artifact_tie": tie_ok, "artifact_ok": art_ok,
              "dbar_pct": round(dbar * 100, 4), "gap_cash_b": round(gc, 4),
              "months_at_floor": r["months_at_or_above_committed_floor"]})
+
+
+# --- R32 C-79 (gate #120): THE DANISH LEG WITH AN INTEREST-ONLY SHARE ------
+# The concession at .tex:629 said the Danish interest-only share "would cut
+# scheduled amortization ... and so move the shortfall in the opposite
+# direction from the payoff rule". Run danish_interest_only_share turns that
+# direction into a crossing: zeroing scheduled amortization on a share sigma
+# of the DANISH leg alone carries the face gap along gap_par - sigma*sched,
+# which crosses zero at 30.8%, and carrying the deferred balance forward at
+# the Danish leg's own speed lifts the crossing to 34.3%. Denmark's own
+# verified share (45%) is above both, so the gap reverses under FACE
+# accounting -- a different reversal from C-75's cash-haircut one, by a
+# different mechanism.
+#
+# Every printed figure below is DERIVED from the run's artifact, and every
+# committed constant it rests on is tied LIVE to two artifacts this run did
+# not write (danish_us_intercept's point, and the committed buyback bracket's
+# early face), so no number this gate enforces is a literal typed into this
+# file. Beyond presence, six properties, each a way this could quietly rot:
+#
+#   (a) THE OLD CONCESSION AND THE OLD FLAT FACE SENTENCE MUST STAY GONE.
+#       Both are checked by absence. The second is the D4 site: ".tex:660
+#       previously read "gross institutional relief under face accounting,
+#       not a net social gain" full stop, which after this run reads as
+#       unconditional. Reverting either one turns this gate red;
+#   (b) THE BREAK-EVEN IS THE DELIVERABLE, and it is stated BEFORE the
+#       imported share. The crossing needs no external input; the 45% is a
+#       pre-window, whole-market, deferred-amortisation read. File order is
+#       checked, not merely presence, because a later edit that leads with
+#       the import would make an imported institutional parameter the claim;
+#   (c) THE THREE LIMITS TRAVEL. Every line that prints "45% of outstanding
+#       mortgage volumes" must carry all four limit spans. This is what stops
+#       the share being quoted a second time somewhere bare;
+#   (d) THE DOUBLE-COUNTING ACCOUNT MUST STAY RETRACTED. An earlier draft
+#       said stacking C-75's cash haircut and this face reversal "would
+#       charge the same dollars twice". That is FALSE: E = dk_total - sched
+#       already excludes the scheduled dollars the IO share removes, so the
+#       pools are DISJOINT; what they share is a balance path, and at
+#       sigma > 0 the deferred balance's own prepayment ADDS to the early
+#       face, so a naive sum UNDERSTATES the haircut. Every occurrence of
+#       "the same dollars twice" must therefore sit under a "rather than";
+#   (e) NO JOINT CELL. The artifact's sigma grid is pinned to the committed
+#       grid plus the two break-evens, so a composed cell cannot appear in it
+#       and then be quoted;
+#   (f) THE CHAIN, re-derived cell by cell: gap1 = gap_par - sigma*sched,
+#       gap2 = gap1 + offset, sigma = 0 returns gap_par exactly with a zero
+#       offset, both orders strictly decreasing in sigma, and each break-even
+#       cell returning zero at its own order.
+DANISH_IO_SHARE_SPANS = {
+    "run_tag": "\\texttt{danish\\_interest\\_only\\_share}",
+    # the sign was the manuscript's own; this run gets no credit for it
+    "no_credit_for_sign": "the direction was already conceded here",
+    # C-74's defect, named: a share scored in BOTH legs contributes zero
+    "danish_leg_only": "scoring it in both legs would neutralize it exactly",
+    "us_zero_held_fixed": "the U.S. leg's effective zero stays held fixed",
+    # the inherited basis seam, disclosed rather than repaired
+    "basis_note": "the U.S. leg's scheduled path over the window and this "
+                  "paper's own proxy for the scheduled component",
+    # P4: the second-order term is reported BESIDE the first, never folded in
+    "second_order_separate": "the offset is reported beside the first-order "
+                             "effect rather than folded into it",
+    "offset_open_ex_ante": "it was the one limb I could not sign in advance",
+    "limit_prewindow": "pre-window (February 2020 against a June "
+                       "2022--November 2025 window)",
+    "limit_deferred": "deferred amortisation (\\emph{afdragsfrihed}), "
+                      "conventionally capped at ten years",
+    "limit_not_permanent": "the share of volume currently \\emph{in} an "
+                           "interest-only period and not a permanent product "
+                           "feature",
+    "limit_population": "whole-market outstanding volumes rather than the "
+                        "owner-occupied thirty-year callable segment",
+    "breakeven_needs_nothing": "it is arithmetic on the committed chain and "
+                               "needs no Danish input",
+    "breakeven_is_reported": "which is why I lead with it",
+    "accounting_layer": "the hazard is untouched and only the amortization "
+                        "path moves",
+    "not_a_resimulation": "not what a re-simulated interest-only book would "
+                          "return",
+    # the D4 re-scopes, at the table and at the closing sentence
+    "tablenote_scope": "the row holds the Danish product mix fixed",
+    "face_scope": "gross institutional relief under face accounting and a "
+                  "held-fixed Danish product mix",
+    "face_scope_why": "what carries the relief is not face accounting alone "
+                      "but face accounting on a transplant that changes the "
+                      "payoff rule and nothing else",
+    # the non-composition account, in the corrected direction
+    "no_stack": "The two reversals do not stack",
+    "shared_balance_path": "but they share a balance path",
+    "understatement": "understate the haircut, not double-count it",
+    "no_joint_cell": "Their sum is not the joint cell, and no joint cell is "
+                     "run here",
+    "citation": "\\citep{nationalbanken2020}",
+}
+
+# The two sentences this landing RETIRES. The first is the unmeasured
+# concession; the second is the unconditional face-accounting claim.
+DANISH_IO_RETIRED = (
+    "which would cut scheduled amortization, the null's largest component, "
+    "and so move the shortfall in the opposite direction from the payoff rule",
+    "is gross institutional relief under face accounting, not a net social "
+    "gain",
+)
+
+
+def danish_interest_only_share_check(tex, io, dan, cb):
+    """Gate #120's rule (R32, C-79): the Danish leg with an interest-only share."""
+    tex_nc = re.sub(r"(?<!\\)%.*", "", tex)
+    p, be, s45 = io["parity"], io["break_even"], io["at_sourced_share"]
+    src, exp = io["source"], io["expectations"]
+    pt, bv = dan["point"], cb["verdict"]
+    gap_par = p["P1_gap_par"]
+    sched = p["P1_sched_total_b"]
+    E = p["P1_buyback_identity_E_b"]
+    cpr = p["P3_mean_danish_cpr_pct"]
+    # the SOURCED share, with the artifact's own fallback so an unsourced
+    # branch-D artifact cannot raise here -- it fails art_ok instead
+    share = s45["io_share"]
+    off45 = s45["second_order_offset_b"]
+    be1, be2 = be["first_order"], be["second_order"]
+    cells = sorted(io["cells"].values(), key=lambda c: c["io_share"])
+
+    sourced_lit = f"{share * 100:.0f}\\% of outstanding mortgage volumes"
+    crossing1 = f"crosses zero at an interest-only share of {be1 * 100:.1f}\\%"
+
+    lits = dict(DANISH_IO_SHARE_SPANS)
+    lits.update({
+        "sched_basis": (f"cuts the face gap by $\\sigma$ times "
+                        f"\\${sched:.2f} billion"),
+        "crossing_first": crossing1,
+        "crossing_second": f"lifts the crossing to {be2 * 100:.1f}\\%",
+        # CONTEXTFUL ON PURPOSE, all three of these. The bare numerals
+        # collide: "30.8" is also the bootstrap understatement factor
+        # (30.8x, three sites) and "$+\\$19.2$ billion" is gate #102's
+        # moving-share bracket cell, so a bare-numeral pin would be
+        # ambiguous and could go green over the wrong site.
+        "danish_speed": (f"the Danish leg's own {cpr:.2f}\\% speed returns "
+                         f"\\${off45:.1f} billion of extra early roll-off at "
+                         f"a {share * 100:.0f}\\% share"),
+        "gap_at_sourced": (f"the face gap is "
+                           f"$-\\${abs(s45['gap_second_order_b']):.1f}$ "
+                           f"billion after that feedback"),
+        "sourced_share": f"interest-only loans at {sourced_lit}",
+        "tablenote_crossing": (f"above a Danish interest-only share of "
+                               f"{be2 * 100:.1f}\\% the face gap reverses too"),
+        "conclusion_crossing": (f"the interest-only crossing above sits at "
+                                f"{be2 * 100:.1f}\\%"),
+        "disjoint_pools": (f"the \\${E:.1f} billion of early face the buyback "
+                           f"credit haircuts is Danish roll-off net of the "
+                           f"scheduled component"),
+        "feedback_size": (f"the deferred balance's own prepayment "
+                          f"(\\${off45:.1f} billion at a "
+                          f"{share * 100:.0f}\\% share) adds to it"),
+    })
+    missing = sorted(k for k, lit in lits.items() if lit not in tex_nc)
+    retired = [lit for lit in DANISH_IO_RETIRED if lit in tex_nc]
+
+    # (b) the break-even is stated BEFORE the imported share. .find(), never
+    # .index(): a missing span must leave this False, not raise.
+    i_cross = tex_nc.find(crossing1)
+    i_src = tex_nc.find(lits["sourced_share"])
+    order_ok = 0 <= i_cross < i_src
+
+    # (c) the limits travel with EVERY printing of the imported share
+    limit_keys = ("limit_prewindow", "limit_deferred", "limit_not_permanent",
+                  "limit_population")
+    src_lines = [ln for ln in tex_nc.split("\n") if sourced_lit in ln]
+    limits_travel = bool(src_lines) and all(
+        all(lits[k] in ln for k in limit_keys) for ln in src_lines)
+
+    # (d) the double-counting account must stay retracted -- enforced by
+    # ABSENCE, not by a negated restatement. An earlier draft explained the
+    # non-composition as "would charge the same dollars twice". That is FALSE:
+    # E = dk_total - sched already EXCLUDES the scheduled dollars an
+    # interest-only share removes, so the two pools are disjoint and nothing is
+    # charged twice. The first version of THIS gate required the phrase to be
+    # present in negated form, which put the false account on the page for a
+    # skimming reader to carry away. It is now required to be absent outright;
+    # the true balance-path account that replaces it is pinned separately by
+    # no_stack / shared_balance_path / understatement / no_joint_cell, so
+    # deleting the retraction still turns the gate red.
+    same_dollars_ok = "the same dollars twice" not in tex_nc
+
+    # the committed constants, tied to the two artifacts that own them
+    tie_ok = (
+        gap_par == pt["institutional_gap_shared_b"]
+        and cpr == pt["mean_danish_cpr_pct"]
+        and E == bv["early_face_E_b"]
+        and gap_par == bv["gap_face_b"]
+    )
+
+    # (e) the grid is the committed one plus the two break-evens: no joint
+    # cell can be hiding in it
+    grid_ok = sorted(round(c["io_share"], 12) for c in cells) == sorted(
+        {0.0, 0.10, 0.20, 0.30, 0.45, 0.50,
+         round(be1, 12), round(be2, 12)})
+    c1 = io["cells"].get(f"sigma_{be1:.6f}")
+    c2 = io["cells"].get(f"sigma_{be2:.6f}")
+    e3_lo, e3_hi = exp["E3_band"]
+
+    art_ok = (
+        io["run_tag"] == "danish_interest_only_share"
+        and io["spec"]["no_engine_runs"] is True
+        and io["spec"]["window_months"] == 42
+        and len(p["P0_sha_pins"]) == 3
+        and p["P0b_artifacts_byte_identical"] is True
+        and p["P3_sched_positive_every_month"] is True
+        and p["P4_second_order_reported_separately"] is True
+        and grid_ok
+        # (f) the chain, cell by cell, with ONLY sigma moving
+        and all(abs(c["gap_first_order_b"]
+                    - (gap_par - c["io_share"] * sched)) < 1e-9
+                for c in cells)
+        and all(abs(c["gap_second_order_b"]
+                    - (c["gap_first_order_b"] + c["second_order_offset_b"]))
+                < 1e-12 for c in cells)
+        # E1: sigma = 0 is the parity anchor, exactly, at both orders
+        and cells[0]["io_share"] == 0.0
+        and cells[0]["second_order_offset_b"] == 0.0
+        and abs(cells[0]["gap_first_order_b"] - gap_par) < 1e-12
+        and abs(cells[0]["gap_second_order_b"] - gap_par) < 1e-12
+        # E2: strictly decreasing at both orders, offset strictly rising
+        and all(a["gap_first_order_b"] > b["gap_first_order_b"]
+                for a, b in zip(cells, cells[1:]))
+        and all(a["gap_second_order_b"] > b["gap_second_order_b"]
+                for a, b in zip(cells, cells[1:]))
+        and all(a["second_order_offset_b"] < b["second_order_offset_b"]
+                for a, b in zip(cells, cells[1:]))
+        # both crossings really cross, at their own order
+        and abs(be1 * sched - gap_par) < 1e-12
+        and c1 is not None and abs(c1["gap_first_order_b"]) < 1e-9
+        and c2 is not None and abs(c2["gap_second_order_b"]) < 1e-9
+        # the offset can only RAISE the bar, and the import clears both
+        and be1 < be2 < share
+        and abs(s45["gap_first_order_b"] - (gap_par - share * sched)) < 1e-9
+        and off45 > 0
+        and s45["gap_second_order_b"] < 0 and s45["reverses"] is True
+        # the imported share is SOURCED, and its three limits are the
+        # artifact's own rather than this file's
+        and src.get("sourced") is True
+        and src.get("io_share") == share
+        and src.get("publisher") == "Danmarks Nationalbank"
+        and src.get("publication_date") == "2020-02-04"
+        and (f"{share * 100:.0f} per cent of outstanding mortgage volumes"
+             in src.get("verbatim", ""))
+        and len(src.get("limits", [])) == 3
+        and any("PRE-WINDOW" in x for x in src.get("limits", []))
+        and any("DEFERRED AMORTISATION" in x for x in src.get("limits", []))
+        and any("whole-market" in x for x in src.get("limits", []))
+        # the expectations, as the spec fixed them before the run
+        and e3_lo < be2 <= e3_hi
+        and exp["E3_sigma_star_second_order"] == be2
+        and all(exp[k] is True for k in (
+            "E1_anchor_exact", "E2_monotone_both_orders", "E3_pass",
+            "E4_sourced_share_reverses_under_face_accounting"))
+    )
+    return (not missing and not retired and order_ok and limits_travel
+            and same_dollars_ok and tie_ok and art_ok,
+            {"missing": missing, "retired_present": retired,
+             "breakeven_before_import": order_ok,
+             "limits_travel": limits_travel,
+             "double_counting_retracted": same_dollars_ok,
+             "cross_artifact_tie": tie_ok, "artifact_ok": art_ok,
+             "grid_ok": grid_ok,
+             "breakeven_pct": (round(be1 * 100, 4), round(be2 * 100, 4)),
+             "gap_at_sourced_b": round(s45["gap_second_order_b"], 4)})
 
 def main() -> int:
     tex = TEX.read_text()
@@ -6428,6 +6695,26 @@ def main() -> int:
           f"cross_artifact_tie={_bd['cross_artifact_tie']}, "
           f"artifact_ok={_bd['artifact_ok']}, "
           f"missing={_bd['missing'] or 'none'}")
+
+    # R32 C-79 (gate #120). Reuses the two artifacts loaded just above --
+    # danish_us_intercept owns gap_par and the Danish mean CPR, the committed
+    # buyback bracket owns the early face -- so the tie is to runs this one
+    # did not write. Every field printed below is computed by the call above
+    # it; nothing here reads a variable that does not yet exist.
+    _dios = json.loads(DIOS_RESULTS.read_text())
+    dios_ok, _di = danish_interest_only_share_check(tex, _dios, _bdan, _bbcb)
+    failures += 0 if dios_ok else 1
+    print(f"[{'PASS' if dios_ok else 'FAIL'}] Danish interest-only share (gate "
+          f"#120): break-evens={_di['breakeven_pct']}%, "
+          f"gap_at_sourced={_di['gap_at_sourced_b']} $bn, "
+          f"breakeven-stated-first={_di['breakeven_before_import']}, "
+          f"limits-travel={_di['limits_travel']}, "
+          f"double-counting-retracted={_di['double_counting_retracted']}, "
+          f"grid_ok={_di['grid_ok']}, "
+          f"retired={_di['retired_present'] or 'gone'}, "
+          f"cross_artifact_tie={_di['cross_artifact_tie']}, "
+          f"artifact_ok={_di['artifact_ok']}, "
+          f"missing={_di['missing'] or 'none'}")
 
     va_ok, _va = verdict_audit_check(tex)
     failures += 0 if va_ok else 1
