@@ -4449,3 +4449,65 @@ that drifted would fail before any new number could exist.
 **15-test battery** (545 → 560). Scope limit stated in the text: the observable is the SOMA
 book's bucketed coupons while the floor is the Freddie panel's loan-level gaps — two populations
 at two grains.
+
+## 49. Round-32 / C-78: the episode gradient with loan age held fixed — run `episode_gradient_age_bands`, LANDS Branch A (2026-07-30)
+
+`.tex:331` carries the paper's only realized-data exhibit that moves in the lock-in direction, and
+its standardization cell held vintage × FICO × LTV **and not age**. C-78 put 12-month loan-age
+strata into that cell. **Two results came back and both are in the manuscript.**
+
+**The point survives.** The standardized gradient is **+3.3691611422459387** with age in the cell
+(committed: +3.4409160684432125), against the model-implied +0.9371125522400376 and the pre-committed
++2.0990896098381784 bar — E5 PASS. The identity limb puts **+0.3814067063006803 of the raw
++4.198179219676357 — 9.085050597960977%** — on age composition alone (E4 PASS against the same bar),
+and age in the cell moves total composition from +0.7679069252018227 to +0.8524146284532019. Every
+limb-B axis telescopes with `identity_residual` exactly 0.0 and decomposes the identical total
+(E2, STOP-class, all seven axes).
+
+**The interval does not.** The age-augmented 95% CI is **[+0.6020279106184718, +4.350514890300537]**
+and it **COVERS** the implied +0.9371, where the committed [+1.1698156633697476, +5.140403332533121]
+excluded it. On `episode_confrontation_within.py:202-216`'s own pre-committed map that is branch (b),
+"GAP CLOSES MATERIALLY", not branch (a), "GAP PERSISTS". This is the finding that costs the paper and
+it is stated in the same paragraph as the one that does not.
+
+**A judgement recorded rather than acted on.** That map's branch-(b) landing rule reads "No assembly
+row" and "The defence is VINDICATED". This landing does **neither**: it is C-78's Branch A, whose
+enumeration is the `.tex:331` clause, a `tab:runindex` row, a new gate and a battery, with "No new
+`tab:assembly` row" and §8.2's status line "directional; not a marginal re-estimate" preserved verbatim.
+So `tab:assembly`'s composition row and §V.E's sixth qualification are **untouched**, and both stay
+true as written — the assembly row prints the committed run's point ($+3.4$ vs implied $+0.9$) and
+carries no interval, and the sixth qualification attributes its $+3.44$ to that same run in the same
+parenthesis. Re-scoping either is Branch C's disposition and posture-adjacent besides
+(`episode_confrontation_within.py:208-210` marks that row "Eugene signs"). The interval claim is
+scoped to the age-augmented cell in its own sentence so that it contradicts neither.
+
+**E3 missed, favourably, and the miss is printed.** I pre-committed that ≥80% of the primary
+selection's shallow exposure would sit in vintages confined to a single age band; realized
+**60.63%**. Age is not merely a relabelling of vintage in this book, so the control is stronger than
+I expected. The manuscript prints both numbers.
+
+**No noise claim anywhere.** `se_pp` rises 0.9314370587782016 → 1.0044551644073587, but the percentile
+interval **NARROWS** in width (3.9705876691633737 → 3.748486979682065) while shifting **down** (lower
+end 1.1698 → 0.6020). An earlier draft printed "noisier" beside a visibly narrower interval; it was
+cut. The gate still asserts the `se_pp` rise as a drift tripwire, redundant with the printed interval
+since both come out of the same bootstrap — **no printed word depends on it**, and the docstring says so.
+
+**DELIBERATE DOUBLE-PIN — the next round must know both sites exist.** `EPISODE_AGE_BANDS_SPANS`
+re-pins gate #75's raw literals `"$+4.20$ CPR points"` and `"$[+3.59, +4.66]$"` (gate #75 lives at
+`tools/liveness_gates.py:4889-4894`). Spec §7 Branch A says gate #75 is **extended, never replaced**,
+and the raw exhibit staying raw under this landing is the property being protected — so a legitimate
+future change to the raw numbers now fails **two** gates, not one. Same hazard class as
+`BUYBACK_BRACKET_SPANS["reversal_range"]` being independently pinned in `LETTER_CURRENT_LITERALS`.
+
+**Scope limit stated in the text, not delegated to the artifact** (spec §8.3): the age cut
+(`AGE0_MIN = 24`) is **held, not swept**. The run stratifies above the cut; it does not test where the
+cut sits. C-92 is still open, so the sentence is pinned as a gate span and tied to the artifact's own
+`spec.age_cut_held`.
+
+**Landed.** The `.tex:331` clause, a `tab:runindex` row, **GATE #119** (every printed literal derived
+from the two artifacts — the age-band numbers from this run, the contrast pair $+3.44$ /
+$[+1.17, +5.14]$ from the COMMITTED within run, so the two cannot drift apart in print; G7 selection
+parity tied live to the committed run's own counts; and the coverage PROPERTY recomputed rather than
+trusted) and a **37-item test battery**. Still open and still stated: within-window refinancing on the
+high-coupon shallow buckets is separated by no field in this design; a cross-sectional level gradient
+is not a dollar marginal; the literal within-stratum gradient stays NOT COMPUTABLE.

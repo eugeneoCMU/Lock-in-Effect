@@ -61,6 +61,10 @@ WALNRB_RESULTS = ROOT / "hazard" / "data" / "wal_note_rate_basis_results.json"
 SCCG_RESULTS = ROOT / "hazard" / "data" / "state_contingent_cap_grid_results.json"
 MTC_RESULTS = ROOT / "hazard" / "data" / "marginal_transaction_counts_results.json"
 DLS_RESULTS = ROOT / "hazard" / "data" / "depth_ladder_shape_results.json"
+EPAGE_RESULTS = (ROOT / "hazard" / "data"
+                 / "episode_gradient_age_bands_results.json")
+ECWITHIN_RESULTS = (ROOT / "hazard" / "data"
+                    / "episode_confrontation_within_results.json")
 COUPONAMORT_RESULTS = (ROOT / "hazard" / "data"
                        / "coupon_convention_amortization_results.json")
 CURTDEMO_RESULTS = ROOT / "hazard" / "data" / "curtailment_profile_demo_results.json"
@@ -1577,6 +1581,198 @@ def month_twoway_clusters_check(tex, v2, v3):
                 "webb_rank": rank, "n_undemoted": len(rungs),
                 "n_censored": n_censored, "widest_interior": widest_interior,
                 "se_shrink_pct": shrink_pct, "se_grow_pct": grow_pct}
+
+
+# --- Round-32 / C-78 (gate #119): THE EPISODE GRADIENT WITH LOAN AGE HELD
+#     FIXED. Reads EPAGE_RESULTS and ECWITHIN_RESULTS (declared at :63).
+EPISODE_AGE_BANDS_SPANS = {
+    # (1) the clause C-78 was written against, now naming the dimension.
+    "age_named_in_the_clause": "loan age now among them",
+    # (2)-(4) the three sentences that carry the result AGAINST this paper.
+    # These are what a later tightening pass would trim first, so they are
+    # pinned as prose and not only as numbers.
+    "point_survives_interval_does_not":
+        "The interval moves against the exhibit even as the point survives",
+    "branch_reclassified": "from a gap that persists to one that closes",
+    "no_longer_separated":
+        "the gradient is no longer separated from the model's implication by "
+        "its own sampling interval",
+    # (5) the E3 miss, which is what makes the age control a real control
+    # rather than a relabelling of vintage. HEDGED WORDING, pinned hedged:
+    # 60.6% of shallow exposure still sits in single-band vintages, so the
+    # honest claim is "not MERELY a relabelling", and that is what is bound.
+    "collinearity_miss_named":
+        "age is not merely a relabelling of vintage in this book",
+    # (6) SPEC section 8.3 -- the one scope limit the spec commits to STATING
+    # in the manuscript rather than delegating to the artifact: the age cut is
+    # held, not swept. C-92 (the floor's flatness in loan age) is still open,
+    # so a reader must not be able to over-read this run as having tested the
+    # cut's location.
+    "age_cut_held_disclosed":
+        "stratifies above the cut rather than testing where it sits",
+    # (7)-(8) gate #75's RAW literals, asserted here as well. Spec section 7
+    # Branch A: gate #75 is EXTENDED, never replaced, and the raw exhibit
+    # staying raw under this landing is the property being protected.
+    # DELIBERATE DOUBLE-PIN: a round that legitimately moves the raw numbers
+    # now fails BOTH gates. Same hazard class as
+    # BUYBACK_BRACKET_SPANS["reversal_range"] vs LETTER_CURRENT_LITERALS.
+    # Recorded in TECHNICAL section 49 and in the C-78 ledger row so the next
+    # round finds both sites.
+    "raw_gradient_survives_gate_75": "$+4.20$ CPR points",
+    "raw_ci_survives_gate_75": "$[+3.59, +4.66]$",
+}
+
+
+def episode_age_bands_check(tex: str, a: dict, w: dict) -> tuple[bool, dict]:
+    """Gate #119's rule (R32, C-78): the episode gradient with loan age held fixed.
+
+    C-78 put 12-month loan-age strata into the standardization cell that
+    .tex:331's hedge was written against. Two results came back and BOTH have to
+    stay in the manuscript, which is the entire reason this gate exists.
+
+    (i) The POINT survives. The standardized gradient is still well clear of the
+    model-implied value with age in the cell, and the identity limb puts only a
+    small slice of the raw gradient on age composition.
+
+    (ii) The INTERVAL does not. The age-augmented 95% CI COVERS the implied
+    value where the committed one excluded it, which on
+    episode_confrontation_within's own pre-committed branch map (that runner,
+    lines 202-216) is "GAP CLOSES MATERIALLY", not "GAP PERSISTS".
+
+    (ii) is the finding that costs this paper, so it is bound three ways: the
+    printed interval is DERIVED here from the artifact; the coverage SENTENCE is
+    a pinned span; and the coverage PROPERTY (lo <= implied <= hi, with the
+    committed lo > implied) is RECOMPUTED here rather than trusted. If a rerun
+    ever moved the CI back off the implied value the gate fails and forces the
+    sentence to change instead of leaving a false claim standing; if an editor
+    deletes the sentence it fails too.
+
+    Every numeric literal is derived -- the new numbers from the age-band
+    artifact, the contrast pair ($+3.44$, $[+1.17, +5.14]$) from the COMMITTED
+    within artifact -- so the two runs cannot drift apart in print. G7's
+    selection parity is likewise tied LIVE to the committed run's own selection
+    counts rather than to literals written here.
+
+    SCOPE. This gate covers the spec's Branch A landing and nothing more: the
+    .tex:331 clause, a tab:runindex row, this gate, its battery. tab:assembly's
+    composition row and Section V.E's sixth qualification are NOT touched and
+    NOT pinned here -- re-scoping either is Branch C's disposition and is
+    posture-adjacent besides (episode_confrontation_within.py:208-210 marks that
+    assembly row "Eugene signs"). Both stay true as written: the assembly row
+    prints the COMMITTED run's point ($+3.4$ vs implied $+0.9$, "above
+    (directional)") and carries no interval, and the sixth qualification
+    attributes its $+3.44$ to that same run in the same parenthesis. The
+    interval claim landed here is scoped to the age-augmented cell in its own
+    sentence, so it contradicts neither.
+
+    One artifact property is asserted with NO printed counterpart: se_pp rising
+    against the committed run. Nothing in the manuscript says "noisier" -- the
+    percentile interval NARROWS in width (3.748 vs 3.971 points) while shifting
+    down, so no widening or noise claim is made anywhere and none is gated. The
+    assertion is kept as a cheap drift tripwire, redundant with the printed
+    interval (both come out of the same bootstrap), and it is documented here so
+    a later round does not mistake it for the anchor of a word.
+    """
+    tex_nc = re.sub(r"(?<!\\)%.*", "", tex)
+    missing = [f"span:{k}" for k in sorted(EPISODE_AGE_BANDS_SPANS)
+               if EPISODE_AGE_BANDS_SPANS[k] not in tex_nc]
+
+    la, lb = a["limb_a"], a["limb_b"]
+    wla = w["limb_a"]
+    g = la["standardized_gradient_pp"]
+    lo, hi = la["ci95_pp"]
+    iw = la["imputed_weight_share"]
+    wg = wla["standardized_gradient_pp"]
+    wlo, whi = wla["ci95_pp"]
+    impl = a["committed_reference"]["model_implied_pp"]
+    total = lb["full_cell_committed"]["total_pp"]
+    com_b = lb["full_cell_committed"]["between_composition_pp"]
+    age_b = lb["age_only"]["between_composition_pp"]
+    aug_b = lb["age_augmented_full"]["between_composition_pp"]
+    bm = a["age_bands"]["band_months"]
+    e = a["expectations"]
+
+    lits = {
+        "band_width":
+            f"adding {bm}-month age bands to the standardization cell" in tex_nc,
+        "age_point": f"leaves the gradient at ${g:+.2f}$ points" in tex_nc,
+        # the manuscript's PRE-EXISTING +3.44 sentence, re-derived here from the
+        # committed artifact so the two runs cannot drift apart in print
+        "committed_point": f"leaves the gradient at ${wg:+.2f}$ points" in tex_nc,
+        # one contextual literal for the age-only limb: the component, the total
+        # it is a share of, and the share itself, in the order they are printed
+        "age_only_and_share": (
+            f"puts ${age_b:+.2f}$ of the raw ${total:+.2f}$ --- "
+            f"${age_b / total * 100:.1f}\\%$ --- on seasoning composition") in tex_nc,
+        "composition_moves": (
+            f"moving total composition from ${com_b:+.2f}$ to "
+            f"${aug_b:+.2f}$") in tex_nc,
+        # the whole CI claim in one derived literal: the age interval, its
+        # imputed weight, the coverage, and the committed interval it displaces
+        "age_ci_and_coverage": (
+            f"it runs $[{lo:+.2f}, {hi:+.2f}]$ (imputed weight share "
+            f"${iw * 100:.1f}\\%$), covering the implied ${impl:+.2f}$ where "
+            f"the committed $[{wlo:+.2f}, {whi:+.2f}]$ excluded it") in tex_nc,
+        "collinearity_bar": (
+            f"at least ${e['E3_collinearity_min'] * 100:.0f}\\%$ of the "
+            f"primary selection's shallow exposure") in tex_nc,
+        "collinearity_measured":
+            f"the realized share is ${e['E3_measured'] * 100:.1f}\\%$" in tex_nc,
+        "runindex_row": (
+            f"seasoning composition at ${age_b:+.2f}$ of ${total:+.2f}$, and an "
+            f"age-augmented interval that covers the model-implied "
+            f"${impl:+.2f}$") in tex_nc,
+        # two sites: the .tex:331 prose and the tab:runindex row
+        "run_tag": tex_nc.count("\\texttt{episode\\_gradient\\_age\\_bands}") >= 2,
+    }
+    missing += sorted(k for k, v in lits.items() if not v)
+
+    pg = a["parity_gates"]
+    sel, wsel = pg["G7_selection_parity"], w["selection"]
+    covers = bool(lo <= impl <= hi)
+    excluded = bool(wlo > impl)
+    art_ok = (
+        a["status"] == "OK"
+        and a["branch_landed"] == "A"
+        and all(bool(v) for v in pg["G0_G4"].values())
+        and bool(pg["G5_frozen_artifact_reproduction"])
+        and all(bool(v["exact"])
+                for v in pg["G6_axis_machinery_reproduces_committed"].values())
+        # G7 tied live to the committed run's own selection, not to literals
+        and all(sel[k] == wsel[k] for k in ("n_strata_total", "n_strata_bucketed",
+                                            "n_strata_primary", "n_rows_primary"))
+        # E2, STOP-class: the decomposition telescopes on EVERY axis reported,
+        # and every axis decomposes the SAME total
+        and all(abs(v["identity_residual"]) < 1e-12 for v in lb.values())
+        and all(abs(v["total_pp"] - total) < 1e-12 for v in lb.values())
+        and bool(e["E4_pass"]) and bool(e["E5_standardized_above_bar"])
+        # the two readings the prose states, recomputed here rather than trusted
+        and covers                      # the age-augmented CI COVERS the implied
+        and excluded                    # the committed CI EXCLUDED it
+        and g > impl                    # the point still stands above the model
+        and g > a["committed_reference"]["half_raw_bar_pp"]
+        # drift tripwire only -- redundant with the printed interval, and NO
+        # printed word depends on it (see the docstring)
+        and la["se_pp"] > wla["se_pp"]
+        # E3 missed, and missed in the direction that makes the control real
+        and e["E3_pass"] is False
+        and e["E3_measured"] < e["E3_collinearity_min"]
+        # the spec section 8.3 disclosure the prose now carries, tied to the
+        # artifact: AGE0_MIN held at production, bands cut on one date, and the
+        # within-stratum limit still declared
+        and a["spec"]["age_cut_held"] == 24
+        and bool(a["spec"]["bands_cut_on_one_date"])
+        and "NOT COMPUTABLE" in a["spec"]["not_within_stratum"]
+    )
+    return (not missing) and art_ok, {
+        "missing": missing,
+        "artifact_ok": art_ok,
+        "age_point_pp": round(g, 4),
+        "age_ci_pp": [round(lo, 4), round(hi, 4)],
+        "covers_implied": covers,
+        "committed_excluded": excluded,
+        "age_only_share_pct": round(age_b / total * 100, 2),
+    }
 
 def main() -> int:
     tex = TEX.read_text()
@@ -5527,6 +5723,17 @@ def main() -> int:
           f"book_count={_mt['book_count']:,}, "
           f"comparator_sourced={_mt['comparator_sourced']}, "
           f"E3_pass={_mt['E3_pass']}, missing={_mt['missing'] or 'none'}")
+    _epab = json.loads(EPAGE_RESULTS.read_text())
+    _ecw = json.loads(ECWITHIN_RESULTS.read_text())
+    epab_ok, _ep = episode_age_bands_check(tex, _epab, _ecw)
+    failures += 0 if epab_ok else 1
+    print(f"[{'PASS' if epab_ok else 'FAIL'}] episode gradient with loan age "
+          f"held fixed (gate #119): point={_ep['age_point_pp']}pp, "
+          f"CI={_ep['age_ci_pp']}, covers_implied={_ep['covers_implied']}, "
+          f"committed_excluded={_ep['committed_excluded']}, "
+          f"age_only_share={_ep['age_only_share_pct']}%, "
+          f"artifact_ok={_ep['artifact_ok']}, "
+          f"missing={_ep['missing'] or 'none'}")
     _sccg = json.loads(SCCG_RESULTS.read_text())
     sccg_ok, _sc = state_contingent_cap_check(tex, _sccg)
     failures += 0 if sccg_ok else 1
