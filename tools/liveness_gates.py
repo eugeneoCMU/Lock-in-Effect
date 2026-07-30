@@ -165,7 +165,7 @@ ZERO_COUNT = [
 ]
 
 EXACTLY_ONE = [
-    "\\title{Mortgage Lock-In and the Federal Reserve's Quantitative Tightening Shortfall}",
+    "\\title{Mortgage Lock-In and the Composition of the Federal Reserve's Agency-MBS Runoff}",
     # Round-21 rewrite of the kernel sentence (replaces the retired
     # "frozen manifests say otherwise" pin above).
     "not kernel-free, and every figure reported here is the kernel-applied",
