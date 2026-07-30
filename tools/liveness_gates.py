@@ -59,6 +59,7 @@ WALTAB_RESULTS = ROOT / "hazard" / "data" / "wal_table_results.json"
 WALNT_RESULTS = ROOT / "hazard" / "data" / "wal_normal_turnover_results.json"
 WALNRB_RESULTS = ROOT / "hazard" / "data" / "wal_note_rate_basis_results.json"
 SCCG_RESULTS = ROOT / "hazard" / "data" / "state_contingent_cap_grid_results.json"
+MTC_RESULTS = ROOT / "hazard" / "data" / "marginal_transaction_counts_results.json"
 COUPONAMORT_RESULTS = (ROOT / "hazard" / "data"
                        / "coupon_convention_amortization_results.json")
 CURTDEMO_RESULTS = ROOT / "hazard" / "data" / "curtailment_profile_demo_results.json"
@@ -938,6 +939,49 @@ def cap_monthly_units_check(tex, eb, bench, binding_lo_pp, binding_hi_pp):
     return all(lits.values()), {"missing": sorted(k for k, v in lits.items() if not v),
                                 "cap_per_month": round(cap, 2),
                                 "achievable_per_month": (round(proj, 1), round(sett, 1))}
+
+
+def marginal_transaction_counts_check(tex, m):
+    """Gate #113's rule (R32, C-76 + C-82): the marginal in transaction counts.
+
+    Every printed count is DERIVED here from the run artifact. Three properties
+    beyond presence are bound, because each is a way the exhibit could go wrong
+    quietly:
+
+    (i) the UPPER-BOUND framing, since s=1 is a convention and dropping the word
+    turns a bound into an estimate; (ii) the DENOMINATOR disclosure, since using
+    the all-loan mean instead of the surviving mean would roughly double every
+    count and the text is what warns a reader; (iii) the NOT-COMPUTED disclosure
+    about the 2022-2024 decline, since silently dropping it would leave the
+    condition looking satisfied when its comparator was never sourced.
+    """
+    c1 = m["cells"]["s_1"]
+    ch = m["cells"]["s_0.5"]
+    cq = m["cells"]["s_0.25"]
+    cmp_ = m["comparator"]
+    lits = {
+        "book_count": f"{round(c1['book_foregone_payoffs'], -2):,.0f}".replace(",", "{,}") in tex,
+        "per_year": f"{round(c1['book_foregone_payoffs_per_year'], -2):,.0f}".replace(",", "{,}") in tex,
+        "bracket_half": f"{round(ch['book_foregone_payoffs'], -2):,.0f}".replace(",", "{,}") in tex,
+        "bracket_quarter": f"{round(cq['book_foregone_payoffs'], -2):,.0f}".replace(",", "{,}") in tex,
+        "surviving_denominator": f"\\${m['spec']['denominator_surviving_mean']:,.0f}".replace(",", "{,}") in tex,
+        "n_surviving": f"{m['spec']['n_surviving']:,}".replace(",", "{,}") in tex,
+        "upper_bound_framing": "upper bound" in tex,
+        "denominator_warning": "would roughly double the count" in tex,
+        "decline_not_computed": "cannot be formed without assuming" in tex,
+        "run_tag": "\\texttt{marginal\\_transaction\\_counts}" in tex,
+    }
+    if cmp_.get("sourced"):
+        share_lo = c1["share_of_2025_run_rate_lo"] * 100
+        share_hi = c1["share_of_2025_run_rate_hi"] * 100
+        lits["share_of_run_rate"] = f"{share_lo:.1f}--{share_hi:.1f}\\%" in tex
+    ok = (all(lits.values())
+          and all(m["parity"].values())
+          and bool(m["expectations"]["E1_counts_increase_in_s"]))
+    return ok, {"missing": sorted(k for k, v in lits.items() if not v),
+                "book_count": round(c1["book_foregone_payoffs"]),
+                "comparator_sourced": bool(cmp_.get("sourced")),
+                "E3_pass": m["expectations"]["E3_pass"]}
 
 
 def state_contingent_cap_check(tex, g):
@@ -5108,6 +5152,13 @@ def main() -> int:
           f"ceiling={_cmu['cap_per_month']}, "
           f"achievable={_cmu['achievable_per_month']}, "
           f"missing={_cmu['missing'] or 'none'}")
+    _mtc = json.loads(MTC_RESULTS.read_text())
+    mtc_ok, _mt = marginal_transaction_counts_check(tex, _mtc)
+    failures += 0 if mtc_ok else 1
+    print(f"[{'PASS' if mtc_ok else 'FAIL'}] marginal in transaction counts (gate #113): "
+          f"book_count={_mt['book_count']:,}, "
+          f"comparator_sourced={_mt['comparator_sourced']}, "
+          f"E3_pass={_mt['E3_pass']}, missing={_mt['missing'] or 'none'}")
     _sccg = json.loads(SCCG_RESULTS.read_text())
     sccg_ok, _sc = state_contingent_cap_check(tex, _sccg)
     failures += 0 if sccg_ok else 1

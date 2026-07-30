@@ -80,13 +80,13 @@ No condition may be left unclassified. Generated from the inventory and the comm
 | C-73 | MAJOR | 3 | RUN | **SATISFIED** | 2ae04e3 | RUN (analytic): recompute the implied cross-sectional gradient at the |
 | C-74 | MAJOR | 3 | RUN | **OPEN** | wave 3 | RUN: score the Ginnie leg with the elasticity attenuated by the measur |
 | C-75 | MAJOR | 3 | RUN | **OPEN** | wave 3 | RUN: re-derive the Danish buyback discount D from the leg's own prepay |
-| C-76 | MAJOR | 3 | RUN | **OPEN** | wave 3 | RUN: express the marginal in transaction counts and set it against rea |
+| C-76 | MAJOR | 3 | RUN | **SATISFIED** | (this commit) Branch A; count lands, comparator's 2022-24 limb recorded infeasible with evidence | RUN: express the marginal in transaction counts and set it against rea |
 | C-77 | MAJOR | 3 | RUN | **OPEN** | wave 3 | RUN: re-solve the Aladangady reconciliation under the additive floor f |
 | C-78 | MAJOR | 3 | RUN | **OPEN** | wave 3 | RUN: re-run the episode gradient within narrow age bands |
 | C-79 | MAJOR | 3 | RUN | **OPEN** | wave 3 | RUN: score a Danish leg with an interest-only share |
 | C-80 | MAJOR | 3 | RUN | **OPEN** | wave 3 | RUN: read the 2018 depth ladder's shape, not only its level |
 | C-81 | MAJOR | 3 | RUN | **SATISFIED** | (this commit) Branch A; E1 held, E2/E3 PASS; the observable is dominated by the floor's own sampling error | RUN (re-tabulation): build the state-contingent cap's two-input table |
-| C-82 | MAJOR | 4 | STRUCTURE | **OPEN** | wave 4 | Add a household-side row to Table 1 |
+| C-82 | MAJOR | 4 | STRUCTURE | **SATISFIED** | (this commit) unblocked by C-76; T1 household row carries the implied count, its bracket and its bounds | Add a household-side row to Table 1 |
 | C-83 | MAJOR | 4 | STRUCTURE | **SATISFIED** | 8255e0d (row quotes BOTH comparators: 6.0yr vs 2021 refi-boom, ~0 vs the turnover floor) | Add a duration row to Table 1 |
 | C-84 | CRITICAL | 4 | STRUCTURE | **SATISFIED** | 6a34d5c | Give the 5.51% age-standardized and 5.52% Fannie reads their own label |
 | C-85 | MAJOR | 5 | REFERENCE | **SATISFIED** | 38db980 (10 entries, each source-verified; fonseca2026 checked distinct from fonseca2024) | Add the missing references |
@@ -141,8 +141,8 @@ No condition may be left unclassified. Generated from the inventory and the comm
 
 ## Counts
 
-- SATISFIED: **104**
-- OPEN: **12**
+- SATISFIED: **106**
+- OPEN: **10**
 - DEFERRED-EUGENE: **7**
 - DECLINED: **8**
 - CLOSED-REFUTED: **1**
