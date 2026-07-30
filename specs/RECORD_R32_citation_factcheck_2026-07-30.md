@@ -1,8 +1,8 @@
 # RECORD — R32 fact-check of three load-bearing external claims (2026-07-30)
 
 Mode: `deep-research` / `fact-check` (source verification only). Iron rule applied: a claim I
-could not confirm is recorded FAIL, not "uncertain". **No manuscript edit is made by this
-record** — findings 1 and 3 are Eugene's calls.
+could not confirm is recorded FAIL, not "uncertain". **Findings 1 and 2 were FIXED on Eugene's instruction** (see the addendum at the end).
+Finding 4 (licensing) remains his call; finding 3 constrains the C-76 spec.
 
 ---
 
@@ -119,3 +119,44 @@ no agent may attempt.
 
 Retrieval, PDF text extraction and claim matching were AI-assisted. Every verdict above rests on
 verbatim text quoted from the primary source, not on model recall.
+
+---
+
+## ADDENDUM — findings 1 and 2 FIXED (2026-07-30, on Eugene's instruction "fix")
+
+| site | before | after |
+|---|---|---|
+| `references.bib` | "draft January 2026" | **"draft July 2026"** |
+| SS II lit review (`\citet[...]`) | `\S3.2.3`, "January 2026 SSRN working draft" | **`\S3.3.2`**, "July 2026 SSRN working draft" |
+| SS VI.B framing | "a January 2026 SSRN working draft" | **"a July 2026 SSRN working draft"** |
+| SS VI.B two-channel para | `\citep[\S4.9.1]` … "only about one basis point, economically negligible" | **`\citep[\S4.10.2]`** … "about **20 basis points** on average, **16--23** across their robustness variants, which they read as leaving equilibrium rates virtually unchanged" |
+| SS VI.D (**a second stale site, caught by the post-edit residual sweep, not by the original fact-check**) | "an equilibrium-rate effect of about one basis point" | **"about 20 basis points"** |
+
+Two things were added rather than merely corrected:
+
+1. **The version sensitivity is now disclosed in the manuscript**, not hidden in this record:
+   "That estimate is itself draft-sensitive --- the January 2026 version of the same paper
+   reported about one basis point --- which is one more reason this channel is carried as an
+   unrefereed import rather than as a settled magnitude." This is the only surviving mention of
+   the 1 bps figure, and a test asserts it can only appear as version history.
+2. **The imported flatness is now quantified from the newer draft's own microdata** instead of
+   asserted: a 100 bp *decrease* in the yield gap moves the annual moving rate by about
+   **+14 bps** under their specification and about **−19 bps** under Fonseca–Liu's control set
+   — near zero and **not consistently signed** (`\S3.3.2`). This strengthens the claim the
+   Danish leg rests on.
+
+**Re-verified as still correct against the July draft, and therefore left alone:**
+`\citep[\S4.6, structural parameters in tab.~3]` — SS4.6 is still Calibration, and the 3.2%
+unconditional Danish FRM moving rate is still one of its stated calibration targets ("jointly
+calibrated to match (i) the average annual moving rate among Danish FRM borrowers (3.2%)").
+The 22% mortgage-interest deduction and 15% capital-gains rate are also still the July draft's
+U.S. tax calibration, summarised in its Table 3.
+
+**Regression cover:** `tests/test_berger_citation_currency.py`, 13 tests (532 → 545). It is a
+test and not a liveness gate because an external working paper has no committed artifact to tie
+a gate to. It pins the absence of both superseded section numbers, the presence of the current
+ones, the 20 bps magnitude, the bib version, and that "one basis point" survives exactly once
+and only inside the declared version-history clause.
+
+**Verification:** ALL GATES PASS (111) | 545 tests | ALL RENDER CHECKS PASS | 152pp both
+variants | variant differs at line 31 only.
