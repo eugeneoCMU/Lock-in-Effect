@@ -19,7 +19,7 @@ No condition may be left unclassified. Generated from the inventory and the comm
 | C-12 | MAJOR | 1 | WORDING | **SATISFIED** | c2e505e | The form-fork sentence's basis mix — SATISFIED |
 | C-13 | MAJOR | 1 | WORDING | **SATISFIED** | d22b265 | Reconcile tab:params' +0.069 with tab:lowband's -0.0686 — SATISFIED |
 | C-14 | MAJOR | 1 | CHECK | **SATISFIED** | d22b265 | Gate asserting the two beta_1 printings agree with the stated conventi |
-| C-15 | MAJOR | 1 | WORDING | **OPEN** | wave 1 | Restate the Ginnie–Freddie attribution on the window mean, not the May |
+| C-15 |MAJOR |1 |WORDING | **SATISFIED** | 592f16d | Restate the Ginnie–Freddie attribution on the window mean, not the May |
 | C-16 | CRITICAL | 1 | META | **SATISFIED** | 7189c8e | Carroll-Round preparation deliverables — SATISFIED |
 | C-17 | CRITICAL | 2 | WORDING | **SATISFIED** | d1bf578 | Settle the +5.6 posture: drop the point and print the range, or state  |
 | C-18 |MAJOR |2 |CHECK | **SATISFIED** | 09bfad2 | State the anchor-selection rule and show it against the five-read exte |
@@ -102,10 +102,10 @@ No condition may be left unclassified. Generated from the inventory and the comm
 | C-95 | MINOR | 4 | STRUCTURE | **OPEN** | wave 4 | Make tab:pathadiag single-spec |
 | C-96 | MINOR | 4 | STRUCTURE | **OPEN** | wave 4 | Promote the distributional-incidence result out of the homogeneity che |
 | C-97 | MINOR | 4 | STRUCTURE | **OPEN** | wave 4 | Give the transportable methodological lesson its own named paragraph |
-| C-98 | MINOR | 5 | REFERENCE | **OPEN** | wave 5 | Flag berger2026's working-paper status where its estimates are importe |
+| C-98 |MINOR |5 |REFERENCE | **SATISFIED** | 592f16d | Flag berger2026's working-paper status where its estimates are importe |
 | C-99 | MINOR | 5 | WORDING | **OPEN** | wave 5 | Print the measured +3.7 at the age-standardized floor with the grid-re |
-| C-100 | MINOR | 5 | WORDING | **OPEN** | wave 5 | Name the percentile rung's grid-exclusion convention and its 26/1,000  |
-| C-101 | MINOR | 5 | WORDING | **OPEN** | wave 5 | Name the denominator of the width ratio |
+| C-100 |MINOR |5 |WORDING | **SATISFIED** | 7b13504 | Name the percentile rung's grid-exclusion convention and its 26/1,000  |
+| C-101 |MINOR |5 |WORDING | **SATISFIED** | 592f16d | Name the denominator of the width ratio |
 | C-102 | MINOR | 5 | WORDING | **OPEN** | wave 5 | Print beta_1(P_q) at {0.015, 0.03, 0.06, 0.12} in tab:params |
 | C-103 | MINOR | 5 | WORDING | **OPEN** | wave 5 | Concede that the cluster bootstrap is a ratio estimator with random de |
 | C-104 | MINOR | 5 | WORDING | **OPEN** | wave 5 | Drop the zero-exclusion clause from the "three things" list |
@@ -116,15 +116,15 @@ No condition may be left unclassified. Generated from the inventory and the comm
 | C-109 | MINOR | 5 | WORDING | **OPEN** | wave 5 | Label the comparator basis at every simulated-vs-empirical CPR compari |
 | C-110 | MINOR | 5 | WORDING | **OPEN** | wave 5 | State how burnout is initialized |
 | C-111 | MINOR | 5 | WORDING | **OPEN** | wave 5 | Take the default baseline's free external corroboration |
-| C-112 | MINOR | 5 | WORDING | **OPEN** | wave 5 | Derive the "$83 billion per CPR point" coefficient at first use |
+| C-112 |MINOR |5 |WORDING | **SATISFIED** | 7b13504 | Derive the "$83 billion per CPR point" coefficient at first use |
 | C-113 | MINOR | 5 | WORDING | **OPEN** | wave 5 | Quote the six extension-years against the normal-turnover row as well |
 | C-114 | MINOR | 5 | CHECK | **OPEN** | wave 5 | Retire the superseded lag interpretation carried in a committed artifa |
 | C-115 | MINOR | 5 | CHECK | **OPEN** | wave 5 | Read the Danish sweep at two named tax-regime points |
 | C-116 | MINOR | 5 | WORDING | **OPEN** | wave 5 | Connect §VI.C to the paper's own 20.4% share and take-up concession |
 | C-117 | MINOR | 5 | WORDING | **OPEN** | wave 5 | Prefer "cap shortfall" in headline sentences |
-| C-118 | MINOR | 5 | REFERENCE | **OPEN** | wave 5 | Say that the labor-reallocation leg is unquantified in this design |
+| C-118 |MINOR |5 |REFERENCE | **SATISFIED** | 7b13504 | Say that the labor-reallocation leg is unquantified in this design |
 | C-119 | MINOR | 5 | REFERENCE | **OPEN** | wave 5 | Connect the mobility constraint to the inventory channel and its incid |
-| C-120 | MINOR | 5 | WORDING | **OPEN** | wave 5 | Name distributional silence about Ginnie Mae borrowers as a limitation |
+| C-120 |MINOR |5 |WORDING | **SATISFIED** | 7b13504 | Name distributional silence about Ginnie Mae borrowers as a limitation |
 | C-121 | MINOR | 6 | WORDING | **OPEN** | wave 6 | De-nest the sentences carrying four or more parentheticals |
 | C-122 | MINOR | 6 | STRUCTURE | **OPEN** | wave 6 | Fold §VI.C into §VI.B |
 | C-123 | MINOR | 6 | WORDING | **OPEN** | wave 6 | Abstract length and structure |
@@ -141,8 +141,8 @@ No condition may be left unclassified. Generated from the inventory and the comm
 
 ## Counts
 
-- OPEN: **78**
-- SATISFIED: **44**
+- OPEN: **71**
+- SATISFIED: **51**
 - DEFERRED-EUGENE: **7**
 - SPEC COMMITTED: **2**
 - CLOSED-REFUTED: **1**
