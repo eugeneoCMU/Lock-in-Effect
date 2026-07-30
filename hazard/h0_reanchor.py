@@ -141,7 +141,13 @@ def data_shas() -> dict:
     for p in sorted(DATA_DIR.rglob("*")):
         if not p.is_file():
             continue
-        if "floor_sweep" in p.parts or p == RESULTS_JSON:
+        # exclude the gitignored floor_sweep/ scratch, this run's own output, and
+        # this run's own checkpoint file. The checkpoint was added in the hardening
+        # pass AFTER the exclusion list was written and was not added to it, which
+        # is what made G2 report FAIL with an EMPTY changed-list on the first
+        # completed run: a NEW key in sha_after cannot appear as a changed key.
+        if ("floor_sweep" in p.parts or p == RESULTS_JSON
+                or p.name == "h0_reanchor_partial.jsonl"):
             continue
         out[str(p.relative_to(DATA_DIR))] = hashlib.sha256(p.read_bytes()).hexdigest()
     return out
@@ -461,7 +467,11 @@ def main() -> None:
         "scope_note": ("hazard/data/** excluding the gitignored floor_sweep/ scratch "
                        "directory that _run_scored writes microsim parquets into by "
                        "design, and excluding this run's own new output path"),
+        # report BOTH directions, so a set difference can never again read as
+        # "nothing changed" while the verdict is False
         "changed": [k for k in sha_before if sha_before.get(k) != sha_after.get(k)],
+        "added": sorted(set(sha_after) - set(sha_before)),
+        "removed": sorted(set(sha_before) - set(sha_after)),
     }
 
     microsim_engine.fetch_data = _ORIG_ENGINE_FETCH
