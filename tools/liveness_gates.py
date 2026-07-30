@@ -111,6 +111,9 @@ MATCHEDDEPTH_RESULTS = ROOT / "hazard" / "data" / "matched_depth_reconciliation_
 # cannot be manufactured by matched_depth_reconciliation.py itself.
 B0VAR_RESULTS = ROOT / "hazard" / "data" / "b0_variance_decomposition.json"
 DANUSINT_RESULTS = ROOT / "hazard" / "data" / "danish_us_intercept_results.json"
+BBCB_RESULTS = ROOT / "hazard" / "data" / "buyback_credit_bracket_results.json"
+BDR_RESULTS = (ROOT / "hazard" / "data"
+               / "buyback_discount_rederived_results.json")
 REFISWEEP_RESULTS = ROOT / "abm" / "data" / "refi_sweep_results.json"
 SHAREDLAYER_RESULTS = ROOT / "hazard" / "data" / "shared_layer_scoring_results.json"
 MARGDECOMP_RESULTS = ROOT / "hazard" / "data" / "marginal_decomposition_results.json"
@@ -172,6 +175,11 @@ ZERO_COUNT = [
     # external-gates cross-check above).
     "is not scored against the 50\\% undercutting band",
     "that band presupposed an empirically admissible turnover level",
+    # R32 C-75: the four-point proxy grid is history, not the operative basis
+    # the printed cash figure stands on. These three phrasings each said it was.
+    "at the committed proxy discounts",
+    "at the paper's own proxy discounts",
+    "across the committed 32--38\\% discount grid",
 ]
 
 EXACTLY_ONE = [
@@ -612,7 +620,7 @@ LETTER_CURRENT_LITERALS = [
     "68.8\\%", "35.8\\%",   # the censoring shares, central and null legs
     "60.2\\%", "76.3\\%", "12.6\\%",  # cross-design, and the reweight's other side
     "$-1.47$",              # the interaction that forbids a composed point
-    "$-\\$89.4$ to $-\\$117.7$ billion",  # the buyback bracket's cash-incidence range
+    "$-\\$51.0$ billion",  # the buyback bracket's cash-incidence figure, re-derived
     "$+11.2$", "$+11.5$",   # the two corrections that run the other way
 ]
 
@@ -650,13 +658,15 @@ ELASTICITY_DISCIPLINE_SPANS = {
 # manuscript's own pathb paragraph recorded the market-value buyback credit
 # as the largest un-priced channel, exceeding the gap. Run
 # buyback_credit_bracket priced both incidence readings from committed
-# artifacts (verdict REVERSES: cash-incidence gap negative at every proxy
-# discount), and the paper now states the gap's sign as incidence-
+# artifacts (verdict REVERSES), R32's buyback_discount_rederived then
+# replaced that run's asserted discount grid with one derived from the
+# leg's own prepayment path (gate #117), and the paper states the gap's
+# sign as incidence-
 # conditional at every site that previously stated signed relief. These
 # spans keep that statement from quietly reverting to the signed claim.
 BUYBACK_BRACKET_SPANS = {
     "run_tag": "\\texttt{buyback\\_credit\\_bracket}",
-    "reversal_range": "$-\\$89.4$ to $-\\$117.7$ billion",
+    "reversal_point": "$-\\$51.0$ billion",
     "pathb_sign": "The gap's sign is therefore incidence-conditional",
     # ROUND-26 denomination resolution: the two incidences answer two
     # QUESTIONS. The benchmark is a face-value object (SOMA current face vs
@@ -2193,6 +2203,202 @@ def ginnie_attenuated_check(tex, g, ov, gof):
                 "in_sample_pp": [round(v, 4) for v in ins_pp],
                 "off_window_pp": [round(v, 4) for v in off_pp],
                 "E3_pass": bool(e["E3_pass"])}
+
+
+# --- R32 C-75 (gate #117): THE RE-DERIVED BUYBACK DISCOUNT -----------------
+# The committed bracket's discount was ASSERTED: buyback_credit_bracket.py:107
+# hard-codes D_GRID = [0.32, 0.34, 0.36, 0.38] and :33 calls it "the
+# manuscript's committed proxy range". Run buyback_discount_rederived prices
+# each month's retired face at its own prepayment-consistent PV, off the leg's
+# own CPR path and the window's own rate path, and the answer is a POINT: the
+# committed range was a range only because the asserted grid had four points.
+#
+# Every printed figure is DERIVED below, and every committed constant it rests
+# on is tied LIVE to two artifacts this run did not write --- the committed
+# bracket's own results and danish_us_intercept's --- so no number the gate
+# enforces is a literal typed into this file. What is written out is the prose
+# those figures would be meaningless without, and six properties beyond
+# presence, each a way this could quietly rot back:
+#
+#   (a) the SUPERSEDED RANGE must be gone. It was live at five .tex sites, and
+#       one of them (the trilemma paragraph) printed a HYPHENATED variant that
+#       gate #103's substring never matched -- so #103 would have stayed green
+#       over a retired figure. Absence is therefore checked in both spellings;
+#   (b) the POINT-NOT-RANGE statement, because a reader who finds one number
+#       where a range used to be will assume a range was narrowed, rather than
+#       that its width was never estimated in the first place;
+#   (c) the ZERO-MONTHS fact, which is what makes "the committed grid was
+#       uniformly too deep" a measurement rather than a statement about an
+#       average;
+#   (d) the PROVENANCE HEDGE. The spec (SS2.3, SS6/P4) calls the no-prepayment
+#       reading of the committed grid "plausible but not exactly reproduced"
+#       and uses it as a non-targeting band check. Both the consistency
+#       wording and the hedge that scopes it are pinned, so the clause cannot
+#       be upgraded into a finding the run does not carry;
+#   (e) the D_crit OWNERSHIP clause. D_crit is gap_par/E on the committed
+#       chain, declared in the spec BEFORE the run so that E4 was falsifiable.
+#       Without the ownership clause the threshold reads as an output of the
+#       re-derivation, which would retrofit the prediction;
+#   (f) gap_face, which this run CANNOT move. It is an identity, and a later
+#       edit that helpfully "updates" it alongside the cash figure would be
+#       wrong. Pinning it here is cheap insurance against that edit.
+#
+# The two-grain disclosure (SS8.3: D_t is priced on the SOMA book's single-pool
+# tabulation while F_t comes from the microsimulated panel's roll-off) is
+# pinned for the same reason: the run inherits that seam and the spec commits
+# the landing to naming it rather than implying one object was priced end to
+# end.
+BUYBACK_DISCOUNT_SPANS = {
+    "run_tag": "\\texttt{buyback\\_discount\\_rederived}",
+    "asserted_not_derived": "The committed grid was asserted, not derived",
+    "prepay_consistent": "prices each month's retired face at its own "
+                         "prepayment-consistent present value",
+    "wac_basis": "aged to that month at the 2.49\\% weighted-average coupon",
+    "two_grains": "The price and the face come from two populations",
+    "seam_inherited": "the seam the committed early-face netting already "
+                      "carries, inherited here rather than repaired",
+    "point_not_range": "That is a point, not a range",
+    "zero_months": "none of the forty-two months reaches the committed "
+                   "grid's floor",
+    "no_prepay_provenance": "consistent with a no-prepayment annuity priced "
+                            "at a representative state",
+    "provenance_not_exact": "plausible rather than exactly reproduced",
+    "verdict_survives": "shrinks the reversal without retiring it",
+    "d_crit_ownership": "arithmetic on the committed chain, fixed before the "
+                        "run rather than produced by it",
+}
+
+# the grid's own length, spelled the way the paragraph spells it; .get() so an
+# out-of-range grid yields a numeral that will simply miss, never a KeyError.
+_GRID_WORDS = {1: "one", 2: "two", 3: "three", 4: "four",
+               5: "five", 6: "six", 7: "seven", 8: "eight"}
+
+
+def buyback_discount_rederived_check(tex, d, cb_art, dan):
+    """Gate #117's rule (R32, C-75): the buyback discount, re-derived."""
+    tex_nc = re.sub(r"(?<!\\)%.*", "", tex)
+    r, p, cb = d["rederived"], d["parity"], d["committed_bracket"]
+    bv = cb_art["verdict"]
+    pt = dan["point"]
+    grid = cb["D_GRID"]
+    anchor = p["P4_provenance_anchor"]
+    months = d["months"]
+    E = p["P2_E_b"]
+    gap_par = p["P2_committed_constants"]["gap_par"]["got"]
+    dbar = r["face_weighted_mean_discount"]
+    gc = r["gap_cash_b"]
+    n_pts = _GRID_WORDS.get(len(grid), len(grid))
+
+    lits = dict(BUYBACK_DISCOUNT_SPANS)
+    lits.update({
+        "dbar": f"face-weighted mean of {dbar * 100:.1f}\\%",
+        "haircut": f"\\${r['haircut_b']:.1f} billion haircut",
+        "gap_cash": f"cash gap of $-\\${abs(gc):.1f}$ billion",
+        "monthly_range": (f"from {r['monthly_D_min'] * 100:.1f}\\% "
+                          f"to {r['monthly_D_max'] * 100:.1f}\\%"),
+        "grid_span": (f"the committed {grid[0] * 100:.0f}--"
+                      f"{grid[-1] * 100:.0f}\\% span was a range only by "
+                      f"virtue of a {n_pts}-point asserted grid"),
+        "provenance": (f"returns {anchor['discount'] * 100:.1f}\\% at zero "
+                       f"prepayment on a "
+                       f"{anchor['state']['coupon'] * 100:.1f}\\% coupon "
+                       f"against a {anchor['state']['market'] * 100:.1f}\\% "
+                       f"market rate"),
+        "own_state": (f"the leg itself prepays at "
+                      f"{p['P5_mean_danish_cpr_pct']:.2f}\\% against a window "
+                      f"averaging {p['P5_market_rate_pct']['mean']:.2f}\\%"),
+        "d_crit": (f"the verdict turns at a "
+                   f"{r['D_crit'] * 100:.1f}\\% discount"),
+        # CONTEXTFUL ON PURPOSE. The bare literal occurs 19x in the manuscript,
+        # so pinning it would go green over the very edit item (f) of this
+        # header says it guards against: a later hand "updating" the single
+        # face-accounting site alongside the cash figure. Verified: this phrase
+        # occurs exactly once in both variants.
+        "gap_face_unmoved": (f"the gap stands at $+\\${r['gap_face_b']:.1f}$ "
+                             "billion under the balance-adjustment reading"),
+    })
+    missing = sorted(k for k, lit in lits.items() if lit not in tex_nc)
+
+    # (a) both spellings the superseded range was live in
+    retired = [lit for lit in ("$-\\$89.4$ to $-\\$117.7$ billion",
+                               "$-\\$89.4$-to-$-\\$117.7$ billion")
+               if lit in tex_nc]
+
+    # the committed constants, tied to the two artifacts that own them
+    cash_rows = bv["cash_rows"]
+    tie_ok = (
+        pt["institutional_gap_shared_b"] == gap_par == r["gap_face_b"]
+        and pt["us_trapped_shared_b"]
+        == p["P2_committed_constants"]["us_shared"]["got"]
+        and pt["danish_trapped_shared_b"]
+        == p["P2_committed_constants"]["dk_shared"]["got"]
+        and pt["mean_danish_cpr_pct"] == p["P5_mean_danish_cpr_pct"]
+        == p["P2_committed_constants"]["mean_danish_cpr_pct"]["got"]
+        and [row["D"] for row in cash_rows] == grid
+        and bv["gap_cash_range_b"] == cb["gap_cash_range_b"]
+        and bv["code"] == cb["code"]
+        and bv["early_face_E_b"] == E
+        and bv["gap_face_b"] == r["gap_face_b"] == gap_par
+        and all(p["P3_chain_bit_identical"][f"D_{row['D']}"]["committed"]
+                == row["gap_cash_b"]
+                and p["P3_chain_bit_identical"][f"D_{row['D']}"]["got"]
+                == row["gap_cash_b"]
+                for row in cash_rows)
+    )
+
+    e4_lo, e4_hi = d["expectations"]["E4_band"]
+    art_ok = (
+        len(grid) == 4
+        and p["P0a_wal_table_import_safe"] is True
+        and p["P0b_artifacts_byte_identical_after_import"] is True
+        and p["P1_schedule_wal_equals_cell_wal"]["max_abs_diff"] < 1e-12
+        and all(x["pass"] is True for x in p["P1_v15_printed"].values())
+        and all(x["got"] == x["want"]
+                for x in p["P2_committed_constants"].values())
+        and all(x["exact"] is True
+                for x in p["P3_chain_bit_identical"].values())
+        # P4: the primitive reproduces where the committed grid came from,
+        # as a band check against the grid itself and at the ZERO-CPR state
+        and grid[0] < anchor["discount"] < grid[-1]
+        and anchor["state"]["cpr"] == 0.0
+        and len(months) == d["spec"]["window_months"] == 42
+        # (c) uniformly too deep, month by month and not on the average
+        and r["months_at_or_above_committed_floor"] == 0
+        and all(m["below_committed_grid_floor"] is True for m in months)
+        and max(m["discount_D"] for m in months) < grid[0]
+        # E1: the monthly decomposition telescopes and is well posed
+        and abs(sum(m["early_face_b"] for m in months) - E) < 1e-9
+        and min(m["early_face_b"] for m in months) > 0
+        # every printed aggregate re-derived from the 42 rows
+        and abs(sum(m["discount_D"] * m["early_face_b"] for m in months) / E
+                - dbar) < 1e-12
+        and abs(r["haircut_b"] / E - dbar) < 1e-12
+        # the chain is the committed one with ONLY D changed
+        and abs(gc - (gap_par - dbar * E)) < 1e-9
+        and abs(r["D_crit"] - gap_par / E) < 1e-12
+        and r["D_crit"] < min(m["discount_D"] for m in months)
+        # the three scope statements the prose makes, made by the artifact
+        and "2.49% WAC" in d["spec"]["method"]
+        and "two populations" in d["spec"]["grain_note"]
+        and cb["provenance"].startswith("asserted, never derived")
+        and "before the run" in r["D_crit_note"]
+        # (f) the face incidence is an identity this run cannot move
+        and r["gap_face_b"] == gap_par
+        # the verdict as printed: still reversing, strictly inside the
+        # committed range's near edge
+        and r["verdict_code"] == "REVERSES" and gc < 0
+        and abs(gc) < abs(cb["gap_cash_range_b"][1])
+        and all(d["expectations"][k] is True for k in (
+            "E1_monthly_face_positive_and_telescopes", "E2_pv_monotone",
+            "E3_every_month_below_committed_grid_floor", "E4_pass",
+            "E5_reverses_and_smaller"))
+        and e4_lo <= d["expectations"]["E4_dbar"] < e4_hi
+    )
+    return (not missing and not retired and tie_ok and art_ok,
+            {"missing": missing, "retired_range_present": retired,
+             "cross_artifact_tie": tie_ok, "artifact_ok": art_ok,
+             "dbar_pct": round(dbar * 100, 4), "gap_cash_b": round(gc, 4),
+             "months_at_floor": r["months_at_or_above_committed_floor"]})
 
 def main() -> int:
     tex = TEX.read_text()
@@ -6209,6 +6415,19 @@ def main() -> int:
           f"tab:lowband cells={_b1['cells_found']} "
           f"signs={_b1['lowband_signs']}, "
           f"replicator_note={_b1['replicator_note']}")
+
+    _bdr = json.loads(BDR_RESULTS.read_text())
+    _bbcb = json.loads(BBCB_RESULTS.read_text())
+    _bdan = json.loads(DANUSINT_RESULTS.read_text())
+    bdr_ok, _bd = buyback_discount_rederived_check(tex, _bdr, _bbcb, _bdan)
+    failures += 0 if bdr_ok else 1
+    print(f"[{'PASS' if bdr_ok else 'FAIL'}] re-derived buyback discount (gate "
+          f"#117): Dbar={_bd['dbar_pct']}%, gap_cash={_bd['gap_cash_b']} $bn, "
+          f"months_at_or_above_floor={_bd['months_at_floor']}, "
+          f"retired_range={_bd['retired_range_present'] or 'gone'}, "
+          f"cross_artifact_tie={_bd['cross_artifact_tie']}, "
+          f"artifact_ok={_bd['artifact_ok']}, "
+          f"missing={_bd['missing'] or 'none'}")
 
     va_ok, _va = verdict_audit_check(tex)
     failures += 0 if va_ok else 1

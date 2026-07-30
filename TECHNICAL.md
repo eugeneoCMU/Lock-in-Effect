@@ -4450,6 +4450,55 @@ that drifted would fail before any new number could exist.
 book's bucketed coupons while the floor is the Freddie panel's loan-level gaps — two populations
 at two grains.
 
+## 49. Round-32 / C-75: the Danish buyback discount, re-derived — run `buyback_discount_rederived`, LANDS (2026-07-30)
+
+The discount at which the Danish leg's retired face is repurchased was **asserted, never
+derived**: `hazard/buyback_credit_bracket.py:107` hard-codes `D_GRID = [0.32, 0.34, 0.36, 0.38]`
+and `:33` calls it "the manuscript's committed proxy range". R2 attached a pre-talk precondition
+to it — the $-\$89$/$-\$118$bn range not to be quoted aloud until this landed.
+
+`buyback_discount_rederived` prices each of the 42 window months' retired face at its own
+prepayment-consistent PV: the SOMA book aged to that month on `wal_table`'s single-pool
+tabulation at the 2.49% WAC, level-payment with SMM from that month's `CPR_Danish`, discounted at
+that month's `market_rate_pct`. Branch A: **face-weighted mean discount 0.2384122218130252**
+(monthly 0.18391516764246985 to 0.28095670536995776), **haircut \$112.20948771647404bn**, **cash
+gap $-\$51.021150346369225$bn**, verdict REVERSES. E1/E2 hold, E3 holds at every one of the 42
+months (`months_at_or_above_committed_floor = 0`), E4 lands at 0.2384 inside the pre-committed
+$[0.13, 0.32)$, E5 holds strictly inside the committed range's near edge $-89.42070354320788$.
+P0–P5 all pass, including the four committed grid points reproducing **bit-identically** and the
+P4 provenance anchor at 0.35329384201857117, inside the committed $[0.32, 0.38]$ span.
+
+**The answer is a point, not a narrowed range.** The committed 32–38% span was a range only
+because the asserted grid had four points; nothing about its width was ever estimated. The §pathb
+paragraph now says so.
+
+**Two claims are deliberately NOT reported as findings of this run.** The no-prepayment reading of
+the committed grid is stated as a consistency, hedged "plausible rather than exactly reproduced"
+per spec §2.3 and §6/P4 (three non-matching values exist for that state: 34.2% scoping, 36.5% as
+R2 reported it, 35.33% from the run's own primitive). And $D_{\mathrm{crit}} = 0.13000725480818595
+= \text{gap\_par}/E$ is arithmetic on the committed chain, declared in the spec **before** the run
+so E4 was falsifiable rather than retrofitted; the prose gives it that owner explicitly. Both the
+hedge and the ownership clause are pinned by gate #117 spans, and each has a battery test that
+rewrites the clause into the unhedged form and confirms the gate goes red.
+
+**Two grains, stated** (spec §8.3): $D_t$ is priced on the SOMA book's vintage tabulation while
+$F_t$ comes from the microsimulated Freddie panel's roll-off. The run inherits that seam from the
+committed $E$ and names it rather than implying one object was priced end to end.
+
+**Landed.** Seven .tex sites restated (52, 85, 285 twice, 766 twice, 770, and the `tab:verdicts`
+row at 1470 that spec §7 names) — one of them, the trilemma paragraph at 770, printed a
+**hyphenated** variant that gate #103's pinned substring never matched, so #103 had been green
+over a live retired figure in the conclusion. Gate #103's `reversal_range` becomes
+`reversal_point`, gate #101's `LETTER_CURRENT_LITERALS` entry and the response letter's current
+section are updated in the same commit (all three are required or gate #101 fires in one
+direction or the other), three retired phrasings are added to `ZERO_COUNT`, a `tab:runindex` row
+is added, and **GATE #117** lands with a **65-test battery**. Every figure gate #117 enforces is
+derived from the run artifact, and every committed constant beneath it is tied live to two
+artifacts this run did not write — `buyback_credit_bracket_results.json` for the grid, the four
+cash rows, the range endpoints, $E$ and gap_face, and `danish_us_intercept_results.json` for
+gap_par, both legs' shared totals and the 5.61% leg speed. `gap_face` is pinned as an identity
+this run cannot move.
+
 ## 50. Round-32 / C-74: the Ginnie share's gap response, bracketed — run `ginnie_overlay_attenuated`, LANDS (2026-07-30)
 
 **The defect.** The committed overlay scores the 20.4% Ginnie face share by the observed Ginnie
