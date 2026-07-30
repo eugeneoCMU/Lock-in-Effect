@@ -78,12 +78,21 @@ def sha(p: Path) -> str:
     return hashlib.sha256(p.read_bytes()).hexdigest()
 
 
+def _is_syspath_call(stmt: ast.stmt) -> bool:
+    """A bare `sys.path.insert(...)` / `sys.path.append(...)` statement.
+
+    Accepted because it mutates sys.path and nothing else: no value is computed, no artifact is
+    read, no engine entry point is touched. episode_confrontation.py:260 is exactly this, outside
+    an if-guard. Any other top-level call is still rejected.
+    """
+    return (isinstance(stmt, ast.Expr) and isinstance(stmt.value, ast.Call)
+            and ast.unparse(stmt.value.func) in ("sys.path.insert", "sys.path.append"))
+
+
 def _syspath_bootstrap(node: ast.If) -> bool:
     if "sys.path" not in ast.unparse(node.test) or node.orelse:
         return False
-    return all(isinstance(s, ast.Expr) and isinstance(s.value, ast.Call)
-               and ast.unparse(s.value.func) in ("sys.path.insert", "sys.path.append")
-               for s in node.body)
+    return all(_is_syspath_call(s) for s in node.body)
 
 
 def binds_names_only(path: Path) -> bool:
@@ -93,6 +102,8 @@ def binds_names_only(path: Path) -> bool:
         if isinstance(node, binding):
             continue
         if isinstance(node, ast.Expr) and isinstance(node.value, ast.Constant):
+            continue
+        if _is_syspath_call(node):
             continue
         if isinstance(node, ast.If):
             if ast.unparse(node.test) == "__name__ == '__main__'" or _syspath_bootstrap(node):
