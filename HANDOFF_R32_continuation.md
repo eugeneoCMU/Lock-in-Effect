@@ -129,12 +129,42 @@ python3 tools/render_gate.py | tail -1
 65 refuted claims across the wave. Apply the CORRECTED set where it exists; where it does
 not, fold the verdict into the draft yourself before applying.
 
-| cluster | conditions | corrected set present? |
-|---|---|---|
-| `G-denominators` | C-31, C-36, C-42, C-43, C-44, C-45, C-46, C-62 | yes |
-| `B-ladder` | C-05, C-20, C-21, C-24, C-25, C-27, C-38, C-69 | yes |
-| `F-assembly` | C-18, C-26, C-39, C-40, C-41 | check; else fold the verdict |
-| `C-formfork` | C-04 (CRITICAL, partial), C-22, C-23, C-28, C-32 | check; else fold the verdict |
+**All four corrected sets are present.** 42 edits survived, 19 were dropped as moot,
+redundant or refuted, and 58 verdict findings were folded in.
+
+| cluster | conditions | edits | dropped | words | apply order |
+|---|---|---|---|---|---|
+| `B-ladder` | C-05, C-20, C-21, C-24, C-25, C-27, C-38, C-69 | 14 | 7 | +471 | **FIRST** (owns L355) |
+| `F-assembly` | C-18, C-26, C-39, C-40, C-41 | 11 | 6 | +316 | second |
+| `C-formfork` | C-04 (CRITICAL, partial), C-22, C-23, C-28, C-32 | 10 | 2 | +250 | third |
+| `G-denominators` | C-31, C-36, C-42, C-43, C-44, C-45, C-46, C-62 | 7 | 4 | +648 | fourth |
+
+**Apply `B-ladder` first.** It flags a SEVERE collision on the line beginning
+`A seventh qualification` (its E3 and E4 are both mid-line there, and E3's OLD ends at
+`I attach no posture`), and a second on the 4KB+ line carrying the 88.7%/85.7%
+shared-basis figures, which `F-assembly` and `G-denominators` also touch. Re-measure
+between clusters; abort on any `count != 1` rather than force it.
+
+**+1,685 words total, and none of it is verified against a build.** That is roughly 4–5
+pages on a paper Eugene has already flagged for length (`C-130`), and two clusters warn
+of float-adjacent growth: `G`'s `tab:danish` post-float note grows 66 words, and `B`'s
+E9 takes a `tab:ladder` status cell from 36 to 42 characters in a plain `@{}llll@{}`
+tabular. **Build and run `render_gate.py` after each cluster, not at the end** — this
+round has already produced one 87.6pt float overflow that every gate passed.
+If length must bite, each corrected set names its own most-droppable pieces.
+
+**Four decisions the fix pass deliberately left open — do not silently resolve them:**
+- **C-31** (expectations denominator at the table site): `G` dropped it on the ground
+  that `tab:headline` already carries \$87.8bn at line 77 and §III.B enumerates its own
+  quoting sites, so a fourth site would falsify that enumeration. The full replacement
+  text is preserved in its DROPPED section if you overrule. Coordinator's call.
+- **C-22** (resolve the floor-form fork with a stated selection rule): `C-formfork`
+  reports it unresolved and **Eugene's call**, with option (ii) as the live remnant.
+- **C-40** (the assembly's inclusion rule): `F-assembly` **could not discharge it
+  truthfully** — no rule it could find in source admits the `tab:assembly` bracket set.
+  That is a legitimate INFEASIBLE outcome; record it as one with the reason.
+- **C-25**'s settling check turns on whether Liebersohn–Rothstein publish a standard
+  error on the mobility coefficient. `B-ladder` claims only what it verified.
 
 Apply **one cluster per commit**, and for each: re-measure every `OLD` count against the
 *current* file (the drafts predate several landings — see §7), assert every pinned span
