@@ -59,6 +59,7 @@ import polars as pl
 import competing_risks
 import floor_sweep as fs
 import literature_hazard as lh
+import microsim_engine
 from config import AGE_SPLINE_KNOTS
 from macro import build_empirical_metrics, fetch_data, fetch_soma_mbs_monthly
 
@@ -94,6 +95,41 @@ PREDICTION_DIRECTION = "fall"
 
 _ORIG_BASELINE = lh.baseline_hazard
 _ORIG_RATE_GAP = competing_risks.compute_rate_gap
+_ORIG_ENGINE_FETCH = microsim_engine.fetch_data
+
+
+def retrying(fn, what: str, tries: int = 6):
+    """FRED and the NY Fed both return transient 5xx. A 214-cell run that dies on
+    one of them has wasted an hour, so the initial fetches retry with backoff."""
+    import time as _t
+    for k in range(tries):
+        try:
+            return fn()
+        except Exception as e:                                   # noqa: BLE001
+            if k == tries - 1:
+                raise
+            wait = 5 * (2 ** k)
+            print(f"   {what} failed ({type(e).__name__}: {e}); retry {k+1}/{tries-1} in {wait}s")
+            _t.sleep(wait)
+
+
+def install_macro_cache(macro_df):
+    """run_qt_microsim calls `calculate_dynamic_friction(fetch_data())` on EVERY cell
+    (hazard/microsim_engine.py:108), so a 214-cell run makes 214 live FRED calls and
+    dies on the first transient one -- which is exactly how this run's first attempt
+    ended (urllib HTTPError 502 mid-loop). `fetch_data` is imported into
+    microsim_engine's namespace as a module-level name, so it is patchable the same way
+    baseline_hazard is; calculate_dynamic_friction copies its argument before touching
+    it (hazard/macro.py:89), so handing back one shared frame cannot leak state between
+    cells.
+
+    This is a robustness fix, NOT a change to what is computed, and it is not asserted
+    -- gate G1a proves it: the cached frame must still reproduce the committed
+    psa_level_sweep trapped_b values to 1e-9 $B. If the cache differed from a live
+    fetch in any way that mattered, G1a would fail. It also makes the run MORE
+    reproducible than the committed convention, since every cell now scores against one
+    macro snapshot instead of up to 214 separately-fetched ones."""
+    microsim_engine.fetch_data = lambda *a, **k: macro_df
 
 
 # ---------------------------------------------------------------- G2 sha census
@@ -243,11 +279,14 @@ def main() -> None:
     prod_floor_mode = lh.FLOOR_MODE
 
     print("loading macro frame + loans ...")
-    macro = fetch_data()
-    soma = fetch_soma_mbs_monthly()
+    macro = retrying(fetch_data, "fetch_data")
+    soma = retrying(fetch_soma_mbs_monthly, "fetch_soma_mbs_monthly")
     empirical = build_empirical_metrics(macro, soma_rolloff=soma)
     loans = pl.read_parquet(fs.LOAN_SAMPLE_PATH)
     fs.SWEEP_DIR.mkdir(parents=True, exist_ok=True)
+    install_macro_cache(macro)
+    print("   macro frame cached for the whole run (see install_macro_cache); "
+          "G1a validates it")
 
     # ---- G1a: unpatched parity + exposure census --------------------------
     print("G1a: unpatched parity at 4.991% (with exposure census on the null leg) ...")
@@ -360,17 +399,35 @@ def main() -> None:
         return
 
     # ---- substituted legs, one pair per usable replicate ------------------
+    # per-replicate results are checkpointed after every replicate, so a transient
+    # network failure mid-loop costs one replicate rather than the whole run
+    ckpt = DATA_DIR / "h0_reanchor_partial.jsonl"
+    done = {}
+    if ckpt.exists():
+        for line in ckpt.read_text().splitlines():
+            if line.strip():
+                d = json.loads(line)
+                done[d["i"]] = d
+        print(f"\nresuming: {len(done)} replicate(s) already checkpointed")
+
     per_rep = []
     if branch in ("A", "B"):
         print(f"\nrunning {len(usable_idx)} usable replicates (2 engine cells each) ...")
-        for n_done, i in enumerate(usable_idx, 1):
-            r = pair(loans, empirical, spline_baseline(h0n[i]))
-            r["i"] = i
-            r["level_mean_h0"] = float((h0n[i] * w).sum())
-            r["level_rel_dev"] = abs(r["level_mean_h0"] - prod_mean) / prod_mean
-            per_rep.append(r)
-            if n_done % 10 == 0 or n_done == len(usable_idx):
-                print(f"   {n_done}/{len(usable_idx)}  marginal_pp {r['marginal_pp']:.4f}")
+        with open(ckpt, "a") as fh:
+            for n_done, i in enumerate(usable_idx, 1):
+                if i in done:
+                    per_rep.append(done[i])
+                    continue
+                r = pair(loans, empirical, spline_baseline(h0n[i]))
+                r["i"] = i
+                r["level_mean_h0"] = float((h0n[i] * w).sum())
+                r["level_rel_dev"] = abs(r["level_mean_h0"] - prod_mean) / prod_mean
+                per_rep.append(r)
+                fh.write(json.dumps(r) + "\n")
+                fh.flush()
+                if n_done % 10 == 0 or n_done == len(usable_idx):
+                    print(f"   {n_done}/{len(usable_idx)}  marginal_pp {r['marginal_pp']:.4f}",
+                          flush=True)
 
     # ---- remaining gates ---------------------------------------------------
     if per_rep:
@@ -407,8 +464,10 @@ def main() -> None:
         "changed": [k for k in sha_before if sha_before.get(k) != sha_after.get(k)],
     }
 
+    microsim_engine.fetch_data = _ORIG_ENGINE_FETCH
     assert lh.baseline_hazard is _ORIG_BASELINE, "baseline_hazard NOT restored"
     assert competing_risks.compute_rate_gap is _ORIG_RATE_GAP, "compute_rate_gap NOT restored"
+    assert microsim_engine.fetch_data is _ORIG_ENGINE_FETCH, "fetch_data NOT restored"
 
     out = {
         "mode": "h0_reanchor",
