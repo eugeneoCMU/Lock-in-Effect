@@ -60,6 +60,7 @@ WALNT_RESULTS = ROOT / "hazard" / "data" / "wal_normal_turnover_results.json"
 WALNRB_RESULTS = ROOT / "hazard" / "data" / "wal_note_rate_basis_results.json"
 SCCG_RESULTS = ROOT / "hazard" / "data" / "state_contingent_cap_grid_results.json"
 MTC_RESULTS = ROOT / "hazard" / "data" / "marginal_transaction_counts_results.json"
+DLS_RESULTS = ROOT / "hazard" / "data" / "depth_ladder_shape_results.json"
 COUPONAMORT_RESULTS = (ROOT / "hazard" / "data"
                        / "coupon_convention_amortization_results.json")
 CURTDEMO_RESULTS = ROOT / "hazard" / "data" / "curtailment_profile_demo_results.json"
@@ -939,6 +940,39 @@ def cap_monthly_units_check(tex, eb, bench, binding_lo_pp, binding_hi_pp):
     return all(lits.values()), {"missing": sorted(k for k, v in lits.items() if not v),
                                 "cap_per_month": round(cap, 2),
                                 "achievable_per_month": (round(proj, 1), round(sett, 1))}
+
+
+def depth_ladder_shape_check(tex, d):
+    """Gate #114's rule (R32, C-80): the 2018 depth ladder's shape.
+
+    Derives every printed per-bin CPR and the plateau coverage from the run
+    artifact. Beyond presence it binds the TWO QUALIFICATIONS, because this
+    exhibit's failure mode is cherry-picking: the plateau supports the paper's
+    own production form, so the tail that argues the other way, and the
+    not-a-test caveat, are exactly what a later edit would be tempted to drop.
+    """
+    bins = {b["bin"]: b for b in d["bins"]}
+    sh = d["shape"]
+    def pct(x):
+        return f"{x:.2f}\\%"
+    lits = {
+        "bin1": pct(bins["(-0.0025,+0.0000]"]["cpr_pct"]) in tex,
+        "bin2": pct(bins["(-0.0050,-0.0025]"]["cpr_pct"]) in tex,
+        "bin3": pct(bins["(-0.0075,-0.0050]"]["cpr_pct"]) in tex,
+        "bin4": pct(bins["(-0.0100,-0.0075]"]["cpr_pct"]) in tex,
+        "rising_bin": pct(bins["(-0.0150,-0.0100]"]["cpr_pct"]) in tex,
+        "tail1": pct(bins["(-0.0200,-0.0150]"]["cpr_pct"]) in tex,
+        "tail2": pct(bins["(-0.0250,-0.0200]"]["cpr_pct"]) in tex,
+        "plateau_coverage": f"{sh['plateau_exposure_share']*100:.1f}\\%" in tex,
+        "tail_disclosed": "not well supported" in tex,
+        "rises_not_falls": "rather than falling" in tex,
+        "not_a_test": "not as a resolution of the fork" in tex,
+        "run_tag": "\\texttt{depth\\_ladder\\_shape}" in tex,
+    }
+    ok = all(lits.values()) and all(d["parity"].values())
+    return ok, {"missing": sorted(k for k, v in lits.items() if not v),
+                "plateau_cov_pct": round(sh["plateau_exposure_share"] * 100, 1),
+                "tail_cov_pct": round(sh["tail_exposure_share"] * 100, 2)}
 
 
 def marginal_transaction_counts_check(tex, m):
@@ -5152,6 +5186,12 @@ def main() -> int:
           f"ceiling={_cmu['cap_per_month']}, "
           f"achievable={_cmu['achievable_per_month']}, "
           f"missing={_cmu['missing'] or 'none'}")
+    _dls = json.loads(DLS_RESULTS.read_text())
+    dls_ok, _dl = depth_ladder_shape_check(tex, _dls)
+    failures += 0 if dls_ok else 1
+    print(f"[{'PASS' if dls_ok else 'FAIL'}] 2018 depth ladder shape (gate #114): "
+          f"plateau_cov={_dl['plateau_cov_pct']}%, tail_cov={_dl['tail_cov_pct']}%, "
+          f"missing={_dl['missing'] or 'none'}")
     _mtc = json.loads(MTC_RESULTS.read_text())
     mtc_ok, _mt = marginal_transaction_counts_check(tex, _mtc)
     failures += 0 if mtc_ok else 1

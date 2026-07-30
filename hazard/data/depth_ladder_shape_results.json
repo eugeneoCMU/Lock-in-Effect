@@ -1,0 +1,163 @@
+{
+  "mode": "depth_ladder_shape",
+  "run_tag": "depth_ladder_shape",
+  "spec": {
+    "spec_file": "specs/SPEC_R32_c80_depth_ladder_shape.md",
+    "leg": "OFF_2018_rising_rate",
+    "window": "201801..201812",
+    "min_gap_observed": -0.028659999999999995,
+    "method": "exposure-weighted differencing of the committed nested reads",
+    "no_new_estimation": true
+  },
+  "parity": {
+    "differencing_inverts_to_nested_reads": true,
+    "declared_bins_reproduced": true,
+    "exposure_shares_decrease_with_depth": true
+  },
+  "inversion_check": {
+    "+0.0000": {
+      "got": 5.334000000000001,
+      "want": 5.334,
+      "abs_diff": 1.7763568394002505e-15
+    },
+    "-0.0025": {
+      "got": 4.991,
+      "want": 4.991,
+      "abs_diff": 0.0
+    },
+    "-0.0050": {
+      "got": 4.695000000000001,
+      "want": 4.695,
+      "abs_diff": 8.881784197001252e-16
+    },
+    "-0.0075": {
+      "got": 4.722,
+      "want": 4.722,
+      "abs_diff": 0.0
+    },
+    "-0.0100": {
+      "got": 4.868999999999998,
+      "want": 4.869,
+      "abs_diff": 1.7763568394002505e-15
+    },
+    "-0.0150": {
+      "got": 4.342,
+      "want": 4.342,
+      "abs_diff": 0.0
+    },
+    "-0.0200": {
+      "got": 3.44,
+      "want": 3.44,
+      "abs_diff": 0.0
+    },
+    "-0.0250": {
+      "got": 0.0,
+      "want": 0.0,
+      "abs_diff": 0.0
+    }
+  },
+  "bins": [
+    {
+      "bin": "(-0.0025,+0.0000]",
+      "gap_lo": -0.0025,
+      "gap_hi": 0.0,
+      "cpr_pct": 7.092280503690626,
+      "exposure_upb": 206405740459.59998,
+      "exposure_share_of_gap0": 0.16323379929408063,
+      "well_supported": true,
+      "n_cohort_months_hi_edge": 155
+    },
+    {
+      "bin": "(-0.0050,-0.0025]",
+      "gap_lo": -0.005,
+      "gap_hi": -0.0025,
+      "cpr_pct": 6.986347318733125,
+      "exposure_upb": 136683659934.21997,
+      "exposure_share_of_gap0": 0.10809482848104152,
+      "well_supported": true,
+      "n_cohort_months_hi_edge": 137
+    },
+    {
+      "bin": "(-0.0075,-0.0050]",
+      "gap_lo": -0.0075,
+      "gap_hi": -0.005,
+      "cpr_pct": 4.668825709568372,
+      "exposure_upb": 467848725597.08984,
+      "exposure_share_of_gap0": 0.36999322210737884,
+      "well_supported": true,
+      "n_cohort_months_hi_edge": 125
+    },
+    {
+      "bin": "(-0.0100,-0.0075]",
+      "gap_lo": -0.01,
+      "gap_hi": -0.0075,
+      "cpr_pct": 4.65406012824054,
+      "exposure_upb": 310182257928.25006,
+      "exposure_share_of_gap0": 0.2453043617997389,
+      "well_supported": true,
+      "n_cohort_months_hi_edge": 107
+    },
+    {
+      "bin": "(-0.0150,-0.0100]",
+      "gap_lo": -0.015,
+      "gap_hi": -0.01,
+      "cpr_pct": 5.142615009689706,
+      "exposure_upb": 94365061745.98001,
+      "exposure_share_of_gap0": 0.07462761217356638,
+      "well_supported": false,
+      "n_cohort_months_hi_edge": 95
+    },
+    {
+      "bin": "(-0.0200,-0.0150]",
+      "gap_lo": -0.02,
+      "gap_hi": -0.015,
+      "cpr_pct": 4.347217141312682,
+      "exposure_upb": 48711984310.69,
+      "exposure_share_of_gap0": 0.03852335818026302,
+      "well_supported": false,
+      "n_cohort_months_hi_edge": 65
+    },
+    {
+      "bin": "(-0.0250,-0.0200]",
+      "gap_lo": -0.025,
+      "gap_hi": -0.02,
+      "cpr_pct": 3.6064910514602353,
+      "exposure_upb": 268741952.1300001,
+      "exposure_share_of_gap0": 0.00021253173375027402,
+      "well_supported": false,
+      "n_cohort_months_hi_edge": 35
+    }
+  ],
+  "deepest_nested_remainder": {
+    "nested_threshold": -0.025,
+    "cpr_pct": 0.0,
+    "exposure_share_of_gap0": 1e-05,
+    "well_supported": false
+  },
+  "shape": {
+    "reading": "step then plateau: CPR falls from ~7.0 to ~4.66 between the second and third bins and then stops falling",
+    "plateau_bins": [
+      "(-0.0075,-0.0050]",
+      "(-0.0100,-0.0075]"
+    ],
+    "plateau_cpr_pct": [
+      4.668825709568372,
+      4.65406012824054
+    ],
+    "plateau_exposure_share": 0.6152975839071178,
+    "tail_bins": [
+      "(-0.0150,-0.0100]",
+      "(-0.0200,-0.0150]",
+      "(-0.0250,-0.0200]"
+    ],
+    "tail_cpr_pct": [
+      5.142615009689706,
+      4.347217141312682,
+      3.6064910514602353
+    ],
+    "tail_exposure_share": 0.11336350208757967,
+    "form_fork": "a floor on TOTAL turnover censors the voluntary hazard and predicts step-then-plateau; an ADDITIVE competing-risks form never censors and predicts continued decline. The plateau is consistent with the production max form.",
+    "support_conditional": "the ladder does eventually fall, but every declining cell below the plateau is flagged well_supported=false by the source artifact's own rule and they hold 11.34% of gap<=0 exposure between them"
+  },
+  "runtime_s": 0.001
+}
