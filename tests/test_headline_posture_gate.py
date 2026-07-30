@@ -82,9 +82,9 @@ def test_point_before_range_fails(tex, abstract):
         "percentile read under-covers), with a "
         "form-conditional hull of $+3.5$ to $+13.1$ points, and it identifies "
         "levels only. Inside that range, $+5.6$ points, or \\$42.6 billion, is "
-        "the value at the calibration I headline, and every correction I can "
+        "the value at the calibration I headline, and the corrections I can "
         "measure to the baseline turnover floor or to the accounting basis "
-        "moves it down within the range rather than up. ")
+        "no longer all run one way. ")
     ok, info = abstract_posture_check(_swap(tex, abstract, mutated))
     assert not ok, "gate #99 accepted a point-first abstract"
     assert info["missing"] == [] and not info["ordered"], (
@@ -99,7 +99,7 @@ def test_frame_dropped_from_the_corrections_claim_fails(tex):
     overclaim HANDOFF_round25 §4.2 records."""
     mutated = tex.replace(
         ABSTRACT_POSTURE["corrections_framed"],
-        "every correction I can measure moves it down within the range rather than up", 1)
+        "the corrections I can measure no longer all run one way", 1)
     assert mutated != tex
     ok, _ = abstract_posture_check(mutated)
     assert not ok

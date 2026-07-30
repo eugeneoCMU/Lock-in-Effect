@@ -471,12 +471,15 @@ ABSTRACT_POSTURE = {
     "interval_referent": "the floor read's sampling error at my central elasticity",
     "point_named_inside": "Inside that range, $+5.6$ points, or \\$42.6 billion, is the "
                           "value at the calibration I headline",
-    # the frame is not decoration: WITHOUT it the claim is false, because the
-    # additive form (+11.2) and the Fonseca anchor (+11.5) move the marginal UP.
-    # Only floor and accounting-basis corrections run one way.
-    "corrections_framed": "every correction I can measure to the baseline turnover floor "
-                          "or to the accounting basis moves it down within the range rather "
-                          "than up",
+    # ROUND 32: the frame is still load-bearing -- the additive form (+11.2) and
+    # the Fonseca anchor (+11.5) move the marginal UP -- but the claim it used to
+    # protect ('moves it down') is now FALSE and has been restated. Task 11's
+    # activity leg is a MEASURED correction to the baseline turnover floor that
+    # moves the marginal up +5.11 points, so 'only floor and accounting-basis
+    # corrections run one way' no longer holds. The pin now protects the two-way
+    # statement instead of the one-way one.
+    "corrections_framed": "the corrections I can measure to the baseline turnover "
+                          "floor or to the accounting basis no longer all run one way",
     # ROUND-26: the panel's two strongest correlated findings (DA-C1 + R1-W1,
     # both verified) were that the abstract quoted the interval without its
     # form conditionality and without its few-cluster inferential status.
