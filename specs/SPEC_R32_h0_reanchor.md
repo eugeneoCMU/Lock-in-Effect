@@ -65,12 +65,32 @@ a transport, and would need its own spec).
 `baseline_hazard` calls `h0_psa(age_months)` without the argument. **Mutating
 `config.PSA_SPEED` at runtime is a silent no-op.** (Round-28 finding, re-verified.)
 
-The seam is `floor_sweep._ORIG_PREPAY`, already used by `psa_level_sweep.py`,
-`floor_form_mixture.py` and the off-window runs, and described in-repo as B2/C3/C5-validated.
-This run follows `hazard/psa_level_sweep.py:107-137` exactly: build a replacement
-`prepay` closure that computes $h_0$ from the spline shape and otherwise reproduces
-`competing_risks.prepay_hazard` term for term, assign it to `fs._ORIG_PREPAY`, and restore
-the original in a `finally`.
+**The seam is `literature_hazard.baseline_hazard`, not `floor_sweep._ORIG_PREPAY`.** This
+spec's first draft named the latter and was wrong: `_ORIG_PREPAY` is the seam for replacing
+the whole *prepay closure* (what `psa_level_sweep` and `floor_form_mixture` do, because they
+change terms inside it), whereas this run replaces **$h_0$ itself**, one function deeper.
+Round 28's WP-J2 (`hazard/scaled_null_housing_activity.py`) establishes and validates the
+right one, and documents why:
+
+> `literature_hazard.prepay_hazard:99` calls `baseline_hazard(loan_age)` as a MODULE-LEVEL
+> name, resolved in `literature_hazard`'s namespace at CALL time; `baseline_hazard:73-76`
+> dispatches to `h0_psa(age_months)`. Patching the module attribute
+> `literature_hazard.PSA_SPEED` does NOT work (the default binds at def time); patching
+> `literature_hazard.baseline_hazard = lambda age, mode=None: ...` DOES.
+
+It also records that `fs._ORIG_PREPAY` and the bind tally pick a replaced baseline up
+automatically, so the bind column stays meaningful and is expected to move — a lower $h_0$ is
+censored by the floor more often. Both facts are load-bearing here: the substitution needs no
+reimplementation of the prepay closure, and `floor_bind_share` becomes a diagnostic of
+whether the substitution took effect.
+
+So: assign `lh.baseline_hazard = <spline closure>`, restore in a `finally`, and change
+nothing else.
+
+**Disclosure carried over from WP-J2:** `competing_risks.py:148` calls `prepay_hazard` on the
+Danish `us_intercept` branch too, so a Danish leg simulated in the same run would also carry
+the substituted baseline. Only the U.S. legs are scored here, and the run must not report any
+Danish quantity.
 
 New runner: `hazard/h0_reanchor.py`. **MUST NOT CHANGE:** `config.py` (`PSA_SPEED` stays
 100.0, `BASELINE_MODE` stays `"psa"`), `literature_hazard.py`, `competing_risks.py`,
@@ -116,15 +136,19 @@ reported as a failed prediction, with the prediction quoted.
 | gate | assertion | why |
 |---|---|---|
 | **G1a** unpatched parity | with no patch installed, the 4.991% central and null legs reproduce `psa_level_sweep_results.json` `cells["4.991|100|*"]` `trapped_b` to $<10^{-9}$ \$B | the harness is wired correctly before anything is substituted |
-| **G1b** identity patch | a patched closure that reconstructs PSA-100 exactly equals the unpatched leg to $<10^{-9}$ \$B, **and** `max abs(lh.h0_psa(age,100) − lh.baseline_hazard(age)) == 0.0` on age 0…360 | the patch path itself introduces no drift (`psa_level_sweep.py`'s own G1b) |
+| **G1b** identity patch, run PATCHED | install `lh.baseline_hazard = lambda age, mode=None: lh.h0_psa(age, psa_speed=100.0)` and require the result to equal the unpatched leg to $<10^{-9}$ \$B, **and** `max abs(lh.h0_psa(age,100) − lh.baseline_hazard(age)) == 0.0` on age 0…360 | WP-J2's design: at the identity parameter the patched call is bit-identical to production **by construction**, which is why the identity cell is run *patched* — it is the wiring test, not a shortcut around it |
+| **G1b′** bind-tally movement | `floor_bind_share` must MOVE between the identity cell and each substituted cell | WP-J2 records that the bind tally picks a replaced baseline up automatically; a frozen bind share is therefore independent evidence the substitution did not reach the engine |
 | **G1c** no-op detection | the substituted leg must differ from the PSA-100 leg by **more than \$1B**; if it does not, that is **GATE_FAILURE, never a result** | a patch that silently failed to take effect would otherwise read as "no change" |
 | **G2** frozen-artifact guard | `psa_level_sweep_results.json`, `oos_identification_results.json`, `floor_form_mixture_results.json` and every other file under `hazard/data/` byte-identical (sha256) before and after the run, except the single new output path | never overwrite a frozen artifact |
 | **G3** level invariance | the exposure-weighted mean $h_0$ of every substituted leg equals the PSA-100 mean to $<10^{-12}$ relative | proves the run tests shape and not level, i.e. §1's claim is true of the code |
 | **G4** floor untouched | the floor stays 4.991% and `FLOOR_MODE` stays the production value on every leg | the floor is the level anchor and is not part of this test |
 
+| **G5** cross-route reproduction | using the same `lh.baseline_hazard` seam with a *pure level scaling* $\phi = 0.75$ at floor 4.991%, the run must return `marginal_pp` $= 0.8560355409769471$ | two committed artifacts already agree on this number by two different routes — `scaled_null_housing_activity_results.json` `ladder["4.991\|0.75"].marginal_pp` and `psa_level_sweep_results.json` `cells["4.991\|75\|6.5"].marginal_pp` are bit-identical, because $\phi = 0.75$ and 75 PSA are the same object. A new harness that cannot reproduce a number two existing routes agree on is broken, and this catches it before any spline is substituted |
+
 `G1c` and `G3` together are the anti-gaming pair: `G1c` makes a silent no-op fail, `G3` makes
 a level change fail. Without both, this run could produce a comfortable number for the wrong
-reason.
+reason. `G5` is the independent-route check: it is the only gate here whose expected value
+comes from outside this run's own machinery.
 
 ## 6. Output — a new path, written once
 
