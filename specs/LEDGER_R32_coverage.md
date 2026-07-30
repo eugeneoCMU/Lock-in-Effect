@@ -136,7 +136,7 @@ No condition may be left unclassified. Generated from the inventory and the comm
 | C-129 | MINOR | EUGENE | STRUCTURE | **DEFERRED-EUGENE** | his call | EUGENE: anonymized master and an archived DOI in place of the GitHub U |
 | C-130 | MAJOR | EUGENE | META | **DEFERRED-EUGENE** | his call | EUGENE: length and venue scope |
 | C-131 | MINOR | EUGENE | META | **DEFERRED-EUGENE** | his call | EUGENE: the adverse-findings register as a standalone methods note |
-| C-132 | CRITICAL | EUGENE | META | **DEFERRED-EUGENE** | his call | EUGENE: the public Freddie loan-level parquet licensing question |
+| C-132 | CRITICAL | EUGENE | META | **DEFERRED-EUGENE (basis now supplied)** | specs/RECORD_R32_citation_factcheck_2026-07-30.md finding 4: SFLLD terms verified verbatim (Nov-2025 version); loan_sample.parquet is loan-grain, 75k rows, and is ALREADY on the public origin/main. Judgment + any history rewrite remain his | EUGENE: the public Freddie loan-level parquet licensing question |
 | C-133 | MINOR | EUGENE | META | **DEFERRED-EUGENE** | his call | EUGENE: the push |
 
 ## Counts
@@ -198,3 +198,11 @@ No condition may be left unclassified. Generated from the inventory and the comm
   list leaves `C-115` (read the Danish sweep at two named tax-regime points, MINOR, wave 5,
   CHECK) unlisted in every group. It is genuinely OPEN, not satisfied and not declined, and
   it is folded into the Danish group (SS5.4) rather than left unclassified.
+
+- **A citation fact-check was run this session** (`specs/RECORD_R32_citation_factcheck_2026-07-30.md`).
+  It does not change any condition's status, but it raises **one material defect not in the
+  inventory**: `berger2026` is cited from the superseded January 2026 draft, and its
+  general-equilibrium result moved from **1 bp** (January, §4.9.1) to **20 bps** (July, and
+  §4.9.1 no longer exists). The manuscript prints "about one basis point … economically
+  negligible". This is Eugene's call because it is a posture question about a load-bearing
+  import, not a repo defect. A second, minor finding: the `\S3.2.3` pin belongs on `\S3.3`.
