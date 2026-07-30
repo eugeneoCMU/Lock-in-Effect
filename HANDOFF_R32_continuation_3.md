@@ -162,3 +162,74 @@ load-bearing · `C-117` **not started** — 35 sites, several inside gate-quoted
 ## 8. WHAT TO PRODUCE AT THE END
 
 Unchanged from handoff #2 §10. **Do not push.**
+
+---
+
+# ADDENDUM — session continued (2026-07-30, second half)
+
+## STATE NOW
+
+**ALL GATES PASS (114) | 593 tests | ALL RENDER CHECKS PASS | 153pp canonical (main 1–107,
+online appendix 108–153) | 153pp variant | variant differs at line 31 only | tree clean.**
+
+**Ledger: 108 SATISFIED / 8 OPEN / 7 DEFERRED-EUGENE / 8 DECLINED / 1 CLOSED-REFUTED / 1 MOOT
+= 133, zero unclassified.**
+
+## LANDED SINCE THE ADDENDUM ABOVE
+
+| condition | commit | note |
+|---|---|---|
+| berger2026 citation fix | `5c9c955` | superseded draft; 1 bp → **20 bps**, §4.9.1 → §4.10.2, §3.2.3 → §3.3.2 |
+| C-132 forward limb | `be79304` | two Freddie parquets untracked + gitignored; paper/README restated code-only |
+| C-88–C-91, C-122 | `f390115` | **DECLINED** on Eugene's "no cuts" |
+| **C-81** (RUN) | `edb5e8c` | state-contingent cap grid; GATE #112 |
+| **C-76** + **C-82** (RUN) | `3c8c03e` | transaction counts; GATE #113 |
+| **C-80** (RUN) | `9c0005b` | depth-ladder shape; GATE #114 |
+| **C-92** | `cc88bea` | flagged by the condition's own stated minimum |
+
+Four runs landed this session in total (C-94, C-81, C-76, C-80), every one Branch A with its
+pre-commitments reported.
+
+## WHAT IS LEFT — 8
+
+### Six wave-3 runs, none started
+`C-72` month-clustered + two-way (stratum × month) rungs · `C-74` Ginnie leg with the elasticity
+attenuated by the measured CRR differential · `C-75` re-derive the Danish buyback discount D
+from the leg's own prepay path · `C-77` re-solve the Aladangady reconciliation under the
+additive form · `C-78` episode gradient within narrow age bands · `C-79` Danish leg with an
+interest-only share.
+
+**Cheapest first, on the evidence of this session:** `C-75` and `C-77` look analytic (like C-73
+and C-80 — re-derivation from committed artifacts). `C-78` has a direct template in
+`hazard/episode_gradient_recompute.py`. `C-72`, `C-74` and `C-79` need the bootstrap or the
+microsim engine and are the expensive three; remember the engine is **single-tenant**.
+
+**The working template is now four runs deep.** `tools/depth_ladder_shape_run.py` is the
+cleanest for a pure re-tabulation (its P1 checks *your own arithmetic* by asserting the
+differencing inverts); `tools/marginal_transaction_counts_run.py` shows how to handle an
+external comparator that cannot be sourced; `tools/state_contingent_cap_run.py` shows the
+declared-not-predicted pattern when scoping has already computed a limb.
+
+### Two wording conditions
+`C-121` OPEN (PARTIAL) and `C-117` not started. My recommendation, unchanged and twice stated:
+leave both. Neither changes a claim's truth and both carry gate-breakage risk. They are the only
+two conditions I would actively counsel against doing.
+
+## HARD-WON THIS HALF
+
+- **Declared vs predicted.** Twice (C-81, C-80) scoping computed a limb before the spec existed.
+  Both specs say so and record the value as a *measurement*, because a "pre-commitment" you
+  already know the answer to is not one. Keep doing this; it is the difference between the
+  discipline and a costume of it.
+- **Print the arithmetic a reader will do.** C-81's true cut-spread is 1.1252 → 1.13, but the
+  printed cells subtract to 1.12. Both spreads now print at 1 dp, and a test asserts the printed
+  cells still subtract to the printed spread.
+- **Guard the divisor, not just the result.** C-76's count divides by the *surviving* mean
+  balance ($237,316.81); the all-loan mean ($126,812.61) averages in prepaid zeros and would
+  roughly double every count. P2 asserts surviving > all-loan, and a test pins the ratio in
+  1.7–2.1 so the "roughly double" warning cannot go stale.
+- **Gate the disclosures that argue against you.** C-80's plateau supports the paper's own
+  production form, so gate #114 pins the falling tail, the bin that *rises*, and the
+  not-a-test caveat. Cherry-picking is that exhibit's failure mode.
+- **`EXHOSLUSM495S` really is unusable on this account** — 13 observations from 2025-06. Handoff
+  #2 was right. `HSN1F` has history but is *new* home sales and retires no existing mortgage.
