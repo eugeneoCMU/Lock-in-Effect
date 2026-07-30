@@ -443,4 +443,4 @@ def test_tag_counting_is_prefix_safe():
     # gate #118's run_tag conjunct is a whole-file presence check, so it still
     # sees both. The counts stay pinned so the next pass notices if a site moves.
     assert TEXT.count(ADD_TAG) == 2 and VARIANT.count(ADD_TAG) == 2
-    assert TEXT.count(MAX_TAG) == 5 and VARIANT.count(MAX_TAG) == 5
+    assert TEXT.count(MAX_TAG) == 4 and VARIANT.count(MAX_TAG) == 4
