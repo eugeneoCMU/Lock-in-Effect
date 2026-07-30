@@ -385,7 +385,8 @@ ASSEMBLY_SPANS = {
     "ladder_insample": "in-sample calibration returns $+9.2$ points",
     "ladder_headline": "outside the window returns the headline $+5.6$",
     "ladder_overlay": "overlay at that same floor returns $+4.4$",
-    "ladder_agestd": "floor read of 5.51\\% implies a marginal near $+3.8$",
+    "ladder_agestd": "floor read of 5.51\\% returns a measured marginal of $+3.7$, "
+                     "against the $+3.8$ its position on the frozen grid implies",
     "ladder_fannie": "5.52\\%, brackets the marginal below the $+4.3$ edge",
     # ROUND-27 B5: the joint cell was run under the pre-committed landing rule
     # (b5_joint_cell: composed +2.928pp, deviation -0.07 from the +3.0
