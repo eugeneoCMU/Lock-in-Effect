@@ -762,6 +762,18 @@ FLOOR_LADDER_SPANS = {
                   "wild-$t$; CR1--CR3 at $t(30)$)",
     "designer_frame": "in the units a cap designer would have to plug in",
     "designer_units": "wild-cluster interval runs from 4.177\\% to 5.800\\%",
+    # R32 C-72: SPEC_R32_c72 §8 Branch A requires FLOOR_LADDER_SPANS to be
+    # EXTENDED, never replaced, when new rows land. These two are the month and
+    # two-way rows, byte-identical to gate #115's derived month_row/two_way_row.
+    # Deliberately literal-only HERE: #107 opens v2's artifact and nothing else,
+    # and the v3 derivation of these same cells (and of the whole ladder's
+    # bookkeeping) lives in gate #115. tests/test_floor_ladder_gate.py's
+    # test_each_span_removal_fails is parametrized over sorted(FLOOR_LADDER_SPANS)
+    # and covers both automatically; that file needs no edit.
+    "ladder_month_row": "CR1 $t$, month clusters & $+3.1$ to $+8.4$ & "
+                        "$t(5)$, $G-1$ & wider on df alone",
+    "ladder_two_way_row": "Two-way, stratum $\\times$ month & $+2.3$ to $+9.3$ "
+                          "& $t(5)$, $\\min(G)-1$ & lower edge censored",
 }
 
 FLOOR_LADDER_READ = "R2_2018_gap<=-0.0025_age>=12"
@@ -1261,6 +1273,310 @@ def abstract_hedge_check(tex: str) -> tuple[bool, dict]:
              "missing": missing, "total": len(ABSTRACT_HEDGES),
              "missing_body": missing_body, "total_body": len(RELOCATED_TO_BODY)})
 
+
+
+# --- R32 (gate #115), C-72: THE MONTH AND TWO-WAY CLUSTER RUNGS ------------
+# C-72's complaint was that the committed cluster unit on the floor read is
+# cross-sectional only (4-way stratum), so a month-level common shock hitting
+# every stratum at once is invisible to every rung of tab:ladder. Run
+# floor_inference_correction_v3 re-clusters the SAME R2 read on the six
+# calendar months the 2018 leg populates, and on both margins at once
+# (Cameron-Gelbach-Miller), and the two rungs land in the ladder.
+#
+# The condition is discharged by PRICING the shock, not by dismissing it, and
+# the two halves of that answer pull opposite ways -- which is exactly why they
+# are pinned separately here. The month-clustered CR1 standard error comes in
+# SMALLER than the stratum-clustered one (so that rung widens on its
+# six-cluster reference distribution alone), while the Cameron-Gelbach-Miller
+# two-way standard error comes in LARGER (so that rung widens because the
+# variance genuinely rose). A tightening pass that kept only the first half
+# would land "the common shock does not matter" one clause away from a row
+# whose variance is a third higher. Both comparisons are asserted here against
+# the artifacts, and the prose sentence that leads with "priced here rather
+# than dismissed" is its own pinned span.
+#
+# Nothing numeric below is a manuscript literal. Every printed cell, every
+# width, both standard-error ratios, the sign-vector count, the month support
+# AND the ladder's own bookkeeping (how many undemoted rungs there are, which
+# is narrowest, how many are censored at the grid edge) are DERIVED from the
+# two committed artifacts -- because this landing moves four counting claims
+# that were true before it and would go quietly false after it:
+#
+#   (i)   the Webb row's rank among the undemoted rungs (third of nine ->
+#         fourth of eleven), and it is stated at TWO sites;
+#   (ii)  how many rungs are censored at the 6.0% grid edge (two -> three) --
+#         checked as a SET equality against the rungs printed wider than
+#         CR2-BM, not as a count that could match by luck;
+#   (iii) which rung is the widest with both endpoints interior -- CR2 at
+#         Bell-McCaffrey df, UNCHANGED by this landing, and the gate proves
+#         that rather than assuming it, because the month rung is the one that
+#         could have falsified it;
+#   (iv)  Section V.E's "the 2018 leg is read in August--December", which the
+#         six-month support contradicted until the July disclosure landed.
+#
+# The three disclosures a tightening pass cuts first are pinned individually:
+# the E3 attribution (the specification gave the cluster-count rationale AND
+# pre-named the narrower-SE outcome, so neither is a discovered refutation),
+# the E4 MISS (the printed month rung's lower edge is NOT censored; only its
+# unprinted Rademacher variant reaches past the edge), and NC-1's substantive
+# threshold (the realized Bell-McCaffrey df is below four even though the
+# G < 5 trigger did not fire).
+#
+# Every word-for-count lookup goes through _CARD/_ORD, which fall back to
+# digits: a drifted artifact must take this gate RED via a missing literal, not
+# abort the whole run with a KeyError.
+
+FICV2_RESULTS = (ROOT / "hazard" / "data"
+                 / "floor_inference_correction_v2_results.json")
+FICV3_RESULTS = (ROOT / "hazard" / "data"
+                 / "floor_inference_correction_v3_results.json")
+
+MONTH_TWOWAY_SPANS = {
+    # the cluster units, named where a reader meets the rungs
+    "caption_recluster": "the last two rungs re-cluster that same read on the "
+                         "six calendar months it populates and on both margins "
+                         "at once",
+    # C-72's ACTUAL answer. Without this sentence the note reads as
+    # "the shock does not matter", which the two-way rung refutes.
+    "priced_not_dismissed": "so the month-level shock is priced here rather "
+                            "than dismissed",
+    # E3's attribution, corrected: SPEC_R32_c72 §5 gives the cluster-count
+    # rationale verbatim ("31 clusters drop to at most 12"), so the prediction's
+    # named channel is the channel that delivered.
+    "e3_prediction_credit": "as I pre-committed it would and for the reason "
+                            "the specification gave, the drop from 31 clusters "
+                            "to six",
+    # ...and the same spec bullet pre-named the narrower-SE outcome, so the
+    # variance result is not a discovered refutation either.
+    "e3_spec_allowed": "Its variance runs the other way, which that "
+                       "specification allowed",
+    # the narrower-SE half, scoped to the cluster unit it holds at
+    "e3_mechanism": "so at this cluster unit the common shock adds no "
+                    "variance, and the widening is the six-cluster reference "
+                    "distribution alone",
+    # E5: computability was a first-class branch, not a prediction
+    "e5_not_predicted": "whether it would be computable at all I deliberately "
+                        "did not predict",
+    # E4, landed as the miss it is
+    "e4_miss": "and it is not---both endpoints of the printed rung are "
+               "interior, and of the two new rows only the two-way one censors",
+    # ...with the one month-axis interval that DOES truncate named, so the
+    # miss statement cannot be read past its own scope
+    "rademacher_scope": "Among the month rung's own variants only the "
+                        "unprinted Rademacher one reaches past that edge.",
+    # NC-4: why Webb stays primary at this cluster unit
+    "nc4_webb_primary": "which is why the Webb six-point weights are primary "
+                        "here, as they are above",
+    "run_credit_v3": "\\texttt{floor\\_inference\\_correction\\_v3}",
+    # the claim this landing must leave standing, checked live below
+    "widest_interior": "widest rung with both endpoints interior to the floor "
+                       "grid---CR2 at Bell--McCaffrey degrees of freedom",
+}
+
+_ORDINAL_WORDS = {1: "first", 2: "second", 3: "third", 4: "fourth",
+                  5: "fifth", 6: "sixth", 7: "seventh", 8: "eighth",
+                  9: "ninth", 10: "tenth", 11: "eleventh", 12: "twelfth"}
+_CARDINAL_WORDS = {1: "one", 2: "two", 3: "three", 4: "four", 5: "five",
+                   6: "six", 7: "seven", 8: "eight", 9: "nine", 10: "ten",
+                   11: "eleven", 12: "twelve"}
+
+_MONTH_NAMES = {"01": "January", "02": "February", "03": "March",
+                "04": "April", "05": "May", "06": "June", "07": "July",
+                "08": "August", "09": "September", "10": "October",
+                "11": "November", "12": "December"}
+
+# every interval object the month rung produces, printed or not
+_MONTH_VARIANTS = ("cr1_t_interval", "cr1_t_interval_df_bm", "cr2_t_interval",
+                   "cr2_t_interval_df_bm", "cr3_t_interval",
+                   "cr3_t_interval_df_bm", "wild_t_rademacher", "wild_t_webb")
+
+
+def _CARD(n):
+    """Cardinal word, or the digits if the count leaves the prose's range --- a
+    gate must go RED on a drifted artifact, never raise."""
+    return _CARDINAL_WORDS.get(n, str(n))
+
+
+def _ORD(n):
+    return _ORDINAL_WORDS.get(n, f"{n}th")
+
+
+def month_twoway_clusters_check(tex, v2, v3):
+    """Gate #115's rule (R32, C-72), as a function so a battery can exercise it."""
+    tex_nc = re.sub(r"(?<!\\)%.*", "", tex)
+    rd = v2.get("reads", {}).get(FLOOR_LADDER_READ, {})
+    mo = v3["rungs"]["month"]
+    tw = v3["two_way"]
+    e3 = v3["expectations"]
+    G = v3["feasibility"]["G_month"]
+
+    # The ELEVEN undemoted rungs tab:ladder prints. WHICH rungs the table shows
+    # is a table-design fact and is listed here; every WIDTH and every
+    # truncation flag below is the artifacts'.
+    rungs = {
+        "cr1": rd["cr1_t_interval"], "cr2": rd["cr2_t_interval"],
+        "cr3": rd["cr3_t_interval"], "rademacher": rd["wild_t_rademacher"],
+        "webb": rd["wild_t_webb"], "cr1_bm": rd["cr1_t_interval_df_bm"],
+        "cr2_bm": rd["cr2_t_interval_df_bm"],
+        "cr3_bm": rd["cr3_t_interval_df_bm"],
+        "restricted": rd["wcr_inverted"], "month_cr1": mo["cr1_t_interval"],
+        "two_way": tw["t_interval"],
+    }
+
+    def width(c):
+        lo, hi = c["marginal_ci95_pp"]
+        return hi - lo
+
+    def censored(c):
+        return bool(c["lower_pp_edge"]["truncated_at_grid_edge"]
+                    or c["upper_pp_edge"]["truncated_at_grid_edge"])
+
+    def cell(c):
+        lo, hi = c["marginal_ci95_pp"]
+        return f"${lo:+.1f}$ to ${hi:+.1f}$"
+
+    rank = sorted(rungs, key=lambda k: width(rungs[k])).index("webb") + 1
+    n_censored = sum(censored(c) for c in rungs.values())
+    interior = {k: width(v) for k, v in rungs.items() if not censored(v)}
+    widest_interior = max(interior, key=interior.get)
+    # the note says the rungs printed WIDER than CR2-BM are exactly the
+    # censored ones; that is a set identity, not a count coincidence
+    printed_wider = {k for k, v in rungs.items()
+                     if width(v) > width(rungs["cr2_bm"])}
+    censored_set = {k for k, v in rungs.items() if censored(v)}
+    stratum_only = {k: v for k, v in rungs.items()
+                    if k not in ("month_cr1", "two_way")}
+    stratum_censored = {k for k, v in stratum_only.items() if censored(v)}
+    stratum_widest = set(sorted(stratum_only,
+                                key=lambda k: width(stratum_only[k]))
+                         [-len(stratum_censored):]) if stratum_censored else set()
+    month_censoring = {k: bool(mo[k]["lower_pp_edge"]["truncated_at_grid_edge"]
+                               or mo[k]["upper_pp_edge"]["truncated_at_grid_edge"])
+                       for k in _MONTH_VARIANTS}
+    shrink_pct = round((1 - mo["se_cr1_smm"] / rd["se_cr1_smm"]) * 100)
+    grow_pct = round((tw["se_2way_smm"] / rd["se_cr1_smm"] - 1) * 100)
+    rad = mo["wild_t_rademacher"]
+    nc1_thresh = v3["not_computable"]["NC1_too_few_month_clusters"]["threshold"]
+    months = v3["feasibility"]["months"]
+    cmpm = v3["feasibility"]["cohort_months_per_month"]
+    sparse = min(cmpm, key=cmpm.get)
+    dense = [m for m in months if m != sparse]
+
+    def name(m):
+        return _MONTH_NAMES[m[4:]]
+
+    lits = dict(MONTH_TWOWAY_SPANS)
+    lits["month_row"] = (
+        f"CR1 $t$, month clusters & {cell(mo['cr1_t_interval'])} & "
+        f"$t({mo['cr1_t_interval']['df_used']:.0f})$, $G-1$ & "
+        "wider on df alone")
+    lits["two_way_row"] = (
+        f"Two-way, stratum $\\times$ month & {cell(tw['t_interval'])} & "
+        f"$t({tw['df_2way']})$, $\\min(G)-1$ & lower edge censored")
+    lits["note_month_unit"] = (
+        f"the month rung groups the {mo['n_cohort_months']} cohort-months by "
+        f"the {_CARD(G)} calendar months the 2018 leg populates, "
+        f"{name(months[0])} to {name(months[-1])}")
+    # the artifact's own method string SUBTRACTS the intersection term; the
+    # prose has to say so, because this note is the only place the reader is
+    # told what the rung is
+    lits["note_two_way_unit"] = (
+        f"the two-way rung adds the CR1 variance clustered on the "
+        f"{tw['G_stratum']} strata to the one clustered on those "
+        f"{_CARD(tw['G_month'])} months and subtracts the one "
+        f"clustered on their {tw['G_intersection_cells']} intersection cells")
+    lits["two_way_df"] = f"$\\min(G)-1 = {tw['df_2way']}$"
+    lits["e3_widths"] = (f"from {e3['E3_committed_cr1_width_pp']:.2f} to "
+                         f"{e3['E3_month_cr1_width_pp']:.2f} points of width")
+    lits["se_shrinks"] = (f"{shrink_pct}\\% \\emph{{smaller}} than the "
+                          "stratum-clustered one")
+    lits["se_grows_twoway"] = (f"{grow_pct}\\% \\emph{{above}} the "
+                               "stratum-clustered one")
+    lits["month_bm_below_four"] = (
+        f"is {mo['df_bm_by_estimator']['cr1']:.1f}---below the "
+        f"{_CARD(nc1_thresh - 1)} my pre-committed "
+        "too-few-clusters rule was written to protect")
+    lits["nc1_trigger_quiet"] = (f"that rule's own $G < {nc1_thresh}$ trigger "
+                                 "did not fire")
+    # Section V.E's month range, reconciled against the read's actual support
+    lits["july_tail_disclosure"] = (
+        f"read in {name(dense[0])}--{name(dense[-1])}---"
+        f"{_CARD(cmpm[sparse])} {name(sparse)} cohort-months aside---")
+    lits["nc4_sign_vectors"] = (f"$2^{{{G}}} = "
+                                f"{int(rad['distinct_sign_vectors'])}$ "
+                                "distinct Rademacher sign vectors")
+    lits["nc4_floor"] = ("cannot resolve below "
+                         f"$1/{int(round(1 / rad['resolution_floor_p']))}$")
+    lits["webb_rank"] = (f"the {_ORD(rank)}-narrowest of the "
+                         f"{_CARD(len(rungs))} undemoted rungs")
+    lits["censored_count"] = (f"The {_CARD(n_censored)} rungs printed "
+                              "wider still understate their own width")
+    lits["two_widest_censored"] = (
+        f"as the {_CARD(len(stratum_censored))} widest stratum rungs "
+        "already are")
+
+    missing = sorted(k for k, v in lits.items() if v not in tex_nc)
+    ok = (
+        not missing
+        # the rank claim is made at BOTH sites, and no stale rank phrase is
+        # left anywhere: every "undemoted rungs" in the file is the right one
+        and tex_nc.count(lits["webb_rank"]) == 2
+        and "undemoted rungs" not in tex_nc.replace(lits["webb_rank"], "")
+        # the claim this landing must NOT have falsified
+        and widest_interior == "cr2_bm"
+        # "the three rungs printed wider still ... are censored to it"
+        and printed_wider == censored_set
+        # the censored stratum rungs really are its widest ones
+        and stratum_censored == stratum_widest
+        # E3 passed on width, at BOTH new cluster units
+        and bool(e3["E3_month_widens"])
+        and e3["E3_month_cr1_width_pp"] > e3["E3_committed_cr1_width_pp"]
+        and width(rungs["month_cr1"]) > width(rungs["cr1"])
+        and width(rungs["two_way"]) > width(rungs["cr1"])
+        # ...and the two variance channels run OPPOSITE ways. Both halves, or
+        # the note is a half-truth in whichever direction survives.
+        and mo["se_cr1_smm"] < rd["se_cr1_smm"]
+        and mo["t_crit_G_minus_1"] > rd["t_crit_G_minus_1"]
+        and tw["se_2way_smm"] > rd["se_cr1_smm"]
+        # NC-1's substantive threshold was crossed even though it did not fire
+        and mo["df_bm_by_estimator"]["cr1"] < nc1_thresh - 1
+        # E4 missed, and the two rows' truncation is as printed
+        and e3["E4_upper_endpoint_truncates"] is False
+        and not censored(rungs["month_cr1"])
+        and censored(rungs["two_way"])
+        and not rungs["two_way"]["upper_pp_edge"]["truncated_at_grid_edge"]
+        # ...and the ONE month-axis interval that does truncate is the
+        # unprinted Rademacher variant the note names
+        and [k for k, v in month_censoring.items() if v] == ["wild_t_rademacher"]
+        # feasibility was measured before any interval was read, and the
+        # branches that would have forbidden a printed row did not fire
+        and bool(v3["feasibility"]["computed_before_any_interval_was_read"])
+        and bool(e3["E1_stratum_replay_bit_identical"])
+        and bool(e3["E2_feasibility_before_outcome"])
+        and bool(e3["E5_two_way_computability_not_predicted"])
+        and bool(tw["computable"]) and tw["V_2way"] > 0
+        and tw["df_2way"] == min(tw["G_stratum"], tw["G_month"]) - 1
+        and not v3["not_computable"]["NC1_too_few_month_clusters"]["triggered"]
+        and not v3["not_computable"]["NC2_two_way_variance_non_positive"]["triggered"]
+        and not v3["not_computable"]["NC3_both_endpoints_off_grid"]["triggered"]
+        and bool(v3["not_computable"]["NC4_rademacher_resolution_floor"]["triggered"])
+        and v3["status"] == "OK"
+        # P3: the substitution is visible, and it is the SAME read
+        and mo["cluster_column_grouped_on"] == "month"
+        and mo["n_clusters"] == G == len(v3["feasibility"]["months"])
+        and mo["n_cohort_months"] == rd["n_cohort_months"]
+        and abs(mo["point_cpr_pct"] - rd["point_cpr_pct"]) < 1e-12
+        # the "two July cohort-months aside" disclosure is the support's own:
+        # the sparse month is the first one and is an order of magnitude below
+        # every other, and the per-month counts exhaust the read
+        and sparse == months[0]
+        and sum(cmpm.values()) == mo["n_cohort_months"]
+        and cmpm[sparse] * 10 < min(cmpm[m] for m in dense)
+    )
+    return ok, {"missing": missing, "lits": lits, "G_month": G,
+                "webb_rank": rank, "n_undemoted": len(rungs),
+                "n_censored": n_censored, "widest_interior": widest_interior,
+                "se_shrink_pct": shrink_pct, "se_grow_pct": grow_pct}
 
 def main() -> int:
     tex = TEX.read_text()
@@ -5170,6 +5486,18 @@ def main() -> int:
           f"ordered={_fl.get('ordered')}, "
           f"artifact_ok={_fl.get('artifact_ok')}, "
           f"missing={_fl['missing'] or 'none'}")
+    _ficv2 = json.loads(FICV2_RESULTS.read_text())
+    _ficv3 = json.loads(FICV3_RESULTS.read_text())
+    mtw_ok, _mtw = month_twoway_clusters_check(tex, _ficv2, _ficv3)
+    failures += 0 if mtw_ok else 1
+    print(f"[{'PASS' if mtw_ok else 'FAIL'}] month and two-way cluster rungs "
+          f"(gate #115): G_month={_mtw['G_month']}, "
+          f"webb_rank={_mtw['webb_rank']}/{_mtw['n_undemoted']} undemoted, "
+          f"censored={_mtw['n_censored']}, "
+          f"widest_interior={_mtw['widest_interior']}, "
+          f"se_month={_mtw['se_shrink_pct']}% smaller, "
+          f"se_2way={_mtw['se_grow_pct']}% larger, "
+          f"missing={_mtw['missing'] or 'none'}")
     _wnt = json.loads(WALNT_RESULTS.read_text())
     _oos_wnt = json.loads((ROOT / "hazard" / "data"
                            / "oos_identification_results.json").read_text())
