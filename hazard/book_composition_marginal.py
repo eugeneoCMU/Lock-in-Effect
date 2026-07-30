@@ -35,7 +35,12 @@ from pathlib import Path
 import numpy as np
 import polars as pl
 
-import fed_mbs_extension_risk as fed
+_REPO = Path(__file__).resolve().parents[1]
+for _p in (_REPO, _REPO / "abm", _REPO / "hazard"):
+    if str(_p) not in sys.path:
+        sys.path.insert(0, str(_p))
+
+import fed_mbs_extension_risk as fed  # noqa: E402
 
 import agents
 import competing_risks

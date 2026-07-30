@@ -1,0 +1,144 @@
+{
+ "mode": "book_composition_marginal",
+ "spec": "specs/SPEC_R32_c07_post_stratification.md",
+ "spec_sha256": "349a39a869b7645461b2e92ebdcbd3b6904d2b4cf198f8d571c7cdc74fefee07",
+ "joint_not_matched_note": "rakes to TWO MARGINALS; the coupon x vintage JOINT is not observable because fetch_soma_mbs_cohorts collapses vintage to one value-weighted origin_date per (term, coupon) bucket. This is not a cell match.",
+ "support_note": "the draw is vintages 2017-2021; the book's pre-2017 (10.6%) and 2022 (23.1%) = 33.7% of face have ZERO support and stay with vintage_overlay",
+ "targets": {
+  "coupon": {
+   "0.015": 0.030359483898487225,
+   "0.02": 0.39769902873832924,
+   "0.025": 0.2929216699131041,
+   "0.03": 0.11820349152376823,
+   "0.035": 0.08067757472375173,
+   "0.04": 0.05108848263985423,
+   "0.045": 0.029050268562705154
+  },
+  "vintage_renormalised": {
+   "2017-19": 0.09063444108761329,
+   "2020": 0.24622356495468278,
+   "2021": 0.6631419939577039
+  },
+  "in_support_face_share": 0.662
+ },
+ "unweighted_pair": {
+  "null_trapped_b": 724.9180585654117,
+  "central_trapped_b": 767.5264524465003,
+  "null_share_pct": 94.79172466371236,
+  "central_share_pct": 100.36328284662208,
+  "marginal_b": 42.60839388108866,
+  "marginal_pp": 5.571558182909726,
+  "null_bind": 0.35785836337667337,
+  "central_bind": 0.6881875607501289,
+  "central_bind_n": 1683124
+ },
+ "vintage_only_pair": {
+  "null_trapped_b": 741.1629498586915,
+  "central_trapped_b": 776.838650984824,
+  "null_share_pct": 96.9159389034733,
+  "central_share_pct": 101.58096441687496,
+  "marginal_b": 35.67570112613248,
+  "marginal_pp": 4.665025513401659,
+  "null_bind": 0.38005340070012666,
+  "central_bind": 0.7110777340231617,
+  "central_bind_n": 1683124
+ },
+ "vintage_only_ipf": {
+  "ipf_iterations": 1,
+  "ipf_converged": true,
+  "max_coupon_margin_error": 0.0,
+  "max_vintage_margin_error": 8.326672684688674e-17,
+  "coupon_bucket_achieved": {},
+  "vintage_achieved": {
+   "2017-19": 0.0906344410876133,
+   "2020": 0.2462235649546827,
+   "2021": 0.6631419939577039
+  },
+  "zeroed_balance_share": 0.0
+ },
+ "post_stratified_pair": {
+  "null_trapped_b": 737.9724089263539,
+  "central_trapped_b": 777.0193150256218,
+  "null_share_pct": 96.49873743633789,
+  "central_share_pct": 101.60458840555837,
+  "marginal_b": 39.04690609926797,
+  "marginal_pp": 5.105850969220484,
+  "null_bind": 0.3801101419953069,
+  "central_bind": 0.7144919575071627,
+  "central_bind_n": 1654773
+ },
+ "post_stratified_ipf": {
+  "ipf_iterations": 26,
+  "ipf_converged": true,
+  "max_coupon_margin_error": 6.494210724738991e-11,
+  "max_vintage_margin_error": 2.7755575615628914e-17,
+  "coupon_bucket_achieved": {
+   "0.015": 0.03035948390360025,
+   "0.02": 0.39769902880327135,
+   "0.025": 0.29292166995817054,
+   "0.03": 0.11820349152089421,
+   "0.035": 0.08067757468226874,
+   "0.04": 0.05108848259698149,
+   "0.045": 0.029050268534813364
+  },
+  "vintage_achieved": {
+   "2017-19": 0.09063444108761329,
+   "2020": 0.24622356495468276,
+   "2021": 0.6631419939577039
+  },
+  "zeroed_balance_share": 0.01881333333333335
+ },
+ "marginal_pp": 5.105850969220484,
+ "move_pp_vs_headline": -0.4657072136892424,
+ "pre_committed_band_pp": [
+  2.5,
+  5.0
+ ],
+ "in_band": false,
+ "prediction": "the marginal FALLS from +5.5716 into [+2.5, +5.0]: raking moves weight out of 2017-19 into 2021, the deepest out-of-the-money and least seasoned cohort, where under the hard maximum the floor binds most and the marginal is zero wherever it binds on both legs",
+ "prediction_held": true,
+ "gates": {
+  "P1_unweighted_parity": {
+   "pass": true,
+   "null_got": 724.9180585654117,
+   "null_want": 724.9180585654117,
+   "central_got": 767.5264524465003,
+   "central_want": 767.5264524465003,
+   "marginal_pp_got": 5.571558182909726,
+   "marginal_pp_want": 5.571558182909726
+  },
+  "P4_bind_parity": {
+   "pass": true,
+   "central_bind_got": 0.6881875607501289,
+   "want": 0.6881875607501289,
+   "n_got": 1683124,
+   "n_want": 1683124
+  },
+  "P2_margins_hit": {
+   "pass": true,
+   "max_coupon_margin_error": 6.494210724738991e-11,
+   "max_vintage_margin_error": 2.7755575615628914e-17,
+   "iterations": 26,
+   "note": "targets recomputed inside the run from SOMA cohorts and composition_shift_results.json; not taken from the spec file"
+  },
+  "P3_no_op_detection": {
+   "pass": true,
+   "threshold_b": 1.0,
+   "null_delta_b": 13.05435036094218,
+   "central_delta_b": 9.492862579121493
+  },
+  "P6_coupon_untouched": {
+   "pass": true,
+   "note": "the converter is applied to a LOCAL COPY inside the raking hook; self.coupon is never reassigned (round-28 G2 design)"
+  },
+  "P7_frozen_artifacts": {
+   "pass": true,
+   "n_files": 204,
+   "scope_note": "hazard/data/** excluding the gitignored floor_sweep/ scratch dir",
+   "changed": []
+  }
+ },
+ "gates_all_pass": true,
+ "branch": "A",
+ "runtime_s": 141.674603291
+}
