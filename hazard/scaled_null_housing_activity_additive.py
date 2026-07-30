@@ -199,6 +199,23 @@ def main() -> None:
                       f"< required ${req:.4f}B")
                 continue
 
+            # ---- LADDER SEEDING (spec section 3: "a ladder is run first to seed the
+            # bracket, exactly as the committed run does").  The committed max-form run
+            # records bracket_seeded_from_ladder=true against a drafted [0.3, 1.0]; that
+            # seeding is what makes MAX_ITERS=10 sufficient.  The first version of this
+            # runner omitted it and exhausted 10 iterations from the full bracket with a
+            # residual above tolerance -- a spec-compliance defect, repaired here.  The
+            # bisection parameters themselves are NOT re-tuned.
+            ladder_phis = sorted(set(snha.PHIS
+                                     + ([snha.XROUTE_PHI] if snha.CROSS_ROUTE else [])))
+            ladder = {p: lift(p) for p in ladder_phis}       # lift DECREASES in phi
+            for a, b in zip(ladder_phis, ladder_phis[1:]):
+                if ladder[a] >= req >= ladder[b]:
+                    lo, hi = a, b
+                    break
+            print(f"  ladder {[f'{p:.2f}:{ladder[p]:.2f}' for p in ladder_phis]} "
+                  f"-> seeded bracket [{lo}, {hi}]")
+
             it, resid, mid = 0, None, None
             while it < snha.MAX_ITERS:
                 it += 1
@@ -224,6 +241,8 @@ def main() -> None:
                 "tolerance_b": snha.ROOT_TOL_B, "max_iters": snha.MAX_ITERS,
                 "bracket_final": [lo, hi],
                 "bracket_drafted": [snha.BISECT_LO, snha.BISECT_HI],
+                "bracket_seeded_from_ladder": True,
+                "ladder_null_lift_b": {f"{p:.2f}": ladder[p] for p in ladder_phis},
                 "required_lift_b": req, "realized_lift_b": lift(mid),
                 "null_trapped_b": null_root,
                 "central_trapped_b": cent_root["trapped_b"],
@@ -252,7 +271,12 @@ def main() -> None:
             stop("P4", "max-form bind-share anchor does not reproduce after the form switch")
 
         # ---- expectations ---------------------------------------------------
-        e2 = all(not r["no_root"] for r in roots.values())
+        # E2 as the spec states it: no_root == false AND converged == true AND the residual
+        # inside tolerance. The first version tested only no_root and reported E2 PASS on a
+        # weaker condition than the spec; that omission is the reason this run was repeated.
+        e2 = all((not r["no_root"]) and r.get("converged") is True
+                 and abs(r.get("residual_b", 1e9)) <= snha.ROOT_TOL_B
+                 for r in roots.values())
         e3_cells = {fk: (r.get("marginal_pp") if not r["no_root"] else None)
                     for fk, r in roots.items()}
         e3 = bool(e2 and all(v is not None and v > E3_MARGINAL_BAR_PP
