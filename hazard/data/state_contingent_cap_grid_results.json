@@ -1,0 +1,91 @@
+{
+  "mode": "state_contingent_cap_grid",
+  "run_tag": "state_contingent_cap_grid",
+  "spec": {
+    "spec_file": "specs/SPEC_R32_c81_state_contingent_cap.md",
+    "question": "the missing function from the indexing observable to a cap level: OTM share x turnover-floor band -> achievable passive principal -> implied cap",
+    "no_new_estimation": true,
+    "depth_cuts_bp": [
+      0,
+      25,
+      50
+    ],
+    "depth_cuts_rationale": "the committed floor reads exist only at gap <= 0 / -0.0025 / -0.005; 200/300/400bp would need new reads",
+    "calculator": "hazard/wal_table.py (imported; main() never called)",
+    "calculator_sha256": "26308a9ff7de7ca86f5753ba63129758cdf2b76907d84e5a6f30a16bfce70b32",
+    "book_face_b": 2700.5636941477837,
+    "book_as_of": "2022-06-29",
+    "reference_market_rate_pct": 5.231111111111111,
+    "window_months": 42,
+    "band_pct": [
+      4.177,
+      5.8
+    ]
+  },
+  "parity": {
+    "nine_rows_bit_identical_via_schedule": true,
+    "read_artifacts_untouched": true,
+    "import_side_effect_free": true,
+    "coupon_shares_sum_to_one": true
+  },
+  "observable_declared_not_predicted": {
+    "note": "computed at scoping time, before the spec was written; recorded as a measurement, not as a pre-committed expectation",
+    "otm_share_pct": {
+      "0": 99.9082,
+      "25": 99.5853,
+      "50": 99.5853
+    },
+    "near_degenerate": true,
+    "why_25_and_50_coincide": "book coupons sit on a 0.5% grid; no bucket between the thresholds"
+  },
+  "expectations": {
+    "E1_monotone_in_floor": true,
+    "E2_range_b_per_month": [
+      14.0,
+      26.0
+    ],
+    "E2_pass": true,
+    "E3_claim": "spread across depth cuts < spread across the mid-cut floor band",
+    "E3_spread_across_cuts_b_per_month": 1.1251833517758403,
+    "E3_spread_across_band_b_per_month": 2.859926306119254,
+    "E3_pass": true
+  },
+  "cells": {
+    "cut_0bp": {
+      "depth_cut_bp": 0,
+      "coupon_threshold_pct": 5.231111111111111,
+      "otm_share_pct": 99.90819674205717,
+      "floor_pct": 5.334,
+      "achievable_b_per_month": 17.072486100906524,
+      "implied_cap_b_per_month": 17.072486100906524
+    },
+    "cut_25bp": {
+      "depth_cut_bp": 25,
+      "coupon_threshold_pct": 4.981111111111111,
+      "otm_share_pct": 99.58529306052793,
+      "floor_pct": 4.991,
+      "achievable_b_per_month": 16.470867388425408,
+      "implied_cap_b_per_month": 16.470867388425408
+    },
+    "cut_50bp": {
+      "depth_cut_bp": 50,
+      "coupon_threshold_pct": 4.731111111111111,
+      "otm_share_pct": 99.58529306052793,
+      "floor_pct": 4.695,
+      "achievable_b_per_month": 15.947302749130683,
+      "implied_cap_b_per_month": 15.947302749130683
+    }
+  },
+  "band": {
+    "floor_4.177pct": {
+      "floor_pct": 4.177,
+      "achievable_b_per_month": 15.021233127348337
+    },
+    "floor_5.8pct": {
+      "floor_pct": 5.8,
+      "achievable_b_per_month": 17.88115943346759
+    }
+  },
+  "scope_limit": "The observable is the SOMA book's bucketed coupon distribution; the floor read is estimated on the Freddie loan-level panel's gaps. Two populations, two grains. The 0.5% coupon bucketing is why the 25 and 50 bp cuts coincide.",
+  "runtime_s": 0.012
+}

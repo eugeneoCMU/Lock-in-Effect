@@ -4393,3 +4393,59 @@ both band ends) is *derived inside the gate* from `expectation_benchmark_results
 binding interval; none is written into the gate. The battery moves each side of the comparison
 independently, because the claim is comparative and a ratio goes stale silently when one side
 moves. 521 -> 532 tests.
+
+## 48. Round-32 / C-81: the state-contingent cap's two-input grid — run `state_contingent_cap_grid`, LANDS (2026-07-30)
+
+**The gap.** §VI.B raised indexing a redemption cap "to the share of the book sitting deeply
+below market coupon" and stopped. C-81's charge: the proposal supplies **no function** from the
+observable to a cap level.
+
+**Spec before runner before run.** `specs/SPEC_R32_c81_state_contingent_cap.md` (`901ecae`),
+then `tools/state_contingent_cap_run.py` (`741c76b`), then the run.
+
+**A deviation from the condition's own grid.** The inventory proposed 200/300/400 bp cuts. The
+committed floor reads exist only at `gap <= 0 / -0.0025 / -0.005` — 0/25/50 bp — so reading at
+200/300/400 would have required *new floor reads*, i.e. new estimation, which this condition
+explicitly forbids. The spec states the deviation and the reason.
+
+**One limb declared rather than predicted.** The observable was computed during scoping, before
+the spec was written. Recording it as a "pre-committed expectation" would have been dressing up
+a known answer, so the spec declares it as a measurement: OTM share **99.9082 / 99.5853 /
+99.5853%** at the three cuts. The 25 and 50 bp cuts coincide because the book's coupons sit on a
+0.5% grid with no bucket between the thresholds. **The observable is near-degenerate.**
+
+**Result — Branch A, E1 held, E2 and E3 both PASS.**
+
+| depth cut | OTM share | floor | achievable = implied cap |
+|---|---|---|---|
+| 0 bp | 99.91% | 5.334% | **$17.07bn/month** |
+| 25 bp | 99.59% | 4.991% | **$16.47bn/month** |
+| 50 bp | 99.59% | 4.695% | **$15.95bn/month** |
+| mid-cut band | — | 4.177–5.800% | **$15.02 – $17.88bn/month** |
+
+**The finding.** The grid supplies the missing function and shows it is not worth much. The
+entire depth range moves the implied cap by about **$1.1bn/month**; the mid-cut floor read's own
+wild-cluster interval moves it by about **$2.9bn/month** — 2.5× more. E3 was a genuine
+pre-commitment and it held: **the designer's observable is dominated by the measurement error in
+the quantity it would be indexed to.** Combined with the near-degenerate observable, the
+indexing proposal is not merely the "weaker alternative" §VI.B already called it; it is
+uninformative for this book.
+
+The levels also cross-check C-54: $15.95–17.07bn/month brackets the $17.6bn/month uniform-spread
+projection on the same window and book, computed by a different route.
+
+**A rounding trap caught before printing.** The true cut-spread is 1.1252, which rounds to 1.13,
+while the printed cells subtract to 1.12. Printing 1.13 beside them would have handed a reader
+an arithmetic error. The manuscript prints both spreads at **one** decimal, gate #112 pins the
+1-dp form, and a test asserts the printed cells still subtract to the printed spread.
+
+**P1 is stronger than C-94's.** `cell_schedule()` mirrors `wal_table.cell_wal`'s recursion so the
+monthly principal can be extracted; P1 then rebuilds **all nine committed `tab:wal` WALs from
+that schedule** and asserts them bit-identical against the frozen artifact. A re-implementation
+that drifted would fail before any new number could exist.
+
+**Landed.** The grid in §VI.B beside C-54's $bn/month sentence, a `tab:runindex` row, **GATE
+#112** (every literal derived from the artifact — three cells, two band ends, both spreads) and a
+**15-test battery** (545 → 560). Scope limit stated in the text: the observable is the SOMA
+book's bucketed coupons while the floor is the Freddie panel's loan-level gaps — two populations
+at two grains.

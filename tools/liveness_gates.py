@@ -58,6 +58,7 @@ SMD_RESULTS = ROOT / "abm" / "data" / "smd_two_moment_results.json"
 WALTAB_RESULTS = ROOT / "hazard" / "data" / "wal_table_results.json"
 WALNT_RESULTS = ROOT / "hazard" / "data" / "wal_normal_turnover_results.json"
 WALNRB_RESULTS = ROOT / "hazard" / "data" / "wal_note_rate_basis_results.json"
+SCCG_RESULTS = ROOT / "hazard" / "data" / "state_contingent_cap_grid_results.json"
 COUPONAMORT_RESULTS = (ROOT / "hazard" / "data"
                        / "coupon_convention_amortization_results.json")
 CURTDEMO_RESULTS = ROOT / "hazard" / "data" / "curtailment_profile_demo_results.json"
@@ -937,6 +938,46 @@ def cap_monthly_units_check(tex, eb, bench, binding_lo_pp, binding_hi_pp):
     return all(lits.values()), {"missing": sorted(k for k, v in lits.items() if not v),
                                 "cap_per_month": round(cap, 2),
                                 "achievable_per_month": (round(proj, 1), round(sett, 1))}
+
+
+def state_contingent_cap_check(tex, g):
+    """Gate #112's rule (R32, C-81): the state-contingent cap's two-input grid.
+
+    Every literal is DERIVED here from the run artifact -- the three cell levels,
+    the two band ends, and BOTH spreads -- so a rerun that moved any of them
+    cannot leave a stale number in SS VI.B.
+
+    The spreads are the point of the exhibit (the observable buys less than the
+    floor's own sampling error), and they are printed at ONE decimal on purpose:
+    the true cut-spread is 1.1252, which rounds to 1.13, while the printed cells
+    subtract to 1.12. Printing 1.13 beside cells that give 1.12 would hand a
+    reader an arithmetic error. The gate therefore pins the 1-dp form, and a test
+    asserts the printed cells still subtract to it.
+    """
+    c, b = g["cells"], g["band"]
+    e = g["expectations"]
+    lits = {
+        "cell_0bp": f"\\${c['cut_0bp']['achievable_b_per_month']:.2f}" in tex,
+        "cell_25bp": f"\\${c['cut_25bp']['achievable_b_per_month']:.2f}" in tex,
+        "cell_50bp": f"\\${c['cut_50bp']['achievable_b_per_month']:.2f}" in tex,
+        "band_lo": f"\\${b['floor_4.177pct']['achievable_b_per_month']:.2f}" in tex,
+        "band_hi": f"\\${b['floor_5.8pct']['achievable_b_per_month']:.2f}" in tex,
+        "cut_spread": (f"about \\${e['E3_spread_across_cuts_b_per_month']:.1f} billion "
+                       "per month") in tex,
+        "band_spread": f"about \\${e['E3_spread_across_band_b_per_month']:.1f} billion" in tex,
+        "degenerate_observable": "near-degenerate" in tex,
+        "two_grains_scope_limit": "two populations at two grains" in tex,
+        "run_tag": "\\texttt{state\\_contingent\\_cap\\_grid}" in tex,
+    }
+    ok = (all(lits.values())
+          and bool(g["parity"]["nine_rows_bit_identical_via_schedule"])
+          and bool(g["parity"]["coupon_shares_sum_to_one"])
+          and bool(g["expectations"]["E1_monotone_in_floor"])
+          and bool(g["observable_declared_not_predicted"]["near_degenerate"]))
+    return ok, {"missing": sorted(k for k, v in lits.items() if not v),
+                "cells_b_per_month": [round(c[k]["achievable_b_per_month"], 2)
+                                      for k in ("cut_0bp", "cut_25bp", "cut_50bp")],
+                "E3_pass": e["E3_pass"]}
 
 
 def wal_note_rate_basis_check(tex, wnrb, amort):
@@ -5067,6 +5108,12 @@ def main() -> int:
           f"ceiling={_cmu['cap_per_month']}, "
           f"achievable={_cmu['achievable_per_month']}, "
           f"missing={_cmu['missing'] or 'none'}")
+    _sccg = json.loads(SCCG_RESULTS.read_text())
+    sccg_ok, _sc = state_contingent_cap_check(tex, _sccg)
+    failures += 0 if sccg_ok else 1
+    print(f"[{'PASS' if sccg_ok else 'FAIL'}] state-contingent cap grid (gate #112): "
+          f"cells={_sc['cells_b_per_month']} $bn/month, E3_pass={_sc['E3_pass']}, "
+          f"missing={_sc['missing'] or 'none'}")
     _wnrb = json.loads(WALNRB_RESULTS.read_text())
     _amort = json.loads(COUPONAMORT_RESULTS.read_text())
     wnrb_ok, _wb = wal_note_rate_basis_check(tex, _wnrb, _amort)
