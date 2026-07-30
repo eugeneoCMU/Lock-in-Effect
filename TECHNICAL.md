@@ -4368,11 +4368,20 @@ deliver averaged **$17.6 billion per month** (uniform-spread) and **$20.0 billio
 could not passively reach under either allocation, which is what "the caps never bound" means in
 decision units.
 
-*A deviation from the condition's own arithmetic, made deliberately.* C-54 (via R3) proposed a
-±$3.6bn/month band computed as the 1.623-CPR-point floor interval on a **$2.70 trillion** book.
-That denominator is not a committed quantity of this paper — the paper's own audit parse is
-**$1,940.9 billion** — so importing it would have printed a figure the repository cannot
-reproduce. The band is instead built from committed quantities only: the binding interval
+*A deviation from the condition's own arithmetic, made deliberately — with a correction to my
+own first reason.* C-54 (via R3) proposed a ±$3.6bn/month band computed as the 1.623-CPR-point
+floor interval on a **$2.70 trillion** book. I first recorded that this denominator was not a
+committed quantity; **that was wrong, and the artifact settled it**:
+`composition_shift_results.json` carries `soma_book.asof_june_2022.total_mbs_face_b =
+2700.5637`, so $2.70trn is committed — it is the **June-2022 as-of** SOMA total, while the
+$1,940.9bn audit parse is the **2026-07-15 as-of** of the same object. Both are real; they are
+different dates, not a real figure and a phantom one.
+
+The deviation stands, on the correct reason: R3's construction multiplies a CPR-point interval
+straight onto book face, which bypasses the committed floor-to-marginal grid this paper uses
+everywhere else to carry a floor read into a marginal, and it would price the interval against
+the whole book rather than against the identified quantity. The band is therefore built through
+that grid instead: the binding interval
 `+2.9` to `+8.7` points propagated through the committed floor-to-marginal grid on the $764.7bn
 benchmark, giving **$0.53 to $1.58 billion per month** of foregone passive principal. The text
 states explicitly that this band attaches to the *identified marginal* and not to the two
