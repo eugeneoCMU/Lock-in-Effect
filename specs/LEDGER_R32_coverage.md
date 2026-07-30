@@ -87,7 +87,7 @@ No condition may be left unclassified. Generated from the inventory and the comm
 | C-80 | MAJOR | 3 | RUN | **OPEN** | wave 3 | RUN: read the 2018 depth ladder's shape, not only its level |
 | C-81 | MAJOR | 3 | RUN | **OPEN** | wave 3 | RUN (re-tabulation): build the state-contingent cap's two-input table |
 | C-82 | MAJOR | 4 | STRUCTURE | **OPEN** | wave 4 | Add a household-side row to Table 1 |
-| C-83 | MAJOR | 4 | STRUCTURE | **OPEN** | wave 4 | Add a duration row to Table 1 |
+| C-83 | MAJOR | 4 | STRUCTURE | **SATISFIED** | 8255e0d (row quotes BOTH comparators: 6.0yr vs 2021 refi-boom, ~0 vs the turnover floor) | Add a duration row to Table 1 |
 | C-84 | CRITICAL | 4 | STRUCTURE | **SATISFIED** | 6a34d5c | Give the 5.51% age-standardized and 5.52% Fannie reads their own label |
 | C-85 | MAJOR | 5 | REFERENCE | **OPEN** | wave 5 | Add the missing references |
 | C-86 | MAJOR | 5 | REFERENCE | **OPEN** | wave 5 | Give §VI.C's assumability claims a cited basis |
@@ -97,11 +97,11 @@ No condition may be left unclassified. Generated from the inventory and the comm
 | C-90 | MAJOR | 6 | STRUCTURE | **OPEN** | wave 6 | Bring §V.E down to ~2,500 words |
 | C-91 | MAJOR | 6 | STRUCTURE | **OPEN** | wave 6 | Bring §VI.D down to ~3pp |
 | C-92 | MINOR | 3 | RUN | **OPEN** | wave 3 | RUN or flag: the floor's flatness in loan age |
-| C-93 | MINOR | 4 | STRUCTURE | **OPEN** | wave 4 | Move Table 8's oversized calibration cell into its tablenote |
+| C-93 | MINOR | 4 | STRUCTURE | **SATISFIED** | 8255e0d (cell 1,627 -> 313 chars; verbatim move, 15 gate literals delta-0) | Move Table 8's oversized calibration cell into its tablenote |
 | C-94 | MINOR | 4 | STRUCTURE | **OPEN** | wave 4 | Give tab:wal a note-rate-basis row for the empirical path |
-| C-95 | MINOR | 4 | STRUCTURE | **OPEN** | wave 4 | Make tab:pathadiag single-spec |
-| C-96 | MINOR | 4 | STRUCTURE | **OPEN** | wave 4 | Promote the distributional-incidence result out of the homogeneity che |
-| C-97 | MINOR | 4 | STRUCTURE | **OPEN** | wave 4 | Give the transportable methodological lesson its own named paragraph |
+| C-95 | MINOR | 4 | STRUCTURE | **SATISFIED** | 8255e0d (both spec-v3 rows + row 4's spec-v3 parenthetical demoted to the note) | Make tab:pathadiag single-spec |
+| C-96 | MINOR | 4 | STRUCTURE | **SATISFIED** | 8255e0d (named paragraph; sequenced with C-90, which is Eugene's) | Promote the distributional-incidence result out of the homogeneity che |
+| C-97 | MINOR | 4 | STRUCTURE | **SATISFIED** | 8255e0d (doubling verified anchor-specific against the artifact; both anchors stated) | Give the transportable methodological lesson its own named paragraph |
 | C-98 | MINOR | 5 | REFERENCE | **SATISFIED** | 592f16d | Flag berger2026's working-paper status where its estimates are importe |
 | C-99 | MINOR | 5 | WORDING | **OPEN** | wave 5 | Print the measured +3.7 at the age-standardized floor with the grid-re |
 | C-100 | MINOR | 5 | WORDING | **SATISFIED** | 7b13504 | Name the percentile rung's grid-exclusion convention and its 26/1,000 |
@@ -141,8 +141,8 @@ No condition may be left unclassified. Generated from the inventory and the comm
 
 ## Counts
 
-- SATISFIED: **86**
-- OPEN: **35**
+- SATISFIED: **91**
+- OPEN: **30**
 - DEFERRED-EUGENE: **7**
 - DECLINED: **3**
 - CLOSED-REFUTED: **1**
@@ -192,3 +192,9 @@ No condition may be left unclassified. Generated from the inventory and the comm
   *enumerates its quoting sites*; adding a fourth site would falsify that enumeration and
   require editing a line three clusters contend for. Ready-to-apply text is preserved in
   `specs/r32_wave2/CORRECTED_w2_G-denominators.md` DROPPED #2 if Eugene overrules.
+
+- **C-115 was missing from the continuation handoff's SS5 ordering.** The handoff's SS5.1--5.6
+  enumerate 34 conditions and call them 35; reconciling the ledger's OPEN rows against that
+  list leaves `C-115` (read the Danish sweep at two named tax-regime points, MINOR, wave 5,
+  CHECK) unlisted in every group. It is genuinely OPEN, not satisfied and not declined, and
+  it is folded into the Danish group (SS5.4) rather than left unclassified.
