@@ -84,6 +84,25 @@ def sha(p: Path) -> str:
     return hashlib.sha256(p.read_bytes()).hexdigest()
 
 
+def _is_syspath_bootstrap(node: ast.If) -> bool:
+    """The repo's standard `if str(DIR) not in sys.path: sys.path.insert(...)` idiom.
+
+    Accepted because it mutates sys.path and nothing else -- it computes no value, reads no
+    artifact and calls into no engine. Anything else in a top-level If is still rejected.
+    """
+    if "sys.path" not in ast.unparse(node.test):
+        return False
+    if node.orelse:
+        return False
+    for stmt in node.body:
+        if not (isinstance(stmt, ast.Expr) and isinstance(stmt.value, ast.Call)):
+            return False
+        fn = ast.unparse(stmt.value.func)
+        if fn not in ("sys.path.insert", "sys.path.append"):
+            return False
+    return True
+
+
 def ast_binds_names_only(path: Path) -> bool:
     tree = ast.parse(path.read_text())
     binding = (ast.Import, ast.ImportFrom, ast.FunctionDef, ast.AsyncFunctionDef,
@@ -93,10 +112,12 @@ def ast_binds_names_only(path: Path) -> bool:
             continue
         if isinstance(node, ast.Expr) and isinstance(node.value, ast.Constant):
             continue
-        if isinstance(node, ast.If) and ast.unparse(node.test) == "__name__ == '__main__'":
-            continue
-        if isinstance(node, (ast.Try, ast.ImportFrom)):
-            continue
+        if isinstance(node, ast.If):
+            if ast.unparse(node.test) == "__name__ == '__main__'":
+                continue
+            if _is_syspath_bootstrap(node):
+                continue
+            return False
         return False
     return True
 
