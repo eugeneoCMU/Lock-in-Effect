@@ -1,0 +1,140 @@
+{
+  "mode": "ginnie_overlay_attenuated",
+  "run_tag": "ginnie_overlay_attenuated",
+  "spec": {
+    "spec_file": "specs/SPEC_R32_c74_ginnie_attenuated_elasticity.md",
+    "construction": "marginal(a) = marginal(0) + a * W_G * Delta_C, Delta_C pinned by marginal(1) == the un-overlaid marginal",
+    "engine_free": "the overlay is a re-scoring of committed legs, not a re-simulation; a full re-simulation of the Ginnie share at beta1*a needs the single-tenant engine and a Ginnie loan panel this design does not have, and is OUT OF SCOPE",
+    "transplant_note": "the per-unit-face CONVENTIONAL wedge is transplanted onto the Ginnie share -- the attenuation hypothesis stated cleanly, not a Ginnie-specific estimate",
+    "ginnie_share": 0.204,
+    "conventional_share": 0.796,
+    "no_engine_runs": true
+  },
+  "honesty_constraints": {
+    "rise_above_0797_is_FORCED": "the Ginnie share contributes EXACTLY ZERO marginal today, so for any a > 0 the corrected marginal must exceed the committed 0.797x by arithmetic. This is recorded so no landing text can present it as evidence.",
+    "level_does_not_identify_slope": "the measurement is a LEVEL difference in voluntary speed at the same window rate path; the elasticity is a SLOPE. The mapping is assumed, so the result is the BRACKET and no single cell may be quoted as 'the measured Ginnie marginal'.",
+    "full_universe_overstates": "Published series is full-universe Ginnie collateral; SOMA's Ginnie holdings are seasoned/low-coupon, so the overlay if anything OVERSTATES the correction \u2014 same signed direction as the static bound. Structural Ginnie inclusion remains formally declined (2026-07-15)."
+  },
+  "parity": {
+    "P0b_artifacts_byte_identical": true,
+    "P1_crr_only_marginal_pp": 7.333248797494442,
+    "P1_crr_only_marginal_b": 56.080892083313415,
+    "P1_committed_anchors": {
+      "central_trapped_b": 818.5300844066606,
+      "null_trapped_b": 748.1850239867648,
+      "netting_b": 69.56220187263008,
+      "benchmark_b": 764.7482532227002
+    },
+    "P2_window_months": 42,
+    "P2_window": [
+      "2022-06",
+      "2025-11"
+    ],
+    "P2_window_mean_crr_pct": {
+      "ginnie": 7.29497619047619,
+      "freddie": 5.940904761904764,
+      "fannie": 5.9426428571428564,
+      "gse_mean": 5.94177380952381
+    },
+    "P3_marginal_at_a1_vs_M_full": {
+      "in_sample": [
+        9.198459770709782,
+        9.198459770709782
+      ],
+      "off_window": [
+        5.57155818290974,
+        5.57155818290974
+      ],
+      "tol_pp": 0.05
+    },
+    "P4_comparator_shift_pp": 0.00022220184315457914,
+    "P4_tol_pp": 0.05,
+    "P5_series_extraction_residual_pp": {
+      "fannie": 0.0006,
+      "freddie": -0.0115,
+      "ginnie": 0.011
+    },
+    "P5_note": "the vector-extraction residual is roughly 1% of the differential it feeds, so r is NOT exact and must not be presented as such"
+  },
+  "measurement": {
+    "crr_differential_ginnie_minus_freddie_pp": 1.3540714285714257,
+    "crr_differential_ginnie_minus_gse_mean_pp": 1.3532023809523794,
+    "speed_ratio_r_freddie": 1.2279234363853504,
+    "speed_ratio_r_gse": 1.227743839522028,
+    "comparator_primary": "freddie -- Path B is built on the Freddie panel and .tex:52 quotes that differential",
+    "m_full_in_sample_pp": 9.198459770709782,
+    "m_full_in_sample_b": 70.34506041989584
+  },
+  "bracket_in_sample": {
+    "M0_committed": {
+      "a": 0.0,
+      "marginal_pp": 7.333248797494442
+    },
+    "M2_primary_1_over_r": {
+      "a": 0.8143830228892033,
+      "marginal_pp": 8.852244948187664
+    },
+    "M1_no_differential": {
+      "a": 1.0,
+      "marginal_pp": 9.198459770709782
+    },
+    "M3_amplification_r": {
+      "a": 1.2279234363853504,
+      "marginal_pp": 9.623585065308685
+    }
+  },
+  "bracket_off_window": {
+    "M0_committed": {
+      "a": 0.0,
+      "marginal_pp": 4.443419164229439
+    },
+    "M2_primary_1_over_r": {
+      "a": 0.8143830228892033,
+      "marginal_pp": 5.362156428501562
+    },
+    "M1_no_differential": {
+      "a": 1.0,
+      "marginal_pp": 5.57155818290974
+    },
+    "M3_amplification_r": {
+      "a": 1.2279234363853504,
+      "marginal_pp": 5.8286875047677515
+    }
+  },
+  "bracket_in_sample_gse_comparator": {
+    "M0_committed": {
+      "a": 0.0,
+      "marginal_pp": 7.333248797494442
+    },
+    "M2_primary_1_over_r": {
+      "a": 0.81450215249242,
+      "marginal_pp": 8.852467150030819
+    },
+    "M1_no_differential": {
+      "a": 1.0,
+      "marginal_pp": 9.198459770709782
+    },
+    "M3_amplification_r": {
+      "a": 1.227743839522028,
+      "marginal_pp": 9.623250079268463
+    }
+  },
+  "expectations": {
+    "E1_a0_reproduces_committed_overlay": true,
+    "E2_monotone_in_a": true,
+    "E3_band_pp": [
+      8.5,
+      9.2
+    ],
+    "E3_M2_in_sample_pp": 8.852244948187664,
+    "E3_pass": true,
+    "E4_open_sign_a_vs_1": {
+      "a_primary_M2": 0.8143830228892033,
+      "a_amplification_M3": 1.2279234363853504,
+      "verdict": "attenuation",
+      "note": "M2 gives a < 1 and M3 gives a > 1 from the SAME measurement; which is the right reading is a modelling judgement this data cannot settle, which is why the run reports the bracket. Both were pre-authorised."
+    },
+    "E5_rise_is_forced_not_a_finding": true
+  },
+  "runtime_s": 0.001
+}
