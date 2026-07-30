@@ -4450,6 +4450,55 @@ that drifted would fail before any new number could exist.
 book's bucketed coupons while the floor is the Freddie panel's loan-level gaps — two populations
 at two grains.
 
+## 50. Round-32 / C-74: the Ginnie share's gap response, bracketed — run `ginnie_overlay_attenuated`, LANDS (2026-07-30)
+
+**The defect.** The committed overlay scores the 20.4% Ginnie face share by the observed Ginnie
+speed in **both** Path B legs, so that share's central-minus-null difference is **exactly zero**
+and the marginal correction is pure conventional-share scaling. R2:M4(b) asked for a weaker
+Ginnie marginal **measured** rather than **none assumed**.
+
+**Engine-free by construction.** The overlay is already a re-scoring of committed legs by an
+observed series, not a re-simulation, and this run stays in that regime:
+`marginal(a) = marginal(0) + a·W_G·Δ_C`, with `Δ_C` pinned by requiring `marginal(1)` to return
+the un-overlaid marginal. A full re-simulation of the Ginnie share at `β₁·a` needs the
+single-tenant engine and a Ginnie loan panel this design does not have; the spec declares it out
+of scope and the artifact records `no_engine_runs`.
+
+**What is measured, and what is not.** The measurement is a **level**: over the window's 42
+months Ginnie voluntary CPR runs 7.294976 against Freddie's 5.940905, a differential of
++1.354071 pp and a speed ratio of 1.227923. The elasticity is a **slope**. Nothing maps one onto
+the other, so the run reports a bracket over the mapping — zero, 81.4%, 100% and 122.8% of the
+conventional share's per-unit-face response — and no cell in it is a measured Ginnie marginal.
+The per-unit-face wedge is **transplanted** from the conventional share, which is the attenuation
+hypothesis stated cleanly rather than a Ginnie-specific estimate.
+
+**Result.** In-sample +7.3 / +8.9 / +9.2 / +9.6 points; composed with the off-window
+calibration +4.4 / +5.4 / +5.6 / +5.8. The a = 0 cell reproduces the committed overlay
+bit-identically at both calibrations (7.333248797494442 against `ginnie_cpr_overlay_results.json`
+`variants.crr_only.marginal_pp`; 4.443419164229439 against `ginnie_overlay_offwindow_results.json`
+`overlay_offwindow.primary.marginal_pp`), and the a = 1 cell returns the un-overlaid marginal at
+both (9.198459770709782 and 5.57155818290974, the latter equal to `conventional_offwindow` to the
+last digit). E3 held; E4's sign was pre-authorised both ways and M3 is labelled **amplification**,
+not re-described as attenuation.
+
+**Two honesty constraints, both in the prose and both gated.** (a) The rise above the committed
+0.797× scaling is **forced** — a share contributing exactly zero must contribute more at any
+positive response — so it is arithmetic, not evidence, and the paper rests nothing on it. (b) A
+level does not identify a slope, so the **bracket** is the result. The +4.4-point overlay member
+stands unrevised: this is a scoping of that estimand, not a correction to it.
+
+**Landed.** The bracket at the end of §V.B's overlay paragraph, a hedged cross-reference at the
+assumability sentence in §I, a `tab:runindex` row, **GATE #116** and a **75-test battery**. The
+gate writes no cell literal of its own: every printed number is rebuilt from the run artifact,
+the a = 0 cell is tied live to **both** committed Ginnie artifacts, and the printed 0.797× is
+derived from the in-sample scaling with the two calibrations asserted to agree inside the printed
+precision. Beyond presence the gate binds the ORDER of the two honesty clauses, because the
+failure mode here is a later pass keeping the numbers and dropping the scope.
+
+**Deviation, disclosed.** Branch A's `tab:assembly` row did not land; see
+`PLAN_R32_execution_log.md` for the reasoning and the retraction of a false justification an
+earlier draft gave for it.
+
 ## 49. Round-32 / C-78: the episode gradient with loan age held fixed — run `episode_gradient_age_bands`, LANDS Branch A (2026-07-30)
 
 `.tex:331` carries the paper's only realized-data exhibit that moves in the lock-in direction, and

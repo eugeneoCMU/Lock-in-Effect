@@ -1950,6 +1950,250 @@ def snha_additive_check(tex, a, mx, max_bytes):
                 "bind_max_then_additive": (round(m5["floor_bind_share"], 4),
                                            round(r5["floor_bind_share"], 4))}
 
+
+1# --- R32 C-74 (gate #116): THE GINNIE SHARE'S GAP RESPONSE, BRACKETED ------
+# The committed overlay scores the 20.4% Ginnie face share by the observed
+# Ginnie speed in BOTH Path B legs, so that share's central-minus-null
+# difference is exactly zero and the marginal correction is pure
+# conventional-share scaling (0.797x). C-74 asks for a WEAKER Ginnie marginal
+# MEASURED rather than NONE ASSUMED. What this design can deliver is a bracket,
+# not a measurement, and the two ways the exhibit can be overclaimed are exactly
+# what a concision pass would cut, so both are pinned:
+#
+#   (a) THE RISE IS FORCED. A share contributing exactly zero must contribute
+#       more at any positive response, so the corrected scaling exceeds the
+#       committed 0.797x by arithmetic. Reporting that as a finding would repeat
+#       the error the paper already names about its own headline sign.
+#   (b) A LEVEL DOES NOT IDENTIFY A SLOPE. The measured object is a level
+#       difference in voluntary speed at the same window rate path; the
+#       elasticity is a slope; the mapping between them is assumed. The BRACKET
+#       is the result and no cell in it is a measured Ginnie marginal.
+#
+# The two paths below belong with the other *_RESULTS constants near the top of
+# the module (OVERLAY_RESULTS is line 45); they sit here only so the gate lands
+# as one contiguous block.
+GINNIEATT_RESULTS = (ROOT / "hazard" / "data"
+                     / "ginnie_overlay_attenuated_results.json")
+GINNIEOFF_RESULTS = (ROOT / "hazard" / "data"
+                     / "ginnie_overlay_offwindow_results.json")
+
+# PROSE spans, and deliberately so. They are pinned to the ONE line carrying
+# both the run tag and the 0.797 clause, so relocating an honesty clause to a
+# footnote fails the gate even when the words survive elsewhere in the file.
+# Every NUMBER this gate checks is derived inside the check from the run
+# artifact and tied live to the two COMMITTED Ginnie artifacts, so no cell
+# literal lives in this file and a rerun that moved a cell cannot be papered
+# over by editing a dict.
+GINNIE_ATTENUATED_SPANS = {
+    # the construction, and that it is a transplant rather than a
+    # Ginnie-specific estimate (spec SS8.2 -- without this the bracket reads as
+    # a measurement on Ginnie collateral, which this design cannot deliver)
+    "transplant": "transplanted, not estimated on Ginnie collateral",
+    "identity_defines_the_fraction": "with the wedge fixed by requiring that a "
+                                     "full-strength Ginnie response return the "
+                                     "un-overlaid marginal",
+    # HONESTY CONSTRAINT (b): a LEVEL does not identify a SLOPE. Four spans,
+    # because the failure mode is a later pass keeping the numbers and dropping
+    # the scope, after which a reader quotes one cell as the measured Ginnie
+    # marginal.
+    "level_scope": "a level, and a voluntary-only one",
+    "level_not_slope": "An elasticity is a slope, and nothing here maps a level "
+                       "onto one",
+    "bracket_not_chosen": "so I bracket the mapping rather than choose it",
+    "no_single_cell": "none of the four is a measured Ginnie marginal",
+    # spec SS8.3: the published series is full-universe Ginnie collateral while
+    # SOMA's holdings are seasoned and low-coupon, so the overlay if anything
+    # OVERSTATES the correction. That direction carries into the speed ratio.
+    "full_universe_overstatement": "read off the same full-universe series with "
+                                   "the same overstatement",
+    # the open sign was pre-authorised BOTH ways (spec SS5 E4); if the a > 1
+    # reading is quoted it must be labelled amplification, not re-described as
+    # attenuation (spec SS7 Branch C)
+    "amplification_named": "which is amplification, not attenuation",
+    # HONESTY CONSTRAINT (a): the rise above the committed scaling is FORCED.
+    # Dropping this turns a tautology into a finding -- the same error the paper
+    # already names about its own headline sign.
+    "rise_is_forced": "is arithmetic, not evidence",
+    "forced_mechanism": "a share contributing exactly zero must contribute more "
+                        "at any positive response",
+    "rest_nothing_on_it": "and I rest nothing on it",
+    # the supplement SCOPES the committed +4.4 estimand; it does not correct it
+    "scopes_not_corrects": "stands unrevised, scoped by the bracket rather than "
+                           "corrected by it",
+}
+
+# WHOLE-FILE spans: the cross-reference the bracket adds at the assumability
+# sentence in SS I, and the hedge that sentence's next clause carries. They are
+# pinned TOGETHER on purpose. The cross-reference without "ceilings, not sizes"
+# would read as SIZING the assumption carve-out, and nothing in this design
+# measures realized take-up (spec SS8.5). The spec's Branch A wording -- "so the
+# carve-out is small" -- was therefore NOT landed; this pair is what replaces it.
+GINNIE_ATTENUATED_FILE_SPANS = {
+    "assumability_link": "to bracket what a Ginnie share that is not gap-inert "
+                         "would contribute, on a mapping it assumes rather than "
+                         "measures",
+    "ceilings_not_sizes": "Both bounds are ceilings, not sizes",
+}
+
+
+def ginnie_attenuated_check(tex, g, ov, gof):
+    """Gate #116's rule (R32, C-74): the Ginnie share's gap response, bracketed.
+
+    Every printed literal is DERIVED here from the run artifact, and the a = 0
+    cell is tied LIVE to both committed Ginnie artifacts at full precision, so a
+    rerun that moved any cell cannot leave a stale digit in SS V.B and a wrong
+    number cannot be introduced by editing this file alone.
+
+    Beyond presence this binds the exhibit's two honesty constraints AND THEIR
+    ORDER, because each is what a concision pass would cut and each is the
+    difference between a scoped bracket and an overclaim:
+
+    (i) THE RISE IS FORCED. Under the committed overlay the Ginnie share
+    contributes exactly zero marginal, so the corrected scaling exceeds the
+    committed 0.797x for every positive response, by arithmetic.
+
+    (ii) A LEVEL DOES NOT IDENTIFY A SLOPE. What the series measures is a level
+    difference in voluntary speed at the same window rate path; the elasticity
+    is a slope; nothing maps one onto the other. The BRACKET is the result and
+    no single cell is a measured Ginnie marginal.
+
+    The printed sequence must come first, then (i), then (ii): a rewrite that
+    leads with the bracket verdict and buries the forced-rise disclaimer after
+    it reads as a finding followed by a hedge, which is the reverse of what the
+    spec commits to. That order is asserted, not just the presence.
+
+    A third span keeps this a SCOPING of the committed 0.797x estimand rather
+    than a correction of it: the +4.4 overlay member is accurate as printed and
+    stays unrevised.
+
+    The printed 0.797x is NOT typed here. It is rebuilt from the in-sample
+    scaling (marginal(0) / M_full = 0.797226 -> "0.797"), and the off-window
+    scaling is separately asserted to agree with it to better than 5e-4, which
+    is finer than the printed precision. The manuscript's own off-window value
+    is 0.797518, which rounds to 0.798; the paper prints 0.797 at five sites and
+    that pre-existing rendering is not this gate's to change.
+
+    The run tag is separately required to occur at least twice (prose +
+    tab:runindex), and the two whole-file spans keep the SS I cross-reference
+    and its hedge alive together.
+    """
+    tex_nc = re.sub(r"(?<!\\)%.*", "", tex)
+    tag = "\\texttt{ginnie\\_overlay\\_attenuated}"
+    lines = [ln for ln in tex_nc.split("\n") if tag in ln and "0.797" in ln]
+    info: dict = {"prose_lines": len(lines)}
+    if len(lines) != 1:
+        return False, {**info, "missing": ["prose_line"], "artifact_ok": None,
+                       "ordered": None, "in_sample_pp": [], "off_window_pp": [],
+                       "E3_pass": None}
+    line = lines[0]
+
+    order = ("M0_committed", "M2_primary_1_over_r", "M1_no_differential",
+             "M3_amplification_r")
+    ins, off = g["bracket_in_sample"], g["bracket_off_window"]
+    ins_pp = [ins[k]["marginal_pp"] for k in order]
+    off_pp = [off[k]["marginal_pp"] for k in order]
+    a0 = ins["M0_committed"]["a"]
+    a2 = ins["M2_primary_1_over_r"]["a"]
+    a1 = ins["M1_no_differential"]["a"]
+    a3 = ins["M3_amplification_r"]["a"]
+    m, p, e = g["measurement"], g["parity"], g["expectations"]
+    r = m["speed_ratio_r_freddie"]
+    conv_off = gof["conventional_offwindow"]["marginal_pp"]
+    scale_off0 = gof["marginal_scale_vs_conventional"]
+    scale_ins0 = ins_pp[0] / m["m_full_in_sample_pp"]
+
+    def seq(v):
+        return f"${v[0]:+.1f}$, ${v[1]:+.1f}$, ${v[2]:+.1f}$ and ${v[3]:+.1f}$"
+
+    lits = {k: v in line for k, v in GINNIE_ATTENUATED_SPANS.items()}
+    lits.update({k: v in tex_nc
+                 for k, v in GINNIE_ATTENUATED_FILE_SPANS.items()})
+    lits.update({
+        "in_sample_sequence": f"{seq(ins_pp)} points across those four" in line,
+        "off_window_sequence": seq(off_pp) in line,
+        "grid_attenuated": f"${a2 * 100:.1f}$\\% of the conventional response" in line,
+        "grid_unit": f"${a1 * 100:.0f}$\\% (no differential)" in line,
+        "grid_amplified": (f"${a3 * 100:.1f}$\\% (proportional-hazard "
+                           "preservation") in line,
+        "ratio_stated": f"${r:.3f}$ times as fast" in line,
+        "ratio_in_rationale": f"a book running ${r:.3f}$ times faster" in line,
+        "differential": (f"runs ${m['crr_differential_ginnie_minus_freddie_pp']:.2f}$ "
+                         "points above Freddie's") in line,
+        "window_months": f"the window's {p['P2_window_months']} months" in line,
+        "forced_scale_literal": (f"rises above the committed ${scale_ins0:.3f}\\times$ "
+                                 "at every positive response") in line,
+        "run_tag_indexed": tex_nc.count(tag) >= 2,
+    })
+
+    # the printed differential and ratio must fall out of the window means the
+    # run recorded, not out of a constant
+    wm = p["P2_window_mean_crr_pct"]
+    derived_ok = (
+        abs((wm["ginnie"] - wm["freddie"])
+            - m["crr_differential_ginnie_minus_freddie_pp"]) < 1e-9
+        and abs(wm["ginnie"] / wm["freddie"] - r) < 1e-9
+    )
+    # the grid is 0, 1/r, 1, r -- derived, so a runner that hard-coded 0.814
+    # would fail here
+    a_grid_ok = (a0 == 0.0 and a1 == 1.0
+                 and abs(a2 * r - 1.0) < 1e-9 and a3 == r)
+    # THE PARITY ANCHOR, live and cross-artifact: the a = 0 cell IS the committed
+    # overlay at both calibrations, bit for bit, and its off-window ratio IS the
+    # 0.797 scaling the committed run wrote
+    anchor_ok = (ins_pp[0] == ov["variants"]["crr_only"]["marginal_pp"]
+                 and off_pp[0] == gof["overlay_offwindow"]["primary"]["marginal_pp"]
+                 and abs(p["P1_crr_only_marginal_pp"]
+                         - ov["variants"]["crr_only"]["marginal_pp"]) < 1e-12
+                 and abs(off_pp[0] / conv_off - scale_off0) < 1e-12)
+    # the identity that makes the fraction mean what its name says: a full
+    # response returns the un-overlaid marginal at BOTH calibrations, and the
+    # off-window arm is bound to the committed run's own conventional leg
+    ident = p["P3_marginal_at_a1_vs_M_full"]
+    tol = ident["tol_pp"]
+    identity_ok = (abs(ident["in_sample"][0] - ident["in_sample"][1]) <= tol
+                   and abs(ident["off_window"][0] - ident["off_window"][1]) <= tol
+                   and abs(ins_pp[2] - m["m_full_in_sample_pp"]) <= tol
+                   and abs(off_pp[2] - conv_off) <= tol)
+    # monotone, and every SCALING past the first strictly above it: the
+    # arithmetic the prose calls forced, re-derived rather than read off a flag,
+    # and compared multiplier-to-multiplier as the prose now states it
+    mono = (all(x < y for x, y in zip(ins_pp, ins_pp[1:]))
+            and all(x < y for x, y in zip(off_pp, off_pp[1:])))
+    s_ins = [x / m["m_full_in_sample_pp"] for x in ins_pp]
+    s_off = [x / conv_off for x in off_pp]
+    forced = (all(s > s_ins[0] for s in s_ins[1:])
+              and all(s > s_off[0] for s in s_off[1:]))
+    # the printed 0.797 stands for both calibrations; they must agree inside the
+    # printed precision or the single literal is misleading
+    scale_agreement_ok = abs(scale_off0 - scale_ins0) < 5e-4
+
+    # ORDER: numbers, then the forced-rise disclaimer, then the bracket verdict
+    i_seq = line.find(seq(off_pp))
+    i_forced = line.find(GINNIE_ATTENUATED_SPANS["rise_is_forced"])
+    i_cell = line.find(GINNIE_ATTENUATED_SPANS["no_single_cell"])
+    ordered = -1 < i_seq < i_forced < i_cell
+
+    art_ok = (
+        bool(p["P0b_artifacts_byte_identical"])
+        and p["P2_window"] == ["2022-06", "2025-11"]
+        and p["P2_window_months"] == 42
+        and abs(p["P4_comparator_shift_pp"]) < p["P4_tol_pp"]
+        and derived_ok and a_grid_ok and anchor_ok and identity_ok
+        and mono and forced and scale_agreement_ok
+        and bool(e["E1_a0_reproduces_committed_overlay"])
+        and bool(e["E2_monotone_in_a"])
+        and bool(e["E5_rise_is_forced_not_a_finding"])
+        and bool(g["spec"]["no_engine_runs"])
+    )
+    ok = all(lits.values()) and art_ok and ordered
+    return ok, {**info,
+                "missing": sorted(k for k, v in lits.items() if not v),
+                "artifact_ok": art_ok,
+                "ordered": ordered,
+                "in_sample_pp": [round(v, 4) for v in ins_pp],
+                "off_window_pp": [round(v, 4) for v in off_pp],
+                "E3_pass": bool(e["E3_pass"])}
+
 def main() -> int:
     tex = TEX.read_text()
     failures = 0
@@ -5939,6 +6183,15 @@ def main() -> int:
           f"cross_artifact_tie={_wb['cross_artifact_tie']}, "
           f"disclaimer={_wb['disclaimer_present']}, "
           f"tag_citations={_wb['tag_citations']}")
+    _gat = json.loads(GINNIEATT_RESULTS.read_text())
+    _gov_c74 = json.loads(OVERLAY_RESULTS.read_text())
+    _goff_c74 = json.loads(GINNIEOFF_RESULTS.read_text())
+    gat_ok, _ga = ginnie_attenuated_check(tex, _gat, _gov_c74, _goff_c74)
+    failures += 0 if gat_ok else 1
+    print(f"[{'PASS' if gat_ok else 'FAIL'}] Ginnie response bracket (gate #116): "
+          f"in-sample={_ga['in_sample_pp']}pp, off-window={_ga['off_window_pp']}pp, "
+          f"ordered={_ga['ordered']}, E3_pass={_ga['E3_pass']}, "
+          f"artifact_ok={_ga['artifact_ok']}, missing={_ga['missing'] or 'none'}")
     print(f"[{'PASS' if cl_ok else 'FAIL'}] convolved sampling line (gate #105): "
           f"{len(CONVOLVED_LINE_SPANS) - len(_cl['missing'])}/"
           f"{len(CONVOLVED_LINE_SPANS)} spans present, "
