@@ -796,6 +796,7 @@ def compute_metrics(
     use_hazard_microsim: bool = False,
     abm_params: Optional[dict] = None,
     sched_smm_override: Optional[pd.Series] = None,
+    allow_surface_cohort_fallback: bool = False,
 ) -> pd.DataFrame:
     """
     Derive roll-off, extension delta, and cumulative trapped liquidity.
@@ -861,12 +862,35 @@ def compute_metrics(
         surface = load_cpr_surface()
 
     multi_cohort = isinstance(surface, dict)
+    cohort_provenance = "caller-supplied" if cohorts is not None else None
     if (multi_cohort or use_burnout) and cohorts is None and not use_hazard_microsim:
         try:
             cohorts = fetch_soma_mbs_cohorts()
-        except Exception:
+            cohort_provenance = "soma-fetch"
+        except Exception as exc:
+            # The fallback is EQUAL-WEIGHTED (cohorts_from_surface), so it
+            # silently substitutes a different book — and the cohort weights
+            # set the scheduled-amortization series that both the simulated
+            # roll-off and the empirical CPR back-out are computed from.
+            # Failing loud is the default; opting in records the substitution.
+            if not allow_surface_cohort_fallback:
+                raise RuntimeError(
+                    "SOMA cohort fetch failed and the equal-weighted "
+                    "surface-derived fallback was not authorized. Pass "
+                    "cohorts=... explicitly, or set "
+                    "allow_surface_cohort_fallback=True to accept an "
+                    "equal-weighted cohort book (which changes scheduled "
+                    f"amortization and every figure derived from it). "
+                    f"Underlying error: {exc!r}"
+                ) from exc
             cohorts = cohorts_from_surface(surface)
-            print("Using cohort weights derived from loaded surface keys.")
+            cohort_provenance = "surface-equal-weight-fallback"
+            print("WARNING: SOMA cohort fetch failed; using EQUAL-WEIGHTED "
+                  "cohort weights derived from loaded surface keys. "
+                  "Scheduled amortization and the empirical CPR back-out "
+                  "are affected.")
+    df.attrs["cohort_provenance"] = cohort_provenance
+    df.attrs["n_cohorts"] = len(cohorts) if cohorts is not None else 0
 
     holdings_b = df["WSHOMCB"] / 1_000
     df["RealDispInc_YoY_Pct"] = df["DSPIC96"].pct_change(12).fillna(0.0) * 100
