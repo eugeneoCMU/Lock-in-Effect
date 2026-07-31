@@ -141,8 +141,7 @@ true`), so the headline count is not an artefact of the approximation. Applying 
 stress, not an estimator, and it is recorded as such rather than quoted. Gate #115's
 battery asserts the two counts agree.
 
-**Not done:** the engine's own re-score. It needs a FRED key and a pinned SOMA cohort
-table. The decomposition is exact given the linearity, but it is not a re-simulation.
+**Done (E1):** the engine's own re-score. See below.
 
 ## Finding 8 — the null's balance path (MAJOR) — **PARTIALLY CONFIRMED; LANDED**
 
@@ -306,5 +305,33 @@ the manifest, is now independently confirmed: the series behind
 
 ## Environment note
 
-All seven R33 gates pass on both editions, the whole liveness suite is green, and the
-test suite is **542 passed**.
+All nine R33 gates (#121–#129) pass on both editions once the engine artifact and
+Monte Carlo figure refresh are present; the whole liveness suite is green.
+
+## Engine confirmation (E1) — **LANDED**
+
+Spec `specs/SPEC_R33B_engine_confirmation.md` and runner
+`tools/r33b_engine_confirmation.py` were committed before execution. Artifact:
+`abm/data/r33b_engine_confirmation_results.json`.
+
+With pinned SOMA cohorts as-of 2026-07-01 and a live FRED API key:
+
+| check | result |
+|---|---|
+| G0 parity (trapped $, share, empirical CPR) | **exact** (diff 0.0) |
+| Engine Δ | **$63.50bn** |
+| Decomposition Δ | $63.88bn |
+| Gap | **$0.38bn** (E1 tolerance ≤ $3bn) |
+| Seeds below 50% | **16 of 50** (unchanged) |
+
+Branch **E1**. Manuscript carries the corroboration at the book-sched site and a
+`tab:runindex` row. Gate #127 requires the E1 artifact. Unit tests:
+`tests/test_engine_confirmation.py`.
+
+## Monte Carlo figure currency (Gate #129) — **FIXED**
+
+Root `abm/monte_carlo_trapped_liquidity.{png,csv}` were stale relative to
+`run-2026-07-04-15yr-foldin` (root mean ~$96.7bn vs caption $103.7bn). Copied from
+the frozen run; mean trapped share now 103.68%. Gate #129 asserts PNG SHA identity
+with the frozen run, CSV moments against `monte_carlo_summary.json`, and caption
+literals against those moments.

@@ -340,10 +340,11 @@ and the direction of travel is the honest part.
 The point-by-point above was written on 26 July 2026 and this letter was not sent
 that day. Rather than leave it describing a manuscript that no longer exists, I
 record here what has changed. Nine of the fourteen items below move \emph{against} the
-paper, and those are the ones I would read first. The last six come from a referee
+paper, and those are the ones I would read first. The last items come from a referee
 round on the argument of Sections~IV--VI, which put twenty-two criticisms to
 independent adversarial refutation; fifteen died against the artifacts and the rest
-are recorded here.
+are recorded here, together with the engine confirmation of the book-sched wedge
+and a Monte Carlo figure-currency fix the confirmation run exposed.
 
 \subsection{The Danish buyback credit is now priced, and it can reverse the gap}
 
@@ -602,6 +603,20 @@ the move is depends on which book schedule is the comparator, so the manuscript 
 both --- \$63.9 billion against the production series, \$33.5 billion against a
 single-pool annuity at the book's own coupon, one seed below rather than sixteen --- and
 lets the reader choose rather than choosing for them.
+Re-running the engine itself on the book's series rather than decomposing
+(run \texttt{r33b\_engine\_confirmation}; spec committed before execution)
+reproduces the committed cross-design figures exactly and recovers
+\$63.5~billion with the same sixteen-of-fifty seeds --- a \$0.38~billion
+gap against the decomposition --- so the wedge is not an accounting artifact.
+
+\subsection{The Monte Carlo figure at the repo root was a different run}
+
+The histogram \texttt{monte\_carlo\_trapped\_liquidity.png} and its CSV sit at
+\texttt{abm/} with no run tag, and the includegraphics resolves them by bare
+name. They had gone stale against the frozen fold-in run the caption quotes:
+the root CSV averaged \$96.7~billion while the caption says \$103.7~billion.
+Both copies now agree with \texttt{run-2026-07-04-15yr-foldin}; the caption's
+literals reproduce from that data.
 
 \subsection{The one fit statistic quoted in dollars was on the basis \S VII.D disowns}
 
