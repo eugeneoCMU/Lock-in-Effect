@@ -4323,6 +4323,15 @@ The count was re-derived per seed (each cell's own age) — also 16, so it is no
 artefact of the seed-invariant Δ. Both comparators are printed ($63.9bn/16-of-50 and
 $33.5bn/1-of-50) rather than one being chosen.
 
+Engine confirmation (E1; `specs/SPEC_R33B_engine_confirmation.md`, runner
+`tools/r33b_engine_confirmation.py`, artifact
+`abm/data/r33b_engine_confirmation_results.json`): with pinned SOMA cohorts
+as-of 2026-07-01 and a live FRED key, the production engine reproduces G0
+bit-identically (trapped dollars, share, empirical CPR) and recovers
+Δ = **$63.50bn / 16-of-50** on the book basis. Gap vs. the accounting
+decomposition is **$0.38bn**. Gate #127 now requires the E1 artifact and the
+manuscript's corroboration sentence.
+
 ### 46.3 The five unadjudicated findings (gates #122, #124, #125, #126)
 - **5, survived:** `fig:waterfall`'s caption claimed all stage levels come from frozen run
   manifests. Stages 1–4 live only in `figures/fig3_stage_levels.json`.
@@ -4366,9 +4375,9 @@ a wrong number behind a green gate. Fix at merge. No computed quantity moves her
 figure is a price statement §VI.D already refuses to read as a volume statement.
 
 ### 46.6 Bookkeeping a future session must know
-- **Gates are numbered #121–#128**, above R32's #120 high-water mark, because R32 is
+- **Gates are numbered #121–#129**, above R32's #120 high-water mark, because R32 is
   unpushed and would otherwise collide. `tab:bases`, `tab:crosswalk` and `tab:runindex`
-  will all need reconciliation at merge.
+  will all need reconciliation at merge. Gate #129 pins Monte Carlo figure currency.
 - **`tab:bases` was already 21.1pt overfull on `main`** before this round; the added
   column took it to 78pt. Repaired with a two-column `\multicolumn` group, `\tabcolsep`
   4pt and `\scriptsize`; full row labels retained. Result is *better* than baseline:
@@ -4376,7 +4385,8 @@ figure is a price statement §VI.D already refuses to read as a volume statement
   still 1–89 / 90–130.
 - **No liveness gate reads a PDF**, and this round proved it again: every gate stayed
   green over a table that did not fit. Build before believing a layout claim.
-- `monte_carlo_trapped_liquidity.png` is not in the repo, so a full build needs a
-  placeholder; pagination is ±1 page across geometries, but no layout verdict moves.
-- The engine's own cross-design re-score now needs only a **FRED key**; the cohort
-  blocker is gone.
+- Root `abm/monte_carlo_trapped_liquidity.{png,csv}` were stale (mean $96.7bn vs
+  caption $103.7bn). Regenerated from `run-2026-07-04-15yr-foldin`; gate #129 pins
+  bit-identity with the frozen run and caption literals against the data.
+- The engine confirmation (E1) closed the remaining FRED-key blocker; the cohort
+  book was already pinned.

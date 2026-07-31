@@ -1,0 +1,67 @@
+{
+ "mode": "r33b_engine_confirmation",
+ "spec": "specs/SPEC_R33B_engine_confirmation.md",
+ "legs": {
+  "parity_population_sched": {
+   "trapped_b": 453.5186133616682,
+   "share_pct": 59.30299434493775,
+   "empirical_trapped_b": 764.7482532227002,
+   "us_cpr_mean_pct": 8.138241675425641,
+   "empirical_cpr_mean_pct": 5.829007141082971,
+   "sched_annualized_pct": 2.3554079710511586,
+   "sched_total_b": 196.56267558361492
+  },
+  "book_sched": {
+   "trapped_b": 390.02322154348104,
+   "share_pct": 51.00021084061286,
+   "empirical_trapped_b": 764.7482532227002,
+   "us_cpr_mean_pct": 8.138241675425641,
+   "empirical_cpr_mean_pct": 5.138811539213689,
+   "sched_annualized_pct": 3.1169560352870924,
+   "sched_total_b": 260.0248216591768
+  }
+ },
+ "G0_parity": {
+  "tolerance": 1e-06,
+  "checks": {
+   "trapped_b": {
+    "want": 453.5186133616682,
+    "got": 453.5186133616682,
+    "diff": 0.0,
+    "pass": true
+   },
+   "share_pct": {
+    "want": 59.30299434493775,
+    "got": 59.30299434493775,
+    "diff": 0.0,
+    "pass": true
+   },
+   "empirical_trapped_b": {
+    "want": 764.7482532227002,
+    "got": 764.7482532227002,
+    "diff": 0.0,
+    "pass": true
+   }
+  },
+  "pass": true
+ },
+ "wedge": {
+  "delta_engine_b": 63.49539181818716,
+  "delta_decomposition_b": 63.8803470149806,
+  "abs_gap_b": 0.3849551967934417,
+  "delta_engine_pp": 8.302783504324898,
+  "book_share_pct_committed_draw": 51.00021084061286,
+  "direction_prediction_held": true
+ },
+ "t2_on_engine_wedge": {
+  "book_mean_pct": 51.90523633695431,
+  "book_min_pct": 45.456138843618646,
+  "seeds_below": 16,
+  "seeds_scored": 50,
+  "branch_unchanged": true
+ },
+ "verdict": {
+  "branch": "E1",
+  "text": "Decomposition confirmed by the engine within $3bn; landed numbers stand."
+ }
+}

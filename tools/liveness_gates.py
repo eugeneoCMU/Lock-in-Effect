@@ -1029,6 +1029,58 @@ def runoff_error_basis_check(tex: str,
     }
 
 
+def monte_carlo_figure_currency_check(tex: str) -> tuple[bool, dict]:
+    """Gate #129: fig:mc's data must be the run the caption describes.
+
+    `abm/monte_carlo_trapped_liquidity.png` and its CSV sit at the repo root
+    with no run tag, and `\\includegraphics` resolves the figure by bare name.
+    They had gone stale against the frozen fold-in run the caption quotes: the
+    root CSV averaged $96.7bn while the caption says $103.7bn, so any build
+    resolving the root copy embedded a histogram contradicting its own caption.
+    Both copies must now agree, and the caption's literals must reproduce from
+    the data rather than being trusted.
+    """
+    import csv as _csv
+    import hashlib as _hl
+
+    frozen_dir = ROOT / "abm" / "data" / "runs" / "run-2026-07-04-15yr-foldin"
+    root_png = ROOT / "abm" / "monte_carlo_trapped_liquidity.png"
+    frozen_png = frozen_dir / "monte_carlo_trapped_liquidity.png"
+    root_csv = ROOT / "abm" / "monte_carlo_results.csv"
+    summary = json.loads((frozen_dir / "monte_carlo_summary.json").read_text())
+
+    def sha(p):
+        return _hl.sha256(p.read_bytes()).hexdigest() if p.exists() else None
+
+    png_match = (root_png.exists() and frozen_png.exists()
+                 and sha(root_png) == sha(frozen_png))
+
+    vals = []
+    if root_csv.exists():
+        with root_csv.open() as fh:
+            vals = [float(r["trapped_us_b"]) for r in _csv.DictReader(fh)]
+    n = len(vals)
+    mean = sum(vals) / n if n else 0.0
+    var = sum((v - mean) ** 2 for v in vals) / (n - 1) if n > 1 else 0.0
+    sd = var ** 0.5
+    data_ok = (n == summary["n_seeds"]
+               and abs(mean - summary["mean_b"]) < 0.01
+               and abs(sd - summary["std_b"]) < 0.05)
+
+    # the caption's own literals, checked against that data
+    caption_ok = all(s in tex for s in (
+        f"SD \\${summary['std_b']:.1f} billion",
+        f"(\\${summary['production_seed_draw_b']:.1f} billion, "
+        f"{int(summary['production_draw_percentile'])}th percentile)",
+        f"the seed mean (\\${summary['mean_b']:.1f} billion)",
+    ))
+    ok = png_match and data_ok and caption_ok
+    return ok, {"png_matches_frozen_run": png_match, "root_csv_n": n,
+                "root_csv_mean": round(mean, 3), "root_csv_sd": round(sd, 3),
+                "data_matches_summary": data_ok,
+                "caption_literals_present": caption_ok}
+
+
 def berger_currency_check(tex: str) -> tuple[bool, dict]:
     """Gate #128: the berger2026 GE magnitude must be the current draft's.
 
@@ -1154,6 +1206,19 @@ def book_sched_wedge_check(tex: str, r33b=None, seeds=None) -> tuple[bool, dict]
 
     words = {16: "sixteen", 15: "fifteen", 17: "seventeen"}
     n_word = words.get(n_below, str(n_below))
+
+    # The engine confirmation must still be an E1 confirmation of this wedge,
+    # with its own parity gate green: if a rerun ever lands on E2/E3/E4 the
+    # manuscript's corroboration sentence is no longer true.
+    eng_path = ROOT / "abm" / "data" / "r33b_engine_confirmation_results.json"
+    eng_ok, eng = False, {}
+    if eng_path.exists():
+        eng = json.loads(eng_path.read_text())
+        eng_ok = (eng["verdict"]["branch"] == "E1"
+                  and eng["G0_parity"]["pass"] is True
+                  and eng["t2_on_engine_wedge"]["branch_unchanged"] is True
+                  and eng["t2_on_engine_wedge"]["seeds_below"] == n_below
+                  and eng["wedge"]["direction_prediction_held"] is True)
     required = [
         f"\\${d['primary_b']:.1f} billion, "
         f"{d['primary_pp_of_benchmark']:.1f} points of benchmark",
@@ -1172,6 +1237,10 @@ def book_sched_wedge_check(tex: str, r33b=None, seeds=None) -> tuple[bool, dict]
         f"\\${r33b['delta']['secondary_single_pool_b']:.1f} billion and one "
         f"seed does",
         "holds functional form fixed and so isolates composition alone",
+        (f"returns \\${eng['wedge']['delta_engine_b']:.1f} billion and the same "
+         f"{n_word} seeds") if eng else "ENGINE_ARTIFACT_MISSING",
+        "after reproducing the committed cross-design figures exactly",
+        "\\texttt{r33b\\_engine\\_confirmation}",
         "\\texttt{r33b\\_book\\_sched}",
         f"running at "
         f"{r33b['scheduled_legs']['population']['annualized_pct']:.2f}\\% "
@@ -1188,11 +1257,14 @@ def book_sched_wedge_check(tex: str, r33b=None, seeds=None) -> tuple[bool, dict]
     missing = [s for s in required if s not in tex]
     present_retired = [s for s in retired if s in tex]
     ok = (not missing and not present_retired and gates_ok
-          and branch_ok and seeds_ok)
+          and branch_ok and seeds_ok and eng_ok)
     return ok, {"missing": missing, "present_retired": present_retired,
                 "parity_gates_all_pass": gates_ok, "branch": v["branch"],
                 "branch_ok": branch_ok, "seeds_below": n_below,
-                "seeds_scored": n_cells, "delta_b": d["primary_b"]}
+                "seeds_scored": n_cells, "delta_b": d["primary_b"],
+                "engine_ok": eng_ok,
+                "engine_branch": eng.get("verdict", {}).get("branch"),
+                "engine_delta_b": eng.get("wedge", {}).get("delta_engine_b")}
 
 
 def null_balance_path_check(tex: str, shared_layer=None) -> tuple[bool, dict]:
@@ -5385,6 +5457,13 @@ def main() -> int:
           f"missing={_wp['missing'] or 'none'}, "
           f"retired={_wp['present_retired'] or 'none'}, "
           f"distinct_ok={_wp['distinct_ok']}")
+    mc_ok, _mc = monte_carlo_figure_currency_check(tex)
+    failures += 0 if mc_ok else 1
+    print(f"[{'PASS' if mc_ok else 'FAIL'}] Monte Carlo figure currency "
+          f"(gate #129): png_matches_frozen={_mc['png_matches_frozen_run']}, "
+          f"root_csv n={_mc['root_csv_n']} mean={_mc['root_csv_mean']} "
+          f"sd={_mc['root_csv_sd']}, data_ok={_mc['data_matches_summary']}, "
+          f"caption_ok={_mc['caption_literals_present']}")
     bg_ok, _bg = berger_currency_check(tex)
     failures += 0 if bg_ok else 1
     print(f"[{'PASS' if bg_ok else 'FAIL'}] berger2026 GE currency (gate #128): "
