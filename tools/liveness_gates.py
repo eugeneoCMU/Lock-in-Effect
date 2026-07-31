@@ -57,6 +57,14 @@ INTERP_RESULTS = ROOT / "abm" / "data" / "interp_spot_check_results.json"
 SMD_RESULTS = ROOT / "abm" / "data" / "smd_two_moment_results.json"
 WALTAB_RESULTS = ROOT / "hazard" / "data" / "wal_table_results.json"
 WALNT_RESULTS = ROOT / "hazard" / "data" / "wal_normal_turnover_results.json"
+SHARED_LAYER_RESULTS = ROOT / "hazard" / "data" / "shared_layer_scoring_results.json"
+CALIB_RECON_RESULTS = ROOT / "hazard" / "data" / "calibration_reconciliation_results.json"
+CONCAVE_MARGINAL_RESULTS = ROOT / "hazard" / "data" / "concave_marginal_results.json"
+EXPECT_BENCH_RESULTS = ROOT / "hazard" / "data" / "expectation_benchmark_results.json"
+FIG3_STAGE_LEVELS = ROOT / "figures" / "fig3_stage_levels.json"
+ABM_RUN_PREFOLDIN = ROOT / "abm" / "data" / "runs" / "run-2026-07-04" / "manifest.json"
+ABM_RUN_FOLDIN = ROOT / "abm" / "data" / "runs" / "run-2026-07-04-15yr-foldin" / "manifest.json"
+ABM_RUN_BERGER = ROOT / "abm" / "data" / "runs" / "run-2026-07-05-berger" / "manifest.json"
 CURTDEMO_RESULTS = ROOT / "hazard" / "data" / "curtailment_profile_demo_results.json"
 SPREADVAR_RESULTS = ROOT / "hazard" / "data" / "expectation_spread_variants_results.json"
 DANBOUND_RESULTS = ROOT / "hazard" / "data" / "danish_discount_bound.json"
@@ -892,6 +900,174 @@ def wal_normal_turnover_check(tex, wnt, oos):
                 "anchor_pct": wnt["spec"]["anchor_full_precision_pct"],
                 "stale_sentence_gone":
                     "No row is printed at a normal-turnover speed." not in tex}
+
+
+def runoff_error_basis_check(tex: str,
+                             shared_layer=None,
+                             calib=None,
+                             concave=None,
+                             expect_bench=None) -> tuple[bool, dict]:
+    """Gate #109: tab:bases runoff-error column on both bases.
+
+    The cumulative-runoff-error column must print the shared-basis errors
+    (the basis §VII.D says is commensurable with the benchmark) beside the
+    standalone ones; the old reassurance that +$2.8bn is "the smallest error"
+    without the shared counterpart must stay gone; and the headline shared
+    miss must equal calibration_reconciliation's miss_vs_benchmark_pp × B.
+    """
+    if shared_layer is None:
+        shared_layer = json.loads(SHARED_LAYER_RESULTS.read_text())
+    if calib is None:
+        calib = json.loads(CALIB_RECON_RESULTS.read_text())
+    if concave is None:
+        concave = json.loads(CONCAVE_MARGINAL_RESULTS.read_text())
+    if expect_bench is None:
+        expect_bench = json.loads(EXPECT_BENCH_RESULTS.read_text())
+
+    res = shared_layer["results"]
+    B = float(res["path_b_central"]["empirical_trapped_b"])
+    W = float(res["path_b_central"]["curtailment_netted_b"])
+    R = float(expect_bench["window"]["actual_runoff_window_b"])
+    ft = {r["floor_annual_cpr_pct"]: r for r in calib["floor_table"]}
+    off = ft[4.991]
+    con_st = float(concave["legs"]["concave_central_4"]["trapped_b"])
+
+    rows = [
+        ("B_central_in",
+         float(res["path_b_central"]["standalone_trapped_b"]),
+         float(res["path_b_central"]["us_trapped_b"])),
+        ("B_null_in",
+         float(res["no_lockin_null"]["standalone_trapped_b"]),
+         float(res["no_lockin_null"]["us_trapped_b"])),
+        ("B_central_oow",
+         float(off["standalone"]["central_trapped_b"]),
+         float(off["shared"]["central_trapped_b"])),
+        ("B_null_oow",
+         float(off["standalone"]["null_trapped_b"]),
+         float(off["shared"]["null_trapped_b"])),
+        ("Path_A",
+         float(res["path_a"]["standalone_trapped_b"]),
+         float(res["path_a"]["us_trapped_b"])),
+        ("concave", con_st, con_st - W),
+    ]
+    pairs = []
+    netting_ok = True
+    for name, st, sh in rows:
+        if name != "concave" and abs((st - sh) - W) > 1e-9:
+            netting_ok = False
+        pairs.append((round(st - B, 1), round(sh - B, 1)))
+
+    def lit(v: float) -> str:
+        sign = "+" if v >= 0 else "-"
+        return f"${sign}{abs(v):.1f}$"
+
+    printed = [f"{lit(e_st)} / {lit(e_sh)}" for e_st, e_sh in pairs]
+
+    # Cross-artifact anchor: miss_vs_benchmark_pp × B == −shared_err (row 3).
+    miss_pp = float(off["miss_vs_benchmark_pp"])
+    shared_err_oow_exact = float(off["shared"]["central_trapped_b"]) - B
+    anchor_ok = abs(miss_pp / 100.0 * B + shared_err_oow_exact) < 1e-6
+
+    # Shared % of realized runoff sextet, one-decimal as printed.
+    shared_pct = [round((sh - B) / R * 100.0, 1) for _, st, sh in rows]
+
+    def pct_lit(p: float) -> str:
+        sign = "+" if p >= 0 else "-"
+        return f"${sign}{abs(p):.1f}\\%$"
+
+    shared_sextet = ", ".join(pct_lit(p) for p in shared_pct)
+
+    retired = [
+        "carries the smallest error of any leg here on the standalone "
+        "scorer: $+\\$2.8$ billion, 0.4\\% of realized runoff",
+        "overshoots the benchmark by \\$164.1 billion---its terminal "
+        "cumulative runoff error, and a 25.1\\% under-prediction",
+    ]
+    required = [
+        "standalone / shared (\\$B)",
+        "third of six rather than first",
+        "commensurable with the benchmark",
+        "Cum.\\ runoff error (six hazard legs)",
+        *printed,
+        shared_sextet,
+        "\\$94.6 billion, 14.5\\% of realized runoff",
+    ]
+    # Marginal figures must remain (basis-invariant; not moved by this edit).
+    marginal_ok = (
+        "$+5.6$ points ($+\\$42.6$ billion)" in tex
+        and "$+9.2$ points ($+\\$70.3$ billion)" in tex
+    )
+    missing = [s for s in required if s not in tex]
+    present_retired = [s for s in retired if s in tex]
+    ok = (not missing and not present_retired and netting_ok
+          and anchor_ok and marginal_ok)
+    return ok, {
+        "missing": missing,
+        "present_retired": present_retired,
+        "netting_ok": netting_ok,
+        "anchor_ok": anchor_ok,
+        "marginal_ok": marginal_ok,
+        "printed_pairs": printed,
+        "shared_sextet": shared_sextet,
+        "shared_err_oow": shared_err_oow_exact,
+        "miss_pp": miss_pp,
+    }
+
+
+def waterfall_provenance_check(tex: str,
+                               stages=None,
+                               prefoldin=None,
+                               foldin=None,
+                               berger=None) -> tuple[bool, dict]:
+    """Gate #110: fig:waterfall caption must not claim all stages are manifests.
+
+    The first four stages live only in figures/fig3_stage_levels.json; stages
+    5–7 come from the frozen run manifests. The caption must say so.
+    """
+    if stages is None:
+        stages = json.loads(FIG3_STAGE_LEVELS.read_text())
+    if prefoldin is None:
+        prefoldin = json.loads(ABM_RUN_PREFOLDIN.read_text())
+    if foldin is None:
+        foldin = json.loads(ABM_RUN_FOLDIN.read_text())
+    if berger is None:
+        berger = json.loads(ABM_RUN_BERGER.read_text())
+
+    early = [s["share_pct"] for s in stages["stages"]]
+    s5 = float(prefoldin["metrics"]["dollars_b"]["share_explained_pct"])
+    s6 = float(foldin["metrics"]["dollars_b"]["share_explained_pct"])
+    s7 = float(berger["metrics"]["dollars_b"]["share_explained_pct"])
+
+    # Printed one-decimal forms in the caption.
+    early_lits = [f"{v:.1f}\\%" for v in early]
+    late_lits = [f"{s5:.1f}\\%", f"{s6:.1f}\\%", f"{s7:.1f}\\%"]
+
+    retired = [
+        "Stage levels from the frozen run manifests catalogued in the "
+        "run ledger",
+    ]
+    required = [
+        "committed diagnostic sequence in \\texttt{figures/fig3\\_stage\\_levels.json}",
+        "no per-stage run manifest",
+        "stages 5--7 are from the frozen run manifests",
+        "\\texttt{run-2026-07-04}",
+        "\\texttt{run-2026-07-04-15yr-foldin}",
+        "\\texttt{run-2026-07-05-berger}",
+        *early_lits,
+        *late_lits,
+    ]
+    # Distinctness of the four hand-typed stages (disclosure stays meaningful).
+    distinct_ok = len(set(early)) == 4
+    missing = [s for s in required if s not in tex]
+    present_retired = [s for s in retired if s in tex]
+    ok = not missing and not present_retired and distinct_ok
+    return ok, {
+        "missing": missing,
+        "present_retired": present_retired,
+        "distinct_ok": distinct_ok,
+        "early": early,
+        "late": [s5, s6, s7],
+    }
 
 
 def buyback_bracket_check(tex: str) -> tuple[bool, dict]:
@@ -4915,6 +5091,18 @@ def main() -> int:
           f"row_present={_wn['present']}, tag_citations={_wn['tag_citations']}, "
           f"anchor_pct={_wn['anchor_pct']}, "
           f"stale_sentence_gone={_wn['stale_sentence_gone']}")
+    re_ok, _re = runoff_error_basis_check(tex)
+    failures += 0 if re_ok else 1
+    print(f"[{'PASS' if re_ok else 'FAIL'}] runoff-error basis (gate #109): "
+          f"missing={_re['missing'] or 'none'}, "
+          f"retired={_re['present_retired'] or 'none'}, "
+          f"anchor_ok={_re['anchor_ok']}, netting_ok={_re['netting_ok']}")
+    wp_ok, _wp = waterfall_provenance_check(tex)
+    failures += 0 if wp_ok else 1
+    print(f"[{'PASS' if wp_ok else 'FAIL'}] waterfall provenance (gate #110): "
+          f"missing={_wp['missing'] or 'none'}, "
+          f"retired={_wp['present_retired'] or 'none'}, "
+          f"distinct_ok={_wp['distinct_ok']}")
     print(f"[{'PASS' if cl_ok else 'FAIL'}] convolved sampling line (gate #105): "
           f"{len(CONVOLVED_LINE_SPANS) - len(_cl['missing'])}/"
           f"{len(CONVOLVED_LINE_SPANS)} spans present, "

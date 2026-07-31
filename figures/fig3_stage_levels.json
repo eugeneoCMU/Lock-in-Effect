@@ -1,5 +1,5 @@
 {
-  "note": "ABM falsification-bridge stage levels (% of the $764.7B benchmark) for the four pre-manifest stages, as printed in the manuscript's falsification narrative (Section VI / VIII.B: rational baseline 71.1, behavioral gates 54.9, income-scaled curtailment 45.1, multi-vintage composition 33.7) and recorded in TECHNICAL.md. The final two stages are NOT stored here: make_figures.py reads them from the frozen run manifests (run-2026-07-04-15yr-foldin share_explained_pct, run-2026-07-05-berger share_explained_pct).",
+  "note": "ABM falsification-bridge stage levels (% of the $764.7B benchmark) for the four pre-manifest stages, as printed in the manuscript's falsification narrative (rational baseline 71.1, behavioral gates 54.9, income-scaled curtailment 45.1, multi-vintage composition 33.7). Stages 5-7 are NOT stored here: make_figures.py reads them from the frozen run manifests (run-2026-07-04 production-corrections share_explained_pct, run-2026-07-04-15yr-foldin, run-2026-07-05-berger). Caption corrected 2026-07-31 (finding 5 / gate #110) so it no longer claims all seven stages come from manifests.",
   "stages": [
     { "label": "Rational\nbaseline", "share_pct": 71.1 },
     { "label": "+ DTI, loss-aversion,\nwait-and-see", "share_pct": 54.9 },
