@@ -1,0 +1,2461 @@
+{
+  "mode": "benchmark_monthly_rebuild",
+  "run_tag": "benchmark_monthly_rebuild",
+  "status": "OK",
+  "spec": {
+    "spec_file": "specs/SPEC_R32_c127_benchmark_monthly_rebuild.md",
+    "condition": "R2:M8, NOT ARBITRATED. This run settles the SOURCEABILITY leg; it does not adjudicate the referee exchange.",
+    "cap_side_untouched": true,
+    "no_engine_runs": true,
+    "window_months": 42
+  },
+  "sourceability": {
+    "summary_fields": [
+      "agencies",
+      "asOfDate",
+      "bills",
+      "cmbs",
+      "frn",
+      "mbs",
+      "notesbonds",
+      "tips",
+      "tipsInflationCompensation",
+      "total"
+    ],
+    "monthly_endpoints": {
+      "mbs/get/monthly.json": "400",
+      "agency/get/monthly.json": "400"
+    },
+    "summary_has_paydown_field": false,
+    "monthly_principal_payment_series_available": false
+  },
+  "parity": {
+    "P1_committed_benchmark_b": 764.7482532227002,
+    "P1_clip_months": [
+      "2022-06",
+      "2023-02",
+      "2024-04",
+      "2025-09"
+    ],
+    "P3_cap_total_rederived_b": 1417.5,
+    "P3_realized_implied_b": 652.7517467772998,
+    "P4_asof_dates": 192,
+    "P4_weeks_retrieved": 192,
+    "P4_fetch_failures": [],
+    "E2_decomposition_exhaustive": true
+  },
+  "weeks": [
+    {
+      "asof": "2022-05-04",
+      "n_cusips": 28891,
+      "total_b": 2706.077239040812
+    },
+    {
+      "asof": "2022-05-11",
+      "n_cusips": 28890,
+      "total_b": 2706.078238839502,
+      "paydown_b": 0.006012237220000267,
+      "added_b": 0.0,
+      "removed_b": 2.40767e-05,
+      "increased_b": 0.0070361126099999696,
+      "delta_b": 0.0009997986899179523,
+      "stale": false
+    },
+    {
+      "asof": "2022-05-18",
+      "n_cusips": 29236,
+      "total_b": 2724.920281740854,
+      "paydown_b": 3.4148781981199936,
+      "added_b": 15.283638625670003,
+      "removed_b": 0.00100356893,
+      "increased_b": 6.974286042729999,
+      "delta_b": 18.842042901352215,
+      "stale": false
+    },
+    {
+      "asof": "2022-05-25",
+      "n_cusips": 29213,
+      "total_b": 2698.5764064294517,
+      "paydown_b": 31.193675427259855,
+      "added_b": 4.2977559988500005,
+      "removed_b": 0.0019662341200000007,
+      "increased_b": 0.5540103511499997,
+      "delta_b": -26.34387531140237,
+      "stale": false
+    },
+    {
+      "asof": "2022-06-01",
+      "n_cusips": 29213,
+      "total_b": 2698.5764065294516,
+      "paydown_b": 0.000477635,
+      "added_b": 0.0,
+      "removed_b": 0.0,
+      "increased_b": 0.000477735,
+      "delta_b": 9.999985195463523e-08,
+      "stale": false
+    },
+    {
+      "asof": "2022-06-08",
+      "n_cusips": 29213,
+      "total_b": 2698.5764063302813,
+      "paydown_b": 0.0005274319899999984,
+      "added_b": 0.0,
+      "removed_b": 0.0,
+      "increased_b": 0.0005272328200000003,
+      "delta_b": -1.9917024474125355e-07,
+      "stale": false
+    },
+    {
+      "asof": "2022-06-15",
+      "n_cusips": 29460,
+      "total_b": 2718.6967046532295,
+      "paydown_b": 2.8268302877899805,
+      "added_b": 17.8167408178,
+      "removed_b": 0.00039966258000000013,
+      "increased_b": 5.13078745553,
+      "delta_b": 20.1202983229482,
+      "stale": false
+    },
+    {
+      "asof": "2022-06-22",
+      "n_cusips": 29703,
+      "total_b": 2719.970130053094,
+      "paydown_b": 8.240574091400005,
+      "added_b": 7.3877752677699995,
+      "removed_b": 1.030613e-05,
+      "increased_b": 2.126234529620001,
+      "delta_b": 1.2734253998646636,
+      "stale": false
+    },
+    {
+      "asof": "2022-06-29",
+      "n_cusips": 29692,
+      "total_b": 2700.5636941477837,
+      "paydown_b": 19.600776479929955,
+      "added_b": 0.0096202885,
+      "removed_b": 0.00106134593,
+      "increased_b": 0.1857816320499997,
+      "delta_b": -19.406435905310445,
+      "stale": false
+    },
+    {
+      "asof": "2022-07-06",
+      "n_cusips": 29692,
+      "total_b": 2700.571594147383,
+      "paydown_b": 0.0021346008800001144,
+      "added_b": 0.0,
+      "removed_b": 0.0,
+      "increased_b": 0.010034600480000018,
+      "delta_b": 0.007899999599430885,
+      "stale": false
+    },
+    {
+      "asof": "2022-07-13",
+      "n_cusips": 29692,
+      "total_b": 2700.5725941473834,
+      "paydown_b": 0.0005002,
+      "added_b": 0.0,
+      "removed_b": 0.0,
+      "increased_b": 0.0015002,
+      "delta_b": 0.0010000000002037268,
+      "stale": false
+    },
+    {
+      "asof": "2022-07-20",
+      "n_cusips": 30361,
+      "total_b": 2717.516852971243,
+      "paydown_b": 10.102767925110053,
+      "added_b": 22.106302084019998,
+      "removed_b": 0.0009345757600000001,
+      "increased_b": 4.941659240700002,
+      "delta_b": 16.944258823859855,
+      "stale": false
+    },
+    {
+      "asof": "2022-07-27",
+      "n_cusips": 30354,
+      "total_b": 2708.655013001621,
+      "paydown_b": 19.346963265150162,
+      "added_b": 9.12581213324,
+      "removed_b": 0.0107056895,
+      "increased_b": 1.3700168518099998,
+      "delta_b": -8.861839969622451,
+      "stale": false
+    },
+    {
+      "asof": "2022-08-03",
+      "n_cusips": 30355,
+      "total_b": 2708.8279999195806,
+      "paydown_b": 0.00263680220000004,
+      "added_b": 0.00570371259,
+      "removed_b": 0.0,
+      "increased_b": 0.16992000756999998,
+      "delta_b": 0.17298691795986088,
+      "stale": false
+    },
+    {
+      "asof": "2022-08-10",
+      "n_cusips": 30356,
+      "total_b": 2708.8439985204004,
+      "paydown_b": 0.0,
+      "added_b": 0.00199999892,
+      "removed_b": 0.0,
+      "increased_b": 0.0139986019,
+      "delta_b": 0.01599860081978477,
+      "stale": false
+    },
+    {
+      "asof": "2022-08-17",
+      "n_cusips": 30840,
+      "total_b": 2718.754180632483,
+      "paydown_b": 2.0920200019500035,
+      "added_b": 7.656625199330009,
+      "removed_b": 0.0005197922000000001,
+      "increased_b": 4.3460967069000045,
+      "delta_b": 9.910182112082566,
+      "stale": false
+    },
+    {
+      "asof": "2022-08-24",
+      "n_cusips": 30848,
+      "total_b": 2717.186844490775,
+      "paydown_b": 6.552798350159999,
+      "added_b": 3.7820543891900003,
+      "removed_b": 0.00161900804,
+      "increased_b": 1.2050268272999998,
+      "delta_b": -1.5673361417079832,
+      "stale": false
+    },
+    {
+      "asof": "2022-08-31",
+      "n_cusips": 30833,
+      "total_b": 2700.60959647043,
+      "paydown_b": 16.6154974266099,
+      "added_b": 0.00050690087,
+      "removed_b": 0.0017633379000000003,
+      "increased_b": 0.039505843280000036,
+      "delta_b": -16.577248020344996,
+      "stale": false
+    },
+    {
+      "asof": "2022-09-07",
+      "n_cusips": 30833,
+      "total_b": 2700.612596227661,
+      "paydown_b": 0.0,
+      "added_b": 0.0,
+      "removed_b": 0.0,
+      "increased_b": 0.0029997572299995663,
+      "delta_b": 0.0029997572310094256,
+      "stale": false
+    },
+    {
+      "asof": "2022-09-14",
+      "n_cusips": 30986,
+      "total_b": 2709.8471648214554,
+      "paydown_b": 0.0,
+      "added_b": 4.288915970459998,
+      "removed_b": 0.0,
+      "increased_b": 4.945652623330001,
+      "delta_b": 9.234568593794393,
+      "stale": false
+    },
+    {
+      "asof": "2022-09-21",
+      "n_cusips": 31036,
+      "total_b": 2706.225455534453,
+      "paydown_b": 8.610863605189964,
+      "added_b": 3.7250843152799993,
+      "removed_b": 0.0006245097199999999,
+      "increased_b": 1.2646945126200004,
+      "delta_b": -3.6217092870024317,
+      "stale": false
+    },
+    {
+      "asof": "2022-09-28",
+      "n_cusips": 31018,
+      "total_b": 2689.556643500111,
+      "paydown_b": 16.739688128680022,
+      "added_b": 0.00015199989000000001,
+      "removed_b": 0.0009927192699999998,
+      "increased_b": 0.07171681371999995,
+      "delta_b": -16.668812034341954,
+      "stale": false
+    },
+    {
+      "asof": "2022-10-05",
+      "n_cusips": 31019,
+      "total_b": 2689.55664379931,
+      "paydown_b": 0.0011080458000000027,
+      "added_b": 0.000451193,
+      "removed_b": 0.0,
+      "increased_b": 0.000657152,
+      "delta_b": 2.991992005263455e-07,
+      "stale": false
+    },
+    {
+      "asof": "2022-10-12",
+      "n_cusips": 31019,
+      "total_b": 2689.55664379931,
+      "paydown_b": 0.0,
+      "added_b": 0.0,
+      "removed_b": 0.0,
+      "increased_b": 0.0,
+      "delta_b": 0.0,
+      "stale": true
+    },
+    {
+      "asof": "2022-10-19",
+      "n_cusips": 31135,
+      "total_b": 2690.0644018725775,
+      "paydown_b": 1.860293041820001,
+      "added_b": 1.990943038229999,
+      "removed_b": 0.29166124258999987,
+      "increased_b": 0.6687693194699996,
+      "delta_b": 0.5077580732672686,
+      "stale": false
+    },
+    {
+      "asof": "2022-10-26",
+      "n_cusips": 31119,
+      "total_b": 2669.965331590322,
+      "paydown_b": 20.857663978119916,
+      "added_b": 0.6871214099399999,
+      "removed_b": 0.00036223697,
+      "increased_b": 0.07183452287999934,
+      "delta_b": -20.099070282255525,
+      "stale": false
+    },
+    {
+      "asof": "2022-11-02",
+      "n_cusips": 30766,
+      "total_b": 2669.9693315095133,
+      "paydown_b": 0.0009812,
+      "added_b": 3.50750535426,
+      "removed_b": 3.5076268672800013,
+      "increased_b": 0.005102632209999986,
+      "delta_b": 0.00399991919130116,
+      "stale": false
+    },
+    {
+      "asof": "2022-11-09",
+      "n_cusips": 30766,
+      "total_b": 2669.970331508513,
+      "paydown_b": 0.0,
+      "added_b": 0.0,
+      "removed_b": 0.0,
+      "increased_b": 0.000999999,
+      "delta_b": 0.0009999989997595549,
+      "stale": false
+    },
+    {
+      "asof": "2022-11-16",
+      "n_cusips": 30752,
+      "total_b": 2668.338128653313,
+      "paydown_b": 1.6362321958499988,
+      "added_b": 0.0,
+      "removed_b": 0.0003611009,
+      "increased_b": 0.004390441539999981,
+      "delta_b": -1.632202855199921,
+      "stale": false
+    },
+    {
+      "asof": "2022-11-23",
+      "n_cusips": 30277,
+      "total_b": 2663.5399694699486,
+      "paydown_b": 4.79815917235999,
+      "added_b": 26.310710650599994,
+      "removed_b": 26.3107106616,
+      "increased_b": 0.0,
+      "delta_b": -4.7981591833645325,
+      "stale": false
+    },
+    {
+      "asof": "2022-11-30",
+      "n_cusips": 30251,
+      "total_b": 2650.2366750429032,
+      "paydown_b": 13.302603673070019,
+      "added_b": 0.0,
+      "removed_b": 0.00069083438,
+      "increased_b": 8.046000003814697e-08,
+      "delta_b": -13.30329442704533,
+      "stale": false
+    },
+    {
+      "asof": "2022-12-07",
+      "n_cusips": 30251,
+      "total_b": 2650.2366750429032,
+      "paydown_b": 0.0,
+      "added_b": 0.0,
+      "removed_b": 0.0,
+      "increased_b": 0.0,
+      "delta_b": 0.0,
+      "stale": true
+    },
+    {
+      "asof": "2022-12-14",
+      "n_cusips": 30251,
+      "total_b": 2650.1141725061625,
+      "paydown_b": 0.12250253674000047,
+      "added_b": 0.0,
+      "removed_b": 0.0,
+      "increased_b": 0.0,
+      "delta_b": -0.12250253674073974,
+      "stale": false
+    },
+    {
+      "asof": "2022-12-21",
+      "n_cusips": 29658,
+      "total_b": 2644.7159970514235,
+      "paydown_b": 5.204771395380028,
+      "added_b": 20.788474136139996,
+      "removed_b": 20.981878195479986,
+      "increased_b": 0.0,
+      "delta_b": -5.3981754547389755,
+      "stale": false
+    },
+    {
+      "asof": "2022-12-28",
+      "n_cusips": 29632,
+      "total_b": 2632.90824167824,
+      "paydown_b": 11.807194388320003,
+      "added_b": 0.0,
+      "removed_b": 0.0005609849299999999,
+      "increased_b": 0.0,
+      "delta_b": -11.807755373183682,
+      "stale": false
+    },
+    {
+      "asof": "2023-01-04",
+      "n_cusips": 29632,
+      "total_b": 2632.90824167824,
+      "paydown_b": 0.0,
+      "added_b": 0.0,
+      "removed_b": 0.0,
+      "increased_b": 0.0,
+      "delta_b": 0.0,
+      "stale": true
+    },
+    {
+      "asof": "2023-01-11",
+      "n_cusips": 29632,
+      "total_b": 2632.90824167824,
+      "paydown_b": 0.0,
+      "added_b": 0.0,
+      "removed_b": 0.0,
+      "increased_b": 0.0,
+      "delta_b": 0.0,
+      "stale": true
+    },
+    {
+      "asof": "2023-01-18",
+      "n_cusips": 29620,
+      "total_b": 2631.4550779882898,
+      "paydown_b": 1.4529901006000014,
+      "added_b": 0.0,
+      "removed_b": 0.00017358937,
+      "increased_b": 0.0,
+      "delta_b": -1.4531636899500882,
+      "stale": false
+    },
+    {
+      "asof": "2023-01-25",
+      "n_cusips": 29055,
+      "total_b": 2616.27347308239,
+      "paydown_b": 15.18121744445998,
+      "added_b": 16.002563617059998,
+      "removed_b": 16.002951078469994,
+      "increased_b": 0.0,
+      "delta_b": -15.181604905899803,
+      "stale": false
+    },
+    {
+      "asof": "2023-02-01",
+      "n_cusips": 29055,
+      "total_b": 2616.27347308239,
+      "paydown_b": 0.0,
+      "added_b": 0.0,
+      "removed_b": 0.0,
+      "increased_b": 0.0,
+      "delta_b": 0.0,
+      "stale": true
+    },
+    {
+      "asof": "2023-02-08",
+      "n_cusips": 29055,
+      "total_b": 2616.27347308239,
+      "paydown_b": 0.0,
+      "added_b": 0.0,
+      "removed_b": 0.0,
+      "increased_b": 0.0,
+      "delta_b": 0.0,
+      "stale": true
+    },
+    {
+      "asof": "2023-02-15",
+      "n_cusips": 29051,
+      "total_b": 2615.0506434440335,
+      "paydown_b": 1.2977348273799987,
+      "added_b": 0.07499471878,
+      "removed_b": 8.952976000000003e-05,
+      "increased_b": 0.0,
+      "delta_b": -1.2228296383564157,
+      "stale": false
+    },
+    {
+      "asof": "2023-02-22",
+      "n_cusips": 29051,
+      "total_b": 2611.7887093756385,
+      "paydown_b": 3.2619340683899996,
+      "added_b": 0.0,
+      "removed_b": 0.0,
+      "increased_b": 0.0,
+      "delta_b": -3.2619340683950213,
+      "stale": false
+    },
+    {
+      "asof": "2023-03-01",
+      "n_cusips": 29014,
+      "total_b": 2601.598207106331,
+      "paydown_b": 10.18996574907999,
+      "added_b": 0.0,
+      "removed_b": 0.0005365202300000001,
+      "increased_b": 0.0,
+      "delta_b": -10.190502269307672,
+      "stale": false
+    },
+    {
+      "asof": "2023-03-08",
+      "n_cusips": 29014,
+      "total_b": 2601.598207106331,
+      "paydown_b": 0.0,
+      "added_b": 0.0,
+      "removed_b": 0.0,
+      "increased_b": 0.0,
+      "delta_b": 0.0,
+      "stale": true
+    },
+    {
+      "asof": "2023-03-15",
+      "n_cusips": 29001,
+      "total_b": 2600.298927914938,
+      "paydown_b": 1.2988872931999942,
+      "added_b": 0.0,
+      "removed_b": 0.00039189821000000004,
+      "increased_b": 0.0,
+      "delta_b": -1.2992791913929977,
+      "stale": false
+    },
+    {
+      "asof": "2023-03-22",
+      "n_cusips": 29015,
+      "total_b": 2596.796903068559,
+      "paydown_b": 3.5587886855999957,
+      "added_b": 0.0474527815,
+      "removed_b": 0.0,
+      "increased_b": 0.00931105771999991,
+      "delta_b": -3.502024846378845,
+      "stale": false
+    },
+    {
+      "asof": "2023-03-29",
+      "n_cusips": 28975,
+      "total_b": 2586.0455833896126,
+      "paydown_b": 10.751094530190093,
+      "added_b": 0.0,
+      "removed_b": 0.0002251487199999999,
+      "increased_b": 0.0,
+      "delta_b": -10.751319678946402,
+      "stale": false
+    },
+    {
+      "asof": "2023-04-05",
+      "n_cusips": 28975,
+      "total_b": 2586.0455833896126,
+      "paydown_b": 0.0,
+      "added_b": 0.0,
+      "removed_b": 0.0,
+      "increased_b": 0.0,
+      "delta_b": 0.0,
+      "stale": true
+    },
+    {
+      "asof": "2023-04-12",
+      "n_cusips": 28975,
+      "total_b": 2586.0455833896126,
+      "paydown_b": 0.0,
+      "added_b": 0.0,
+      "removed_b": 0.0,
+      "increased_b": 0.0,
+      "delta_b": 0.0,
+      "stale": true
+    },
+    {
+      "asof": "2023-04-19",
+      "n_cusips": 28990,
+      "total_b": 2584.61319202069,
+      "paydown_b": 1.4950624556000034,
+      "added_b": 0.6893188137000001,
+      "removed_b": 0.6370971442799999,
+      "increased_b": 0.01044941728,
+      "delta_b": -1.4323913689227084,
+      "stale": false
+    },
+    {
+      "asof": "2023-04-26",
+      "n_cusips": 28953,
+      "total_b": 2567.367272820505,
+      "paydown_b": 17.25038413722019,
+      "added_b": 0.00013034711,
+      "removed_b": 0.00053155298,
+      "increased_b": 0.00486614287,
+      "delta_b": -17.245919200184744,
+      "stale": false
+    },
+    {
+      "asof": "2023-05-03",
+      "n_cusips": 28959,
+      "total_b": 2567.3712724225957,
+      "paydown_b": 0.0,
+      "added_b": 0.0026121620700000005,
+      "removed_b": 0.0,
+      "increased_b": 0.0013874400199999982,
+      "delta_b": 0.003999602090516419,
+      "stale": false
+    },
+    {
+      "asof": "2023-05-10",
+      "n_cusips": 28959,
+      "total_b": 2567.3712724225957,
+      "paydown_b": 0.0,
+      "added_b": 0.0,
+      "removed_b": 0.0,
+      "increased_b": 0.0,
+      "delta_b": 0.0,
+      "stale": true
+    },
+    {
+      "asof": "2023-05-17",
+      "n_cusips": 28955,
+      "total_b": 2566.0213920626315,
+      "paydown_b": 0.691943196349998,
+      "added_b": 63.798233188230064,
+      "removed_b": 64.46019108333003,
+      "increased_b": 0.004020731470000002,
+      "delta_b": -1.3498803599641178,
+      "stale": false
+    },
+    {
+      "asof": "2023-05-24",
+      "n_cusips": 28936,
+      "total_b": 2562.0181285264425,
+      "paydown_b": 4.056589690479999,
+      "added_b": 65.51757483541,
+      "removed_b": 65.50242892790003,
+      "increased_b": 0.03818024678999998,
+      "delta_b": -4.003263536189024,
+      "stale": false
+    },
+    {
+      "asof": "2023-05-31",
+      "n_cusips": 28897,
+      "total_b": 2549.844564049502,
+      "paydown_b": 12.172974959390004,
+      "added_b": 0.0,
+      "removed_b": 0.0005895175699999996,
+      "increased_b": 0.0,
+      "delta_b": -12.173564476940555,
+      "stale": false
+    },
+    {
+      "asof": "2023-06-07",
+      "n_cusips": 28897,
+      "total_b": 2549.8445736803724,
+      "paydown_b": 0.00014645082000000007,
+      "added_b": 0.0,
+      "removed_b": 0.0,
+      "increased_b": 0.00015608169000011404,
+      "delta_b": 9.630870408727787e-06,
+      "stale": false
+    },
+    {
+      "asof": "2023-06-14",
+      "n_cusips": 28908,
+      "total_b": 2549.780864372622,
+      "paydown_b": 0.06944337043999711,
+      "added_b": 0.0057340626900000006,
+      "removed_b": 0.0,
+      "increased_b": 0.0,
+      "delta_b": -0.06370930775028683,
+      "stale": false
+    },
+    {
+      "asof": "2023-06-21",
+      "n_cusips": 28903,
+      "total_b": 2544.9612664842984,
+      "paydown_b": 4.819325255799995,
+      "added_b": 0.0,
+      "removed_b": 0.00027263251,
+      "increased_b": 0.0,
+      "delta_b": -4.819597888323642,
+      "stale": false
+    },
+    {
+      "asof": "2023-06-28",
+      "n_cusips": 28856,
+      "total_b": 2529.753022342314,
+      "paydown_b": 15.207587325099949,
+      "added_b": 0.0,
+      "removed_b": 0.0006568169099999998,
+      "increased_b": 0.0,
+      "delta_b": -15.208244141984324,
+      "stale": false
+    },
+    {
+      "asof": "2023-07-05",
+      "n_cusips": 28855,
+      "total_b": 2529.753022342034,
+      "paydown_b": 0.0,
+      "added_b": 0.0,
+      "removed_b": 2.8e-10,
+      "increased_b": 0.0,
+      "delta_b": -2.801243681460619e-10,
+      "stale": false
+    },
+    {
+      "asof": "2023-07-12",
+      "n_cusips": 28855,
+      "total_b": 2529.753022342034,
+      "paydown_b": 0.0,
+      "added_b": 0.0,
+      "removed_b": 0.0,
+      "increased_b": 0.0,
+      "delta_b": 0.0,
+      "stale": true
+    },
+    {
+      "asof": "2023-07-19",
+      "n_cusips": 28851,
+      "total_b": 2529.676951663263,
+      "paydown_b": 0.40198516813999974,
+      "added_b": 0.32620457473000003,
+      "removed_b": 0.00029008538,
+      "increased_b": 0.0,
+      "delta_b": -0.07607067877097506,
+      "stale": false
+    },
+    {
+      "asof": "2023-07-26",
+      "n_cusips": 28768,
+      "total_b": 2509.187003822067,
+      "paydown_b": 20.47468695267992,
+      "added_b": 0.22598919372999998,
+      "removed_b": 0.24125008223,
+      "increased_b": 0.0,
+      "delta_b": -20.489947841196226,
+      "stale": false
+    },
+    {
+      "asof": "2023-08-02",
+      "n_cusips": 28768,
+      "total_b": 2509.187003822067,
+      "paydown_b": 0.0,
+      "added_b": 0.0,
+      "removed_b": 0.0,
+      "increased_b": 0.0,
+      "delta_b": 0.0,
+      "stale": true
+    },
+    {
+      "asof": "2023-08-09",
+      "n_cusips": 28768,
+      "total_b": 2509.187003822067,
+      "paydown_b": 0.0,
+      "added_b": 0.0,
+      "removed_b": 0.0,
+      "increased_b": 0.0,
+      "delta_b": 0.0,
+      "stale": true
+    },
+    {
+      "asof": "2023-08-16",
+      "n_cusips": 28770,
+      "total_b": 2509.1135930568616,
+      "paydown_b": 4.134596579460005,
+      "added_b": 4.06152385261,
+      "removed_b": 0.00033803836,
+      "increased_b": 0.0,
+      "delta_b": -0.07341076520515344,
+      "stale": false
+    },
+    {
+      "asof": "2023-08-23",
+      "n_cusips": 28787,
+      "total_b": 2504.770803383106,
+      "paydown_b": 6.166029763650003,
+      "added_b": 1.8232400899,
+      "removed_b": 0.0,
+      "increased_b": 0.0,
+      "delta_b": -4.34278967375576,
+      "stale": false
+    },
+    {
+      "asof": "2023-08-30",
+      "n_cusips": 27458,
+      "total_b": 2490.5049585188885,
+      "paydown_b": 14.189909833359952,
+      "added_b": 0.0,
+      "removed_b": 0.0759350318499999,
+      "increased_b": 1e-09,
+      "delta_b": -14.265844864217343,
+      "stale": false
+    },
+    {
+      "asof": "2023-09-06",
+      "n_cusips": 27458,
+      "total_b": 2490.5049585188885,
+      "paydown_b": 0.0,
+      "added_b": 0.0,
+      "removed_b": 0.0,
+      "increased_b": 0.0,
+      "delta_b": 0.0,
+      "stale": true
+    },
+    {
+      "asof": "2023-09-13",
+      "n_cusips": 27458,
+      "total_b": 2490.5049585188885,
+      "paydown_b": 0.0,
+      "added_b": 0.0,
+      "removed_b": 0.0,
+      "increased_b": 0.0,
+      "delta_b": 0.0,
+      "stale": true
+    },
+    {
+      "asof": "2023-09-20",
+      "n_cusips": 27539,
+      "total_b": 2486.0994811845103,
+      "paydown_b": 385.14224060647024,
+      "added_b": 380.73632449403004,
+      "removed_b": 7.297460000000001e-05,
+      "increased_b": 0.00051175267,
+      "delta_b": -4.405477334378247,
+      "stale": false
+    },
+    {
+      "asof": "2023-09-27",
+      "n_cusips": 25212,
+      "total_b": 2471.406562662496,
+      "paydown_b": 12.08080551264995,
+      "added_b": 0.051999895450000014,
+      "removed_b": 2.664112956779995,
+      "increased_b": 5.2e-08,
+      "delta_b": -14.692918522014224,
+      "stale": false
+    },
+    {
+      "asof": "2023-10-04",
+      "n_cusips": 25212,
+      "total_b": 2471.406562662496,
+      "paydown_b": 0.0,
+      "added_b": 0.0,
+      "removed_b": 0.0,
+      "increased_b": 0.0,
+      "delta_b": 0.0,
+      "stale": true
+    },
+    {
+      "asof": "2023-10-11",
+      "n_cusips": 25212,
+      "total_b": 2471.406562662496,
+      "paydown_b": 0.0,
+      "added_b": 0.0,
+      "removed_b": 0.0,
+      "increased_b": 0.0,
+      "delta_b": 0.0,
+      "stale": true
+    },
+    {
+      "asof": "2023-10-18",
+      "n_cusips": 25205,
+      "total_b": 2471.339432252101,
+      "paydown_b": 0.0670349568799997,
+      "added_b": 0.0,
+      "removed_b": 9.545352000000002e-05,
+      "increased_b": 0.0,
+      "delta_b": -0.06713041039529344,
+      "stale": false
+    },
+    {
+      "asof": "2023-10-25",
+      "n_cusips": 23709,
+      "total_b": 2454.617609359085,
+      "paydown_b": 15.94204594279997,
+      "added_b": 138.22376405006997,
+      "removed_b": 139.00354100036,
+      "increased_b": 0.0,
+      "delta_b": -16.721822893015997,
+      "stale": false
+    },
+    {
+      "asof": "2023-11-01",
+      "n_cusips": 23709,
+      "total_b": 2454.617609359085,
+      "paydown_b": 0.0,
+      "added_b": 0.0,
+      "removed_b": 0.0,
+      "increased_b": 0.0,
+      "delta_b": 0.0,
+      "stale": true
+    },
+    {
+      "asof": "2023-11-08",
+      "n_cusips": 23709,
+      "total_b": 2454.617609359085,
+      "paydown_b": 0.0,
+      "added_b": 0.0,
+      "removed_b": 0.0,
+      "increased_b": 0.0,
+      "delta_b": 0.0,
+      "stale": true
+    },
+    {
+      "asof": "2023-11-15",
+      "n_cusips": 23734,
+      "total_b": 2454.641775802317,
+      "paydown_b": 0.06480385537000036,
+      "added_b": 0.05823884921999999,
+      "removed_b": 2.083169e-05,
+      "increased_b": 0.030752281089999996,
+      "delta_b": 0.0241664432323887,
+      "stale": false
+    },
+    {
+      "asof": "2023-11-22",
+      "n_cusips": 23769,
+      "total_b": 2451.309459034203,
+      "paydown_b": 54.2925945392897,
+      "added_b": 50.95559557029001,
+      "removed_b": 0.0,
+      "increased_b": 0.004682200889999999,
+      "delta_b": -3.3323167681141967,
+      "stale": false
+    },
+    {
+      "asof": "2023-11-29",
+      "n_cusips": 21953,
+      "total_b": 2438.7654776499226,
+      "paydown_b": 12.108003353899983,
+      "added_b": 0.0,
+      "removed_b": 0.43597803914999983,
+      "increased_b": 8.849999904632569e-09,
+      "delta_b": -12.543981384280414,
+      "stale": false
+    },
+    {
+      "asof": "2023-12-06",
+      "n_cusips": 21953,
+      "total_b": 2438.7654776499226,
+      "paydown_b": 0.0,
+      "added_b": 0.0,
+      "removed_b": 0.0,
+      "increased_b": 0.0,
+      "delta_b": 0.0,
+      "stale": true
+    },
+    {
+      "asof": "2023-12-13",
+      "n_cusips": 21954,
+      "total_b": 2438.6315707657736,
+      "paydown_b": 0.1389069726100019,
+      "added_b": 0.00499999715,
+      "removed_b": 0.0,
+      "increased_b": 9.131000108629814e-08,
+      "delta_b": -0.13390688414892793,
+      "stale": false
+    },
+    {
+      "asof": "2023-12-20",
+      "n_cusips": 21970,
+      "total_b": 2435.227097014923,
+      "paydown_b": 27.166477295750095,
+      "added_b": 23.762473363129992,
+      "removed_b": 0.0004699656999999999,
+      "increased_b": 1.4746000500023364e-07,
+      "delta_b": -3.404473750850684,
+      "stale": false
+    },
+    {
+      "asof": "2023-12-27",
+      "n_cusips": 20217,
+      "total_b": 2423.5451090443185,
+      "paydown_b": 11.137160906079957,
+      "added_b": 65.35121453219,
+      "removed_b": 65.89604159670004,
+      "increased_b": 0.0,
+      "delta_b": -11.681987970604496,
+      "stale": false
+    },
+    {
+      "asof": "2024-01-03",
+      "n_cusips": 20217,
+      "total_b": 2423.5451091434807,
+      "paydown_b": 1.0609000078641163e-07,
+      "added_b": 0.0,
+      "removed_b": 0.0,
+      "increased_b": 2.0526001077615298e-07,
+      "delta_b": 9.916220733430237e-08,
+      "stale": false
+    },
+    {
+      "asof": "2024-01-10",
+      "n_cusips": 20217,
+      "total_b": 2423.5451091434807,
+      "paydown_b": 0.0,
+      "added_b": 0.0,
+      "removed_b": 0.0,
+      "increased_b": 0.0,
+      "delta_b": 0.0,
+      "stale": true
+    },
+    {
+      "asof": "2024-01-17",
+      "n_cusips": 20213,
+      "total_b": 2423.4850806410004,
+      "paydown_b": 0.05993647949000074,
+      "added_b": 0.0,
+      "removed_b": 9.202299e-05,
+      "increased_b": 0.0,
+      "delta_b": -0.06002850248023606,
+      "stale": false
+    },
+    {
+      "asof": "2024-01-24",
+      "n_cusips": 20243,
+      "total_b": 2420.4192889023325,
+      "paydown_b": 124.77111323313976,
+      "added_b": 121.70532149447003,
+      "removed_b": 0.0,
+      "increased_b": 0.0,
+      "delta_b": -3.06579173866794,
+      "stale": false
+    },
+    {
+      "asof": "2024-01-31",
+      "n_cusips": 18919,
+      "total_b": 2408.9359360181898,
+      "paydown_b": 10.883908812040113,
+      "added_b": 0.0,
+      "removed_b": 0.5994440721100004,
+      "increased_b": 0.0,
+      "delta_b": -11.483352884142732,
+      "stale": false
+    },
+    {
+      "asof": "2024-02-07",
+      "n_cusips": 18919,
+      "total_b": 2408.9359360181898,
+      "paydown_b": 0.0,
+      "added_b": 0.0,
+      "removed_b": 0.0,
+      "increased_b": 0.0,
+      "delta_b": 0.0,
+      "stale": true
+    },
+    {
+      "asof": "2024-02-14",
+      "n_cusips": 18948,
+      "total_b": 2409.00693194536,
+      "paydown_b": 0.0,
+      "added_b": 0.028374735410000004,
+      "removed_b": 0.0,
+      "increased_b": 0.04262119176,
+      "delta_b": 0.07099592717031555,
+      "stale": false
+    },
+    {
+      "asof": "2024-02-21",
+      "n_cusips": 18976,
+      "total_b": 2406.005100441906,
+      "paydown_b": 101.80656183104007,
+      "added_b": 98.80534313276,
+      "removed_b": 0.0006128051700000001,
+      "increased_b": 0.0,
+      "delta_b": -3.0018315034540137,
+      "stale": false
+    },
+    {
+      "asof": "2024-02-28",
+      "n_cusips": 17397,
+      "total_b": 2395.0243344207806,
+      "paydown_b": 10.438564925670024,
+      "added_b": 0.0,
+      "removed_b": 0.5422010955100021,
+      "increased_b": 0.0,
+      "delta_b": -10.980766021125419,
+      "stale": false
+    },
+    {
+      "asof": "2024-03-06",
+      "n_cusips": 17397,
+      "total_b": 2395.0243344207806,
+      "paydown_b": 0.0,
+      "added_b": 0.0,
+      "removed_b": 0.0,
+      "increased_b": 0.0,
+      "delta_b": 0.0,
+      "stale": true
+    },
+    {
+      "asof": "2024-03-13",
+      "n_cusips": 17397,
+      "total_b": 2395.0243344207806,
+      "paydown_b": 0.0,
+      "added_b": 0.0,
+      "removed_b": 0.0,
+      "increased_b": 0.0,
+      "delta_b": 0.0,
+      "stale": true
+    },
+    {
+      "asof": "2024-03-20",
+      "n_cusips": 17429,
+      "total_b": 2391.783655670262,
+      "paydown_b": 41.62948302885979,
+      "added_b": 38.36478252440998,
+      "removed_b": 0.00021476881,
+      "increased_b": 0.024236522729999998,
+      "delta_b": -3.240678750518782,
+      "stale": false
+    },
+    {
+      "asof": "2024-03-27",
+      "n_cusips": 16292,
+      "total_b": 2380.239925961464,
+      "paydown_b": 10.851706514079968,
+      "added_b": 50.31472748750001,
+      "removed_b": 51.00675068221007,
+      "increased_b": 0.0,
+      "delta_b": -11.543729708797855,
+      "stale": false
+    },
+    {
+      "asof": "2024-04-03",
+      "n_cusips": 16292,
+      "total_b": 2380.239925961464,
+      "paydown_b": 0.0,
+      "added_b": 0.0,
+      "removed_b": 0.0,
+      "increased_b": 0.0,
+      "delta_b": 0.0,
+      "stale": true
+    },
+    {
+      "asof": "2024-04-10",
+      "n_cusips": 16292,
+      "total_b": 2380.239925961464,
+      "paydown_b": 0.0,
+      "added_b": 0.0,
+      "removed_b": 0.0,
+      "increased_b": 0.0,
+      "delta_b": 0.0,
+      "stale": true
+    },
+    {
+      "asof": "2024-04-17",
+      "n_cusips": 16301,
+      "total_b": 2380.0572594197247,
+      "paydown_b": 0.20247512418000058,
+      "added_b": 0.019818333180000005,
+      "removed_b": 0.00019041700999999998,
+      "increased_b": 0.00018066625999999997,
+      "delta_b": -0.18266654173930874,
+      "stale": false
+    },
+    {
+      "asof": "2024-04-24",
+      "n_cusips": 16333,
+      "total_b": 2376.536747676983,
+      "paydown_b": 89.61836843274006,
+      "added_b": 86.09785669000001,
+      "removed_b": 0.0,
+      "increased_b": 0.0,
+      "delta_b": -3.5205117427417463,
+      "stale": false
+    },
+    {
+      "asof": "2024-05-01",
+      "n_cusips": 15289,
+      "total_b": 2363.8828946294375,
+      "paydown_b": 12.076226884469987,
+      "added_b": 0.0,
+      "removed_b": 0.5776261630600008,
+      "increased_b": 0.0,
+      "delta_b": -12.653853047545454,
+      "stale": false
+    },
+    {
+      "asof": "2024-05-08",
+      "n_cusips": 15289,
+      "total_b": 2363.8828946294375,
+      "paydown_b": 0.0,
+      "added_b": 0.0,
+      "removed_b": 0.0,
+      "increased_b": 0.0,
+      "delta_b": 0.0,
+      "stale": true
+    },
+    {
+      "asof": "2024-05-15",
+      "n_cusips": 15283,
+      "total_b": 2363.817628474116,
+      "paydown_b": 0.06497533384999984,
+      "added_b": 0.0,
+      "removed_b": 0.00029082147,
+      "increased_b": 0.0,
+      "delta_b": -0.06526615532129654,
+      "stale": false
+    },
+    {
+      "asof": "2024-05-22",
+      "n_cusips": 15315,
+      "total_b": 2360.076208180993,
+      "paydown_b": 49.714627006730005,
+      "added_b": 45.97320671361,
+      "removed_b": 0.0,
+      "increased_b": 0.0,
+      "delta_b": -3.7414202931231557,
+      "stale": false
+    },
+    {
+      "asof": "2024-05-29",
+      "n_cusips": 14476,
+      "total_b": 2346.4833296263337,
+      "paydown_b": 13.151694694660042,
+      "added_b": 0.0,
+      "removed_b": 0.44118386003,
+      "increased_b": 0.0,
+      "delta_b": -13.592878554659364,
+      "stale": false
+    },
+    {
+      "asof": "2024-06-05",
+      "n_cusips": 14476,
+      "total_b": 2346.4833296263337,
+      "paydown_b": 0.0,
+      "added_b": 0.0,
+      "removed_b": 0.0,
+      "increased_b": 0.0,
+      "delta_b": 0.0,
+      "stale": true
+    },
+    {
+      "asof": "2024-06-12",
+      "n_cusips": 14476,
+      "total_b": 2346.4833296263337,
+      "paydown_b": 0.0,
+      "added_b": 0.0,
+      "removed_b": 0.0,
+      "increased_b": 0.0,
+      "delta_b": 0.0,
+      "stale": true
+    },
+    {
+      "asof": "2024-06-18",
+      "n_cusips": 14491,
+      "total_b": 2346.4850042671196,
+      "paydown_b": 0.06577256769999999,
+      "added_b": 0.061214932459999996,
+      "removed_b": 0.0005509980099999999,
+      "increased_b": 0.0067832740499999995,
+      "delta_b": 0.0016746407859500323,
+      "stale": false
+    },
+    {
+      "asof": "2024-06-26",
+      "n_cusips": 13815,
+      "total_b": 2327.85224885039,
+      "paydown_b": 18.167304543530012,
+      "added_b": 54.14301216102,
+      "removed_b": 54.60846303420993,
+      "increased_b": 0.0,
+      "delta_b": -18.63275541672965,
+      "stale": false
+    },
+    {
+      "asof": "2024-07-03",
+      "n_cusips": 13815,
+      "total_b": 2327.85224885039,
+      "paydown_b": 0.0,
+      "added_b": 0.0,
+      "removed_b": 0.0,
+      "increased_b": 0.0,
+      "delta_b": 0.0,
+      "stale": true
+    },
+    {
+      "asof": "2024-07-10",
+      "n_cusips": 13815,
+      "total_b": 2327.85224885039,
+      "paydown_b": 0.0,
+      "added_b": 0.0,
+      "removed_b": 0.0,
+      "increased_b": 0.0,
+      "delta_b": 0.0,
+      "stale": true
+    },
+    {
+      "asof": "2024-07-17",
+      "n_cusips": 13821,
+      "total_b": 2327.7898665507564,
+      "paydown_b": 38.48602682495979,
+      "added_b": 38.42370939121,
+      "removed_b": 6.486589e-05,
+      "increased_b": 0.0,
+      "delta_b": -0.062382299633554794,
+      "stale": false
+    },
+    {
+      "asof": "2024-07-24",
+      "n_cusips": 13863,
+      "total_b": 2324.0736894306374,
+      "paydown_b": 24.60729242204001,
+      "added_b": 20.879683111349998,
+      "removed_b": 0.0,
+      "increased_b": 0.01143219057,
+      "delta_b": -3.7161771201190277,
+      "stale": false
+    },
+    {
+      "asof": "2024-07-31",
+      "n_cusips": 13146,
+      "total_b": 2310.0584534311206,
+      "paydown_b": 13.6171918039699,
+      "added_b": 0.0,
+      "removed_b": 0.398044195519999,
+      "increased_b": 0.0,
+      "delta_b": -14.01523599951679,
+      "stale": false
+    },
+    {
+      "asof": "2024-08-07",
+      "n_cusips": 13146,
+      "total_b": 2310.05845342463,
+      "paydown_b": 4.085619000000041e-05,
+      "added_b": 0.0,
+      "removed_b": 0.0,
+      "increased_b": 4.0849699999999956e-05,
+      "delta_b": -6.490608939202502e-09,
+      "stale": false
+    },
+    {
+      "asof": "2024-08-14",
+      "n_cusips": 13146,
+      "total_b": 2309.9919255857003,
+      "paydown_b": 0.06652783892999649,
+      "added_b": 0.0,
+      "removed_b": 0.0,
+      "increased_b": 0.0,
+      "delta_b": -0.06652783892968728,
+      "stale": false
+    },
+    {
+      "asof": "2024-08-21",
+      "n_cusips": 13170,
+      "total_b": 2305.952318051178,
+      "paydown_b": 75.24525280313003,
+      "added_b": 71.20581282709999,
+      "removed_b": 0.00016755849,
+      "increased_b": 0.0,
+      "delta_b": -4.0396075345224745,
+      "stale": false
+    },
+    {
+      "asof": "2024-08-28",
+      "n_cusips": 12403,
+      "total_b": 2291.676263872482,
+      "paydown_b": 13.730975642039969,
+      "added_b": 0.0,
+      "removed_b": 0.5450785366900004,
+      "increased_b": 0.0,
+      "delta_b": -14.276054178695631,
+      "stale": false
+    },
+    {
+      "asof": "2024-09-04",
+      "n_cusips": 12403,
+      "total_b": 2291.676263872482,
+      "paydown_b": 0.0,
+      "added_b": 0.0,
+      "removed_b": 0.0,
+      "increased_b": 0.0,
+      "delta_b": 0.0,
+      "stale": true
+    },
+    {
+      "asof": "2024-09-11",
+      "n_cusips": 12403,
+      "total_b": 2291.676263872482,
+      "paydown_b": 0.0,
+      "added_b": 0.0,
+      "removed_b": 0.0,
+      "increased_b": 0.0,
+      "delta_b": 0.0,
+      "stale": true
+    },
+    {
+      "asof": "2024-09-18",
+      "n_cusips": 12402,
+      "total_b": 2291.611564385737,
+      "paydown_b": 83.4498979721295,
+      "added_b": 83.38540561563002,
+      "removed_b": 0.00020713024999999998,
+      "increased_b": 0.0,
+      "delta_b": -0.0646994867452122,
+      "stale": false
+    },
+    {
+      "asof": "2024-09-25",
+      "n_cusips": 11725,
+      "total_b": 2273.970992789874,
+      "paydown_b": 16.857340227209995,
+      "added_b": 15.328047583790003,
+      "removed_b": 16.111278952429995,
+      "increased_b": 0.0,
+      "delta_b": -17.640571595863094,
+      "stale": false
+    },
+    {
+      "asof": "2024-10-02",
+      "n_cusips": 11725,
+      "total_b": 2273.970992789874,
+      "paydown_b": 0.0,
+      "added_b": 0.0,
+      "removed_b": 0.0,
+      "increased_b": 0.0,
+      "delta_b": 0.0,
+      "stale": true
+    },
+    {
+      "asof": "2024-10-09",
+      "n_cusips": 11725,
+      "total_b": 2273.970992789874,
+      "paydown_b": 0.0,
+      "added_b": 0.0,
+      "removed_b": 0.0,
+      "increased_b": 0.0,
+      "delta_b": 0.0,
+      "stale": true
+    },
+    {
+      "asof": "2024-10-16",
+      "n_cusips": 11725,
+      "total_b": 2273.984962066175,
+      "paydown_b": 0.06088158834000032,
+      "added_b": 0.07499850525,
+      "removed_b": 0.00014764058999999996,
+      "increased_b": 0.0,
+      "delta_b": 0.013969276300940692,
+      "stale": false
+    },
+    {
+      "asof": "2024-10-23",
+      "n_cusips": 11742,
+      "total_b": 2270.51273475344,
+      "paydown_b": 114.53780083624987,
+      "added_b": 111.06557352350998,
+      "removed_b": 0.0,
+      "increased_b": 0.0,
+      "delta_b": -3.472227312734958,
+      "stale": false
+    },
+    {
+      "asof": "2024-10-30",
+      "n_cusips": 11183,
+      "total_b": 2257.8649144413725,
+      "paydown_b": 11.911811119109986,
+      "added_b": 0.0,
+      "removed_b": 0.7360091929500006,
+      "increased_b": 0.0,
+      "delta_b": -12.647820312067324,
+      "stale": false
+    },
+    {
+      "asof": "2024-11-06",
+      "n_cusips": 11183,
+      "total_b": 2257.8649144413725,
+      "paydown_b": 0.0,
+      "added_b": 0.0,
+      "removed_b": 0.0,
+      "increased_b": 0.0,
+      "delta_b": 0.0,
+      "stale": true
+    },
+    {
+      "asof": "2024-11-13",
+      "n_cusips": 11183,
+      "total_b": 2257.8649144413725,
+      "paydown_b": 0.0,
+      "added_b": 0.0,
+      "removed_b": 0.0,
+      "increased_b": 0.0,
+      "delta_b": 0.0,
+      "stale": true
+    },
+    {
+      "asof": "2024-11-20",
+      "n_cusips": 11193,
+      "total_b": 2254.1837645239716,
+      "paydown_b": 55.439769128380085,
+      "added_b": 51.753733315990004,
+      "removed_b": 0.00011168747,
+      "increased_b": 0.00499758246,
+      "delta_b": -3.681149917400944,
+      "stale": false
+    },
+    {
+      "asof": "2024-11-27",
+      "n_cusips": 10513,
+      "total_b": 2240.9233979947144,
+      "paydown_b": 12.827887444940009,
+      "added_b": 6.227673624709998,
+      "removed_b": 6.660152709019999,
+      "increased_b": 0.0,
+      "delta_b": -13.260366529257226,
+      "stale": false
+    },
+    {
+      "asof": "2024-12-04",
+      "n_cusips": 10513,
+      "total_b": 2240.9233979947144,
+      "paydown_b": 0.0,
+      "added_b": 0.0,
+      "removed_b": 0.0,
+      "increased_b": 0.0,
+      "delta_b": 0.0,
+      "stale": true
+    },
+    {
+      "asof": "2024-12-11",
+      "n_cusips": 10513,
+      "total_b": 2240.9233979947144,
+      "paydown_b": 0.0,
+      "added_b": 0.0,
+      "removed_b": 0.0,
+      "increased_b": 0.0,
+      "delta_b": 0.0,
+      "stale": true
+    },
+    {
+      "asof": "2024-12-18",
+      "n_cusips": 10518,
+      "total_b": 2240.7341259657815,
+      "paydown_b": 30.757757050920095,
+      "added_b": 30.567905659949997,
+      "removed_b": 0.00030187042,
+      "increased_b": 0.00088123246,
+      "delta_b": -0.18927202893291906,
+      "stale": false
+    },
+    {
+      "asof": "2024-12-24",
+      "n_cusips": 10530,
+      "total_b": 2237.4262823833183,
+      "paydown_b": 46.16101579129993,
+      "added_b": 42.853172208839986,
+      "removed_b": 0.0,
+      "increased_b": 0.0,
+      "delta_b": -3.3078435824631924,
+      "stale": false
+    },
+    {
+      "asof": "2024-12-31",
+      "n_cusips": 9306,
+      "total_b": 2225.2155396597987,
+      "paydown_b": 11.586551927549976,
+      "added_b": 0.0,
+      "removed_b": 0.6241907978099985,
+      "increased_b": 1.8299999237060547e-09,
+      "delta_b": -12.210742723519616,
+      "stale": false
+    },
+    {
+      "asof": "2025-01-08",
+      "n_cusips": 9306,
+      "total_b": 2225.2155396597987,
+      "paydown_b": 0.0,
+      "added_b": 0.0,
+      "removed_b": 0.0,
+      "increased_b": 0.0,
+      "delta_b": 0.0,
+      "stale": true
+    },
+    {
+      "asof": "2025-01-15",
+      "n_cusips": 9301,
+      "total_b": 2225.157681774626,
+      "paydown_b": 0.05754502140999996,
+      "added_b": 0.0,
+      "removed_b": 0.00031286376999999993,
+      "increased_b": 0.0,
+      "delta_b": -0.05785788517277979,
+      "stale": false
+    },
+    {
+      "asof": "2025-01-22",
+      "n_cusips": 9308,
+      "total_b": 2221.793033515722,
+      "paydown_b": 141.13215263417987,
+      "added_b": 137.76750437528,
+      "removed_b": 0.0,
+      "increased_b": 0.0,
+      "delta_b": -3.3646482589037987,
+      "stale": false
+    },
+    {
+      "asof": "2025-01-29",
+      "n_cusips": 8490,
+      "total_b": 2209.533357333265,
+      "paydown_b": 11.464055527739989,
+      "added_b": 0.0,
+      "removed_b": 0.7956206560299992,
+      "increased_b": 1.30999755859375e-09,
+      "delta_b": -12.259676182457042,
+      "stale": false
+    },
+    {
+      "asof": "2025-02-05",
+      "n_cusips": 8490,
+      "total_b": 2209.533357333265,
+      "paydown_b": 0.0,
+      "added_b": 0.0,
+      "removed_b": 0.0,
+      "increased_b": 0.0,
+      "delta_b": 0.0,
+      "stale": true
+    },
+    {
+      "asof": "2025-02-12",
+      "n_cusips": 8490,
+      "total_b": 2209.533357333265,
+      "paydown_b": 0.0,
+      "added_b": 0.0,
+      "removed_b": 0.0,
+      "increased_b": 0.0,
+      "delta_b": 0.0,
+      "stale": true
+    },
+    {
+      "asof": "2025-02-19",
+      "n_cusips": 8509,
+      "total_b": 2209.548459112058,
+      "paydown_b": 0.055651217310000285,
+      "added_b": 0.06541934483999999,
+      "removed_b": 0.00024609927999999997,
+      "increased_b": 0.005579750539999999,
+      "delta_b": 0.015101778792995901,
+      "stale": false
+    },
+    {
+      "asof": "2025-02-26",
+      "n_cusips": 8495,
+      "total_b": 2195.291210344857,
+      "paydown_b": 14.257074009390028,
+      "added_b": 0.0,
+      "removed_b": 0.00017475781000000004,
+      "increased_b": 0.0,
+      "delta_b": -14.257248767200963,
+      "stale": false
+    },
+    {
+      "asof": "2025-03-05",
+      "n_cusips": 8495,
+      "total_b": 2195.291210344857,
+      "paydown_b": 0.0,
+      "added_b": 0.0,
+      "removed_b": 0.0,
+      "increased_b": 0.0,
+      "delta_b": 0.0,
+      "stale": true
+    },
+    {
+      "asof": "2025-03-12",
+      "n_cusips": 8495,
+      "total_b": 2195.291210344857,
+      "paydown_b": 0.0,
+      "added_b": 0.0,
+      "removed_b": 0.0,
+      "increased_b": 0.0,
+      "delta_b": 0.0,
+      "stale": true
+    },
+    {
+      "asof": "2025-03-19",
+      "n_cusips": 8507,
+      "total_b": 2195.2430729096536,
+      "paydown_b": 0.05712007327000035,
+      "added_b": 0.00836814143,
+      "removed_b": 1.6465870000000002e-05,
+      "increased_b": 0.0006309625000000002,
+      "delta_b": -0.0481374352034436,
+      "stale": false
+    },
+    {
+      "asof": "2025-03-26",
+      "n_cusips": 8500,
+      "total_b": 2180.991299353225,
+      "paydown_b": 14.305751465490067,
+      "added_b": 0.04699628575,
+      "removed_b": 1.627625e-05,
+      "increased_b": 0.0069978995600000005,
+      "delta_b": -14.251773556428816,
+      "stale": false
+    },
+    {
+      "asof": "2025-04-02",
+      "n_cusips": 8500,
+      "total_b": 2180.9912994531346,
+      "paydown_b": 0.0,
+      "added_b": 0.00037465,
+      "removed_b": 0.00037455009000000004,
+      "increased_b": 0.0,
+      "delta_b": 9.990981197915971e-08,
+      "stale": false
+    },
+    {
+      "asof": "2025-04-09",
+      "n_cusips": 8500,
+      "total_b": 2180.9912994531246,
+      "paydown_b": 9.999997913837433e-12,
+      "added_b": 0.0,
+      "removed_b": 0.0,
+      "increased_b": 0.0,
+      "delta_b": -1.000444171950221e-11,
+      "stale": true
+    },
+    {
+      "asof": "2025-04-16",
+      "n_cusips": 8496,
+      "total_b": 2180.871920488539,
+      "paydown_b": 0.1292504215899949,
+      "added_b": 0.009999501119999999,
+      "removed_b": 0.00012804412,
+      "increased_b": 0.0,
+      "delta_b": -0.11937896458539399,
+      "stale": false
+    },
+    {
+      "asof": "2025-04-23",
+      "n_cusips": 8500,
+      "total_b": 2177.4056021827355,
+      "paydown_b": 3.471267003059995,
+      "added_b": 0.00491401257,
+      "removed_b": 5.120127e-05,
+      "increased_b": 8.588595999999997e-05,
+      "delta_b": -3.466318305803725,
+      "stale": false
+    },
+    {
+      "asof": "2025-04-30",
+      "n_cusips": 8485,
+      "total_b": 2164.9636966348744,
+      "paydown_b": 12.442272021609984,
+      "added_b": 0.00025636613000000003,
+      "removed_b": 0.0006696587099999998,
+      "increased_b": 0.0007797663300000001,
+      "delta_b": -12.441905547861097,
+      "stale": false
+    },
+    {
+      "asof": "2025-05-07",
+      "n_cusips": 8485,
+      "total_b": 2164.9636966348744,
+      "paydown_b": 0.0,
+      "added_b": 0.0,
+      "removed_b": 0.0,
+      "increased_b": 0.0,
+      "delta_b": 0.0,
+      "stale": true
+    },
+    {
+      "asof": "2025-05-14",
+      "n_cusips": 8485,
+      "total_b": 2164.9636966348744,
+      "paydown_b": 0.0,
+      "added_b": 0.0,
+      "removed_b": 0.0,
+      "increased_b": 0.0,
+      "delta_b": 0.0,
+      "stale": true
+    },
+    {
+      "asof": "2025-05-21",
+      "n_cusips": 8477,
+      "total_b": 2161.319815139835,
+      "paydown_b": 3.6435721109300063,
+      "added_b": 0.0,
+      "removed_b": 0.00030938409999999993,
+      "increased_b": 0.0,
+      "delta_b": -3.6438814950392953,
+      "stale": false
+    },
+    {
+      "asof": "2025-05-28",
+      "n_cusips": 8468,
+      "total_b": 2148.1915029051574,
+      "paydown_b": 13.128310822060023,
+      "added_b": 0.0,
+      "removed_b": 1.4126200000000002e-06,
+      "increased_b": 0.0,
+      "delta_b": -13.12831223467765,
+      "stale": false
+    },
+    {
+      "asof": "2025-06-04",
+      "n_cusips": 8468,
+      "total_b": 2148.1915029051574,
+      "paydown_b": 0.0,
+      "added_b": 0.0,
+      "removed_b": 0.0,
+      "increased_b": 0.0,
+      "delta_b": 0.0,
+      "stale": true
+    },
+    {
+      "asof": "2025-06-11",
+      "n_cusips": 8468,
+      "total_b": 2148.1915029051574,
+      "paydown_b": 0.0,
+      "added_b": 0.0,
+      "removed_b": 0.0,
+      "increased_b": 0.0,
+      "delta_b": 0.0,
+      "stale": true
+    },
+    {
+      "asof": "2025-06-18",
+      "n_cusips": 8491,
+      "total_b": 2148.2010362595265,
+      "paydown_b": 0.06135320166999999,
+      "added_b": 0.044854467610000004,
+      "removed_b": 0.00010985987999999999,
+      "increased_b": 0.026141948300000002,
+      "delta_b": 0.009533354369068547,
+      "stale": false
+    },
+    {
+      "asof": "2025-06-25",
+      "n_cusips": 8482,
+      "total_b": 2130.562970558564,
+      "paydown_b": 17.63803147197001,
+      "added_b": 0.0,
+      "removed_b": 3.422899e-05,
+      "increased_b": 0.0,
+      "delta_b": -17.63806570096267,
+      "stale": false
+    },
+    {
+      "asof": "2025-07-02",
+      "n_cusips": 8482,
+      "total_b": 2130.562970558564,
+      "paydown_b": 0.0,
+      "added_b": 0.0,
+      "removed_b": 0.0,
+      "increased_b": 0.0,
+      "delta_b": 0.0,
+      "stale": true
+    },
+    {
+      "asof": "2025-07-09",
+      "n_cusips": 8482,
+      "total_b": 2130.562970558564,
+      "paydown_b": 0.0,
+      "added_b": 0.0,
+      "removed_b": 0.0,
+      "increased_b": 0.0,
+      "delta_b": 0.0,
+      "stale": true
+    },
+    {
+      "asof": "2025-07-16",
+      "n_cusips": 8477,
+      "total_b": 2130.4985812902264,
+      "paydown_b": 0.0642310481399997,
+      "added_b": 0.0,
+      "removed_b": 0.00015822019,
+      "increased_b": 0.0,
+      "delta_b": -0.06438926833743608,
+      "stale": false
+    },
+    {
+      "asof": "2025-07-23",
+      "n_cusips": 8504,
+      "total_b": 2126.855880617837,
+      "paydown_b": 3.7205686358200034,
+      "added_b": 0.06971523506,
+      "removed_b": 0.0,
+      "increased_b": 0.008152728369999999,
+      "delta_b": -3.64270067238931,
+      "stale": false
+    },
+    {
+      "asof": "2025-07-30",
+      "n_cusips": 8494,
+      "total_b": 2112.7552383846764,
+      "paydown_b": 14.100485559219965,
+      "added_b": 0.0,
+      "removed_b": 0.00015667394,
+      "increased_b": 0.0,
+      "delta_b": -14.10064223316067,
+      "stale": false
+    },
+    {
+      "asof": "2025-08-06",
+      "n_cusips": 8494,
+      "total_b": 2112.7552383846764,
+      "paydown_b": 0.0,
+      "added_b": 0.0,
+      "removed_b": 0.0,
+      "increased_b": 0.0,
+      "delta_b": 0.0,
+      "stale": true
+    },
+    {
+      "asof": "2025-08-13",
+      "n_cusips": 8494,
+      "total_b": 2112.6889663906363,
+      "paydown_b": 0.06627199404000092,
+      "added_b": 0.0,
+      "removed_b": 0.0,
+      "increased_b": 0.0,
+      "delta_b": -0.06627199404010753,
+      "stale": false
+    },
+    {
+      "asof": "2025-08-20",
+      "n_cusips": 8490,
+      "total_b": 2108.857238065162,
+      "paydown_b": 3.831609203670005,
+      "added_b": 0.0,
+      "removed_b": 0.00011912181000000002,
+      "increased_b": 0.0,
+      "delta_b": -3.8317283254741596,
+      "stale": false
+    },
+    {
+      "asof": "2025-08-27",
+      "n_cusips": 8486,
+      "total_b": 2094.9453245750333,
+      "paydown_b": 13.911903811819936,
+      "added_b": 0.0,
+      "removed_b": 9.67831e-06,
+      "increased_b": 0.0,
+      "delta_b": -13.911913490128882,
+      "stale": false
+    },
+    {
+      "asof": "2025-09-03",
+      "n_cusips": 8486,
+      "total_b": 2094.9453245750333,
+      "paydown_b": 0.0,
+      "added_b": 0.0,
+      "removed_b": 0.0,
+      "increased_b": 0.0,
+      "delta_b": 0.0,
+      "stale": true
+    },
+    {
+      "asof": "2025-09-10",
+      "n_cusips": 8486,
+      "total_b": 2094.9453245750333,
+      "paydown_b": 0.0,
+      "added_b": 0.0,
+      "removed_b": 0.0,
+      "increased_b": 0.0,
+      "delta_b": 0.0,
+      "stale": true
+    },
+    {
+      "asof": "2025-09-17",
+      "n_cusips": 8481,
+      "total_b": 2094.8854110936054,
+      "paydown_b": 0.05971343002000028,
+      "added_b": 0.0,
+      "removed_b": 0.00020005139999999997,
+      "increased_b": 0.0,
+      "delta_b": -0.05991348142788411,
+      "stale": false
+    },
+    {
+      "asof": "2025-09-24",
+      "n_cusips": 8481,
+      "total_b": 2091.3170083929417,
+      "paydown_b": 3.5684027006599908,
+      "added_b": 0.0,
+      "removed_b": 0.0,
+      "increased_b": 0.0,
+      "delta_b": -3.5684027006636825,
+      "stale": false
+    },
+    {
+      "asof": "2025-10-01",
+      "n_cusips": 8473,
+      "total_b": 2078.092682731866,
+      "paydown_b": 13.224109120609887,
+      "added_b": 0.0,
+      "removed_b": 0.00021654045999999996,
+      "increased_b": 0.0,
+      "delta_b": -13.224325661075909,
+      "stale": false
+    },
+    {
+      "asof": "2025-10-08",
+      "n_cusips": 8473,
+      "total_b": 2078.092682731866,
+      "paydown_b": 0.0,
+      "added_b": 0.0,
+      "removed_b": 0.0,
+      "increased_b": 0.0,
+      "delta_b": 0.0,
+      "stale": true
+    },
+    {
+      "asof": "2025-10-15",
+      "n_cusips": 8466,
+      "total_b": 2078.1054572422845,
+      "paydown_b": 0.05787999802999968,
+      "added_b": 0.07099292453,
+      "removed_b": 0.0003384160900000001,
+      "increased_b": 0.0,
+      "delta_b": 0.012774510418694263,
+      "stale": false
+    },
+    {
+      "asof": "2025-10-22",
+      "n_cusips": 8466,
+      "total_b": 2074.717007000235,
+      "paydown_b": 3.388450242050007,
+      "added_b": 0.0,
+      "removed_b": 0.0,
+      "increased_b": 0.0,
+      "delta_b": -3.3884502420496574,
+      "stale": false
+    },
+    {
+      "asof": "2025-10-29",
+      "n_cusips": 8455,
+      "total_b": 2062.093057414718,
+      "paydown_b": 12.623419964239972,
+      "added_b": 0.0,
+      "removed_b": 0.0005296212799999999,
+      "increased_b": 0.0,
+      "delta_b": -12.623949585517039,
+      "stale": false
+    },
+    {
+      "asof": "2025-11-05",
+      "n_cusips": 8455,
+      "total_b": 2062.093057414718,
+      "paydown_b": 0.0,
+      "added_b": 0.0,
+      "removed_b": 0.0,
+      "increased_b": 0.0,
+      "delta_b": 0.0,
+      "stale": true
+    },
+    {
+      "asof": "2025-11-12",
+      "n_cusips": 8455,
+      "total_b": 2062.093057414718,
+      "paydown_b": 0.0,
+      "added_b": 0.0,
+      "removed_b": 0.0,
+      "increased_b": 0.0,
+      "delta_b": 0.0,
+      "stale": true
+    },
+    {
+      "asof": "2025-11-19",
+      "n_cusips": 8456,
+      "total_b": 2062.0403582247404,
+      "paydown_b": 0.06169509488999988,
+      "added_b": 0.008999998189999999,
+      "removed_b": 4.0932800000000006e-06,
+      "increased_b": 0.0,
+      "delta_b": -0.05269918997737477,
+      "stale": false
+    },
+    {
+      "asof": "2025-11-26",
+      "n_cusips": 8452,
+      "total_b": 2045.824659652084,
+      "paydown_b": 16.269141546879993,
+      "added_b": 0.04899950065,
+      "removed_b": 0.0003433203,
+      "increased_b": 0.00478679387,
+      "delta_b": -16.215698572656493,
+      "stale": false
+    },
+    {
+      "asof": "2025-12-03",
+      "n_cusips": 8452,
+      "total_b": 2045.824659652084,
+      "paydown_b": 0.0,
+      "added_b": 0.0,
+      "removed_b": 0.0,
+      "increased_b": 0.0,
+      "delta_b": 0.0,
+      "stale": true
+    },
+    {
+      "asof": "2025-12-10",
+      "n_cusips": 8452,
+      "total_b": 2045.824659652084,
+      "paydown_b": 0.0,
+      "added_b": 0.0,
+      "removed_b": 0.0,
+      "increased_b": 0.0,
+      "delta_b": 0.0,
+      "stale": true
+    },
+    {
+      "asof": "2025-12-17",
+      "n_cusips": 8460,
+      "total_b": 2045.638704812804,
+      "paydown_b": 0.2007207266700027,
+      "added_b": 0.014220933739999999,
+      "removed_b": 0.00023410820000000003,
+      "increased_b": 0.0007790618500000003,
+      "delta_b": -0.18595483927992973,
+      "stale": false
+    },
+    {
+      "asof": "2025-12-24",
+      "n_cusips": 8460,
+      "total_b": 2042.7368622339336,
+      "paydown_b": 2.9018425788700015,
+      "added_b": 0.0,
+      "removed_b": 0.0,
+      "increased_b": 0.0,
+      "delta_b": -2.9018425788704008,
+      "stale": false
+    },
+    {
+      "asof": "2025-12-31",
+      "n_cusips": 8447,
+      "total_b": 2031.271929825095,
+      "paydown_b": 11.464491909359952,
+      "added_b": 0.0,
+      "removed_b": 0.00044049948,
+      "increased_b": 0.0,
+      "delta_b": -11.46493240883865,
+      "stale": false
+    }
+  ],
+  "monthly_net_rolloff_b": {
+    "2022-05": 7.500832611360238,
+    "2022-06": -1.987287718332027,
+    "2022-07": -8.091318853837038,
+    "2022-08": 8.045416531190767,
+    "2022-09": 11.052952970318984,
+    "2022-10": 19.591311909789056,
+    "2022-11": 19.728656547418723,
+    "2022-12": 17.328433364663397,
+    "2023-01": 16.63476859584989,
+    "2023-02": 4.484763706751437,
+    "2023-03": 25.743125986025916,
+    "2023-04": 18.678310569107452,
+    "2023-05": 17.52270877100318,
+    "2023-06": 20.091541707187844,
+    "2023-07": 20.566018520247326,
+    "2023-08": 18.682045303178256,
+    "2023-09": 19.09839585639247,
+    "2023-10": 16.78895330341129,
+    "2023-11": 15.852131709162222,
+    "2023-12": 15.220368605604108,
+    "2024-01": 14.609173026128701,
+    "2024-02": 13.911601597409117,
+    "2024-03": 14.784408459316637,
+    "2024-04": 3.703178284481055,
+    "2024-05": 30.05341805064927,
+    "2024-06": 18.6310807759437,
+    "2024-07": 17.793795419269372,
+    "2024-08": 18.3821895586384,
+    "2024-09": 17.705271082608306,
+    "2024-10": 16.10607834850134,
+    "2024-11": 16.94151644665817,
+    "2024-12": 15.707858334915727,
+    "2025-01": 15.68218232653362,
+    "2025-02": 14.242146988407967,
+    "2025-03": 14.29991099163226,
+    "2025-04": 16.02760271835041,
+    "2025-05": 16.772193729716946,
+    "2025-06": 17.6285323465936,
+    "2025-07": 17.807732173887416,
+    "2025-08": 17.80991380964315,
+    "2025-09": 3.6283161820915666,
+    "2025-10": 29.22395097822391,
+    "2025-11": 16.268397762633867,
+    "2025-12": 14.55272982698898
+  },
+  "monthly_gross_paydown_b": {
+    "2022-05": 34.61456586259985,
+    "2022-06": 30.66918592610994,
+    "2022-07": 29.452365991140212,
+    "2022-08": 25.2629525809199,
+    "2022-09": 25.350551733869985,
+    "2022-10": 22.71906506573992,
+    "2022-11": 19.73797624128001,
+    "2022-12": 17.134468320440032,
+    "2023-01": 16.634207545059983,
+    "2023-02": 4.559668895769998,
+    "2023-03": 25.798736258070072,
+    "2023-04": 18.745446592820194,
+    "2023-05": 16.921507846220003,
+    "2023-06": 20.096502402159942,
+    "2023-07": 20.876672120819922,
+    "2023-08": 24.49053617646996,
+    "2023-09": 397.22304611912017,
+    "2023-10": 16.00908089967997,
+    "2023-11": 66.46540174855969,
+    "2023-12": 38.442545174440056,
+    "2024-01": 135.71495863075987,
+    "2024-02": 112.24512675671009,
+    "2024-03": 52.48118954293976,
+    "2024-04": 89.82084355692005,
+    "2024-05": 75.00752391971004,
+    "2024-06": 18.233077111230013,
+    "2024-07": 76.7105110509697,
+    "2024-08": 89.04279714028999,
+    "2024-09": 100.30723819933951,
+    "2024-10": 126.51049354369985,
+    "2024-11": 68.2676565733201,
+    "2024-12": 88.50532476977,
+    "2025-01": 152.65375318332985,
+    "2025-02": 14.312725226700028,
+    "2025-03": 14.362871538760068,
+    "2025-04": 16.042789446269975,
+    "2025-05": 16.771882932990028,
+    "2025-06": 17.699384673640008,
+    "2025-07": 17.88528524317997,
+    "2025-08": 17.809785009529943,
+    "2025-09": 3.628116130679991,
+    "2025-10": 29.293859324929866,
+    "2025-11": 16.33083664176999,
+    "2025-12": 14.567055214899955
+  },
+  "committed_method_monthly_diff_b": {
+    "2022-06": 1.987287718332027,
+    "2022-07": 8.091318853837038,
+    "2022-08": -8.045416531190767,
+    "2022-09": -11.052952970318984,
+    "2022-10": -19.591311909789056,
+    "2022-11": -19.728656547418723,
+    "2022-12": -17.328433364663397,
+    "2023-01": -16.63476859584989,
+    "2023-02": -4.484763706751437,
+    "2023-03": -25.743125986025916,
+    "2023-04": -18.678310569107452,
+    "2023-05": -17.52270877100318,
+    "2023-06": -20.091541707187844,
+    "2023-07": -20.566018520247326,
+    "2023-08": -18.682045303178256,
+    "2023-09": -19.09839585639247,
+    "2023-10": -16.78895330341129,
+    "2023-11": -15.852131709162222,
+    "2023-12": -15.220368605604108,
+    "2024-01": -14.609173026128701,
+    "2024-02": -13.911601597409117,
+    "2024-03": -14.784408459316637,
+    "2024-04": -3.703178284481055,
+    "2024-05": -30.05341805064927,
+    "2024-06": -18.6310807759437,
+    "2024-07": -17.793795419269372,
+    "2024-08": -18.3821895586384,
+    "2024-09": -17.705271082608306,
+    "2024-10": -16.10607834850134,
+    "2024-11": -16.94151644665817,
+    "2024-12": -15.707858334915727,
+    "2025-01": -15.68218232653362,
+    "2025-02": -14.242146988407967,
+    "2025-03": -14.29991099163226,
+    "2025-04": -16.02760271835041,
+    "2025-05": -16.772193729716946,
+    "2025-06": -17.6285323465936,
+    "2025-07": -17.807732173887416,
+    "2025-08": -17.80991380964315,
+    "2025-09": -3.6283161820915666,
+    "2025-10": -29.22395097822391,
+    "2025-11": -16.268397762633867,
+    "2025-12": -14.55272982698898
+  },
+  "stale_weeks_by_month": {
+    "2022-10": [
+      "2022-10-12"
+    ],
+    "2022-12": [
+      "2022-12-07"
+    ],
+    "2023-01": [
+      "2023-01-04",
+      "2023-01-11"
+    ],
+    "2023-02": [
+      "2023-02-01",
+      "2023-02-08"
+    ],
+    "2023-03": [
+      "2023-03-08"
+    ],
+    "2023-04": [
+      "2023-04-05",
+      "2023-04-12"
+    ],
+    "2023-05": [
+      "2023-05-10"
+    ],
+    "2023-07": [
+      "2023-07-12"
+    ],
+    "2023-08": [
+      "2023-08-02",
+      "2023-08-09"
+    ],
+    "2023-09": [
+      "2023-09-06",
+      "2023-09-13"
+    ],
+    "2023-10": [
+      "2023-10-04",
+      "2023-10-11"
+    ],
+    "2023-11": [
+      "2023-11-01",
+      "2023-11-08"
+    ],
+    "2023-12": [
+      "2023-12-06"
+    ],
+    "2024-01": [
+      "2024-01-10"
+    ],
+    "2024-02": [
+      "2024-02-07"
+    ],
+    "2024-03": [
+      "2024-03-06",
+      "2024-03-13"
+    ],
+    "2024-04": [
+      "2024-04-03",
+      "2024-04-10"
+    ],
+    "2024-05": [
+      "2024-05-08"
+    ],
+    "2024-06": [
+      "2024-06-05",
+      "2024-06-12"
+    ],
+    "2024-07": [
+      "2024-07-03",
+      "2024-07-10"
+    ],
+    "2024-09": [
+      "2024-09-04",
+      "2024-09-11"
+    ],
+    "2024-10": [
+      "2024-10-02",
+      "2024-10-09"
+    ],
+    "2024-11": [
+      "2024-11-06",
+      "2024-11-13"
+    ],
+    "2024-12": [
+      "2024-12-04",
+      "2024-12-11"
+    ],
+    "2025-01": [
+      "2025-01-08"
+    ],
+    "2025-02": [
+      "2025-02-05",
+      "2025-02-12"
+    ],
+    "2025-03": [
+      "2025-03-05",
+      "2025-03-12"
+    ],
+    "2025-04": [
+      "2025-04-09"
+    ],
+    "2025-05": [
+      "2025-05-07",
+      "2025-05-14"
+    ],
+    "2025-06": [
+      "2025-06-04",
+      "2025-06-11"
+    ],
+    "2025-07": [
+      "2025-07-02",
+      "2025-07-09"
+    ],
+    "2025-08": [
+      "2025-08-06"
+    ],
+    "2025-09": [
+      "2025-09-03",
+      "2025-09-10"
+    ],
+    "2025-10": [
+      "2025-10-08"
+    ],
+    "2025-11": [
+      "2025-11-05",
+      "2025-11-12"
+    ],
+    "2025-12": [
+      "2025-12-03",
+      "2025-12-10"
+    ]
+  },
+  "expectations": {
+    "E3_all_clip_months_have_a_stale_week": false,
+    "E3_stale_weeks_in_clip_months": {
+      "2022-06": [],
+      "2023-02": [
+        "2023-02-01",
+        "2023-02-08"
+      ],
+      "2024-04": [
+        "2024-04-03",
+        "2024-04-10"
+      ],
+      "2025-09": [
+        "2025-09-03",
+        "2025-09-10"
+      ]
+    },
+    "E4_tol_frac": 0.01,
+    "E4_reconstructed_window_total_b": 652.7517467773678,
+    "E4_month_end_convention_total_b": 652.7517467773678,
+    "E4_month_end_reproduces_exactly": true,
+    "gross_declines_b": 2186.227947786129,
+    "gross_note": "gross face declines run ~3x net because face falls on reinvestment settlement and roll as well as on principal; no principal-payment series is recoverable from levels",
+    "E4_implied_realized_total_b": 652.7517467772998,
+    "E4_abs_diff_b": 6.798472895752639e-11,
+    "E4_pass": true,
+    "E5_reconstruction_still_shows_low_months": true,
+    "E5_clip_month_paydowns_b": {
+      "2022-06": -1.987287718332027,
+      "2023-02": 4.484763706751437,
+      "2024-04": 3.703178284481055,
+      "2025-09": 3.6283161820915666
+    },
+    "E5_window_median_paydown_b": 16.78895330341129
+  },
+  "runtime_s": 2.603
+}
