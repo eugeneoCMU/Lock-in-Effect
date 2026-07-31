@@ -4286,3 +4286,97 @@ precision-fragile: 2dp vs full precision differ by 0.1yr at Nov-2025 — recorde
 per-row in `precision_agreement_2dp_vs_full`). Verdicts row: none (clean E1
 pass, no post-run judgment — the spec's default). Note: the spec numbered its
 gate #107; D1 (E7+CR1) took that slot in the same round, so this landed as #108.
+
+## 46. Round-33: the §§IV–VI referee round landed on main, and one run (2026-07-31)
+
+A referee round on the *argument* of §§IV–VI put 22 criticisms to independent adversarial
+refutation: **15 died against the artifacts, 2 survived, 5 never reached a refuter** (the
+run hit a usage limit). All 22 are now resolved. Landed on `main` (R30 tip) because the
+R32 continuation branch was never pushed — see §46.6.
+
+### 46.1 R33-A: the runoff-error column was on the disowned basis (gate #121)
+`tab:bases`'s cumulative-runoff-error column was standalone-only. On the shared basis —
+the one §VII.D calls commensurable — the headline off-window leg's miss is **−$66.78bn /
+10.2% of realized runoff, third of six**, not "+$2.8bn, the smallest error of any leg
+here." The decisive check is internal: `calibration_reconciliation`'s
+`miss_vs_benchmark_pp = 8.73280878608061` times the benchmark is **$66.78400264883bn**,
+bit-identical to the shared-basis error, so the note and the prose two lines later were
+quoting one quantity in two forms 24× apart. Both bases now printed. Marginal untouched
+(basis-invariant). Finding 9 is adjudicated in the same note: the null out-fits the
+central leg **only** at in-sample on the standalone scorer; the gate re-derives all four
+inequalities.
+
+### 46.2 R33-B: the empirical-CPR referent, and pricing the wedge (gates #123, #127)
+Part 1: §III.B said "two implementations of this back-out exist"; there are **three**. The
+cross-design family nets a schedule keyed to the simulated population's own coupon and
+age, so its referent is 5.83% (5.64% reweighted) against production 5.14%, and it moves
+with the simulated draw seed. Dollar benchmark bit-identical throughout.
+
+Part 2 (`r33b_book_sched`, spec and runner committed before execution): the same override
+drives the simulated leg, and trapped liquidity accumulates **net and unclipped**, so the
+swap is linear and needs no engine. `Σ h·sched_book` is the manifest's $260.0248bn;
+`Σ h·sched_pop` is `Ĥ · Σ sched_pop`, with the holdings scale recovered **two independent
+ways** from two different SMM series (2383.51 vs 2375.01, agreeing to 0.36%). Wedge
+**$63.88bn = 8.35pp**. Branch **T2** fired as pre-committed: book-basis mean 51.85%, min
+45.41%, **16 of 50 seeds below the 50% threshold**. Verdict survives, unanimity does not.
+The count was re-derived per seed (each cell's own age) — also 16, so it is not an
+artefact of the seed-invariant Δ. Both comparators are printed ($63.9bn/16-of-50 and
+$33.5bn/1-of-50) rather than one being chosen.
+
+### 46.3 The five unadjudicated findings (gates #122, #124, #125, #126)
+- **5, survived:** `fig:waterfall`'s caption claimed all stage levels come from frozen run
+  manifests. Stages 1–4 live only in `figures/fig3_stage_levels.json`.
+- **8, partially confirmed:** the renormalisation is asymmetric — the β₁=0 null is held to
+  the lock-in-affected balance path, so the marginal is an **upper bound** on the
+  compounding-consistent one. Direction landed, magnitude not (needs a
+  counterfactual-balance run).
+- **7, confirmed:** `tab:danish` 47.10 → **47.14** and 3.40 → **3.36** against the
+  manifests they descend from; one prose range carried the second error.
+- **6, confirmed:** "no synthetic-population specification lands within 45%" is falsified
+  by §IV.A's own 71.1% rational baseline, under the paper's own use of the phrase.
+
+### 46.4 Three repo defects found along the way
+1. **Silent equal-weight cohort fallback.** `compute_metrics` caught *any* exception from
+   the live SOMA fetch and substituted `cohorts_from_surface`, which is equal-weighted,
+   printing one stdout line. Cohort weights set the scheduled series, so it moved every
+   figure derived from it. Now fails loud; opt in with `allow_surface_cohort_fallback`;
+   provenance in `df.attrs`.
+2. **The cohort book was recoverable all along.** The NY Fed API serves historical as-of
+   dates. Of two candidates that both give 11 cohorts at WAC 2.49, the reference-cohort
+   weight (0.3611966033043993 vs 0.360718772041) and months elapsed (60 vs 59) pick out
+   **2026-07-01**, and the decisive holdings-free check confirms it: the rebuilt
+   cohort-weighted scheduled series reproduces the manifest's own SMM mean to **2.7e-13**.
+   Pinned at `abm/data/soma_cohorts_2026-07-01.json`; `tools/pin_soma_cohorts.py`;
+   `load_pinned_cohorts()`; `fetch_soma_mbs_cohorts(as_of=...)`. **The production
+   scheduled series is now reproducible offline.**
+3. **A gate that could never pass.** `matched-depth reconciliation` had been red since
+   R30. 38 of 40 cells reproduce exactly; two differ by **0.016 on sums of $73.8 trillion**
+   — one float64 ULP — against an **absolute 1e-3** tolerance. Now relative. A permanently
+   red gate is a gate nobody reads, and it sat beside eight clauses whose failure it
+   masked.
+
+### 46.5 `berger2026` was stale by more than an order of magnitude (gate #128)
+SSRN 403s the sandbox, but the authors host both drafts. The **January 2026** draft (the
+one cited) says the two systems differ "by only **1 bp** on average", §4.9.1. The current
+**March 2026** draft says "on average only **18 bps** higher", §4.10.2, and calls that cost
+*non-trivial*. **R32's own fact-check recorded 20 bps and is wrong** — likely a misreading
+of the March draft's 22 bps sensitivity (moving intensity +25%), which is neither the
+baseline nor a rounding of it. R32 landed 20 bps *and gated it*, so that branch will merge
+a wrong number behind a green gate. Fix at merge. No computed quantity moves here: the
+figure is a price statement §VI.D already refuses to read as a volume statement.
+
+### 46.6 Bookkeeping a future session must know
+- **Gates are numbered #121–#128**, above R32's #120 high-water mark, because R32 is
+  unpushed and would otherwise collide. `tab:bases`, `tab:crosswalk` and `tab:runindex`
+  will all need reconciliation at merge.
+- **`tab:bases` was already 21.1pt overfull on `main`** before this round; the added
+  column took it to 78pt. Repaired with a two-column `\multicolumn` group, `\tabcolsep`
+  4pt and `\scriptsize`; full row labels retained. Result is *better* than baseline:
+  overfull hbox 24 → 23, one removed and none added, 130/131pp unchanged, split boundary
+  still 1–89 / 90–130.
+- **No liveness gate reads a PDF**, and this round proved it again: every gate stayed
+  green over a table that did not fit. Build before believing a layout claim.
+- `monte_carlo_trapped_liquidity.png` is not in the repo, so a full build needs a
+  placeholder; pagination is ±1 page across geometries, but no layout verdict moves.
+- The engine's own cross-design re-score now needs only a **FRED key**; the cohort
+  blocker is gone.
