@@ -236,7 +236,7 @@ where $\delta$ is the proportional quarterly mobility decline per 100 bp of rate
 \begin{threeparttable}
 \caption{Path B parameters.}
 \label{tab:params}
-\begin{tabular}{@{}llll@{}}
+\begin{tabular}{@{}>{\raggedright\arraybackslash}p{2.8cm}>{\raggedright\arraybackslash}p{1.8cm}>{\raggedright\arraybackslash}p{2.6cm}>{\raggedright\arraybackslash}p{6.3cm}@{}}
 \toprule
 Parameter & Value & Units & Provenance \\
 \midrule
@@ -336,19 +336,27 @@ A seventh qualification assembles those readings against the ones that run the o
 \caption{The assembly at a glance. Every value repeats a committed figure from the text of this subsection; the binding interval and the form-conditional hull are deliberately not restated here (see the text and Table~\ref{tab:uncertainty}).}
 \label{tab:assembly}
 \footnotesize
-\begin{tabular}{@{}llll@{}}
+\setlength{\tabcolsep}{3.5pt}
+\begin{tabular}{@{}>{\raggedright\arraybackslash}p{3.5cm}>{\raggedright\arraybackslash}p{2.1cm}>{\raggedright\arraybackslash}p{1.9cm}>{\raggedright\arraybackslash}p{6.0cm}@{}}
 \toprule
 Reading & Marginal (pp) & vs.\ $+5.6$ & Status \\
 \midrule
 In-sample calibration point & $+9.2$ & above & in-window point, not the headline \\
 Off-window re-anchor & $+5.6$ & headline & mid-grid anchor inside the binding interval \\
-Ginnie overlay at the corrected floor & $+4.4$ & below & change of estimand (re-scoping onto the conventional sub-book), not a correction \\ Vintage overlay at the corrected floor & $+3.7$ & below & change of estimand (re-scoping onto the in-window-vintage share), not a correction (run \texttt{vintage\_overlay}) \\
+Ginnie overlay at the corrected floor & $+4.4$ & below & change of estimand (re-scoping onto the conventional sub-book), not a correction \\
+Vintage overlay at the corrected floor & $+3.7$ & below & change of estimand (re-scoping onto the in-window-vintage share), not a correction (run \texttt{vintage\_overlay}) \\
 Age-standardized floor (5.51\%) & $\sim +3.8$ & below & indicative bound, 84\% imputed weight \\
 Fannie floor read (5.52\%) & below $+4.3$ & below & bracketing, second agency \\
-Overlay $\times$ age-standardized & $+2.9$ & below & measured composed lower member (run \texttt{b5\_joint\_cell}); within $0.1$ of proportional \\ Moving-share bracket, $s = 0.5$, off-window & $+3.4$ & below & convention bracket, not an estimate (run \texttt{moving\_share\_bracket\_offwindow}) \\ Moving-share bracket, $s = 0.25$, off-window & $+1.8$ & below the interval & the bracket's deep stress; edge by construction \\ Housing-activity-scaled baseline (Aladangady-anchored) & $+0.9$ & below the interval & scaled-null variant; upward-bias entry, root $\phi^{*} = 0.754$ (run \texttt{scaled\_null\_housing\_activity}) \\ Sub-band elasticity, $\delta = 3.25\%$, off-window & $+3.5$ & below & band-extension member (Table~\ref{tab:lowband}) \\ Concave transform alone, off-window & $+5.1$ & below & transform member (run \texttt{concave\_marginal}) \\
+Overlay $\times$ age-standardized & $+2.9$ & below & measured composed lower member (run \texttt{b5\_joint\_cell}); within $0.1$ of proportional \\
+Moving-share bracket, $s = 0.5$, off-window & $+3.4$ & below & convention bracket, not an estimate (run \texttt{moving\_share\_bracket\_offwindow}) \\
+Moving-share bracket, $s = 0.25$, off-window & $+1.8$ & below the interval & the bracket's deep stress; edge by construction \\
+Housing-activity-scaled baseline (Aladangady-anchored) & $+0.9$ & below the interval & scaled-null variant; upward-bias entry, root $\phi^{*} = 0.754$ (run \texttt{scaled\_null\_housing\_activity}) \\
+Sub-band elasticity, $\delta = 3.25\%$, off-window & $+3.5$ & below & band-extension member (Table~\ref{tab:lowband}) \\
+Concave transform alone, off-window & $+5.1$ & below & transform member (run \texttt{concave\_marginal}) \\
 Concave $\times$ additive joint cell & interaction $-1.47$ & --- & the one joint cell run \\
 Additive form & $+11.2$ & above & counterweight, functional-form choice \\
-Fonseca--Liu anchor & $+11.5$ & above & counterweight, conservative-band evidence \\ Cross-sectional gradient, composition-standardized & gradient $+3.4$ vs implied $+0.9$ & above (directional) & directional; not a marginal re-estimate (run \texttt{episode\_confrontation\_within}) \\
+Fonseca--Liu anchor & $+11.5$ & above & counterweight, conservative-band evidence \\
+Cross-sectional gradient, composition-standardized & gradient $+3.4$ vs implied $+0.9$ & above (directional) & directional; not a marginal re-estimate (run \texttt{episode\_confrontation\_within}) \\
 \bottomrule
 \end{tabular}
 \end{table}
@@ -422,15 +430,16 @@ Table~\ref{tab:uncertainty} consolidates the three uncertainty layers that attac
 \label{tab:uncertainty}
 \footnotesize
 \begin{threeparttable}
-\begin{tabular}{@{}p{2.4cm}p{3.3cm}p{4.0cm}p{4.8cm}@{}}
+\setlength{\tabcolsep}{2.5pt}%
+\begin{tabular}{@{}>{\raggedright\arraybackslash}p{2.2cm}>{\raggedright\arraybackslash}p{3.0cm}>{\raggedright\arraybackslash}p{3.8cm}>{\raggedright\arraybackslash}p{5.0cm}@{}}
 \toprule
 Quantity & Point (shared; standalone) & Sampling 95\% CI & Calibration range \\
 \midrule
-Path B central level (in-sample calibration) & 97.9\%; 107.0\% & $[97.9, 98.0]$\%; $[107.0, 107.1]$\% & covariate priors 92.2--99.2\%; elasticity band 96.8--99.1\% (shared basis); off-window floor 91.3\% shared (88.2--93.7\% across its range); covariate endpoints at the off-window floor 94.3--102.5\% standalone, an 8.2-point swing exceeding the marginal there (run \texttt{covariate\_ablation\_offwindow}) \\
+Path B central level (in-sample calibration) & 97.9\%; 107.0\% & $[97.9, 98.0]$\%; $[107.0, 107.1]$\% & covariate priors 92.2--99.2\%; elasticity band 96.8--99.1\% (shared basis); off-window floor 91.3\% shared (88.2--93.7\% across its range); covariate endpoints at the off-window floor 94.3--102.5\% standalone, an 8.2-point swing exceeding the marginal there (run \texttt{covariate\_ablation\_\allowbreak offwindow}) \\
 $\beta_1 = 0$ null level (in-sample calibration) & 88.7\%; 97.8\% & $[88.7, 88.8]$\%; $[97.8, 97.9]$\% & moves one-for-one with the floor level: 85.7\% shared at the off-window floor, 83.9--86.9\% across its range (Section~\ref{sec:robustness-floor}) \\
-Lock-in marginal, off-window floor (headline) & $+5.6$pp (basis-invariant) & floor-read wild-cluster bootstrap-$t$ $[+2.9, +8.7]$pp at the central elasticity $\delta = 6.5\%$ (the binding layer, and a sampling interval on the floor read alone rather than on the elasticity; percentile read $[+3.0, +8.0]$pp; the elasticity dimension is Table~\ref{tab:lowband}); loan/stratum cluster bootstrap $[+4.63, +6.92]$pp (width $0.39\times$ the corrected floor read; 25.8 effective clusters); the two layers convolved as independent, $[+2.80, +8.99]$pp (run \texttt{layer\_convolution}; independence is assumed, not measured --- under maximal positive dependence the width is $8.12$pp) & $+4.3$ to $+6.8$ across the defensible off-window floor range (Table~\ref{tab:oosfloor}); age-standardized floor 5.51\% $\to$ $+3.8$ (84\% imputed weight; band open below $+4.3$); independent Fannie Mae read of the same off-window cell 5.52\% (run \texttt{fannie\_floor\_read}), above the clean band and bracketing the marginal below $+4.3$; $+3.9$ to $+7.5$ joint with the band; additive form $+11.2$ (form-conditional hull $+3.5$ to $+13.1$); concave transform $+5.1$; the two \emph{jointly} $+9.2$, an interaction of $-1.47$ points, so these two entries do not add (run \texttt{concave\_additive\_marginal}); Ginnie overlay $+4.4$ (cuts the same way as the age-standardized read; now run jointly with it in run \texttt{b5\_joint\_cell}: composed $+2.9$, within $0.1$ of proportional); floor-stability check $+\$45.1$B; baseline-level sweep 75--150 PSA $+0.9$ to $+15.6$ (a convention range, no coverage property; run \texttt{psa\_level\_sweep}); covariate endpoints move this marginal by only $+0.1$ while spanning 8.2 points of level (run \texttt{covariate\_ablation\_offwindow}); survival-selection attenuation $+5.1$/$+4.6$/$+3.7$ at $a = 0.86/0.73/0.54$, the frailty-identity mapping $a = S^{\theta}$ at the measured $S = 40{,}234/75{,}000$ and $\theta = 0.25/0.5/1$ (run \texttt{attenuation\_sensitivity}; a transport sensitivity on the imported coefficient, kept out of the assembly on that ground) \\
+Lock-in marginal, off-window floor (headline) & $+5.6$pp (basis-invariant) & floor-read wild-cluster bootstrap-$t$ $[+2.9, +8.7]$pp at the central elasticity $\delta = 6.5\%$ (the binding layer, and a sampling interval on the floor read alone rather than on the elasticity; percentile read $[+3.0, +8.0]$pp; the elasticity dimension is Table~\ref{tab:lowband}); loan/stratum cluster bootstrap $[+4.63, +6.92]$pp (width $0.39\times$ the corrected floor read; 25.8 effective clusters); the two layers convolved as independent, $[+2.80, +8.99]$pp (run \texttt{layer\_\allowbreak convolution}; independence is assumed, not measured --- under maximal positive dependence the width is $8.12$pp) & $+4.3$ to $+6.8$ across the defensible off-window floor range (Table~\ref{tab:oosfloor}); age-standardized floor 5.51\% $\to$ $+3.8$ (84\% imputed weight; band open below $+4.3$); independent Fannie Mae read of the same off-window cell 5.52\% (run \texttt{fannie\_floor\_\allowbreak read}), above the clean band and bracketing the marginal below $+4.3$; $+3.9$ to $+7.5$ joint with the band; additive form $+11.2$ (form-conditional hull $+3.5$ to $+13.1$); concave transform $+5.1$; the two \emph{jointly} $+9.2$, an interaction of $-1.47$ points, so these two entries do not add (run \texttt{concave\_additive\_\allowbreak marginal}); Ginnie overlay $+4.4$ (cuts the same way as the age-standardized read; now run jointly with it in run \texttt{b5\_joint\_cell}: composed $+2.9$, within $0.1$ of proportional); floor-stability check $+\$45.1$B; baseline-level sweep 75--150 PSA $+0.9$ to $+15.6$ (a convention range, no coverage property; run \texttt{psa\_level\_\allowbreak sweep}); covariate endpoints move this marginal by only $+0.1$ while spanning 8.2 points of level (run \texttt{covariate\_ablation\_\allowbreak offwindow}); survival-selection attenuation $+5.1$/$+4.6$/$+3.7$ at $a = 0.86/0.73/0.54$, the frailty-identity mapping $a = S^{\theta}$ at the measured $S = 40{,}234/75{,}000$ and $\theta = 0.25/0.5/1$ (run \texttt{attenuation\_\allowbreak sensitivity}; a transport sensitivity on the imported coefficient, kept out of the assembly on that ground) \\
 \addlinespace
-Lock-in marginal, in-sample point & $+9.2$pp (basis-invariant) & within-stratum $[+9.17, +9.23]$pp (sd $0.016$); stratum-cluster $[+8.27, +10.19]$pp (sd $0.52$; run \texttt{bootstrap\_pathb\_cluster}) & box $+2.1$ to $+13.2$; floor form $+11.2$; within-run floor dispersion $+7.1$ to $+9.4$; regime-split baseline break $+5.0$ to $+12.1$; PSA level sweep $+3.3$ to $+16.5$ (run \texttt{psa\_level\_sweep}); covariate endpoints move this marginal $+1.9$ \\
+Lock-in marginal, in-sample point & $+9.2$pp (basis-invariant) & within-stratum $[+9.17, +9.23]$pp (sd $0.016$); stratum-cluster $[+8.27, +10.19]$pp (sd $0.52$; run \texttt{bootstrap\_pathb\_\allowbreak cluster}) & box $+2.1$ to $+13.2$; floor form $+11.2$; within-run floor dispersion $+7.1$ to $+9.4$; regime-split baseline break $+5.0$ to $+12.1$; PSA level sweep $+3.3$ to $+16.5$ (run \texttt{psa\_level\_\allowbreak sweep}); covariate endpoints move this marginal $+1.9$ \\
 \bottomrule
 \end{tabular}
 \begin{tablenotes}[flushleft]\footnotesize
@@ -447,7 +456,7 @@ Lock-in marginal, in-sample point & $+9.2$pp (basis-invariant) & within-stratum 
 \label{tab:ladder}
 \footnotesize
 \begin{threeparttable}
-\begin{tabular}{@{}llll@{}}
+\begin{tabular}{@{}>{\raggedright\arraybackslash}p{4.0cm}>{\raggedright\arraybackslash}p{2.3cm}>{\raggedright\arraybackslash}p{2.8cm}>{\raggedright\arraybackslash}p{4.4cm}@{}}
 \toprule
 Layer & Marginal (pp) & Degrees of freedom & Status \\
 \midrule
@@ -798,7 +807,7 @@ Headline figures in this paper changed across drafts as specification errors wer
 
 Every current headline figure cites a frozen, tagged run manifest; two freezes ran on uncommitted working trees, so manifest git hashes alone do not name an exact reproduction checkout, and the repository's run ledger records the exact reproduction commits. The one that carries a headline quantity should be named here rather than left to the ledger: the fold-in Monte Carlo behind the ABM's seed distribution (\texttt{run-2026-07-04-15yr-foldin}) was frozen about two minutes before its own code was committed, so its manifest's commit field points at the \emph{previous} state of the tree. Its reproduction checkout is recorded in the ledger, and on that run, specifications must be identified by cohort-bucket count---seven for the thirty-year-only specification, eleven for the fold-in---rather than by the manifest commit, which is unreliable for exactly this reason. Anyone reproducing the ABM's 13.6\% seed mean or its 11.9\% frozen draw needs that rule, and it is the reason the two figures were once mistakenly attributed to the native-fifteen-year specification.
 
-\paragraph{Reproducibility conventions.} Provenance details referenced from the main text are collected here. The ABM headline run's manifest lives at \path{abm/data/runs/run-2026-07-04-15yr-foldin/manifest.json} and is reproduced via \texttt{freeze\_run.py -{}-tag run-2026-07-04-15yr-foldin} against the fold-in specification's code; a manifest's recorded \texttt{git\_commit} is the pre-run parent of the freezing commit (the convention the replication package's technical documentation records). Post-freeze runs follow the spec-before-run convention: the grid, parity gates, and interpretive thresholds are fixed in the run script's header and committed before execution (for the floor sweeps, spec commits \texttt{ad52db6} and \texttt{651d1a0} precede result commits \texttt{d0ef130} and \texttt{57181b3}); where script and artifact enter the repository in one revision (the form test \texttt{hazard/floor\_form\_test.py}, the bootstrap), the header is the ex-ante record. Referenced artifact files not named in the main text: \texttt{wal\_anchor\_results.json} (WAL anchor), \texttt{floor\_sweep\_results.json} and \texttt{floor\_band\_cross\_results.json} (the calibration box), \texttt{theil\_data.json} (dynamic-fit decomposition), \texttt{vintage\_residual\_bound\_results.json} (vintage bound), and \texttt{ml\_comparator\_holdout\_results.json} (flexible-learner comparator).
+\paragraph{Reproducibility conventions.} Provenance details referenced from the main text are collected here. The ABM headline run's manifest lives at \path{abm/data/runs/run-2026-07-04-15yr-foldin/manifest.json} and is reproduced via \path{freeze_run.py} \texttt{-{}-tag run-2026-07-04-15yr-foldin} against the fold-in specification's code; a manifest's recorded \texttt{git\_commit} is the pre-run parent of the freezing commit (the convention the replication package's technical documentation records). Post-freeze runs follow the spec-before-run convention: the grid, parity gates, and interpretive thresholds are fixed in the run script's header and committed before execution (for the floor sweeps, spec commits \texttt{ad52db6} and \texttt{651d1a0} precede result commits \texttt{d0ef130} and \texttt{57181b3}); where script and artifact enter the repository in one revision (the form test \path{hazard/floor_form_test.py}, the bootstrap), the header is the ex-ante record. Referenced artifact files not named in the main text: \path{wal_anchor_results.json} (WAL anchor), \path{floor_sweep_results.json} and \path{floor_band_cross_results.json} (the calibration box), \path{theil_data.json} (dynamic-fit decomposition), \path{vintage_residual_bound_results.json} (vintage bound), and \path{ml_comparator_holdout_results.json} (flexible-learner comparator).
 
 \begin{table}[H]
 \centering
@@ -806,7 +815,8 @@ Every current headline figure cites a frozen, tagged run manifest; two freezes r
 \begin{threeparttable}
 \caption{Basis-and-inputs crosswalk for headline quantities. Bases are defined in Section~\ref{sec:method-benchmark} and collected numerically in Table~\ref{tab:bases}; every model quantity descends from a frozen, tagged run manifest (reproducibility conventions above).}
 \label{tab:crosswalk}
-\begin{tabular}{@{}p{4.9cm}p{3.4cm}p{2.2cm}p{3.9cm}@{}}
+\setlength{\tabcolsep}{3pt}%
+\begin{tabular}{@{}>{\raggedright\arraybackslash}p{3.6cm}>{\raggedright\arraybackslash}p{2.7cm}>{\raggedright\arraybackslash}p{1.9cm}>{\raggedright\arraybackslash}p{5.5cm}@{}}
 \toprule
 Quantity & Accounting basis & Home exhibit & Source run / input \\
 \midrule
@@ -1388,9 +1398,10 @@ The right reading of this is a finding about the criterion, not a failure of the
 \begin{threeparttable}
 \caption{Seasonalizing the turnover floor. Each leg re-runs the production microsimulation as a paired central and $\beta_1 = 0$ null with only the turnover floor's calendar profile varied; the marginal is the central-minus-null difference and is basis-invariant. $U_2$ and $r$ are scored on the central leg against the SOMA back-out over the 42-month window. The constant-4.0\% row reproduces the committed production artifacts bitwise. Pre-committed run \texttt{seasonal\_floor\_timing}; artifacts catalogued in Appendix~\ref{app:ledger}.}
 \label{tab:seasonalfloor}
-\begin{tabular}{@{}lrrrrrr@{}}
+\setlength{\tabcolsep}{2.8pt}%
+\begin{tabular}{@{}>{\raggedright\arraybackslash}p{3.8cm}rrrrrr@{}}
 \toprule
-Floor leg & Null (\$B) & Central (\$B) & Marginal (\$B) & Marginal (pp) & $U_2$ (diffs) & $r$ (detr.) \\
+Floor leg & Null (\$B) & Central (\$B) & Marg.\ (\$B) & Marg.\ (pp) & $U_2$ (diffs) & $r$ (detr.) \\
 \midrule
 Constant 4.0\% (production) & 748.185 & 818.530 & $+70.345$ & $+9.20$ & 1.0029 & $-0.203$ \\
 Constant 4.5\% & 738.869 & 796.510 & $+57.642$ & $+7.54$ & 1.0023 & $-0.255$ \\
