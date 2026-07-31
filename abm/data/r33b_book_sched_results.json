@@ -107,12 +107,19 @@
    "at_h_curt": 64.2303145998749
   }
  },
+ "seed_invariance_check": {
+  "n_below_seed_invariant_delta": 16,
+  "n_below_per_seed_delta": 16,
+  "agree": true,
+  "note": "uniform worst-case age is a stress, not an estimator; the per-seed figure is the one the landing quotes"
+ },
  "verdict": {
   "branch": "T2",
   "text": "book-basis mean clears 50% but the minimum does not: the verdict survives, the unanimity claim does not.",
   "book_basis_mean_pct": 51.85489883109258,
   "book_basis_min_pct": 45.40580133775691,
   "seeds_below_threshold": 16,
+  "seeds_below_threshold_per_seed_delta": 16,
   "seeds_scored": 50,
   "prediction_held": true
  }
