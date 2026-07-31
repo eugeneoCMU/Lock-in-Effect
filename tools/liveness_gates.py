@@ -1029,6 +1029,43 @@ def runoff_error_basis_check(tex: str,
     }
 
 
+def berger_currency_check(tex: str) -> tuple[bool, dict]:
+    """Gate #128: the berger2026 GE magnitude must be the current draft's.
+
+    The January 2026 draft put the equilibrium-rate effect at 1 bp (its
+    §4.9.1); the March 2026 draft puts it at 18 bps (§4.10.2) and declines to
+    call it negligible. The manuscript quoted the January figure long after it
+    was superseded, so both the value and the section pin are gated, and the
+    retired forms are held at zero. Evidence:
+    specs/RECORD_R33_berger_currency_2026-07-31.md.
+    """
+    tex_nc = re.sub(r"(?<!\\)%.*", "", tex)
+    retired = [
+        "by only about one basis point, economically negligible",
+        "an equilibrium-rate effect of about one basis point",
+        "\\citep[\\S4.9.1]{berger2026}",
+    ]
+    required = [
+        "\\citep[\\S4.10.2]{berger2026}",
+        "about 18 basis points",
+        "an equilibrium-rate effect of about 18 basis points",
+        "the January 2026 draft's",
+        "moved by more than an order of magnitude between the two",
+    ]
+    missing = [s for s in required if s not in tex_nc]
+    present_retired = [s for s in retired if s in tex_nc]
+    # The bib must carry both drafts so the pin is auditable.
+    bib_ok = True
+    bib_path = ROOT / "paper" / "v18" / "references.bib"
+    if bib_path.exists():
+        bib = bib_path.read_text()
+        bib_ok = ("18 bps in \\S4.10.2" in bib
+                  and "1 bp in \\S4.9.1" in bib)
+    ok = not missing and not present_retired and bib_ok
+    return ok, {"missing": missing, "present_retired": present_retired,
+                "bib_records_both_drafts": bib_ok}
+
+
 def cpr_referent_check(tex: str,
                        foldin=None,
                        cross=None,
@@ -5348,6 +5385,12 @@ def main() -> int:
           f"missing={_wp['missing'] or 'none'}, "
           f"retired={_wp['present_retired'] or 'none'}, "
           f"distinct_ok={_wp['distinct_ok']}")
+    bg_ok, _bg = berger_currency_check(tex)
+    failures += 0 if bg_ok else 1
+    print(f"[{'PASS' if bg_ok else 'FAIL'}] berger2026 GE currency (gate #128): "
+          f"missing={_bg['missing'] or 'none'}, "
+          f"retired={_bg['present_retired'] or 'none'}, "
+          f"bib_records_both_drafts={_bg['bib_records_both_drafts']}")
     cr_ok, _cr2 = cpr_referent_check(tex)
     failures += 0 if cr_ok else 1
     print(f"[{'PASS' if cr_ok else 'FAIL'}] empirical-CPR referent (gate #123): "
