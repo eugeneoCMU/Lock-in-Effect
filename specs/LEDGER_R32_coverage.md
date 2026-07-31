@@ -131,8 +131,8 @@ No condition may be left unclassified. Generated from the inventory and the comm
 | C-124 | MINOR | 6 | WORDING | **DECLINED** | the parenthetical it would move is ABSTRACT_POSTURE['interval_qualifier'], a Wave-1 landing for C-01; moving it would undo an upheld condition to satisfy a MINOR one | Move the inference-machinery detail out of the abstract into T1's note |
 | C-125 | MAJOR | CLOSE | CHECK | **SATISFIED** | c3f37a7 (abstract recounted with the gate's own function: 323 -> 341; files identical outside line 31) | CLOSE: re-count the abstract and confirm the two abstract files stay i |
 | C-126 | MAJOR | EUGENE | WORDING | **SATISFIED** | d1bf578 | EUGENE: retitle to the claim the paper establishes |
-| C-127 | MINOR | EUGENE | CHECK | **DEFERRED-EUGENE** | his call | EUGENE: whether the benchmark's monthly series should be rebuilt at mo |
-| C-128 | MINOR | EUGENE | CHECK | **DEFERRED-EUGENE** | his call | EUGENE: whether the realized-side window-boundary allocation should be |
+| C-127 | MINOR | EUGENE | CHECK | **SATISFIED** | Eugene's scope call given 2026-07-30; spec `SPEC_R32_c127_benchmark_monthly_rebuild.md`, run `benchmark_monthly_rebuild`, **Branch D**. Neither rebuild route R2 named is usable: no monthly principal-payment endpoint exists (both HTTP 400, summary carries levels only), and the per-CUSIP route cannot isolate principal because gross face churn runs ~3x net. The realized leg RECONCILES EXACTLY from independent per-CUSIP data ($652.7517bn vs $652.7517bn, diff $0.0000, against a 1% bar) so the benchmark is NOT in play, and the reconstruction does NOT retire the clip zeros. E3 missed: 3 of 4 clip months carry a stale published week, 2022-06 does not. App. N's ARTIFACT classification stands. **Manuscript landing still pending.** |
+| C-128 | MINOR | EUGENE | CHECK | **SATISFIED** | Eugene's scope call given 2026-07-30; spec `SPEC_R32_c128_realized_boundary_allocation.md`, run `realized_boundary_allocation`, **Branch A**. Aligning the realized leg as well as the cap shifts the benchmark -$25.38bn against the cap-only -$42.00bn at all three committed kernels; the realized leg gives back $16.6bn because it is non-zero before the window where the cap is not. 3.32% of the benchmark, so a T2 disclosed sensitivity and the headline does not move. Production convention stays calendar. **Manuscript landing still pending.** |
 | C-129 | MINOR | EUGENE | STRUCTURE | **DEFERRED-EUGENE** | his call | EUGENE: anonymized master and an archived DOI in place of the GitHub U |
 | C-130 | MAJOR | EUGENE | META | **DEFERRED-EUGENE** | his call | EUGENE: length and venue scope |
 | C-131 | MINOR | EUGENE | META | **DEFERRED-EUGENE** | his call | EUGENE: the adverse-findings register as a standalone methods note |
@@ -141,9 +141,9 @@ No condition may be left unclassified. Generated from the inventory and the comm
 
 ## Counts
 
-- SATISFIED: **114**  (includes C-92, satisfied by the condition's own stated minimum)
+- SATISFIED: **116**  (includes C-92, satisfied by the condition's own stated minimum; and C-127/C-128, run and adjudicated but their manuscript landings still pending)
 - DECLINED: **8**
-- DEFERRED-EUGENE: **7**  (includes C-132, forward limb done / history limb reserved)
+- DEFERRED-EUGENE: **5**  (includes C-132, forward limb done / history limb reserved)
 - OPEN: **2**  (C-117; C-121 partial)
 - CLOSED-REFUTED: **1**
 - MOOT: **1**
@@ -212,5 +212,5 @@ No condition may be left unclassified. Generated from the inventory and the comm
   exist only to reduce length, so the premise is withdrawn rather than the sections being
   defended one by one. Two consequences worth recording: (i) C-96's landing carried a note that
   it was sequenced with C-90, and that sequencing constraint is now released; (ii) the paper
-  stands at 152pp, up from 148 at the start of this session, and every added page is a condition
+  stands at 157pp (main 1-111, online appendix 112-157), up from 148 at the start of the round, and every added page is a condition
   being satisfied — if the venue decision (C-130) later forces a length, these five come back.

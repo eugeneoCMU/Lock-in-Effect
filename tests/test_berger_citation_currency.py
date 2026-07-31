@@ -49,6 +49,30 @@ def test_ge_magnitude_is_the_current_one(tex):
     assert "an equilibrium-rate effect of about 20 basis points" in tex
 
 
+def test_the_superseded_one_bp_figure_survives_nowhere_as_a_current_claim():
+    """Presence checks alone let a stale sibling survive -- and one did.
+
+    Commit 5c9c955 corrected the GE magnitude 1bp -> 20bps "at BOTH sites" and this file
+    pinned the two corrected strings. It missed a THIRD site: .tex:661 still read
+    "Berger et al.'s roughly one-basis-point equilibrium shift", asserting the superseded
+    January-2026 figure as current, two paragraphs after .tex:626 correctly labels one
+    basis point as the superseded value. Asserting the new string is present cannot detect
+    that; asserting the old one is absent can.
+
+    The hyphenated form is the discriminator. .tex:626's legitimate historical mention
+    reads "reported about one basis point" (spaced); only a current-claim usage is
+    hyphenated as a compound modifier. So this pins the hyphenated form at zero without
+    touching the honest historical reference.
+    """
+    for name, tex in (("canonical", TEX), ("variant", VARIANT)):
+        assert "one-basis-point" not in tex, (
+            f"{name}: the superseded 1bp figure is stated as a current claim; "
+            f"berger2026's July draft gives ~20 basis points")
+        assert "the January 2026 version of the same paper reported about one basis point" in tex, (
+            f"{name}: the labelled historical mention of the 1bp figure was removed; it is "
+            f"the evidence that the estimate is draft-sensitive and should stay")
+
+
 @BOTH
 def test_only_surviving_one_bp_mention_is_the_declared_draft_history(tex):
     """The 1 bps figure may appear exactly once, and only as version history."""
