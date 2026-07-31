@@ -98,6 +98,16 @@ def test_seed_count_recomputed_from_cells():
     assert all(c["share_pct"] >= 50.0 for c in cells)
 
 
+def test_count_survives_a_per_seed_wedge():
+    """The landing applies one Delta to every seed; the per-seed recomputation
+    (each cell's own population age) must give the same count, or the headline
+    'sixteen of the fifty' is an artefact of the approximation."""
+    chk = R33B["seed_invariance_check"]
+    assert chk["n_below_seed_invariant_delta"] == chk["n_below_per_seed_delta"]
+    assert chk["agree"] is True
+    assert R33B["verdict"]["seeds_below_threshold_per_seed_delta"] == 16
+
+
 def test_unanimity_retirement_is_stated():
     span = "The threshold verdict survives the basis change; its unanimity does not"
     assert span in TEX

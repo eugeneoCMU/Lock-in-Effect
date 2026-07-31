@@ -116,6 +116,31 @@ Secondary basis (single-pool book annuity at the June-2022 WAC 2.471%, mean age 
 isolating composition at a fixed functional form): **Δ = $33.50bn / 4.38pp**. Reported in
 the artifact, not verdict-bearing, and not quoted in the manuscript.
 
+### The basis choice is the load-bearing judgement call in this landing
+
+Branch **T2 fires on either basis**, so the verdict — threshold survives, unanimity does
+not — is robust to it. The *count* is not:
+
+| basis | Δ | book-basis mean | seeds below 50 |
+|---|---|---|---|
+| **primary** (production cohort-weighted, term-aware) | $63.88bn | 51.85% | **16 of 50** |
+| secondary (single-pool book annuity, like-for-like form) | $33.50bn | 55.83% | **1 of 50** |
+
+The manuscript quotes sixteen. The case for the primary basis is that it is the book's
+actual mechanical leg and the one §VI.B means by "scheduled amortization is fixed by the
+book's composition"; the case for the secondary is that it holds functional form fixed
+and so isolates composition alone. This was pre-committed, but it is a choice, and it is
+where a reader who disagrees will disagree.
+
+### Seed-invariance of the count, checked rather than assumed
+
+Limit 2 of the spec applies one Δ to all fifty seeds. Recomputing Δ **per seed** from each
+cell's own population age gives **16 of 50 as well** (`seed_invariance_check.agree =
+true`), so the headline count is not an artefact of the approximation. Applying the
+*maximum* observed age uniformly to every seed would give 14 — but that is a worst-case
+stress, not an estimator, and it is recorded as such rather than quoted. Gate #115's
+battery asserts the two counts agree.
+
 **Not done:** the engine's own re-score. It needs a FRED key and a pinned SOMA cohort
 table. The decomposition is exact given the linearity, but it is not a re-simulation.
 

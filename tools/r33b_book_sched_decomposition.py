@@ -197,18 +197,35 @@ def main() -> int:
     else:
         branch, text = "T3", ("book-basis mean falls below 50%: the undercut "
                               "verdict is basis-conditional. Eugene's call.")
-    n_below = sum(
-        1 for c in SEEDS["per_cell"]
-        if c.get("leg") == "A_joint" and c.get("variant") == "recalibrated"
-        and (c["trapped_b"] - delta_primary) / B * 100.0 < 50.0)
-    n_cells = sum(1 for c in SEEDS["per_cell"]
-                  if c.get("leg") == "A_joint" and c.get("variant") == "recalibrated")
+    cells = [c for c in SEEDS["per_cell"]
+             if c.get("leg") == "A_joint" and c.get("variant") == "recalibrated"]
+    n_cells = len(cells)
+    n_below = sum(1 for c in cells
+                  if (c["trapped_b"] - delta_primary) / B * 100.0 < 50.0)
+    # Limit 2 of the spec says Δ is applied seed-invariantly. Recompute it per
+    # seed from each cell's own population age (the per-cell WAC is not
+    # recorded, so it stays at the committed value) and report both. If the two
+    # counts disagree, the seed-invariant headline is not safe to quote.
+    n_below_perseed = 0
+    for c in cells:
+        d_i = sum_book_dollars_primary - h_mean * sched_sum(
+            pop_wac, c["population_mean_age_mo"])
+        if (c["trapped_b"] - d_i) / B * 100.0 < 50.0:
+            n_below_perseed += 1
+    out["seed_invariance_check"] = {
+        "n_below_seed_invariant_delta": n_below,
+        "n_below_per_seed_delta": n_below_perseed,
+        "agree": bool(n_below == n_below_perseed),
+        "note": ("uniform worst-case age is a stress, not an estimator; the "
+                 "per-seed figure is the one the landing quotes"),
+    }
     out["verdict"] = {
         "branch": branch,
         "text": text,
         "book_basis_mean_pct": share_mean,
         "book_basis_min_pct": share_min,
         "seeds_below_threshold": n_below,
+        "seeds_below_threshold_per_seed_delta": n_below_perseed,
         "seeds_scored": n_cells,
         "prediction_held": bool(p4),
     }
