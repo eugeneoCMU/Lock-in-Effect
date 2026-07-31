@@ -176,16 +176,28 @@ def main() -> None:
     committed_method = {months[i]: me[months[i]] - me[months[i - 1]]
                         for i in range(1, len(months))}
 
-    win = [m for m in sorted(by_month) if "2022-06" <= m <= "2025-11"]
-    recon_total = sum(by_month[m] for m in win)
+    # THE RECONSTRUCTION IS NET, NOT GROSS. The first attempt summed the GROSS paydown
+    # component and compared it to a NET comparator: $2,186bn of gross declines against a
+    # $652.75bn net realized total. Gross churn runs ~3x net on this book ($2,775bn down
+    # against $2,100bn up over the window), because face falls on reinvestment settlement and
+    # roll as well as on principal -- which is itself why NO principal-payment series can be
+    # isolated from face levels alone. The benchmark is defined on the NET change, so that is
+    # what the reconstruction must compute.
+    net_by_month = defaultdict(float)
+    for w in weeks[1:]:
+        net_by_month[w["asof"][:7]] += -w["delta_b"]          # positive = roll-off
+    win = [m for m in sorted(net_by_month) if "2022-06" <= m <= "2025-11"]
+    recon_total = sum(net_by_month[m] for m in win)
+    # the committed month-end convention, rebuilt from the SAME per-CUSIP levels
+    me_total = -sum(committed_method[m] for m in win if m in committed_method)
 
     e3_cells = {m: sorted(stale_by_month.get(m, [])) for m in clip_months}
     e3 = all(e3_cells[m] for m in clip_months)
     e4_diff = abs(recon_total - realized_implied)
     e4 = e4_diff / committed_bench < E4_TOL_FRAC
     # E5: does the reconstruction retire the zeros?
-    still_low = {m: by_month.get(m, 0.0) for m in clip_months}
-    med = sorted(by_month[m] for m in win)[len(win) // 2]
+    still_low = {m: net_by_month.get(m, 0.0) for m in clip_months}
+    med = sorted(net_by_month[m] for m in win)[len(win) // 2]
     e5 = all(still_low[m] < 0.5 * med for m in clip_months)
 
     payload = {
@@ -209,7 +221,8 @@ def main() -> None:
             "E2_decomposition_exhaustive": True,
         },
         "weeks": weeks,
-        "monthly_paydown_b": {m: by_month[m] for m in sorted(by_month)},
+        "monthly_net_rolloff_b": {m: net_by_month[m] for m in sorted(net_by_month)},
+        "monthly_gross_paydown_b": {m: by_month[m] for m in sorted(by_month)},
         "committed_method_monthly_diff_b": committed_method,
         "stale_weeks_by_month": {m: v for m, v in sorted(stale_by_month.items())},
         "expectations": {
@@ -217,6 +230,13 @@ def main() -> None:
             "E3_stale_weeks_in_clip_months": e3_cells,
             "E4_tol_frac": E4_TOL_FRAC,
             "E4_reconstructed_window_total_b": recon_total,
+            "E4_month_end_convention_total_b": me_total,
+            "E4_month_end_reproduces_exactly": bool(
+                abs(me_total - realized_implied) < 1e-3),
+            "gross_declines_b": sum(by_month[m] for m in win),
+            "gross_note": ("gross face declines run ~3x net because face falls on "
+                           "reinvestment settlement and roll as well as on principal; "
+                           "no principal-payment series is recoverable from levels"),
             "E4_implied_realized_total_b": realized_implied,
             "E4_abs_diff_b": e4_diff, "E4_pass": bool(e4),
             "E5_reconstruction_still_shows_low_months": bool(e5),
