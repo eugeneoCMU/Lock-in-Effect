@@ -4161,8 +4161,13 @@ def main() -> int:
         and all(
             _mdgrid[leg]["depths"][f"{t:+.4f}"]["cpr_pct"] == _MG[leg][t]["cpr"]
             and _mdgrid[leg]["depths"][f"{t:+.4f}"]["n_cohort_months"] == _MG[leg][t]["n"]
+            # Exposure sums run to ~7e13, where one float64 ULP is ~0.016 and
+            # the summation order depends on the parquet chunking, so an
+            # absolute 1e-3 bound was unsatisfiable off the machine that wrote
+            # the artifact. Compare relatively; CPR and cell counts stay exact.
             and abs(_mdgrid[leg]["depths"][f"{t:+.4f}"]["exposure_upb"]
-                    - _MG[leg][t]["upb"]) <= 1e-3
+                    - _MG[leg][t]["upb"])
+            <= max(1e-3, 1e-12 * abs(_MG[leg][t]["upb"]))
             and bool(_mdgrid[leg]["depths"][f"{t:+.4f}"]["well_supported"]) == _MG[leg][t]["sup"]
             for leg in MD_LEGS for t in MD_DEPTHS)
     )
