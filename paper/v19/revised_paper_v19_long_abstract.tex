@@ -620,7 +620,7 @@ Specification & U.S. leg & Danish leg & Gap (US$-$DK) & Mean CPR US/DK \\
 Mechanism-extrapolated ABM\tnote{a} & $+\$91.0$B & $-\$834.5$B & $+\$925.5$B & 11.68\% / 47.14\% \\
 Berger ABM, Danish-level\tnote{b} & $+\$84.5$B & $+\$812.9$B & $-\$728.4$B & 11.76\% / 3.36\% \\
 Berger hybrid, Danish-level\tnote{c} & $+\$749.0$B & $+\$848.9$B & $-\$99.9$B & 4.76\% / 3.39\% \\
-Berger hybrid, U.S.-intercept\tnote{d} & $+\$749.0$B & $+\$687.8$B & $+\$61.2$B & 4.76\% / 5.61\% (band $+\$61.2$--$+\$256.8$B over 0--3\% refinance-in-place; run \texttt{danish\_refi\_finegrid}) \\
+Berger hybrid, U.S.-intercept\tnote{d} & $+\$749.0$B & $+\$687.8$B & $+\$61.2$B & 4.76\% / 5.61\% \\
 \bottomrule
 \end{tabular}
 \begin{tablenotes}[flushleft]\footnotesize
@@ -628,7 +628,7 @@ Berger hybrid, U.S.-intercept\tnote{d} & $+\$749.0$B & $+\$687.8$B & $+\$61.2$B 
 \item[a] Superseded: applies the U.S.-calibrated mobility function to a Danish-style rate gap it was never estimated to describe (see text).
 \item[b] The Berger recalibration's U.S. leg is re-simulated under that run's own calibration-stage freeze (native 15-year gate), not the \$91.0 billion production headline, so both legs and the gap share one frozen calibration. The Danish leg prepays more slowly under the tax-adjusted elasticities, trapping more than the U.S. leg. Danish-level anchor: imports Denmark's descriptive 3.2\%/yr moving level, a rule-plus-country bundle whose Danish mean CPR sits below the 4\% turnover floor (see text).
 \item[c] Bracketing case under the shared-accounting hybrid pipeline (Section~\ref{sec:robustness-hybrid}); both legs are printed from the shared-layer scoring artifact at the in-sample calibration point, the floor the Danish legs were run at (U.S. trapped \$749.0 billion = 97.9\% of benchmark; Danish trapped \$848.9 billion); neither leg was re-run at the off-window floor. Its sign is not robust: the sweep of the refinance-in-place input crosses zero at a 1.4\% CPR contribution.
-\item[d] The paper's production estimate (rule-only counterfactual): Berger et al.'s moving-flatness fact anchored at the production U.S. hazard's zero-gap intercept, turnover floor retained, refinance-in-place at the general-equilibrium best estimate ($\approx$0). The U.S. leg reproduces the committed production artifacts exactly. The gap is positive at every point of the refinance-in-place sweep (Figure~\ref{fig:gapsweep}), which under this anchor is forced by construction rather than found: see Section~\ref{sec:abm-danish}.
+\item[d] The paper's production estimate (rule-only counterfactual): Berger et al.'s moving-flatness fact anchored at the production U.S. hazard's zero-gap intercept, turnover floor retained, refinance-in-place at the general-equilibrium best estimate ($\approx$0). The refinance-in-place band is $+\$61.2$--$+\$256.8$B over 0--3\% (run \texttt{danish\_refi\_finegrid}). The U.S. leg reproduces the committed production artifacts exactly. The gap is positive at every point of the refinance-in-place sweep (Figure~\ref{fig:gapsweep}), which under this anchor is forced by construction rather than found: see Section~\ref{sec:abm-danish}.
 \end{tablenotes}
 \end{threeparttable}
 \end{table}
@@ -672,18 +672,22 @@ The recalibrated variant recovers \$453.5 billion, or 59.3\%, of the benchmark, 
 \begin{threeparttable}
 \caption{Cross-design test results: real Freddie Mac structural covariates substituted into the ABM under two calibration choices, against the synthetic-population production ABM.}
 \label{tab:crossdesign}
-\begin{tabular}{@{}p{4.0cm}lll@{}}
+\begin{tabular}{@{}>{\raggedright\arraybackslash}p{2.9cm}
+                >{\raggedright\arraybackslash}p{3.5cm}
+                >{\raggedright\arraybackslash}p{3.2cm}
+                >{\raggedright\arraybackslash}p{2.8cm}@{}}
 \toprule
  & Recalibrated (primary) & Frozen (robustness) & Synthetic control \\
 \midrule
 Mobility-scale parameter & 36,086 & 43,883 & 43,883 \\
-Trapped liquidity & \$453.5B (59.3\%; fifty-seed mean 60.2\%; 50.9\%/51.9\% on the book's scheduled amortization) & \$159.5B (20.9\%; 22.0\%) & \$91.0B (11.9\%) \\
+Trapped liquidity\tnote{a} & \$453.5B (59.3\%; fifty-seed mean 60.2\%) & \$159.5B (20.9\%; 22.0\%) & \$91.0B (11.9\%) \\
 Mean CPR & 8.14\% & 11.63\% & 11.68\% \\
 CPR path corr. (lag 0) & $-0.336$ & $-0.311$ & $-0.318$ \\
 Peak lag & 0 (no positive alignment) & 0 (no positive alignment) & 0 \\
 \bottomrule
 \end{tabular}
 \begin{tablenotes}[flushleft]\footnotesize
+\item[a] On the book's own scheduled amortization the recalibrated cell is 50.9\%/51.9\%, with sixteen of fifty seeds below the 50\% threshold (Section~\ref{sec:robustness-crossdesign}).
 \item Peak lag follows the max-$|r|$ convention of Table~\ref{tab:estimators}. Under the alternative most-positive-$r$ convention, the synthetic control's best alignment is $+0.195$ at lag $-3$, the ``$+0.19$ at the three-month lead'' of Section~\ref{sec:abm-results}; the two conventions summarize the same cross-correlation profile, and the substantive conclusion (no positive contemporaneous alignment, which, after Section~\ref{sec:pathb}'s detrending result, no estimator including Path B shows) holds under either.
 \end{tablenotes}
 \end{threeparttable}
