@@ -1,0 +1,119 @@
+{
+ "mode": "r33b_book_sched_decomposition",
+ "spec": "specs/SPEC_R33B_book_sched_decomposition.md",
+ "note": "Accounting decomposition over committed artifacts; no simulation, no estimation, no network.",
+ "holdings_scale": {
+  "h_from_scheduled_b": 2383.5051039304544,
+  "h_from_curtailment_b": 2375.0147922927126,
+  "h_mean_b": 2379.2599481115835,
+  "relative_gap": 0.003568467432270505
+ },
+ "scheduled_legs": {
+  "population": {
+   "wac_pct": 3.3608263,
+   "mean_age_mo": 22.2711,
+   "smm_sum": 0.08243927898679056,
+   "annualized_pct": 2.3554079710511586,
+   "dollars_b": 196.14447464446766
+  },
+  "book_primary_cohort_weighted": {
+   "dollars_b": 260.02482165944826,
+   "annualized_pct": 3.116956035290348,
+   "source": "manifest run-2026-07-04-15yr-foldin scheduled_amort_b"
+  },
+  "book_secondary_single_pool": {
+   "wac_pct": 2.4710166626442693,
+   "mean_age_mo": 28.00676933038703,
+   "vintage_share_sum": 0.9999999999999972,
+   "smm_sum": 0.096519075091094,
+   "annualized_pct": 2.757687859745543,
+   "dollars_b": 229.64396959301436
+  }
+ },
+ "parity_gates": {
+  "P1_holdings_scale_agreement": {
+   "rel_gap": 0.003568467432270505,
+   "tol": 0.02,
+   "pass": true
+  },
+  "P2_committed_quotes_replay": {
+   "pass": true
+  },
+  "P3_population_parameters_replay": {
+   "pass": true
+  },
+  "P4_direction_prediction": {
+   "pass": true,
+   "prediction": "book amortizes faster than the sample population"
+  }
+ },
+ "parity_gates_all_pass": true,
+ "delta": {
+  "primary_b": 63.8803470149806,
+  "primary_pp_of_benchmark": 8.353121010186628,
+  "secondary_single_pool_b": 33.49949494854669,
+  "secondary_pp_of_benchmark": 4.380460472760491
+ },
+ "applied": {
+  "committed_draw": {
+   "sample_basis_trapped_b": 453.5186133616682,
+   "sample_basis_share_pct": 59.30299434493775,
+   "book_basis_trapped_b": 389.6382663466876,
+   "book_basis_share_pct": 50.949873334751125
+  },
+  "fifty_seed_mean": {
+   "sample_basis_trapped_b": 460.4397800361595,
+   "sample_basis_share_pct": 60.2080198412792,
+   "book_basis_trapped_b": 396.5594330211789,
+   "book_basis_share_pct": 51.85489883109258
+  },
+  "fifty_seed_min": {
+   "sample_basis_trapped_b": 411.12041960724605,
+   "sample_basis_share_pct": 53.75892234794354,
+   "book_basis_trapped_b": 347.24007259226545,
+   "book_basis_share_pct": 45.40580133775691
+  },
+  "fifty_seed_p2.5": {
+   "sample_basis_trapped_b": 421.3541724876798,
+   "sample_basis_share_pct": 55.09710819371803,
+   "book_basis_trapped_b": 357.4738254726992,
+   "book_basis_share_pct": 46.7439871835314
+  },
+  "fifty_seed_p97.5": {
+   "sample_basis_trapped_b": 505.08256278054495,
+   "sample_basis_share_pct": 66.04559875123523,
+   "book_basis_trapped_b": 441.20221576556435,
+   "book_basis_share_pct": 57.692477741048606
+  }
+ },
+ "sensitivities": {
+  "seed_population_age": {
+   "min_age": {
+    "age_mo": 22.0394,
+    "delta_b": 63.8803470149806
+   },
+   "max_age": {
+    "age_mo": 22.5274,
+    "delta_b": 62.94287815710382
+   }
+  },
+  "book_age_pm3mo_secondary": {
+   "minus3": 30.52607503252171,
+   "base": 33.49949494854669,
+   "plus3": 36.53299609375922
+  },
+  "holdings_scale_bracket_delta_primary_b": {
+   "at_h_sched": 63.5303794300863,
+   "at_h_curt": 64.2303145998749
+  }
+ },
+ "verdict": {
+  "branch": "T2",
+  "text": "book-basis mean clears 50% but the minimum does not: the verdict survives, the unanimity claim does not.",
+  "book_basis_mean_pct": 51.85489883109258,
+  "book_basis_min_pct": 45.40580133775691,
+  "seeds_below_threshold": 16,
+  "seeds_scored": 50,
+  "prediction_held": true
+ }
+}
