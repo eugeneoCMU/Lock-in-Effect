@@ -505,9 +505,37 @@ def _default_cohort() -> List[dict]:
 TERM_MONTHS_BY_LABEL = {"30yr": 360, "15yr": 180}
 
 
+def load_pinned_cohorts(as_of: str = "2026-07-01") -> List[dict]:
+    """Load a committed SOMA cohort book instead of re-fetching one.
+
+    `abm/data/soma_cohorts_<as_of>.json` is written by
+    `tools/pin_soma_cohorts.py`, which validates the recovered book against a
+    frozen run manifest before writing. The 2026-07-01 book is the one behind
+    `run-2026-07-04-15yr-foldin`: it reproduces that manifest's cohort count,
+    WAC, reference-cohort weight and months-elapsed, and its cohort-weighted
+    scheduled-amortization series to 3e-13.
+
+    Using this makes a run's scheduled amortization reproducible offline; the
+    live fetch cannot be, because it always returns the latest book.
+    """
+    path = _REPO_ROOT / "abm" / "data" / f"soma_cohorts_{as_of}.json"
+    if not path.exists():
+        raise FileNotFoundError(
+            f"no pinned SOMA cohort book for {as_of} at {path}. Create one "
+            f"with: python3 tools/pin_soma_cohorts.py --as-of {as_of}")
+    pinned = json.loads(path.read_text())
+    return [{"coupon": float(c["coupon"]),
+             "weight": float(c["weight"]),
+             "origin_date": pd.Timestamp(c["origin_date"]),
+             "months_elapsed": int(c["months_elapsed"]),
+             "term_months": int(c["term_months"])}
+            for c in pinned["cohorts"]]
+
+
 def fetch_soma_mbs_cohorts(min_share: float = 0.02,
                            coupon_step_pct: float = 0.5,
                            terms: tuple = ("30yr", "15yr"),
+                           as_of: Optional[str] = None,
                            ) -> List[dict]:
     """
     Fetch CUSIP-level SOMA MBS holdings and bucket into per-term coupon
@@ -526,10 +554,16 @@ def fetch_soma_mbs_cohorts(min_share: float = 0.02,
     Step-3 no-regression check).
     """
     try:
-        req = urllib.request.Request(SOMA_LATEST_DATE_URL,
-                                     headers={"Accept": "application/json"})
-        with urllib.request.urlopen(req, timeout=15) as resp:
-            as_of_str = json.loads(resp.read())["soma"]["asOfDates"][0]
+        if as_of is None:
+            req = urllib.request.Request(SOMA_LATEST_DATE_URL,
+                                         headers={"Accept": "application/json"})
+            with urllib.request.urlopen(req, timeout=15) as resp:
+                as_of_str = json.loads(resp.read())["soma"]["asOfDates"][0]
+        else:
+            # An explicit as-of makes the cohort book reproducible: the API
+            # serves historical dates, so a frozen run's cohort table can be
+            # recovered instead of being silently re-fetched at today's book.
+            as_of_str = str(as_of)
         as_of = pd.Timestamp(as_of_str)
 
         url = SOMA_CUSIP_URL.format(date=as_of_str)
