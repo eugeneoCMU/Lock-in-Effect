@@ -961,7 +961,7 @@ def runoff_error_basis_check(tex: str,
         sign = "+" if v >= 0 else "-"
         return f"${sign}{abs(v):.1f}$"
 
-    printed = [f"{lit(e_st)} / {lit(e_sh)}" for e_st, e_sh in pairs]
+    printed = [f"{lit(e_st)} & {lit(e_sh)}" for e_st, e_sh in pairs]
 
     # Cross-artifact anchor: miss_vs_benchmark_pp × B == −shared_err (row 3).
     miss_pp = float(off["miss_vs_benchmark_pp"])
@@ -984,10 +984,11 @@ def runoff_error_basis_check(tex: str,
         "cumulative runoff error, and a 25.1\\% under-prediction",
     ]
     required = [
-        "standalone / shared (\\$B)",
+        "\\multicolumn{2}{c}{Cum.\\ runoff error (\\$B)}",
+        "& standalone & shared \\\\",
         "third of six rather than first",
         "commensurable with the benchmark",
-        "Cum.\\ runoff error (six hazard legs)",
+        "Cum.\\ runoff error (six legs)",
         *printed,
         shared_sextet,
         "\\$94.6 billion, 14.5\\% of realized runoff",
@@ -1012,6 +1013,152 @@ def runoff_error_basis_check(tex: str,
         "shared_err_oow": shared_err_oow_exact,
         "miss_pp": miss_pp,
     }
+
+
+def cpr_referent_check(tex: str,
+                       foldin=None,
+                       cross=None,
+                       reweight=None) -> tuple[bool, dict]:
+    """Gate #111 (R33-B part 1): the empirical-CPR referent is leg-specific.
+
+    §III.B said two back-out implementations exist; there are three, and the
+    cross-design family's referent is a function of the population it
+    simulates. The disclosure must name all three, quote each referent live
+    from its artifact, and keep the retired two-implementation claim gone.
+    """
+    if foldin is None:
+        foldin = json.loads(ABM_RUN_FOLDIN.read_text())
+    if cross is None:
+        cross = json.loads((ROOT / "abm" / "data"
+                            / "cross_design_results.json").read_text())
+    if reweight is None:
+        reweight = json.loads((ROOT / "abm" / "data"
+                               / "cross_design_reweight_results.json").read_text())
+
+    prod = float(foldin["metrics"]["cpr_pct"]["empirical"]["mean"])
+    xd = float(cross["variants"]["recalibrated"]["empirical_cpr_mean_pct"])
+    rw = float(reweight["variants"]["v2_reweighted_frozen"]
+               ["empirical_cpr_mean_pct"])
+    bench = float(cross["variants"]["recalibrated"]["empirical_trapped_b"])
+
+    # The three referents must actually differ, or the disclosure is inert.
+    distinct_ok = len({round(prod, 2), round(xd, 2), round(rw, 2)}) == 3
+    # The dollar benchmark must be common across runs (the claim we print).
+    bench_ok = all(
+        abs(float(v["empirical_trapped_b"]) - bench) < 1e-9
+        for v in list(cross["variants"].values())
+        + list(reweight["variants"].values())
+    )
+    retired = [
+        "Two implementations of this back-out exist in the pipeline",
+        "Section~\\ref{sec:method-benchmark} notes the two constructions.",
+    ]
+    required = [
+        "Three implementations of this back-out exist in the pipeline",
+        "keyed to the simulated population's own weighted coupon and mean age",
+        f"{xd:.2f}\\% for the committed cross-design draw",
+        f"{rw:.2f}\\% once that population is reweighted",
+        f"against the production {prod:.2f}\\%",
+        f"mean CPR 8.14\\% against its own {xd:.2f}\\% back-out",
+        "notes the three constructions",
+        "not on a common referent with the rest of the table, while every "
+        "dollar column is",
+        f"\\${bench:.3f} billion is bit-identical in every run",
+    ]
+    missing = [s for s in required if s not in tex]
+    present_retired = [s for s in retired if s in tex]
+    ok = not missing and not present_retired and distinct_ok and bench_ok
+    return ok, {
+        "missing": missing,
+        "present_retired": present_retired,
+        "distinct_ok": distinct_ok,
+        "bench_ok": bench_ok,
+        "referents": [prod, xd, rw],
+    }
+
+
+def null_balance_path_check(tex: str, shared_layer=None) -> tuple[bool, dict]:
+    """Gate #112 (finding 8): the null's renormalisation asymmetry is stated.
+
+    The engine renormalises both legs to realized holdings, so the beta_1 = 0
+    null is scored on the lock-in-affected balance path rather than the
+    faster-declining one it would itself have produced. The direction of the
+    resulting bias in the marginal must be disclosed, and the artifact must
+    keep showing the null rolling off FASTER than the central leg (which is
+    what makes the direction an upper bound rather than a lower one).
+    """
+    if shared_layer is None:
+        shared_layer = json.loads(SHARED_LAYER_RESULTS.read_text())
+    res = shared_layer["results"]
+    central = float(res["path_b_central"]["us_trapped_b"])
+    null = float(res["no_lockin_null"]["us_trapped_b"])
+    # Null traps less => null rolls off more => a self-consistent null would
+    # deplete balances faster => reported marginal is an upper bound.
+    direction_ok = null < central
+    required = [
+        "The renormalisation is not symmetric in what it costs the two legs",
+        "scored on that same realized, lock-in-affected path",
+        "upper bound on the compounding-consistent one",
+        "counterfactual-balance run of the kind only the Danish legs perform",
+    ]
+    missing = [s for s in required if s not in tex]
+    ok = not missing and direction_ok
+    return ok, {"missing": missing, "direction_ok": direction_ok,
+                "central": central, "null": null}
+
+
+def danish_cpr_manifest_check(tex: str,
+                              foldin=None,
+                              berger=None) -> tuple[bool, dict]:
+    """Gate #113 (finding 7): tab:danish mean-CPR cells match their manifests."""
+    if foldin is None:
+        foldin = json.loads(ABM_RUN_FOLDIN.read_text())
+    if berger is None:
+        berger = json.loads(ABM_RUN_BERGER.read_text())
+
+    def cell(m, key):
+        return float(m["metrics"]["cpr_pct"][key]["mean"])
+
+    row_a = (f"{cell(foldin, 'us_abm'):.2f}\\% / "
+             f"{cell(foldin, 'danish'):.2f}\\%")
+    row_b = (f"{cell(berger, 'us_abm'):.2f}\\% / "
+             f"{cell(berger, 'danish'):.2f}\\%")
+    retired = ["11.68\\% / 47.10\\%", "11.76\\% / 3.40\\%",
+               "(3.39--3.40\\%, Table~\\ref{tab:danish})"]
+    required = [row_a, row_b,
+                f"({cell(berger, 'danish'):.2f}--3.39\\%, "
+                f"Table~\\ref{{tab:danish}})"]
+    missing = [s for s in required if s not in tex]
+    present_retired = [s for s in retired if s in tex]
+    ok = not missing and not present_retired
+    return ok, {"missing": missing, "present_retired": present_retired,
+                "row_a": row_a, "row_b": row_b}
+
+
+def within45_scope_check(tex: str, stages=None) -> tuple[bool, dict]:
+    """Gate #114 (finding 6): the 'within 45%' claim is scoped to the
+    corrected family, and names the uncorrected baseline that beats it."""
+    if stages is None:
+        stages = json.loads(FIG3_STAGE_LEVELS.read_text())
+    baseline = float(stages["stages"][0]["share_pct"])
+    # The claim is only false if the baseline is in fact within 45 points.
+    counterexample_live = (100.0 - baseline) < 45.0
+    retired = [
+        "No synthetic-population household-choice specification I tested "
+        "lands within 45\\% of it. ",
+    ]
+    required = [
+        "once the production corrections are applied",
+        "the corrected family runs at 11.1--13.2\\%",
+        f"the rational baseline at {baseline:.1f}\\% does land within 45\\%",
+        "not part of the production estimate family",
+    ]
+    missing = [s for s in required if s not in tex]
+    present_retired = [s for s in retired if s in tex]
+    ok = not missing and not present_retired and counterexample_live
+    return ok, {"missing": missing, "present_retired": present_retired,
+                "counterexample_live": counterexample_live,
+                "baseline": baseline}
 
 
 def waterfall_provenance_check(tex: str,
@@ -5103,6 +5250,29 @@ def main() -> int:
           f"missing={_wp['missing'] or 'none'}, "
           f"retired={_wp['present_retired'] or 'none'}, "
           f"distinct_ok={_wp['distinct_ok']}")
+    cr_ok, _cr2 = cpr_referent_check(tex)
+    failures += 0 if cr_ok else 1
+    print(f"[{'PASS' if cr_ok else 'FAIL'}] empirical-CPR referent (gate #111): "
+          f"missing={_cr2['missing'] or 'none'}, "
+          f"retired={_cr2['present_retired'] or 'none'}, "
+          f"distinct={_cr2['distinct_ok']}, common_benchmark={_cr2['bench_ok']}, "
+          f"referents={[round(v, 3) for v in _cr2['referents']]}")
+    nb_ok, _nb = null_balance_path_check(tex)
+    failures += 0 if nb_ok else 1
+    print(f"[{'PASS' if nb_ok else 'FAIL'}] null balance-path asymmetry "
+          f"(gate #112): missing={_nb['missing'] or 'none'}, "
+          f"direction_ok={_nb['direction_ok']}")
+    dc_ok, _dc = danish_cpr_manifest_check(tex)
+    failures += 0 if dc_ok else 1
+    print(f"[{'PASS' if dc_ok else 'FAIL'}] Danish mean-CPR vs manifests "
+          f"(gate #113): missing={_dc['missing'] or 'none'}, "
+          f"retired={_dc['present_retired'] or 'none'}")
+    w45_ok, _w45 = within45_scope_check(tex)
+    failures += 0 if w45_ok else 1
+    print(f"[{'PASS' if w45_ok else 'FAIL'}] within-45% scope (gate #114): "
+          f"missing={_w45['missing'] or 'none'}, "
+          f"retired={_w45['present_retired'] or 'none'}, "
+          f"counterexample_live={_w45['counterexample_live']}")
     print(f"[{'PASS' if cl_ok else 'FAIL'}] convolved sampling line (gate #105): "
           f"{len(CONVOLVED_LINE_SPANS) - len(_cl['missing'])}/"
           f"{len(CONVOLVED_LINE_SPANS)} spans present, "

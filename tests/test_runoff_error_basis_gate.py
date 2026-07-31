@@ -44,10 +44,10 @@ def test_variant_carries_the_landing():
 
 
 def test_shared_pair_removal_fails():
-    pair = "$+2.8$ / $-66.8$"
+    pair = "$+2.8$ & $-66.8$"
     assert pair in TEX, "headline shared pair missing (vacuous mutation)"
     ok, _ = runoff_error_basis_check(
-        TEX.replace(pair, "$+2.8$"), SHARED, CALIB, CONCAVE, EXPECT)
+        TEX.replace(pair, "$+2.8$ & "), SHARED, CALIB, CONCAVE, EXPECT)
     assert not ok
 
 
@@ -60,7 +60,7 @@ def test_third_of_six_removal_fails():
 
 
 def test_crosswalk_row_removal_fails():
-    span = "Cum.\\ runoff error (six hazard legs)"
+    span = "Cum.\\ runoff error (six legs)"
     assert span in TEX
     ok, _ = runoff_error_basis_check(
         TEX.replace(span, ""), SHARED, CALIB, CONCAVE, EXPECT)
