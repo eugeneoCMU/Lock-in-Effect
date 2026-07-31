@@ -1,0 +1,96 @@
+{
+  "mode": "realized_boundary_allocation",
+  "run_tag": "realized_boundary_allocation",
+  "status": "OK",
+  "pre_committed": true,
+  "spec": {
+    "spec_file": "specs/SPEC_R32_c128_realized_boundary_allocation.md",
+    "construction": "same machinery, opposite leg: the committed settlement-lag kernel applied to the REALIZED series as well as the cap, with the realized leg keeping its own pre-window values",
+    "why_the_legs_differ": "the pre-QT cap is zero, so the cap leg loses mass only at the window's end; the realized series is non-zero before the window, so it also GAINS mass at the start",
+    "production_convention_stays_calendar": true,
+    "month_alignment_only": "revisits neither the cap schedule, the SOMA series' construction (that is C-127), the window bounds, nor the reinvestment-ceiling reading of the cap",
+    "kernel_imported_not_estimated": true,
+    "no_engine_runs": true
+  },
+  "parity": {
+    "P1_calendar_reproduces": 764.7482532227002,
+    "P1_cap_only_reproduces": 722.7482532227002,
+    "P2_committed_calendar": 764.7482532227002,
+    "P2_committed_cap_only": 722.7482532227002,
+    "P3_kernel": [
+      0.1,
+      0.6,
+      0.3
+    ],
+    "P3_n_qt_active_months": 42,
+    "P4_pre_window_months": 17,
+    "P5_boundary_decomposition_sums": true,
+    "E2_cap_edge_loss_b": 42.0
+  },
+  "legs": {
+    "production": {
+      "kernel": [
+        0.1,
+        0.6,
+        0.3
+      ],
+      "benchmark_both_aligned_b": 739.3642710059,
+      "benchmark_cap_only_b": 722.7482532227002,
+      "shift_both_b": -25.383982216800177,
+      "shift_cap_only_b": -42.0,
+      "shift_both_pct_of_committed": -3.3192599145967816,
+      "realized_total_calendar_b": -652.7517467772998,
+      "realized_total_settled_b": -636.1357289941,
+      "realized_boundary_mass_in_b": -4.544884865730046,
+      "realized_boundary_mass_out_b": -21.16090264892989,
+      "cap_total_calendar_b": -1417.5,
+      "cap_edge_loss_b": 42.0
+    },
+    "slower": {
+      "kernel": [
+        0.0,
+        0.5,
+        0.5
+      ],
+      "benchmark_both_aligned_b": 735.5538183649,
+      "benchmark_cap_only_b": 712.2482532227002,
+      "shift_both_b": -29.19443485780016,
+      "shift_cap_only_b": -52.5,
+      "shift_both_pct_of_committed": -3.817522267592356,
+      "realized_total_calendar_b": -652.7517467772998,
+      "realized_total_settled_b": -629.4461816351,
+      "realized_boundary_mass_in_b": -3.828407058050061,
+      "realized_boundary_mass_out_b": -27.1339722002499,
+      "cap_total_calendar_b": -1417.5,
+      "cap_edge_loss_b": 52.5
+    },
+    "faster": {
+      "kernel": [
+        0.3,
+        0.6,
+        0.1
+      ],
+      "benchmark_both_aligned_b": 745.7971640809402,
+      "benchmark_cap_only_b": 736.7482532227002,
+      "shift_both_b": -18.951089141760008,
+      "shift_cap_only_b": -28.0,
+      "shift_both_pct_of_committed": -2.478082043587397,
+      "realized_total_calendar_b": -652.7517467772998,
+      "realized_total_settled_b": -643.7028359190598,
+      "realized_boundary_mass_in_b": -4.512082463110027,
+      "realized_boundary_mass_out_b": -13.560993321349997,
+      "cap_total_calendar_b": -1417.5,
+      "cap_edge_loss_b": 28.0
+    }
+  },
+  "expectations": {
+    "E3_both_moves_less_than_cap_only": true,
+    "E3_shift_both_b": -25.383982216800177,
+    "E3_shift_cap_only_b": -42.0,
+    "E3_sign_deliberately_not_predicted": true,
+    "E4_max_share": 0.1,
+    "E4_shift_share_of_committed": 0.03319259914596782,
+    "E4_pass": true
+  },
+  "runtime_s": 1.555
+}
