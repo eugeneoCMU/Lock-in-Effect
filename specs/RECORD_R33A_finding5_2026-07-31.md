@@ -199,8 +199,10 @@ derived from them. Now: fails loud by default, opt in with
 `n_cohorts` in `df.attrs`. Every production caller already passes `cohorts=` explicitly,
 so nothing in the repo depended on the silent path. `tests/test_cohort_provenance.py`.
 
-Still open (not fixed here): the 11-cohort table is frozen nowhere, so the production
-scheduled-amortization series cannot be rebuilt offline from anything committed.
+**Closed later in this record:** the 11-cohort table is now pinned at
+`abm/data/soma_cohorts_2026-07-01.json` (see "The production SOMA cohort book is
+recovered and pinned" below), and the engine confirmation (E1) closed the remaining
+FRED-key blocker.
 
 ## Typesetting — verified by build, not asserted
 
@@ -219,9 +221,9 @@ into two narrow columns under a `\multicolumn` group, shortening the four row la
 | `tab:bases` overfull | 21.1pt | **none** |
 
 Multiset diff of every overfull box against baseline: one removed (the `tab:bases`
-21.1pt), **none added**. Built with tectonic 0.15.0; `monte_carlo_trapped_liquidity` is
-not in the repo, so a placeholder was used for the layout check only — the measurements
-above are otherwise from the real sources.
+21.1pt), **none added**. Built with tectonic 0.15.0. Root
+`monte_carlo_trapped_liquidity.{png,csv}` were later refreshed from the fold-in run
+(gate #129); the final rebuild uses the real figure.
 
 ## Self-audit: every judgement call, and how each was resolved
 
@@ -298,10 +300,10 @@ Landed: `abm/data/soma_cohorts_2026-07-01.json` (sha-stamped, with its validatio
 `tests/test_pinned_soma_cohorts.py` (7 tests).
 
 **Two consequences.** The production scheduled-amortization series is now reproducible
-offline, so the blocker recorded against R33-B part 2 is half removed — what remains is
-the FRED key for the macro frame. And R33-B's primary anchor, which had to be taken from
-the manifest, is now independently confirmed: the series behind
-`scheduled_amort_b.total = 260.0248` rebuilds from committed data.
+offline. The remaining FRED-key blocker was closed by the E1 engine confirmation (see
+above). And R33-B's primary anchor, which had to be taken from the manifest, is now
+independently confirmed: the series behind `scheduled_amort_b.total = 260.0248`
+rebuilds from committed data.
 
 ## Environment note
 
