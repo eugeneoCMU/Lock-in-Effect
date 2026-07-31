@@ -75,11 +75,49 @@ that those rows are not on a common CPR referent while every dollar column is.
 **GATE #111** + 10-test battery (referents read live, distinctness enforced, common
 dollar benchmark policed).
 
-**Part 2 (the re-score) is NOT landed** and must not be run before its landing rule is
-committed. Note the blocker found while checking feasibility: the production
-cohort-weighted schedule is *not reproducible offline* (see the repo defect below), so
-the re-score must be built on the committed June-2022 SOMA book tabulation in
-`composition_shift_results.json`, not on a re-fetch.
+## R33-B part 2 — pricing the wedge — **RUN, ADJUDICATED T2, LANDED**
+
+Spec `specs/SPEC_R33B_book_sched_decomposition.md` was **committed before the run**
+(`7e01122`), the runner before it executed. The engine could not be re-run here (no FRED
+key, and the SOMA cohort table is frozen nowhere), but the swap does not need the engine:
+trapped liquidity accumulates **net and unclipped**, and `sched_smm` enters the simulated
+roll-off linearly, so the effect is an exact accounting decomposition.
+
+`Σ h·sched_book` is committed directly (manifest `scheduled_amort_b.total = 260.0248`);
+`Σ h·sched_pop` is `Ĥ · Σ sched_pop`, with the effective holdings scale recovered **two
+independent ways** from two different SMM series — `Ĥ_sched = 2383.51`,
+`Ĥ_curt = 2375.01`, agreeing to **0.36%** (parity gate P1, tolerance 2%).
+
+**Result.** All parity gates passed and the direction prediction held (the book amortizes
+at 3.12%/yr against the sample population's 2.36%/yr):
+
+| leg | sample basis | **book basis** |
+|---|---|---|
+| committed draw | 59.30% | **50.95%** |
+| fifty-seed mean | 60.21% | **51.85%** |
+| 95% band | 55.10--66.05% | **46.74--57.69%** |
+| fifty-seed min | 53.76% | **45.41%** |
+| seeds below the 50% threshold | 0 of 50 | **16 of 50** |
+
+Wedge **Δ = $63.88bn = 8.35 points of benchmark**, robust to the holdings bracket
+($63.53--64.23bn) and to per-seed population age ($62.94--63.88bn). Independently, this
+lands inside the $59--63bn / 7--9 point figure the referee reconstructed by a different
+route.
+
+**Branch T2 fired** exactly as pre-committed: mean ≥ 50% > min. So the threshold verdict
+survives the basis change and **the unanimity claim does not**. Landed at all three
+governing sites — §IV l.155, §VII.D l.659, §VII.D l.691 — each now stating the
+sample-basis figure, the book-basis figure, and that sixteen of fifty seeds fall below
+the threshold rather than none. `tab:runindex` row added. **GATE #115** + 13-test battery
+that re-derives the 16-of-50 count from the seed artifact independently of the runner and
+fails if the artifact ever lands on a different branch.
+
+Secondary basis (single-pool book annuity at the June-2022 WAC 2.471%, mean age 28.0mo,
+isolating composition at a fixed functional form): **Δ = $33.50bn / 4.38pp**. Reported in
+the artifact, not verdict-bearing, and not quoted in the manuscript.
+
+**Not done:** the engine's own re-score. It needs a FRED key and a pinned SOMA cohort
+table. The decomposition is exact given the linearity, but it is not a re-simulation.
 
 ## Finding 8 — the null's balance path (MAJOR) — **PARTIALLY CONFIRMED; LANDED**
 

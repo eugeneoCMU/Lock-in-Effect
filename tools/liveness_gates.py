@@ -1077,6 +1077,66 @@ def cpr_referent_check(tex: str,
     }
 
 
+def book_sched_wedge_check(tex: str, r33b=None, seeds=None) -> tuple[bool, dict]:
+    """Gate #115 (R33-B part 2): the cross-design leg's book-basis restatement.
+
+    The leg is scored on the simulated sample's scheduled amortization, not the
+    book's. The wedge, the book-basis figures, and the retirement of the
+    fifty-seed unanimity claim must all be live against the run artifact, and
+    the branch the manuscript reports must be the branch the artifact computed.
+    """
+    if r33b is None:
+        r33b = json.loads((ROOT / "abm" / "data"
+                           / "r33b_book_sched_results.json").read_text())
+    if seeds is None:
+        seeds = json.loads((ROOT / "abm" / "data"
+                            / "cross_design_seeds_results.json").read_text())
+
+    v = r33b["verdict"]
+    d = r33b["delta"]
+    app = r33b["applied"]
+    gates_ok = bool(r33b["parity_gates_all_pass"])
+    branch_ok = v["branch"] == "T2"
+    # The landing rule is only satisfiable if the artifact still says T2.
+    n_below = int(v["seeds_below_threshold"])
+    n_cells = int(v["seeds_scored"])
+
+    words = {16: "sixteen", 15: "fifteen", 17: "seventeen"}
+    n_word = words.get(n_below, str(n_below))
+    required = [
+        f"\\${d['primary_b']:.1f} billion, "
+        f"{d['primary_pp_of_benchmark']:.1f} points of benchmark",
+        f"{app['committed_draw']['book_basis_share_pct']:.1f}\\% on the "
+        f"committed draw and "
+        f"{app['fifty_seed_mean']['book_basis_share_pct']:.1f}\\% over fifty seeds",
+        f"{app['fifty_seed_p2.5']['book_basis_share_pct']:.1f}--"
+        f"{app['fifty_seed_p97.5']['book_basis_share_pct']:.1f}\\%",
+        f"{n_word} of the fifty seeds below the threshold rather than none",
+        "The threshold verdict survives the basis change; its unanimity does not",
+        "accounting decomposition rather than a re-simulation",
+        "\\texttt{r33b\\_book\\_sched}",
+        f"running at "
+        f"{r33b['scheduled_legs']['population']['annualized_pct']:.2f}\\% "
+        f"annualized against the book's cohort-weighted, term-aware "
+        f"{r33b['scheduled_legs']['book_primary_cohort_weighted']['annualized_pct']:.2f}\\%",
+    ]
+    # The retired unanimity must be gone from the two governing sites: it may
+    # survive ONLY as the sample-basis statement it now is.
+    bare_unanimity = ("and all fifty seeds classify as undercutting. The "
+                      "frozen variant averages 22.0\\%.")
+    retired = [bare_unanimity]
+    # The seed count must still be what the artifact scored.
+    seeds_ok = n_cells == 50 and 0 < n_below < 50
+    missing = [s for s in required if s not in tex]
+    present_retired = [s for s in retired if s in tex]
+    ok = (not missing and not present_retired and gates_ok
+          and branch_ok and seeds_ok)
+    return ok, {"missing": missing, "present_retired": present_retired,
+                "parity_gates_all_pass": gates_ok, "branch": v["branch"],
+                "branch_ok": branch_ok, "seeds_below": n_below,
+                "seeds_scored": n_cells, "delta_b": d["primary_b"]}
+
+
 def null_balance_path_check(tex: str, shared_layer=None) -> tuple[bool, dict]:
     """Gate #112 (finding 8): the null's renormalisation asymmetry is stated.
 
@@ -5257,6 +5317,14 @@ def main() -> int:
           f"retired={_cr2['present_retired'] or 'none'}, "
           f"distinct={_cr2['distinct_ok']}, common_benchmark={_cr2['bench_ok']}, "
           f"referents={[round(v, 3) for v in _cr2['referents']]}")
+    bs_ok, _bs = book_sched_wedge_check(tex)
+    failures += 0 if bs_ok else 1
+    print(f"[{'PASS' if bs_ok else 'FAIL'}] cross-design book-sched wedge "
+          f"(gate #115): missing={_bs['missing'] or 'none'}, "
+          f"retired={_bs['present_retired'] or 'none'}, branch={_bs['branch']}, "
+          f"parity={_bs['parity_gates_all_pass']}, "
+          f"seeds_below={_bs['seeds_below']}/{_bs['seeds_scored']}, "
+          f"delta=${_bs['delta_b']:.2f}B")
     nb_ok, _nb = null_balance_path_check(tex)
     failures += 0 if nb_ok else 1
     print(f"[{'PASS' if nb_ok else 'FAIL'}] null balance-path asymmetry "
