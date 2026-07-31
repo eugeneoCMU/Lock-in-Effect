@@ -1,4 +1,4 @@
-"""Battery for gate #111 (R33-B part 1: the empirical-CPR referent).
+"""Battery for gate #123 (R33-B part 1: the empirical-CPR referent).
 
 Every mutation is asserted non-vacuous before it is applied.
 """
@@ -27,12 +27,12 @@ RETIRED = "Two implementations of this back-out exist in the pipeline"
 
 def test_gate_passes_on_the_manuscript():
     ok, info = cpr_referent_check(TEX, FOLDIN, CROSS, REWEIGHT)
-    assert ok, f"gate #111 fails on the shipped manuscript: {info}"
+    assert ok, f"gate #123 fails on the shipped manuscript: {info}"
 
 
 def test_variant_carries_the_landing():
     ok, info = cpr_referent_check(VARIANT, FOLDIN, CROSS, REWEIGHT)
-    assert ok, f"gate #111 fails on the long-abstract variant: {info}"
+    assert ok, f"gate #123 fails on the long-abstract variant: {info}"
 
 
 def test_retired_two_implementations_fails():

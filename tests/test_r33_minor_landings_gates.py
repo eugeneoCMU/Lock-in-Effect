@@ -1,4 +1,4 @@
-"""Batteries for gates #112 (null balance path), #113 (Danish mean CPR),
+"""Batteries for gates #124 (null balance path), #113 (Danish mean CPR),
 and #114 (the 'within 45%' scope).
 
 Findings 6, 7 and 8 of the §§IV--VI referee round. Every mutation is asserted
@@ -30,29 +30,29 @@ BERGER = json.loads((ROOT / "abm" / "data" / "runs" / "run-2026-07-05-berger"
 STAGES = json.loads((ROOT / "figures" / "fig3_stage_levels.json").read_text())
 
 
-# --- gate #112: the null's balance-path asymmetry -------------------------
+# --- gate #124: the null's balance-path asymmetry -------------------------
 
-def test_112_passes_on_both_editions():
+def test_124_passes_on_both_editions():
     for tex, label in ((TEX, "main"), (VARIANT, "variant")):
         ok, info = null_balance_path_check(tex, SHARED)
-        assert ok, f"gate #112 fails on {label}: {info}"
+        assert ok, f"gate #124 fails on {label}: {info}"
 
 
-def test_112_disclosure_removal_fails():
+def test_124_disclosure_removal_fails():
     span = "upper bound on the compounding-consistent one"
     assert span in TEX
     ok, _ = null_balance_path_check(TEX.replace(span, ""), SHARED)
     assert not ok
 
 
-def test_112_asymmetry_sentence_removal_fails():
+def test_124_asymmetry_sentence_removal_fails():
     span = "The renormalisation is not symmetric in what it costs the two legs"
     assert span in TEX
     ok, _ = null_balance_path_check(TEX.replace(span, ""), SHARED)
     assert not ok
 
 
-def test_112_direction_flip_fails():
+def test_124_direction_flip_fails():
     """If the null ever traps MORE than the central leg, 'upper bound' inverts."""
     s = copy.deepcopy(SHARED)
     s["results"]["no_lockin_null"]["us_trapped_b"] = (
@@ -62,15 +62,15 @@ def test_112_direction_flip_fails():
     assert info["direction_ok"] is False
 
 
-# --- gate #113: tab:danish mean-CPR cells vs their manifests --------------
+# --- gate #125: tab:danish mean-CPR cells vs their manifests --------------
 
-def test_113_passes_on_both_editions():
+def test_125_passes_on_both_editions():
     for tex, label in ((TEX, "main"), (VARIANT, "variant")):
         ok, info = danish_cpr_manifest_check(tex, FOLDIN, BERGER)
-        assert ok, f"gate #113 fails on {label}: {info}"
+        assert ok, f"gate #125 fails on {label}: {info}"
 
 
-def test_113_old_cells_restored_fail():
+def test_125_old_cells_restored_fail():
     for stale in ("11.68\\% / 47.10\\%", "11.76\\% / 3.40\\%"):
         assert stale not in TEX, f"{stale} should have been corrected"
     restored = TEX.replace("11.68\\% / 47.14\\%", "11.68\\% / 47.10\\%")
@@ -79,14 +79,14 @@ def test_113_old_cells_restored_fail():
     assert "11.68\\% / 47.10\\%" in info["present_retired"]
 
 
-def test_113_stale_prose_range_restored_fails():
+def test_125_stale_prose_range_restored_fails():
     restored = TEX.replace("(3.36--3.39\\%, Table~\\ref{tab:danish})",
                            "(3.39--3.40\\%, Table~\\ref{tab:danish})")
     ok, _ = danish_cpr_manifest_check(restored, FOLDIN, BERGER)
     assert not ok
 
 
-def test_113_manifest_drift_fails():
+def test_125_manifest_drift_fails():
     """A drifted manifest must fail against the unmoved tex."""
     b = copy.deepcopy(BERGER)
     b["metrics"]["cpr_pct"]["danish"]["mean"] = 3.99
@@ -94,34 +94,34 @@ def test_113_manifest_drift_fails():
     assert not ok
 
 
-def test_113_cells_are_the_manifest_values():
+def test_125_cells_are_the_manifest_values():
     assert f"{FOLDIN['metrics']['cpr_pct']['danish']['mean']:.2f}" == "47.14"
     assert f"{BERGER['metrics']['cpr_pct']['danish']['mean']:.2f}" == "3.36"
 
 
-# --- gate #114: the 'within 45%' scope ------------------------------------
+# --- gate #126: the 'within 45%' scope ------------------------------------
 
-def test_114_passes_on_both_editions():
+def test_126_passes_on_both_editions():
     for tex, label in ((TEX, "main"), (VARIANT, "variant")):
         ok, info = within45_scope_check(tex, STAGES)
-        assert ok, f"gate #114 fails on {label}: {info}"
+        assert ok, f"gate #126 fails on {label}: {info}"
 
 
-def test_114_scope_clause_removal_fails():
+def test_126_scope_clause_removal_fails():
     span = "once the production corrections are applied"
     assert span in TEX
     ok, _ = within45_scope_check(TEX.replace(span, ""), STAGES)
     assert not ok
 
 
-def test_114_counterexample_removal_fails():
+def test_126_counterexample_removal_fails():
     span = "the rational baseline at 71.1\\% does land within 45\\%"
     assert span in TEX
     ok, _ = within45_scope_check(TEX.replace(span, ""), STAGES)
     assert not ok
 
 
-def test_114_goes_inert_if_baseline_moves_below_the_bar():
+def test_126_goes_inert_if_baseline_moves_below_the_bar():
     """If the baseline ever falls outside 45 points, the caveat is moot."""
     s = copy.deepcopy(STAGES)
     s["stages"][0]["share_pct"] = 40.0

@@ -1,4 +1,4 @@
-"""Battery for gate #115 (R33-B part 2: the cross-design book-sched wedge).
+"""Battery for gate #127 (R33-B part 2: the cross-design book-sched wedge).
 
 Also re-derives the decomposition's own arithmetic independently of the runner,
 so the artifact cannot drift from its spec without a test failing.
@@ -29,7 +29,7 @@ CROSS = json.loads((ROOT / "abm" / "data"
 def test_gate_passes_on_both_editions():
     for tex, label in ((TEX, "main"), (VARIANT, "variant")):
         ok, info = book_sched_wedge_check(tex, R33B, SEEDS)
-        assert ok, f"gate #115 fails on {label}: {info}"
+        assert ok, f"gate #127 fails on {label}: {info}"
 
 
 def test_spec_was_committed_before_the_run():
@@ -109,10 +109,21 @@ def test_count_survives_a_per_seed_wedge():
 
 
 def test_unanimity_retirement_is_stated():
-    span = "The threshold verdict survives the basis change; its unanimity does not"
+    span = ("The threshold verdict survives on either comparator; its "
+            "unanimity survives on neither")
     assert span in TEX
     ok, _ = book_sched_wedge_check(TEX.replace(span, ""), R33B, SEEDS)
     assert not ok
+
+
+def test_both_comparators_are_printed():
+    """The basis choice is the reader's: both wedges must appear."""
+    for span in ("\\$63.9 billion and sixteen seeds fall below",
+                 "\\$33.5 billion and one seed does",
+                 "holds functional form fixed and so isolates composition alone"):
+        assert span in TEX, span
+        ok, _ = book_sched_wedge_check(TEX.replace(span, ""), R33B, SEEDS)
+        assert not ok, f"gate survives removal of {span!r}"
 
 
 def test_bare_unanimity_restored_fails():
