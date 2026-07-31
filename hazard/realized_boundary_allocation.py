@@ -41,7 +41,11 @@ SMB = DATA / "settlement_months_benchmark_results.json"          # FROZEN, read 
 ROLLOFF = "Actual_Monthly_Rolloff_Billions"
 QT_START = pd.Timestamp("2022-06-01")
 E4_MAX_SHARE = 0.10        # spec section 4: stays a T2 disclosed sensitivity
-MIN_PRE_MONTHS = 3         # spec section 5, P4: a 3-tap kernel needs 3 pre-window months
+# spec section 5, P4. A length-3 kernel actually REACHES BACK len(k)-1 = 2
+# months; 3 is a conservative floor, not the reach. The distinction matters:
+# 17 pre-window months exist, but only 2 can ever contribute, and an earlier
+# draft of the manuscript quoted the 17 as though all of them settled in.
+MIN_PRE_MONTHS = 3
 
 
 def stop(gate: str, msg: str) -> None:
@@ -69,6 +73,39 @@ def trapped(realized: pd.Series, cap: pd.Series, mask: pd.Series) -> float:
     """settlement_months_benchmark.trapped_total, with the realized leg made a parameter."""
     delta = (realized - cap).where(mask)
     return float(delta.fillna(0.0).where(mask, 0.0).sum())
+
+
+def boundary_masses(realized: pd.Series, kernel, mask: pd.Series):
+    """(mass_in, mass_out) for the realized leg, each computed DIRECTLY.
+
+    REPAIRED 2026-07-30.  The first version weighted the month at distance d
+    before the window start by k[d] and then defined mass_out as the residual
+    r_tot_cal + mass_in - r_tot_set.  Both were wrong, and the second error
+    concealed the first.
+
+    Under x_settle[t] = sum_l k[l] * x[t-l], a source month s reaches window
+    month t = s + l.  So a month d places BEFORE the window start enters with
+    the kernel's TAIL weight sum(k[d:]) -- it settles into every window month
+    from s+d onward -- not with the single tap k[d].  With k = [0.1, 0.6, 0.3]
+    the last pre-window month enters at 0.6 + 0.3 = 0.9, not 0.6.
+
+    Symmetrically, the month i places before the window END loses sum(k[i+1:])
+    past the end: the final window month loses 0.9, the one before it 0.3.
+
+    Because mass_out was a residual, mass_in - mass_out collapsed to
+    r_tot_set - r_tot_cal for ANY mass_in, which made the run's own P5 and the
+    liveness gate that re-derived it vacuous with respect to mass_in.  Both
+    masses are now independent, so P5 below is a real constraint that can fail.
+    """
+    idx = realized.index
+    pre = idx[idx < QT_START]
+    win = idx[mask.reindex(idx, fill_value=False).to_numpy()]
+    reach = len(kernel) - 1          # how far back the kernel can actually see
+    mass_in = sum(float(realized.get(pre[-d], 0.0)) * sum(kernel[d:])
+                  for d in range(1, reach + 1) if d <= len(pre))
+    mass_out = sum(float(realized.get(win[-1 - i], 0.0)) * sum(kernel[i + 1:])
+                   for i in range(reach) if i < len(win))
+    return mass_in, mass_out
 
 
 def main() -> None:
@@ -127,13 +164,10 @@ def main() -> None:
         cap_leg = trapped(realized_cal, c_set, mask)
         r_tot_cal = float(realized_cal.where(mask).fillna(0.0).sum())
         r_tot_set = float(r_set.where(mask).fillna(0.0).sum())
-        # boundary decomposition of the realized leg
-        mass_in = sum(
-            k[l] * float(realized_cal.get(d, 0.0))
-            for l in range(1, len(k))
-            for d in [realized_cal.index[realized_cal.index < QT_START][-l]]
-            if l <= len(realized_cal.index[realized_cal.index < QT_START]))
-        mass_out = r_tot_cal + mass_in - r_tot_set
+        # boundary decomposition of the realized leg -- both sides computed
+        # directly from the kernel's tail weights, neither as the other's
+        # residual, so the P5 identity below is a real check
+        mass_in, mass_out = boundary_masses(realized_cal, k, mask)
         legs[name] = {
             "kernel": list(k),
             "benchmark_both_aligned_b": both,
@@ -152,12 +186,15 @@ def main() -> None:
         }
 
     p = legs["production"]
-    # ---- P5: the boundary decomposition must sum ---------------------------
-    recon = p["realized_total_calendar_b"] + p["realized_boundary_mass_in_b"] \
-        - p["realized_boundary_mass_out_b"]
-    if abs(recon - p["realized_total_settled_b"]) > 1e-6:
-        stop("P5", f"boundary decomposition does not sum: {recon} vs "
-                   f"{p['realized_total_settled_b']}")
+    # ---- P5: the boundary decomposition must sum, for EVERY kernel ----------
+    # Now that mass_out is computed rather than back-solved, this identity has
+    # content: it fails if either tail weighting is wrong.
+    for name, L in legs.items():
+        recon = (L["realized_total_calendar_b"] + L["realized_boundary_mass_in_b"]
+                 - L["realized_boundary_mass_out_b"])
+        if abs(recon - L["realized_total_settled_b"]) > 1e-6:
+            stop("P5", f"{name}: boundary decomposition does not sum: {recon} vs "
+                       f"{L['realized_total_settled_b']}")
 
     e3 = abs(p["shift_both_b"]) < abs(p["shift_cap_only_b"])
     e4 = abs(p["shift_both_b"]) / committed < E4_MAX_SHARE
