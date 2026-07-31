@@ -1,0 +1,132 @@
+{
+ "mode": "soma_cohorts_pinned",
+ "as_of": "2026-07-01",
+ "source": "https://markets.newyorkfed.org/api/soma/agency/get/all/asof/2026-07-01.json",
+ "n_cohorts": 11,
+ "cohort_wac_pct": 2.49004,
+ "sha256_of_cohorts": "a2926088868f6e5afb511271913183fea4de25bc6be32a8ad30666690154e1c1",
+ "bucketing": {
+  "min_share": 0.02,
+  "coupon_step_pct": 0.5,
+  "terms": [
+   "30yr",
+   "15yr"
+  ]
+ },
+ "cohorts": [
+  {
+   "coupon": 0.015,
+   "weight": 0.034563517103,
+   "origin_date": "2021-08-19",
+   "months_elapsed": 58,
+   "term_months": 180
+  },
+  {
+   "coupon": 0.02,
+   "weight": 0.04068015024,
+   "origin_date": "2021-05-13",
+   "months_elapsed": 62,
+   "term_months": 180
+  },
+  {
+   "coupon": 0.025,
+   "weight": 0.009097934272,
+   "origin_date": "2020-02-11",
+   "months_elapsed": 77,
+   "term_months": 180
+  },
+  {
+   "coupon": 0.03,
+   "weight": 0.006974062872,
+   "origin_date": "2020-03-04",
+   "months_elapsed": 76,
+   "term_months": 180
+  },
+  {
+   "coupon": 0.015,
+   "weight": 0.027530225293,
+   "origin_date": "2021-03-25",
+   "months_elapsed": 63,
+   "term_months": 360
+  },
+  {
+   "coupon": 0.02,
+   "weight": 0.361196603304,
+   "origin_date": "2021-07-04",
+   "months_elapsed": 60,
+   "term_months": 360
+  },
+  {
+   "coupon": 0.025,
+   "weight": 0.266262248227,
+   "origin_date": "2021-06-08",
+   "months_elapsed": 61,
+   "term_months": 360
+  },
+  {
+   "coupon": 0.03,
+   "weight": 0.107476835747,
+   "origin_date": "2018-01-25",
+   "months_elapsed": 101,
+   "term_months": 360
+  },
+  {
+   "coupon": 0.035,
+   "weight": 0.073370030186,
+   "origin_date": "2017-10-05",
+   "months_elapsed": 105,
+   "term_months": 360
+  },
+  {
+   "coupon": 0.04,
+   "weight": 0.046439564663,
+   "origin_date": "2018-10-20",
+   "months_elapsed": 92,
+   "term_months": 360
+  },
+  {
+   "coupon": 0.045,
+   "weight": 0.026408828092,
+   "origin_date": "2018-12-26",
+   "months_elapsed": 90,
+   "term_months": 360
+  }
+ ],
+ "scheduled_series_parity": {
+  "recomputed_smm_mean_pct": 0.2597463362739244,
+  "manifest_smm_mean_pct": 0.2597463362741957,
+  "recomputed_annualized_pct": 3.116956035287093,
+  "note": "holdings-free: only the run's own cohort book reproduces this series"
+ },
+ "validation": {
+  "manifest": "abm/data/runs/run-2026-07-04-15yr-foldin/manifest.json",
+  "checks": {
+   "n_cohorts": {
+    "want": 11,
+    "got": 11,
+    "pass": true
+   },
+   "cohort_wac_pct": {
+    "want": 2.49,
+    "got": 2.49004,
+    "pass": true
+   },
+   "reference_cohort_weight": {
+    "want": 0.3611966033043993,
+    "got": 0.361196603304,
+    "pass": true
+   },
+   "reference_cohort_months_elapsed": {
+    "want": 60,
+    "got": 60,
+    "pass": true
+   },
+   "scheduled_smm_mean_pct": {
+    "want": 0.2597463362741957,
+    "got": 0.2597463362739244,
+    "pass": true
+   }
+  },
+  "all_pass": true
+ }
+}

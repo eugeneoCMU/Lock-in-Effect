@@ -247,9 +247,64 @@ when the softened wording moved out from under their pinned spans, which is the 
 they exist for. A third gap surfaced the same way: gate #127 was not pinning the primary
 comparator's clause at all, and now does.
 
+## The "environmental" gate failure was a real defect — **FIXED**
+
+Twice this session the standing `matched-depth reconciliation` failure
+(`grid-recomputed-from-panel=False`) was written off as environmental. It was not.
+
+Recomputing the forty cells against the artifact: **thirty-eight match exactly**, and the
+two that do not differ by **0.016 on sums of \$73.8 trillion** — one float64 ULP
+(`2^-52 x 7.4e13 = 0.0164`). The check bounded `exposure_upb` by an **absolute 1e-3**,
+which is below one ULP at that magnitude, so it could only ever pass on the machine that
+wrote the artifact; any different parquet chunking or summation order fails it. CPR to
+three decimals and every cohort-month count reproduce bit-for-bit, so nothing about the
+data or the result is in question.
+
+Fixed by comparing exposure **relatively** (`max(1e-3, 1e-12 x |sum|)`, which clears one
+ULP by three orders of magnitude) while leaving CPR and counts exact. Verified three runs
+each way: consistently `False` before, **ALL GATES PASS** after — the first fully green
+gate run of this session. `tests/test_matched_depth_tolerance.py` re-derives the grid,
+pins the ULP-scale reasoning, and asserts the gate reports the grid as reproduced.
+
+A permanently red gate is a gate nobody reads, which is the real cost: it sat red across
+R30 and would have masked a genuine failure of any of the eight other clauses in the same
+check.
+
+## The production SOMA cohort book is recovered and pinned — **FIXED**
+
+Twice this session the cohort table was called irrecoverable: the manifest keeps only
+`n_cohorts`, `cohort_wac_pct` and a reference cohort, and `fetch_soma_mbs_cohorts` always
+re-fetched the *latest* book. That was wrong in one respect — **the NY Fed API serves
+historical as-of dates**, so the book is recoverable, not merely snapshottable.
+
+Two as-of dates were candidates (`2026-07-01`, `2026-06-24`); the manifest's two coarse
+fields cannot tell them apart, since both give 11 cohorts at WAC ≈ 2.49. Two sharper
+discriminators settle it:
+
+| check | manifest | 2026-07-01 | 2026-06-24 |
+|---|---|---|---|
+| reference-cohort weight | 0.3611966033043993 | **0.361196603304** | 0.360718772041 |
+| reference-cohort months elapsed | 60 | **60** | 59 |
+| scheduled SMM window mean | 0.2597463362741957% | **0.2597463362739%** | — |
+
+The last is decisive and holdings-free: rebuilding the cohort-weighted, term-aware
+scheduled series from the recovered book reproduces the manifest's own mean to
+**2.7e-13** (3.116956%/yr either way). Only the run's own book does that, and a
+one-month perturbation of the heaviest cohort breaks it (asserted in the battery).
+
+Landed: `abm/data/soma_cohorts_2026-07-01.json` (sha-stamped, with its validation block),
+`tools/pin_soma_cohorts.py` to regenerate or pin another as-of,
+`fed.load_pinned_cohorts()` to consume it offline, and an `as_of` parameter on
+`fetch_soma_mbs_cohorts` so a fetch can mean something other than "latest".
+`tests/test_pinned_soma_cohorts.py` (7 tests).
+
+**Two consequences.** The production scheduled-amortization series is now reproducible
+offline, so the blocker recorded against R33-B part 2 is half removed — what remains is
+the FRED key for the macro frame. And R33-B's primary anchor, which had to be taken from
+the manifest, is now independently confirmed: the series behind
+`scheduled_amort_b.total = 260.0248` rebuilds from committed data.
+
 ## Environment note
 
-On this cloud checkout the pre-existing `matched-depth reconciliation` cross-check fails
-with `grid-recomputed-from-panel=False` both before and after these edits (it recomputes
-from a gitignored panel; not introduced here). All six new gates pass on both editions,
-and the full suite is **523 passed**.
+All seven R33 gates pass on both editions, the whole liveness suite is green, and the
+test suite is **542 passed**.
