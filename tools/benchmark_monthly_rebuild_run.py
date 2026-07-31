@@ -109,8 +109,12 @@ def main() -> None:
         or any(v == "200" for v in src["monthly_endpoints"].values()))
 
     # ---- as-of dates in range ----------------------------------------------
-    dates = [d for d in get(f"{API}/asofdates/list.json")["soma"]["asOfDates"]
-             if WINDOW[0] <= d <= WINDOW[1]]
+    # sorted() is LOAD-BEARING: the API returns asOfDates NEWEST-FIRST. Differencing an
+    # unsorted list runs backwards through time, face rises at every step, the paydown branch
+    # never fires, and the reconstruction comes out near zero. That is exactly what the first
+    # attempt produced ($26.8bn over 42 months on a $2.7trn book) before this line existed.
+    dates = sorted(d for d in get(f"{API}/asofdates/list.json")["soma"]["asOfDates"]
+                   if WINDOW[0] <= d <= WINDOW[1])
     if len(dates) < 100:
         stop("P4", f"only {len(dates)} as-of dates in range; expected ~180")
     print(f"as-of dates in range: {len(dates)}  ({dates[0]} .. {dates[-1]})")
