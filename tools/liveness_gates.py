@@ -992,7 +992,20 @@ def runoff_error_basis_check(tex: str,
         *printed,
         shared_sextet,
         "\\$94.6 billion, 14.5\\% of realized runoff",
+        # The null-out-fits-central ranking is a standalone-basis artefact and
+        # must be stated with the scope that makes it one (finding 9).
+        "the null appears to out-fit the model",
+        "at the off-window floor it fits better on the standalone scorer too",
     ]
+    # ...and that scope claim must remain true of the artifacts.
+    e_in_c, e_in_n = pairs[0][0], pairs[1][0]
+    e_of_c, e_of_n = pairs[2][0], pairs[3][0]
+    s_in_c, s_in_n = pairs[0][1], pairs[1][1]
+    s_of_c, s_of_n = pairs[2][1], pairs[3][1]
+    finding9_ok = (abs(e_in_n) < abs(e_in_c)          # null out-fits: in-sample, standalone
+                   and abs(e_of_c) < abs(e_of_n)      # central wins off-window, standalone
+                   and abs(s_in_c) < abs(s_in_n)      # central wins in-sample, shared
+                   and abs(s_of_c) < abs(s_of_n))     # central wins off-window, shared
     # Marginal figures must remain (basis-invariant; not moved by this edit).
     marginal_ok = (
         "$+5.6$ points ($+\\$42.6$ billion)" in tex
@@ -1001,13 +1014,14 @@ def runoff_error_basis_check(tex: str,
     missing = [s for s in required if s not in tex]
     present_retired = [s for s in retired if s in tex]
     ok = (not missing and not present_retired and netting_ok
-          and anchor_ok and marginal_ok)
+          and anchor_ok and marginal_ok and finding9_ok)
     return ok, {
         "missing": missing,
         "present_retired": present_retired,
         "netting_ok": netting_ok,
         "anchor_ok": anchor_ok,
         "marginal_ok": marginal_ok,
+        "finding9_scope_ok": finding9_ok,
         "printed_pairs": printed,
         "shared_sextet": shared_sextet,
         "shared_err_oow": shared_err_oow_exact,
@@ -1112,8 +1126,15 @@ def book_sched_wedge_check(tex: str, r33b=None, seeds=None) -> tuple[bool, dict]
         f"{app['fifty_seed_p2.5']['book_basis_share_pct']:.1f}--"
         f"{app['fifty_seed_p97.5']['book_basis_share_pct']:.1f}\\%",
         f"{n_word} of the fifty seeds below the threshold rather than none",
-        "The threshold verdict survives the basis change; its unanimity does not",
+        "The threshold verdict survives on either comparator; its unanimity "
+        "survives on neither",
         "accounting decomposition rather than a re-simulation",
+        # Both comparators must be printed, so the basis choice is the
+        # reader's rather than the author's.
+        f"\\${d['primary_b']:.1f} billion and {n_word} seeds fall below",
+        f"\\${r33b['delta']['secondary_single_pool_b']:.1f} billion and one "
+        f"seed does",
+        "holds functional form fixed and so isolates composition alone",
         "\\texttt{r33b\\_book\\_sched}",
         f"running at "
         f"{r33b['scheduled_legs']['population']['annualized_pct']:.2f}\\% "
@@ -1157,7 +1178,12 @@ def null_balance_path_check(tex: str, shared_layer=None) -> tuple[bool, dict]:
     direction_ok = null < central
     required = [
         "The renormalisation is not symmetric in what it costs the two legs",
-        "scored on that same realized, lock-in-affected path",
+        "Both legs are renormalised to the same realized path",
+        "held to a balance path its own higher prepayment would have drained "
+        "faster",
+        # the central leg's own imperfection must stay stated, or the
+        # asymmetry reads as sharper than it is
+        "it recovers 91.3\\% of the benchmark, not all of it",
         "upper bound on the compounding-consistent one",
         "counterfactual-balance run of the kind only the Danish legs perform",
     ]
@@ -1207,9 +1233,16 @@ def within45_scope_check(tex: str, stages=None) -> tuple[bool, dict]:
         "No synthetic-population household-choice specification I tested "
         "lands within 45\\% of it. ",
     ]
+    # The "corrected family" range must be the frozen manifests', not prose.
+    lo = min(float(json.loads(p.read_text())["metrics"]["dollars_b"]
+                   ["share_explained_pct"])
+             for p in (ABM_RUN_PREFOLDIN, ABM_RUN_FOLDIN, ABM_RUN_BERGER))
+    hi = max(float(json.loads(p.read_text())["metrics"]["dollars_b"]
+                   ["share_explained_pct"])
+             for p in (ABM_RUN_PREFOLDIN, ABM_RUN_FOLDIN, ABM_RUN_BERGER))
     required = [
         "once the production corrections are applied",
-        "the corrected family runs at 11.1--13.2\\%",
+        f"the corrected family runs at {lo:.1f}--{hi:.1f}\\%",
         f"the rational baseline at {baseline:.1f}\\% does land within 45\\%",
         "not part of the production estimate family",
     ]
@@ -1218,7 +1251,7 @@ def within45_scope_check(tex: str, stages=None) -> tuple[bool, dict]:
     ok = not missing and not present_retired and counterexample_live
     return ok, {"missing": missing, "present_retired": present_retired,
                 "counterexample_live": counterexample_live,
-                "baseline": baseline}
+                "baseline": baseline, "corrected_family_range": (lo, hi)}
 
 
 def waterfall_provenance_check(tex: str,
@@ -5300,19 +5333,19 @@ def main() -> int:
           f"stale_sentence_gone={_wn['stale_sentence_gone']}")
     re_ok, _re = runoff_error_basis_check(tex)
     failures += 0 if re_ok else 1
-    print(f"[{'PASS' if re_ok else 'FAIL'}] runoff-error basis (gate #109): "
+    print(f"[{'PASS' if re_ok else 'FAIL'}] runoff-error basis (gate #121): "
           f"missing={_re['missing'] or 'none'}, "
           f"retired={_re['present_retired'] or 'none'}, "
           f"anchor_ok={_re['anchor_ok']}, netting_ok={_re['netting_ok']}")
     wp_ok, _wp = waterfall_provenance_check(tex)
     failures += 0 if wp_ok else 1
-    print(f"[{'PASS' if wp_ok else 'FAIL'}] waterfall provenance (gate #110): "
+    print(f"[{'PASS' if wp_ok else 'FAIL'}] waterfall provenance (gate #122): "
           f"missing={_wp['missing'] or 'none'}, "
           f"retired={_wp['present_retired'] or 'none'}, "
           f"distinct_ok={_wp['distinct_ok']}")
     cr_ok, _cr2 = cpr_referent_check(tex)
     failures += 0 if cr_ok else 1
-    print(f"[{'PASS' if cr_ok else 'FAIL'}] empirical-CPR referent (gate #111): "
+    print(f"[{'PASS' if cr_ok else 'FAIL'}] empirical-CPR referent (gate #123): "
           f"missing={_cr2['missing'] or 'none'}, "
           f"retired={_cr2['present_retired'] or 'none'}, "
           f"distinct={_cr2['distinct_ok']}, common_benchmark={_cr2['bench_ok']}, "
@@ -5320,7 +5353,7 @@ def main() -> int:
     bs_ok, _bs = book_sched_wedge_check(tex)
     failures += 0 if bs_ok else 1
     print(f"[{'PASS' if bs_ok else 'FAIL'}] cross-design book-sched wedge "
-          f"(gate #115): missing={_bs['missing'] or 'none'}, "
+          f"(gate #127): missing={_bs['missing'] or 'none'}, "
           f"retired={_bs['present_retired'] or 'none'}, branch={_bs['branch']}, "
           f"parity={_bs['parity_gates_all_pass']}, "
           f"seeds_below={_bs['seeds_below']}/{_bs['seeds_scored']}, "
@@ -5328,16 +5361,16 @@ def main() -> int:
     nb_ok, _nb = null_balance_path_check(tex)
     failures += 0 if nb_ok else 1
     print(f"[{'PASS' if nb_ok else 'FAIL'}] null balance-path asymmetry "
-          f"(gate #112): missing={_nb['missing'] or 'none'}, "
+          f"(gate #124): missing={_nb['missing'] or 'none'}, "
           f"direction_ok={_nb['direction_ok']}")
     dc_ok, _dc = danish_cpr_manifest_check(tex)
     failures += 0 if dc_ok else 1
     print(f"[{'PASS' if dc_ok else 'FAIL'}] Danish mean-CPR vs manifests "
-          f"(gate #113): missing={_dc['missing'] or 'none'}, "
+          f"(gate #125): missing={_dc['missing'] or 'none'}, "
           f"retired={_dc['present_retired'] or 'none'}")
     w45_ok, _w45 = within45_scope_check(tex)
     failures += 0 if w45_ok else 1
-    print(f"[{'PASS' if w45_ok else 'FAIL'}] within-45% scope (gate #114): "
+    print(f"[{'PASS' if w45_ok else 'FAIL'}] within-45% scope (gate #126): "
           f"missing={_w45['missing'] or 'none'}, "
           f"retired={_w45['present_retired'] or 'none'}, "
           f"counterexample_live={_w45['counterexample_live']}")

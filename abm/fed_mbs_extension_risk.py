@@ -811,6 +811,16 @@ def compute_metrics(
     WSHOMCB's amortized-cost accounting. Both series remain settlement-date
     based, so TBA-settlement lag is a limitation shared by either source,
     not something switching to SOMA fixes on its own.
+
+    Behaviour change (2026-07-31): when a cohort book is required and
+    `cohorts` is not supplied, a failed SOMA fetch now RAISES instead of
+    silently falling back to `cohorts_from_surface`, which is equal-weighted.
+    Cohort weights set the scheduled-amortization series, which enters both
+    the simulated roll-off and the empirical CPR back-out, so the old
+    fallback moved every figure derived from them while printing one line to
+    stdout. Pass `cohorts=...` (what every production caller does) or set
+    `allow_surface_cohort_fallback=True` to accept the equal-weighted book.
+    The choice is recorded in `df.attrs["cohort_provenance"]`.
     """
     df = df.copy()
 

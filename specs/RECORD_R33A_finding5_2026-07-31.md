@@ -72,7 +72,7 @@ The dollar benchmark is unaffected — `empirical_trapped_b` is bit-identical
 Landed: the corrected three-implementation sentence in §III.B; the cross-design row of
 `tab:estimators` now names its own 5.83% back-out; the correlation-column note states
 that those rows are not on a common CPR referent while every dollar column is.
-**GATE #111** + 10-test battery (referents read live, distinctness enforced, common
+**GATE #123** + 10-test battery (referents read live, distinctness enforced, common
 dollar benchmark policed).
 
 ## R33-B part 2 — pricing the wedge — **RUN, ADJUDICATED T2, LANDED**
@@ -108,7 +108,7 @@ route.
 survives the basis change and **the unanimity claim does not**. Landed at all three
 governing sites — §IV l.155, §VII.D l.659, §VII.D l.691 — each now stating the
 sample-basis figure, the book-basis figure, and that sixteen of fifty seeds fall below
-the threshold rather than none. `tab:runindex` row added. **GATE #115** + 13-test battery
+the threshold rather than none. `tab:runindex` row added. **GATE #127** + 13-test battery
 that re-derives the 16-of-50 count from the seed artifact independently of the runner and
 fails if the artifact ever lands on a different branch.
 
@@ -157,7 +157,7 @@ months → smaller roll-off → larger trapped → **smaller marginal**. So the 
 marginal is an upper bound on the compounding-consistent one.
 
 The direction is deterministic from the accounting (null traps less ⇒ null rolls off
-more), and **gate #112 ties it to the artifact** so it cannot silently invert. The
+more), and **gate #124 ties it to the artifact** so it cannot silently invert. The
 magnitude is deliberately not stated: pricing it needs a counterfactual-balance run of
 the kind only the Danish legs perform, which is not attempted.
 
@@ -173,7 +173,7 @@ Two of four rows disagreed with the frozen manifests they descend from:
 Prose propagation was narrower than alleged: l.596's "3.39--3.40\%" carried row (b)'s
 error and is now "3.36--3.39\%"; the one-decimal "47.1\%" mentions elsewhere were always
 consistent with 47.14. The inference the sentence supports (Danish legs sit *below* the
-4% floor) is unaffected, and marginally strengthened. **GATE #113** derives both cells
+4% floor) is unaffected, and marginally strengthened. **GATE #125** derives both cells
 from the manifests, so neither can drift again.
 
 ## Finding 6 — the "within 45%" claim (MINOR) — **CONFIRMED; LANDED**
@@ -183,7 +183,7 @@ from the manifests, so neither can drift again.
 "within 45\%" and 76.3% "within 24\%"), **§IV.A's rational baseline at 71.1% does land
 within 45%**, and it is a synthetic-population household-choice specification the paper
 tested. Scoped to the corrected production family (11.1--13.2%), with the counterexample
-named in place rather than 350 lines away at the existing caveat. **GATE #114**, which
+named in place rather than 350 lines away at the existing caveat. **GATE #126**, which
 also goes red if the baseline ever moves outside 45 points and the caveat becomes moot.
 
 Margin worth recording: the next bridge stage, behavioral gates at 54.9%, misses the
@@ -223,6 +223,29 @@ Multiset diff of every overfull box against baseline: one removed (the `tab:base
 21.1pt), **none added**. Built with tectonic 0.15.0; `monte_carlo_trapped_liquidity` is
 not in the repo, so a placeholder was used for the layout check only — the measurements
 above are otherwise from the real sources.
+
+## Self-audit: every judgement call, and how each was resolved
+
+Asked whether the posture question was the only discretionary choice, it was not. Ten were
+enumerated and all ten are now closed.
+
+| # | judgement call | resolution |
+|---|---|---|
+| 1 | **Basis choice** — primary (production cohort-weighted) gave 16/50 seeds below; secondary (single-pool) gave 1/50 | **Removed from the author.** Both comparators are now printed at all three sites with their counts, so the reader makes the choice. T2 fires on both, so the verdict never depended on it. Gate #127 pins both. |
+| 2 | Seed-invariant Δ applied to all 50 seeds | **Recomputed per seed** from each cell's own population age: still 16/50 (`seed_invariance_check.agree`). The uniform-max-age stress that gives 14 is recorded as a stress, not quoted. |
+| 3 | Finding 8's "calibrated to reproduce" overstated the central leg | **Softened and quantified**: the text now says the central leg is calibrated against the realized world *imperfectly — it recovers 91.3%, not all of it*, and gate #124 requires that qualifier to stay. |
+| 4 | Finding 9 closed by assertion, never adjudicated | **Adjudicated in print.** At the in-sample calibration on the standalone scorer the null's error *is* smaller than the central leg's ($-\$16.6$B vs $+\$53.8$B); on the shared basis the central leg wins at both calibrations, and off-window it wins on standalone too. Gate #121 pins the sentence *and* re-derives all four inequalities from the artifacts. |
+| 5 | "the corrected family runs at 11.1--13.2\%" was my characterization | **Tied to the manifests.** Gate #126 now derives the range from `run-2026-07-04` / `-15yr-foldin` / `-berger` rather than accepting the literal. |
+| 6 | Finding 7 resolved as "the table is wrong" rather than "the manifests are stale" | **Evidence recorded**: all five committed manifests were checked; Danish means are 47.2144, 47.1372, 47.2144, 3.3606, 44.0856. None yields the printed 47.10 or 3.40, so no reading of the manifests supports the old cells. |
+| 7 | `\scriptsize` + shortened row labels traded precision for width | **Labels restored in full** ("in-sample calibration", "off-window floor"); width recovered with `\tabcolsep` 4pt instead. `\footnotesize` genuinely does not fit (47.3pt over) and stays. |
+| 8 | Gate numbers #109--#115 would collide with R32's #115--#120 | **Renumbered #121--#127**, above R32's high-water mark. |
+| 9 | Flipping the cohort-fallback default could surprise an external caller | **Documented at the call site**: `compute_metrics`'s docstring now states the behaviour change, the flag, and why the old default was dangerous. The raised error names the flag. |
+| 10 | Layout verdict rested on a placeholder figure; no split recut | **Bounded and checked.** Rebuilt at three placeholder geometries (square/wide/tall): `tab:bases` FITS and overfull count is 23 in all three; only the absolute page count moves (130--131). Split boundary recomputed from the PDF: **1--89 / 90--130, identical to baseline**, so no recut is required. |
+
+Two of these were caught by the gates themselves during the fix pass — #124 and #127 failed
+when the softened wording moved out from under their pinned spans, which is the behaviour
+they exist for. A third gap surfaced the same way: gate #127 was not pinning the primary
+comparator's clause at all, and now does.
 
 ## Environment note
 

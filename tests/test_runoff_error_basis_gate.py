@@ -1,4 +1,4 @@
-"""Battery for gate #109 (R33-A: runoff-error column on both bases)."""
+"""Battery for gate #121 (R33-A: runoff-error column on both bases)."""
 import copy
 import json
 import sys
@@ -35,12 +35,12 @@ RETIRED_PATHA = (
 
 def test_gate_passes_on_the_manuscript():
     ok, info = runoff_error_basis_check(TEX, SHARED, CALIB, CONCAVE, EXPECT)
-    assert ok, f"gate #109 fails on the shipped manuscript: {info}"
+    assert ok, f"gate #121 fails on the shipped manuscript: {info}"
 
 
 def test_variant_carries_the_landing():
     ok, info = runoff_error_basis_check(VARIANT, SHARED, CALIB, CONCAVE, EXPECT)
-    assert ok, f"gate #109 fails on the long-abstract variant: {info}"
+    assert ok, f"gate #121 fails on the long-abstract variant: {info}"
 
 
 def test_shared_pair_removal_fails():

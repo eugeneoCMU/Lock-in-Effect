@@ -1,4 +1,4 @@
-"""Battery for gate #110 (finding 5: waterfall stage provenance)."""
+"""Battery for gate #122 (finding 5: waterfall stage provenance)."""
 import copy
 import json
 import sys
@@ -31,13 +31,13 @@ RETIRED = (
 def test_gate_passes_on_the_manuscript():
     ok, info = waterfall_provenance_check(
         TEX, STAGES, PREFOLDIN, FOLDIN, BERGER)
-    assert ok, f"gate #110 fails on the shipped manuscript: {info}"
+    assert ok, f"gate #122 fails on the shipped manuscript: {info}"
 
 
 def test_variant_carries_the_landing():
     ok, info = waterfall_provenance_check(
         VARIANT, STAGES, PREFOLDIN, FOLDIN, BERGER)
-    assert ok, f"gate #110 fails on the long-abstract variant: {info}"
+    assert ok, f"gate #122 fails on the long-abstract variant: {info}"
 
 
 def test_disclosure_removal_fails():
