@@ -339,8 +339,11 @@ and the direction of travel is the honest part.
 
 The point-by-point above was written on 26 July 2026 and this letter was not sent
 that day. Rather than leave it describing a manuscript that no longer exists, I
-record here what has changed. Four of the eight items below move \emph{against} the
-paper, and those are the ones I would read first.
+record here what has changed. Nine of the fourteen items below move \emph{against} the
+paper, and those are the ones I would read first. The last six come from a referee
+round on the argument of Sections~IV--VI, which put twenty-two criticisms to
+independent adversarial refutation; fifteen died against the artifacts and the rest
+are recorded here.
 
 \subsection{The Danish buyback credit is now priced, and it can reverse the gap}
 
@@ -580,6 +583,82 @@ half the adopted central value, and a bracket applying the elasticity to an assu
 moving share of the total hazard. And an audit table now censuses every
 non-mechanical post-run adjudication, in both directions, so the adjudication record
 the manuscript relies on can be checked in one place.
+
+\subsection{The cross-design threshold's unanimity does not survive the book's own
+amortization}
+
+This is the item I would read first. The cross-design leg nets a scheduled-amortization
+series keyed to the \emph{simulated} population's weighted coupon and mean age, not to
+the SOMA book's, and that series enters the simulated roll-off linearly. Because trapped
+liquidity accumulates net and unclipped, the substitution is an accounting decomposition
+rather than a re-simulation, and its landing rule (T1--T4) was fixed before it ran
+(\run{r33b\_book\_sched}). Re-scored on the book's cohort-weighted, term-aware schedule
+the leg falls \$63.9 billion, 8.4 points of benchmark: 50.9\% on the committed draw and
+51.9\% over fifty seeds, with a 95\% band of 46.7--57.7\% and sixteen of the fifty seeds
+below the pre-committed 50\% threshold rather than none. The threshold verdict survives;
+the claim that all fifty seeds cross it does not, and the band now straddles the
+threshold it was quoted as clearing. All three governing sites are corrected. How large
+the move is depends on which book schedule is the comparator, so the manuscript prints
+both --- \$63.9 billion against the production series, \$33.5 billion against a
+single-pool annuity at the book's own coupon, one seed below rather than sixteen --- and
+lets the reader choose rather than choosing for them.
+
+\subsection{The one fit statistic quoted in dollars was on the basis \S VII.D disowns}
+
+The accounting-basis table's cumulative-runoff-error column was computed on the
+standalone scorer, the basis the paper itself says is not commensurable with the
+benchmark. On the shared basis the headline off-window leg's miss is $-\$66.8$ billion,
+10.2\% of realized runoff, and third of six legs --- not the $+\$2.8$ billion, 0.4\%,
+``smallest error of any leg here'' the note reported. The two are the same leg's same
+miss: $-\$66.8$ billion is exactly the 8.7-point miss quoted two sentences later, so the
+paragraph was carrying one quantity in two forms, twenty-four times apart, separated only
+by a basis label. Both bases are now printed, the reassurance is retired, Path~A's
+\$164.1 billion carries its shared counterpart, and the crosswalk gains the row it was
+missing. No identified quantity moves; the marginal is basis-invariant.
+
+\subsection{\S III.B said two empirical-CPR back-outs exist; there are three}
+
+The cross-design family uses neither of the two the paper names. Its empirical referent
+is a function of the population it simulates --- 5.83\% for the committed draw, 5.64\%
+reweighted, against the production 5.14\%, and it moves with the simulated draw seed. The
+dollar benchmark is untouched and bit-identical in every run, so this is a path-referent
+defect rather than a level one, but the sentence was false as written and is corrected,
+with each affected row now naming the series it is scored against.
+
+\subsection{The $\beta_1 = 0$ null is denied its own balance path, and the marginal is
+therefore an upper bound}
+
+Both legs are renormalised to the realized holdings path, which is the lock-in-affected
+one. The central leg is calibrated against that world, imperfectly; the null is held to a
+balance path its own higher prepayment would have drained faster. A self-consistent null
+would carry lower balances into the later months, roll off less, and trap more --- so the
+reported marginal is an upper bound on the compounding-consistent one. The direction
+follows from the accounting and is now stated; the magnitude would need a
+counterfactual-balance run of the kind only the Danish legs perform, which I do not
+attempt.
+
+\subsection{A cited general-equilibrium magnitude had moved by more than an order of
+magnitude}
+
+The paper quoted \citet{berger2026} as putting the equilibrium-rate effect of a
+repurchase-at-market option at about one basis point, ``economically negligible.'' That
+was the January 2026 draft's figure (its \S4.9.1). The current March 2026 draft puts it at
+18 basis points (\S4.10.2) and declines to call it negligible. Corrected at both sites,
+with the section pin and the provenance stated in print. No computed quantity moves: the
+figure is a price statement the paper already refuses to read as a volume statement, and
+\S VI.D contradicts the volume reading with realized Danish redemption data.
+
+\subsection{Three smaller corrections, none of which moves a result}
+
+The ABM stress-test bridge figure's caption claimed its stage levels came from frozen run
+manifests; the first four stages have no run manifest and come from a committed
+diagnostic file, which the caption now says. Two of the Danish table's four
+mean-CPR cells disagreed with the manifests they descend from (47.10 against 47.14, 3.40
+against 3.36) and are corrected, along with one prose range that carried the second
+error. And \S V.E's claim that no synthetic-population household-choice specification
+lands within 45\% of the benchmark is falsified by this paper's own rational baseline at
+71.1\%; the claim is now scoped to the corrected production family, with the
+counterexample named where the claim is made rather than three hundred lines away.
 
 \subsection{Verification}
 
