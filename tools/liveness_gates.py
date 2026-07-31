@@ -1251,7 +1251,27 @@ def book_sched_wedge_check(tex: str, r33b=None, seeds=None) -> tuple[bool, dict]
     # survive ONLY as the sample-basis statement it now is.
     bare_unanimity = ("and all fifty seeds classify as undercutting. The "
                       "frozen variant averages 22.0\\%.")
-    retired = [bare_unanimity]
+    # Intro contributions and conclusion body once restated bare unanimity /
+    # bare 59.3% after the governing sites were hedged; keep those closed.
+    bare_intro = (
+        "on all fifty seeds the real-covariate leg crossed the threshold, "
+        "fixed before that run, at which that reading is undercut "
+        "(Section~\\ref{sec:robustness-crossdesign})."
+    )
+    bare_conclusion = (
+        "reaching 59.3\\% (76.3\\% at the book's composition), above the "
+        "pre-committed threshold"
+    )
+    retired = [bare_unanimity, bare_intro, bare_conclusion]
+    required += [
+        "a crossing that survives being re-scored on the book's own "
+        "scheduled amortization (50.9\\% and 51.9\\%), though its "
+        "fifty-of-fifty unanimity does not",
+        "50.9\\% and 51.9\\% when re-scored on the book's own scheduled "
+        "amortization",
+        "a crossing that survives that re-scoring though its "
+        "fifty-of-fifty unanimity does not",
+    ]
     # The seed count must still be what the artifact scored.
     seeds_ok = n_cells == 50 and 0 < n_below < 50
     missing = [s for s in required if s not in tex]
