@@ -2713,8 +2713,17 @@ def danish_interest_only_share_check(tex, io, dan, cb):
 #       File order is checked, not merely presence, because an edit that led
 #       with -$25.4bn would make a sensitivity read as the committed number;
 #   (b) THE OFFSET IS DECOMPOSED, NOT ASSERTED. mass_in - mass_out must equal
-#       both_aligned - cap_only, for EVERY kernel, not just the production
-#       one -- that identity is the whole audit trail for "gives back";
+#       both_aligned - cap_only for EVERY kernel, AND mass_out must re-derive
+#       from benchmark_monthly_rebuild's own monthly series -- a run C-128
+#       never reads. The second half is not decoration. REPAIRED 2026-07-30:
+#       the first version of this run weighted the last pre-window month by
+#       k[1] instead of k[1]+k[2] and then defined mass_out as the residual
+#       r_tot_cal + mass_in - r_tot_set, so mass_in - mass_out collapsed to
+#       r_tot_set - r_tot_cal for ANY mass_in and this clause was VACUOUS. It
+#       shipped $4.5bn/$21.2bn for eight hours when the true masses are
+#       $6.8bn/$23.4bn. The identity alone still cannot see a CORRELATED shift
+#       in both masses -- which is exactly the shape that bug had -- so the
+#       external anchor is what makes this clause bite;
 #   (c) THE PRE-COMMITMENT SPLIT MUST SURVIVE. E3 fixed the DIRECTION before
 #       the run and deliberately left the residual's SIGN open. Prose
 #       claiming the sign was predicted turns this red;
@@ -2730,6 +2739,12 @@ RBA_SPANS = {
                               "offset was fixed before the run",
     "stays_calendar": "the production convention remains calendar on both legs",
     "not_a_rebasing": "stays a disclosed sensitivity rather than a re-basing",
+    # The both-legs block sits between the cap-only figures and the sentence
+    # that reads them, so the referent must be NAMED. Landing this block
+    # unnamed left "the variant" pointing at the both-legs leg, whose
+    # re-basing factor is 1.034, under a sentence asserting 1.058.
+    "cap_only_referent": "What the cap-only variant establishes",
+    "cap_only_referent_2": "The cap-only variant also bears",
     # the tab:runindex row, pinned by its DESCRIPTION rather than by the
     # tag: the tag also sits in the prose citation, so a tag-only pin
     # would stay green over a deleted row.
@@ -2738,7 +2753,7 @@ RBA_SPANS = {
 }
 
 
-def realized_boundary_allocation_check(tex, rba, smb):
+def realized_boundary_allocation_check(tex, rba, smb, bmr):
     """Gate #121's rule (R32, C-128): the realized-side boundary allocation."""
     tex_nc = re.sub(r"(?<!\\)%.*", "", tex)
     par, leg, exp = rba["parity"], rba["legs"], rba["expectations"]
@@ -2751,16 +2766,21 @@ def realized_boundary_allocation_check(tex, rba, smb):
     pct = abs(pro["shift_both_pct_of_committed"])
     give_back = abs(pro["shift_cap_only_b"]) - abs(shift_both)
     pw = par["P4_pre_window_months"]
-    # the pre-window month count is spelled out in the prose, so it is derived
-    # here rather than typed: an unmapped count falls through to the digits and
-    # the span stops matching.
-    pre_word = {17: "seventeen"}.get(pw, str(pw))
+    # The prose spells out how far back the kernel REACHES, not how many
+    # pre-window months happen to exist. Those are different numbers and the
+    # manuscript briefly conflated them: 17 months exist (START_DATE), but a
+    # length-3 kernel can only ever see len(k)-1 = 2 of them, so 15 of the 17
+    # contribute exactly zero to every field this gate checks. Deriving the
+    # word from the kernel means the span tracks the quantity that matters.
+    reach = len(par["P3_kernel"]) - 1
+    reach_word = {2: "two", 3: "three", 4: "four"}.get(reach, str(reach))
 
     cap_only_lit = ("the benchmark moves by exactly that \\$42.0 billion")
 
     lits = dict(RBA_SPANS)
     lits.update({
-        "pre_window": f"{pre_word} pre-QT months of realized roll-off",
+        "pre_window": (f"the {reach_word} months the kernel reaches back into "
+                       f"settle into its start"),
         "boundary_decomp": (f"the realized leg gains \\${m_in:.1f} billion "
                             f"there against \\${m_out:.1f} billion leaving at "
                             f"the end"),
@@ -2809,6 +2829,22 @@ def realized_boundary_allocation_check(tex, rba, smb):
         and abs(lg["shift_both_b"]) < abs(lg["shift_cap_only_b"])
         for lg in (pro, slow, fast))
 
+    # THE ANCHOR. mass_out re-derived from benchmark_monthly_rebuild's own
+    # monthly series, which C-128 never reads: the month i places before the
+    # window end loses sum(k[i+1:]) past it. The window's own months are taken
+    # from that artifact too (its first clip month IS the window's opening
+    # month), so no date is typed here. This pins one side of the
+    # decomposition ABSOLUTELY, which the P5 identity cannot do.
+    net = bmr["monthly_net_rolloff_b"]
+    months = sorted(net)
+    i0 = months.index(bmr["parity"]["P1_clip_months"][0])
+    win_months = months[i0:i0 + bmr["spec"]["window_months"]]
+    anchor_ok = len(win_months) == bmr["spec"]["window_months"] and all(
+        abs(lg["realized_boundary_mass_out_b"]
+            + sum(sum(lg["kernel"][i + 1:]) * net[win_months[-1 - i]]
+                  for i in range(len(lg["kernel"]) - 1))) < 1e-6
+        for lg in (pro, slow, fast))
+
     art_ok = (
         rba["run_tag"] == "realized_boundary_allocation"
         and rba["status"] == "OK"
@@ -2833,10 +2869,10 @@ def realized_boundary_allocation_check(tex, rba, smb):
         and exp["E4_shift_share_of_committed"] < exp["E4_max_share"]
         and abs(pct / 100.0 - exp["E4_shift_share_of_committed"]) < 1e-12
     )
-    return (not missing and order_ok and tie_ok and art_ok,
+    return (not missing and order_ok and tie_ok and art_ok and anchor_ok,
             {"missing": missing, "cap_only_leads": order_ok,
              "cross_artifact_tie": tie_ok, "artifact_ok": art_ok,
-             "decomposition_ok": decomp_ok,
+             "decomposition_ok": decomp_ok, "mass_out_anchored": anchor_ok,
              "both_aligned_b": round(both, 4),
              "shift_both_b": round(shift_both, 4),
              "share_pct": round(pct, 4)})
@@ -7054,13 +7090,15 @@ def main() -> int:
     # than re-derived, so the tie is to a run this one did not write.
     _rba = json.loads(RBA_RESULTS.read_text())
     _smb121 = json.loads(SMB_RESULTS.read_text())
-    rba_ok, _rb = realized_boundary_allocation_check(tex, _rba, _smb121)
+    _bmr = json.loads(BMR_RESULTS.read_text())
+    rba_ok, _rb = realized_boundary_allocation_check(tex, _rba, _smb121, _bmr)
     failures += 0 if rba_ok else 1
     print(f"[{'PASS' if rba_ok else 'FAIL'}] realized boundary allocation "
           f"(gate #121): both_aligned={_rb['both_aligned_b']} $bn, "
           f"shift={_rb['shift_both_b']} $bn ({_rb['share_pct']}%), "
           f"cap_only_leads={_rb['cap_only_leads']}, "
           f"decomposition={_rb['decomposition_ok']}, "
+          f"mass_out_anchored={_rb['mass_out_anchored']}, "
           f"cross_artifact_tie={_rb['cross_artifact_tie']}, "
           f"artifact_ok={_rb['artifact_ok']}, "
           f"missing={_rb['missing'] or 'none'}")
@@ -7068,7 +7106,6 @@ def main() -> int:
     # R32 C-127 (gate #122), BRANCH D. The clip months and the ARTIFACT
     # verdict this disclosure strengthens belong to h1_zero_months_diagnosis;
     # the cap-relative benchmark belongs to expectation_benchmark.
-    _bmr = json.loads(BMR_RESULTS.read_text())
     _h1z = json.loads(H1Z_RESULTS.read_text())
     _xb122 = json.loads(EXPECT_RESULTS.read_text())
     bmr_ok, _bm = benchmark_monthly_rebuild_check(tex, _bmr, _h1z, _xb122)

@@ -23,6 +23,7 @@ import sys
 import time
 from pathlib import Path
 
+import numpy as np
 import pandas as pd
 
 HAZ = Path(__file__).resolve().parent
@@ -99,7 +100,8 @@ def boundary_masses(realized: pd.Series, kernel, mask: pd.Series):
     """
     idx = realized.index
     pre = idx[idx < QT_START]
-    win = idx[mask.reindex(idx, fill_value=False).to_numpy()]
+    # qt_active_mask returns a bare ndarray aligned to df.index, not a Series
+    win = idx[np.asarray(getattr(mask, "to_numpy", lambda: mask)(), dtype=bool)]
     reach = len(kernel) - 1          # how far back the kernel can actually see
     mass_in = sum(float(realized.get(pre[-d], 0.0)) * sum(kernel[d:])
                   for d in range(1, reach + 1) if d <= len(pre))

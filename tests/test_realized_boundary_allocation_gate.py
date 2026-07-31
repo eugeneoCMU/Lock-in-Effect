@@ -8,10 +8,23 @@ $-42.0$bn. The both-aligned $-25.4$bn is a rider on it. One test moves the
 new clause ahead of the cap-only account and asserts ONLY `cap_only_leads`
 flips -- every span still present, every artifact identity intact.
 
-AN ASSERTED OFFSET. "Gives back $16.6bn" is only auditable because
-mass_in - mass_out equals both_aligned - cap_only exactly, for every kernel.
-The identity is re-derived here rather than read off the artifact's own
-summary flag, and breaking it in a single kernel is tested.
+AN ASSERTED OFFSET -- AND THE IDENTITY THAT COULD NOT AUDIT IT. The first
+version of this battery claimed "gives back $16.6bn" was auditable because
+mass_in - mass_out equals both_aligned - cap_only for every kernel. That was
+wrong, and it let a false pair of figures ship in bf31cd2. mass_out was
+computed as the residual r_tot_cal + mass_in - r_tot_set, so the difference
+collapsed to r_tot_set - r_tot_cal for ANY mass_in: the identity held no
+matter how wrong mass_in was, and the run's own P5 gate was tautological for
+the same reason. The manuscript carried $4.5bn/$21.2bn when the true masses
+were $6.8bn/$23.4bn.
+
+The identity is still tested, because it must still hold. But the check that
+BITES is now the external anchor: mass_out re-derived from
+benchmark_monthly_rebuild's monthly series, a run C-128 never reads. An
+identity between two quantities cannot police either one when one is defined
+from the other -- only an outside anchor can. See
+test_a_correlated_shift_in_both_masses_is_caught_by_the_anchor, which
+reproduces the exact shape of the shipped defect.
 
 REWRITING THE PRE-COMMITMENT. E3 fixed the DIRECTION before the run and
 deliberately left the residual's SIGN open. An artifact claiming the sign was
@@ -47,13 +60,16 @@ RBA = json.loads((ROOT / "hazard" / "data"
                   / "realized_boundary_allocation_results.json").read_text())
 SMB = json.loads((ROOT / "hazard" / "data"
                   / "settlement_months_benchmark_results.json").read_text())
+BMR = json.loads((ROOT / "hazard" / "data"
+                  / "benchmark_monthly_rebuild_results.json").read_text())
 
 # The literals the gate BUILDS from the artifact, written out here so a silent
 # artifact change breaks this file as well as the gate.
 DERIVED = {
-    "pre_window": "seventeen pre-QT months of realized roll-off",
-    "boundary_decomp": "the realized leg gains \\$4.5 billion there against "
-                       "\\$21.2 billion leaving at the end",
+    "pre_window": "the two months the kernel reaches back into settle into "
+                  "its start",
+    "boundary_decomp": "the realized leg gains \\$6.8 billion there against "
+                       "\\$23.4 billion leaving at the end",
     "gives_back": "giving back \\$16.6 billion of the cap-side \\$42.0 billion",
     "both_aligned": "lands the benchmark at \\$739.4 billion",
     "shift": "a shift of $-\\$25.4$ billion or $-3.3$\\%",
@@ -66,8 +82,9 @@ DERIVED = {
 CAP_ONLY_LIT = "the benchmark moves by exactly that \\$42.0 billion"
 
 
-def check(tex, rba=None, smb=None):
-    return realized_boundary_allocation_check(tex, rba or RBA, smb or SMB)
+def check(tex, rba=None, smb=None, bmr=None):
+    return realized_boundary_allocation_check(
+        tex, rba or RBA, smb or SMB, bmr or BMR)
 
 
 def test_gate_passes_on_the_manuscript():
@@ -86,8 +103,9 @@ def test_the_gate_is_wired_into_the_suite():
     gate number must all exist in the gate source."""
     assert "RBA_RESULTS = " in GATES_SRC
     assert "SMB_RESULTS = " in GATES_SRC
-    assert ("realized_boundary_allocation_check(tex, _rba, _smb121)"
+    assert ("realized_boundary_allocation_check(tex, _rba, _smb121, _bmr)"
             in GATES_SRC)
+    assert "BMR_RESULTS = " in GATES_SRC
     assert "#121" in GATES_SRC
 
 
@@ -296,13 +314,96 @@ def test_too_few_pre_window_months_fails():
     assert not ok and not info["artifact_ok"]
 
 
-def test_a_changed_pre_window_count_breaks_the_spelled_out_word():
-    """The prose spells the count. Trace: an unmapped count falls through to
-    digits, so the span stops matching rather than silently disagreeing."""
+def test_the_prose_tracks_the_KERNEL_REACH_not_the_pre_window_count():
+    """The manuscript briefly conflated these. 17 pre-window months exist, but
+    a length-3 kernel sees only len(k)-1 = 2 of them; the other 15 contribute
+    exactly zero to every artifact field. Trace: moving P4 must NOT disturb the
+    span (it is not what the prose describes), while lengthening the kernel
+    must, because the reach is then 3."""
     rba = copy.deepcopy(RBA)
-    rba["parity"]["P4_pre_window_months"] = 18
+    rba["parity"]["P4_pre_window_months"] = 25
     ok, info = check(TEX, rba=rba)
-    assert not ok and "pre_window" in info["missing"]
+    assert ok, "the spelled-out word must not track P4"
+
+    rba2 = copy.deepcopy(RBA)
+    rba2["parity"]["P3_kernel"] = [0.1, 0.5, 0.3, 0.1]
+    ok2, info2 = check(TEX, rba=rba2)
+    assert not ok2 and "pre_window" in info2["missing"]
+
+
+# --- THE REGRESSION: the defect that shipped in bf31cd2 -------------------
+def test_a_correlated_shift_in_both_masses_is_caught_by_the_anchor():
+    """This is the exact shape of the bug that shipped for eight hours.
+
+    The runner weighted the last pre-window month by k[1] instead of
+    k[1]+k[2], and mass_out was defined as the residual
+    r_tot_cal + mass_in - r_tot_set -- so it absorbed the identical error and
+    BOTH masses moved together. mass_in - mass_out was therefore unchanged,
+    which is why the P5 gate, gate #121's clause (b) and this battery all
+    stayed green over $4.5bn/$21.2bn when the truth was $6.8bn/$23.4bn.
+
+    Trace: shift both masses by the same small amount, chosen so the PRINTED
+    figures still round to 6.8 and 23.4. Then `missing` stays empty and
+    `decomposition_ok` stays True -- proving the identity is structurally
+    blind -- and ONLY `mass_out_anchored` can fail."""
+    rba = copy.deepcopy(RBA)
+    for leg in ("production", "slower", "faster"):
+        rba["legs"][leg]["realized_boundary_mass_in_b"] -= 0.04
+        rba["legs"][leg]["realized_boundary_mass_out_b"] -= 0.04
+    for leg in ("production", "slower", "faster"):
+        lg = rba["legs"][leg]
+        assert abs((lg["realized_boundary_mass_in_b"]
+                    - lg["realized_boundary_mass_out_b"])
+                   - (lg["benchmark_both_aligned_b"]
+                      - lg["benchmark_cap_only_b"])) < 1e-6, (
+            "vacuous: the shift must preserve the identity")
+    ok, info = check(TEX, rba=rba)
+    assert not ok, "a correlated mass shift must not pass"
+    assert info["missing"] == [], "the printed figures must still round the same"
+    assert info["decomposition_ok"], (
+        "the P5 identity cannot see a correlated shift -- that is the point")
+    assert not info["mass_out_anchored"], "the anchor is what must catch it"
+
+
+def test_mass_out_re_derives_from_the_rebuild_artifact_on_every_kernel():
+    """The anchor, re-derived here. The month i places before the window end
+    loses sum(k[i+1:]) past it, and benchmark_monthly_rebuild owns that
+    monthly series -- a run C-128 never reads."""
+    net = BMR["monthly_net_rolloff_b"]
+    months = sorted(net)
+    i0 = months.index(BMR["parity"]["P1_clip_months"][0])
+    win = months[i0:i0 + BMR["spec"]["window_months"]]
+    assert len(win) == 42 and win[0] == "2022-06" and win[-1] == "2025-11"
+    for name, lg in RBA["legs"].items():
+        k = lg["kernel"]
+        derived = -sum(sum(k[i + 1:]) * net[win[-1 - i]] for i in range(len(k) - 1))
+        assert abs(lg["realized_boundary_mass_out_b"] - derived) < 1e-6, name
+
+
+def test_breaking_the_rebuild_series_breaks_the_anchor():
+    """Trace: the anchor reads C-127's artifact, so moving the window's final
+    month there turns gate #121 red without any C-128 field moving."""
+    bmr = copy.deepcopy(BMR)
+    bmr["monthly_net_rolloff_b"]["2025-11"] += 1.0
+    ok, info = check(TEX, bmr=bmr)
+    assert not ok and not info["mass_out_anchored"]
+    assert info["missing"] == [] and info["decomposition_ok"]
+
+
+def test_the_masses_are_no_longer_a_residual_of_each_other():
+    """The structural repair. If mass_out were still back-solved, this
+    difference would be exactly 0.0 on every kernel and the identity would be
+    a tautology. Non-zero float noise is the evidence of independence."""
+    slack = []
+    for lg in RBA["legs"].values():
+        resid = (lg["realized_total_calendar_b"]
+                 + lg["realized_boundary_mass_in_b"]
+                 - lg["realized_total_settled_b"])
+        slack.append(abs(resid - lg["realized_boundary_mass_out_b"]))
+        assert slack[-1] < 1e-6, "the identity must still HOLD"
+    assert any(s > 0 for s in slack), (
+        "every kernel closing to exactly 0.0 would mean mass_out is still "
+        "the residual and P5 is still tautological")
 
 
 def test_an_engine_run_or_a_rebased_convention_fails():

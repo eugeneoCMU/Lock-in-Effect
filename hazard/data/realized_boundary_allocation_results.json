@@ -41,8 +41,8 @@
       "shift_both_pct_of_committed": -3.3192599145967816,
       "realized_total_calendar_b": -652.7517467772998,
       "realized_total_settled_b": -636.1357289941,
-      "realized_boundary_mass_in_b": -4.544884865730046,
-      "realized_boundary_mass_out_b": -21.16090264892989,
+      "realized_boundary_mass_in_b": -6.792725496630054,
+      "realized_boundary_mass_out_b": -23.40874327982994,
       "cap_total_calendar_b": -1417.5,
       "cap_edge_loss_b": 42.0
     },
@@ -59,8 +59,8 @@
       "shift_both_pct_of_committed": -3.817522267592356,
       "realized_total_calendar_b": -652.7517467772998,
       "realized_total_settled_b": -629.4461816351,
-      "realized_boundary_mass_in_b": -3.828407058050061,
-      "realized_boundary_mass_out_b": -27.1339722002499,
+      "realized_boundary_mass_in_b": -7.5748081095500766,
+      "realized_boundary_mass_out_b": -30.880373251749916,
       "cap_total_calendar_b": -1417.5,
       "cap_edge_loss_b": 52.5
     },
@@ -77,8 +77,8 @@
       "shift_both_pct_of_committed": -2.478082043587397,
       "realized_total_calendar_b": -652.7517467772998,
       "realized_total_settled_b": -643.7028359190598,
-      "realized_boundary_mass_in_b": -4.512082463110027,
-      "realized_boundary_mass_out_b": -13.560993321349997,
+      "realized_boundary_mass_in_b": -5.26136267341003,
+      "realized_boundary_mass_out_b": -14.310273531649978,
       "cap_total_calendar_b": -1417.5,
       "cap_edge_loss_b": 28.0
     }
@@ -92,5 +92,5 @@
     "E4_shift_share_of_committed": 0.03319259914596782,
     "E4_pass": true
   },
-  "runtime_s": 1.555
+  "runtime_s": 1.533
 }
