@@ -116,6 +116,18 @@ BDR_RESULTS = (ROOT / "hazard" / "data"
                / "buyback_discount_rederived_results.json")
 DIOS_RESULTS = (ROOT / "hazard" / "data"
                 / "danish_interest_only_share_results.json")
+RBA_RESULTS = (ROOT / "hazard" / "data"
+               / "realized_boundary_allocation_results.json")
+BMR_RESULTS = (ROOT / "hazard" / "data"
+               / "benchmark_monthly_rebuild_results.json")
+# Gate #121/#122 cross-ties. SMB owns the two committed benchmarks C-128
+# must reproduce; H1Z owns the four clip months and the ARTIFACT verdict
+# C-127 strengthens; EXPECT owns the cap-relative benchmark both rest on.
+# None is written by the run under test, so agreement cannot be faked
+# from inside either new artifact.
+SMB_RESULTS = (ROOT / "hazard" / "data"
+               / "settlement_months_benchmark_results.json")
+H1Z_RESULTS = ROOT / "hazard" / "data" / "h1_zero_months_diagnosis.json"
 REFISWEEP_RESULTS = ROOT / "abm" / "data" / "refi_sweep_results.json"
 SHAREDLAYER_RESULTS = ROOT / "hazard" / "data" / "shared_layer_scoring_results.json"
 MARGDECOMP_RESULTS = ROOT / "hazard" / "data" / "marginal_decomposition_results.json"
@@ -2678,6 +2690,315 @@ def danish_interest_only_share_check(tex, io, dan, cb):
              "grid_ok": grid_ok,
              "breakeven_pct": (round(be1 * 100, 4), round(be2 * 100, 4)),
              "gap_at_sourced_b": round(s45["gap_second_order_b"], 4)})
+
+# --- R32 C-128 (gate #121): THE REALIZED-SIDE BOUNDARY ALLOCATION ---------
+# Section VII.B prices the CAP-side settlement convolution at -$42.0bn
+# (-5.5%) and says, in terms, that "the realized series is untouched". That
+# leg is not symmetric. The pre-QT cap is ZERO, so convolving it can only lose
+# mass at the window's END; the realized series is non-zero before the window,
+# so seventeen pre-QT months of roll-off exist to settle INTO its start. Run
+# realized_boundary_allocation convolves BOTH legs. The two edge effects
+# partially offset -- $4.5bn in against $21.2bn out, giving back $16.6bn of
+# the cap-side $42.0bn -- so the benchmark lands at $739.4bn, a -$25.4bn
+# shift, 3.32% of the committed benchmark and inside the pre-fixed 10% bar.
+#
+# Every printed figure is DERIVED from the artifact, and the two committed
+# benchmarks this run had to reproduce are tied LIVE to
+# settlement_months_benchmark -- an artifact this run did not write -- so no
+# number this gate enforces is a literal typed into this file. Beyond
+# presence, four properties, each a way this could quietly rot:
+#
+#   (a) THE CAP-ONLY ACCOUNT MUST STILL COME FIRST. The committed convention
+#       is the cap-side one and the both-aligned figure is a rider on it.
+#       File order is checked, not merely presence, because an edit that led
+#       with -$25.4bn would make a sensitivity read as the committed number;
+#   (b) THE OFFSET IS DECOMPOSED, NOT ASSERTED. mass_in - mass_out must equal
+#       both_aligned - cap_only, for EVERY kernel, not just the production
+#       one -- that identity is the whole audit trail for "gives back";
+#   (c) THE PRE-COMMITMENT SPLIT MUST SURVIVE. E3 fixed the DIRECTION before
+#       the run and deliberately left the residual's SIGN open. Prose
+#       claiming the sign was predicted turns this red;
+#   (d) THE THRESHOLD IS THE ARTIFACT'S. E4's 10% bar is read from the run
+#       and never typed here, and the realized-side shift must clear it.
+RBA_SPANS = {
+    "run_tag": "\\texttt{realized\\_boundary\\_allocation}",
+    "direction": "moves the benchmark less, not more",
+    "why_asymmetric": "The pre-QT cap is zero, so the cap leg loses mass only "
+                      "at the window's end",
+    "sign_open": "the sign of the residual deliberately was not",
+    "direction_precommitted": "That the two edge effects would partially "
+                              "offset was fixed before the run",
+    "stays_calendar": "the production convention remains calendar on both legs",
+    "not_a_rebasing": "stays a disclosed sensitivity rather than a re-basing",
+    # the tab:runindex row, pinned by its DESCRIPTION rather than by the
+    # tag: the tag also sits in the prose citation, so a tag-only pin
+    # would stay green over a deleted row.
+    "runindex_row": "Window-boundary allocation priced on the realized "
+                    "leg as well as the cap",
+}
+
+
+def realized_boundary_allocation_check(tex, rba, smb):
+    """Gate #121's rule (R32, C-128): the realized-side boundary allocation."""
+    tex_nc = re.sub(r"(?<!\\)%.*", "", tex)
+    par, leg, exp = rba["parity"], rba["legs"], rba["expectations"]
+    pro, slow, fast = leg["production"], leg["slower"], leg["faster"]
+    both = pro["benchmark_both_aligned_b"]
+    shift_both = pro["shift_both_b"]
+    cap_edge = pro["cap_edge_loss_b"]
+    m_in = abs(pro["realized_boundary_mass_in_b"])
+    m_out = abs(pro["realized_boundary_mass_out_b"])
+    pct = abs(pro["shift_both_pct_of_committed"])
+    give_back = abs(pro["shift_cap_only_b"]) - abs(shift_both)
+    pw = par["P4_pre_window_months"]
+    # the pre-window month count is spelled out in the prose, so it is derived
+    # here rather than typed: an unmapped count falls through to the digits and
+    # the span stops matching.
+    pre_word = {17: "seventeen"}.get(pw, str(pw))
+
+    cap_only_lit = ("the benchmark moves by exactly that \\$42.0 billion")
+
+    lits = dict(RBA_SPANS)
+    lits.update({
+        "pre_window": f"{pre_word} pre-QT months of realized roll-off",
+        "boundary_decomp": (f"the realized leg gains \\${m_in:.1f} billion "
+                            f"there against \\${m_out:.1f} billion leaving at "
+                            f"the end"),
+        "gives_back": (f"giving back \\${give_back:.1f} billion of the "
+                       f"cap-side \\${cap_edge:.1f} billion"),
+        "both_aligned": f"lands the benchmark at \\${both:.1f} billion",
+        # CONTEXTFUL ON PURPOSE. "3.3" and the bracket endpoints are common
+        # numerals in this manuscript; a bare-numeral pin could go green over
+        # an unrelated site.
+        "shift": (f"a shift of $-\\${abs(shift_both):.1f}$ billion or "
+                  f"$-{pct:.1f}$\\%"),
+        "bracket": (f"bracket at $-\\${abs(fast['shift_both_b']):.1f}$ and "
+                    f"$-\\${abs(slow['shift_both_b']):.1f}$ billion"),
+        "threshold_share": (f"at {pct:.1f}\\% of the committed benchmark the "
+                            f"boundary treatment"),
+    })
+    missing = sorted(k for k, lit in lits.items() if lit not in tex_nc)
+
+    # (a) the committed cap-only account still leads. .find(), never .index():
+    # a missing span must leave this False rather than raise.
+    i_cap = tex_nc.find(cap_only_lit)
+    i_both = tex_nc.find(lits["direction"])
+    order_ok = 0 <= i_cap < i_both
+
+    # the two committed benchmarks belong to a run this one did not write
+    tie_ok = (
+        par["P2_committed_calendar"] == smb["calendar_benchmark_b"]
+        and par["P2_committed_cap_only"] == smb["legs"]["production"]["benchmark_b"]
+        and par["P1_calendar_reproduces"] == smb["calendar_benchmark_b"]
+        and par["P1_cap_only_reproduces"] == smb["legs"]["production"]["benchmark_b"]
+        and par["P3_kernel"] == smb["kernel_production"]
+        and par["P3_n_qt_active_months"] == smb["n_qt_active_months"]
+        and par["E2_cap_edge_loss_b"] == smb["window_edge_cap_mass_lost_b"]
+    )
+
+    # (b) the decomposition, re-derived for every kernel rather than read off
+    # the production row's summary
+    decomp_ok = all(
+        abs((lg["realized_boundary_mass_in_b"] - lg["realized_boundary_mass_out_b"])
+            - (lg["benchmark_both_aligned_b"] - lg["benchmark_cap_only_b"])) < 1e-6
+        and abs(lg["shift_both_b"]
+                - (lg["benchmark_both_aligned_b"] - smb["calendar_benchmark_b"])) < 1e-9
+        and abs(lg["shift_cap_only_b"]
+                - (lg["benchmark_cap_only_b"] - smb["calendar_benchmark_b"])) < 1e-9
+        # E3 for every kernel: aligning both legs moves LESS than cap-only
+        and abs(lg["shift_both_b"]) < abs(lg["shift_cap_only_b"])
+        for lg in (pro, slow, fast))
+
+    art_ok = (
+        rba["run_tag"] == "realized_boundary_allocation"
+        and rba["status"] == "OK"
+        and rba["pre_committed"] is True
+        and rba["spec"]["no_engine_runs"] is True
+        and rba["spec"]["production_convention_stays_calendar"] is True
+        and rba["spec"]["kernel_imported_not_estimated"] is True
+        and par["P5_boundary_decomposition_sums"] is True
+        # P4: a kernel of length 3 needs at least 3 pre-window months, or the
+        # run would have convolved against zeros and fabricated the asymmetry
+        and pw >= len(par["P3_kernel"])
+        and decomp_ok
+        # (c) the direction was predicted; the SIGN was deliberately not
+        and exp["E3_both_moves_less_than_cap_only"] is True
+        and exp["E3_sign_deliberately_not_predicted"] is True
+        and exp["E3_shift_both_b"] == shift_both
+        and exp["E3_shift_cap_only_b"] == pro["shift_cap_only_b"]
+        # (d) the disclosure bar is the artifact's own, and it is cleared
+        and exp["E4_pass"] is True
+        and abs(exp["E4_shift_share_of_committed"]
+                - abs(shift_both) / smb["calendar_benchmark_b"]) < 1e-12
+        and exp["E4_shift_share_of_committed"] < exp["E4_max_share"]
+        and abs(pct / 100.0 - exp["E4_shift_share_of_committed"]) < 1e-12
+    )
+    return (not missing and order_ok and tie_ok and art_ok,
+            {"missing": missing, "cap_only_leads": order_ok,
+             "cross_artifact_tie": tie_ok, "artifact_ok": art_ok,
+             "decomposition_ok": decomp_ok,
+             "both_aligned_b": round(both, 4),
+             "shift_both_b": round(shift_both, 4),
+             "share_pct": round(pct, 4)})
+
+
+# --- R32 C-127 (gate #122): THE BENCHMARK'S MONTHLY SERIES, REBUILT --------
+# The benchmark's realized series is built by differencing weekly Wednesday
+# current-face levels, which yields four exact-zero months. R2's objection was
+# that rebuilding from published monthly SOMA principal payments, or from
+# per-CUSIP factor changes, would retire them and reopen the monthly-timing
+# question on a clean comparator. Run benchmark_monthly_rebuild probed both
+# routes. NEITHER is usable: there is no monthly principal-payment endpoint
+# (both return HTTP 400; the summary carries levels only), and the per-CUSIP
+# route recovers face LEVELS, not principal -- gross declines run $2,186bn
+# against a $652.8bn net, ~3.35x, because face also falls on reinvestment
+# settlement and roll. Netted, it reproduces the committed month-end
+# differencing to 6.8e-11 bn and returns the same four low months.
+#
+# This landed on BRANCH D, not Branch A: E3 predicted all four clip months
+# would carry a stale published week and 2022-06 carries none. The manuscript
+# therefore states the exception, and states that staleness is ORDINARY --
+# 59 of 192 weeks and 36 of 44 months carry one -- rather than diagnostic.
+# Three properties beyond presence:
+#
+#   (a) THE EXCEPTION MAY NOT BE ROUNDED AWAY. A later edit tightening this
+#       to "all four" is the exact overclaim Branch D exists to prevent, so
+#       "three of the four" and the June-2022 exception are both pinned, and
+#       the artifact's own E3 flag must stay False;
+#   (b) STALENESS MAY NOT BE PROMOTED TO A MECHANISM. The ordinary-rather-
+#       than-diagnostic clause and its two counts are required, and the
+#       counts are DERIVED from the artifact's own stale-week map;
+#   (c) THE ZEROS ARE TIED TO THE RUN THAT OWNS THEM. Each clip month's
+#       rebuilt net roll-off must equal the NEGATION of
+#       h1_zero_months_diagnosis's raw month-end diff, an artifact this run
+#       did not write, and that run's ARTIFACT verdict must still stand.
+BMR_SPANS = {
+    "run_tag": "\\texttt{benchmark\\_monthly\\_rebuild}",
+    "probed": "was probed rather than assumed, and neither route is usable",
+    "no_monthly": "No monthly SOMA principal-payment series is published",
+    "levels_only": "the summary endpoint carries holdings levels only, and "
+                   "both monthly endpoints return HTTP 400",
+    "levels_not_principal": "recovers face levels rather than principal "
+                            "payments",
+    "why_gross": "since face also falls on reinvestment settlement and roll",
+    # (a) the Branch-D scoping, both halves
+    "three_of_four": "Three of the four sit on a week the New York Fed "
+                     "republished unchanged and June 2022 does not",
+    # (b) staleness is not a mechanism
+    "not_diagnostic": "republication is ordinary rather than diagnostic",
+    "scope": "what the rebuild establishes is that the alternative source is "
+             "unavailable and the zeros survive it, not a second mechanism",
+    # same reasoning as gate #121: pin the row's description, not its tag
+    "runindex_row": "rebuilt from per-CUSIP SOMA holdings: sourceability "
+                    "of the alternative constructions",
+}
+
+# The overclaim this gate exists to keep out. Branch D turns on 2022-06
+# carrying NO stale week; any prose asserting all four do is false.
+BMR_OVERCLAIM = (
+    "all four clip months",
+    "each of the four sits on a week",
+    "all four sit on a week",
+)
+
+
+def benchmark_monthly_rebuild_check(tex, bmr, h1z, expect):
+    """Gate #122's rule (R32, C-127): the benchmark's monthly series rebuilt."""
+    tex_nc = re.sub(r"(?<!\\)%.*", "", tex)
+    par, exp, src = bmr["parity"], bmr["expectations"], bmr["sourceability"]
+    stale = bmr["stale_weeks_by_month"]
+    net = bmr["monthly_net_rolloff_b"]
+    clip = list(par["P1_clip_months"])
+    rows = h1z["parity_gates"]["P1_zeros_reproduce"]["rows"]
+
+    n_weeks = par["P4_weeks_retrieved"]
+    n_months = len(net)
+    n_stale_weeks = sum(len(v) for v in stale.values())
+    n_stale_months = len(stale)
+    recon = exp["E4_reconstructed_window_total_b"]
+    implied = exp["E4_implied_realized_total_b"]
+    gross = exp["gross_declines_b"]
+    median = exp["E5_window_median_paydown_b"]
+    pays = [exp["E5_clip_month_paydowns_b"][m] for m in clip]
+
+    lits = dict(BMR_SPANS)
+    lits.update({
+        "gross_vs_net": (f"gross face declines run \\${gross:,.0f} billion "
+                         f"against a \\${implied:.1f} billion net").replace(
+                             ",", "{,}"),
+        "weeks": f"netted over {n_weeks} weekly as-of dates",
+        # the reconciliation, printed at the precision that makes it a
+        # reconciliation rather than a rounding
+        "reconciles": (f"reproduces the committed month-end differencing, "
+                       f"\\${recon:.4f} billion against \\${implied:.4f} "
+                       f"billion"),
+        "low_months": (f"returns the same four low months at "
+                       f"$-\\${abs(pays[0]):.1f}$, \\${pays[1]:.1f}, "
+                       f"\\${pays[2]:.1f} and \\${pays[3]:.1f} billion "
+                       f"against a \\${median:.1f} billion window median"),
+        # (b) DERIVED counts -- a changed stale map moves these literals
+        "stale_counts": (f"{n_stale_weeks} of those {n_weeks} weeks and "
+                         f"{n_stale_months} of the {n_months} months they "
+                         f"span carry one"),
+    })
+    missing = sorted(k for k, lit in lits.items() if lit not in tex_nc)
+    overclaimed = [lit for lit in BMR_OVERCLAIM if lit in tex_nc]
+
+    # (c) each clip month's rebuilt net roll-off is the NEGATION of the
+    # month-end diff owned by h1_zero_months_diagnosis
+    tie_ok = (
+        sorted(clip) == sorted(rows)
+        and all(abs(net[m] + rows[m]["raw_me_diff_b"]) < 1e-6 for m in clip)
+        and all(rows[m]["clip_binds"] is True for m in clip)
+        and h1z["verdict"]["outcome"] == "ARTIFACT"
+        and h1z["classification_summary"]["spike_followed_all_artifact"] is True
+        and par["P1_committed_benchmark_b"] == expect["cap_benchmark_b"]
+    )
+
+    # the counts the prose prints are the artifact's own map, recomputed
+    counts_ok = (
+        n_stale_weeks == sum(len(v) for v in stale.values())
+        and all(w in [x["asof"] for x in bmr["weeks"]]
+                for v in stale.values() for w in v)
+        and n_weeks == len(bmr["weeks"]) == par["P4_asof_dates"]
+    )
+
+    art_ok = (
+        bmr["run_tag"] == "benchmark_monthly_rebuild"
+        and bmr["status"] == "OK"
+        and bmr["spec"]["cap_side_untouched"] is True
+        and bmr["spec"]["no_engine_runs"] is True
+        and bmr["spec"]["window_months"] == 42
+        and not par["P4_fetch_failures"]
+        and par["E2_decomposition_exhaustive"] is True
+        and counts_ok
+        # sourceability: BOTH of R2's routes, as the run found them
+        and src["summary_has_paydown_field"] is False
+        and src["monthly_principal_payment_series_available"] is False
+        and all(v == "400" for v in src["monthly_endpoints"].values())
+        # E4: the settling test, inside its own pre-fixed tolerance
+        and exp["E4_pass"] is True
+        and exp["E4_month_end_reproduces_exactly"] is True
+        and abs(recon - implied) == exp["E4_abs_diff_b"]
+        and abs(recon - implied) < exp["E4_tol_frac"] * implied
+        # E5: the reconstruction does NOT retire the zeros
+        and exp["E5_reconstruction_still_shows_low_months"] is True
+        and all(abs(p) < 0.5 * median for p in pays)
+        # (a) BRANCH D. 2022-06 carries no stale week and the artifact says so
+        and exp["E3_all_clip_months_have_a_stale_week"] is False
+        and sum(1 for m in clip
+                if exp["E3_stale_weeks_in_clip_months"][m]) == len(clip) - 1
+        and not exp["E3_stale_weeks_in_clip_months"]["2022-06"]
+        # gross is not net, by the factor the comment records
+        and gross > 3 * implied
+    )
+    return (not missing and not overclaimed and tie_ok and art_ok,
+            {"missing": missing, "overclaimed": overclaimed,
+             "cross_artifact_tie": tie_ok, "artifact_ok": art_ok,
+             "counts_ok": counts_ok,
+             "stale": f"{n_stale_weeks}/{n_weeks}wk {n_stale_months}/{n_months}mo",
+             "reconciles_to_b": f"{abs(recon - implied):.2e}"})
+
 
 def main() -> int:
     tex = TEX.read_text()
@@ -6727,6 +7048,38 @@ def main() -> int:
           f"cross_artifact_tie={_di['cross_artifact_tie']}, "
           f"artifact_ok={_di['artifact_ok']}, "
           f"missing={_di['missing'] or 'none'}")
+
+    # R32 C-128 (gate #121). The two committed benchmarks this run had to
+    # reproduce belong to settlement_months_benchmark, loaded here rather
+    # than re-derived, so the tie is to a run this one did not write.
+    _rba = json.loads(RBA_RESULTS.read_text())
+    _smb121 = json.loads(SMB_RESULTS.read_text())
+    rba_ok, _rb = realized_boundary_allocation_check(tex, _rba, _smb121)
+    failures += 0 if rba_ok else 1
+    print(f"[{'PASS' if rba_ok else 'FAIL'}] realized boundary allocation "
+          f"(gate #121): both_aligned={_rb['both_aligned_b']} $bn, "
+          f"shift={_rb['shift_both_b']} $bn ({_rb['share_pct']}%), "
+          f"cap_only_leads={_rb['cap_only_leads']}, "
+          f"decomposition={_rb['decomposition_ok']}, "
+          f"cross_artifact_tie={_rb['cross_artifact_tie']}, "
+          f"artifact_ok={_rb['artifact_ok']}, "
+          f"missing={_rb['missing'] or 'none'}")
+
+    # R32 C-127 (gate #122), BRANCH D. The clip months and the ARTIFACT
+    # verdict this disclosure strengthens belong to h1_zero_months_diagnosis;
+    # the cap-relative benchmark belongs to expectation_benchmark.
+    _bmr = json.loads(BMR_RESULTS.read_text())
+    _h1z = json.loads(H1Z_RESULTS.read_text())
+    _xb122 = json.loads(EXPECT_RESULTS.read_text())
+    bmr_ok, _bm = benchmark_monthly_rebuild_check(tex, _bmr, _h1z, _xb122)
+    failures += 0 if bmr_ok else 1
+    print(f"[{'PASS' if bmr_ok else 'FAIL'}] benchmark monthly rebuild "
+          f"(gate #122): reconciles to {_bm['reconciles_to_b']} $bn, "
+          f"stale={_bm['stale']}, counts_ok={_bm['counts_ok']}, "
+          f"overclaimed={_bm['overclaimed'] or 'none'}, "
+          f"cross_artifact_tie={_bm['cross_artifact_tie']}, "
+          f"artifact_ok={_bm['artifact_ok']}, "
+          f"missing={_bm['missing'] or 'none'}")
 
     va_ok, _va = verdict_audit_check(tex)
     failures += 0 if va_ok else 1
