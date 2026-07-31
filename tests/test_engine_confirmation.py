@@ -78,6 +78,30 @@ def test_manuscript_carries_the_engine_corroboration():
         assert info["engine_branch"] == "E1"
 
 
+def test_intro_and_conclusion_cannot_restate_bare_unanimity():
+    """Coherence pass: L59 / L740 must carry the book-basis hedge."""
+    bare_intro = (
+        "on all fifty seeds the real-covariate leg crossed the threshold, "
+        "fixed before that run, at which that reading is undercut "
+        "(Section~\\ref{sec:robustness-crossdesign})."
+    )
+    bare_conclusion = (
+        "reaching 59.3\\% (76.3\\% at the book's composition), above the "
+        "pre-committed threshold"
+    )
+    for tex, label in ((TEX, "main"), (VARIANT, "variant")):
+        assert bare_intro not in tex, f"bare intro unanimity returned in {label}"
+        assert bare_conclusion not in tex, f"bare conclusion returned in {label}"
+        assert "fifty-of-fifty unanimity does not" in tex
+        assert ("50.9\\% and 51.9\\% when re-scored on the book's own "
+                "scheduled amortization") in tex
+
+
+def test_long_abstract_carries_book_sched_hedge():
+    assert ("50.9\\% and 51.9\\% on the book's own scheduled amortization, "
+            "where sixteen of fifty seeds fall below the threshold") in VARIANT
+
+
 def test_monte_carlo_figure_is_the_foldin_run():
     """The defect the FRED session exposed: the root figure was stale."""
     ok, info = monte_carlo_figure_currency_check(TEX)
