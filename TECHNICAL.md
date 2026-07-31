@@ -30,6 +30,39 @@ For module-level runbooks, see [README.md](README.md). For hazard pipeline specs
 20. [Berger et al. Danish Recalibration — Two Estimated Channels](#20-berger-et-al-danish-recalibration--two-estimated-channels)
 21. [July 2026 Verification Round — Committed Artifacts and Manuscript v14](#21-july-2026-verification-round--committed-artifacts-and-manuscript-v14)
 22. [Manuscript Verification Record (Referee Rounds, July 2026)](#22-manuscript-verification-record-referee-rounds-july-2026)
+23. [Referee Round 13 — External Critique Implementation (July 2026)](#23-referee-round-13--external-critique-implementation-july-2026)
+24. [Referee Round 14 — Author-Ratified Data Runs (July 2026)](#24-referee-round-14--author-ratified-data-runs-july-2026)
+25. [Referee Round 15 — Coverage, Composition, and Calibration Runs (July 2026)](#25-referee-round-15--coverage-composition-and-calibration-runs-july-2026)
+26. [Referee Round 16 — Weakness-List Revision: Vintage Bound, Dynamic-Fit Diagnostics, Flexible-Learner Comparator (July 2026)](#26-referee-round-16--weakness-list-revision-vintage-bound-dynamic-fit-diagnostics-flexible-learner-comparator-july-2026)
+27. [Round-17 revision: full referee report — seven runs, three tables, identification status (2026-07-17)](#27-round-17-revision-full-referee-report--seven-runs-three-tables-identification-status-2026-07-17)
+28. [Round-18 revision: full referee report — eight runs, basis crosswalk, non-cancellation finding (2026-07-17)](#28-round-18-revision-full-referee-report--eight-runs-basis-crosswalk-non-cancellation-finding-2026-07-17)
+29. [Round-19 partial: third-reviewer clarity/citation pass (2026-07-17)](#29-round-19-partial-third-reviewer-claritycitation-pass-2026-07-17)
+30. [Panel revision (2026-07-18): out-of-window involuntary-turnover floor anchor](#30-panel-revision-2026-07-18-out-of-window-involuntary-turnover-floor-anchor)
+31. [Panel revision (2026-07-19/20): headline-calibration reconciliation and sign-statistic provenance](#31-panel-revision-2026-07-1920-headline-calibration-reconciliation-and-sign-statistic-provenance)
+32. [Panel revision (2026-07-20): matched-depth reconciliation of the floor demotion, and three forced claims relabelled](#32-panel-revision-2026-07-20-matched-depth-reconciliation-of-the-floor-demotion-and-three-forced-claims-relabelled)
+33. [Round-23: the benchmark is convention-dependent by −5.5%, and all of it is mechanical (2026-07-26)](#33-round-23-the-benchmark-is-convention-dependent-by-55-and-all-of-it-is-mechanical-2026-07-26)
+34. [Round-23: the DTI non-monotonicity is a re-calibration artifact (2026-07-26)](#34-round-23-the-dti-non-monotonicity-is-a-re-calibration-artifact-2026-07-26)
+35. [Round-24: the assembly (2026-07-27) — no runs](#35-round-24-the-assembly-2026-07-27--no-runs)
+36. [Round-24b: the front of the paper leads with the range (2026-07-27) — no runs](#36-round-24b-the-front-of-the-paper-leads-with-the-range-2026-07-27--no-runs)
+37. [Round-24c: Section IV leads with the cross-design result (2026-07-27) — no runs](#37-round-24c-section-iv-leads-with-the-cross-design-result-2026-07-27--no-runs)
+38. [Round-24d: the response letter, and the gate that reads it (2026-07-27)](#38-round-24d-the-response-letter-and-the-gate-that-reads-it-2026-07-27)
+39. [Round-26: panel review, five pre-committed runs, two headline restatements, the online appendix (2026-07-28)](#39-round-26-panel-review-five-pre-committed-runs-two-headline-restatements-the-online-appendix-2026-07-28)
+40. [Round-27: re-review verification, score-improvement plan, and the approved posture set (2026-07-28)](#40-round-27-re-review-verification-score-improvement-plan-and-the-approved-posture-set-2026-07-28)
+41. [Round-27 second half: the survivor set executed (2026-07-28)](#41-round-27-second-half-the-survivor-set-executed-2026-07-28)
+42. [Round-27: the #21 vintage-segment run is NOT_FEASIBLE — feasibility determination, no execution (2026-07-28)](#42-round-27-the-21-vintage-segment-run-is-notfeasible--feasibility-determination-no-execution-2026-07-28)
+43. [Round-27: B5 joint cell — run, LANDS at +2.9 (2026-07-28)](#43-round-27-b5-joint-cell--run-lands-at-29-2026-07-28)
+44. [Round-27: the abstract cut, 367 -> 280 words (author-directed, 2026-07-28)](#44-round-27-the-abstract-cut-367---280-words-author-directed-2026-07-28)
+45. [Round-30: the normal-turnover WAL row — run `wal_normal_turnover`, LANDS (2026-07-29)](#45-round-30-the-normal-turnover-wal-row--run-walnormalturnover-lands-2026-07-29)
+46. [Round-32 / C-94: the note-rate-basis WAL row — run `wal_note_rate_basis`, LANDS (2026-07-30)](#46-round-32--c-94-the-note-rate-basis-wal-row--run-walnoteratebasis-lands-2026-07-30)
+47. [Round-32 / SS5.4: the Danish group and the cap result in decision units (2026-07-30)](#47-round-32--ss54-the-danish-group-and-the-cap-result-in-decision-units-2026-07-30)
+48. [Round-32 / C-81: the state-contingent cap's two-input grid — run `state_contingent_cap_grid`, LANDS (2026-07-30)](#48-round-32--c-81-the-state-contingent-caps-two-input-grid--run-statecontingentcapgrid-lands-2026-07-30)
+49. [Round-32 / C-75: the Danish buyback discount, re-derived — run `buyback_discount_rederived`, LANDS (2026-07-30)](#49-round-32--c-75-the-danish-buyback-discount-re-derived--run-buybackdiscountrederived-lands-2026-07-30)
+50. [Round-32 / C-74: the Ginnie share's gap response, bracketed — run `ginnie_overlay_attenuated`, LANDS (2026-07-30)](#50-round-32--c-74-the-ginnie-shares-gap-response-bracketed--run-ginnieoverlayattenuated-lands-2026-07-30)
+51. [Round-32 / C-78: the episode gradient with loan age held fixed — run `episode_gradient_age_bands`, LANDS Branch A (2026-07-30)](#51-round-32--c-78-the-episode-gradient-with-loan-age-held-fixed--run-episodegradientagebands-lands-branch-a-2026-07-30)
+52. [Round-32 / C-127: the benchmark's monthly series rebuilt from per-CUSIP SOMA holdings — run `benchmark_monthly_rebuild`, LANDS Branch D (2026-07-30)](#52-round-32--c-127-the-benchmarks-monthly-series-rebuilt-from-per-cusip-soma-holdings--run-benchmarkmonthlyrebuild-lands-branch-d-2026-07-30)
+53. [Round-32 / C-128: the realized-side window-boundary allocation — run `realized_boundary_allocation`, LANDS Branch A, then REPAIRED (2026-07-30)](#53-round-32--c-128-the-realized-side-window-boundary-allocation--run-realizedboundaryallocation-lands-branch-a-then-repaired-2026-07-30)
+
+> **Numbering caveat.** Section numbers 29, 30, 31, 32 are each used TWICE in the body (a parallel-landing collision). The entries above point at the FIRST occurrence. They are not renumbered because §43 is cited by two committed pre-run specs as the spec-before-run protocol, and renumbering the block would shift it.
 
 Appendices: [A — File Map](#appendix-a--file-map) · [B — ABM-Era Granular Archaeology](#appendix-b--abm-era-granular-archaeology)
 
@@ -4548,7 +4581,7 @@ failure mode here is a later pass keeping the numbers and dropping the scope.
 `PLAN_R32_execution_log.md` for the reasoning and the retraction of a false justification an
 earlier draft gave for it.
 
-## 49. Round-32 / C-78: the episode gradient with loan age held fixed — run `episode_gradient_age_bands`, LANDS Branch A (2026-07-30)
+## 51. Round-32 / C-78: the episode gradient with loan age held fixed — run `episode_gradient_age_bands`, LANDS Branch A (2026-07-30)
 
 `.tex:331` carries the paper's only realized-data exhibit that moves in the lock-in direction, and
 its standardization cell held vintage × FICO × LTV **and not age**. C-78 put 12-month loan-age
@@ -4609,3 +4642,120 @@ parity tied live to the committed run's own counts; and the coverage PROPERTY re
 trusted) and a **37-item test battery**. Still open and still stated: within-window refinancing on the
 high-coupon shallow buckets is separated by no field in this design; a cross-sectional level gradient
 is not a dollar marginal; the literal within-stratum gradient stays NOT COMPUTABLE.
+
+---
+
+## 52. Round-32 / C-127: the benchmark's monthly series rebuilt from per-CUSIP SOMA holdings — run `benchmark_monthly_rebuild`, LANDS Branch D (2026-07-30)
+
+R2's M8 objection (never arbitrated: the synthesizer did not re-derive the
+benchmark) was that the realized series should be rebuilt from published monthly
+SOMA principal payments, or from CUSIP factor changes, which would retire the
+four exact-zero months and reopen the monthly-timing question on a clean
+comparator. Both routes were probed live. **Neither is usable.**
+
+There is no monthly principal-payment endpoint: `soma/mbs/get/monthly.json` and
+`soma/agency/get/monthly.json` both return HTTP 400, and `soma/summary.json`
+carries holdings **levels** only — its ten fields contain no paydown, principal
+or factor column. The per-CUSIP route (`soma/mbs/get/asof/{date}.json`) does
+exist, and 192 weekly as-of dates were fetched with zero failures, but it
+recovers face levels rather than principal: **gross face declines run
+\$2,186bn against a \$652.8bn net, ~3.35×**, because face also falls on
+reinvestment settlement and roll. No principal-payment series is recoverable
+from levels.
+
+Netted, the reconstruction reproduces the committed month-end differencing to
+**6.8e-11 bn** (\$652.7517467773678 against \$652.7517467772998, against a
+pre-fixed 1% bar), so **the benchmark is not in play** — E4 passes by eleven
+orders of magnitude. And E5 holds: the reconstruction still returns the same
+four low months (−\$2.0, \$4.5, \$3.7, \$3.6bn against a \$16.8bn window
+median), so it does **not** retire the zeros.
+
+**E3 MISSED, which is why this is Branch D and not Branch A.** The prediction
+was that all four clip months would carry a stale published week. Three do
+(2023-02, 2024-04, 2025-09); **2022-06 carries none.** The manuscript states
+the exception. It also states that republication is **ordinary rather than
+diagnostic** — 59 of the 192 published weeks and 36 of the 44 months they span
+carry a stale week — because "three of four clip months are stale" would read
+as though staleness identified a clip month, which it does not.
+
+Landed as a four-sentence disclosure appended to Appendix N's zero-months
+paragraph, strengthening its existing `ARTIFACT` classification **by
+elimination** rather than by new evidence. Gate #122 ties each clip month's
+rebuilt net roll-off to the **negation** of `h1_zero_months_diagnosis`'s
+month-end diff, requires that run's ARTIFACT verdict to still stand, derives
+both stale counts from the artifact's own map, and enforces a case-insensitive
+regex family of overclaiming spellings as **ABSENT**. 66-test battery.
+
+**Runner defects caught before the run mattered:** it differenced *backwards*
+(the NY Fed `asOfDates` endpoint returns newest-first and was consumed
+unsorted), then summed *gross* against a *net* comparator. Both were found only
+because \$26.8bn and \$2,186bn against \$653bn are absurd on their face.
+
+---
+
+## 53. Round-32 / C-128: the realized-side window-boundary allocation — run `realized_boundary_allocation`, LANDS Branch A, then REPAIRED (2026-07-30)
+
+`settlement_months_benchmark` convolved the **cap** with the committed
+settlement-lag kernel and left the realized series calendar, losing \$42.0bn at
+the window's end only — the pre-QT cap is zero, so the window's start loses
+nothing. The realized series is **not** zero before the window, so it can settle
+into it. C-128 prices that asymmetry.
+
+Convolving both legs lands the benchmark at **\$739.4bn**, a **−\$25.4bn**
+shift against the cap-only −\$42.0bn: 3.32% of the committed benchmark, inside
+the pre-fixed 10% bar, so a **T2 disclosed sensitivity**. The three committed
+kernels bracket it at −\$19.0 and −\$29.2bn. E3 predicted the direction
+(aligning both legs moves *less*) and deliberately left the residual's **sign**
+open; the production convention stays calendar on both legs.
+
+### 53.1 The repair — a false pair of figures, and a guard that was an identity
+
+The landing shipped "\$4.5 billion there against \$21.2 billion leaving at the
+end" for eight hours. **Both figures were wrong; the true boundary masses are
+\$6.8bn and \$23.4bn.**
+
+Under `x_settle[t] = Σ_l k[l]·x[t−l]`, a source month *d* places before the
+window start reaches every window month from *s+d* onward, so it enters with the
+kernel's **tail** weight `sum(k[d:])`, not the single tap `k[d]`. With
+`k = [0.1, 0.6, 0.3]` the last pre-window month enters at 0.9, not 0.6. The run
+used `k[d]`, so its `mass_in` was not the entering mass at all — it was the mass
+landing in the window's *first month only*.
+
+**Why nothing caught it.** `mass_out` was defined as the residual
+`r_tot_cal + mass_in − r_tot_set`, which absorbed the identical error. So
+`mass_in − mass_out` collapsed to `r_tot_set − r_tot_cal` **for any `mass_in`**,
+making the run's own P5 gate and liveness gate #121's clause (b) — whose header
+called that identity "the whole audit trail for 'gives back'" — exactly vacuous.
+Verified: `mass_out − residual = 0.00e+00` on all three kernels. The net
+\$16.6bn, the benchmark level, the shift and every percentage are unaffected,
+because the masses never enter `benchmark_both_aligned_b`; that invariance is
+precisely what made the error invisible.
+
+**Detection** was an adversarial audit of the landing itself, confirmed three
+ways before anything was touched: reverse-solving the two pre-window months from
+the three kernels' `mass_in` is *overdetermined and consistent to 4.4e-16*; the
+corrected identity closes to ~1e-11 on all three kernels using
+`benchmark_monthly_rebuild_results.json`, an artifact C-128 never reads; and the
+residual collapse is exact.
+
+**The repair.** `boundary_masses()` now computes both sides directly from the
+kernel's tail weights, so P5 has content and runs over all three kernels
+(residual slack 6.4e-14, *not* 0.0 — the evidence of independence). The re-run
+reproduced the prediction stated in the pre-run commit exactly, and moved
+**exactly 6 of 64 artifact fields**. Gate #121 gained an **external anchor**
+re-deriving `mass_out` from `benchmark_monthly_rebuild`'s monthly series.
+
+**The transferable lesson, and the reason this section exists:** *an identity
+between two quantities cannot police either one when one is defined from the
+other.* The identity was re-derived for all three kernels rather than trusted
+from a summary flag — and it was still worthless, because it was blind to a
+**correlated** shift in both masses, which is the shape this bug had. Only an
+outside anchor can catch that. `tests/test_realized_boundary_allocation_gate.py::
+test_a_correlated_shift_in_both_masses_is_caught_by_the_anchor` reproduces it.
+
+Two further repairs in the same sentence: the prose said "seventeen pre-QT
+months … settle into the window's start" when a length-3 kernel reaches back
+**two** (fifteen of the seventeen contribute exactly zero, and the gate was
+*forcing* the 17 into the prose); and the landing had orphaned the \$1.058\$
+re-basing factor's antecedent, since inserting the both-legs block left "the
+variant" pointing at a leg whose factor is 1.034.

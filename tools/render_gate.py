@@ -9,7 +9,16 @@ and the defect survived every round because every literal was present and
 correctly derived IN THE SOURCE -- it simply never reached the page.
 
 This gate fails when a glyph is positioned off the sheet, when a cross-reference
-is unresolved, or when the page count moves unexpectedly.
+is unresolved, or when the split PDFs do not partition the canonical one.
+
+It deliberately does NOT pin a page count. The count legitimately moves every
+round (113 -> 129 -> 130 -> 157), so a literal would go red on every ordinary
+landing and be retuned rather than believed. The third clause of this docstring
+used to claim a page-count check anyway, backed by an EXPECTED_PAGES dict that
+was defined once and read nowhere; both are gone. What IS checked are the two
+invariants that do not churn and that nothing else guarded: the hand-cut split
+must partition the canonical document exactly, and the variant must have the
+same length as it.
 
 Position is computed in DEVICE space. pypdf's text visitor hands back the text
 matrix (tm) and the current transformation matrix (cm) separately; tm alone is
@@ -41,7 +50,6 @@ DEFAULTS = [
 # at the very bottom margin is fine. 2pt is far below the 12pt line height, so
 # a clipped LINE can never hide inside the tolerance.
 EPS = 2.0
-EXPECTED_PAGES = {"revised_paper_v18.pdf": None}  # informational only
 
 
 def device_xy(cm, tm) -> tuple[float, float]:
@@ -108,6 +116,28 @@ def main(argv: list[str]) -> int:
             print(f"         p{pno} at ({dx:.1f}, {dy:.1f}): {text!r}")
         if len(r["offpage"]) > 8:
             print(f"         ... and {len(r['offpage']) - 8} more")
+    # The split is cut BY HAND after every rebuild and nothing verified it.
+    # These two invariants are structural rather than numeric, so they never
+    # need retuning: pages must be conserved, and the variant must not drift
+    # in length from the canonical file.
+    if not argv[1:]:
+        seen = {p.name: scan(p)["pages"] for p in DEFAULTS if p.exists()}
+        canon = seen.get("revised_paper_v18.pdf")
+        parts = (seen.get("revised_paper_v18_main.pdf"),
+                 seen.get("revised_paper_v18_online_appendix.pdf"))
+        variant = seen.get("revised_paper_v18_long_abstract.pdf")
+        if canon is not None and all(x is not None for x in parts):
+            split_ok = parts[0] + parts[1] == canon
+            failures += 0 if split_ok else 1
+            print(f"[{'PASS' if split_ok else 'FAIL'}] split partitions the "
+                  f"canonical document: {parts[0]} + {parts[1]} = "
+                  f"{parts[0] + parts[1]} against {canon}pp")
+        if canon is not None and variant is not None:
+            var_ok = variant == canon
+            failures += 0 if var_ok else 1
+            print(f"[{'PASS' if var_ok else 'FAIL'}] variant length matches the "
+                  f"canonical document: {variant}pp against {canon}pp")
+
     print(f"\n{'ALL RENDER CHECKS PASS' if not failures else f'{failures} RENDER CHECK(S) FAILED'}")
     return 1 if failures else 0
 

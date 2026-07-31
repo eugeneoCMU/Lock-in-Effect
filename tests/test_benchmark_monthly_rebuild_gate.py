@@ -96,17 +96,63 @@ def test_the_gate_is_wired_into_the_suite():
 
 
 # --- (a) BRANCH D: the exception may not be rounded away ------------------
-@pytest.mark.parametrize("lit", BMR_OVERCLAIM)
-def test_the_overclaiming_spellings_are_absent_and_turn_the_gate_red(lit):
-    """2022-06 carries NO stale week. Any prose asserting all four do is
-    false. Trace: the conjunct is a bare absence test, so re-inserting the
-    phrase anywhere turns the gate red through `overclaimed`, independently
-    of every span still being present."""
-    assert lit not in TEX and lit not in VARIANT
-    ok, info = check(TEX + f"\n\nA stray restatement: {lit} are stale.\n")
-    assert not ok
-    assert lit in info["overclaimed"]
+# Written out LONGHAND rather than parametrized over BMR_OVERCLAIM. A test
+# parametrized over the guard's own list is structurally incapable of finding
+# a spelling the list is MISSING -- which is how the case-sensitivity hole
+# survived. These are the sentences a careless edit would actually produce.
+FALSE_SPELLINGS = [
+    "All four clip months sit on a week the New York Fed republished "
+    "unchanged.",
+    "Every one of the four sits on a week the Fed republished.",
+    "All of the four clip months carry a stale week.",
+    "The four clip months all sit on a republished week.",
+    "all four sit on a week that was republished",
+    "each of the four sits on a stale week",
+]
+
+# True sentences that must NOT trip the guard, including the negated form and
+# the manuscript's own Branch-D wording.
+LEGITIMATE = [
+    "not all four clip months carry one",
+    "the four accounting bases all move together",
+    "positive at all four specifications",
+]
+
+
+@pytest.mark.parametrize("lit", FALSE_SPELLINGS)
+def test_every_overclaiming_spelling_turns_the_gate_red(lit):
+    """2022-06 carries NO stale week, so each of these is false. Trace: the
+    conjunct is an absence test, so adding the sentence anywhere reds the gate
+    through `overclaimed` while every pinned span survives -- which is the
+    point: the leak this guards is the ADDED SECOND SITE, not a rewrite of the
+    pinned sentence."""
+    ok, info = check(TEX + f"\n\nA stray restatement: {lit}\n")
+    assert not ok, f"gate #122 stayed green over: {lit!r}"
+    assert info["overclaimed"], f"not caught by the absence guard: {lit!r}"
     assert info["missing"] == [], "this must be caught by absence, not presence"
+
+
+@pytest.mark.parametrize("lit", LEGITIMATE)
+def test_true_sentences_do_not_trip_the_overclaim_guard(lit):
+    """A guard that fires on true statements gets deleted. The negated form
+    especially: "not all four clip months carry one" is exactly right."""
+    ok, info = check(TEX + f"\n\nFor the record, {lit}.\n")
+    assert info["overclaimed"] == [], f"false positive on: {lit!r}"
+    assert ok
+
+
+def test_the_shipped_manuscript_carries_no_overclaim_in_either_variant():
+    for name, doc in (("canonical", TEX), ("variant", VARIANT)):
+        ok, info = check(doc)
+        assert info["overclaimed"] == [], (name, info["overclaimed"])
+
+
+def test_the_guard_is_case_insensitive():
+    """The hole that shipped: three lowercase substrings matched with a
+    case-sensitive `in`, so the SENTENCE-INITIAL spelling of the exact claim
+    the guard exists to block passed green."""
+    ok, info = check(TEX + "\n\nALL FOUR CLIP MONTHS carry one.\n")
+    assert not ok and info["overclaimed"]
 
 
 def test_the_artifact_e3_flag_must_stay_false():

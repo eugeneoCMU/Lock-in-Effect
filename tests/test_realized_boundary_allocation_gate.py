@@ -430,4 +430,7 @@ def test_the_landing_did_not_disturb_the_committed_cap_side_account():
     assert TEX.count(CAP_ONLY_LIT) == VARIANT.count(CAP_ONLY_LIT) == 1
     assert TEX.count("a settlement-aligned benchmark of \\$722.7 billion") == 1
     assert TEX.count("$-\\$28.0$ and $-\\$52.5$ billion") == 1
-    assert TEX.count("\\texttt{settlement\\_months\\_benchmark}") == 1
+    # prose citation + its tab:runindex row (added 2026-07-30; the run gate
+    # #121 cross-ties to was cited in the text and indexed nowhere)
+    assert TEX.count("\\texttt{settlement\\_months\\_benchmark}") == 2
+    assert VARIANT.count("\\texttt{settlement\\_months\\_benchmark}") == 2

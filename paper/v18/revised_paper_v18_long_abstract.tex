@@ -854,7 +854,7 @@ Vintage bound \$11.7B (1.5\%) & observed-speed bound & Section~\ref{sec:pathb} &
 \end{threeparttable}
 \end{table}
 
-\paragraph{Robustness and diagnostic runs.} Headline-quantity runs are in Table~\ref{tab:crosswalk}; the diagnostic and robustness runs are indexed in Table~\ref{tab:runindex}.
+\paragraph{Robustness and diagnostic runs.} Headline-quantity runs are in Table~\ref{tab:crosswalk}; the principal diagnostic and robustness runs are indexed in Table~\ref{tab:runindex}.
 
 {\footnotesize
 \begin{longtable}{@{}p{5.4cm}p{8.8cm}@{}}
@@ -868,6 +868,8 @@ Run tag & Produces \\
 Run tag & Produces \\
 \midrule
 \endhead
+\texttt{settlement\_months\_benchmark} & Cap schedule convolved with the committed settlement-lag kernel against an unchanged realized series: the cap-side settlement-alignment sensitivity, $-\$42.0$ billion (Section~\ref{sec:robustness-benchmark}) \\
+\texttt{marginal\_transaction\_counts} & The marginal converted to foregone transactions across the moving-share bracket, against the 2025 existing-home-sales run rate (Section~\ref{sec:discussion-policy}) \\
 \texttt{realized\_boundary\_allocation} & Window-boundary allocation priced on the realized leg as well as the cap: the settlement-alignment sensitivity re-read with both legs convolved (Section~\ref{sec:robustness-benchmark}) \\
 \texttt{benchmark\_monthly\_rebuild} & The benchmark's realized series rebuilt from per-CUSIP SOMA holdings: sourceability of the alternative constructions, and whether they retire the four exact-zero months (Appendix~\ref{sec:robustness-seasonalfloor}) \\
 \texttt{wal\_normal\_turnover} & Portfolio WAL at the off-window turnover-floor read: the normal-turnover row of Table~\ref{tab:wal} (Appendix~\ref{sec:robustness-wal}) \\

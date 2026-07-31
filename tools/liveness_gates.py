@@ -111,6 +111,11 @@ MATCHEDDEPTH_RESULTS = ROOT / "hazard" / "data" / "matched_depth_reconciliation_
 # cannot be manufactured by matched_depth_reconciliation.py itself.
 B0VAR_RESULTS = ROOT / "hazard" / "data" / "b0_variance_decomposition.json"
 DANUSINT_RESULTS = ROOT / "hazard" / "data" / "danish_us_intercept_results.json"
+# The Danish band's own run. Its upper endpoint is printed at FIVE sites and
+# had no tex-to-artifact pin anywhere in tools/ or tests/, while the lower
+# endpoint carried three -- so the band could drift open at one end silently.
+DANFG_RESULTS = (ROOT / "hazard" / "data"
+                 / "danish_refi_finegrid_results.json")
 BBCB_RESULTS = ROOT / "hazard" / "data" / "buyback_credit_bracket_results.json"
 BDR_RESULTS = (ROOT / "hazard" / "data"
                / "buyback_discount_rederived_results.json")
@@ -244,12 +249,21 @@ FIGURE_FORBIDDEN = ["model CPR leads", "model leads", "TBA settlement"]
 # Freeze item (ii), LaTeX half: every cross-reference goes through \ref —
 # a hardcoded "Table 7" / "Section V.C" literal would silently drift when
 # floats renumber. Comments are stripped before matching.
+# Widened 2026-07-30. The appendix pattern covered letters A-B while the paper
+# runs A through O, so it went green over the exact drift its header describes
+# (verified by injecting "Appendix~N" for the C-127 site: all five counts
+# stayed 0). And every pattern was singular-only while the manuscript uses
+# Sections~\ref x31, Tables~\ref x1 and Appendices~\ref x1 -- 33 sites where a
+# hardcoded plural is the likelier drift and no singular pattern could match.
+# "I" is excluded from the appendix class deliberately: the paper voice is
+# first person, so "the Appendix I show" would false-positive.
 HARDCODED_XREF = {
-    "Table N literal": r"Table[~ ]\d",
-    "Figure N literal": r"Figure[~ ]\d",
-    "Section roman literal": r"Section[~ ][IVX]+(?:\.[A-Z])?(?![a-zA-Z}])",
-    "Appendix letter literal": r"Appendix[~ ][AB](?![a-zA-Z}])",
-    "Equation (N) literal": r"[Ee]quation[~ ]\(\d\)",
+    "Table N literal": r"Tables?[~ ]\d",
+    "Figure N literal": r"Figures?[~ ]\d",
+    "Section roman literal": r"Sections?[~ ][IVX]+(?:\.[A-Z])?(?![a-zA-Z}])",
+    "Appendix letter literal":
+        r"Appendix(?:es)?[~ ](?:[A-HJ-Z])(?![a-zA-Z}])",
+    "Equation (N) literal": r"[Ee]quations?[~ ]\(\d\)",
 }
 
 # --- Round-20 (gate #68): ABSTRACT-SCOPED HEDGE SPANS -----------------------
@@ -1640,7 +1654,8 @@ EPISODE_AGE_BANDS_SPANS = {
     # DELIBERATE DOUBLE-PIN: a round that legitimately moves the raw numbers
     # now fails BOTH gates. Same hazard class as
     # BUYBACK_BRACKET_SPANS["reversal_range"] vs LETTER_CURRENT_LITERALS.
-    # Recorded in TECHNICAL section 49 and in the C-78 ledger row so the next
+    # Recorded in TECHNICAL section 51 (renumbered 2026-07-30 from a duplicate
+    # 49 that collided with C-75's) and in the C-78 ledger row so the next
     # round finds both sites.
     "raw_gradient_survives_gate_75": "$+4.20$ CPR points",
     "raw_ci_survives_gate_75": "$[+3.59, +4.66]$",
@@ -2930,12 +2945,23 @@ BMR_SPANS = {
 }
 
 # The overclaim this gate exists to keep out. Branch D turns on 2022-06
-# carrying NO stale week; any prose asserting all four do is false.
+# carrying NO stale week, so any prose asserting all four do is FALSE.
+#
+# WIDENED 2026-07-30. These were three lowercase substrings matched
+# case-sensitively, so the sentence-initial spelling of the exact claim the
+# gate exists to block -- "All four clip months sit on a week the New York Fed
+# republished unchanged" -- passed green, as did five ordinary paraphrases.
+# Matching is now case-insensitive over a regex FAMILY. The negative lookbehind
+# is a deliberate carve-out: a future "not all four clip months carry one" is a
+# TRUE sentence and must not turn the gate red.
 BMR_OVERCLAIM = (
-    "all four clip months",
-    "each of the four sits on a week",
-    "all four sit on a week",
+    r"all\s+(?:of\s+)?(?:the\s+)?four\s+clip\s+months",
+    r"(?:all|each|every)\s+(?:one\s+)?(?:of\s+)?(?:the\s+)?four\s+"
+    r"(?:clip\s+months\s+)?(?:sits?|carries|carry)\b",
+    r"the\s+four\s+clip\s+months\s+(?:all|each)\b",
+    r"all\s+four\s+(?:sits?|carry|carries)\b",
 )
+BMR_OVERCLAIM_GUARD = r"(?<!not )(?<!Not )"
 
 
 def benchmark_monthly_rebuild_check(tex, bmr, h1z, expect):
@@ -2978,7 +3004,8 @@ def benchmark_monthly_rebuild_check(tex, bmr, h1z, expect):
                          f"span carry one"),
     })
     missing = sorted(k for k, lit in lits.items() if lit not in tex_nc)
-    overclaimed = [lit for lit in BMR_OVERCLAIM if lit in tex_nc]
+    overclaimed = [pat for pat in BMR_OVERCLAIM
+                   if re.search(BMR_OVERCLAIM_GUARD + pat, tex_nc, re.I)]
 
     # (c) each clip month's rebuilt net roll-off is the NEGATION of the
     # month-end diff owned by h1_zero_months_diagnosis
@@ -6063,6 +6090,10 @@ def main() -> int:
             if s["refi_inplace_cpr"] == rfs["best_estimate_refi"]][0]["gap_pathB_b"]
     dn_flip_ok = (_lvl < 0 < dn_gap_b) and rfs["breakeven_refi"]["path_b"] > 0
     _oos_point = _oos["headline_oos_marginal"]["clean_marginal_b_point_at_6.5"]
+    # the band's own run, and the count of sites its upper endpoint reaches
+    _dfg = json.loads(DANFG_RESULTS.read_text())
+    _dfg_lo, _dfg_hi = _dfg["band_0_3_b"]
+    _DFG_UPPER_SITES = 5
     dn_lits = {
         "trapped_levels":
             f"\\${dn_dk_b:.1f} billion against \\${dn_us_b:.1f} billion" in tex,
@@ -6071,6 +6102,23 @@ def main() -> int:
              f"({dn_gap_b / _bench * 100:.1f}\\% of the benchmark)") in tex,
         "sweep_ceiling":
             f"$+\\${max(dn_sweep_gaps):,.1f}$ billion".replace(",", "{,}") in tex,
+        # THE BAND, BOTH ENDS. Added 2026-07-30: the lower endpoint carried the
+        # anti-drift guarantee at three places and the UPPER carried none, at
+        # five print sites -- so perturbing every one of them left ALL GATES
+        # PASS. Both endpoints are read from the band's own run, and the four
+        # spans below cover all five occurrences exactly (2+1+1+1), so no site
+        # can be deleted behind another.
+        "band_range": (f"$+\\${_dfg_lo:.1f}$ to $+\\${_dfg_hi:.1f}$ billion "
+                       f"over 0--3\\% refinance-in-place") in tex,
+        "band_abstract_ceiling": (f"a band swept to $+\\${_dfg_hi:.1f}$ billion "
+                                  f"at 3\\% refinance-in-place") in tex,
+        "band_finegrid_sweep": (f"the gap runs from $+\\${_dfg_lo:.1f}$ billion "
+                                f"at 0\\% to $+\\${_dfg_hi:.1f}$ billion at "
+                                f"3\\%") in tex,
+        "band_table": f"band $+\\${_dfg_lo:.1f}$--$+\\${_dfg_hi:.1f}$B" in tex,
+        # every printed occurrence of the upper endpoint is accounted for
+        "band_upper_fully_covered":
+            tex.count(f"{_dfg_hi:.1f}") == _DFG_UPPER_SITES,
         "danish_level_flip": f"$-\\${abs(_lvl):.1f}$ billion" in tex,
         "breakeven": f"{rfs['breakeven_refi']['path_b'] * 100:.1f}\\% CPR" in tex,
         "mean_cprs": (f"{_pt['mean_danish_cpr_pct']:.2f}\\%" in tex
@@ -6128,8 +6176,12 @@ def main() -> int:
     # complete set.
     dn_context_ok = not dn_unqualified and tex.count("positive at every") >= 6
     dn_claims = tex.count("\\texttt{danish\\_us\\_intercept}")
+    dn_band_ok = (bool(_dfg.get("parity_gates_all_pass"))
+                  and abs(_dfg["parity_gates"]["G4_cell3pct"]["got"]
+                          - _dfg_hi) < 1e-9
+                  and _dfg_lo < _dfg_hi)
     dn_ok = (dn_forced_ok and dn_premise_ok and dn_flip_ok and dn_context_ok
-             and dn_claims >= 1 and all(dn_lits.values()))
+             and dn_claims >= 1 and dn_band_ok and all(dn_lits.values()))
     failures += 0 if dn_ok else 1
     print(
         f"[{'PASS' if dn_ok else 'FAIL'}] cross-check danish forced-positivity "
@@ -6210,9 +6262,33 @@ def main() -> int:
     }
     # the width disclosure must travel with the claim: §VII.B, the limitations
     # section, and the conclusion each quote the number where a reader meets it.
-    fn_sites = tex.count(f"{fn_width:.2f}")
+    # The disclosure must TRAVEL WITH THE CLAIM, so it is pinned by three
+    # contextful spans built from fn_width -- not by counting the bare numeral.
+    # `tex.count("11.06") >= 3` matched 5 sites of which only 2 were pinned
+    # anywhere, so ANY TWO of the three unpinned sites could be deleted with
+    # the gate still green -- including the conclusion clause, which is the
+    # whole point of the round-20 relabel. A %-commented site also counted,
+    # since this checked `tex` rather than the comment-stripped copy.
+    _tex_nc67 = re.sub(r"(?<!\\)%.*", "", tex)
+    # one contextful span PER SITE -- all five, each unique, so no site can be
+    # deleted behind the others. Both figures are derived, never typed.
+    fn_span_lits = {
+        "headline_note": (f"the pre-committed envelope it clears is "
+                          f"{fn_width:.2f} points wide"),
+        "fannie_section": (f"an {fn_width:.2f}-point window around a "
+                           f"{fn_fred_pp:.2f}-point Freddie estimate"),
+        "uncertainty_note": (f"that envelope is {fn_width:.2f} points wide and "
+                             f"the agreement, not the gate"),
+        "conclusion": f"whose envelope gate is {fn_width:.2f} points wide",
+        "verdict_ledger": (f"the {fn_width:.2f}-point envelope judged too wide "
+                           f"to carry information"),
+    }
+    fn_missing_spans = sorted(k for k, v in fn_span_lits.items()
+                              if v not in _tex_nc67)
+    fn_sites = _tex_nc67.count(f"{fn_width:.2f}")
     fn_ok = (fn_ref_ok and fn_shape_ok and fn_box_pinned_ok and fn_internal_ok
-             and fn_sites >= 3 and all(fn_lits.values()))
+             and not fn_missing_spans and fn_sites == len(fn_span_lits)
+             and all(fn_lits.values()))
     failures += 0 if fn_ok else 1
     print(
         f"[{'PASS' if fn_ok else 'FAIL'}] cross-check fannie envelope width: "
@@ -6223,8 +6299,8 @@ def main() -> int:
         f"{_fan['universe']['staged_loans_total']:,} staged loans "
         f"(marginal DERIVED from trapped levels, internal-consistency="
         f"{fn_internal_ok}), gate-still-passes={fn_shape_ok}, "
-        f"width disclosed at {fn_sites} sites "
-        f"(want >=3), literals="
+        f"width disclosed at {fn_sites} sites, all {len(fn_span_lits)} "
+        f"contextfully pinned (missing={fn_missing_spans or 'none'}), literals="
         f"{ {k: v for k, v in fn_lits.items() if not v} or 'all present'}"
     )
 
@@ -6257,7 +6333,26 @@ def main() -> int:
     # variant must therefore differ from the canonical file in the ABSTRACT LINE
     # ONLY; anything else means it has drifted and must be regenerated.
     _canon_lines = TEX.read_text().split("\n")
+    # The exemption is the ABSTRACT, located STRUCTURALLY. It used to be "any
+    # line whose text starts with \noindent", which was true-by-accident: at
+    # the commit that introduced this rule the canonical file had exactly one
+    # such line (the abstract) and the commit message recorded "the exemption
+    # is exactly one line, not a loophole". NINE more \noindent lines have
+    # been added since -- eight of them "Notes to Table~..." blocks, plus the
+    # Online Appendix divider -- silently widening the exemption tenfold, so
+    # the entire table-notes apparatus of a 157pp manuscript could carry
+    # retired numbers in a variant with the suite green. A prior session
+    # demonstrated exactly that with 93.4\%, the literal gate #59 exists to
+    # exclude. Bounds are DERIVED, never hardcoded: a literal abstract line
+    # number goes stale the first time a line is inserted above it.
+    _ab_lo = next((i for i, _l in enumerate(_canon_lines, 1)
+                   if _l.strip().startswith("\\begin{abstract}")), None)
+    _ab_hi = next((i for i, _l in enumerate(_canon_lines, 1)
+                   if _l.strip().startswith("\\end{abstract}")), None)
     var_bad = []
+    if _ab_lo is None or _ab_hi is None or _ab_hi <= _ab_lo:
+        var_bad.append("canonical: abstract environment not locatable, so no "
+                       "variant difference can be certified as abstract-only")
     for _p in TEX_VARIANTS:
         if _p == TEX:
             continue
@@ -6271,7 +6366,9 @@ def main() -> int:
                            f"{len(_canon_lines)} canonical)")
         else:
             _diff = [i + 1 for i in range(len(_vl)) if _vl[i] != _canon_lines[i]]
-            _non_abstract = [n for n in _diff if _canon_lines[n - 1].strip()[:9] != "\\noindent"]
+            _non_abstract = [n for n in _diff
+                             if not (_ab_lo is not None and _ab_hi is not None
+                                     and _ab_lo < n < _ab_hi)]
             if _non_abstract:
                 var_bad.append(f"{_p.name}: body drift at lines "
                                f"{_non_abstract[:8]}{'…' if len(_non_abstract) > 8 else ''}")

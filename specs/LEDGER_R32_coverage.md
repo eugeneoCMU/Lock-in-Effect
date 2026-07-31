@@ -179,7 +179,12 @@ No condition may be left unclassified. Generated from the inventory and the comm
   VERDICT and no CORRECTED set**: it is the one Wave-2 cluster that was never adversarially
   verified. The house rule is that agents draft and the coordinator verifies before applying;
   an unverified draft is not eligible. C-19 and C-67 were carried as "IN FIX PASS" on the
-  strength of that draft and are therefore returned to **OPEN**, which is their true state.
+  strength of that draft and were therefore returned to **OPEN** *at the time this note was
+  written*. **STATUS CORRECTED 2026-07-30:** both have since LANDED and their rows read
+  **SATISFIED** (C-19 at `b1d4b2d`, C-67 at `e96cb1d`). The finding above stands --- the
+  A-posture draft was never adversarially verified --- but the status assertion in this
+  bullet was stale and read as current. This is the repo's own "surviving stale sibling"
+  pattern, in the round's authority on what is owed.
 - **C-22 — CLOSED as REFUTED.** Its premise is that the floor-form selection rule is
   unstated. It is stated, once, in §VII.F ("The max form remains production for its
   semantics ... the aggregate-level comparison is context for the level, not the selection
@@ -196,8 +201,11 @@ No condition may be left unclassified. Generated from the inventory and the comm
 - **C-115 was missing from the continuation handoff's SS5 ordering.** The handoff's SS5.1--5.6
   enumerate 34 conditions and call them 35; reconciling the ledger's OPEN rows against that
   list leaves `C-115` (read the Danish sweep at two named tax-regime points, MINOR, wave 5,
-  CHECK) unlisted in every group. It is genuinely OPEN, not satisfied and not declined, and
-  it is folded into the Danish group (SS5.4) rather than left unclassified.
+  CHECK) unlisted in every group. It was genuinely OPEN *when this note was written*, and
+  was folded into the Danish group (SS5.4) rather than left unclassified. **STATUS
+  CORRECTED 2026-07-30:** it has since LANDED and its row reads **SATISFIED** (`8036fd3`).
+  The reconciliation finding --- that the handoff's SS5 enumeration counted 34 as 35 ---
+  stands; only the status assertion was stale.
 
 - **A citation fact-check was run this session** (`specs/RECORD_R32_citation_factcheck_2026-07-30.md`).
   It does not change any condition's status, but it raises **one material defect not in the
