@@ -7,6 +7,8 @@
 \usepackage{array}
 \usepackage{booktabs}
 \usepackage{threeparttable}
+\usepackage{longtable}
+\usepackage[referable]{threeparttablex}
 \usepackage{caption}
 \usepackage{authblk}
 \usepackage[authoryear,round]{natbib}
@@ -60,16 +62,31 @@ This paper's affirmative contributions are three. First, a decomposition of the 
 
 Table~\ref{tab:headline} collects the core results and their operative uncertainties in one place; every value repeats a committed, gated figure.
 
-\begin{table}[H]
-\centering
+\begingroup
+\scriptsize
+\setlength{\tabcolsep}{3.5pt}
+\begin{ThreePartTable}
+\begin{TableNotes}[flushleft]\scriptsize
+\item[a] Sensitivity catalogue for the headline marginal, each entry a committed figure derived where it is cited and none of them a sampling interval: off-window floor range $+4.3$ to $+6.8$ (max form; $+3.9$ to $+7.5$ joint with the band); additive form $+11.2$, floor-invariant; form-conditional hull $+3.5$ to $+13.1$, upper end from a 61.2\%-recovery cell and not read as an equally credentialed member (the concave transform and the additive form do not compose additively: jointly $+9.2$, interaction $-1.47$); mixture curve in the floor's strictly-involuntary share: $+9.7$ at $s{=}0.25$, $+10.7$ at $s{=}0.4$ (run \texttt{floor\_form\_mixture}); Ginnie overlay $+4.4$ (conventional-share scaling $0.797\times$); floor-stability check $+\$45.1$ billion.
+\end{TableNotes}
+\begin{longtable}{@{}>{\raggedright\arraybackslash}p{3.8cm}>{\raggedright\arraybackslash}p{4.4cm}>{\raggedright\arraybackslash}p{5.4cm}@{}}
 \caption{Core results and operative uncertainties. Each row repeats committed values derived in the referenced exhibit; recovery percentages are quoted on the benchmark-consistent shared basis. The uncertainty hierarchy is established in Table~\ref{tab:uncertainty}: simulation-seed noise is negligible at reporting precision and sampling is quoted under the stratum-cluster scheme; the calibration box is the operative uncertainty --- except the headline marginal, whose binding layer is the floor read's own propagated sampling error (Table~\ref{tab:uncertainty}). Table~\ref{tab:crosswalk} (Appendix~\ref{app:ledger}) maps each headline quantity to its accounting basis and source run. The Path B recovery is estimated on the Freddie 2017--2021 conventional universe; Section~\ref{sec:method-benchmark} derives that universe's coverage of SOMA book face on the book's own agency $\times$ vintage joint cells, and states the external-speed overlay that bounds each exclusion (Section~\ref{sec:pathb}).}
-\label{tab:headline}
-\footnotesize
-\begin{threeparttable}
-\begin{tabular}{@{}p{4.6cm}p{4.6cm}p{5.3cm}@{}}
+\label{tab:headline}\\
 \toprule
 Object & Headline value & Uncertainty / bounds \\
 \midrule
+\endfirsthead
+\caption[]{Core results and operative uncertainties (\emph{continued}).}\\
+\toprule
+Object & Headline value & Uncertainty / bounds \\
+\midrule
+\endhead
+\midrule
+\multicolumn{3}{r@{}}{\emph{Continued on next page}}\\
+\endfoot
+\bottomrule
+\insertTableNotes
+\endlastfoot
 Cap-relative benchmark, June 2022--November 2025 (Section~\ref{sec:method-benchmark}) & \$764.7 billion & -- \\
 Expectations-based complement (Section~\ref{sec:method-benchmark}) & \$87.8 billion, 11.5\% of the cap-relative benchmark & Fed's ex-ante projection implied 75.6--88.5\% of the cap-shortfall, by intra-2022 allocation \\
 Mechanical null, $\beta_1 = 0$ (Section~\ref{sec:identification}; Table~\ref{tab:bases}) & 85.7\% of benchmark at the headline off-window floor; 88.7\% in-sample & 83.9--86.9\% across the off-window floor range; moves one-for-one with the floor level \\
@@ -80,13 +97,9 @@ Path B central level (Table~\ref{tab:estimators}) & 91.3\% at the headline off-w
 Production ABM (Table~\ref{tab:estimators}) & 13.6\% seed mean & 10--17\% seed band; frozen draw 11.9\%; the operative uncertainty is calibration, not seed noise. The swing that establishes this is measured on a different design: on the real-covariate cross-design, switching one calibration choice moves recovery across 20.9--59.3\%, against a fifty-seed cross-design sweep whose own band is 10.9 points (Section~\ref{sec:robustness-crossdesign}). That is a span across two calibration choices on that design, not an interval around this row's 13.6\%, and does not contain it \\
 Cross-design ABM, real covariates (Table~\ref{tab:crossdesign}) & 59.3\% recalibrated; fifty-seed mean 60.2\%, 95\% band 55.1--66.0\% (50.9\%/51.9\% on the book's own scheduled amortization, sixteen of fifty below the threshold; 76.3\% at book composition; effective sample 1{,}332 of 10{,}000, re-draw 70.6\%) & 20.9\% under the frozen scale; fifty-seed mean 22.0\% (12.6\% at book composition) \\
 Danish rule-only counterfactual (Table~\ref{tab:danish}) & $+\$61.2$ billion & positivity is forced by the zero-gap anchor, so the refinancing sweep cannot flip it; the Danish-level bracketing anchor does, at $-\$99.9$ billion. The gap is incidence-conditional: $+\$61.2$ billion under face accounting (the benchmark's own denomination), reversing to $-\$89.4$ to $-\$117.7$ billion under cash accounting at the committed proxy discounts (run \texttt{buyback\_credit\_bracket}; Section~\ref{sec:pathb}) \\
-\bottomrule
-\end{tabular}
-\begin{tablenotes}[flushleft]\footnotesize
-\item[a] Sensitivity catalogue for the headline marginal, each entry a committed figure derived where it is cited and none of them a sampling interval: off-window floor range $+4.3$ to $+6.8$ (max form; $+3.9$ to $+7.5$ joint with the band); additive form $+11.2$, floor-invariant; form-conditional hull $+3.5$ to $+13.1$, upper end from a 61.2\%-recovery cell and not read as an equally credentialed member (the concave transform and the additive form do not compose additively: jointly $+9.2$, interaction $-1.47$); mixture curve in the floor's strictly-involuntary share: $+9.7$ at $s{=}0.25$, $+10.7$ at $s{=}0.4$ (run \texttt{floor\_form\_mixture}); Ginnie overlay $+4.4$ (conventional-share scaling $0.797\times$); floor-stability check $+\$45.1$ billion.
-\end{tablenotes}
-\end{threeparttable}
-\end{table}
+\end{longtable}
+\end{ThreePartTable}
+\endgroup
 
 \paragraph{Definitions used throughout.} Four accounting bases attach to every recovery percentage (Section~\ref{sec:method-benchmark}): the \emph{standalone-scorer} basis (no adjustment), the \emph{benchmark-consistent shared} basis (nets a common \$69.6 billion curtailment flow identically from every U.S. leg; the main-text convention), the \emph{full-book} basis (reweights to the SOMA book's coupon mix), and the \emph{composed} basis (both). Two floor calibrations attach to every marginal and level: the \emph{in-sample calibration point} (the 4\% baseline turnover floor measured in-window on the locked-in 2023--24 cohorts; returns $+9.2$ points) and the \emph{off-window calibration} (the 4.70--5.33\% floor measured on pre-episode 2018 discount cohorts; returns $+5.6$ points and is the headline). The floor itself is a measured object: realized-turnover reads put it at 3.8--3.9\% in-window (flat across seasoning cuts), 4.70--5.33\% on the off-window 2018 leg, 5.51\% under an imputation-heavy age standardization (84\% imputed weight, an indicative bound derived from the same 2018 leg), and 5.52\% on an independent out-of-agency Fannie Mae read; the last two lines sit above the clean band, which is why the band's lower edge is the soft one (Section~\ref{sec:robustness-floor}). The ``baseline turnover floor'' (sometimes called an involuntary-turnover floor) names that measured object without decomposing it: what these reads measure is total deep-discount-cohort turnover, which mixes discretionary life-cycle moves and cash-out refinancings with strictly involuntary events, and the strictly-involuntary share is plausibly well under half (Section~\ref{sec:pathb}), a share the mixture curve of Section~\ref{sec:robustness-floor} prices directly. ``Trapped liquidity'' and ``shortfall'' denote the net shortfall of realized roll-off against the phased redemption caps (\$764.7 billion over June 2022--November 2025), and the \emph{lock-in marginal} is the difference between the central simulation and its $\beta_1 = 0$ mechanical null, the paper's identified object, whose operative uncertainty is the calibration-and-form envelope of Table~\ref{tab:uncertainty} rather than any sampling interval. That envelope is a grid, not a confidence region, and the distinction is load-bearing: the elasticity band it sweeps is \citeauthor{liebersohn2024}'s \emph{specification} range with my adopted midpoint at its centre, not a published point estimate with a published standard error, and no sampling error of theirs is propagated anywhere in this paper. So the envelope has no coverage property. Where a genuine sampling interval exists---the floor reads' cluster bootstrap, and the loan- and stratum-level bootstraps of Section~\ref{sec:pathb}---I quote it as such and rank it against the envelope explicitly rather than merging the two. One global property of the design should be stated here as well as in the limitations, because every number below inherits it: \emph{no outcome-holdout months exist anywhere in this paper}, without exception. The turnover floor that sets Path~B's level is calibrated on in-window turnover, Path~A trains on nineteen of the forty-two QT months, and Path~B's level is evaluated on the window that sets it. Each of these is disclosed again where it arises, and the nineteen-month floor variant reported later is an input-stability check rather than an outcome holdout. Every recovery percentage in this paper is accordingly an in-sample or calibrated quantity in the time dimension, and should be read as a description of fit rather than as a prediction (Section~\ref{sec:limitations}).
 
