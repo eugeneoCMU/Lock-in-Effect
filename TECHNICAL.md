@@ -4759,3 +4759,31 @@ months … settle into the window's start" when a length-3 kernel reaches back
 *forcing* the 17 into the prose); and the landing had orphaned the \$1.058\$
 re-basing factor's antecedent, since inserting the both-legs block left "the
 variant" pointing at a leg whose factor is 1.034.
+
+
+## §46. V20 panel-revision runs (2026-08-04)
+
+Three spec-before-run companions to the v19 panel review, all adopted by author
+instruction, all landing on their L1 branches, gates #123–#125 + 13-test battery:
+
+- `compounding_consistent_null` (SPEC_V20_A): the microsim's monthly
+  renormalization to realized holdings (microsim_engine._simulate_regime scale
+  line) switched to scale=1.0 after the opening scale_to_holdings; verbatim
+  engine copy validated by bit-identical ON-mode reproduction (G-A1a/G-A1b).
+  CC marginal +4.84pp / $37.0B vs renormalized +5.57pp → bias +0.74pp, priced.
+- `null_floor_interval` (SPEC_V20_B, amendment A1): committed v1 wild-t floor
+  endpoints (binding R2 read) through a PCHIP on the committed floor-sweep grid
+  converted to the shared basis; null recovery interval [80.6, 88.4]% around
+  85.7%; zero new sampling; off-node agreement within floor_uncertainty's
+  committed $B tolerance.
+- `fewcluster_coverage` (SPEC_V20_C, amendment A1): cluster-level Monte Carlo on
+  the committed leverage profile; restricted Webb wild-t covers 94.3/95.1
+  (Gaussian/t5) and is the narrowest qualifying construction — the committed
+  binding layer is defended, CR1 (84.0) and the percentile (89.5) under-cover as
+  the ladder's demotions assumed. One RuntimeWarning (invalid value in matmul)
+  observed in degenerate bootstrap replicates; NaN comparisons resolve
+  conservatively (counted as non-coverage). Hardening note: replace degenerate
+  replicates explicitly if the run is ever re-cut.
+
+The manuscript's printed spec count moved 22 → 25 (caught by
+test_spec_count_claim, which exists for exactly this).

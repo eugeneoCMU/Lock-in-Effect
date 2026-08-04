@@ -133,6 +133,9 @@ BMR_RESULTS = (ROOT / "hazard" / "data"
 SMB_RESULTS = (ROOT / "hazard" / "data"
                / "settlement_months_benchmark_results.json")
 H1Z_RESULTS = ROOT / "hazard" / "data" / "h1_zero_months_diagnosis.json"
+CN_RESULTS = ROOT / "hazard" / "data" / "compounding_null_results.json"
+NFI_RESULTS = ROOT / "hazard" / "data" / "null_floor_interval_results.json"
+FCC_RESULTS = ROOT / "hazard" / "data" / "fewcluster_coverage_results.json"
 REFISWEEP_RESULTS = ROOT / "abm" / "data" / "refi_sweep_results.json"
 SHAREDLAYER_RESULTS = ROOT / "hazard" / "data" / "shared_layer_scoring_results.json"
 MARGDECOMP_RESULTS = ROOT / "hazard" / "data" / "marginal_decomposition_results.json"
@@ -3078,6 +3081,68 @@ def benchmark_monthly_rebuild_check(tex, bmr, h1z, expect):
              "counts_ok": counts_ok,
              "stale": f"{n_stale_weeks}/{n_weeks}wk {n_stale_months}/{n_months}mo",
              "reconciles_to_b": f"{abs(recon - implied):.2e}"})
+
+
+
+
+# --- V20 spec runs (gates #123/#124/#125): THE THREE PANEL COMPANIONS -------
+# Landed 2026-08-04 under SPEC_V20_{A,B,C} (adopted, committed before the runs).
+# Each is a live cross-artifact tie: the printed sentences must carry the
+# artifact's own values at the artifact's own precision, the artifact's landing
+# branch must be the L1 branch the spec names, and the artifact's own parity
+# gates must have passed. No literal lives in any of the three gates.
+def compounding_null_check(tex: str, art: dict) -> tuple[bool, dict]:
+    cc = art["compounding_consistent"]
+    span_m = (f"the marginal is $+{cc['marginal_cc_pp']:.2f}$ points "
+              f"(\\${cc['marginal_cc_b']:.1f} billion; central "
+              f"{cc['central_recovery_cc_shared_pct']:.1f}\\%, null "
+              f"{cc['null_recovery_cc_shared_pct']:.1f}\\% shared)")
+    span_b = f"bias at ${art['bias_priced_pp']:.2f}$ points"
+    ga = art["gates"]
+    info = {
+        "marginal_span": span_m in tex,
+        "bias_span": span_b in tex,
+        "branch_L1": art["landing_branch"] == "L1_within_1pp",
+        "runner_gates": bool(all(ga["G_A1a"].values()) and all(ga["G_A1b"].values())),
+        "signing_held": cc["marginal_cc_pp"]
+                        <= art["committed_anchors"]["marginal_pp"] + 1e-9,
+        "cc_pp": round(cc["marginal_cc_pp"], 4),
+    }
+    return all(v for k, v in info.items() if k != "cc_pp"), info
+
+
+def null_floor_interval_gate_check(tex: str, art: dict) -> tuple[bool, dict]:
+    lo, hi = art["binding_interval_pct"]
+    span = f"$[{lo:.1f}, {hi:.1f}]$\\%"
+    gb = art["gates"]["G_B1b_offnode"]
+    info = {
+        "span_count_ge_2": tex.count(span) >= 2,
+        "branch_L1": art["landing_branch"] == "L1_lands",
+        "no_new_sampling": bool(art["gates"]["no_new_sampling"]),
+        "offnode_within_tol": gb["max_err_pp"] <= gb["tol_pp"],
+        "interval": [round(lo, 2), round(hi, 2)],
+    }
+    return all(v for k, v in info.items() if k != "interval"), info
+
+
+def fewcluster_coverage_check(tex: str, art: dict) -> tuple[bool, dict]:
+    gsc = art["cells"]["gaussian"]["coverage_pct"]
+    t5c = art["cells"]["t5"]["coverage_pct"]
+    spans = [
+        f"covers {gsc['restricted_webb']:.1f}\\% under Gaussian and "
+        f"{t5c['restricted_webb']:.1f}\\% under $t_5$",
+        f"{gsc['cr1_t']:.1f}\\%/{t5c['cr1_t']:.1f}\\% for CR1",
+        f"{gsc['percentile']:.1f}\\%/{t5c['percentile']:.1f}\\% for the "
+        f"demoted percentile read",
+    ]
+    info = {
+        "spans_present": all(sp in tex for sp in spans),
+        "branch_L1": art["landing_branch"] == "L1_webb_retains",
+        "oracle_bounds": all(94.0 <= v <= 96.0
+                             for v in art["gates"]["G_C1_oracle"].values()),
+        "binding": art["binding_construction"],
+    }
+    return all(v for k, v in info.items() if k != "binding"), info
 
 
 def main() -> int:
@@ -7238,6 +7303,30 @@ def main() -> int:
           f"{len(VERDICT_AUDIT_SPANS) - len(_va['missing'])}/"
           f"{len(VERDICT_AUDIT_SPANS)} spans present, "
           f"missing={_va['missing'] or 'none'}")
+
+    _cn = json.loads(CN_RESULTS.read_text())
+    cn_ok, _cni = compounding_null_check(tex, _cn)
+    failures += 0 if cn_ok else 1
+    print(f"[{'PASS' if cn_ok else 'FAIL'}] compounding-consistent null "
+          f"(gate #123): cc marginal {_cni['cc_pp']}pp, "
+          f"spans={_cni['marginal_span']}/{_cni['bias_span']}, "
+          f"branch_L1={_cni['branch_L1']}, runner_gates={_cni['runner_gates']}, "
+          f"signing={_cni['signing_held']}")
+
+    _nfi = json.loads(NFI_RESULTS.read_text())
+    nfi_ok, _nfii = null_floor_interval_gate_check(tex, _nfi)
+    failures += 0 if nfi_ok else 1
+    print(f"[{'PASS' if nfi_ok else 'FAIL'}] null floor interval (gate #124): "
+          f"{_nfii['interval']}, span_x2={_nfii['span_count_ge_2']}, "
+          f"branch_L1={_nfii['branch_L1']}, "
+          f"offnode_ok={_nfii['offnode_within_tol']}")
+
+    _fcc = json.loads(FCC_RESULTS.read_text())
+    fcc_ok, _fcci = fewcluster_coverage_check(tex, _fcc)
+    failures += 0 if fcc_ok else 1
+    print(f"[{'PASS' if fcc_ok else 'FAIL'}] few-cluster coverage (gate #125): "
+          f"binding={_fcci['binding']}, spans={_fcci['spans_present']}, "
+          f"branch_L1={_fcci['branch_L1']}, oracle={_fcci['oracle_bounds']}")
 
     print(f"\n{'ALL GATES PASS' if failures == 0 else f'{failures} GATE(S) FAILED'}")
     return 0 if failures == 0 else 1

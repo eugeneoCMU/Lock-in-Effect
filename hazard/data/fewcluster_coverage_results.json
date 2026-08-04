@@ -1,0 +1,82 @@
+{
+  "mode": "fewcluster_coverage",
+  "run_tag": "fewcluster_coverage",
+  "spec": "specs/SPEC_V20_C_fewcluster_coverage_2026-08-04.md",
+  "inputs": {
+    "artifact": "floor_inference_correction_v2_results.json",
+    "sha256": "44e60a5b7153ceeee76820072f693bbc096937b0c34ed9a137a65a7514c79ddb",
+    "read": "R2_2018_gap<=-0.0025_age>=12",
+    "G": 31,
+    "mu_true_smm": 0.004257129719866917,
+    "se_cr1_smm": 0.0003053670536820312,
+    "effective_clusters": 5.871713810074108,
+    "max_leverage": 0.33233117506965454,
+    "bm_dof": 1.8953118897264436,
+    "S": 5000,
+    "B": 999,
+    "seed": 20260804
+  },
+  "gates": {
+    "G_C1_oracle": {
+      "gaussian": 94.72,
+      "t5": 95.62
+    },
+    "G_C2_design": {
+      "effective_clusters": 5.871713810074108,
+      "max_leverage": 0.33233117506965454
+    }
+  },
+  "cells": {
+    "gaussian": {
+      "coverage_pct": {
+        "oracle_z": 94.72,
+        "cr1_t": 83.98,
+        "cr2_bm": 99.46000000000001,
+        "cr3_t": 90.88000000000001,
+        "webb_wild_t": 90.84,
+        "rademacher_wild_t": 91.4,
+        "restricted_webb": 94.34,
+        "percentile": 89.52
+      },
+      "mean_width_smm": {
+        "oracle_z": 0.001197016854563781,
+        "cr1_t": 0.0009302503093651078,
+        "cr2_bm": 0.002318179823204679,
+        "cr3_t": 0.0012190472953337997,
+        "webb_wild_t": 0.00139678936893396,
+        "rademacher_wild_t": 0.00139678936893396,
+        "restricted_webb": 0.00139678936893396,
+        "percentile": 0.0008972276780967901
+      }
+    },
+    "t5": {
+      "coverage_pct": {
+        "oracle_z": 95.62,
+        "cr1_t": 85.74000000000001,
+        "cr2_bm": 99.64,
+        "cr3_t": 91.96,
+        "webb_wild_t": 91.42,
+        "rademacher_wild_t": 91.72,
+        "restricted_webb": 95.08,
+        "percentile": 89.94
+      },
+      "mean_width_smm": {
+        "oracle_z": 0.001197016854563781,
+        "cr1_t": 0.0009018626494588784,
+        "cr2_bm": 0.0022423631852998963,
+        "cr3_t": 0.0011764380279801687,
+        "webb_wild_t": 0.0013083209631723667,
+        "rademacher_wild_t": 0.0013083209631723667,
+        "restricted_webb": 0.0013083209631723667,
+        "percentile": 0.000868563173464846
+      }
+    }
+  },
+  "qualifying": [
+    "cr2_bm",
+    "restricted_webb"
+  ],
+  "binding_construction": "restricted_webb",
+  "landing_branch": "L1_webb_retains",
+  "runtime_s": 20.8
+}

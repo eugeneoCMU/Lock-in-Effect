@@ -78,17 +78,27 @@ against the post-R32 manuscript.
    abstract still states the range before the point); perturbation battery
    re-synced; ALL GATES PASS, 1093 tests green; both variants rebuild clean.
 
-## Pending author-only runs (specs committed before any run)
+## The three spec runs — EXECUTED AND LANDED (2026-08-04, all on their L1 branches)
 
-- **DRAFT_V20_A `compounding_consistent_null`** — prices the renormalization
-  upper-bound bias Table 11 discloses. Landing rules fixed ex ante, including
-  the uncomfortable branch. *(R1-W4/Q3; EIC-Q7; DA-C2.)*  **[PENDING-RUN]**
-- **DRAFT_V20_B `null_floor_interval`** — the floor read's sampling interval on
-  the null's 85.7%, same draws as the marginal layer. *(R1-Q8.)* **[PENDING-RUN]**
-- **DRAFT_V20_C `fewcluster_coverage`** — coverage simulation at the design's
-  5.9 effective clusters / 0.33 leverage; pre-committed rule can replace the
-  quoted binding interval with CR3+BM [+2.3, +9.6]. *(R1-W3/Q1; DA-C3.)*
-  **[PENDING-RUN]**
+- **SPEC_V20_A `compounding_consistent_null`** *(R1-W4/Q3; EIC-Q7; DA-C2)*:
+  re-run on each leg's own counterfactual balance path, the marginal is
+  **+4.84pp ($37.0B; central 92.3%, null 87.4% shared)** against the
+  renormalized +5.57pp — the disclosed upper-bound bias is **+0.74pp**, inside
+  the quoted interval; the signing expectation held. Reproduction gates G-A1a
+  (production bit-identity, fresh environment) and G-A1b (engine-copy fidelity)
+  both passed. Landed in §V.E; gate #123 ties the sentence to the artifact.
+- **SPEC_V20_B `null_floor_interval`** *(R1-Q8; amendment V20-B-A1)*: the floor
+  read's sampling layer propagated to the null's level gives a wild-cluster
+  interval of **[80.6, 88.4]%** on the 85.7%, from the committed v1 floor-scale
+  endpoints through the committed grid (zero new sampling). Landed in Table 1's
+  null row and §V.E; gate #124.
+- **SPEC_V20_C `fewcluster_coverage`** *(R1-W3/Q1; DA-C3; amendment V20-C-A1)*:
+  the designed coverage simulation at the committed leverage profile (31
+  clusters, 5.9 effective, max leverage 0.33; 5,000×999) covers **94.3%/95.1%**
+  (Gaussian/t5) for the committed restricted Webb construction — against
+  84.0%/85.7% for CR1, 89.5%/89.9% for the demoted percentile, 99.5%/99.6%
+  (over-covering, wider) for CR2+BM. The binding-layer choice is DEFENDED by
+  measured coverage; **no quoted number changes**. Landed in §V.E; gate #125.
 
 ## Phase-3 additions landed (2026-08-04, second commit)
 
