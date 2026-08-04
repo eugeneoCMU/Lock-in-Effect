@@ -2,7 +2,19 @@
 
 **Status: ADOPTED 2026-08-04 by author instruction ("run all of them"); committed BEFORE the run per Protocol B5 / TECHNICAL §43. NOTE: §3's rule can change the paper's quoted binding interval; the author's instruction covers all three specs including this one. Executed in-session under the guarded-runner pattern.**
 
-**Amendment log:** none.
+**Amendment log:**
+- **V20-C-A1 (2026-08-04, before the run).** Three implementation reductions,
+  each recorded before execution: (i) the DGP is simulated at the CLUSTER level
+  on the committed leverage profile (v2 artifact `leverages_h`, R2 read) — the
+  sufficient level, since every evaluated construction operates on cluster sums;
+  the intra-cluster correlation named in the draft is subsumed in the
+  cluster-level residual variance, whose truth scale is set to the committed CR1
+  SE (also the oracle's known variance). (ii) Coverage of the restricted
+  wild-t inversion is evaluated as the test at the truth (exactly interval
+  coverage for an inversion, with no interval search). (iii) The percentile rung
+  is the cluster-pairs bootstrap percentile. The empirical design matrix
+  requirement in G-C2 binds on the committed leverage profile (effective
+  clusters and maximum leverage), which the intercept-only design determines.
 
 **Panel trace:** R1 W3 + Q1 (v19 panel, 2026-08-04); DA C3 (adjacent). The floor
 read rests on 31 nominal clusters worth 5.9 effective (Herfindahl-inverse) with

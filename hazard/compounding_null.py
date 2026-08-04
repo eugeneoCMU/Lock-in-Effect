@@ -67,9 +67,10 @@ from extension_risk import (                # noqa: E402
 )
 from literature_hazard import rothstein_beta1   # noqa: E402
 from loan_sample import load_or_build_loan_sample   # noqa: E402
-from macro import calculate_dynamic_friction, fetch_data   # noqa: E402
+from macro import (                         # noqa: E402
+    calculate_dynamic_friction, fetch_data, fetch_soma_mbs_monthly,
+)
 from markov import load_transition_matrix   # noqa: E402
-from soma_data import fetch_soma_mbs_monthly    # noqa: E402
 
 DATA = HAZ / "data"
 OUT = DATA / "compounding_null_results.json"
@@ -316,8 +317,8 @@ def main() -> None:
         "gates": {"G_A1a": ga1a, "G_A1b": ga1b, "G_A2": ga2,
                   "shared_layer_path_invariance": True},
         "production_renormalized": {
-            "central": {k: v for k, v in prod_c.items()},
-            "null": {k: v for k, v in prod_n.items()},
+            "central": {k: v for k, v in prod_c.items() if not k.startswith("_")},
+            "null": {k: v for k, v in prod_n.items() if not k.startswith("_")},
             "central_shared_share_pct": prod_c_sh_pct,
             "null_shared_share_pct": prod_n_sh_pct,
             "marginal_pp_shared": marginal_prod_pp,
