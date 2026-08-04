@@ -2,7 +2,22 @@
 
 **Status: ADOPTED 2026-08-04 by author instruction ("run all of them"); committed BEFORE the run per Protocol B5 / TECHNICAL §43. Executed in-session under the guarded-runner pattern.**
 
-**Amendment log:** none.
+**Amendment log:**
+- **V20-B-A1 (2026-08-04, before the run).** The drafted §1 named
+  `bootstrap_pathb_cluster_draws*.csv` as the sampling input; that is the Path B
+  stratum-cluster layer, not the floor read's. The floor read's sampling layer
+  enters the paper through the committed floor-scale interval endpoints of
+  `floor_inference_correction_results.json` (binding read R2, whose marginal-scale
+  image is the quoted [+2.9, +8.7]). The runner therefore maps THOSE committed
+  endpoints — wild-t plus the CR1/CR2/CR3 rungs — through a PCHIP built on the
+  committed floor-sweep grid converted to the shared basis, exactly the
+  floor_uncertainty.py construction for the marginal (same grid, same
+  edge-truncation convention, same committed $B off-node tolerance). This is
+  STRONGER than drafted: zero new sampling, endpoint mapping commutes through the
+  monotone map, and G-B2's draw-hash check is replaced by sha-pins on the three
+  committed input artifacts. G-B1's "bit-identical at the point" becomes: node
+  reproduction exact to 1e-12 plus off-node agreement with the committed
+  oos_identification null rows within floor_uncertainty's committed tolerance.
 
 **Panel trace:** R1 Q8 (v19 panel, 2026-08-04). The rate-inelastic null's 85.7%
 recovery carries a floor-range band (83.9–86.9% across the off-window floor range)
