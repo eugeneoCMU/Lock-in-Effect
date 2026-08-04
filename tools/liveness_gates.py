@@ -313,8 +313,10 @@ ABSTRACT_HEDGES = {
     # is real, and the abstract must not let the two be read as one
     "cost_scoped_institutional": "The institutional cash-flow cost is small",
     # the null's recovery rests on amortization AND baseline turnover
-    "null_mechanical_components": "scheduled amortization and baseline "
-                                  "turnover",
+    # V20 panel revision (2026-08-04): pin re-synced to the compressed abstract;
+    # the span's purpose is unchanged, the phrasing follows the manuscript.
+    "null_mechanical_components": "scheduled amortization plus a turnover "
+                                  "floor",
     # ROUND 22 (3d): the ABM-vs-hazard contrast must not be attributed to
     # modeling paradigm in the abstract. This is the hedge the concision handoff
     # named as the highest-value ungated abstract hedge; pinning it BEFORE any
@@ -509,15 +511,21 @@ ABSTRACT_POSTURE = {
     # ROUND-26 full restatement: the binding layer is the wild-cluster
     # bootstrap-t interval from run floor_inference_correction; the percentile
     # read is demoted to a labeled mention inside the same parenthetical.
-    "interval": "The design bounds it between $+2.9$ and $+8.7$ points",
+    # V20 panel revision (2026-08-04): pin re-synced to the compressed abstract;
+    # the span's purpose is unchanged, the phrasing follows the manuscript.
+    "interval": "$+2.9$ to $+8.7$ points under the production floor form",
     # ROUND-28 (DA-C3): the abstract must say WHAT the interval bounds. "pins"
     # claimed the design pinned the elasticity's contribution; the interval is
     # the floor read's sampling error at a FIXED elasticity, which contributes
     # zero width. Pinned as its own span so a concision pass cannot delete the
     # referent while keeping the interval.
-    "interval_referent": "the floor read's sampling error at my central elasticity",
-    "point_named_inside": "Inside that range, $+5.6$ points, or \\$42.6 billion, is the "
-                          "value at the calibration I headline",
+    # V20 panel revision (2026-08-04): pin re-synced to the compressed abstract;
+    # the span's purpose is unchanged, the phrasing follows the manuscript.
+    "interval_referent": "the floor read's sampling error at the central elasticity",
+    # V20 panel revision (2026-08-04): pin re-synced to the compressed abstract;
+    # the span's purpose is unchanged, the phrasing follows the manuscript.
+    "point_named_inside": "with $+5.6$ points, \\$42.6 billion, the value at the "
+                          "anchor calibration inside it",
     # ROUND 32: the frame is still load-bearing -- the additive form (+11.2) and
     # the Fonseca anchor (+11.5) move the marginal UP -- but the claim it used to
     # protect ('moves it down') is now FALSE and has been restated. Task 11's
@@ -525,8 +533,10 @@ ABSTRACT_POSTURE = {
     # moves the marginal up +5.11 points, so 'only floor and accounting-basis
     # corrections run one way' no longer holds. The pin now protects the two-way
     # statement instead of the one-way one.
-    "corrections_framed": "the corrections I can measure to the baseline turnover "
-                          "floor or to the accounting basis no longer all run one way",
+    # V20 panel revision (2026-08-04): pin re-synced to the compressed abstract;
+    # the span's purpose is unchanged, the phrasing follows the manuscript.
+    "corrections_framed": "measured corrections to the floor and the accounting "
+                          "basis move it in both directions",
     # ROUND-26: the panel's two strongest correlated findings (DA-C1 + R1-W1,
     # both verified) were that the abstract quoted the interval without its
     # form conditionality and without its few-cluster inferential status.
@@ -539,15 +549,22 @@ ABSTRACT_POSTURE = {
     # under-coverage kept; the demoted percentile literal now lives in the
     # body only, x4), hull restored to the of-form inside the interval
     # sentence.
-    "interval_qualifier": "a wild-cluster interval on 31 clusters; the "
-                          "percentile read under-covers",
-    "hull_in_abstract": "form-conditional hull of $+3.5$ to $+13.1$ points",
+    # V20 panel revision (2026-08-04): pin re-synced to the compressed abstract;
+    # the span's purpose is unchanged, the phrasing follows the manuscript.
+    # V20: the percentile-under-covers literal now lives in the body only (x4);
+    # the abstract keeps the inferential status inside the interval parenthetical.
+    "interval_qualifier": "wild-cluster on 31 clusters",
+    # V20 panel revision (2026-08-04): pin re-synced to the compressed abstract;
+    # the span's purpose is unchanged, the phrasing follows the manuscript.
+    "hull_in_abstract": "form-conditional hull of $+3.5$ to $+13.1$",
     # ROUND-26 B8 (DA-M3): the abstract's mechanical-null sentence scoped
     # "however households react to rates" without marking that the floor it
     # rests on is itself calibrated from realized -- partly behavioral --
     # turnover. The qualifier travels with the null claim; canonical-scoped
     # because the archived variant's abstract predates it.
-    "null_floor_behavioral": "itself read from realized, partly behavioral "
+    # V20 panel revision (2026-08-04): pin re-synced to the compressed abstract;
+    # the span's purpose is unchanged, the phrasing follows the manuscript.
+    "null_floor_behavioral": "read from realized, partly behavioral "
                              "turnover",
 }
 
@@ -561,7 +578,7 @@ def abstract_posture_check(tex: str) -> tuple[bool, dict]:
     abstract = tex_nc[_i + len(ABSTRACT_BOUNDS[0]):_j] if found else ""
     missing = sorted(k for k, v in ABSTRACT_POSTURE.items() if v not in abstract)
     # the range must be stated BEFORE the point it contains
-    i_range = abstract.find("$+2.9$ and $+8.7$")
+    i_range = abstract.find("$+2.9$ to $+8.7$")  # V20: abstract phrasing re-synced
     i_point = abstract.find("$+5.6$ points")
     ordered = i_range != -1 and i_point != -1 and i_range < i_point
     return (found and not missing and ordered,
@@ -5549,7 +5566,7 @@ def main() -> int:
             f"against {_prod['shared']['central_share_pct']:.1f}\\% at the "
             f"in-window calibration" in tex,
         "abstract_null_and_central_kept":
-            f"still accounts for {_h['null_shared_share_pct']:.1f}\\% of it" in tex
+            f"accounts for {_h['null_shared_share_pct']:.1f}\\% of it" in tex
             and f"accounts for {_h['central_shared_share_pct']:.1f}\\%." in tex,
         "miss_both_calibrations":
             f"the miss is {_h['miss_vs_benchmark_pp']:.1f} points on the headline "

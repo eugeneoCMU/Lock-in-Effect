@@ -72,19 +72,16 @@ def test_point_before_range_fails(tex, abstract):
     """Put the point back in front, keeping every literal. This is the exact
     arrangement round 24b removed, and a span-presence check accepts it."""
     mutated = (
-        " \\noindent Baseline turnover (itself read from realized, "
-        "partly behavioral turnover) sets the floor. "
-        "Lock-in itself adds $+5.6$ points, or \\$42.6 billion. "
-        "What lock-in itself adds is a range rather than a number. "
-        "The design bounds it between $+2.9$ and $+8.7$ points under its "
-        "production floor form (the floor read's sampling error at my "
-        "central elasticity; a wild-cluster interval on 31 clusters; the "
-        "percentile read under-covers), with a "
-        "form-conditional hull of $+3.5$ to $+13.1$ points, and it identifies "
-        "levels only. Inside that range, $+5.6$ points, or \\$42.6 billion, is "
-        "the value at the calibration I headline, and the corrections I can "
-        "measure to the baseline turnover floor or to the accounting basis "
-        "no longer all run one way. ")
+        " \\noindent A turnover floor read from realized, partly behavioral "
+        "turnover sets the baseline. "
+        "Lock-in itself adds, with $+5.6$ points, \\$42.6 billion, the value "
+        "at the anchor calibration inside it, most of the margin. "
+        "What lock-in itself adds is a range rather than a number: "
+        "$+2.9$ to $+8.7$ points under the production floor form (the floor "
+        "read's sampling error at the central elasticity, wild-cluster on 31 "
+        "clusters), a form-conditional hull of $+3.5$ to $+13.1$; measured "
+        "corrections to the floor and the accounting basis move it in both "
+        "directions. ")
     ok, info = abstract_posture_check(_swap(tex, abstract, mutated))
     assert not ok, "gate #99 accepted a point-first abstract"
     assert info["missing"] == [] and not info["ordered"], (
@@ -130,8 +127,8 @@ def test_commented_out_posture_fails(tex, abstract):
 # claim.
 # --------------------------------------------------------------------------
 @pytest.mark.parametrize("old,new", [
-    ("however the rate-responsive margin behaves",
-     "however the rate-responsive margin moves"),
+    ("the design identifies a marginal, not a level",
+     "the design identifies a marginal --- not a level"),
     ("The cost to households who could not move is real.",
      "The cost to households who could not move is real and unevenly borne."),
 ])
