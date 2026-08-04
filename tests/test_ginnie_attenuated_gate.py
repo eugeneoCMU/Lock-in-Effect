@@ -174,12 +174,13 @@ def test_the_run_tag_must_also_be_indexed():
     Removing the LAST occurrence leaves the bracket line intact (prose_lines 1,
     every span present) and trips run_tag_indexed alone. The assertion on
     missing is what makes this test bite the rule it names."""
-    # THREE sites since the tab:assembly bracket row landed: prose (.tex:283),
-    # the assembly row, then tab:runindex LAST -- so rfind still targets the
-    # index row and the trace above still holds.
-    assert TEX.count(TAG) == 3, "prose + tab:assembly + tab:runindex expected"
+    # V20 relocation: the prose citation moved WITH its paragraph to
+    # Appendix app:params, so file order is now assembly row, tab:runindex,
+    # then prose LAST. The index row is the MIDDLE occurrence; removing that
+    # one is what trips run_tag_indexed alone.
+    assert TEX.count(TAG) == 3, "assembly + tab:runindex + prose expected"
     assert VARIANT.count(TAG) == 3
-    i = TEX.rfind(TAG)
+    i = TEX.find(TAG, TEX.find(TAG) + 1)
     mutated = TEX[:i] + TEX[i + len(TAG):]
     ok, info = ginnie_attenuated_check(mutated, G, OV, GOF)
     assert not ok, "the tab:runindex row is not required"
@@ -190,10 +191,11 @@ def test_the_run_tag_must_also_be_indexed():
 def test_removing_the_prose_citation_fails_on_the_prose_line_rule():
     """The complementary failure mode, documented so the two are not confused.
 
-    TRACE: removing the FIRST tag occurrence strips the citation from .tex:283,
-    so no line carries both the tag and '0.797', len(lines) == 0, and the check
-    short-circuits with missing == ['prose_line']."""
-    i = TEX.find(TAG)
+    TRACE (v20): the prose citation lives in Appendix app:params since the
+    relocation, LAST in file order; removing the LAST occurrence strips it,
+    so no line carries both the tag and '0.797', len(lines) == 0, and the
+    check short-circuits with missing == ['prose_line']."""
+    i = TEX.rfind(TAG)
     mutated = TEX[:i] + TEX[i + len(TAG):]
     ok, info = ginnie_attenuated_check(mutated, G, OV, GOF)
     assert not ok
