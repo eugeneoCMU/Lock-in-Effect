@@ -90,18 +90,42 @@ against the post-R32 manuscript.
   quoted binding interval with CR3+BM [+2.3, +9.6]. *(R1-W3/Q1; DA-C3.)*
   **[PENDING-RUN]**
 
-## Deferred to the restructure **[PHASE-3]**
+## Phase-3 additions landed (2026-08-04, second commit)
 
-Main text ≤ 50 pp.; ABM compressed to a subsection + appendix and the
-conclusion's "two central findings" framing conditioned (EIC-W2; R1-W5; DA-C4);
-audit apparatus to the replication package (EIC-W1; R2-W5); Tables 5/9 adjacent
-to §V.E; run tags out of prose; household-side bound + FICO/LTV tilt promotion +
-renters sentence (R3-W1/W3); taxpayer-carry paragraph (R3-W2); policy box
-(R3-W5); deliberate-non-bindingness paragraph + partial-equilibrium boundary in
-VI.B (R3-W4); remaining P3 text pass; new references (Fuster et al. 2013;
-Hancock & Passmore 2011; Amromin et al. 2020; Song & Zhu 2019 RFS 32(8)
-2955–2996; optionally McPhail–Schnabl–Tuckman — **correct title: "Do Banks Hedge
-Using Interest Rate Swaps?", NBER WP 31166**).
+- **Household-side treatment** (R3-W1): the existing constrained-move counts
+  (per-year counts; 5.7–6.3% of the 4.08M annual sale run rate) now carry the
+  welfare attribution sentence (magnitude attributed to Gerardi et al. 2024
+  rather than measured), and the conclusion states the distributional tilt
+  (below-740-FICO 1.23–1.26×, above-80-LTV 1.23×) with the assumability
+  carve-out's bounded status (R3-W3).
+- **Taxpayer-carry back-of-envelope** (R3-W2/Q1): ~250–300bp funding spread
+  over the 2.49% WAC → order-of-$1B/year negative carry on the $42.6B of
+  trapped roll-off, stated as a remittances-denominated restatement of the WAL
+  extension with the face-versus-cash incidence caveat.
+- **Policy take-away paragraph** (R3-W5/Q5): what transfers (floor band in CPR
+  units, scheduled-amortization path, elasticity band), what must not travel
+  alone (+5.6 anchor; $764.7B), which accounting basis answers which question.
+- **Deliberate-non-bindingness + partial-equilibrium boundary in VI.B**
+  (R3-W4/Q3/Q4; DA alt-path 3): non-bindingness as a possible choice; the
+  FOMC's primarily-Treasuries composition objective as the standing that
+  survives it; spread-feedback boundary stated where the recommendations are.
+- **Factor-paydown note** (R2 institutional #2/Q3): the CUSIP factor-series
+  construction named as the superior path and why it was not taken.
+- **References added and cited**: Fuster et al. (2013) at the primary–secondary
+  spread decomposition; Hancock & Passmore (2011) at the QE rate-transmission
+  sentence; Amromin, Bhutta & Keys (2020) at the moving/refi-mix bracket (with
+  the "loan-purpose" → "termination-reason" wording fix); Song & Zhu (2019,
+  RFS 32(8), 2955–2996) at the TBA financing discussion.
+
+## Deferred to the dedicated compression session **[PHASE-3b]**
+
+Main text ≤ 50 pp. (global prose compression); ABM section + VII.C tightening
+and the conclusion's "two central findings" framing conditioned (EIC-W2; R1-W5;
+DA-C4); audit apparatus migrated to the replication package with gate #104
+rescoped to the migrated file (EIC-W1; R2-W5); Tables 5/9 relocated adjacent to
+§V.E; run tags out of prose; editions + split recut after pagination settles.
+Optional additional reference: McPhail–Schnabl–Tuckman — **correct title: "Do
+Banks Hedge Using Interest Rate Swaps?", NBER WP 31166**.
 
 ## Responses to the Devil's Advocate CRITICALs
 
