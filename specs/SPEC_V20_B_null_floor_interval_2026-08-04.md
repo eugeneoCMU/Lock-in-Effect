@@ -1,7 +1,6 @@
 # DRAFT SPEC V20-B — floor sampling interval on the null's recovery (`null_floor_interval`)
 
-**Status: DRAFT — awaiting author adoption; promote to `SPEC_` with date before any
-run. Author-only execution.**
+**Status: ADOPTED 2026-08-04 by author instruction ("run all of them"); committed BEFORE the run per Protocol B5 / TECHNICAL §43. Executed in-session under the guarded-runner pattern.**
 
 **Amendment log:** none.
 

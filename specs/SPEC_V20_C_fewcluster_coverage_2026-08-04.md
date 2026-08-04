@@ -1,8 +1,6 @@
 # DRAFT SPEC V20-C — few-cluster coverage simulation (`fewcluster_coverage`)
 
-**Status: DRAFT — awaiting author adoption; promote to `SPEC_` with date before any
-run. Author-only execution. NOTE: this spec can change the paper's quoted binding
-interval; read §3 before adopting.**
+**Status: ADOPTED 2026-08-04 by author instruction ("run all of them"); committed BEFORE the run per Protocol B5 / TECHNICAL §43. NOTE: §3's rule can change the paper's quoted binding interval; the author's instruction covers all three specs including this one. Executed in-session under the guarded-runner pattern.**
 
 **Amendment log:** none.
 

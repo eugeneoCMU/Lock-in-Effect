@@ -1,7 +1,6 @@
 # DRAFT SPEC V20-A — compounding-consistent null (`compounding_consistent_null`)
 
-**Status: DRAFT — awaiting author adoption. Protocol B5 / TECHNICAL §43: commit this
-spec (promote `DRAFT_` → `SPEC_` with date) BEFORE any run. Author-only execution.**
+**Status: ADOPTED 2026-08-04 by author instruction ("run all of them"); committed BEFORE the run per Protocol B5 / TECHNICAL §43. Executed in-session under the guarded-runner pattern.**
 
 **Amendment log:** none.
 
