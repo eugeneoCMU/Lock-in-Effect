@@ -238,7 +238,55 @@ standalone note), which is a publication-strategy decision, not a cut.
 
 ---
 
-## 6. Verification log for the landed trims
+## 6. ADDENDUM 2026-08-05 — tier (b) EXECUTED on "continue"
+
+Landed (both variants, opus-inline-drafted, workflow-refuted by 4 group
+refuters + a completeness critic, 2 blocking + 8 advisory findings all
+applied):
+
+- **b1 ✓** tab:ladder + its notes → app:floormech, byte-identical, with the
+  receiving appendix's scope sentence extended per the critic.
+- **b3 ✓** the headline-row calibration catalogue (Table 7 notes tail) →
+  app:floormech as a \paragraph; the headline cell's what-it-prices
+  parenthetical compressed with the read-to-read exclusion restored as an
+  appended notes sentence (the refuter caught that the cut deleted its only
+  corpus instance).
+- **b2 partial ✓** Table 1: Production-ABM and household-side cells
+  compressed (the Danish cell is pinned wall-to-wall — 9 gate spans — and
+  was left whole). Refuters corrected two defects in my own compression:
+  the 5.7–6.3\% run-rate share had been mis-scoped onto the bracket counts
+  (it belongs to the grossed $s=1$ bound), and the same-households
+  non-additivity rationale had been dropped corpus-wide.
+- **b4 half ✓** VII.E curtailment demonstration runs → app:params (lead-in
+  anchored to the VII.E identity per the refuter). **The VII.B settlement-edge
+  relocation was REVERTED by gate design:** gate #121 asserts the cap-only
+  \$42.0B account *leads* the both-legs direction sentence in reading order
+  (`cap_only_leads`), and its `why_asymmetric` span is byte-pinned — the gate
+  is not stale; it encodes intended presentation. Reverted, not re-synced.
+- **b5 partial ✓** V.E fourth-qualification withdraw-restatement compressed
+  to a pointer — and the refuter exposed a pre-existing defect: the
+  "Section III.B itself judges the less faithful" attribution was STALE
+  (III.B never made the judgment; git pickaxe confirms). The judgment is now
+  stated once, in III.B, at the unpinned allocation-contrast sentence.
+  Graybill dedup landed with the transitive object restored. The
+  **envelope third-statement dedup is withdrawn from the menu**: gate #67
+  pins the 11.06-width disclosure at five contextful sites by design ("no
+  site can be deleted behind the others" — the conclusion clause was the
+  round-20 relabel's point).
+- **Float fix ✓** \clearpage before the bibliography: Tables 4–9 no longer
+  trail the references (References now open p. 90).
+- Skipped by judgment: b6 (VI.B cap-grid — pinned and panel-central EIC-Q5
+  content) and the ablation-list dedup (pin-dense at 2 of 3 sites).
+
+**State after (a)+(b):** main text ≈44.9k words (program convention;
+−~1.7k today), built **95pp local main text** (banner p. 96), documents
+139/140/13pp, 0-undefined; editions clean at the pinned counts
+{24/13/8/2/42}; split recut 1–95 / 96–139; 128/128 gates, 1,109 tests,
+green at every group boundary. Cloud-equivalent ≈ 81pp. The §5 arithmetic
+otherwise stands: what remains of (b) is ~1pp of small dedups; the distance
+to ≤50pp cloud is tier (c) plus, decisively, the companion-paper split.
+
+## 7. Verification log for the landed trims
 
 - Pin scan: AST string-literal extraction over `tools/liveness_gates.py` +
   `tests/*.py` (7,541 literals ≥10 chars); zero literals intersect any

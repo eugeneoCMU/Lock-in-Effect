@@ -30,6 +30,11 @@ from pathlib import Path
 # transform-slot / Fonseca-corroboration), whose every clause duplicated the
 # adjacent body text, is deleted, so footnotes 3 -> 2 (fn:manifest and the
 # sec:method-abm payoff-rule footnote remain).
+# V20 fresh-eyes tier (b): tab:ladder + its notes and the headline-row
+# calibration catalogue relocated to app:floormech, the VII.E curtailment
+# demonstration runs to app:params -- relocations only, so every count is
+# unchanged (a planned VII.B settlement-edge relocation was REVERTED when
+# gate #121's cap-only-account-leads ordering refused it).
 WANT = {"tables": 24, "figures": 13, "equations": 8, "footnotes": 2,
         "headings": 42}
 
