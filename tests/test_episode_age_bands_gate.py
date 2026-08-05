@@ -68,9 +68,13 @@ from liveness_gates import (  # noqa: E402
     episode_age_bands_check,
 )
 
-TEX = (ROOT / "paper" / "v18" / "revised_paper_v18.tex").read_text()
+# V20 closing-session rescope: app:ledger/app:verdicts live in the standalone
+# replication_appendices.tex; the gated corpus is manuscript + that file.
+TEX = ((ROOT / "paper" / "v18" / "revised_paper_v18.tex").read_text()
+       + "\n" + (ROOT / "paper" / "v18" / "replication_appendices.tex").read_text())
 VARIANT = (ROOT / "paper" / "v18"
-           / "revised_paper_v18_long_abstract.tex").read_text()
+           / "revised_paper_v18_long_abstract.tex").read_text() \
+    + "\n" + (ROOT / "paper" / "v18" / "replication_appendices.tex").read_text()  # V20 rescope
 A = json.loads((ROOT / "hazard" / "data"
                 / "episode_gradient_age_bands_results.json").read_text())
 W = json.loads((ROOT / "hazard" / "data"

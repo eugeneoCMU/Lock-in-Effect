@@ -34,10 +34,14 @@ from liveness_gates import (  # noqa: E402
     ginnie_attenuated_check,
 )
 
-TEX = (ROOT / "paper" / "v18" / "revised_paper_v18.tex").read_text()
+# V20 closing-session rescope: app:ledger/app:verdicts live in the standalone
+# replication_appendices.tex; the gated corpus is manuscript + that file.
+TEX = ((ROOT / "paper" / "v18" / "revised_paper_v18.tex").read_text()
+       + "\n" + (ROOT / "paper" / "v18" / "replication_appendices.tex").read_text())
 OPENER = "Pure conventional-share scaling is what a gap-inert Ginnie share gives."
 VARIANT = (ROOT / "paper" / "v18"
-           / "revised_paper_v18_long_abstract.tex").read_text()
+           / "revised_paper_v18_long_abstract.tex").read_text() \
+    + "\n" + (ROOT / "paper" / "v18" / "replication_appendices.tex").read_text()  # V20 rescope
 HAZ = ROOT / "hazard" / "data"
 G = json.loads((HAZ / "ginnie_overlay_attenuated_results.json").read_text())
 OV = json.loads((HAZ / "ginnie_cpr_overlay_results.json").read_text())
@@ -175,12 +179,13 @@ def test_the_run_tag_must_also_be_indexed():
     every span present) and trips run_tag_indexed alone. The assertion on
     missing is what makes this test bite the rule it names."""
     # V20 relocation: the prose citation moved WITH its paragraph to
-    # Appendix app:params, so file order is now assembly row, tab:runindex,
-    # then prose LAST. The index row is the MIDDLE occurrence; removing that
-    # one is what trips run_tag_indexed alone.
-    assert TEX.count(TAG) == 3, "assembly + tab:runindex + prose expected"
+    # Appendix app:params; V20 CLOSING RESCOPE: tab:runindex migrated to
+    # replication_appendices.tex, which the gated corpus appends LAST, so
+    # file order is now assembly row, prose, then the index row LAST.
+    # Removing the LAST occurrence is what trips run_tag_indexed alone.
+    assert TEX.count(TAG) == 3, "assembly + prose + tab:runindex expected"
     assert VARIANT.count(TAG) == 3
-    i = TEX.find(TAG, TEX.find(TAG) + 1)
+    i = TEX.rfind(TAG)
     mutated = TEX[:i] + TEX[i + len(TAG):]
     ok, info = ginnie_attenuated_check(mutated, G, OV, GOF)
     assert not ok, "the tab:runindex row is not required"
@@ -192,10 +197,12 @@ def test_removing_the_prose_citation_fails_on_the_prose_line_rule():
     """The complementary failure mode, documented so the two are not confused.
 
     TRACE (v20): the prose citation lives in Appendix app:params since the
-    relocation, LAST in file order; removing the LAST occurrence strips it,
-    so no line carries both the tag and '0.797', len(lines) == 0, and the
-    check short-circuits with missing == ['prose_line']."""
-    i = TEX.rfind(TAG)
+    relocation; after the closing-session corpus rescope the runindex row
+    (in replication_appendices.tex) sits LAST in the corpus, so the prose
+    citation is the MIDDLE occurrence; removing it leaves no line carrying
+    both the tag and '0.797', len(lines) == 0, and the check short-circuits
+    with missing == ['prose_line']."""
+    i = TEX.find(TAG, TEX.find(TAG) + 1)
     mutated = TEX[:i] + TEX[i + len(TAG):]
     ok, info = ginnie_attenuated_check(mutated, G, OV, GOF)
     assert not ok

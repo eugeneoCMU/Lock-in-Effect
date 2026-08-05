@@ -3146,7 +3146,13 @@ def fewcluster_coverage_check(tex: str, art: dict) -> tuple[bool, dict]:
 
 
 def main() -> int:
-    tex = TEX.read_text()
+    # V20 CLOSING SESSION RESCOPE: app:ledger and app:verdicts migrated to the
+    # standalone paper/v18/replication_appendices.tex (EIC-W1/R2-W5; byte-identical
+    # bodies, xr-resolved refs). The gated corpus for span, count, run-citation,
+    # runindex-row, and verdict-ledger checks is the manuscript PLUS that file,
+    # which is the same content the suite gated before the migration. Abstract-
+    # scoped and variant-diff gates below still read the manuscript files alone.
+    tex = TEX.read_text() + "\n" + (ROOT / "paper" / "v18" / "replication_appendices.tex").read_text()
     failures = 0
 
     for phrase in ZERO_COUNT:

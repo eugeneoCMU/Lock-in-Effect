@@ -37,8 +37,10 @@ MAX_PATH = ROOT / "hazard" / "data" / "scaled_null_housing_activity_results.json
 ADD_PATH = (ROOT / "hazard" / "data"
             / "scaled_null_housing_activity_additive_results.json")
 
-TEXT = TEX.read_text()
-VARIANT = VARIANT_PATH.read_text()
+# V20 closing-session rescope: the runindex row lives in replication_appendices.tex
+_REPLAPPX = (ROOT / "paper" / "v18" / "replication_appendices.tex").read_text()
+TEXT = TEX.read_text() + "\n" + _REPLAPPX
+VARIANT = VARIANT_PATH.read_text() + "\n" + _REPLAPPX
 MAXB = MAX_PATH.read_bytes()
 A = json.loads(ADD_PATH.read_text())
 MX = json.loads(MAXB)

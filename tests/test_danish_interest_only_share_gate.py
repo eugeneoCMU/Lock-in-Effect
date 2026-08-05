@@ -47,9 +47,13 @@ from liveness_gates import (  # noqa: E402
     danish_interest_only_share_check,
 )
 
-TEX = (ROOT / "paper" / "v18" / "revised_paper_v18.tex").read_text()
+# V20 closing-session rescope: app:ledger/app:verdicts live in the standalone
+# replication_appendices.tex; the gated corpus is manuscript + that file.
+TEX = ((ROOT / "paper" / "v18" / "revised_paper_v18.tex").read_text()
+       + "\n" + (ROOT / "paper" / "v18" / "replication_appendices.tex").read_text())
 VARIANT = (ROOT / "paper" / "v18"
-           / "revised_paper_v18_long_abstract.tex").read_text()
+           / "revised_paper_v18_long_abstract.tex").read_text() \
+    + "\n" + (ROOT / "paper" / "v18" / "replication_appendices.tex").read_text()  # V20 rescope
 BIB = (ROOT / "paper" / "v18" / "references.bib").read_text()
 GATES_SRC = (ROOT / "tools" / "liveness_gates.py").read_text()
 IO = json.loads((ROOT / "hazard" / "data"

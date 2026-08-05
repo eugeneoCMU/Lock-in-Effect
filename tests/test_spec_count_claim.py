@@ -18,6 +18,7 @@ import pytest
 
 ROOT = Path(__file__).resolve().parents[1]
 SPECS = ROOT / "specs"
+_REPLAPPX = (ROOT / "paper" / "v18" / "replication_appendices.tex").read_text()
 TEX = [ROOT / "paper" / "v18" / "revised_paper_v18.tex",
        ROOT / "paper" / "v18" / "revised_paper_v18_long_abstract.tex"]
 
@@ -43,7 +44,9 @@ def test_printed_spec_count_matches_the_directory(tex_path: Path) -> None:
     assert n in NUMBER_WORDS, (
         f"specs/ holds {n} SPEC files, outside this test's number-word table; extend "
         f"NUMBER_WORDS and update the manuscript sentence together")
-    hits = CLAIM.findall(tex_path.read_text())
+    # V20 closing-session rescope: the claim sentence lives in app:verdicts,
+    # migrated to replication_appendices.tex; each variant ships with it.
+    hits = CLAIM.findall(tex_path.read_text() + _REPLAPPX)
     assert len(hits) == 1, (
         f"{tex_path.name}: expected exactly one spec-count claim, found {len(hits)}: {hits}")
     assert hits[0] == NUMBER_WORDS[n], (
@@ -53,6 +56,6 @@ def test_printed_spec_count_matches_the_directory(tex_path: Path) -> None:
 
 
 def test_both_variants_agree_on_the_count() -> None:
-    words = [CLAIM.findall(p.read_text())[0] for p in TEX]
+    words = [CLAIM.findall(p.read_text() + _REPLAPPX)[0] for p in TEX]
     assert len(set(words)) == 1, (
         f"the two manuscript variants disagree on the spec count: {words}")
