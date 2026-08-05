@@ -141,10 +141,17 @@ against the manuscript, with the gate corpus rescoped to read the migrated
 file (EIC-W1; R2-W5). Tables 5/9 sit adjacent to §V.E. Thirty-seven run-tag
 parentheticals are out of the prose (the remainder are gate- or test-pinned,
 in table apparatus, or carry content beyond the tag). Editions and the
-main/online split are recut on the settled pagination (main text pp. 1–97
-local-engine; the compression floor below ~46.6k words is set by the pinned
-disclosure apparatus — cutting further means deleting measured results, an
-authorial scope decision recorded rather than taken).
+main/online split are recut on the settled pagination. A fresh-eyes review
+pass (2026-08-05) then removed a further ~2.0k words of pure restatement and
+relocated the inference-ladder and calibration-catalogue apparatus to the
+online appendix, bringing the main text to ~44.9k words and pp. 1–95
+local-engine (≈81 cloud-equivalent), with the deferred floats now placed
+before the references; the compression floor below ~45k words is set by the
+pinned disclosure apparatus — two liveness gates refuse further deletion by
+design (the cap-only-account ordering gate and the five-site envelope-width
+gate) — so cutting further means deleting measured results, an authorial
+scope decision recorded rather than taken
+(`specs/RECORD_v20_fresh_eyes_shortening_menu.md`).
 Optional additional reference: McPhail–Schnabl–Tuckman — **correct title: "Do
 Banks Hedge Using Interest Rate Swaps?", NBER WP 31166**.
 
