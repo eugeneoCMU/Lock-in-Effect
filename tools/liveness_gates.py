@@ -454,8 +454,10 @@ ASSEMBLY_SPANS = {
     # ROUND-28 (R1-W1 / C3 branch a): the ranking is now scoped — the PSA
     # baseline-level convention spans wider but has no coverage property; the
     # floor read is the widest layer WITH one, and that scoping is pinned.
+    # V20-N1 re-landing (2026-08-05): interval re-pinned to the restricted
+    # inversion selected by SPEC_V20_C's frozen rule; scoping unchanged.
     "posture_binding_layer": "The widest layer that does have a coverage property is the "
-                             "floor reads' own sampling error, $+2.9$ to $+8.7$ points "
+                             "floor reads' own sampling error, $+2.3$ to $+9.1$ points "
                              "after wild-cluster correction",
     "posture_lower_half": "every correction listed above falls in its lower half",
     # (c) the censoring share (HANDOFF_round24 §4) and the framing that
@@ -516,7 +518,7 @@ ABSTRACT_POSTURE = {
     # read is demoted to a labeled mention inside the same parenthetical.
     # V20 panel revision (2026-08-04): pin re-synced to the compressed abstract;
     # the span's purpose is unchanged, the phrasing follows the manuscript.
-    "interval": "$+2.9$ to $+8.7$ points under the production floor form",
+    "interval": "$+2.3$ to $+9.1$ points under the production floor form",  # V20-N1 re-landed
     # ROUND-28 (DA-C3): the abstract must say WHAT the interval bounds. "pins"
     # claimed the design pinned the elasticity's contribution; the interval is
     # the floor read's sampling error at a FIXED elasticity, which contributes
@@ -581,7 +583,7 @@ def abstract_posture_check(tex: str) -> tuple[bool, dict]:
     abstract = tex_nc[_i + len(ABSTRACT_BOUNDS[0]):_j] if found else ""
     missing = sorted(k for k, v in ABSTRACT_POSTURE.items() if v not in abstract)
     # the range must be stated BEFORE the point it contains
-    i_range = abstract.find("$+2.9$ to $+8.7$")  # V20: abstract phrasing re-synced
+    i_range = abstract.find("$+2.3$ to $+9.1$")  # V20-N1: binding interval re-landed
     i_point = abstract.find("$+5.6$ points")
     ordered = i_range != -1 and i_point != -1 and i_range < i_point
     return (found and not missing and ordered,
@@ -662,7 +664,8 @@ LETTER_HISTORICAL_MARKER = "range that stood at\nthe time at $+3.9$ to $+13.1$ p
 LETTER_CURRENT_LITERALS = [
     "$+3.5$ to $+13.1$",   # the hull, as it now stands
     "$+3.0$ to $+8.0$",    # the demoted percentile read (still quoted, labeled)
-    "$+2.9$ to $+8.7$",    # the corrected binding layer the posture is stated against
+    "$+2.3$ to $+9.1$",    # V20-N1: the adjudicated binding layer
+    "$+2.9$ to $+8.7$",    # the Webb rung, retained beside it
     "$+3.53$", "$+10.83$",  # the cell that widened it, and the concave ceiling
     "$+270.4$", "$-105.3$",  # the ABM null's sign disagreement
     "68.8\\%", "35.8\\%",   # the censoring shares, central and null legs
@@ -823,7 +826,9 @@ FLOOR_LADDER_SPANS = {
     "run_credit": "\\texttt{floor\\_inference\\_correction} (Rademacher "
                   "wild-$t$; CR1--CR3 at $t(30)$)",
     "designer_frame": "in the units a cap designer would have to plug in",
-    "designer_units": "wild-cluster interval runs from 4.177\\% to 5.800\\%",
+    # V20-N1: the designer clause now quotes the BINDING rung's floor image (the
+    # restricted inversion); the Webb read stays named as the cap grid's input.
+    "designer_units": "binding wild-cluster inversion runs from 4.033\\% to 6.181\\%",
     # R32 C-72: SPEC_R32_c72 §8 Branch A requires FLOOR_LADDER_SPANS to be
     # EXTENDED, never replaced, when new rows land. These two are the month and
     # two-way rows, byte-identical to gate #115's derived month_row/two_way_row.
@@ -913,6 +918,8 @@ def floor_ladder_check(tex: str) -> tuple[bool, dict]:
     cr1bm = rd.get("cr1_t_interval_df_bm", {})
     cr3 = rd.get("cr3_t_interval", {})
     webb = rd.get("wild_t_webb", {})
+    wcr = rd.get("wcr_inverted", {})  # V20-N1: the adjudicated binding rung
+    wcrf = wcr.get("floor_ci95_pct") or [None, None]
     c1 = cr1.get("marginal_ci95_pp") or [None, None]
     c1b = cr1bm.get("marginal_ci95_pp") or [None, None]
     wf = webb.get("floor_ci95_pct") or [None, None]
@@ -939,8 +946,10 @@ def floor_ladder_check(tex: str) -> tuple[bool, dict]:
         and dfbm["cr1"] > dfbm["cr2"] > dfbm["cr3"]
         and rd["se_cr1_smm"] < rd["se_cr2_smm"] < rd["se_cr3_smm"]
         and c1b != cr3.get("marginal_ci95_pp")
-        # the designer-units clause is the SAME read's Webb interval in floor
-        # units, and the floor-to-marginal map is inverse
+        # V20-N1: the designer-units clause quotes the BINDING rung (restricted
+        # inversion) in floor units; the Webb read remains the cap grid's input
+        # and its floor image is still checked against the artifact.
+        and f"{wcrf[0]:.3f}\\% to {wcrf[1]:.3f}\\%" == "4.033\\% to 6.181\\%"
         and f"{wf[0]:.3f}\\% to {wf[1]:.3f}\\%" == "4.177\\% to 5.800\\%"
         and webb["upper_pp_edge"]["floor_pct"] < webb["lower_pp_edge"]["floor_pct"]
         and abs(webb["marginal_ci95_pp"][0] - 2.8549950653913494) < 1e-9
@@ -1430,9 +1439,10 @@ MONTH_TWOWAY_SPANS = {
     "nc4_webb_primary": "which is why the Webb six-point weights are primary "
                         "here, as they are above",
     "run_credit_v3": "\\texttt{floor\\_inference\\_correction\\_v3}",
-    # the claim this landing must leave standing, checked live below
-    "widest_interior": "widest rung with both endpoints interior to the floor "
-                       "grid---CR2 at Bell--McCaffrey degrees of freedom",
+    # V20-N1: the rank-primacy claims were replaced by the frozen-rule
+    # adjudication; the pinned claim is now that CR2+BM is named as the OTHER
+    # qualifying rung standing beside the restricted inversion, at both sites.
+    "widest_interior": "the other qualifying rung, stands beside",
 }
 
 _ORDINAL_WORDS = {1: "first", 2: "second", 3: "third", 4: "fourth",
@@ -1569,8 +1579,10 @@ def month_twoway_clusters_check(tex, v2, v3):
                                 "distinct Rademacher sign vectors")
     lits["nc4_floor"] = ("cannot resolve below "
                          f"$1/{int(round(1 / rad['resolution_floor_p']))}$")
-    lits["webb_rank"] = (f"the {_ORD(rank)}-narrowest of the "
-                         f"{_CARD(len(rungs))} undemoted rungs")
+    # V20-N1: the manuscript no longer prints a Webb rank claim; the rank is
+    # still computed (and reported in this gate's printout) but the tex pin is
+    # the frozen-rule selection language.
+    lits["webb_rank"] = "narrowest construction clearing the"
     lits["censored_count"] = (f"The {_CARD(n_censored)} rungs printed "
                               "wider still understate their own width")
     lits["two_widest_censored"] = (
@@ -1582,8 +1594,10 @@ def month_twoway_clusters_check(tex, v2, v3):
         not missing
         # the rank claim is made at BOTH sites, and no stale rank phrase is
         # left anywhere: every "undemoted rungs" in the file is the right one
-        and tex_nc.count(lits["webb_rank"]) == 2
-        and "undemoted rungs" not in tex_nc.replace(lits["webb_rank"], "")
+        # V20-N1: the qualifying-rung-beside claim is made at BOTH sites, and
+        # no stale rank phrase survives anywhere.
+        and tex_nc.count(lits["widest_interior"]) == 2
+        and "undemoted rungs" not in tex_nc
         # the claim this landing must NOT have falsified
         and widest_interior == "cr2_bm"
         # "the three rungs printed wider still ... are censored to it"
@@ -3125,24 +3139,43 @@ def null_floor_interval_gate_check(tex: str, art: dict) -> tuple[bool, dict]:
     return all(v for k, v in info.items() if k != "interval"), info
 
 
-def fewcluster_coverage_check(tex: str, art: dict) -> tuple[bool, dict]:
+def fewcluster_coverage_check(tex: str, art: dict, ladder: dict) -> tuple[bool, dict]:
     gsc = art["cells"]["gaussian"]["coverage_pct"]
     t5c = art["cells"]["t5"]["coverage_pct"]
     spans = [
         f"covers {gsc['restricted_webb']:.1f}\\% under Gaussian and "
         f"{t5c['restricted_webb']:.1f}\\% under $t_5$",
+        # V20-N1: the Webb rung's own coverage must be disclosed beside it
+        f"{gsc['webb_wild_t']:.1f}\\%/{t5c['webb_wild_t']:.1f}\\% for the Webb wild-$t$",
         f"{gsc['cr1_t']:.1f}\\%/{t5c['cr1_t']:.1f}\\% for CR1",
         f"{gsc['percentile']:.1f}\\%/{t5c['percentile']:.1f}\\% for the "
         f"demoted percentile read",
     ]
+    # V20-N1 (SPEC_V20_C section 4, the live tie the first landing omitted):
+    # the quoted binding interval must be the interval of the construction the
+    # artifact's decision-rule field selected -- DERIVED from the ladder
+    # artifact, never typed here. The run's own landing_branch string
+    # ("L1_webb_retains") contradicts the frozen rule (webb_wild_t fails the
+    # coverage bar); it is sha-pinned, left unedited, and deliberately NOT
+    # asserted -- the adjudication is recorded in the manuscript's ladder note.
+    _rung_key = {"restricted_webb": "wcr_inverted",
+                 "webb_wild_t": "wild_t_webb",
+                 "cr2_bm": "cr2_t_interval_df_bm"}[art["binding_construction"]]
+    _rd = ladder["reads"]["R2_2018_gap<=-0.0025_age>=12"][_rung_key]
+    _blo, _bhi = _rd["marginal_ci95_pp"]
+    binding_span = f"$[{_blo:+.1f}, {_bhi:+.1f}]$"
     info = {
         "spans_present": all(sp in tex for sp in spans),
-        "branch_L1": art["landing_branch"] == "L1_webb_retains",
+        "binding_interval_quoted": binding_span in tex,
+        "rule_applied": (art["binding_construction"] in art["qualifying"]
+                         and gsc["webb_wild_t"] < 93.0),
         "oracle_bounds": all(94.0 <= v <= 96.0
                              for v in art["gates"]["G_C1_oracle"].values()),
         "binding": art["binding_construction"],
+        "binding_span": binding_span,
     }
-    return all(v for k, v in info.items() if k != "binding"), info
+    return all(v for k, v in info.items()
+               if k not in ("binding", "binding_span")), info
 
 
 def main() -> int:
@@ -6788,7 +6821,10 @@ def main() -> int:
              and abs(fu_pb["adjusted_floor_pct"] - 5.507748455937158) < 1e-9
              and abs(fu_pb["imputed_weight_share"] - 0.8398743947117693) < 1e-9)
     fu_tex_ok = (tex.count("$+3.0$ to $+8.0$") >= 2
-                 and tex.count("$+2.9$ to $+8.7$") >= 4
+                 # V20-N1: the binding interval is the restricted inversion's;
+                 # the Webb rung's read is retained beside it, not as binding.
+                 and tex.count("$+2.3$ to $+9.1$") >= 4
+                 and tex.count("$+2.9$ to $+8.7$") >= 2
                  and "floor\\_uncertainty" in tex
                  and "floor\\_inference\\_correction" in tex
                  and "open below $+4.3$" in tex
@@ -7151,7 +7187,8 @@ def main() -> int:
           f"anchor_pct={_wn['anchor_pct']}, "
           f"stale_sentence_gone={_wn['stale_sentence_gone']}")
     _eb_cap = json.loads(EXPECT_RESULTS.read_text())
-    cmu_ok, _cmu = cap_monthly_units_check(tex, _eb_cap, _eb_cap["cap_benchmark_b"], 2.9, 8.7)
+    # V20-N1: band re-derived at the adjudicated binding interval (restricted inversion)
+    cmu_ok, _cmu = cap_monthly_units_check(tex, _eb_cap, _eb_cap["cap_benchmark_b"], 2.3, 9.1)
     failures += 0 if cmu_ok else 1
     print(f"[{'PASS' if cmu_ok else 'FAIL'}] cap result in $bn/month (gate #111): "
           f"ceiling={_cmu['cap_per_month']}, "
@@ -7328,11 +7365,17 @@ def main() -> int:
           f"offnode_ok={_nfii['offnode_within_tol']}")
 
     _fcc = json.loads(FCC_RESULTS.read_text())
-    fcc_ok, _fcci = fewcluster_coverage_check(tex, _fcc)
+    # V20-N1: the ladder artifact supplies the binding construction's interval
+    _fi2_ladder = json.loads(
+        (ROOT / "hazard" / "data"
+         / "floor_inference_correction_v2_results.json").read_text())
+    fcc_ok, _fcci = fewcluster_coverage_check(tex, _fcc, _fi2_ladder)
     failures += 0 if fcc_ok else 1
     print(f"[{'PASS' if fcc_ok else 'FAIL'}] few-cluster coverage (gate #125): "
-          f"binding={_fcci['binding']}, spans={_fcci['spans_present']}, "
-          f"branch_L1={_fcci['branch_L1']}, oracle={_fcci['oracle_bounds']}")
+          f"binding={_fcci['binding']} (interval {_fcci['binding_span']} "
+          f"quoted={_fcci['binding_interval_quoted']}), "
+          f"spans={_fcci['spans_present']}, rule_applied={_fcci['rule_applied']}, "
+          f"oracle={_fcci['oracle_bounds']}")
 
     print(f"\n{'ALL GATES PASS' if failures == 0 else f'{failures} GATE(S) FAILED'}")
     return 0 if failures == 0 else 1

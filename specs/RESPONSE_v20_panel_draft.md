@@ -99,11 +99,19 @@ against the post-R32 manuscript.
   null row and §V.E; gate #124.
 - **SPEC_V20_C `fewcluster_coverage`** *(R1-W3/Q1; DA-C3; amendment V20-C-A1)*:
   the designed coverage simulation at the committed leverage profile (31
-  clusters, 5.9 effective, max leverage 0.33; 5,000×999) covers **94.3%/95.1%**
-  (Gaussian/t5) for the committed restricted Webb construction — against
-  84.0%/85.7% for CR1, 89.5%/89.9% for the demoted percentile, 99.5%/99.6%
-  (over-covering, wider) for CR2+BM. The binding-layer choice is DEFENDED by
-  measured coverage; **no quoted number changes**. Landed in §V.E; gate #125.
+  clusters, 5.9 effective, max leverage 0.33; 5,000×999). **Re-adjudicated in
+  the v20 re-review round (N1):** the run's own frozen rule (narrowest
+  construction with ≥93.0/≥91.0 coverage) is FAILED by the Webb wild-t
+  (90.8%/91.4%) and met by the restricted wild-cluster inversion
+  (94.3%/95.1%), which the artifact's `binding_construction` field selects.
+  Applying the rule as frozen, **the quoted binding interval is now the
+  restricted inversion's [+2.3, +9.1]** at every binding site (abstract,
+  Table 1, §V.E, VII.F, conclusion, designer units), with the Webb rung's
+  [+2.9, +8.7] retained beside it as a reported rung; the run artifact's
+  `landing_branch` string ("L1_webb_retains") contradicts its own rule and is
+  left unedited (sha-pinned), with the adjudication recorded in the ladder
+  note. Gate #125 now implements the spec §4 live tie (quoted interval ==
+  the decision field's construction, derived not typed).
 
 ## Phase-3 additions landed (2026-08-04, second commit)
 

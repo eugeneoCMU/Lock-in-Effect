@@ -49,6 +49,15 @@ def nfi() -> dict:
 
 
 @pytest.fixture(scope="module")
+def ladder() -> dict:
+    # V20-N1: gate #125's live tie reads the binding construction's interval
+    # from the v2 ladder artifact.
+    import json as _json
+    return _json.loads((ROOT / "hazard" / "data"
+                        / "floor_inference_correction_v2_results.json").read_text())
+
+
+@pytest.fixture(scope="module")
 def fcc() -> dict:
     return json.loads(FCC_RESULTS.read_text())
 
@@ -120,9 +129,16 @@ def test_nfi_fails_when_offnode_tolerance_breached(tex, nfi):
     assert not ok and not info["offnode_within_tol"], info
 
 
+
+
+def LADDER() -> dict:
+    import json as _json
+    return _json.loads((ROOT / "hazard" / "data"
+                        / "floor_inference_correction_v2_results.json").read_text())
+
 # ---------------------------------------------------------------- gate #125
-def test_fcc_passes_on_real_tree(tex, fcc):
-    ok, info = fewcluster_coverage_check(tex, fcc)
+def test_fcc_passes_on_real_tree(tex, fcc, ladder):
+    ok, info = fewcluster_coverage_check(tex, fcc, ladder)
     assert ok, info
 
 
@@ -132,27 +148,33 @@ def test_fcc_fails_when_coverage_sentence_removed(tex, fcc):
     span = (f"covers {g['restricted_webb']:.1f}\\% under Gaussian and "
             f"{t5['restricted_webb']:.1f}\\% under $t_5$")
     assert span in tex
-    ok, info = fewcluster_coverage_check(tex.replace(span, ""), fcc)
+    ok, info = fewcluster_coverage_check(tex.replace(span, ""), fcc, LADDER())
     assert not ok and not info["spans_present"], info
 
 
 def test_fcc_fails_when_coverage_moves(tex, fcc):
     art = copy.deepcopy(fcc)
     art["cells"]["gaussian"]["coverage_pct"]["restricted_webb"] -= 1.0
-    ok, info = fewcluster_coverage_check(tex, art)
+    ok, info = fewcluster_coverage_check(tex, art, LADDER())
     assert not ok and not info["spans_present"], info
 
 
-def test_fcc_fails_on_non_L1_branch(tex, fcc):
+def test_fcc_fails_when_binding_construction_not_quoted(tex, fcc):
+    # V20-N1 TRACE: the live tie (SPEC_V20_C section 4). If the artifact's
+    # decision field named cr2_bm, the manuscript's quoted [+2.3, +9.1] would
+    # no longer be the binding construction's interval ([+2.4, +9.1]) and the
+    # gate must fail. The old branch-string assert is retired: the frozen
+    # artifact's landing_branch ("L1_webb_retains") contradicts its own rule
+    # and is deliberately left unasserted.
     art = copy.deepcopy(fcc)
-    art["landing_branch"] = "L2_bm_sandwich_binding"
-    ok, info = fewcluster_coverage_check(tex, art)
-    assert not ok and not info["branch_L1"], info
+    art["binding_construction"] = "cr2_bm"
+    ok, info = fewcluster_coverage_check(tex, art, LADDER())
+    assert not ok and not info["binding_interval_quoted"], info
 
 
 def test_fcc_fails_when_oracle_out_of_bounds(tex, fcc):
     art = copy.deepcopy(fcc)
     first = next(iter(art["gates"]["G_C1_oracle"]))
     art["gates"]["G_C1_oracle"][first] = 90.0
-    ok, info = fewcluster_coverage_check(tex, art)
+    ok, info = fewcluster_coverage_check(tex, art, LADDER())
     assert not ok and not info["oracle_bounds"], info

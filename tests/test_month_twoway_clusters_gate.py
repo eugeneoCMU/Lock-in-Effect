@@ -88,9 +88,10 @@ def test_each_literal_removal_fails(key):
      "their 138 intersection cells", 1),                    # note_two_way_unit
     ("two July cohort-months aside",
      "three July cohort-months aside", 1),                  # july_tail_disclosure
-    # the rank phrase is deliberately a TWO-site literal; replace() hits both
-    ("fourth-narrowest of the eleven",
-     "fifth-narrowest of the eleven", 2),                    # webb_rank
+    # V20-N1: the rank phrase is retired; the two-site literal is now the
+    # qualifying-rung-beside claim of the frozen-rule adjudication.
+    ("the other qualifying rung, stands beside",
+     "the other qualifying rung, sits beside", 2),           # widest_interior
 ])
 def test_a_wrong_digit_fails(printed, perturbed, n_sites):
     assert TEX.count(printed) == n_sites, \
@@ -107,9 +108,10 @@ def test_the_rank_claim_is_made_at_both_sites():
     TRACE: deleting ONE occurrence leaves the literal present (so `missing`
     stays empty) but drops the count to 1, and the count == 2 conjunct fails.
     """
-    assert TEX.count(LITS["webb_rank"]) == 2
+    # V20-N1: the two-site claim is now LITS["widest_interior"].
+    assert TEX.count(LITS["widest_interior"]) == 2
     ok, _ = month_twoway_clusters_check(
-        TEX.replace(LITS["webb_rank"], "", 1), V2, V3)
+        TEX.replace(LITS["widest_interior"], "", 1), V2, V3)
     assert not ok, "one repaired site and one deleted site passes the gate"
 
 
@@ -369,9 +371,10 @@ def test_a_wider_month_rung_would_break_the_rank_claim():
     d = copy.deepcopy(V3)
     d["rungs"]["month"]["cr1_t_interval"]["marginal_ci95_pp"] = [2.0, 8.0]
     ok, info = month_twoway_clusters_check(TEX, V2, d)
-    assert not ok
+    # V20-N1: the manuscript no longer prints a rank claim, so rank drift is
+    # informational rather than gate-failing; the gate must still REPORT the
+    # moved rank (fourth -> third of eleven).
     assert info["webb_rank"] == 3
-    assert "webb_rank" in info["missing"]
 
 
 def test_the_gate_goes_red_not_boom_on_an_out_of_range_count():

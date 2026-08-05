@@ -71,7 +71,29 @@ upper half; the ϕ* production member +0.9 still falls outside; the lower edge
   test_month_twoway_clusters (rank claims re-pinned to the adjudicated text),
   test_response_letter_gate (if letter literals move).
 
-## 4. Invariants
+## 4. EXECUTED (2026-08-05, same day, single batch)
+
+All of §2/§3 landed with three recorded deviations from plan: (i) **M13 does
+not apply** — no verdicts-ledger row exists for the three V20 runs (the
+migrated table's "Twenty-five specifications" count predates them), so the
+in-manuscript ladder note carries the adjudication and the migrated file is
+untouched; (ii) the **letter kept the Webb interval as a single-occurrence
+literal** ("lower edge $+2.9$, upper $+8.7$") so gate #101's deletion-mutation
+semantics survive; (iii) two **residual width claims** found in
+self-verification were repaired beyond the plan's list (the V.E convolved-pair
+recommendation is now labeled Webb-rung/pre-adjudication, and the resolution
+sentence's "ladder roughly five points wide" became "binding interval roughly
+seven points wide"). Gate #115's rank-primacy pins were re-pointed at the
+adjudicated two-site claim, with the rank-drift mutation demoted to
+informational (`info["webb_rank"]`) because the manuscript no longer prints a
+rank claim — the one deliberate, documented weakening. Gate #125 now derives
+the binding span from `binding_construction` through the v2 ladder artifact
+(spec §4's live tie); its old `branch_L1` assert is retired as contradicting
+the frozen rule. Final state: 128 gates, 1,110 tests, both variants
+0-undefined (141/142pp; main text 96pp, banner p. 97, split 1–96/97–141),
+editions clean {24/13/8/2/42}, artifacts refreshed.
+
+## 5. Invariants
 
 Suite green at every commit; both variants identical bodies; no artifact
 edited; every placement/comparison claim re-verified at the new interval, not
