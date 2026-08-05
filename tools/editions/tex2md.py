@@ -23,8 +23,11 @@ import re
 import sys
 from pathlib import Path
 
-WANT = {"tables": 27, "figures": 13, "equations": 8, "footnotes": 3,
-        "headings": 44}
+# V20 closing session: tab:crosswalk, tab:runindex, tab:verdicts and the
+# app:ledger/app:verdicts section heads migrated to replication_appendices.tex,
+# so the manuscript edition carries 3 fewer tables and 2 fewer headings.
+WANT = {"tables": 24, "figures": 13, "equations": 8, "footnotes": 3,
+        "headings": 42}
 
 
 def strip_comments(s):
