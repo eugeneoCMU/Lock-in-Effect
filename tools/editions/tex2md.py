@@ -26,7 +26,11 @@ from pathlib import Path
 # V20 closing session: tab:crosswalk, tab:runindex, tab:verdicts and the
 # app:ledger/app:verdicts section heads migrated to replication_appendices.tex,
 # so the manuscript edition carries 3 fewer tables and 2 fewer headings.
-WANT = {"tables": 24, "figures": 13, "equations": 8, "footnotes": 3,
+# V20 fresh-eyes trim: the Section V.B calibration footnote (band-midpoint /
+# transform-slot / Fonseca-corroboration), whose every clause duplicated the
+# adjacent body text, is deleted, so footnotes 3 -> 2 (fn:manifest and the
+# sec:method-abm payoff-rule footnote remain).
+WANT = {"tables": 24, "figures": 13, "equations": 8, "footnotes": 2,
         "headings": 42}
 
 
