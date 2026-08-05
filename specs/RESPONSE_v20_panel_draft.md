@@ -127,13 +127,24 @@ against the post-R32 manuscript.
   the "loan-purpose" → "termination-reason" wording fix); Song & Zhu (2019,
   RFS 32(8), 2955–2996) at the TBA financing discussion.
 
-## Deferred to the dedicated compression session **[PHASE-3b]**
+## Compression session **[PHASE-3b — EXECUTED, 2026-08-04]**
 
-Main text ≤ 50 pp. (global prose compression); ABM section + VII.C tightening
-and the conclusion's "two central findings" framing conditioned (EIC-W2; R1-W5;
-DA-C4); audit apparatus migrated to the replication package with gate #104
-rescoped to the migrated file (EIC-W1; R2-W5); Tables 5/9 relocated adjacent to
-§V.E; run tags out of prose; editions + split recut after pagination settles.
+Global prose compression executed across nine batches plus the closing
+structural session (commits 7e7b502..8a89c8e): main text 55,995 → 46,598 words
+(−17%), every batch landing with the full gate suite and test battery green and
+both variants 0-undefined. The conclusion's framing was conditioned (DA-C4,
+e348a91); the ABM section and VII.C were tightened in batches 7 and 9. The
+audit apparatus (app:ledger and app:verdicts, with the crosswalk, run-index,
+and verdict tables) is migrated byte-identical to the replication package's
+standalone `replication_appendices` document, whose cross-references resolve
+against the manuscript, with the gate corpus rescoped to read the migrated
+file (EIC-W1; R2-W5). Tables 5/9 sit adjacent to §V.E. Thirty-seven run-tag
+parentheticals are out of the prose (the remainder are gate- or test-pinned,
+in table apparatus, or carry content beyond the tag). Editions and the
+main/online split are recut on the settled pagination (main text pp. 1–97
+local-engine; the compression floor below ~46.6k words is set by the pinned
+disclosure apparatus — cutting further means deleting measured results, an
+authorial scope decision recorded rather than taken).
 Optional additional reference: McPhail–Schnabl–Tuckman — **correct title: "Do
 Banks Hedge Using Interest Rate Swaps?", NBER WP 31166**.
 
