@@ -31,15 +31,20 @@ against the post-R32 manuscript.
    defined simulation object (definition sentence retained). "As homeowners
    relocated naturally" → "as principal was repaid."  *(R1-W1; R2-W3; R3-minor;
    DA-C2 naming component; EIC abstract comments.)*
-2. **Abstract rewritten 427 → 229 words**, decomposition-first: cap shortfall
+2. **Abstract rewritten 427 → 244 words** (229 at the Phase-3b close; +15 from
+   the re-review round's two hedge additions — the projection-relative clause's
+   upper-bound status and the cost sentence's zero-refinance-edge condition),
+   decomposition-first: cap shortfall
    with the 1.7–1.9× ex-ante multiple in the same sentence; rate-inelastic
    baseline with its behavior-containing floor named inside the sentence; both
    denominators (cap-relative 85.7%/35.6% by form; projection-relative $87.8B
    with lock-in ≈ half, 23–80% across floors and allocations); the range stated
    before the point per the round-24 posture (gate #99), with the wild-cluster
    status and form-conditional hull kept inside the interval sentence; the
-   institutional-cost sentence now carries its two conditions ("small only under
-   the production floor form and face-value accounting").  *(EIC-W1/W5; R1-W2;
+   institutional-cost sentence now carries its three conditions ("small only
+   under the production floor form and face-value accounting, and at the
+   zero-refinance edge of the rule-only band" — the third added in the
+   re-review round, closing DA-C5's residual).  *(EIC-W1/W5; R1-W2;
    R2-W3; R3-W5; DA-C1/C3/C5.)*
 3. **Convention-envelope row added to Table 1** (+0.9 to +15.6 across named
    convention variants; calibration box +2.1 to +13.2; labeled as ranges without
@@ -122,7 +127,8 @@ against the post-R32 manuscript.
 - **Factor-paydown note** (R2 institutional #2/Q3): the CUSIP factor-series
   construction named as the superior path and why it was not taken.
 - **References added and cited**: Fuster et al. (2013) at the primary–secondary
-  spread decomposition; Hancock & Passmore (2011) at the QE rate-transmission
+  spread decomposition (in the online appendix's payoff-rule specification,
+  Appendix A — not in main text); Hancock & Passmore (2011) at the QE rate-transmission
   sentence; Amromin, Bhutta & Keys (2020) at the moving/refi-mix bracket (with
   the "loan-purpose" → "termination-reason" wording fix); Song & Zhu (2019,
   RFS 32(8), 2955–2996) at the TBA financing discussion.
@@ -144,9 +150,10 @@ in table apparatus, or carry content beyond the tag). Editions and the
 main/online split are recut on the settled pagination. A fresh-eyes review
 pass (2026-08-05) then removed a further ~2.0k words of pure restatement and
 relocated the inference-ladder and calibration-catalogue apparatus to the
-online appendix, bringing the main text to ~44.9k words and pp. 1–95
-local-engine (≈81 cloud-equivalent), with the deferred floats now placed
-before the references; the compression floor below ~45k words is set by the
+online appendix, bringing the main text to ~44.9k words and pp. 1–96
+local-engine (≈82 cloud-equivalent), with the deferred exhibit floats now
+flushed adjacent to their Section V.E/V.F discussion (Tables at pp. 49–53 of
+the local build) rather than trailing the references; the compression floor below ~45k words is set by the
 pinned disclosure apparatus — two liveness gates refuse further deletion by
 design (the cap-only-account ordering gate and the five-site envelope-width
 gate) — so cutting further means deleting measured results, an authorial
@@ -197,8 +204,9 @@ Banks Hedge Using Interest Rate Swaps?", NBER WP 31166**.
   publishes no assumption counts in GMAR or MBS disclosures; public volumes are
   press analyses of FHA/VA data (≈4,052 FHA assumptions 2023; ≈6,400 combined
   2023). The 20.4% therefore remains an upper bound; a sentence citing the FHA
-  counts as scale context is drafted for Phase 3, source-flagged as press
-  analysis of agency data.
+  counts as scale context is drafted but NOT landed in the manuscript — it
+  would rest on press analyses of agency data, and whether to cite that source
+  class is held for the author's call.
 - **R3-Q1 (carry cost):** accepted in principle — Phase 3 adds the
   back-of-envelope (trapped balance × funding spread × WAL extension) with the
   incidence caveats the cash-haircut bracket already establishes.

@@ -213,6 +213,16 @@ class Conv:
                     body = body.split("\\endhead", 1)[1]
                     hdr = block[after_spec:block.index("\\endfirsthead")] \
                         if "\\endfirsthead" in block else ""
+                    # V20 re-review N-m2: the firsthead carries the longtable's
+                    # \caption{...}\label{...}\\ row; strip it so the caption
+                    # (already extracted into `cap` above) is not re-emitted
+                    # as the first table row.
+                    ci = hdr.find("\\caption")
+                    if ci >= 0:
+                        _, ce = balanced(hdr, ci + len("\\caption"))
+                        hdr = hdr[:ci] + hdr[ce:]
+                    hdr = re.sub(r"\\label\{[^}]*\}", "", hdr)
+                    hdr = re.sub(r"^\s*\\\\", "", hdr.lstrip())
                     body = hdr + body
                 for mk in ("\\endfirsthead", "\\endhead", "\\endfoot",
                            "\\endlastfoot"):
@@ -296,6 +306,9 @@ class Conv:
                       "", body)
         body = re.sub(r"\\vspace\{[^}]*\}", "", body)
         body = body.replace("{\\footnotesize", "")
+        # V20 re-review N-m2: stripping the {\footnotesize opener above
+        # orphans its group-closing brace on its own line; drop those.
+        body = re.sub(r"(?m)^\}\s*$\n?", "", body)
         body = "\n".join(ln for ln in body.split("\n") if ln.strip() != "}")
         body = self.footnote_pull(body)
 
@@ -379,6 +392,10 @@ class Conv:
                 out.append(f"[^{k}]: {fn.strip()}")
                 out.append("")
         md = "\n".join(out)
+        # V20 re-review N-m2 (final pass): group-closing braces orphaned by
+        # stripped {\small / {\footnotesize wrappers surface as standalone
+        # "}" paragraphs only after assembly; drop them here.
+        md = re.sub(r"(?m)^\}\s*$\n?", "", md)
         md = re.sub(r"\n{3,}", "\n\n", md)
         return md
 

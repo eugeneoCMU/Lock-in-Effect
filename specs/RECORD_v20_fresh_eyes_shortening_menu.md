@@ -286,7 +286,35 @@ green at every group boundary. Cloud-equivalent ≈ 81pp. The §5 arithmetic
 otherwise stands: what remains of (b) is ~1pp of small dedups; the distance
 to ≤50pp cloud is tier (c) plus, decisively, the companion-paper split.
 
-## 7. Verification log for the landed trims
+## 7. ADDENDUM 2026-08-05 (2) — re-review verdict + small-fix batch
+
+Five-seat re-review of the 95pp build (personas pinned from v19): **MINOR
+REVISION, panel mean 73.8** (v19: Major, 68.1); DA closed 4/5 CRITICALs, C5
+partial, zero new CRITICALs. Package: `~/Downloads/revised_paper_v20_REREVIEW.md`
+(+ uncommitted worktree copy). The panel's verified small fixes are LANDED
+(this addendum's commit): abstract "up to roughly half … upper bounds by
+construction" + the cost sentence's third condition (zero-refinance edge;
+closes DA-C5; abstract 229→244w, letter + gate #101 + test battery re-synced);
+the conclusion-thesis garble repaired (real-Freddie-data attribution; the
+any-rate-response clause moved back onto the caps claim); "falls
+disproportionately" matching the measured tilt; 9 stale `sec:pathb` references
+retargeted to `app:params`/`sec:abm-danish` for the relocated
+buyback-incidence material; the standalone document's banner now carries the
+manuscript's real title; Table 7's null row gains the [80.6, 88.4]\%
+propagated interval; the deferred floats are flushed adjacent to §V.E/V.F
+(Tables at pp. 49–53; main text 96pp, banner p. 97, split recut 1–96/97–140;
+cost: +1 page); tex2md's longtable-caption and orphaned-brace leaks fixed
+(editions clean, 0 residual). **NOT landed — the round's one MAJOR (N1),
+which is an authorial spec adjudication:** §V.E's 94.3/95.1 coverage defense
+belongs to the restricted-inversion rung; the quoted plain Webb wild-t
+[+2.9, +8.7] covers 90.84/91.42 in `fewcluster_coverage_results.json`, below
+SPEC_V20_C §3's pre-committed ≥93.0 Gaussian bar, and gate #125's
+`branch_L1` does not implement the spec's §4 live tie. The spec's own L2
+landing would move the quoted binding interval; the alternative is an
+explicit adjudicated deviation in the verdict ledger. Either way the choice
+is Eugene's and is recorded here rather than taken.
+
+## 8. Verification log for the landed trims
 
 - Pin scan: AST string-literal extraction over `tools/liveness_gates.py` +
   `tests/*.py` (7,541 literals ≥10 chars); zero literals intersect any
