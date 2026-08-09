@@ -238,6 +238,37 @@ LTV ≤ 80 — at leverage 0.3323, **33.2%** of total and **1.94×** the next la
   replace a true record with a false one. Add a dated pointer if anything.
 - Creating a spec named `floor_form_calibration_parity`.
 
+### ROUND 2 — LANDED as 28d65c4 (symbol collisions)
+
+The `a = S^{\theta}` attenuation identity collided on **all three** of its
+symbols, so renaming it fixed three collisions in one edit on four lines:
+
+```
+a = S^\theta   ->   \eta = S_{\mathrm{pre}}^{\xi}      :225, :316, :333, :1222
+                                                        + replication_appendices.tex:200
+```
+
+The **frailty** side was renamed, not the ABM side: `\theta` owns 11 sites
+including a four-row `tab:abmparams` block and the binary-search range, against
+the frailty's four lines. `S_{\mathrm{pre}}` leaves the ABM's bare `S = 60`
+untouched. Every target string was verified pinned by **zero** gates and zero
+tests before editing.
+
+`\sigma`: the sharp collision was bare-vs-bare — :219 (rate stress magnitude)
+against :563 (Danish share). Renamed the Danish share to `\chi`; rate stress
+keeps `\sigma` as the senior tabled use, and the log-normal `\sigma = 0.45/0.35`
+of `tab:abmparams` is contextually bound and untouched. This one **was** pinned:
+lockstep edit to `liveness_gates.py:2606` and
+`tests/test_danish_interest_only_share_gate.py:69`, one literal each, same commit.
+
+`\lambda`: **REFUTED, no edit.** Bare `\lambda` is exclusively loss aversion; the
+other two senses are always subscripted (`\lambda_p`/`\lambda_d`,
+`\lambda_{\mathrm{ridge}}`). Subscripts disambiguate — editing would have been churn.
+
+Post-edit separation verified identical in both variants: `\theta` 11 (ABM only),
+`\sigma` 7 (rate stress + log-normal only), `\xi` 14 / `\eta` 5 (frailty only),
+`\chi` 2, residual `a = S^` zero. PDF glyph counts match source exactly.
+
 ### Author-only
 
 The floor-form posture call — headline at the `s = 0` endpoint versus promoting the
