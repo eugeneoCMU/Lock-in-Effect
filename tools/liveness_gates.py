@@ -2603,7 +2603,7 @@ def danish_interest_only_share_check(tex, io, dan, cb):
 
     lits = dict(DANISH_IO_SHARE_SPANS)
     lits.update({
-        "sched_basis": (f"cuts the face gap by $\\sigma$ times "
+        "sched_basis": (f"cuts the face gap by $\\chi$ times "
                         f"\\${sched:.2f} billion"),
         "crossing_first": crossing1,
         "crossing_second": f"lifts the crossing to {be2 * 100:.1f}\\%",

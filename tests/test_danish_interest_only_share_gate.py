@@ -66,7 +66,7 @@ CB = json.loads((ROOT / "hazard" / "data"
 # The literals the gate BUILDS from the artifact, written out here so a
 # silent artifact change breaks this file as well as the gate.
 DERIVED = {
-    "sched_basis": "cuts the face gap by $\\sigma$ times \\$198.67 billion",
+    "sched_basis": "cuts the face gap by $\\chi$ times \\$198.67 billion",
     "crossing_first": "crosses zero at an interest-only share of 30.8\\%",
     "crossing_second": "lifts the crossing to 34.3\\%",
     "danish_speed": "the Danish leg's own 5.61\\% speed returns \\$9.1 "
