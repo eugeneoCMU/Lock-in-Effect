@@ -269,6 +269,48 @@ Post-edit separation verified identical in both variants: `\theta` 11 (ABM only)
 `\sigma` 7 (rate stress + log-normal only), `\xi` 14 / `\eta` 5 (frailty only),
 `\chi` 2, residual `a = S^` zero. PDF glyph counts match source exactly.
 
+### ROUND 3 — LANDED as 1fb1350 (last collision closed) + the §V.D counts
+
+**Moving-share `s` → `\mu`.** After the mixture rename to `\omega`, two senses of
+bare `$s$` remained: the Path A stratum index and the moving-share bracket. Renamed
+the bracket, keeping `$s$` for the stratum — the senior use and the only one with a
+notation-table entry. 24 tokens across exactly five lines (:80 ×3, :229 ×14, :316 ×4,
+:333 ×2, :551 ×1), applied line-scoped with per-line expected counts asserted so the
+four stratum-sense tokens at :682/:878/:999/:1003 could not be caught by accident.
+Lockstep, same commit: gate #102's three literals at `liveness_gates.py:704-706`,
+after verifying no test hardcodes them.
+
+**Result: exactly four standalone math `$s$` tokens remain, all the stratum index.**
+The symbol is single-valued.
+
+**`tab:hazard-notation`** gained a fourth block, *Convention and transport
+parameters*: `\mu`, `\omega`, the cyclical floor variant
+`\underline{h}_t = 4\%(1+\kappa z_t)`, `\eta = S_{\mathrm{pre}}^{\xi}`,
+`S_{\mathrm{pre}}`, `\xi`. The table defined none of them before. Its note claimed
+"no coefficient symbol is reused across them" — true, but scoped to coefficients
+while reading as a global guarantee; it now says so.
+
+**§V.D standardization-cell counts landed, verified against artifacts** (they were
+held back in round 1 as unverified): `episode_confrontation_within_results.json`
+gives axis `vintage|fico_bucket|ltv_bucket`, `n_cells = 22`, `n_common_cells = 18`;
+`episode_gradient_age_bands_results.json` gives `n_cells = 29` on the age-augmented
+axis with the same 18 in common. Both now printed at :287.
+
+**Gate-design note.** The gate covering that passage builds its literals with
+f-strings (`liveness_gates.py:1773-1774`), so an AST string-literal scan does not
+see them. Both survived because the insertions fell outside the pinned spans — but
+that was checked by reading the gate, not by the scan. This is the repo's known
+blind-spot class and it is still live.
+
+**Symbol state after three rounds:** `s` = stratum index only; `\theta` = ABM
+mobility scale only; `\sigma` = rate stress + log-normal dispersion only; `\mu`,
+`\omega`, `\eta`, `\xi`, `S_{\mathrm{pre}}`, `\chi` each single-valued; `\lambda`
+untouched and correct. **No live symbol overload remains.**
+
+**Not done, and off the list:** the `stratum` rename at :1247/:1253. It was the
+original audit's proposal and this record refutes it — objects 1 and 3 are the same
+partition, so "stratum cluster" is the right name.
+
 ### Author-only
 
 The floor-form posture call — headline at the `s = 0` endpoint versus promoting the
