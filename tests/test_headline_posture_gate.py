@@ -127,8 +127,8 @@ def test_commented_out_posture_fails(tex, abstract):
 # claim.
 # --------------------------------------------------------------------------
 @pytest.mark.parametrize("old,new", [
-    ("the design identifies a marginal, not a level",
-     "the design identifies a marginal --- not a level"),
+    ("The design identifies a marginal, not a level",
+     "The design identifies a marginal --- not a level"),
     ("The cost to households who could not move is real.",
      "The cost to households who could not move is real and unevenly borne."),
 ])

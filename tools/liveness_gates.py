@@ -5741,7 +5741,8 @@ def main() -> int:
             f"in-window calibration" in tex,
         "abstract_null_and_central_kept":
             f"accounts for {_h['null_shared_share_pct']:.1f}\\% of it" in tex
-            and f"accounts for {_h['central_shared_share_pct']:.1f}\\%." in tex,
+            and f"accounts for {_h['central_shared_share_pct']:.1f}\\%, on the "
+                f"benchmark-consistent basis" in tex,
         "miss_both_calibrations":
             f"the miss is {_h['miss_vs_benchmark_pp']:.1f} points on the headline "
             f"calibration and {_prod['miss_vs_benchmark_pp']:.1f} points on the "
