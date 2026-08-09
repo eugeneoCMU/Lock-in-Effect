@@ -311,6 +311,52 @@ untouched and correct. **No live symbol overload remains.**
 original audit's proposal and this record refutes it — objects 1 and 3 are the same
 partition, so "stratum cluster" is the right name.
 
+### ROUND 4 — CLOSEOUT, landed as 46e80e9 and f546c76
+
+Ten further edits, all verified against the current file (line numbers from the
+earlier rounds had already drifted — the six notation rows moved :1240 to :1248).
+
+- Replicate counts no longer print a bare italic `B`, which is the burnout state
+  `B_{s(i),t}` in eq. (1): roman at :430 and math-italic in two ladder rows, all
+  now "9{,}999 replications". The genuinely different 999 at :316 was already a word.
+- `h^{\mathrm{vol}}` occurred exactly once in the manuscript, inside the identity
+  at :682, defined nowhere. Now a notation row, with `h^{\mathrm{prep}}_{i,t}` and
+  `h^{\mathrm{def}}_{i,t}` beside it — the table had defined the *derived* hazard
+  while omitting both *primary* displayed ones.
+- The identity's left-hand side was a bare `$h$` bound to nothing — the only
+  standalone math `h` in the file. Now `h^{\mathrm{prep}}`, which is house style
+  and matches what `literature_hazard.py:113-115` assigns.
+- `\phi^{*}` at :316: **not the arithmetic slip it was reported as.** The artifact
+  gives 0.75390625 at the 4.991% floor and 0.75625 at 4.0%; every printed numeral
+  rounds correctly. The defect was scope — an unqualified "the root" carried across
+  two anchors — fixed by naming the floor. Adding the second root was **rejected**:
+  :316 already prints 0.756 four sentences later for the *additive* root, and
+  `tests/test_scaled_null_additive_gate.py:427-433` exists to forbid restating that
+  pair as holding at both anchors.
+- "band" carried the floor axis and the elasticity axis in one phrase at :690 and
+  :219; "stratum-cluster" read as the three-way draw stratum at :920 and :287.
+  Both disambiguated.
+
+### The terminology table — DESIGNED, NOT LANDED
+
+The word census is sound: *cell*, *band*, *anchor*, *basis*, *stratum*, *floor*,
+*form*, *draw* and *null* are each genuinely overloaded, and the manuscript has no
+glossary today. But the drafted table must **not** be pasted as written. Four
+blockers, all verified:
+
+1. The *anchor* row must read "the middle of the three depth cuts fixed before the
+   reads" — the drafted gloss was wrong.
+2. The *cell* row conflates two grids: the 21-cell calibration box (`tab:floorband`)
+   and the 27-cell off-window floor × band grid (`oos_identification`). It must also
+   note the panel is unbalanced — 10,176 stratum-months against 296 × 36 = 10,656.
+3. Adding a table requires bumping `tools/editions/tex2md.py:38` `'tables': 24` → 25
+   **in the same commit**, or the editions converter's hard self-check fails.
+4. At ~63 lines it should probably be a `longtable`, as `tab:uncertainty` is, and
+   needs a build to confirm it does not overflow its float.
+
+It is a content deliverable that changes what the paper claims about its own
+vocabulary, so it is Eugene's call, not a mechanical landing.
+
 ### Author-only
 
 The floor-form posture call — headline at the `s = 0` endpoint versus promoting the
