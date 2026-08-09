@@ -74,8 +74,8 @@ def test_point_before_range_fails(tex, abstract):
     mutated = (
         " \\noindent A turnover floor read from realized, partly behavioral "
         "turnover sets the baseline. "
-        "Lock-in itself adds, with $+5.6$ points, \\$42.6 billion, the value "
-        "at the anchor calibration inside it, most of the margin. "
+        "Lock-in itself adds, with $+5.6$ points, \\$42.6 billion, the production "
+        "form's endpoint, inside it, most of the margin. "
         "What lock-in itself adds is a range rather than a number: "
         "$+2.3$ to $+9.1$ points under the production floor form (the floor "  # V20-N1
         "read's sampling error at the central elasticity, wild-cluster on 31 "

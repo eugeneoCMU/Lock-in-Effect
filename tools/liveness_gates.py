@@ -532,8 +532,8 @@ ABSTRACT_POSTURE = {
     "interval_referent": "the floor read's sampling error at the central elasticity",
     # V20 panel revision (2026-08-04): pin re-synced to the compressed abstract;
     # the span's purpose is unchanged, the phrasing follows the manuscript.
-    "point_named_inside": "with $+5.6$ points, \\$42.6 billion, the value at the "
-                          "anchor calibration inside it",
+    "point_named_inside": "with $+5.6$ points, \\$42.6 billion, the production "
+                          "form's endpoint, inside it",
     # ROUND 32: the frame is still load-bearing -- the additive form (+11.2) and
     # the Fonseca anchor (+11.5) move the marginal UP -- but the claim it used to
     # protect ('moves it down') is now FALSE and has been restated. Task 11's
