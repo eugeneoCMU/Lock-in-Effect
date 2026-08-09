@@ -36,7 +36,7 @@ from pathlib import Path
 # unchanged (a planned VII.B settlement-edge relocation was REVERTED when
 # gate #121's cap-only-account-leads ordering refused it).
 WANT = {"tables": 25, "figures": 13, "equations": 8, "footnotes": 2,
-        "headings": 42}
+        "headings": 59}
 
 
 def strip_comments(s):
@@ -348,7 +348,7 @@ class Conv:
                     i = j + 1
                     break
             else:
-                m = re.match(r"\\(section|subsection)\{", stripped)
+                m = re.match(r"\\(section|subsection|subsubsection)\{", stripped)
                 if m:
                     cmd = m.group(1)
                     titletxt, jj = balanced(stripped, stripped.index("{"))
@@ -357,8 +357,13 @@ class Conv:
                     self.counts["headings"] += 1
                     if cmd == "section":
                         out += [f"## {num}. {self.inline(titletxt)}", ""]
-                    else:
+                    elif cmd == "subsection":
                         out += [f"### {num} {self.inline(titletxt)}", ""]
+                    else:
+                        # sub-subsections are navigation aids added in the v20
+                        # readability pass; they carry no \label and therefore
+                        # no aux-resolved number, so they render unnumbered.
+                        out += [f"#### {self.inline(titletxt)}", ""]
                     rest = stripped[jj:]
                     rest = re.sub(r"^\\label\{[^}]*\}", "", rest)
                     if rest.strip():
