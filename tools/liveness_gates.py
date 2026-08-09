@@ -701,9 +701,9 @@ ELASTICITY_DISCIPLINE_SPANS = {
     "curve_posture": "prices the dependence on the imported elasticity rather "
                      "than identifying it",
     "bracket_run_tag": "\\texttt{moving\\_share\\_bracket}",
-    "bracket_values": "$+\\$37.7$ billion ($+4.9$ points) at $s = 0.5$ and "
-                      "$+\\$19.2$ billion ($+2.5$ points) at $s = 0.25$",
-    "bracket_posture": "$s$ is a bracketing parameter rather than an estimate",
+    "bracket_values": "$+\\$37.7$ billion ($+4.9$ points) at $\\mu = 0.5$ and "
+                      "$+\\$19.2$ billion ($+2.5$ points) at $\\mu = 0.25$",
+    "bracket_posture": "$\\mu$ is a bracketing parameter rather than an estimate",
 }
 
 
