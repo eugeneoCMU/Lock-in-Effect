@@ -337,7 +337,39 @@ earlier rounds had already drifted — the six notation rows moved :1240 to :124
   :219; "stratum-cluster" read as the three-way draw stratum at :920 and :287.
   Both disambiguated.
 
-### The terminology table — DESIGNED, NOT LANDED
+### The terminology table — LANDED (Eugene's go, round 5)
+
+`tab:terminology` is in, as a `longtable` in the house idiom, placed beside
+`tab:hazard-notation`. Nine rows, ordered by damage with **stratum first** — it is
+the overload that produced an actual false statement in the manuscript (:211).
+Cost: 141→143pp canonical, 142→144pp variant.
+
+All four blockers below were resolved before landing, and two of the corrections
+were themselves corrected on verification:
+
+- The **anchor** gloss now reads "the middle of the three depth cuts fixed before
+  the reads" — verified: `floor_uncertainty_results.json` carries exactly three
+  2018 reads (gap ≤ +0.0000 / −0.0025 / −0.0050) and the mid-grid anchor is R2.
+- The **cell** row splits the two grids, both verified by direct count: the
+  **21-cell** calibration box (`tab:floorband`, seven floors × three elasticities)
+  and the **27-cell** off-window floor × elasticity-band grid (`oos_identification`,
+  nine floors × three bands).
+- **DROPPED as unverifiable:** the proposed "10,176 training cells / 423 in 20
+  zero-event strata / unbalanced against 296 × 36 = 10,656". None of those numbers
+  occurs anywhere in the manuscript and I could not source them from an artifact.
+  The row says "a stratum-month observation" without a count.
+- `tools/editions/tex2md.py` `WANT["tables"]` 24 → 25, same commit. The converter
+  re-run confirms it counts 25.
+
+**One thing the suite caught that no reader did:** the drafted tablenote reused the
+phrase "their 137 intersection cells", which
+`tests/test_month_twoway_clusters_gate.py:97` asserts occurs exactly **once** — it
+is the single-site anchor of a mutation battery. Duplicating it broke the test.
+Fixed by rewording the note ("the 137 cells where those two intersect"), not by
+touching the test. The full suite is the only thing that would have caught this;
+no pin grep would have, because the assertion is about *uniqueness*, not presence.
+
+### The terminology table — original blocker list (all now resolved)
 
 The word census is sound: *cell*, *band*, *anchor*, *basis*, *stratum*, *floor*,
 *form*, *draw* and *null* are each genuinely overloaded, and the manuscript has no

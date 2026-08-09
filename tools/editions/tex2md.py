@@ -35,7 +35,7 @@ from pathlib import Path
 # demonstration runs to app:params -- relocations only, so every count is
 # unchanged (a planned VII.B settlement-edge relocation was REVERTED when
 # gate #121's cap-only-account-leads ordering refused it).
-WANT = {"tables": 24, "figures": 13, "equations": 8, "footnotes": 2,
+WANT = {"tables": 25, "figures": 13, "equations": 8, "footnotes": 2,
         "headings": 42}
 
 
