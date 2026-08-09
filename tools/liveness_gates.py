@@ -79,6 +79,7 @@ DTI_RESULTS = ROOT / "abm" / "data" / "dti_threshold_sweep_results.json"
 COHORTTIMING_RESULTS = ROOT / "abm" / "data" / "cohort_timing_diagnostic_results.json"
 OOWFLOOR_RESULTS = ROOT / "hazard" / "data" / "out_of_window_floor_results.json"
 OOSIDENT_RESULTS = ROOT / "hazard" / "data" / "oos_identification_results.json"
+FFM_RESULTS = ROOT / "hazard" / "data" / "floor_form_mixture_results.json"
 SEASFLOOR_RESULTS = ROOT / "hazard" / "data" / "seasonal_floor_timing_results.json"
 B3TIMING_RESULTS = ROOT / "hazard" / "data" / "b3_timing_scores.json"
 FCPERM_RESULTS = ROOT / "hazard" / "data" / "floor_cyclical_permutation_results.json"
@@ -1313,6 +1314,14 @@ def assembly_check(tex: str) -> tuple[bool, dict]:
              "table_missing": table_missing})
 
 
+def _abstract_of(tex: str) -> str:
+    """The abstract environment alone, for gates that must scope to it."""
+    tex_nc = re.sub(r"(?<!\\)%.*", "", tex)
+    i = tex_nc.find(ABSTRACT_BOUNDS[0])
+    j = tex_nc.find(ABSTRACT_BOUNDS[1], i + 1)
+    return tex_nc[i + len(ABSTRACT_BOUNDS[0]):j] if (i != -1 and j != -1) else ""
+
+
 def abstract_hedge_check(tex: str) -> tuple[bool, dict]:
     """Gate #68's rule, as a function so the perturbation battery can exercise
     THE SHIPPED RULE instead of a copy of it.
@@ -1347,6 +1356,59 @@ def abstract_hedge_check(tex: str) -> tuple[bool, dict]:
              "missing": missing, "total": len(ABSTRACT_HEDGES),
              "missing_body": missing_body, "total_body": len(RELOCATED_TO_BODY)})
 
+
+
+def floor_form_mixture_check(tex: str, ffm: dict) -> tuple[bool, dict]:
+    """Gate #126: the floor-form mixture curve, live-tied.
+
+    Until this gate existed the mixture artifact was read by NO gate and NO test,
+    while ledger C-22 -- the paper's headline posture -- turns entirely on it. Every
+    value below is DERIVED from the artifact; no curve literal is hand-carried, so a
+    drifted print fails rather than a stale copy passing.
+    """
+    def cell(floor: str, omega: str) -> float:
+        return ffm["cells"][f"{floor}|{omega}|6.5"]["marginal_pp"]
+
+    v0_off, v1_off = cell("4.991", "0"), cell("4.991", "1")
+    v0_in, v1_in = cell("4", "0"), cell("4", "1")
+    v01, v025, v04 = cell("4.991", "0.1"), cell("4.991", "0.25"), cell("4.991", "0.4")
+    # the headline's own transmission: how much a 0.99-point floor rise costs,
+    # under each form. This is the asymmetry the abstract's binding layer hides.
+    d_max, d_add = v0_in - v0_off, v1_in - v1_off
+
+    spans = {
+        # SS VII.F's printed curve
+        "curve": (f"$+{v01:.1f}$ points by $\\omega = 0.1$, $+{v025:.1f}$ at "
+                  f"$\\omega = 0.25$, $+{v04:.1f}$ at $\\omega = 0.4$"),
+        # Table 1's notes, which print the same two interior points
+        "table1_notes": (f"$+{v025:.1f}$ at $\\omega{{=}}0.25$, "
+                         f"$+{v04:.1f}$ at $\\omega{{=}}0.4$"),
+        # the orientation must stay attached to the symbol
+        "orientation": ("$\\omega = 0$ is the production hard maximum, "
+                        "$\\omega = 1$ the additive form"),
+        # the transmission sentence landed with the C-22 posture repair
+        "transmission": (f"moves the marginal by $-{d_max:.2f}$ points under the "
+                         f"production form and by $-{d_add:.2f}$ under the additive one"),
+    }
+    missing = sorted(k for k, v in spans.items() if v not in tex)
+    orient = ffm.get("orientation", {})
+    ok = (
+        not missing
+        # the headline IS the omega = 0 endpoint of this curve
+        and abs(v0_off - 5.6) < 0.05
+        # orientation is not silently flipped
+        and orient.get("s0") == "production hard maximum"
+        and orient.get("s1") == "additive competing-risks"
+        # the curve rises to a plateau: monotone through the named interior
+        and v0_off < v01 < v025 < v04 < cell("4.991", "0.6")
+        # and the asymmetry that makes the posture a posture, not an estimate
+        and d_max > 3.0 and d_add < 0.1
+        and ffm.get("parity_gates_all_pass") is True
+        and tex.count("\\texttt{floor\\_form\\_mixture}") >= 1
+    )
+    return ok, {"missing": missing, "omega0_off": round(v0_off, 4),
+                "omega1_off": round(v1_off, 4), "d_max": round(d_max, 4),
+                "d_add": round(d_add, 4), "named_s": orient.get("paper_semantics_named_s")}
 
 
 # --- R32 (gate #115), C-72: THE MONTH AND TWO-WAY CLUSTER RUNGS ------------
@@ -3907,7 +3969,12 @@ def main() -> int:
         "point_pp": "$+5.6$" in tex,
         "range_pp": "$+4.3$ to $+6.8$" in tex,
         "heldout": "$+\\$45.1$ billion" in tex,
-        "insample_demoted": "in-sample calibration point" in tex,
+        # SCOPED (was a bare whole-file presence check, which any headline
+        # reversal would have satisfied): the ABSTRACT must carry the
+        # off-window point and must NOT reinstate the in-sample one.
+        "insample_demoted": ("in-sample calibration point" in tex
+                             and "$+5.6$" in _abstract_of(tex)
+                             and "$+9.2$" not in _abstract_of(tex)),
         "clean_band": "4.70--5.33\\%" in tex,
     }
     oos_ok = (
@@ -7203,6 +7270,14 @@ def main() -> int:
     print(f"[{'PASS' if dls_ok else 'FAIL'}] 2018 depth ladder shape (gate #114): "
           f"plateau_cov={_dl['plateau_cov_pct']}%, tail_cov={_dl['tail_cov_pct']}%, "
           f"missing={_dl['missing'] or 'none'}")
+    _ffm = json.loads(FFM_RESULTS.read_text())
+    ffm_ok, _ff = floor_form_mixture_check(tex, _ffm)
+    failures += 0 if ffm_ok else 1
+    print(f"[{'PASS' if ffm_ok else 'FAIL'}] floor-form mixture curve "
+          f"(gate #126): omega0={_ff['omega0_off']}pp omega1={_ff['omega1_off']}pp "
+          f"at the off-window floor; floor transmission {_ff['d_max']} (max) vs "
+          f"{_ff['d_add']} (additive); paper-semantics omega={_ff['named_s']}; "
+          f"missing={_ff['missing'] or 'none'}")
     _snha_max_bytes = SNHAMAX_RESULTS.read_bytes()
     _snha = json.loads(SNHAADD_RESULTS.read_text())
     _snha_max = json.loads(_snha_max_bytes)
