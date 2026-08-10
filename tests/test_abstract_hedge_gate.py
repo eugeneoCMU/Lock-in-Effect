@@ -235,8 +235,8 @@ BENIGN = {
         "The cost to households who could not move is real.",
         "The cost to households who could not move is real and large."),
     "reword_unrelated_lead": (
-        "locks households into old, cheap loans",
-        "locks households into old and cheap loans"),
+        "lock households into old, cheap loans",
+        "lock households into old and cheap loans"),
 }
 
 
