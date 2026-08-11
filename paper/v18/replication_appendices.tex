@@ -159,6 +159,27 @@ Run tag & Produces \\
 \texttt{cross\_design\_seeds} & Fifty-seed sweep of both cross-design variants over both randomization layers, with per-seed floor reads (Section~\ref{sec:robustness-crossdesign}) \\
 \texttt{episode\_confrontation} & Realized cumulative prepayment gradient by window-mean gap depth, against the model-implied gradient (Section~\ref{sec:robustness-floor}) \\
 \texttt{production\_scale\_test} & Production-specification scale comparison at $N = 10{,}000$ and $N = 75{,}000$, fifty seeds each (Section~\ref{sec:robustness-scale}) \\
+\texttt{abm\_null\_feasibility} & Why the ABM yields no differential: its two candidate nulls disagree in sign (Section~\ref{sec:abm-interp}). \\
+\texttt{b5\_joint\_cell} & The age-standardized floor's measured marginal and its joint cell with the Ginnie overlay (Section~\ref{sec:identification}). \\
+\texttt{book\_composition\_marginal} & The marginal after raking the loan draw to the book's coupon and vintage margins (Section~\ref{sec:identification}). \\
+\texttt{composition\_shift} & How far the book's coupon, vintage, and agency mix departs from the estimation sample (Section~\ref{app:composition}). \\
+\texttt{compounding\_consistent\_null} & That dropping monthly renormalization to realized holdings moves the marginal by 0.74 points (Section~\ref{sec:identification}). \\
+\texttt{concave\_hull\_band\_ends} & The concave transform's remaining off-window cells, widening the hull's lower edge to +3.5 (Section~\ref{sec:robustness-floor}). \\
+\texttt{danish\_redemption\_validation} & That deep-discount Danish callables redeemed at 26.4% per year, against a 4-5% baseline (Section~\ref{sec:abm-danish}). \\
+\texttt{depth\_ladder\_shape} & Step-then-plateau per-bin turnover in the 2018 ladder, the shape the max floor predicts (Section~\ref{sec:robustness-floor}). \\
+\texttt{dti\_nonmonotonicity\_decomposition} & That the DTI-wall sweep's non-monotonicity is the floor-retention recalibration, not the wall (Section~\ref{sec:robustness-extensions}). \\
+\texttt{episode\_gradient\_recompute} & That the cross-sectional gradient shortfall is not an artifact of the demoted anchor (Section~\ref{sec:patha}). \\
+\texttt{fannie\_floor\_read} & The committed floor rule's out-of-agency read, 5.52% Fannie against 5.19% Freddie (Section~\ref{sec:identification}). \\
+\texttt{fewcluster\_coverage} & Each inference rung's simulated coverage at 5.9 effective clusters, and which rung qualifies (Section~\ref{sec:identification}). \\
+\texttt{floor\_cyclical\_permutation} & That the kappa range prices floor dispersion under the maximum, not rate-cycle co-movement (Section~\ref{sec:robustness-seasonalfloor}). \\
+\texttt{floor\_transport\_two\_sided} & The two opposite-signed floor transports, calendar mix and housing activity, never netted (Section~\ref{sec:identification}). \\
+\texttt{grouped\_calibration} & That Path A's holdout shortfall is temporal drift, not a reliability-slope failure (Section~\ref{app:theil}). \\
+\texttt{h0\_reanchor} & That the transported Path A seasoning shape puts the marginal above the headline (Section~\ref{sec:identification}). \\
+\texttt{null\_floor\_interval} & The rate-inelastic null's benchmark share carried through the floor read's own sampling error (Section~\ref{sec:intro}). \\
+\texttt{pathA\_seasonal\_permutation} & That Path A's timing gain is calendar-aligned while its recovery level is calendar-invariant (Section~\ref{app:patha-detail}). \\
+\texttt{sign\_forcing\_stats} & The coupon-versus-window-minimum-rate statistics that force the marginal's sign, and their two-month coverage gap (Section~\ref{sec:identification}). \\
+\texttt{subgroup\_marginals\_placebo} & That random partitions with no economic content also earn the broad-based verdict (Section~\ref{sec:identification}). \\
+\texttt{synthetic\_companion\_null} & That only the synthetic companion's differential, not its 106% recovery level, is readable (Section~\ref{sec:robustness-synthesis}). \\
 \bottomrule
 \end{longtable}
 }
