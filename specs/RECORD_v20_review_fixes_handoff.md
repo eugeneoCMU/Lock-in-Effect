@@ -68,11 +68,12 @@ Run: `python3 tools/liveness_gates.py` and `python3 -m pytest tests/ -q`.
   corrections to pre-existing rows (one asserted a reading the paper had withdrawn).
 - 7 bibliography entries normalized to initials.
 
-**Readability** (main text, measured)
+**Readability** (main text = lines before `\appendix`; em-dashes counted as
+exact `---` sequences — the .tex has no literal U+2014)
 
 | | before | after |
 |---|---|---|
-| em-dashes | 445 | 123 |
+| em-dashes | 445 | 120 |
 | "rather than" | 180 | 55 |
 | sentences > 62 words | 161 | 10 |
 | mean sentence length | 44.4 | 27.8 |
