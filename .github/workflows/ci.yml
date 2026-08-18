@@ -1,0 +1,55 @@
+name: CI
+
+# Runs the pytest suite on every push and pull request.
+#
+# WHAT THIS DOES NOT RUN, AND WHY: `python3 tools/liveness_gates.py` is the project's
+# 129-gate manuscript check, and it CANNOT run here. On a clean clone it passes 75 gates
+# and then dies with an unhandled FileNotFoundError reading
+# hazard/data/cohort_month_panel.parquet -- one of the two Freddie-derived files
+# deliberately un-shipped for licensing in be79304 ("they stay on his disk"). Gates 76-129
+# never execute. Running it in CI would report a hard failure on every commit for a reason
+# that has nothing to do with the commit, so it is left out until that hard dependency is
+# made optional. Run it locally, where the data is present.
+#
+# The pytest suite has no such problem: on a clean checkout it is 1161 passed, 2 skipped,
+# and both skips announce themselves (the un-shipped parquet, and a PDF that is only built
+# locally). tests/test_printed_values_reconcile.py -- which re-derives the manuscript's
+# printed values from their committed artifacts -- runs in full here, because every
+# artifact it reads is tracked.
+
+on:
+  push:
+    branches: [main, 'claude/**']
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  tests:
+    name: pytest
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: pip
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+          pip install pytest
+
+      - name: Run test suite
+        run: python -m pytest tests/ -q --no-header -rs
+
+      - name: Confirm the two manuscript editions stay in sync
+        # They must be byte-identical apart from line 31, the abstract. A half-applied
+        # edit to one edition is otherwise invisible.
+        run: |
+          diff <(sed '31d' paper/v18/revised_paper_v18.tex) \
+               <(sed '31d' paper/v18/revised_paper_v18_long_abstract.tex) \
+            && echo "editions in sync (identical apart from the abstract)"
