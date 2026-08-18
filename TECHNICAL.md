@@ -1399,7 +1399,7 @@ So the U.S.-transplant Danish CPR = flat 3.2% moving + ≈0 refi.
 | ABM Danish CPR mean | 47.1% | **3.4%** |
 | ABM Danish trapped | −$834.5B | **+$812.9B** |
 | ABM institutional gap (US−DK) | +$925.5B | **−$728.4B** |
-| ABM DK−US CPR wedge | +32.3pp | −8.4pp |
+| ABM DK−US CPR wedge | +35.5pp | −8.4pp |
 | Path B (hybrid) institutional gap | +$925.5B | **−$99.9B** |
 | Path B (hybrid) US / Danish CPR | 11.68% / 47.1% | 4.76% / 3.39% |
 
