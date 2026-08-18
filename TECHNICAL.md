@@ -2038,7 +2038,7 @@ production artifact changed.
 
 The critique's flagship objection held up: the §20 Danish legs import
 Denmark's descriptive 3.2%/yr moving LEVEL, producing Danish mean CPRs
-(3.39–3.40%) below the 4% involuntary-turnover floor, conflating the payoff
+(3.36–3.39%) below the 4% involuntary-turnover floor, conflating the payoff
 rule with Danish baseline mobility. Berger's identified moving-margin fact is
 the SLOPE (flat in the coupon gap). Fix: `common/berger_calibration.py` gains
 a transplant-anchor switch (`set_danish_moving_anchor`, default `dk_level`
@@ -4787,3 +4787,49 @@ instruction, all landing on their L1 branches, gates #123–#125 + 13-test batte
 
 The manuscript's printed spec count moved 22 → 25 (caught by
 test_spec_count_claim, which exists for exactly this).
+
+
+## 54. `tab:danish`'s two stale Danish CPR cells, and the gate hole that let them stand (2026-08-17)
+
+The manuscript printed two Danish mean-CPR cells that its own frozen manifests
+contradict. Both are re-derivable from artifacts committed in this repo, so
+settling it needed no external source:
+
+| `tab:danish` row | manifest | printed | corrected |
+|---|---|---|---|
+| Mechanism-extrapolated ABM (`run-2026-07-04-15yr-foldin`) | 47.13724153305981 | 47.10% | **47.14%** |
+| Berger ABM, Danish-level (`run-2026-07-05-berger`) | 3.3605729629547856 | 3.40% | **3.36%** |
+
+Path: `metrics.cpr_pct.danish.mean` in each run's `manifest.json`. The U.S. legs
+beside them (11.68%, 11.76%) round correctly from the same two files, so the
+error was confined to the Danish column.
+
+Third site: V.C prose cited the pair as "3.39--3.40\%, Table~\ref{tab:danish}".
+With the ABM leg at 3.36% and the hybrid leg unchanged at 3.39%, that range is
+3.36--3.39\%. The 3.39% hybrid figure is NOT touched — different pipeline, and
+this file corroborates it at 1179, 1404, 1415, 2820.
+
+**This file was already right; the manuscript was the stale copy.** Line 473
+carried **3.36%** and 1156/1350 carried 47.14% throughout. The 1-dp renderings at
+1354/1399/1404/1732 (47.1%, 3.4%) are correct roundings and were left alone. The
+one stale site here was §23.1's parenthetical "(3.39–3.40%)", corrected in the
+same commit; its argument is unaffected, since 3.36–3.39% still sits below the 4%
+involuntary-turnover floor that sentence is about.
+
+**No computed quantity moves.** These are printed summaries of frozen artifacts,
+not inputs; the institutional gaps in the same rows (+$925.5B, −$728.4B) are
+untouched. Both editions edited, six lines, commit `c1f6f29`.
+
+**The gate hole.** Nothing in `tools/liveness_gates.py` or `tests/` matched
+`47.10`, `3.40`, or the prose range — the cells were never gated, which is why a
+wrong value survived. `origin/cursor/r33a-finding5-0aaf` carries a gate
+(`danish_cpr_manifest_check`) that re-derives these cells live from the manifests
+rather than string-matching them; adopting it would close the hole. Two cautions
+if it is taken: that branch numbers it **#125**, which collides with this line's
+`fewcluster_coverage` #125, and that branch's headline `berger2026` 18 bps
+"correction" is separately WRONG (the July 16 2026 draft's baseline is 20 bps;
+18 bps is its no-deductibility tax variant) and must not come along with it.
+
+Surfaced by diffing against that branch; re-verified here directly against the
+manifests, which are byte-identical on both branches. ALL GATES PASS; 1139
+passed, 1 skipped.
