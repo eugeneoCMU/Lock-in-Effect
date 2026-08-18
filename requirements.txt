@@ -1,3 +1,4 @@
+# Core analysis stack.
 pandas
 numpy
 matplotlib
@@ -5,7 +6,22 @@ fredapi
 polars
 statsmodels
 pyarrow
+scipy            # imported directly by 13 modules; previously only arrived
+                 # transitively via statsmodels, which is not a contract
+scikit-learn     # hazard/landmark_isotonic_holdout.py, hazard/ml_comparator_holdout.py
+                 # import it at module level
+
+# Verification. `python3 -m pytest tests/` is the package's own check and the
+# README tells a recipient to run it, so it belongs here rather than in a dev-only
+# file: installing requirements.txt alone must be enough to reproduce the suite.
+pytest
+
+# Google Drive sync (common/google_drive.py).
 google-auth
 google-auth-oauthlib
 google-auth-httplib2
 google-api-python-client
+
+# Optional, imported lazily inside functions and not needed for the test suite:
+#   pypdf   -> tools/render_gate.py   (PDF render checks; its test skips without a built PDF)
+#   PyMuPDF -> tools/extract_gmar_dec25.py  (imports as `fitz`)
