@@ -95,6 +95,22 @@ def test_danish_berger_level_cell(tex):
 
 
 @BOTH
+def test_danish_prose_range_tracks_the_table(tex):
+    """V.C cites the two Danish-level legs as a range; its lower bound is the
+    Berger ABM cell, so it drifts whenever that cell does. Adopted from the
+    R33 branch's danish_cpr_manifest_check, which carried this check and my
+    first battery did not. The 3.39 upper bound is the hybrid leg, whose value
+    has no manifest in this pair (different pipeline), so it is pinned as a
+    literal rather than derived."""
+    berger = _load("abm/data/runs/run-2026-07-05-berger/manifest.json")
+    dk = _dig(berger, "metrics", "cpr_pct", "danish", "mean")
+    assert f"({dk:.2f}--3.39\\%, Table~\\ref{{tab:danish}})" in tex
+    assert "(3.39--3.40\\%, Table~\\ref{tab:danish})" not in tex, (
+        "the retired 3.39--3.40 range is back"
+    )
+
+
+@BOTH
 def test_danish_row_dollar_figures_match_foldin(tex):
     m = _load("abm/data/runs/run-2026-07-04-15yr-foldin/manifest.json")
     d = _dig(m, "metrics", "dollars_b")
