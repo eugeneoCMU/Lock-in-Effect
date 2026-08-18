@@ -316,7 +316,11 @@ Reruns the **entire** ABM→macro pipeline 50 times, each time re-seeding the ra
 ### Prerequisites
 
 - Python 3.9+
-- A free FRED API key from <https://fred.stlouisfed.org/docs/api/api_key.html> (already set in both core scripts; replace if you fork). No key is needed for the NY Fed SOMA API.
+- A free FRED API key from <https://fred.stlouisfed.org/docs/api/api_key.html>. It is **not** bundled: `abm_lockin_simulation.py` and `fed_mbs_extension_risk.py` resolve it at module import, so both fail on import without one. Set it before running:
+  ```bash
+  export FRED_API_KEY="your_key"   # or copy .env.example to .env and fill it in
+  ```
+  No key is needed for the NY Fed SOMA API.
 
 ### Install
 

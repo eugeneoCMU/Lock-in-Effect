@@ -74,7 +74,21 @@ python3 hazard/extension_risk.py
 python3 hazard/extension_risk.py --mode literature
 ```
 
-**Note:** If Freddie Mac files are not found locally, the loader looks in the Google Drive folder *you* configured in step 3a. There is no public mirror: if you have not obtained the dataset from Freddie Mac yourself (step 3), the build will not proceed. Subsequent runs use the cached copies. To force a fresh download, run with the environment variable `FORCE_REFRESH=1` or manually clear the cache in `./data/cache/`.
+### 5. Verify
+
+```bash
+python3 -m pytest tests/
+```
+
+Expected on a fresh clone: **1161 passed, 2 skipped**. Both skips name themselves — the un-shipped Freddie parquet, and a PDF that is only built locally.
+
+`python3 tools/liveness_gates.py` (129 manuscript gates) needs the un-shipped Freddie data: on a clean clone it passes 75 gates and then exits with `FileNotFoundError` on `hazard/data/cohort_month_panel.parquet`, so gates 76–129 do not run. It is not part of the recipient-facing check for that reason.
+
+**Note:** If Freddie Mac files are not found locally, the loader looks in the Google Drive folder *you* configured in step 3a. There is no public mirror.
+
+**If no Freddie data is found, the build does NOT stop.** `hazard/ingest.py` and `hazard/loan_sample.py` fall back to `generate_synthetic_fixture()` and continue, printing `Building panel from synthetic fixture …` as they go. The resulting parquet is written to the same path a real build would use, so any figure, table or manifest produced from it is **fabricated data wearing the real filename** — the printed line is the only signal. Do not treat output as a replication unless you obtained the dataset in step 3 and saw no synthetic-fixture message.
+
+Subsequent runs use the cached copies. To rebuild from scratch, use the `--rebuild` flag (e.g. `python3 hazard/extension_risk.py --rebuild`), which unlinks the cached parquets.
 
 ## Layout
 
