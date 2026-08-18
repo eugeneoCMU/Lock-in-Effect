@@ -1385,8 +1385,11 @@ Berger, Jeong, Marx, Olesen & Tourre's estimated elasticities directly (`berger2
   the *tax* treatment of the realized discount. Denmark: capital-gains exempt
   (θ=33%) → strong shield → a large home refi channel. U.S. transplant: taxable
   gain (θg=15%) with a smaller deduction (θi=22%) removes the shield; Berger's
-  realistic-tax scenario moves the equilibrium mortgage rate only **~1bp**, so
-  the U.S.-transplant refi channel is anchored to that GE result as **negligible**
+  realistic-tax scenario moves the equilibrium mortgage rate by about **20 bps**
+  (July 2026 draft §4.10.2; the January 2026 draft this section originally cited
+  said ~1bp), which the authors read as leaving equilibrium rates virtually
+  unchanged, so the U.S.-transplant refi channel is anchored to that GE result as
+  **small**
   (a partial-equilibrium reduced form over-predicts because it omits the rate
   adjustment; the Danish-home reduced form is retained for the contrast).
 
@@ -1409,7 +1412,8 @@ Berger's *estimated* Danish elasticities the Danish counterfactual prepays only
 ~3.4%/yr — barely faster than the empirical U.S. book — so the "Danish system
 frees up far more trapped liquidity" claim does not survive contact with the
 real elasticities. This is exactly Berger's own conclusion: under U.S. tax law
-the buyback institution adds ~1bp, i.e. almost nothing.
+the buyback institution adds ~20 bps to equilibrium mortgage rates, which the
+authors read as leaving rates virtually unchanged.
 
 The two frameworks now bracket the sign. The **Path B hybrid** puts both regimes
 on empirically-grounded footing (US 4.76%, Danish 3.39%) and gives a **small
@@ -1426,8 +1430,11 @@ Reproduce: `cd abm && python3 abm_lockin_simulation.py && python3 freeze_run.py
 
 ### 20.1 Sensitivity sweep of the U.S.-transplant refi channel
 
-§20 anchors the U.S.-transplant refi-in-place CPR to Berger's ~1bp GE result
-(≈0). Because that zero drives the *sign* of the institutional gap, it is
+§20 anchors the U.S.-transplant refi-in-place CPR to Berger's GE result
+(~20 bps in the July 2026 draft, ~1bp in the January draft originally cited),
+read as ≈0 refi VOLUME. The inference is price → volume: the GE number is a rate
+effect, and the manuscript explicitly declines to read it as a volume statement
+(§VI.D contradicts that reading with realized Danish redemption data). Because that zero drives the *sign* of the institutional gap, it is
 parameterized (`set_us_transplant_refi`) and swept from 0 to the partial-
 equilibrium reduced-form ceiling (**~18%/yr** — the estimate §20 rejected as
 over-predicting, representative ~17.4% at QT rates; Denmark's own ~33%/yr
@@ -1447,7 +1454,7 @@ channel and both U.S.-side calibrations fixed through to the gap.
 **Breakeven** (gap = 0): **ABM at refi ≈ 12.6%**, **Path B at refi ≈ 1.4%**.
 
 **Where the best estimate sits — and the honest conclusion.** The best-evidence
-refi is ≈0 (Berger's realistic-tax ~1bp). Against that:
+refi is ≈0 (Berger's realistic-tax GE rate effect ~20 bps). Against that:
 
 - The **ABM's** negative gap has a **wide ~12.6pp margin** to breakeven — its
   sign is robust to any plausible refi. But the ABM's U.S. leg is over-predicted
@@ -4833,3 +4840,39 @@ if it is taken: that branch numbers it **#125**, which collides with this line's
 Surfaced by diffing against that branch; re-verified here directly against the
 manifests, which are byte-identical on both branches. ALL GATES PASS; 1139
 passed, 1 skipped.
+
+
+## 55. §20's Berger GE anchor updated 1bp → 20 bps (author-directed, 2026-08-18)
+
+§20 anchored the U.S.-transplant refi-in-place channel to Berger et al.'s
+general-equilibrium rate effect, cited from the **January 2026** draft at **~1bp**.
+The current draft is **July 16 2026** (84pp), whose baseline is **20 bps** —
+"introducing the option raises mortgage rates by only 20 bps on average", and
+"20 bps per annum on average in our baseline calibration" (§4.10.2/§4.10.6),
+verified against the authors' hosted PDF. The manuscript moved to 20 bps in R32;
+this file had not followed. Four sites updated: the anchoring sentence, the §20
+Interpretation paragraph, the §20.1 sweep preamble, and the §20.3 best-estimate
+parenthetical. The two surviving "~1bp" mentions are now explicitly labelled as
+January-draft history, matching the manuscript's own treatment.
+
+**Two characterizations had to change with the number, not just the digits.**
+"i.e. almost nothing" and "**negligible**" were conclusions drawn FROM 1bp; at
+20 bps they no longer follow in this file's own voice. Both now attribute the
+reading to the authors ("which the authors read as leaving equilibrium rates
+virtually unchanged"), which is their actual language in the July draft, rather
+than asserting it here.
+
+**WHAT THIS DOES NOT SETTLE — read before relying on §20.1.** The calibration
+default is unchanged: `set_us_transplant_refi` still defaults to ≈0 refi volume,
+and every committed artifact is untouched. The anchoring is a **price → volume**
+inference — the GE number is a rate effect, and the manuscript explicitly
+declines to read it as a volume statement (§VI.D contradicts that reading with
+realized Danish redemption data, 26.4%/yr on deep-discount bonds). Whether ≈0
+remains the right volume anchor once the price effect is 20× larger was NOT
+re-derived here, and the §20.1 sweep exists precisely because that zero drives
+the sign of the institutional gap: Path B's breakeven is at refi ≈ 1.4%/yr, a
+margin thin enough that this question is live rather than academic.
+
+Note the 18 bps figure that appears in `origin/cursor/r33a-finding5-0aaf` is NOT
+the baseline — it is the no-deductibility tax variant (§4.10.4) and the
+Fonseca–Liu-1.20 recalibration (§4.10.6). See §54's closing note.
