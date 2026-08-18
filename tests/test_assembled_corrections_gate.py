@@ -197,7 +197,8 @@ HANDOFF_COMMITMENTS = [
     "$+9.2$",          # in-sample calibration
     "$+5.6$",          # off-window headline
     "$+4.4$",          # Ginnie overlay
-    "$+3.8$",          # age-standardised floor
+    "$+3.8$",          # age-standardised floor, as the GRID read
+    "$+3.7$",          # ...and the value b5_joint_cell actually measured there
     "$+2.9$",          # the composed lower member, measured by b5_joint_cell
                        # (round 27; supersedes the naive $+3.0$ projection,
                        # which survives in prose as the projection history)

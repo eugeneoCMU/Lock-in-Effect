@@ -1,0 +1,79 @@
+# Adversarial verdict — F-assembly (C-18, C-26, C-39, C-40, C-41)
+
+VERDICT: APPLY_WITH_LISTED_FIXES
+edits_checked: 8
+
+## COUNT_MISMATCHES (4)
+1. NONE. All 8 OLD_COUNT_ASSERTs re-measured with str.count: each exactly 1. Sites: Edits 1-5 all on line 333; Edit 6 line 349; Edit 7 line 345; Edit 8 line 348.
+
+2. CENSUS: all 37 literal rows verified before AND after by applying the 8 edits in order to an in-memory copy. Zero mismatches (0.797 5->6; $0.797\times$ 2->3; 0.6645 1->2; $0.6645\times$ 1->2; $0.002$ 3->4; $0.001$ 0->1; 5.19\% 2->4; 4.991\% 17->20; 0.337 2->3; 4.869\% 1->2; 4.695\% 4->5; 10\% support rule 1->2; $+5.1$ 5->7; $+3.7$ 5->7; mid-grid 9->10; median 16->19; S^{\theta} 2->4; survival-selection 1->3; free parameter 3->4; attenuation_sensitivity 3->5; matched_depth_reconciliation 2->3; all 15 'unchanged' rows unchanged).
+
+3. STRUCTURAL: all verified exactly as claimed. Assembly paragraph 968->1401 words, 6252->8805 chars; doc 66783->67266 (+483); gate #98 15/15 spans and 4/4 table spans before and after; exactly 1 'A seventh qualification' paragraph; line-349 ' & ' 18->21 i.e. 6->7 four-column rows; $ count even.
+
+4. COMPANION spans (outside region) verified: Companion A count 1 at line 439; Companion B count 1 at line 1430; '(neutral)' 13, '(downward)' 1, as the draft states.
+
+
+## REFUTED_CLAIMS (10)
+1. REFUTED (Edit 1) — '$0.002$ and $0.001$ points of either move specific to the overlay rather than to the SHARE ARITHMETIC'. Those two artifact values are primary-minus-PLACEBO speed-series components, not residuals against share arithmetic: ginnie_specific_marginal_component_pp 0.0021157 = 4.443419-4.441303 (primary vs gse_placebo); vintage_specific_marginal_component_pp 0.0010419 = 3.702154-3.701112 (primary vs sampled_placebo). The residual against pure share arithmetic is ~4x larger and nearly equal for both: 4.443419-0.796*5.571558 = 0.0085pp; 3.702154-0.663*5.571558 = 0.0082pp. The paper's own labels (.tex:271 'the Ginnie-specific differential contribution'; .tex:1430 'placebo spread 0.0002 ... vintage-specific component +0.001 points') are specific-vs-placebo. FIX: '...specific to the overlaid segments' own observed speeds rather than to the placebo series'.
+
+2. REFUTED as stated (Edit 3, Edit 7) — 'The anchor is a counting rule and not a pick among the reads'. oos_identification_results.json instrument1_oow_floor.defensible_clean_floor records reads_pct {5.334, 4.991, 4.695} plus primary_point_selection = 'gap<=-0.0025_age>=12' — a recorded PICK, with no median rule anywhere. grep of specs/ and TECHNICAL.md finds no 'median of the three' commitment; the only occurrence is C-18's own word 'implicit'. Worse, it collides with .tex:79 (Table 1, A-posture's region), which pins the mid-grid anchor as 'an anchor convention rather than a central tendency' — and a median IS a central tendency. Edit 7 repeats the collision in the table cell. FIX: 'the mid-grid 4.991\% is the middle of the three committed depth cuts, an anchor convention rather than a central tendency', and drop 'counting rule and not a pick'.
+
+3. SELF-FALSIFYING (Edit 1) — the stated inclusion rule ('a reading enters if this paper scores this marginal, over the full window, under a committed run or a committed grid read, labelled with the floor it is scored at and the input it moves, and nothing clearing that bar is held out for running the wrong way'). At least three committed runs clear that bar and are absent from tab:assembly: psa_level_sweep (+0.9 to +15.6 at the off-window floor, input = seasoning ramp; .tex:333, .tex:439); covariate_ablation_offwindow (the marginal moves +0.1 at the 4.991\% floor, input = the covariate block; .tex:269, .tex:323, .tex:439); floor_form_mixture (+9.7 at s=0.25, +10.7 at s=0.4, input = the floor's strictly-involuntary share; .tex:90, .tex:323, .tex:715 — and these run UPWARD, tripping the 'held out for running the wrong way' clause). The draft's rationale claims the rule excludes the covariate ablation 'as a level swing'; it does not — the reported quantity is a marginal move at a labelled floor. Only the '+$45.1B' floor-stability check is genuinely excluded (by 'over the full window'). The rule needs a discriminating clause or those three need rows.
+
+4. NEW CONTRADICTION (Edit 2) — Edit 2's arithmetic is CORRECT (5.522-5.185 = 0.337 agency; 5.185-4.991 = 0.194 period; total 0.531), matching .tex:323. But .tex:439 (tab:uncertainty headline row, B-ladder/E region) currently reads 'its like-for-like Freddie counterpart 5.185\% rather than the 2018 leg's 4.991\%, so MOST of that distance is period and not agency' — which is FALSE (agency 0.337 > period 0.194). After Edit 2 the manuscript states both. The draft cited .tex:439 approvingly and did not notice. A companion repair at .tex:439 must land with Edit 2.
+
+5. C-39 NOT DISCHARGED WHERE THE CONDITION REQUIRES, and a new contradiction (Edit 1). C-39's condition: 'The rule adopted must be stated once in §V.B and T5 and the ledger must agree with it.' 'change of estimand' and 'not a correction' occur ONLY at line 346 (tab:assembly) and line 1430 (ledger); §V.B never states it. And §V.B contradicts the label: .tex:271 says 'the marginal CORRECTION is pure conventional-share scaling ($0.797\times$)' and 'overstates the CORRECTION'; .tex:90 files it under 'Sensitivity catalogue ... Ginnie overlay $+4.4$'. After Edit 1's 'Two of the entries are not corrections at all', §V.B and §V.E disagree in terms. The draft's preamble cites .tex:269/271 as recording the decision; those lines record the confinement, not the label. Companion repair needed at .tex:271 (and .tex:90).
+
+6. UNSUPPORTED DIRECTION (Edit 4) — 're-reading it at the window's own level ... would move the anchor DOWN and the marginal UP'. The anchor-down half requires the QT window to have been less active than the 2018 leg. No committed artifact carries an activity comparison; 'existing-home sales' occurs 0 times in the .tex and C-71 records the 5.34M/4.09M figures as external NAR data the repository does not hold. The draft's UNVERIFIED #3 claims the edit is 'conditional on nothing' and makes no claim about which period was more active — inconsistent with its own text, which asserts a signed direction. FIX: scope it ('if the window's turnover level is the lower of the two, which I do not measure here') or state the mechanism without the sign.
+
+7. ADJACENT CONTRADICTION (Edit 4) — the same paragraph already says 'A calibrated companion prices the omitted housing-activity level term ... and the marginal at $+0.9$ points at the headline floor ... The variant documents an upward bias; the corrected member lies below the headline.' Edit 4 adds a second housing-activity correction with the OPPOSITE sign, using the same phrase ('the housing-activity level'), without distinguishing the channel (the floor's read-period activity vs the null's seasoning baseline). As drafted the paragraph asserts that housing activity biases the marginal both up and down.
+
+8. IMPRECISION (Edit 1) — 'each is the headline scaled by what it retains, $0.797\times$ and $0.6645\times$' equates the realized marginal scale with the retained share. The paper prints both on purpose: .tex:271 '($0.797$ against $0.796$)'; vintage retained = 0.663 vs scale 0.6645 (expectation_check.scale_relative_deviation_vs_retained_pct = 0.222). 'scaled almost exactly by what it retains' is the accurate form. Separately, Edit 1 describes the same mechanism in two registers — Ginnie 'to its own published speed', vintage 'to a zero marginal' — where the vintage run in fact scores the segment at its observed Fannie speeds in BOTH legs (spec string), zero marginal being the consequence, not the method.
+
+9. NEW NUMERIC HOMONYMS (Edits 5, 6) — the assembly paragraph currently contains no '$+5.1$' and no '$+3.7$' (measured: 0 and 0). After Edit 5 the prose prints both for the ATTENUATION, and those are exactly tab:assembly's rounded values for the concave-transform row ($+5.1$, prose $+5.06$) and the VINTAGE-overlay row ($+3.7$) — different objects. The caption asserts 'Every value repeats a committed figure from the text of this subsection', so a reader mapping table to prose will mis-bind both. C-19's standing warning about numerically distinct +2.9s is the same hazard class. The theta labels in both prose and row mitigate but do not remove it.
+
+10. VERIFIED SOUND (no fault found): the attenuation figures — attenuation_sensitivity_results.json monotonicity['4.991'].marginal_pp_ordered = [5.5716, 5.0955, 4.6177, 3.7037] against theta = 0/0.25/0.5/1, so '+5.1 to +3.7 over theta = 0.25 to 1' is exact; 'a different axis from the elasticity band, not a widening of it' reproduces not_an_elasticity_band_widening; 'theta free' matches free_parameter_note and .tex:231; Section~\ref{sec:pathb} is the correct pointer (label at line 217, content at 231). The five-read median is correct: clean_band_under_extended_ladder.well_supported_reads_pct = [5.334, 4.991, 4.695, 4.722, 4.869], median 4.869; band_unchanged_by_extension true; floor_to_marginal 4.695 -> +6.771 and 4.991 -> +5.572, so 4.869\% implies a marginal ABOVE the headline — the honest direction, correctly stated. 'ex-ante 10\% support rule' matches .tex:867/1320 and MD_SUPPORT = 0.10.
+
+
+## PIN_VIOLATIONS (6)
+1. NONE. Gate #98's rule re-implemented locally from tools/liveness_gates.py:380-436 (not imported, no repo script run): before and after the 8 edits, exactly 1 'A seventh qualification' paragraph, 15/15 ASSEMBLY_SPANS present in it, 4/4 ASSEMBLY_TABLE_SPANS present in the file.
+
+2. ASSEMBLY_SPANS['ladder_fannie'] = '5.52\\%, brackets the marginal below the $+4.3$ edge' is the only pinned span any OLD contains (Edit 2); NEW reproduces it byte-identically (insertion begins after '(above)'). The draft's claim is correct.
+
+3. tests/test_assembled_corrections_gate.py: both benign-rewrite fixtures still count 1 after ('because this paper states each correction where it arises', 'What the assembly settles is where in the interval the mass sits'); test_paragraph_split_fails' index anchor 'Three things stop the list' intact; all 9 HANDOFF_COMMITMENTS still inside the paragraph.
+
+4. ZERO_COUNT 19/19 at 0, EXACTLY_ONE 4/4 at 1, HARDCODED_XREF 0 on all five regexes, SUPERSEDED_CONTEXTUAL '894.8' 0 unlabeled — identical before and after. (Edit 5's 'Section~\ref{sec:pathb}' does not match the Section-roman regex.)
+
+5. Gate #101: abstract byte-identical (1840 bytes, 294 words) so (b) unaffected; no LETTER_CURRENT_LITERAL loses its count so (c) unaffected. Gates #99 (ABSTRACT_POSTURE), #102, #103, #104 (VERDICT_AUDIT_SPANS), #105-#109: no pinned span inside any OLD; Companion B leaves #104's two direction-rows untouched.
+
+6. matched-depth cross-check: md_claims 2 -> 3 against '>= 1'; none of its ~22 'in tex' literal pins is inside any OLD. Draft's claim correct. Minor: the draft cites liveness_gates.py:379-436 and 3963-3981; the actual spans are 380-436 and 3956-3981 — immaterial.
+
+
+## CONVENTION_VIOLATIONS (6)
+1. 'basis' misused for a period (Edit 2): 'a comparison that holds on the pooled period's BASIS alone', 20 words after 'brackets the marginal', in a paragraph whose other uses of 'basis' are the ACCOUNTING basis ('every correction to the floor or to the accounting basis'). The standing convention is that marginals are basis-invariant and never carry a basis label; this wording invites exactly that reading. FIX: 'on the pooled period alone'.
+
+2. Forward/dangling reference (Edit 1): '--- the survival-selection attenuation included (below)' depends on Edit 5. The draft's own fallback ('If the coordinator declines the companion edits, drop Edits 5 and 6') would leave Edit 1 pointing at nothing. Edit 1 must be conditioned on Edit 5, and the draft does not say so.
+
+3. Order defect (Edit 1): 'Two of the entries are not corrections at all' is stated BEFORE any entry is listed (the ladder sentence follows), and the vintage overlay has no antecedent anywhere in the paragraph ('vintage' occurs 0 times in line 333). 'the list' also has no antecedent at that point.
+
+4. Redundancy (Edit 4): 'one mechanism read more than once' restates the paragraph's existing 'The floor-level corrections and the censoring share are one mechanism read twice' three sentences upstream. Edit 3 restates .tex:719's already-printed extension-leaves-the-band-unchanged claim and prints only one of the two extra reads (4.869\%, not 4.722\%), so the five-read median cannot be checked at its own site; C-18's fix asks for §VII.F, the draft puts it in §V.E.
+
+5. Not violated, confirmed: no post-float note moved into a float (tab:assembly has none and none is created); no disclosure deleted (Edits 4 and 5 are additions); hedge scopes preserved ('the one floor-side correction I can name', '$\theta$ free'); no anti-condition acted on (no beta_1 flip, Webb not called narrowest, abstract untouched, 40,234 not swapped, 53.7\% untouched, R2:M8 untouched); no layer/rung conflation.
+
+6. Build risk (unresolved, draft flags it): tab:assembly is [H] and its declared widths already sum to ~17.1cm against a ~16.5cm textwidth (tests/test_render_gate.py line 66 names 'the tab:assembly defect' at x=620 > 612). Edit 6 adds no width but +1 row, and the paragraph gains 433 words. A 130-page build plus render_gate must be checked before this ships.
+
+
+## COLLISIONS (5)
+1. Edits 1-5 all sit on line 333, which is inside TWO sibling regions as declared: B-ladder ('Section V.E ... the inference-ladder and binding-layer passages' — the binding-layer sentence is on line 333 and Edits 4/5 insert on either side of it) and C-formfork ('Section V (the form fork)' — line 333 contains '$+3.5$ to $+13.1$' x1 and 'form dimension' x1). No byte overlap with F's OLDs, but F must be applied FIRST or any B/C anchor carrying neighbouring context on line 333 will stale.
+
+2. Edit 1's OLD is the V.E twin of the introduction's line-46 sentence ('every correction I can measure to the floor or to the accounting basis moves...'), which is A-posture's region. Unique OLD, no byte collision, but the two sentences must be kept consistent if A-posture rewrites its twin.
+
+3. Edits 3 and 7 assert the mid-grid anchor is a median, contradicting .tex:79 (Table 1) 'an anchor convention rather than a central tendency' — Table 1 is A-posture's region.
+
+4. Companion A targets .tex:439 (tab:uncertainty) = B-ladder/E region. Companion B targets .tex:1430 (App. O adjudication ledger) = G-denominators region. Edits 5 and 6 cannot land without both.
+
+5. The two repairs this review adds also fall in sibling regions: .tex:439's false 'most of that distance is period and not agency' (B-ladder/E) and .tex:271 / .tex:90's 'the marginal correction' wording (C-formfork / D-mechanical).
+
+
+## NOTES
+Measurement is flawless: 8/8 OLD counts are 1, all 37 census literals and every structural figure reproduce exactly, no pinned span is lost, abstract byte-identical (294 words). So not REJECT. But three items must be fixed before application: (1) Edit 1's 0.002/0.001 are placebo-series components, not share-arithmetic residuals (those are ~0.008 for both); (2) Edit 1's inclusion rule admits psa_level_sweep, covariate_ablation_offwindow and floor_form_mixture, none of which is in tab:assembly — it falsifies itself; (3) Edits 3/7's "median"/"counting rule" contradicts Table 1's "anchor convention rather than a central tendency" and the artifact's primary_point_selection. Three companion repairs in sibling regions are also required: .tex:439 ("most of that distance is period" is arithmetically false), .tex:271 ("the marginal correction"), plus the draft's own Companions A/B. Edit 4's signed direction needs scoping.

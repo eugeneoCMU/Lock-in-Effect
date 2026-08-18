@@ -55,7 +55,7 @@ HANDOFF_PHRASES = [
     "fifty-seed mean",
     "recalibrated on real loan covariates",
     "institutional cash-flow",
-    "baseline turnover",
+    "turnover floor",
     "uniform-spread",
     "input-stability check",
     "modeling paradigm",
@@ -121,9 +121,9 @@ def _mutations(abstract: str) -> dict[str, str]:
         "drops_institutional_scope": abstract.replace(
             "The institutional cash-flow cost is small", "The cost is small"),
         "drops_baseline_turnover": abstract.replace(
-            "scheduled amortization and baseline turnover (itself "
-            "read from realized, partly behavioral turnover) fall short",
-            "scheduled amortization falls short"),
+            "scheduled amortization plus a turnover floor read from "
+            "realized, partly behavioral turnover, accounts",
+            "scheduled amortization accounts"),
         # --- scoping ------------------------------------------------------
         # the body keeps every phrase; only the abstract is gutted. A
         # whole-file count gate would pass this.
@@ -235,8 +235,8 @@ BENIGN = {
         "The cost to households who could not move is real.",
         "The cost to households who could not move is real and large."),
     "reword_unrelated_lead": (
-        "locks households into old, cheap loans",
-        "locks households into old and cheap loans"),
+        "lock households into old, cheap loans",
+        "lock households into old and cheap loans"),
 }
 
 

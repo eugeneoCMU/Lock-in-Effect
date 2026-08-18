@@ -23,8 +23,20 @@ import re
 import sys
 from pathlib import Path
 
-WANT = {"tables": 27, "figures": 13, "equations": 8, "footnotes": 3,
-        "headings": 44}
+# V20 closing session: tab:crosswalk, tab:runindex, tab:verdicts and the
+# app:ledger/app:verdicts section heads migrated to replication_appendices.tex,
+# so the manuscript edition carries 3 fewer tables and 2 fewer headings.
+# V20 fresh-eyes trim: the Section V.B calibration footnote (band-midpoint /
+# transform-slot / Fonseca-corroboration), whose every clause duplicated the
+# adjacent body text, is deleted, so footnotes 3 -> 2 (fn:manifest and the
+# sec:method-abm payoff-rule footnote remain).
+# V20 fresh-eyes tier (b): tab:ladder + its notes and the headline-row
+# calibration catalogue relocated to app:floormech, the VII.E curtailment
+# demonstration runs to app:params -- relocations only, so every count is
+# unchanged (a planned VII.B settlement-edge relocation was REVERTED when
+# gate #121's cap-only-account-leads ordering refused it).
+WANT = {"tables": 25, "figures": 13, "equations": 8, "footnotes": 2,
+        "headings": 59}
 
 
 def strip_comments(s):
@@ -185,14 +197,36 @@ class Conv:
         i = block.find("\\caption{")
         if i >= 0:
             cap, _ = balanced(block, i + len("\\caption"))
+        block = block.replace("}\\\\\n\\toprule", "}\n\\toprule")
         lm = re.search(r"\\label\{(tab:[^}]*)\}", block)
         num = self.lab.get(lm.group(1), "?") if lm else "?"
         # tabular body
         rows_md = []
-        ti = block.find("\\begin{tabular}")
+        env = "tabular" if "\\begin{tabular}" in block else "longtable"
+        ti = block.find("\\begin{" + env + "}")
         if ti >= 0:
-            _, after_spec = balanced(block, ti + len("\\begin{tabular}"))
-            body = block[after_spec:block.index("\\end{tabular}")]
+            _, after_spec = balanced(block, ti + len("\\begin{" + env + "}"))
+            body = block[after_spec:block.index("\\end{" + env + "}")]
+            # longtable repeats its header for continuation pages; keep one copy
+            if env == "longtable":
+                if "\\endhead" in body:
+                    body = body.split("\\endhead", 1)[1]
+                    hdr = block[after_spec:block.index("\\endfirsthead")] \
+                        if "\\endfirsthead" in block else ""
+                    # V20 re-review N-m2: the firsthead carries the longtable's
+                    # \caption{...}\label{...}\\ row; strip it so the caption
+                    # (already extracted into `cap` above) is not re-emitted
+                    # as the first table row.
+                    ci = hdr.find("\\caption")
+                    if ci >= 0:
+                        _, ce = balanced(hdr, ci + len("\\caption"))
+                        hdr = hdr[:ci] + hdr[ce:]
+                    hdr = re.sub(r"\\label\{[^}]*\}", "", hdr)
+                    hdr = re.sub(r"^\s*\\\\", "", hdr.lstrip())
+                    body = hdr + body
+                for mk in ("\\endfirsthead", "\\endhead", "\\endfoot",
+                           "\\endlastfoot"):
+                    body = body.replace(mk, "")
             body = re.sub(r"\\(top|mid|bottom)rule", "", body)
             body = re.sub(r"\\cmidrule(\([^)]*\))?\{[^}]*\}", "", body)
             body = re.sub(r"\\addlinespace(\[[^\]]*\])?", "", body)
@@ -272,6 +306,9 @@ class Conv:
                       "", body)
         body = re.sub(r"\\vspace\{[^}]*\}", "", body)
         body = body.replace("{\\footnotesize", "")
+        # V20 re-review N-m2: stripping the {\footnotesize opener above
+        # orphans its group-closing brace on its own line; drop those.
+        body = re.sub(r"(?m)^\}\s*$\n?", "", body)
         body = "\n".join(ln for ln in body.split("\n") if ln.strip() != "}")
         body = self.footnote_pull(body)
 
@@ -300,7 +337,8 @@ class Conv:
                 out += ["## Abstract", "", self.inline(inner).strip(), ""]
                 i = j + 1
                 continue
-            for env, fn in (("table", self.table_block),
+            for env, fn in (("longtable", self.table_block),
+                            ("table", self.table_block),
                             ("figure", self.figure_block),
                             ("equation", self.equation_block)):
                 if stripped.startswith(f"\\begin{{{env}}}"):
@@ -310,7 +348,7 @@ class Conv:
                     i = j + 1
                     break
             else:
-                m = re.match(r"\\(section|subsection)\{", stripped)
+                m = re.match(r"\\(section|subsection|subsubsection)\{", stripped)
                 if m:
                     cmd = m.group(1)
                     titletxt, jj = balanced(stripped, stripped.index("{"))
@@ -319,8 +357,13 @@ class Conv:
                     self.counts["headings"] += 1
                     if cmd == "section":
                         out += [f"## {num}. {self.inline(titletxt)}", ""]
-                    else:
+                    elif cmd == "subsection":
                         out += [f"### {num} {self.inline(titletxt)}", ""]
+                    else:
+                        # sub-subsections are navigation aids added in the v20
+                        # readability pass; they carry no \label and therefore
+                        # no aux-resolved number, so they render unnumbered.
+                        out += [f"#### {self.inline(titletxt)}", ""]
                     rest = stripped[jj:]
                     rest = re.sub(r"^\\label\{[^}]*\}", "", rest)
                     if rest.strip():
@@ -354,6 +397,10 @@ class Conv:
                 out.append(f"[^{k}]: {fn.strip()}")
                 out.append("")
         md = "\n".join(out)
+        # V20 re-review N-m2 (final pass): group-closing braces orphaned by
+        # stripped {\small / {\footnotesize wrappers surface as standalone
+        # "}" paragraphs only after assembly; drop them here.
+        md = re.sub(r"(?m)^\}\s*$\n?", "", md)
         md = re.sub(r"\n{3,}", "\n\n", md)
         return md
 

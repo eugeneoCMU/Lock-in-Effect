@@ -1,0 +1,89 @@
+{
+  "mode": "marginal_transaction_counts",
+  "run_tag": "marginal_transaction_counts",
+  "spec": {
+    "spec_file": "specs/SPEC_R32_c76_transaction_counts.md",
+    "window_months": 42,
+    "denominator": "mean balance of SURVIVING loans (balance > 0) in the frozen sample",
+    "denominator_surviving_mean": 237316.81146742523,
+    "denominator_all_loan_mean_REJECTED": 126812.61137573334,
+    "denominator_note": "the all-loan mean averages in prepaid loans at zero balance and would roughly double the implied count; a payoff retires a live balance",
+    "n_surviving": 40077,
+    "soma_book_face_b": 2700.5636941477837,
+    "sigma_range": [
+      0.2,
+      0.22
+    ],
+    "sigma_note": "SOMA share of 1-4 family mortgage debt is NOT a committed artifact of this repo, so the gross-up is a bracket, not a point",
+    "s1_is_upper_bound": "s=1 is the production convention: all voluntary gap response is treated as the moving channel, so the count is an upper bound on the moving component"
+  },
+  "parity": {
+    "cells_and_null_match_committed": true,
+    "bracket_ordered": true,
+    "surviving_mean_exceeds_all_loan_mean": true,
+    "s1_reproduces_headline_5p6pp_42p6b": true
+  },
+  "comparator": {
+    "sourced": true,
+    "series_id": "EXHOSLUSM495S",
+    "n_obs_2025": 7,
+    "first_date": "2025-06-01",
+    "last_date": "2025-12-01",
+    "run_rate_2025": 4084285.714285714,
+    "note": "annualized SAAR monthly observations averaged over 2025; this account returns no pre-2025 history for this series, which is why the 2022-2024 decline comparison is not computed"
+  },
+  "not_computed": {
+    "share_of_2022_2024_decline": "NOT COMPUTED. fonseca2026 (NBER 35237) verifies a 40% drop in U.S. existing home sales between 2022 and 2024, but as a percentage; this account returns no pre-2025 history for EXHOSLUSM495S, so the 2022 level cannot be sourced. Deriving it would require assuming 2024 ~ 2025, an assumption this run declines to make."
+  },
+  "expectations": {
+    "E1_counts_increase_in_s": true,
+    "E2_range": [
+      150000,
+      400000
+    ],
+    "E2_s1_whole_market_per_year": [
+      233171.75098883302,
+      256488.9260877163
+    ],
+    "E2_pass": true,
+    "E3_max_share": 0.1,
+    "E3_s1_share_of_2025_run_rate": 0.06279896756257482,
+    "E3_pass": true
+  },
+  "cells": {
+    "s_0.25": {
+      "moving_share": 0.25,
+      "marginal_b": 13.927399285867523,
+      "marginal_pp": 1.8211743834884921,
+      "book_foregone_payoffs": 58686.94762814659,
+      "book_foregone_payoffs_per_year": 16767.699322327597,
+      "whole_market_per_year_lo": 76216.81510148908,
+      "whole_market_per_year_hi": 83838.49661163798,
+      "share_of_2025_run_rate_lo": 0.018660990056328212,
+      "share_of_2025_run_rate_hi": 0.020527089061961032
+    },
+    "s_0.5": {
+      "moving_share": 0.5,
+      "marginal_b": 25.707131262521443,
+      "marginal_pp": 3.361515525428123,
+      "book_foregone_payoffs": 108324.10524801811,
+      "book_foregone_payoffs_per_year": 30949.744356576604,
+      "whole_market_per_year_lo": 140680.65616625728,
+      "whole_market_per_year_hi": 154748.72178288302,
+      "share_of_2025_run_rate_lo": 0.034444371918985695,
+      "share_of_2025_run_rate_hi": 0.03788880911088427
+    },
+    "s_1": {
+      "moving_share": 1.0,
+      "marginal_b": 42.60839388108866,
+      "marginal_pp": 5.571558182909741,
+      "book_foregone_payoffs": 179542.24826140143,
+      "book_foregone_payoffs_per_year": 51297.78521754326,
+      "whole_market_per_year_lo": 233171.75098883302,
+      "whole_market_per_year_hi": 256488.9260877163,
+      "share_of_2025_run_rate_lo": 0.057089970511431665,
+      "share_of_2025_run_rate_hi": 0.06279896756257482
+    }
+  },
+  "runtime_s": 0.331
+}

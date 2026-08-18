@@ -1,3 +1,19 @@
+# Session working notes and tooling — kept on disk, not published.
+# Coordination artifacts, not the research record. Deliberately NOT ignored:
+# specs/ (the paper's App. A cites it by name), TECHNICAL.md,
+# SPEC_danish_redemption_validation_*.md, OOS_IDENTIFICATION.md.
+HANDOFF_*.md
+PLAN_*.md
+REVIEW_*.md
+REVIEW2_*.md
+REVIEW3_*.md
+REREVIEW_*.md
+revision_roadmap_*.md
+timing_sweep_log.md
+docs/carroll_round_qa_prep.md
+docs/superpowers/
+tools/purge_from_published_history.sh
+
 # Freddie Mac raw loan-level files (large; user-downloaded)
 hazard/data/raw/
 Historic Freddie/
@@ -49,6 +65,15 @@ hazard/data/oos_identification_run.log
 
 # Phase backups made by the freeze protocol
 *.bak-*
+
+# Freddie Mac SF Loan-Level Dataset — derived loan-level and small-cell objects.
+# Freddie's Additional Terms permit publishing derived products only where they
+# "cannot be used to derive or recreate any part of" the dataset. The 75,000-loan
+# sample is loan-grain, and 1,454 of the cohort-month panel's cells hold <=2 loans
+# (minimum 1), so neither clearly meets that condition. Code-only, same footing as
+# Fannie below; both regenerate from a user's own Freddie download.
+hazard/data/loan_sample.parquet
+hazard/data/cohort_month_panel.parquet
 
 # Fannie Mae SF Loan Performance data — LICENSE prohibits redistribution
 # (repo is public): never commit native downloads or derived panels/cells.

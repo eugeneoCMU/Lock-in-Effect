@@ -72,19 +72,16 @@ def test_point_before_range_fails(tex, abstract):
     """Put the point back in front, keeping every literal. This is the exact
     arrangement round 24b removed, and a span-presence check accepts it."""
     mutated = (
-        " \\noindent Baseline turnover (itself read from realized, "
-        "partly behavioral turnover) sets the floor. "
-        "Lock-in itself adds $+5.6$ points, or \\$42.6 billion. "
-        "What lock-in itself adds is a range rather than a number. "
-        "The design bounds it between $+2.9$ and $+8.7$ points under its "
-        "production floor form (the floor read's sampling error at my "
-        "central elasticity; a wild-cluster interval on 31 clusters; the "
-        "percentile read under-covers), with a "
-        "form-conditional hull of $+3.5$ to $+13.1$ points, and it identifies "
-        "levels only. Inside that range, $+5.6$ points, or \\$42.6 billion, is "
-        "the value at the calibration I headline, and every correction I can "
-        "measure to the baseline turnover floor or to the accounting basis "
-        "moves it down within the range rather than up. ")
+        " \\noindent A turnover floor read from realized, partly behavioral "
+        "turnover sets the baseline. "
+        "Lock-in itself adds, with $+5.6$ points, \\$42.6 billion, the production "
+        "form's endpoint, inside it, most of the margin. "
+        "What lock-in itself adds is a range rather than a number: "
+        "$+2.3$ to $+9.1$ points under the production floor form (the floor "  # V20-N1
+        "read's sampling error at the central elasticity, wild-cluster on 31 "
+        "clusters), a form-conditional hull of $+3.5$ to $+13.1$; measured "
+        "corrections to the floor and the accounting basis move it in both "
+        "directions. ")
     ok, info = abstract_posture_check(_swap(tex, abstract, mutated))
     assert not ok, "gate #99 accepted a point-first abstract"
     assert info["missing"] == [] and not info["ordered"], (
@@ -99,7 +96,7 @@ def test_frame_dropped_from_the_corrections_claim_fails(tex):
     overclaim HANDOFF_round25 §4.2 records."""
     mutated = tex.replace(
         ABSTRACT_POSTURE["corrections_framed"],
-        "every correction I can measure moves it down within the range rather than up", 1)
+        "the corrections I can measure no longer all run one way", 1)
     assert mutated != tex
     ok, _ = abstract_posture_check(mutated)
     assert not ok
@@ -130,8 +127,8 @@ def test_commented_out_posture_fails(tex, abstract):
 # claim.
 # --------------------------------------------------------------------------
 @pytest.mark.parametrize("old,new", [
-    ("however the rate-responsive margin behaves",
-     "however the rate-responsive margin moves"),
+    ("The design identifies a marginal, not a level",
+     "The design identifies a marginal --- not a level"),
     ("The cost to households who could not move is real.",
      "The cost to households who could not move is real and unevenly borne."),
 ])
@@ -149,6 +146,6 @@ def test_benign_rewrites_stay_green(tex, old, new):
 def test_abstract_posture_agrees_with_section_ve(tex):
     ve = [ln for ln in tex.split("\n") if ln.startswith("A seventh qualification")]
     assert len(ve) == 1, "Section V.E's assembly paragraph is missing or duplicated"
-    assert "$+2.9$ to $+8.7$ points" in ve[0], "V.E no longer quotes the binding interval"
+    assert "$+2.3$ to $+9.1$ points" in ve[0], "V.E no longer quotes the binding interval"  # V20-N1
     assert "no interior member is privileged, and the range rather than any point is what the design delivers" in ve[0], (
         "V.E no longer states the range-carries reading of Section V.E")

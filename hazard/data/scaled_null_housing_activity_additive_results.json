@@ -1,0 +1,200 @@
+{
+  "mode": "scaled_null_housing_activity_additive",
+  "run_tag": "scaled_null_housing_activity_additive",
+  "status": "OK",
+  "spec": {
+    "spec_file": "specs/SPEC_R32_c77_aladangady_additive.md",
+    "calibration_condition": "find phi* such that trapped_null(phi*) - trapped_null(1) = (0.56/0.44) * [ trapped_central(1) - trapped_null(1) ]",
+    "ratio": 1.272727272727273,
+    "rate_share": 0.44,
+    "non_rate_share": 0.56,
+    "mapping": "M1 unchanged: phi scales the PSA baseline h0 in BOTH legs, floor untouched. M2/M3/M4 stay rejected -- re-opening the mapping under a different form would change the estimand and break comparability with the max-form row this run sits beside.",
+    "floor_form": "production ADDITIVE code path -- the same lh.FLOOR_MODE switch floor_form_mixture uses for its s=1 endpoint",
+    "bisection": {
+      "bracket": [
+        0.3,
+        1.0
+      ],
+      "tol_b": 0.05,
+      "max_iters": 10,
+      "not_retuned": true
+    },
+    "danish_leg_disclosure": "competing_risks.py:148 calls prepay_hazard on the Danish us_intercept branch too, so the Danish leg simulated in the same run also carries the scaled baseline. Only the U.S. leg is scored.",
+    "engine_run": true,
+    "engine_is_single_tenant": true
+  },
+  "parity_gates": {
+    "P0_sha_pins": {
+      "hazard/scaled_null_housing_activity.py": "c8641a7ee97ffb53a2e71f31778a0f83376cb96d94417b1b3a60963749d293d7",
+      "hazard/literature_hazard.py": "c75a653b53cbc0ea033dc7b54cb62804b630a701c2a044d6a8288838decb9540",
+      "hazard/competing_risks.py": "08be5b3c74c75f5c543fb857e52c4d54e9fd6bb31f4cbd29b21989acbf4aa29a",
+      "hazard/config.py": "faae6a5c0c2a83083aa9cee990836f4d544cd0ea55fb920e83f0df36d009168e",
+      "hazard/data/scaled_null_housing_activity_results.json": "265a665e9dc081c2dee2d64fed4bbf22ccaad0e2358309de0e41c22ecca9740e",
+      "hazard/data/floor_form_mixture_results.json": "527a74e4c3bb31c8b68ddcf03e1754fc16db8ad2aaeea5ecf3529e3260472d29"
+    },
+    "P1_additive_endpoint_parity": {
+      "4|0": {
+        "got": 427.7040999885527,
+        "want": 427.7040999885527,
+        "pass": true
+      },
+      "4|6.5": {
+        "got": 513.7265922748531,
+        "want": 513.7265922748531,
+        "pass": true
+      },
+      "4.991|0": {
+        "got": 341.83938974816874,
+        "want": 341.83938974816874,
+        "pass": true
+      },
+      "4.991|6.5": {
+        "got": 427.54488764725437,
+        "want": 427.54488764725437,
+        "pass": true
+      }
+    },
+    "P2_max_form_parity": {
+      "4|0": {
+        "got": 748.1850239867648,
+        "want": 748.1850239867648,
+        "pass": true
+      },
+      "4|6.5": {
+        "got": 818.5300844066606,
+        "want": 818.5300844066606,
+        "pass": true
+      },
+      "4.991|0": {
+        "got": 724.9180585654117,
+        "want": 724.9180585654117,
+        "pass": true
+      },
+      "4.991|6.5": {
+        "got": 767.5264524465003,
+        "want": 767.5264524465003,
+        "pass": true
+      }
+    },
+    "P3_baseline_identity": {
+      "vs_h0_psa": 0.0,
+      "vs_baseline_hazard": 0.0
+    },
+    "P4_restoration_and_bind_anchor": {
+      "restored": true,
+      "bind_share": 0.6881875607501289,
+      "want": 0.6881875607501289
+    },
+    "P5_ratio_recomputed": 1.272727272727273,
+    "P5_floor_read_live_pct": 4.991
+  },
+  "committed_max_form": {
+    "4": {
+      "phi_star": 0.75625,
+      "marginal_pp": 3.4679508192893707,
+      "floor_bind_share": 0.7564017862023238,
+      "required_lift_b": 89.53007689804927
+    },
+    "4.991": {
+      "phi_star": 0.75390625,
+      "marginal_pp": 0.897850936460884,
+      "floor_bind_share": 0.9444295250973784,
+      "required_lift_b": 54.228864939567394
+    }
+  },
+  "roots_additive": {
+    "4": {
+      "no_root": false,
+      "phi_star": 0.75625,
+      "psa_speed_effective": 75.625,
+      "iterations": 3,
+      "residual_b": 0.03915970510334432,
+      "converged": true,
+      "tolerance_b": 0.05,
+      "max_iters": 10,
+      "bracket_final": [
+        0.75,
+        0.7625
+      ],
+      "bracket_drafted": [
+        0.3,
+        1.0
+      ],
+      "bracket_seeded_from_ladder": true,
+      "ladder_null_lift_b": {
+        "0.70": 134.74994258036315,
+        "0.75": 112.32620848834142,
+        "0.80": 89.88937051001813,
+        "0.90": 44.97418011788159,
+        "1.00": 0.0
+      },
+      "required_lift_b": 109.48317200074607,
+      "realized_lift_b": 109.52233170584941,
+      "null_trapped_b": 537.2264316944021,
+      "central_trapped_b": 602.4033076096173,
+      "null_mean_cpr_pct": 7.32986404518219,
+      "marginal_b": 65.17687591521519,
+      "marginal_pp": 8.522657703441032,
+      "floor_bind_share": 0.7722520741193162,
+      "additive_marginal_at_phi1_b": 86.02249228630046,
+      "additive_marginal_at_phi1_pp": 11.24847188912115
+    },
+    "4.991": {
+      "no_root": false,
+      "phi_star": 0.7564453124999999,
+      "psa_speed_effective": 75.64453124999999,
+      "iterations": 8,
+      "residual_b": -0.00476369996243875,
+      "converged": true,
+      "tolerance_b": 0.05,
+      "max_iters": 10,
+      "bracket_final": [
+        0.75625,
+        0.756640625
+      ],
+      "bracket_drafted": [
+        0.3,
+        1.0
+      ],
+      "bracket_seeded_from_ladder": true,
+      "ladder_null_lift_b": {
+        "0.70": 134.30305873160228,
+        "0.75": 111.95658574095592,
+        "0.80": 89.59587294560839,
+        "0.90": 44.82959718545726,
+        "1.00": 0.0
+      },
+      "required_lift_b": 109.07972459883626,
+      "realized_lift_b": 109.07496089887383,
+      "null_trapped_b": 450.91435064704257,
+      "central_trapped_b": 515.8509251144648,
+      "null_mean_cpr_pct": 8.347804285430486,
+      "marginal_b": 64.93657446742219,
+      "marginal_pp": 8.491235409008798,
+      "floor_bind_share": 0.9479515472419144,
+      "additive_marginal_at_phi1_b": 85.70549789908563,
+      "additive_marginal_at_phi1_pp": 11.207021073656191
+    }
+  },
+  "expectations": {
+    "E2_root_exists_both_floors": true,
+    "E3_bar_pp": 4.0,
+    "E3_marginal_pp_by_floor": {
+      "4": 8.522657703441032,
+      "4.991": 8.491235409008798
+    },
+    "E3_pass": true,
+    "E4_phi_star_direction_deliberately_not_predicted": {
+      "additive": {
+        "4": 0.75625,
+        "4.991": 0.7564453124999999
+      },
+      "max_committed": {
+        "4": 0.75625,
+        "4.991": 0.75390625
+      },
+      "note": "either direction lands and neither is scored as a miss; the spec declined to guess a direction it could not derive"
+    }
+  },
+  "runtime_s": 394.006
+}

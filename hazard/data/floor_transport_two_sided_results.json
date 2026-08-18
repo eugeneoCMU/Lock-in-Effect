@@ -1,0 +1,164 @@
+{
+ "mode": "floor_transport_two_sided",
+ "spec": "specs/SPEC_R32_floor_transport_two_sided.md",
+ "spec_sha256": "803760d95c155d7be47645a5120f6f133cc19ce886a82a19abdcdde0761daee2",
+ "base": {
+  "floor_pct": 4.991,
+  "null_trapped_b": 724.9180585654117,
+  "central_trapped_b": 767.5264524465003,
+  "null_share_pct": 94.79172466371236,
+  "central_share_pct": 100.36328284662208,
+  "marginal_b": 42.60839388108866,
+  "marginal_pp": 5.571558182909726,
+  "null_floor_bind_share": 0.35785836337667337,
+  "central_floor_bind_share": 0.6881875607501289
+ },
+ "leg_a_calendar_standardization": {
+  "support_2018_leg": [
+   {
+    "reporting_period": 201807,
+    "n_cohort_months": 2,
+    "exposure_share_pct": 8.999981603694072e-05
+   },
+   {
+    "reporting_period": 201808,
+    "n_cohort_months": 48,
+    "exposure_share_pct": 20.28749502007965
+   },
+   {
+    "reporting_period": 201809,
+    "n_cohort_months": 48,
+    "exposure_share_pct": 20.14868980831702
+   },
+   {
+    "reporting_period": 201810,
+    "n_cohort_months": 49,
+    "exposure_share_pct": 19.992528529026792
+   },
+   {
+    "reporting_period": 201811,
+    "n_cohort_months": 49,
+    "exposure_share_pct": 19.85298555757211
+   },
+   {
+    "reporting_period": 201812,
+    "n_cohort_months": 49,
+    "exposure_share_pct": 19.718211085188386
+   }
+  ],
+  "leg_smm": 0.0034047757414027487,
+  "qt_smm": 0.0035579856937601683,
+  "flat_smm": 0.0035111831013962514,
+  "ratio": 1.0449985443958485,
+  "floor_pct": 5.215587735079679,
+  "result": {
+   "floor_pct": 5.215587735079679,
+   "null_trapped_b": 716.3588710805716,
+   "central_trapped_b": 752.2940042731401,
+   "null_share_pct": 93.67250831391736,
+   "central_share_pct": 98.37145767942887,
+   "marginal_b": 35.935133192568514,
+   "marginal_pp": 4.69894936551151,
+   "null_floor_bind_share": 0.43091239861115405,
+   "central_floor_bind_share": 0.7451928675486773
+  },
+  "pre_committed_band_pp": [
+   4.6,
+   4.9
+  ],
+  "in_band": true,
+  "direction": "RAISES the floor, LOWERS the marginal",
+  "move_pp": -0.8726088173982163
+ },
+ "leg_b_activity_matching": {
+  "specs": {
+   "b1_listings": {
+    "series": "ACTLISCOUUS",
+    "leg_mean": 1268865.3333333333,
+    "qt_mean": 801671.3333333334,
+    "ratio": 0.6318017462320668,
+    "floor_pct": 3.153322515444245
+   },
+   "b2_sales": {
+    "computable": false,
+    "candidates_tried": [
+     {
+      "id": "EXHOSLUSM545S",
+      "error": "ValueError: Bad Request.  The series does not exist."
+     },
+     {
+      "id": "EXHOSLUSM495S",
+      "n_obs": 14,
+      "first": "2025-05-01",
+      "last": "2026-06-01",
+      "leg_months_covered": 0
+     },
+     {
+      "id": "HOSSUPUSM673N",
+      "n_obs": 14,
+      "first": "2025-05-01",
+      "last": "2026-06-01",
+      "leg_months_covered": 0
+     }
+    ],
+    "reason": "the spec's series id EXHOSLUSM545S does not exist on FRED, and the nearest existing-home-sales and months-supply series available on this account return only a short recent history with NO coverage of the 2018 leg months, so no 2018-vs-window sales comparison is constructible"
+   }
+  },
+  "primary": "b1_listings",
+  "floor_pct": 3.153322515444245,
+  "result": {
+   "floor_pct": 3.153322515444245,
+   "null_trapped_b": 757.4633723016896,
+   "central_trapped_b": 839.1795910679017,
+   "null_share_pct": 99.0474145066286,
+   "central_share_pct": 109.73278952015161,
+   "marginal_b": 81.71621876621214,
+   "marginal_pp": 10.685375013523014,
+   "null_floor_bind_share": 0.07085098899427493,
+   "central_floor_bind_share": 0.14438448979397833
+  },
+  "pre_committed_sign": "floor BELOW 4.991% and marginal ABOVE +5.5716",
+  "sign_held": true,
+  "b1_b2_signs_agree": null,
+  "direction_measured": "LOWERS the floor, RAISES the marginal",
+  "move_pp": 5.113816830613288
+ },
+ "composition_note": "The two legs are opposite-signed and are reported SEPARATELY at their own floors. No composed cell was run, so no net is reported: spec Section 3 forbids adding or netting them, and forbids any 'they roughly cancel' claim, because b5_joint_cell showed two floor-side adjustments compose with an interaction (-1.47 points on the first joint cell it ran). The two legs bound the correction from either side without pinning a net.",
+ "gates": {
+  "A1_B1_base_floor_parity": {
+   "pass": true,
+   "null_got": 724.9180585654117,
+   "null_want": 724.9180585654117,
+   "central_got": 767.5264524465003,
+   "central_want": 767.5264524465003,
+   "marginal_pp_got": 5.571558182909726,
+   "marginal_pp_want": 5.571558182909726
+  },
+  "A2_standardization_ratio": {
+   "pass": true,
+   "ratio_recomputed": 1.0449985443958485,
+   "ratio_target_5dp": 1.045,
+   "leg_smm": 0.0034047757414027487,
+   "qt_smm": 0.0035579856937601683,
+   "flat_smm": 0.0035111831013962514,
+   "flat_ratio": 1.0312523843199328,
+   "note": "recomputed inside the run from the committed 12-vector and the panel-derived month mix; NOT taken from the spec file"
+  },
+  "B2_activity_ratio_recomputed": {
+   "pass": true,
+   "note": "both activity ratios recomputed inside the run from the macro frame macro.py itself builds (ACTLISCOUUS) and from a live FRED call (EXHOSLUSM545S); neither taken from the spec file"
+  },
+  "G_frozen_artifacts": {
+   "pass": true,
+   "n_files": 203,
+   "scope_note": "hazard/data/** excluding the gitignored floor_sweep/ scratch dir",
+   "changed": []
+  },
+  "G_floor_mode_untouched": {
+   "pass": true,
+   "floor_mode": "max"
+  }
+ },
+ "gates_all_pass": true,
+ "runtime_s": 129.46939650000002
+}

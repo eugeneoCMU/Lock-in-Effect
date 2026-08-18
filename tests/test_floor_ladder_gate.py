@@ -60,7 +60,7 @@ def test_the_ladder_order_is_gated():
     ("$+3.2$ to $+8.3$", "$+3.3$ to $+8.3$"),
     ("$+2.8$ to $+8.8$ & $t(6.2)$", "$+2.8$ to $+8.9$ & $t(6.2)$"),
     ("$t(6.2)$", "$t(6.3)$"),
-    ("4.177\\% to 5.800\\%", "4.177\\% to 5.801\\%"),
+    ("4.033\\% to 6.181\\%", "4.033\\% to 6.182\\%"),  # V20-N1: binding rung floor image
 ])
 def test_a_wrong_digit_fails(printed, perturbed):
     assert TEX.count(printed) == 1, f"{printed!r} is not the single site"
@@ -105,6 +105,11 @@ def test_the_designer_units_clause_is_the_webb_interval_in_floor_units():
     w = RD["wild_t_webb"]
     lo, hi = w["floor_ci95_pct"]
     assert f"{lo:.3f}\\% to {hi:.3f}\\%" == "4.177\\% to 5.800\\%"
+    # V20-N1: the designer clause now QUOTES the binding rung (restricted
+    # inversion); the Webb read above remains the cap grid's input.
+    wc = RD["wcr_inverted"]
+    wlo, whi = wc["floor_ci95_pct"]
+    assert f"{wlo:.3f}\\% to {whi:.3f}\\%" == "4.033\\% to 6.181\\%"
     # the map is inverse: the LOW floor carries the HIGH marginal
     assert w["upper_pp_edge"]["floor_pct"] < w["lower_pp_edge"]["floor_pct"]
     assert abs(w["marginal_ci95_pp"][0] - 2.8549950653913494) < 1e-9

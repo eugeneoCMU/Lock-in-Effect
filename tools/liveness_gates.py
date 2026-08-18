@@ -57,6 +57,16 @@ INTERP_RESULTS = ROOT / "abm" / "data" / "interp_spot_check_results.json"
 SMD_RESULTS = ROOT / "abm" / "data" / "smd_two_moment_results.json"
 WALTAB_RESULTS = ROOT / "hazard" / "data" / "wal_table_results.json"
 WALNT_RESULTS = ROOT / "hazard" / "data" / "wal_normal_turnover_results.json"
+WALNRB_RESULTS = ROOT / "hazard" / "data" / "wal_note_rate_basis_results.json"
+SCCG_RESULTS = ROOT / "hazard" / "data" / "state_contingent_cap_grid_results.json"
+MTC_RESULTS = ROOT / "hazard" / "data" / "marginal_transaction_counts_results.json"
+DLS_RESULTS = ROOT / "hazard" / "data" / "depth_ladder_shape_results.json"
+EPAGE_RESULTS = (ROOT / "hazard" / "data"
+                 / "episode_gradient_age_bands_results.json")
+ECWITHIN_RESULTS = (ROOT / "hazard" / "data"
+                    / "episode_confrontation_within_results.json")
+COUPONAMORT_RESULTS = (ROOT / "hazard" / "data"
+                       / "coupon_convention_amortization_results.json")
 CURTDEMO_RESULTS = ROOT / "hazard" / "data" / "curtailment_profile_demo_results.json"
 SPREADVAR_RESULTS = ROOT / "hazard" / "data" / "expectation_spread_variants_results.json"
 DANBOUND_RESULTS = ROOT / "hazard" / "data" / "danish_discount_bound.json"
@@ -69,6 +79,7 @@ DTI_RESULTS = ROOT / "abm" / "data" / "dti_threshold_sweep_results.json"
 COHORTTIMING_RESULTS = ROOT / "abm" / "data" / "cohort_timing_diagnostic_results.json"
 OOWFLOOR_RESULTS = ROOT / "hazard" / "data" / "out_of_window_floor_results.json"
 OOSIDENT_RESULTS = ROOT / "hazard" / "data" / "oos_identification_results.json"
+FFM_RESULTS = ROOT / "hazard" / "data" / "floor_form_mixture_results.json"
 SEASFLOOR_RESULTS = ROOT / "hazard" / "data" / "seasonal_floor_timing_results.json"
 B3TIMING_RESULTS = ROOT / "hazard" / "data" / "b3_timing_scores.json"
 FCPERM_RESULTS = ROOT / "hazard" / "data" / "floor_cyclical_permutation_results.json"
@@ -101,6 +112,31 @@ MATCHEDDEPTH_RESULTS = ROOT / "hazard" / "data" / "matched_depth_reconciliation_
 # cannot be manufactured by matched_depth_reconciliation.py itself.
 B0VAR_RESULTS = ROOT / "hazard" / "data" / "b0_variance_decomposition.json"
 DANUSINT_RESULTS = ROOT / "hazard" / "data" / "danish_us_intercept_results.json"
+# The Danish band's own run. Its upper endpoint is printed at FIVE sites and
+# had no tex-to-artifact pin anywhere in tools/ or tests/, while the lower
+# endpoint carried three -- so the band could drift open at one end silently.
+DANFG_RESULTS = (ROOT / "hazard" / "data"
+                 / "danish_refi_finegrid_results.json")
+BBCB_RESULTS = ROOT / "hazard" / "data" / "buyback_credit_bracket_results.json"
+BDR_RESULTS = (ROOT / "hazard" / "data"
+               / "buyback_discount_rederived_results.json")
+DIOS_RESULTS = (ROOT / "hazard" / "data"
+                / "danish_interest_only_share_results.json")
+RBA_RESULTS = (ROOT / "hazard" / "data"
+               / "realized_boundary_allocation_results.json")
+BMR_RESULTS = (ROOT / "hazard" / "data"
+               / "benchmark_monthly_rebuild_results.json")
+# Gate #121/#122 cross-ties. SMB owns the two committed benchmarks C-128
+# must reproduce; H1Z owns the four clip months and the ARTIFACT verdict
+# C-127 strengthens; EXPECT owns the cap-relative benchmark both rest on.
+# None is written by the run under test, so agreement cannot be faked
+# from inside either new artifact.
+SMB_RESULTS = (ROOT / "hazard" / "data"
+               / "settlement_months_benchmark_results.json")
+H1Z_RESULTS = ROOT / "hazard" / "data" / "h1_zero_months_diagnosis.json"
+CN_RESULTS = ROOT / "hazard" / "data" / "compounding_null_results.json"
+NFI_RESULTS = ROOT / "hazard" / "data" / "null_floor_interval_results.json"
+FCC_RESULTS = ROOT / "hazard" / "data" / "fewcluster_coverage_results.json"
 REFISWEEP_RESULTS = ROOT / "abm" / "data" / "refi_sweep_results.json"
 SHAREDLAYER_RESULTS = ROOT / "hazard" / "data" / "shared_layer_scoring_results.json"
 MARGDECOMP_RESULTS = ROOT / "hazard" / "data" / "marginal_decomposition_results.json"
@@ -162,9 +198,17 @@ ZERO_COUNT = [
     # external-gates cross-check above).
     "is not scored against the 50\\% undercutting band",
     "that band presupposed an empirically admissible turnover level",
+    # R32 C-75: the four-point proxy grid is history, not the operative basis
+    # the printed cash figure stands on. These three phrasings each said it was.
+    "at the committed proxy discounts",
+    "at the paper's own proxy discounts",
+    "across the committed 32--38\\% discount grid",
 ]
 
 EXACTLY_ONE = [
+    # V20 post-re-review: the author reverted decision gate D2 to the original
+    # title (2026-08-05); the III.B standing paragraph carries the
+    # shortfall-vs-objective scoping either way.
     "\\title{Mortgage Lock-In and the Federal Reserve's Quantitative Tightening Shortfall}",
     # Round-21 rewrite of the kernel sentence (replaces the retired
     # "frozen manifests say otherwise" pin above).
@@ -212,12 +256,21 @@ FIGURE_FORBIDDEN = ["model CPR leads", "model leads", "TBA settlement"]
 # Freeze item (ii), LaTeX half: every cross-reference goes through \ref —
 # a hardcoded "Table 7" / "Section V.C" literal would silently drift when
 # floats renumber. Comments are stripped before matching.
+# Widened 2026-07-30. The appendix pattern covered letters A-B while the paper
+# runs A through O, so it went green over the exact drift its header describes
+# (verified by injecting "Appendix~N" for the C-127 site: all five counts
+# stayed 0). And every pattern was singular-only while the manuscript uses
+# Sections~\ref x31, Tables~\ref x1 and Appendices~\ref x1 -- 33 sites where a
+# hardcoded plural is the likelier drift and no singular pattern could match.
+# "I" is excluded from the appendix class deliberately: the paper voice is
+# first person, so "the Appendix I show" would false-positive.
 HARDCODED_XREF = {
-    "Table N literal": r"Table[~ ]\d",
-    "Figure N literal": r"Figure[~ ]\d",
-    "Section roman literal": r"Section[~ ][IVX]+(?:\.[A-Z])?(?![a-zA-Z}])",
-    "Appendix letter literal": r"Appendix[~ ][AB](?![a-zA-Z}])",
-    "Equation (N) literal": r"[Ee]quation[~ ]\(\d\)",
+    "Table N literal": r"Tables?[~ ]\d",
+    "Figure N literal": r"Figures?[~ ]\d",
+    "Section roman literal": r"Sections?[~ ][IVX]+(?:\.[A-Z])?(?![a-zA-Z}])",
+    "Appendix letter literal":
+        r"Appendix(?:es)?[~ ](?:[A-HJ-Z])(?![a-zA-Z}])",
+    "Equation (N) literal": r"[Ee]quations?[~ ]\(\d\)",
 }
 
 # --- Round-20 (gate #68): ABSTRACT-SCOPED HEDGE SPANS -----------------------
@@ -267,8 +320,10 @@ ABSTRACT_HEDGES = {
     # is real, and the abstract must not let the two be read as one
     "cost_scoped_institutional": "The institutional cash-flow cost is small",
     # the null's recovery rests on amortization AND baseline turnover
-    "null_mechanical_components": "scheduled amortization and baseline "
-                                  "turnover",
+    # V20 panel revision (2026-08-04): pin re-synced to the compressed abstract;
+    # the span's purpose is unchanged, the phrasing follows the manuscript.
+    "null_mechanical_components": "scheduled amortization plus a turnover "
+                                  "floor",
     # ROUND 22 (3d): the ABM-vs-hazard contrast must not be attributed to
     # modeling paradigm in the abstract. This is the hedge the concision handoff
     # named as the highest-value ungated abstract hedge; pinning it BEFORE any
@@ -382,7 +437,8 @@ ASSEMBLY_SPANS = {
     "ladder_insample": "in-sample calibration returns $+9.2$ points",
     "ladder_headline": "outside the window returns the headline $+5.6$",
     "ladder_overlay": "overlay at that same floor returns $+4.4$",
-    "ladder_agestd": "floor read of 5.51\\% implies a marginal near $+3.8$",
+    "ladder_agestd": "floor read of 5.51\\% returns a measured marginal of $+3.7$, "
+                     "against the $+3.8$ its position on the frozen grid implies",
     "ladder_fannie": "5.52\\%, brackets the marginal below the $+4.3$ edge",
     # ROUND-27 B5: the joint cell was run under the pre-committed landing rule
     # (b5_joint_cell: composed +2.928pp, deviation -0.07 from the +3.0
@@ -402,8 +458,10 @@ ASSEMBLY_SPANS = {
     # ROUND-28 (R1-W1 / C3 branch a): the ranking is now scoped — the PSA
     # baseline-level convention spans wider but has no coverage property; the
     # floor read is the widest layer WITH one, and that scoping is pinned.
+    # V20-N1 re-landing (2026-08-05): interval re-pinned to the restricted
+    # inversion selected by SPEC_V20_C's frozen rule; scoping unchanged.
     "posture_binding_layer": "The widest layer that does have a coverage property is the "
-                             "floor reads' own sampling error, $+2.9$ to $+8.7$ points "
+                             "floor reads' own sampling error, $+2.3$ to $+9.1$ points "
                              "after wild-cluster correction",
     "posture_lower_half": "every correction listed above falls in its lower half",
     # (c) the censoring share (HANDOFF_round24 §4) and the framing that
@@ -462,21 +520,32 @@ ABSTRACT_POSTURE = {
     # ROUND-26 full restatement: the binding layer is the wild-cluster
     # bootstrap-t interval from run floor_inference_correction; the percentile
     # read is demoted to a labeled mention inside the same parenthetical.
-    "interval": "The design bounds it between $+2.9$ and $+8.7$ points",
+    # V20 panel revision (2026-08-04): pin re-synced to the compressed abstract;
+    # the span's purpose is unchanged, the phrasing follows the manuscript.
+    "interval": "$+2.3$ to $+9.1$ points under the production floor form",  # V20-N1 re-landed
     # ROUND-28 (DA-C3): the abstract must say WHAT the interval bounds. "pins"
     # claimed the design pinned the elasticity's contribution; the interval is
     # the floor read's sampling error at a FIXED elasticity, which contributes
     # zero width. Pinned as its own span so a concision pass cannot delete the
     # referent while keeping the interval.
-    "interval_referent": "the floor read's sampling error at my central elasticity",
-    "point_named_inside": "Inside that range, $+5.6$ points, or \\$42.6 billion, is the "
-                          "value at the calibration I headline",
-    # the frame is not decoration: WITHOUT it the claim is false, because the
-    # additive form (+11.2) and the Fonseca anchor (+11.5) move the marginal UP.
-    # Only floor and accounting-basis corrections run one way.
-    "corrections_framed": "every correction I can measure to the baseline turnover floor "
-                          "or to the accounting basis moves it down within the range rather "
-                          "than up",
+    # V20 panel revision (2026-08-04): pin re-synced to the compressed abstract;
+    # the span's purpose is unchanged, the phrasing follows the manuscript.
+    "interval_referent": "the floor read's sampling error at the central elasticity",
+    # V20 panel revision (2026-08-04): pin re-synced to the compressed abstract;
+    # the span's purpose is unchanged, the phrasing follows the manuscript.
+    "point_named_inside": "with $+5.6$ points, \\$42.6 billion, the production "
+                          "form's endpoint, inside it",
+    # ROUND 32: the frame is still load-bearing -- the additive form (+11.2) and
+    # the Fonseca anchor (+11.5) move the marginal UP -- but the claim it used to
+    # protect ('moves it down') is now FALSE and has been restated. Task 11's
+    # activity leg is a MEASURED correction to the baseline turnover floor that
+    # moves the marginal up +5.11 points, so 'only floor and accounting-basis
+    # corrections run one way' no longer holds. The pin now protects the two-way
+    # statement instead of the one-way one.
+    # V20 panel revision (2026-08-04): pin re-synced to the compressed abstract;
+    # the span's purpose is unchanged, the phrasing follows the manuscript.
+    "corrections_framed": "measured corrections to the floor and the accounting "
+                          "basis move it in both directions",
     # ROUND-26: the panel's two strongest correlated findings (DA-C1 + R1-W1,
     # both verified) were that the abstract quoted the interval without its
     # form conditionality and without its few-cluster inferential status.
@@ -489,15 +558,22 @@ ABSTRACT_POSTURE = {
     # under-coverage kept; the demoted percentile literal now lives in the
     # body only, x4), hull restored to the of-form inside the interval
     # sentence.
-    "interval_qualifier": "a wild-cluster interval on 31 clusters; the "
-                          "percentile read under-covers",
-    "hull_in_abstract": "form-conditional hull of $+3.5$ to $+13.1$ points",
+    # V20 panel revision (2026-08-04): pin re-synced to the compressed abstract;
+    # the span's purpose is unchanged, the phrasing follows the manuscript.
+    # V20: the percentile-under-covers literal now lives in the body only (x4);
+    # the abstract keeps the inferential status inside the interval parenthetical.
+    "interval_qualifier": "wild-cluster on 31 clusters",
+    # V20 panel revision (2026-08-04): pin re-synced to the compressed abstract;
+    # the span's purpose is unchanged, the phrasing follows the manuscript.
+    "hull_in_abstract": "form-conditional hull of $+3.5$ to $+13.1$",
     # ROUND-26 B8 (DA-M3): the abstract's mechanical-null sentence scoped
     # "however households react to rates" without marking that the floor it
     # rests on is itself calibrated from realized -- partly behavioral --
     # turnover. The qualifier travels with the null claim; canonical-scoped
     # because the archived variant's abstract predates it.
-    "null_floor_behavioral": "itself read from realized, partly behavioral "
+    # V20 panel revision (2026-08-04): pin re-synced to the compressed abstract;
+    # the span's purpose is unchanged, the phrasing follows the manuscript.
+    "null_floor_behavioral": "read from realized, partly behavioral "
                              "turnover",
 }
 
@@ -511,7 +587,7 @@ def abstract_posture_check(tex: str) -> tuple[bool, dict]:
     abstract = tex_nc[_i + len(ABSTRACT_BOUNDS[0]):_j] if found else ""
     missing = sorted(k for k, v in ABSTRACT_POSTURE.items() if v not in abstract)
     # the range must be stated BEFORE the point it contains
-    i_range = abstract.find("$+2.9$ and $+8.7$")
+    i_range = abstract.find("$+2.3$ to $+9.1$")  # V20-N1: binding interval re-landed
     i_point = abstract.find("$+5.6$ points")
     ordered = i_range != -1 and i_point != -1 and i_range < i_point
     return (found and not missing and ordered,
@@ -592,13 +668,14 @@ LETTER_HISTORICAL_MARKER = "range that stood at\nthe time at $+3.9$ to $+13.1$ p
 LETTER_CURRENT_LITERALS = [
     "$+3.5$ to $+13.1$",   # the hull, as it now stands
     "$+3.0$ to $+8.0$",    # the demoted percentile read (still quoted, labeled)
-    "$+2.9$ to $+8.7$",    # the corrected binding layer the posture is stated against
+    "$+2.3$ to $+9.1$",    # V20-N1: the adjudicated binding layer
+    "$+2.9$ to $+8.7$",    # the Webb rung, retained beside it
     "$+3.53$", "$+10.83$",  # the cell that widened it, and the concave ceiling
     "$+270.4$", "$-105.3$",  # the ABM null's sign disagreement
     "68.8\\%", "35.8\\%",   # the censoring shares, central and null legs
     "60.2\\%", "76.3\\%", "12.6\\%",  # cross-design, and the reweight's other side
     "$-1.47$",              # the interaction that forbids a composed point
-    "$-\\$89.4$ to $-\\$117.7$ billion",  # the buyback bracket's cash-incidence range
+    "$-\\$51.0$ billion",  # the buyback bracket's cash-incidence figure, re-derived
     "$+11.2$", "$+11.5$",   # the two corrections that run the other way
 ]
 
@@ -625,9 +702,9 @@ ELASTICITY_DISCIPLINE_SPANS = {
     "curve_posture": "prices the dependence on the imported elasticity rather "
                      "than identifying it",
     "bracket_run_tag": "\\texttt{moving\\_share\\_bracket}",
-    "bracket_values": "$+\\$37.7$ billion ($+4.9$ points) at $s = 0.5$ and "
-                      "$+\\$19.2$ billion ($+2.5$ points) at $s = 0.25$",
-    "bracket_posture": "$s$ is a bracketing parameter rather than an estimate",
+    "bracket_values": "$+\\$37.7$ billion ($+4.9$ points) at $\\mu = 0.5$ and "
+                      "$+\\$19.2$ billion ($+2.5$ points) at $\\mu = 0.25$",
+    "bracket_posture": "$\\mu$ is a bracketing parameter rather than an estimate",
 }
 
 
@@ -636,13 +713,15 @@ ELASTICITY_DISCIPLINE_SPANS = {
 # manuscript's own pathb paragraph recorded the market-value buyback credit
 # as the largest un-priced channel, exceeding the gap. Run
 # buyback_credit_bracket priced both incidence readings from committed
-# artifacts (verdict REVERSES: cash-incidence gap negative at every proxy
-# discount), and the paper now states the gap's sign as incidence-
+# artifacts (verdict REVERSES), R32's buyback_discount_rederived then
+# replaced that run's asserted discount grid with one derived from the
+# leg's own prepayment path (gate #117), and the paper states the gap's
+# sign as incidence-
 # conditional at every site that previously stated signed relief. These
 # spans keep that statement from quietly reverting to the signed claim.
 BUYBACK_BRACKET_SPANS = {
     "run_tag": "\\texttt{buyback\\_credit\\_bracket}",
-    "reversal_range": "$-\\$89.4$ to $-\\$117.7$ billion",
+    "reversal_point": "$-\\$51.0$ billion",
     "pathb_sign": "The gap's sign is therefore incidence-conditional",
     # ROUND-26 denomination resolution: the two incidences answer two
     # QUESTIONS. The benchmark is a face-value object (SOMA current face vs
@@ -751,7 +830,21 @@ FLOOR_LADDER_SPANS = {
     "run_credit": "\\texttt{floor\\_inference\\_correction} (Rademacher "
                   "wild-$t$; CR1--CR3 at $t(30)$)",
     "designer_frame": "in the units a cap designer would have to plug in",
-    "designer_units": "wild-cluster interval runs from 4.177\\% to 5.800\\%",
+    # V20-N1: the designer clause now quotes the BINDING rung's floor image (the
+    # restricted inversion); the Webb read stays named as the cap grid's input.
+    "designer_units": "binding wild-cluster inversion runs from 4.033\\% to 6.181\\%",
+    # R32 C-72: SPEC_R32_c72 §8 Branch A requires FLOOR_LADDER_SPANS to be
+    # EXTENDED, never replaced, when new rows land. These two are the month and
+    # two-way rows, byte-identical to gate #115's derived month_row/two_way_row.
+    # Deliberately literal-only HERE: #107 opens v2's artifact and nothing else,
+    # and the v3 derivation of these same cells (and of the whole ladder's
+    # bookkeeping) lives in gate #115. tests/test_floor_ladder_gate.py's
+    # test_each_span_removal_fails is parametrized over sorted(FLOOR_LADDER_SPANS)
+    # and covers both automatically; that file needs no edit.
+    "ladder_month_row": "CR1 $t$, month clusters & $+3.1$ to $+8.4$ & "
+                        "$t(5)$, $G-1$ & wider on df alone",
+    "ladder_two_way_row": "Two-way, stratum $\\times$ month & $+2.3$ to $+9.3$ "
+                          "& $t(5)$, $\\min(G)-1$ & lower edge censored",
 }
 
 FLOOR_LADDER_READ = "R2_2018_gap<=-0.0025_age>=12"
@@ -829,6 +922,8 @@ def floor_ladder_check(tex: str) -> tuple[bool, dict]:
     cr1bm = rd.get("cr1_t_interval_df_bm", {})
     cr3 = rd.get("cr3_t_interval", {})
     webb = rd.get("wild_t_webb", {})
+    wcr = rd.get("wcr_inverted", {})  # V20-N1: the adjudicated binding rung
+    wcrf = wcr.get("floor_ci95_pct") or [None, None]
     c1 = cr1.get("marginal_ci95_pp") or [None, None]
     c1b = cr1bm.get("marginal_ci95_pp") or [None, None]
     wf = webb.get("floor_ci95_pct") or [None, None]
@@ -855,8 +950,10 @@ def floor_ladder_check(tex: str) -> tuple[bool, dict]:
         and dfbm["cr1"] > dfbm["cr2"] > dfbm["cr3"]
         and rd["se_cr1_smm"] < rd["se_cr2_smm"] < rd["se_cr3_smm"]
         and c1b != cr3.get("marginal_ci95_pp")
-        # the designer-units clause is the SAME read's Webb interval in floor
-        # units, and the floor-to-marginal map is inverse
+        # V20-N1: the designer-units clause quotes the BINDING rung (restricted
+        # inversion) in floor units; the Webb read remains the cap grid's input
+        # and its floor image is still checked against the artifact.
+        and f"{wcrf[0]:.3f}\\% to {wcrf[1]:.3f}\\%" == "4.033\\% to 6.181\\%"
         and f"{wf[0]:.3f}\\% to {wf[1]:.3f}\\%" == "4.177\\% to 5.800\\%"
         and webb["upper_pp_edge"]["floor_pct"] < webb["lower_pp_edge"]["floor_pct"]
         and abs(webb["marginal_ci95_pp"][0] - 2.8549950653913494) < 1e-9
@@ -893,6 +990,255 @@ def wal_normal_turnover_check(tex, wnt, oos):
                 "stale_sentence_gone":
                     "No row is printed at a normal-turnover speed." not in tex}
 
+
+
+def cap_monthly_units_check(tex, eb, bench, binding_lo_pp, binding_hi_pp):
+    """Gate #111's rule (R32, C-54): SS VI.B's result in the units of a cap decision.
+
+    C-54 asked for the cap result restated in $bn/month with a band, because a
+    cap is set in $bn/month and the paper stated it only in window totals. Every
+    literal below is DERIVED here from the committed benchmark artifact and the
+    binding interval -- none is written into this gate -- so a rerun that moved
+    the projections cannot leave a stale monthly figure standing in SS VI.B.
+
+    Two things beyond arithmetic are bound. (i) The RATIOS, because "the ceiling
+    was near twice the achievable rate" is the sentence's claim and a ratio drifts
+    silently when either side moves. (ii) The scope disclaimer: the band belongs
+    to the identified marginal, NOT to the two projection levels, which are
+    accounting constructions with no sampling interval. Without that sentence the
+    paragraph reads as though a projection had a confidence interval.
+    """
+    M = 42
+    proj = eb["window"]["projected_runoff_window_b"] / M
+    sett = eb["settlement_aware_allocation"]["projected_runoff_window_b"] / M
+    cap = eb["supplementary_projection_wedge"]["cap_target_window_b"] / M
+    lo = bench * binding_lo_pp / 100.0 / M
+    hi = bench * binding_hi_pp / 100.0 / M
+    lits = {
+        "cap_ceiling": f"\\${cap:.2f} billion per month" in tex,
+        "uniform_spread": f"\\${proj:.1f} billion per month" in tex,
+        "settlement_aware": f"\\${sett:.1f} billion per month" in tex,
+        "ratios": f"ratios of {cap / proj:.2f} and {cap / sett:.2f}" in tex,
+        "marginal_band": f"\\${lo:.2f} to \\${hi:.2f} billion per month" in tex,
+        "band_scope_disclaimer": (
+            "That band attaches to the identified marginal, not to the two "
+            "projection levels") in tex,
+    }
+    return all(lits.values()), {"missing": sorted(k for k, v in lits.items() if not v),
+                                "cap_per_month": round(cap, 2),
+                                "achievable_per_month": (round(proj, 1), round(sett, 1))}
+
+
+def depth_ladder_shape_check(tex, d):
+    """Gate #114's rule (R32, C-80): the 2018 depth ladder's shape.
+
+    Derives every printed per-bin CPR and the plateau coverage from the run
+    artifact. Beyond presence it binds the TWO QUALIFICATIONS, because this
+    exhibit's failure mode is cherry-picking: the plateau supports the paper's
+    own production form, so the tail that argues the other way, and the
+    not-a-test caveat, are exactly what a later edit would be tempted to drop.
+    """
+    bins = {b["bin"]: b for b in d["bins"]}
+    sh = d["shape"]
+    def pct(x):
+        return f"{x:.2f}\\%"
+    lits = {
+        "bin1": pct(bins["(-0.0025,+0.0000]"]["cpr_pct"]) in tex,
+        "bin2": pct(bins["(-0.0050,-0.0025]"]["cpr_pct"]) in tex,
+        "bin3": pct(bins["(-0.0075,-0.0050]"]["cpr_pct"]) in tex,
+        "bin4": pct(bins["(-0.0100,-0.0075]"]["cpr_pct"]) in tex,
+        "rising_bin": pct(bins["(-0.0150,-0.0100]"]["cpr_pct"]) in tex,
+        "tail1": pct(bins["(-0.0200,-0.0150]"]["cpr_pct"]) in tex,
+        "tail2": pct(bins["(-0.0250,-0.0200]"]["cpr_pct"]) in tex,
+        "plateau_coverage": f"{sh['plateau_exposure_share']*100:.1f}\\%" in tex,
+        "tail_disclosed": "not well supported" in tex,
+        "rises_not_falls": "rather than falling" in tex,
+        "not_a_test": "not as a resolution of the fork" in tex,
+        "run_tag": "\\texttt{depth\\_ladder\\_shape}" in tex,
+    }
+    ok = all(lits.values()) and all(d["parity"].values())
+    return ok, {"missing": sorted(k for k, v in lits.items() if not v),
+                "plateau_cov_pct": round(sh["plateau_exposure_share"] * 100, 1),
+                "tail_cov_pct": round(sh["tail_exposure_share"] * 100, 2)}
+
+
+def marginal_transaction_counts_check(tex, m):
+    """Gate #113's rule (R32, C-76 + C-82): the marginal in transaction counts.
+
+    Every printed count is DERIVED here from the run artifact. Three properties
+    beyond presence are bound, because each is a way the exhibit could go wrong
+    quietly:
+
+    (i) the UPPER-BOUND framing, since s=1 is a convention and dropping the word
+    turns a bound into an estimate; (ii) the DENOMINATOR disclosure, since using
+    the all-loan mean instead of the surviving mean would roughly double every
+    count and the text is what warns a reader; (iii) the NOT-COMPUTED disclosure
+    about the 2022-2024 decline, since silently dropping it would leave the
+    condition looking satisfied when its comparator was never sourced.
+    """
+    c1 = m["cells"]["s_1"]
+    ch = m["cells"]["s_0.5"]
+    cq = m["cells"]["s_0.25"]
+    cmp_ = m["comparator"]
+    lits = {
+        "book_count": f"{round(c1['book_foregone_payoffs'], -2):,.0f}".replace(",", "{,}") in tex,
+        "per_year": f"{round(c1['book_foregone_payoffs_per_year'], -2):,.0f}".replace(",", "{,}") in tex,
+        "bracket_half": f"{round(ch['book_foregone_payoffs'], -2):,.0f}".replace(",", "{,}") in tex,
+        "bracket_quarter": f"{round(cq['book_foregone_payoffs'], -2):,.0f}".replace(",", "{,}") in tex,
+        "surviving_denominator": f"\\${m['spec']['denominator_surviving_mean']:,.0f}".replace(",", "{,}") in tex,
+        "n_surviving": f"{m['spec']['n_surviving']:,}".replace(",", "{,}") in tex,
+        "upper_bound_framing": "upper bound" in tex,
+        "denominator_warning": "would roughly double the count" in tex,
+        "decline_not_computed": "cannot be formed without assuming" in tex,
+        "run_tag": "\\texttt{marginal\\_transaction\\_counts}" in tex,
+    }
+    if cmp_.get("sourced"):
+        share_lo = c1["share_of_2025_run_rate_lo"] * 100
+        share_hi = c1["share_of_2025_run_rate_hi"] * 100
+        lits["share_of_run_rate"] = f"{share_lo:.1f}--{share_hi:.1f}\\%" in tex
+    ok = (all(lits.values())
+          and all(m["parity"].values())
+          and bool(m["expectations"]["E1_counts_increase_in_s"]))
+    return ok, {"missing": sorted(k for k, v in lits.items() if not v),
+                "book_count": round(c1["book_foregone_payoffs"]),
+                "comparator_sourced": bool(cmp_.get("sourced")),
+                "E3_pass": m["expectations"]["E3_pass"]}
+
+
+def state_contingent_cap_check(tex, g):
+    """Gate #112's rule (R32, C-81): the state-contingent cap's two-input grid.
+
+    Every literal is DERIVED here from the run artifact -- the three cell levels,
+    the two band ends, and BOTH spreads -- so a rerun that moved any of them
+    cannot leave a stale number in SS VI.B.
+
+    The spreads are the point of the exhibit (the observable buys less than the
+    floor's own sampling error), and they are printed at ONE decimal on purpose:
+    the true cut-spread is 1.1252, which rounds to 1.13, while the printed cells
+    subtract to 1.12. Printing 1.13 beside cells that give 1.12 would hand a
+    reader an arithmetic error. The gate therefore pins the 1-dp form, and a test
+    asserts the printed cells still subtract to it.
+    """
+    c, b = g["cells"], g["band"]
+    e = g["expectations"]
+    lits = {
+        "cell_0bp": f"\\${c['cut_0bp']['achievable_b_per_month']:.2f}" in tex,
+        "cell_25bp": f"\\${c['cut_25bp']['achievable_b_per_month']:.2f}" in tex,
+        "cell_50bp": f"\\${c['cut_50bp']['achievable_b_per_month']:.2f}" in tex,
+        "band_lo": f"\\${b['floor_4.177pct']['achievable_b_per_month']:.2f}" in tex,
+        "band_hi": f"\\${b['floor_5.8pct']['achievable_b_per_month']:.2f}" in tex,
+        "cut_spread": (f"about \\${e['E3_spread_across_cuts_b_per_month']:.1f} billion "
+                       "per month") in tex,
+        "band_spread": f"about \\${e['E3_spread_across_band_b_per_month']:.1f} billion" in tex,
+        "degenerate_observable": "near-degenerate" in tex,
+        "two_grains_scope_limit": "two populations at two grains" in tex,
+        "run_tag": "\\texttt{state\\_contingent\\_cap\\_grid}" in tex,
+    }
+    ok = (all(lits.values())
+          and bool(g["parity"]["nine_rows_bit_identical_via_schedule"])
+          and bool(g["parity"]["coupon_shares_sum_to_one"])
+          and bool(g["expectations"]["E1_monotone_in_floor"])
+          and bool(g["observable_declared_not_predicted"]["near_degenerate"]))
+    return ok, {"missing": sorted(k for k, v in lits.items() if not v),
+                "cells_b_per_month": [round(c[k]["achievable_b_per_month"], 2)
+                                      for k in ("cut_0bp", "cut_25bp", "cut_50bp")],
+                "E3_pass": e["E3_pass"]}
+
+
+def wal_note_rate_basis_check(tex, wnrb, amort):
+    """Gate #110's rule (R32, C-94), as a function so a battery can exercise it.
+
+    tab:wal used to print the empirical path on ONE basis (the 5.14% ABM-basis
+    back-out) while tab:estimators disclosed three, so the corrected amortization
+    basis was disclosed and never became the comparator. The note-rate row now
+    closes that, and this gate binds four things.
+
+    (i) The printed row is the artifact's, built here from the artifact rather
+    than written as a literal, so a rerun that moved the row cannot leave a stale
+    pair standing in the table. (ii) The BASIS EFFECT stated in the tablenote is
+    re-derived from the committed empirical row and the new one, because that
+    difference -- not either level -- is the quantity C-94 is about, and a
+    comparison is exactly what drifts silently when one side moves. (iii) A live
+    cross-artifact tie: the CPR this run used must still be the coupon-convention
+    run's own note-rate leg, so the two artifacts cannot drift apart unnoticed.
+    (iv) The parity and monotonicity flags the runner set.
+
+    The mixed-basis extension disclaimer is asserted present: it is the sentence
+    that stops a reader differencing the note-rate row against the ABM-basis
+    no-shock row, which would reintroduce the defect this row removes.
+    """
+    nr = wnrb["rows"]["empirical_note_rate_basis"]
+    emp = wnrb["comparators"]["empirical_abm_basis_committed"]
+    lit_row = (f"({nr['mean_cpr_pct']:.2f}\\%) & {nr['wal_june_2022']:.1f} & "
+               f"{nr['wal_nov_2025']:.1f}")
+    lit_emp = (f"({emp['mean_cpr_pct']:.2f}\\%) & {emp['wal_june_2022']:.1f} & "
+               f"{emp['wal_nov_2025']:.1f}")
+    d_june = round(emp["wal_june_2022"] - nr["wal_june_2022"], 1)
+    d_nov = round(emp["wal_nov_2025"] - nr["wal_nov_2025"], 1)
+    lit_effect = (f"shortens the empirical path by {d_june:.1f} years at the "
+                  f"window's open and {d_nov:.1f} at its close")
+    par, exp = wnrb["parity"], wnrb["expectations"]
+    live_cpr = amort["hazard_legs"]["delta_080"]["mean_cpr_pct"]
+    tie_ok = wnrb["spec"]["note_rate_cpr_full_precision_pct"] == live_cpr
+    disclaimer = ("no committed note-rate", "mix conventions inside one statistic")
+    disc_ok = all(s in tex for s in disclaimer)
+    ok = (bool(par["nine_rows_bit_identical"])
+          and bool(par["read_artifacts_untouched"])
+          and bool(par["printed_row_precision_insensitive"])
+          and bool(exp["E3_strictly_shorter_than_5p14_row"])
+          and tie_ok and disc_ok
+          and lit_row in tex and lit_emp in tex
+          and lit_effect in tex
+          and tex.count("\\texttt{wal\\_note\\_rate\\_basis}") >= 1)
+    return ok, {"lit_row": lit_row, "row_present": lit_row in tex,
+                "abm_row_present": lit_emp in tex,
+                "effect_present": lit_effect in tex, "lit_effect": lit_effect,
+                "cross_artifact_tie": tie_ok, "disclaimer_present": disc_ok,
+                "tag_citations": tex.count("\\texttt{wal\\_note\\_rate\\_basis}")}
+
+
+def beta1_sign_check(tex: str) -> tuple[bool, dict]:
+    """Gate #109's rule (round 32, C-R4): the manuscript prints beta_1 under ONE
+    sign convention.
+
+    The panel saw $0.069$ in tab:params and $-0.0686$ in tab:lowband for the same
+    parameter at the same delta and proposed flipping the printed signs. Reading
+    the source first showed why that would have been wrong: eq:beta1 defines
+    beta_1 WITH a leading minus, so it is positive under the manuscript's own
+    definition, and eq:pathB multiplies it by the signed gap, which is negative
+    for a locked-in borrower -- so a positive beta_1 suppresses prepayment and
+    tab:params was already correct. tab:lowband was printing the convention of
+    the production helper hazard/literature_hazard.py:rothstein_beta1, which
+    returns ln(h_shocked/h_base) WITHOUT that minus. Neither was a computational
+    error; one symbol was being printed under two conventions.
+
+    So this gate asserts AGREEMENT, not a sign: whatever sign tab:params states
+    for the central beta_1, every tab:lowband cell carries the same one. That is
+    the property the objection was about, and it survives a later round choosing
+    to restate eq:beta1 the other way round -- which a hardcoded "must be
+    positive" gate would not.
+    """
+    m = re.search(r"\$\\beta_1\$ \(central\) & \$(-?)([0-9.]+)\$", tex)
+    params_sign = 0 if m is None else (-1 if m.group(1) else 1)
+    i = tex.find(r"\label{tab:lowband}")
+    j = tex.find(r"\end{tabular}", i) if i != -1 else -1
+    # the float runs past \end{tabular}, and the replicator note lives in the
+    # tablenotes block between there and \end{threeparttable} -- so the cells are
+    # read from the tabular and the note is looked for over the whole float.
+    k = tex.find(r"\end{threeparttable}", i) if i != -1 else -1
+    body = tex[i:j] if (i != -1 and j != -1) else ""
+    float_txt = tex[i:k] if (i != -1 and k != -1) else ""
+    # the delta and beta_1 columns lead each row: "6.50 & $0.0686$ & ..."
+    cells = [float(sign + digits) for sign, digits in
+             re.findall(r"^\s*[0-9.]+ & \$(-?)([0-9.]+)\$ &", body, re.M)]
+    nonzero = [c for c in cells if c != 0.0]
+    signs = {1 if c > 0 else -1 for c in nonzero}
+    ok = (m is not None and body != "" and len(nonzero) == 9
+          and len(signs) == 1 and signs == {params_sign}
+          and "rothstein" in float_txt)
+    return ok, {"params_sign": params_sign, "lowband": nonzero,
+                "lowband_signs": sorted(signs), "cells_found": len(cells),
+                "replicator_note": "rothstein" in float_txt}
 
 def buyback_bracket_check(tex: str) -> tuple[bool, dict]:
     """Gate #103's rule, as a function so a battery can exercise it."""
@@ -968,6 +1314,14 @@ def assembly_check(tex: str) -> tuple[bool, dict]:
              "table_missing": table_missing})
 
 
+def _abstract_of(tex: str) -> str:
+    """The abstract environment alone, for gates that must scope to it."""
+    tex_nc = re.sub(r"(?<!\\)%.*", "", tex)
+    i = tex_nc.find(ABSTRACT_BOUNDS[0])
+    j = tex_nc.find(ABSTRACT_BOUNDS[1], i + 1)
+    return tex_nc[i + len(ABSTRACT_BOUNDS[0]):j] if (i != -1 and j != -1) else ""
+
+
 def abstract_hedge_check(tex: str) -> tuple[bool, dict]:
     """Gate #68's rule, as a function so the perturbation battery can exercise
     THE SHIPPED RULE instead of a copy of it.
@@ -1003,8 +1357,1900 @@ def abstract_hedge_check(tex: str) -> tuple[bool, dict]:
              "missing_body": missing_body, "total_body": len(RELOCATED_TO_BODY)})
 
 
+
+def floor_form_mixture_check(tex: str, ffm: dict) -> tuple[bool, dict]:
+    """Gate #126: the floor-form mixture curve, live-tied.
+
+    Until this gate existed the mixture artifact was read by NO gate and NO test,
+    while ledger C-22 -- the paper's headline posture -- turns entirely on it. Every
+    value below is DERIVED from the artifact; no curve literal is hand-carried, so a
+    drifted print fails rather than a stale copy passing.
+    """
+    def cell(floor: str, omega: str) -> float:
+        return ffm["cells"][f"{floor}|{omega}|6.5"]["marginal_pp"]
+
+    v0_off, v1_off = cell("4.991", "0"), cell("4.991", "1")
+    v0_in, v1_in = cell("4", "0"), cell("4", "1")
+    v01, v025, v04 = cell("4.991", "0.1"), cell("4.991", "0.25"), cell("4.991", "0.4")
+    # the headline's own transmission: how much a 0.99-point floor rise costs,
+    # under each form. This is the asymmetry the abstract's binding layer hides.
+    d_max, d_add = v0_in - v0_off, v1_in - v1_off
+
+    spans = {
+        # SS VII.F's printed curve
+        "curve": (f"$+{v01:.1f}$ points by $\\omega = 0.1$, $+{v025:.1f}$ at "
+                  f"$\\omega = 0.25$, $+{v04:.1f}$ at $\\omega = 0.4$"),
+        # Table 1's notes, which print the same two interior points
+        "table1_notes": (f"$+{v025:.1f}$ at $\\omega{{=}}0.25$, "
+                         f"$+{v04:.1f}$ at $\\omega{{=}}0.4$"),
+        # the orientation must stay attached to the symbol
+        "orientation": ("$\\omega = 0$ is the production hard maximum, "
+                        "$\\omega = 1$ the additive form"),
+        # the transmission sentence landed with the C-22 posture repair
+        "transmission": (f"moves the marginal by $-{d_max:.2f}$ points under the "
+                         f"production form and by $-{d_add:.2f}$ under the additive one"),
+    }
+    missing = sorted(k for k, v in spans.items() if v not in tex)
+    orient = ffm.get("orientation", {})
+    ok = (
+        not missing
+        # the headline IS the omega = 0 endpoint of this curve
+        and abs(v0_off - 5.6) < 0.05
+        # orientation is not silently flipped
+        and orient.get("s0") == "production hard maximum"
+        and orient.get("s1") == "additive competing-risks"
+        # the curve rises to a plateau: monotone through the named interior
+        and v0_off < v01 < v025 < v04 < cell("4.991", "0.6")
+        # and the asymmetry that makes the posture a posture, not an estimate
+        and d_max > 3.0 and d_add < 0.1
+        and ffm.get("parity_gates_all_pass") is True
+        and tex.count("\\texttt{floor\\_form\\_mixture}") >= 1
+    )
+    return ok, {"missing": missing, "omega0_off": round(v0_off, 4),
+                "omega1_off": round(v1_off, 4), "d_max": round(d_max, 4),
+                "d_add": round(d_add, 4), "named_s": orient.get("paper_semantics_named_s")}
+
+
+# --- R32 (gate #115), C-72: THE MONTH AND TWO-WAY CLUSTER RUNGS ------------
+# C-72's complaint was that the committed cluster unit on the floor read is
+# cross-sectional only (4-way stratum), so a month-level common shock hitting
+# every stratum at once is invisible to every rung of tab:ladder. Run
+# floor_inference_correction_v3 re-clusters the SAME R2 read on the six
+# calendar months the 2018 leg populates, and on both margins at once
+# (Cameron-Gelbach-Miller), and the two rungs land in the ladder.
+#
+# The condition is discharged by PRICING the shock, not by dismissing it, and
+# the two halves of that answer pull opposite ways -- which is exactly why they
+# are pinned separately here. The month-clustered CR1 standard error comes in
+# SMALLER than the stratum-clustered one (so that rung widens on its
+# six-cluster reference distribution alone), while the Cameron-Gelbach-Miller
+# two-way standard error comes in LARGER (so that rung widens because the
+# variance genuinely rose). A tightening pass that kept only the first half
+# would land "the common shock does not matter" one clause away from a row
+# whose variance is a third higher. Both comparisons are asserted here against
+# the artifacts, and the prose sentence that leads with "priced here rather
+# than dismissed" is its own pinned span.
+#
+# Nothing numeric below is a manuscript literal. Every printed cell, every
+# width, both standard-error ratios, the sign-vector count, the month support
+# AND the ladder's own bookkeeping (how many undemoted rungs there are, which
+# is narrowest, how many are censored at the grid edge) are DERIVED from the
+# two committed artifacts -- because this landing moves four counting claims
+# that were true before it and would go quietly false after it:
+#
+#   (i)   the Webb row's rank among the undemoted rungs (third of nine ->
+#         fourth of eleven), and it is stated at TWO sites;
+#   (ii)  how many rungs are censored at the 6.0% grid edge (two -> three) --
+#         checked as a SET equality against the rungs printed wider than
+#         CR2-BM, not as a count that could match by luck;
+#   (iii) which rung is the widest with both endpoints interior -- CR2 at
+#         Bell-McCaffrey df, UNCHANGED by this landing, and the gate proves
+#         that rather than assuming it, because the month rung is the one that
+#         could have falsified it;
+#   (iv)  Section V.E's "the 2018 leg is read in August--December", which the
+#         six-month support contradicted until the July disclosure landed.
+#
+# The three disclosures a tightening pass cuts first are pinned individually:
+# the E3 attribution (the specification gave the cluster-count rationale AND
+# pre-named the narrower-SE outcome, so neither is a discovered refutation),
+# the E4 MISS (the printed month rung's lower edge is NOT censored; only its
+# unprinted Rademacher variant reaches past the edge), and NC-1's substantive
+# threshold (the realized Bell-McCaffrey df is below four even though the
+# G < 5 trigger did not fire).
+#
+# Every word-for-count lookup goes through _CARD/_ORD, which fall back to
+# digits: a drifted artifact must take this gate RED via a missing literal, not
+# abort the whole run with a KeyError.
+
+FICV2_RESULTS = (ROOT / "hazard" / "data"
+                 / "floor_inference_correction_v2_results.json")
+FICV3_RESULTS = (ROOT / "hazard" / "data"
+                 / "floor_inference_correction_v3_results.json")
+
+MONTH_TWOWAY_SPANS = {
+    # the cluster units, named where a reader meets the rungs
+    "caption_recluster": "the last two rungs re-cluster that same read on the "
+                         "six calendar months it populates and on both margins "
+                         "at once",
+    # C-72's ACTUAL answer. Without this sentence the note reads as
+    # "the shock does not matter", which the two-way rung refutes.
+    "priced_not_dismissed": "so the month-level shock is priced here rather "
+                            "than dismissed",
+    # E3's attribution, corrected: SPEC_R32_c72 §5 gives the cluster-count
+    # rationale verbatim ("31 clusters drop to at most 12"), so the prediction's
+    # named channel is the channel that delivered.
+    "e3_prediction_credit": "as I pre-committed it would and for the reason "
+                            "the specification gave, the drop from 31 clusters "
+                            "to six",
+    # ...and the same spec bullet pre-named the narrower-SE outcome, so the
+    # variance result is not a discovered refutation either.
+    "e3_spec_allowed": "Its variance runs the other way, which that "
+                       "specification allowed",
+    # the narrower-SE half, scoped to the cluster unit it holds at
+    "e3_mechanism": "so at this cluster unit the common shock adds no "
+                    "variance, and the widening is the six-cluster reference "
+                    "distribution alone",
+    # E5: computability was a first-class branch, not a prediction
+    "e5_not_predicted": "whether it would be computable at all I deliberately "
+                        "did not predict",
+    # E4, landed as the miss it is
+    "e4_miss": "and it is not---both endpoints of the printed rung are "
+               "interior, and of the two new rows only the two-way one censors",
+    # ...with the one month-axis interval that DOES truncate named, so the
+    # miss statement cannot be read past its own scope
+    "rademacher_scope": "Among the month rung's own variants only the "
+                        "unprinted Rademacher one reaches past that edge.",
+    # NC-4: why Webb stays primary at this cluster unit
+    "nc4_webb_primary": "which is why the Webb six-point weights are primary "
+                        "here, as they are above",
+    "run_credit_v3": "\\texttt{floor\\_inference\\_correction\\_v3}",
+    # V20-N1: the rank-primacy claims were replaced by the frozen-rule
+    # adjudication; the pinned claim is now that CR2+BM is named as the OTHER
+    # qualifying rung standing beside the restricted inversion, at both sites.
+    "widest_interior": "the other qualifying rung, stands beside",
+}
+
+_ORDINAL_WORDS = {1: "first", 2: "second", 3: "third", 4: "fourth",
+                  5: "fifth", 6: "sixth", 7: "seventh", 8: "eighth",
+                  9: "ninth", 10: "tenth", 11: "eleventh", 12: "twelfth"}
+_CARDINAL_WORDS = {1: "one", 2: "two", 3: "three", 4: "four", 5: "five",
+                   6: "six", 7: "seven", 8: "eight", 9: "nine", 10: "ten",
+                   11: "eleven", 12: "twelve"}
+
+_MONTH_NAMES = {"01": "January", "02": "February", "03": "March",
+                "04": "April", "05": "May", "06": "June", "07": "July",
+                "08": "August", "09": "September", "10": "October",
+                "11": "November", "12": "December"}
+
+# every interval object the month rung produces, printed or not
+_MONTH_VARIANTS = ("cr1_t_interval", "cr1_t_interval_df_bm", "cr2_t_interval",
+                   "cr2_t_interval_df_bm", "cr3_t_interval",
+                   "cr3_t_interval_df_bm", "wild_t_rademacher", "wild_t_webb")
+
+
+def _CARD(n):
+    """Cardinal word, or the digits if the count leaves the prose's range --- a
+    gate must go RED on a drifted artifact, never raise."""
+    return _CARDINAL_WORDS.get(n, str(n))
+
+
+def _ORD(n):
+    return _ORDINAL_WORDS.get(n, f"{n}th")
+
+
+def month_twoway_clusters_check(tex, v2, v3):
+    """Gate #115's rule (R32, C-72), as a function so a battery can exercise it."""
+    tex_nc = re.sub(r"(?<!\\)%.*", "", tex)
+    rd = v2.get("reads", {}).get(FLOOR_LADDER_READ, {})
+    mo = v3["rungs"]["month"]
+    tw = v3["two_way"]
+    e3 = v3["expectations"]
+    G = v3["feasibility"]["G_month"]
+
+    # The ELEVEN undemoted rungs tab:ladder prints. WHICH rungs the table shows
+    # is a table-design fact and is listed here; every WIDTH and every
+    # truncation flag below is the artifacts'.
+    rungs = {
+        "cr1": rd["cr1_t_interval"], "cr2": rd["cr2_t_interval"],
+        "cr3": rd["cr3_t_interval"], "rademacher": rd["wild_t_rademacher"],
+        "webb": rd["wild_t_webb"], "cr1_bm": rd["cr1_t_interval_df_bm"],
+        "cr2_bm": rd["cr2_t_interval_df_bm"],
+        "cr3_bm": rd["cr3_t_interval_df_bm"],
+        "restricted": rd["wcr_inverted"], "month_cr1": mo["cr1_t_interval"],
+        "two_way": tw["t_interval"],
+    }
+
+    def width(c):
+        lo, hi = c["marginal_ci95_pp"]
+        return hi - lo
+
+    def censored(c):
+        return bool(c["lower_pp_edge"]["truncated_at_grid_edge"]
+                    or c["upper_pp_edge"]["truncated_at_grid_edge"])
+
+    def cell(c):
+        lo, hi = c["marginal_ci95_pp"]
+        return f"${lo:+.1f}$ to ${hi:+.1f}$"
+
+    rank = sorted(rungs, key=lambda k: width(rungs[k])).index("webb") + 1
+    n_censored = sum(censored(c) for c in rungs.values())
+    interior = {k: width(v) for k, v in rungs.items() if not censored(v)}
+    widest_interior = max(interior, key=interior.get)
+    # the note says the rungs printed WIDER than CR2-BM are exactly the
+    # censored ones; that is a set identity, not a count coincidence
+    printed_wider = {k for k, v in rungs.items()
+                     if width(v) > width(rungs["cr2_bm"])}
+    censored_set = {k for k, v in rungs.items() if censored(v)}
+    stratum_only = {k: v for k, v in rungs.items()
+                    if k not in ("month_cr1", "two_way")}
+    stratum_censored = {k for k, v in stratum_only.items() if censored(v)}
+    stratum_widest = set(sorted(stratum_only,
+                                key=lambda k: width(stratum_only[k]))
+                         [-len(stratum_censored):]) if stratum_censored else set()
+    month_censoring = {k: bool(mo[k]["lower_pp_edge"]["truncated_at_grid_edge"]
+                               or mo[k]["upper_pp_edge"]["truncated_at_grid_edge"])
+                       for k in _MONTH_VARIANTS}
+    shrink_pct = round((1 - mo["se_cr1_smm"] / rd["se_cr1_smm"]) * 100)
+    grow_pct = round((tw["se_2way_smm"] / rd["se_cr1_smm"] - 1) * 100)
+    rad = mo["wild_t_rademacher"]
+    nc1_thresh = v3["not_computable"]["NC1_too_few_month_clusters"]["threshold"]
+    months = v3["feasibility"]["months"]
+    cmpm = v3["feasibility"]["cohort_months_per_month"]
+    sparse = min(cmpm, key=cmpm.get)
+    dense = [m for m in months if m != sparse]
+
+    def name(m):
+        return _MONTH_NAMES[m[4:]]
+
+    lits = dict(MONTH_TWOWAY_SPANS)
+    lits["month_row"] = (
+        f"CR1 $t$, month clusters & {cell(mo['cr1_t_interval'])} & "
+        f"$t({mo['cr1_t_interval']['df_used']:.0f})$, $G-1$ & "
+        "wider on df alone")
+    lits["two_way_row"] = (
+        f"Two-way, stratum $\\times$ month & {cell(tw['t_interval'])} & "
+        f"$t({tw['df_2way']})$, $\\min(G)-1$ & lower edge censored")
+    lits["note_month_unit"] = (
+        f"the month rung groups the {mo['n_cohort_months']} cohort-months by "
+        f"the {_CARD(G)} calendar months the 2018 leg populates, "
+        f"{name(months[0])} to {name(months[-1])}")
+    # the artifact's own method string SUBTRACTS the intersection term; the
+    # prose has to say so, because this note is the only place the reader is
+    # told what the rung is
+    lits["note_two_way_unit"] = (
+        f"the two-way rung adds the CR1 variance clustered on the "
+        f"{tw['G_stratum']} strata to the one clustered on those "
+        f"{_CARD(tw['G_month'])} months and subtracts the one "
+        f"clustered on their {tw['G_intersection_cells']} intersection cells")
+    lits["two_way_df"] = f"$\\min(G)-1 = {tw['df_2way']}$"
+    lits["e3_widths"] = (f"from {e3['E3_committed_cr1_width_pp']:.2f} to "
+                         f"{e3['E3_month_cr1_width_pp']:.2f} points of width")
+    lits["se_shrinks"] = (f"{shrink_pct}\\% \\emph{{smaller}} than the "
+                          "stratum-clustered one")
+    lits["se_grows_twoway"] = (f"{grow_pct}\\% \\emph{{above}} the "
+                               "stratum-clustered one")
+    lits["month_bm_below_four"] = (
+        f"is {mo['df_bm_by_estimator']['cr1']:.1f}---below the "
+        f"{_CARD(nc1_thresh - 1)} my pre-committed "
+        "too-few-clusters rule was written to protect")
+    lits["nc1_trigger_quiet"] = (f"that rule's own $G < {nc1_thresh}$ trigger "
+                                 "did not fire")
+    # Section V.E's month range, reconciled against the read's actual support
+    lits["july_tail_disclosure"] = (
+        f"read in {name(dense[0])}--{name(dense[-1])}---"
+        f"{_CARD(cmpm[sparse])} {name(sparse)} cohort-months aside---")
+    lits["nc4_sign_vectors"] = (f"$2^{{{G}}} = "
+                                f"{int(rad['distinct_sign_vectors'])}$ "
+                                "distinct Rademacher sign vectors")
+    lits["nc4_floor"] = ("cannot resolve below "
+                         f"$1/{int(round(1 / rad['resolution_floor_p']))}$")
+    # V20-N1: the manuscript no longer prints a Webb rank claim; the rank is
+    # still computed (and reported in this gate's printout) but the tex pin is
+    # the frozen-rule selection language.
+    lits["webb_rank"] = "narrowest construction clearing the"
+    lits["censored_count"] = (f"The {_CARD(n_censored)} rungs printed "
+                              "wider still understate their own width")
+    lits["two_widest_censored"] = (
+        f"as the {_CARD(len(stratum_censored))} widest stratum rungs "
+        "already are")
+
+    missing = sorted(k for k, v in lits.items() if v not in tex_nc)
+    ok = (
+        not missing
+        # the rank claim is made at BOTH sites, and no stale rank phrase is
+        # left anywhere: every "undemoted rungs" in the file is the right one
+        # V20-N1: the qualifying-rung-beside claim is made at BOTH sites, and
+        # no stale rank phrase survives anywhere.
+        and tex_nc.count(lits["widest_interior"]) == 2
+        and "undemoted rungs" not in tex_nc
+        # the claim this landing must NOT have falsified
+        and widest_interior == "cr2_bm"
+        # "the three rungs printed wider still ... are censored to it"
+        and printed_wider == censored_set
+        # the censored stratum rungs really are its widest ones
+        and stratum_censored == stratum_widest
+        # E3 passed on width, at BOTH new cluster units
+        and bool(e3["E3_month_widens"])
+        and e3["E3_month_cr1_width_pp"] > e3["E3_committed_cr1_width_pp"]
+        and width(rungs["month_cr1"]) > width(rungs["cr1"])
+        and width(rungs["two_way"]) > width(rungs["cr1"])
+        # ...and the two variance channels run OPPOSITE ways. Both halves, or
+        # the note is a half-truth in whichever direction survives.
+        and mo["se_cr1_smm"] < rd["se_cr1_smm"]
+        and mo["t_crit_G_minus_1"] > rd["t_crit_G_minus_1"]
+        and tw["se_2way_smm"] > rd["se_cr1_smm"]
+        # NC-1's substantive threshold was crossed even though it did not fire
+        and mo["df_bm_by_estimator"]["cr1"] < nc1_thresh - 1
+        # E4 missed, and the two rows' truncation is as printed
+        and e3["E4_upper_endpoint_truncates"] is False
+        and not censored(rungs["month_cr1"])
+        and censored(rungs["two_way"])
+        and not rungs["two_way"]["upper_pp_edge"]["truncated_at_grid_edge"]
+        # ...and the ONE month-axis interval that does truncate is the
+        # unprinted Rademacher variant the note names
+        and [k for k, v in month_censoring.items() if v] == ["wild_t_rademacher"]
+        # feasibility was measured before any interval was read, and the
+        # branches that would have forbidden a printed row did not fire
+        and bool(v3["feasibility"]["computed_before_any_interval_was_read"])
+        and bool(e3["E1_stratum_replay_bit_identical"])
+        and bool(e3["E2_feasibility_before_outcome"])
+        and bool(e3["E5_two_way_computability_not_predicted"])
+        and bool(tw["computable"]) and tw["V_2way"] > 0
+        and tw["df_2way"] == min(tw["G_stratum"], tw["G_month"]) - 1
+        and not v3["not_computable"]["NC1_too_few_month_clusters"]["triggered"]
+        and not v3["not_computable"]["NC2_two_way_variance_non_positive"]["triggered"]
+        and not v3["not_computable"]["NC3_both_endpoints_off_grid"]["triggered"]
+        and bool(v3["not_computable"]["NC4_rademacher_resolution_floor"]["triggered"])
+        and v3["status"] == "OK"
+        # P3: the substitution is visible, and it is the SAME read
+        and mo["cluster_column_grouped_on"] == "month"
+        and mo["n_clusters"] == G == len(v3["feasibility"]["months"])
+        and mo["n_cohort_months"] == rd["n_cohort_months"]
+        and abs(mo["point_cpr_pct"] - rd["point_cpr_pct"]) < 1e-12
+        # the "two July cohort-months aside" disclosure is the support's own:
+        # the sparse month is the first one and is an order of magnitude below
+        # every other, and the per-month counts exhaust the read
+        and sparse == months[0]
+        and sum(cmpm.values()) == mo["n_cohort_months"]
+        and cmpm[sparse] * 10 < min(cmpm[m] for m in dense)
+    )
+    return ok, {"missing": missing, "lits": lits, "G_month": G,
+                "webb_rank": rank, "n_undemoted": len(rungs),
+                "n_censored": n_censored, "widest_interior": widest_interior,
+                "se_shrink_pct": shrink_pct, "se_grow_pct": grow_pct}
+
+
+# --- Round-32 / C-78 (gate #119): THE EPISODE GRADIENT WITH LOAN AGE HELD
+#     FIXED. Reads EPAGE_RESULTS and ECWITHIN_RESULTS (declared at :63).
+EPISODE_AGE_BANDS_SPANS = {
+    # (1) the clause C-78 was written against, now naming the dimension.
+    "age_named_in_the_clause": "loan age now among them",
+    # (2)-(4) the three sentences that carry the result AGAINST this paper.
+    # These are what a later tightening pass would trim first, so they are
+    # pinned as prose and not only as numbers.
+    "point_survives_interval_does_not":
+        "The interval moves against the exhibit even as the point survives",
+    "branch_reclassified": "from a gap that persists to one that closes",
+    "no_longer_separated":
+        "the gradient is no longer separated from the model's implication by "
+        "its own sampling interval",
+    # (5) the E3 miss, which is what makes the age control a real control
+    # rather than a relabelling of vintage. HEDGED WORDING, pinned hedged:
+    # 60.6% of shallow exposure still sits in single-band vintages, so the
+    # honest claim is "not MERELY a relabelling", and that is what is bound.
+    "collinearity_miss_named":
+        "age is not merely a relabelling of vintage in this book",
+    # (6) SPEC section 8.3 -- the one scope limit the spec commits to STATING
+    # in the manuscript rather than delegating to the artifact: the age cut is
+    # held, not swept. C-92 (the floor's flatness in loan age) is still open,
+    # so a reader must not be able to over-read this run as having tested the
+    # cut's location.
+    "age_cut_held_disclosed":
+        "stratifies above the cut rather than testing where it sits",
+    # (7)-(8) gate #75's RAW literals, asserted here as well. Spec section 7
+    # Branch A: gate #75 is EXTENDED, never replaced, and the raw exhibit
+    # staying raw under this landing is the property being protected.
+    # DELIBERATE DOUBLE-PIN: a round that legitimately moves the raw numbers
+    # now fails BOTH gates. Same hazard class as
+    # BUYBACK_BRACKET_SPANS["reversal_range"] vs LETTER_CURRENT_LITERALS.
+    # Recorded in TECHNICAL section 51 (renumbered 2026-07-30 from a duplicate
+    # 49 that collided with C-75's) and in the C-78 ledger row so the next
+    # round finds both sites.
+    "raw_gradient_survives_gate_75": "$+4.20$ CPR points",
+    "raw_ci_survives_gate_75": "$[+3.59, +4.66]$",
+}
+
+
+def episode_age_bands_check(tex: str, a: dict, w: dict) -> tuple[bool, dict]:
+    """Gate #119's rule (R32, C-78): the episode gradient with loan age held fixed.
+
+    C-78 put 12-month loan-age strata into the standardization cell that
+    .tex:331's hedge was written against. Two results came back and BOTH have to
+    stay in the manuscript, which is the entire reason this gate exists.
+
+    (i) The POINT survives. The standardized gradient is still well clear of the
+    model-implied value with age in the cell, and the identity limb puts only a
+    small slice of the raw gradient on age composition.
+
+    (ii) The INTERVAL does not. The age-augmented 95% CI COVERS the implied
+    value where the committed one excluded it, which on
+    episode_confrontation_within's own pre-committed branch map (that runner,
+    lines 202-216) is "GAP CLOSES MATERIALLY", not "GAP PERSISTS".
+
+    (ii) is the finding that costs this paper, so it is bound three ways: the
+    printed interval is DERIVED here from the artifact; the coverage SENTENCE is
+    a pinned span; and the coverage PROPERTY (lo <= implied <= hi, with the
+    committed lo > implied) is RECOMPUTED here rather than trusted. If a rerun
+    ever moved the CI back off the implied value the gate fails and forces the
+    sentence to change instead of leaving a false claim standing; if an editor
+    deletes the sentence it fails too.
+
+    Every numeric literal is derived -- the new numbers from the age-band
+    artifact, the contrast pair ($+3.44$, $[+1.17, +5.14]$) from the COMMITTED
+    within artifact -- so the two runs cannot drift apart in print. G7's
+    selection parity is likewise tied LIVE to the committed run's own selection
+    counts rather than to literals written here.
+
+    SCOPE. This gate covers the spec's Branch A landing and nothing more: the
+    .tex:331 clause, a tab:runindex row, this gate, its battery. tab:assembly's
+    composition row and Section V.E's sixth qualification are NOT touched and
+    NOT pinned here -- re-scoping either is Branch C's disposition and is
+    posture-adjacent besides (episode_confrontation_within.py:208-210 marks that
+    assembly row "Eugene signs"). Both stay true as written: the assembly row
+    prints the COMMITTED run's point ($+3.4$ vs implied $+0.9$, "above
+    (directional)") and carries no interval, and the sixth qualification
+    attributes its $+3.44$ to that same run in the same parenthesis. The
+    interval claim landed here is scoped to the age-augmented cell in its own
+    sentence, so it contradicts neither.
+
+    One artifact property is asserted with NO printed counterpart: se_pp rising
+    against the committed run. Nothing in the manuscript says "noisier" -- the
+    percentile interval NARROWS in width (3.748 vs 3.971 points) while shifting
+    down, so no widening or noise claim is made anywhere and none is gated. The
+    assertion is kept as a cheap drift tripwire, redundant with the printed
+    interval (both come out of the same bootstrap), and it is documented here so
+    a later round does not mistake it for the anchor of a word.
+    """
+    tex_nc = re.sub(r"(?<!\\)%.*", "", tex)
+    missing = [f"span:{k}" for k in sorted(EPISODE_AGE_BANDS_SPANS)
+               if EPISODE_AGE_BANDS_SPANS[k] not in tex_nc]
+
+    la, lb = a["limb_a"], a["limb_b"]
+    wla = w["limb_a"]
+    g = la["standardized_gradient_pp"]
+    lo, hi = la["ci95_pp"]
+    iw = la["imputed_weight_share"]
+    wg = wla["standardized_gradient_pp"]
+    wlo, whi = wla["ci95_pp"]
+    impl = a["committed_reference"]["model_implied_pp"]
+    total = lb["full_cell_committed"]["total_pp"]
+    com_b = lb["full_cell_committed"]["between_composition_pp"]
+    age_b = lb["age_only"]["between_composition_pp"]
+    aug_b = lb["age_augmented_full"]["between_composition_pp"]
+    bm = a["age_bands"]["band_months"]
+    e = a["expectations"]
+
+    lits = {
+        "band_width":
+            f"adding {bm}-month age bands to the standardization cell" in tex_nc,
+        "age_point": f"leaves the gradient at ${g:+.2f}$ points" in tex_nc,
+        # the manuscript's PRE-EXISTING +3.44 sentence, re-derived here from the
+        # committed artifact so the two runs cannot drift apart in print
+        "committed_point": f"leaves the gradient at ${wg:+.2f}$ points" in tex_nc,
+        # one contextual literal for the age-only limb: the component, the total
+        # it is a share of, and the share itself, in the order they are printed
+        "age_only_and_share": (
+            f"puts ${age_b:+.2f}$ of the raw ${total:+.2f}$ --- "
+            f"${age_b / total * 100:.1f}\\%$ --- on seasoning composition") in tex_nc,
+        "composition_moves": (
+            f"moving total composition from ${com_b:+.2f}$ to "
+            f"${aug_b:+.2f}$") in tex_nc,
+        # the whole CI claim in one derived literal: the age interval, its
+        # imputed weight, the coverage, and the committed interval it displaces
+        "age_ci_and_coverage": (
+            f"it runs $[{lo:+.2f}, {hi:+.2f}]$ (imputed weight share "
+            f"${iw * 100:.1f}\\%$), covering the implied ${impl:+.2f}$ where "
+            f"the committed $[{wlo:+.2f}, {whi:+.2f}]$ excluded it") in tex_nc,
+        "collinearity_bar": (
+            f"at least ${e['E3_collinearity_min'] * 100:.0f}\\%$ of the "
+            f"primary selection's shallow exposure") in tex_nc,
+        "collinearity_measured":
+            f"the realized share is ${e['E3_measured'] * 100:.1f}\\%$" in tex_nc,
+        "runindex_row": (
+            f"seasoning composition at ${age_b:+.2f}$ of ${total:+.2f}$, and an "
+            f"age-augmented interval that covers the model-implied "
+            f"${impl:+.2f}$") in tex_nc,
+        # two sites: the .tex:331 prose and the tab:runindex row
+        # SCOPED, not counted. This was count(tag) >= 2, calibrated when the tag
+        # sat at exactly two sites; a third citation (the tab:assembly Status
+        # cell) made removing any ONE of them leave the threshold satisfied, so
+        # the removal test stopped biting. The prose/assembly citation form and
+        # the tab:runindex row are now checked separately -- runindex_row pins
+        # the row's own text -- so neither can be dropped behind the other and
+        # the rule survives a fourth citation.
+        "run_tag": "(run \\texttt{episode\\_gradient\\_age\\_bands})" in tex_nc,
+    }
+    missing += sorted(k for k, v in lits.items() if not v)
+
+    pg = a["parity_gates"]
+    sel, wsel = pg["G7_selection_parity"], w["selection"]
+    covers = bool(lo <= impl <= hi)
+    excluded = bool(wlo > impl)
+    art_ok = (
+        a["status"] == "OK"
+        and a["branch_landed"] == "A"
+        and all(bool(v) for v in pg["G0_G4"].values())
+        and bool(pg["G5_frozen_artifact_reproduction"])
+        and all(bool(v["exact"])
+                for v in pg["G6_axis_machinery_reproduces_committed"].values())
+        # G7 tied live to the committed run's own selection, not to literals
+        and all(sel[k] == wsel[k] for k in ("n_strata_total", "n_strata_bucketed",
+                                            "n_strata_primary", "n_rows_primary"))
+        # E2, STOP-class: the decomposition telescopes on EVERY axis reported,
+        # and every axis decomposes the SAME total
+        and all(abs(v["identity_residual"]) < 1e-12 for v in lb.values())
+        and all(abs(v["total_pp"] - total) < 1e-12 for v in lb.values())
+        and bool(e["E4_pass"]) and bool(e["E5_standardized_above_bar"])
+        # the two readings the prose states, recomputed here rather than trusted
+        and covers                      # the age-augmented CI COVERS the implied
+        and excluded                    # the committed CI EXCLUDED it
+        and g > impl                    # the point still stands above the model
+        and g > a["committed_reference"]["half_raw_bar_pp"]
+        # drift tripwire only -- redundant with the printed interval, and NO
+        # printed word depends on it (see the docstring)
+        and la["se_pp"] > wla["se_pp"]
+        # E3 missed, and missed in the direction that makes the control real
+        and e["E3_pass"] is False
+        and e["E3_measured"] < e["E3_collinearity_min"]
+        # the spec section 8.3 disclosure the prose now carries, tied to the
+        # artifact: AGE0_MIN held at production, bands cut on one date, and the
+        # within-stratum limit still declared
+        and a["spec"]["age_cut_held"] == 24
+        and bool(a["spec"]["bands_cut_on_one_date"])
+        and "NOT COMPUTABLE" in a["spec"]["not_within_stratum"]
+    )
+    return (not missing) and art_ok, {
+        "missing": missing,
+        "artifact_ok": art_ok,
+        "age_point_pp": round(g, 4),
+        "age_ci_pp": [round(lo, 4), round(hi, 4)],
+        "covers_implied": covers,
+        "committed_excluded": excluded,
+        "age_only_share_pct": round(age_b / total * 100, 2),
+    }
+
+
+# --- R32 / C-77 artifacts (gate #118). TWO of them on purpose: the committed
+# max-form run is read SEPARATELY so the new artifact cannot certify its own
+# comparator. These may sit with the other *_RESULTS constants (after
+# DLS_RESULTS, tools/liveness_gates.py:63) or here; both are module level and
+# evaluated before main() either way.
+SNHAADD_RESULTS = (ROOT / "hazard" / "data"
+                   / "scaled_null_housing_activity_additive_results.json")
+SNHAMAX_RESULTS = (ROOT / "hazard" / "data"
+                   / "scaled_null_housing_activity_results.json")
+
+
+# --- R32 / C-77 (gate #118): THE ALADANGADY CALIBRATION IS FORM-CONDITIONAL --
+# The housing-activity reconciliation was solved only under the production
+# hard-maximum floor form, and the tab:assembly row carried its +0.9 as though
+# the reading were form-invariant. Re-solved under the additive form (run
+# scaled_null_housing_activity_additive) the root barely moves at the headline
+# floor -- 0.756 against 0.754 -- while the surviving marginal lands at +8.5
+# points at BOTH anchors (8.4912 and 8.5227). So the calibration documents an
+# upward bias under either form, and only WHERE the corrected member falls is a
+# form choice.
+#
+# Four things this gate binds past presence, because each is a way this landing
+# could go wrong quietly:
+#
+# (i)   PLACEMENT. +8.5 sits in the UPPER half of the +2.9 to +8.7 binding
+#       interval -- INSIDE it, about 0.2 below the upper edge, NOT above it.
+#       Gate #98 pins "every correction listed above falls in its lower half",
+#       a claim scoped to the ladder ABOVE the binding-interval sentence, so
+#       writing this member up into that ladder would falsify a pinned sentence
+#       without editing it. The ordering assert requires the passage to appear
+#       AFTER the lower-half sentence and AFTER the counterweight clause it
+#       belongs with; in_paragraph requires it to stay inside the seventh-
+#       qualification paragraph rather than escape into a new one.
+# (ii)  THE MECHANISM. What separates the forms is censoring, not a slacker
+#       floor: the floor exceeds the volitional hazard NO LESS OFTEN at the
+#       additive root (0.9480) than at the max root (0.9444) -- it simply stops
+#       truncating. That comparison is asserted against the two artifacts
+#       rather than printed, because "94.8\%" already denotes the null leg's
+#       100-PSA recovery share in this same paragraph and a second referent for
+#       it would be a trap for a later reader.
+# (iii) NO BARE NUMERALS. Every printed literal is checked inside the clause it
+#       belongs to. "$+0.9$", "$+3.5$", "$+5.6$" and "$+11.2$" each already
+#       occur at unrelated sites ("$+0.9$ to $+15.6$", "$+3.5$ to $+13.1$", the
+#       headline, the tab:uncertainty note at .tex:474), so a bare-numeral
+#       check would pass on a manuscript that had lost the sentence it was
+#       meant to pin. That is the hole the C-77 verifier found in the draft.
+# (iv)  THE COMPARATOR. The max-form legs are read from the COMMITTED max run,
+#       never from the additive run's copy of them; the copy is checked against
+#       it to the bit, and the committed file's BYTES are checked against the
+#       sha the additive run recorded for what it was scored against. If the
+#       max run is ever re-run this gate fails loudly rather than silently
+#       comparing a stale +0.9.
+#
+# NOTE: the additive run tag CONTAINS the max tag as a stem, so every tag
+# comparison here closes the brace -- "...activity\_additive}" does not contain
+# "...activity}". A battery test asserts that property, because the next gate to
+# count either tag will get it wrong otherwise.
+SNHA_ADDITIVE_PROSE = "Re-solving the same condition under the additive form"
+
+
+def snha_additive_check(tex, a, mx, max_bytes):
+    """Gate #118's rule (R32, C-77), as a function so the battery exercises THE
+    SHIPPED RULE rather than a copy of it (gate #68's header explains why that
+    distinction is not pedantry).
+
+    a         -- the additive re-solve's artifact.
+    mx        -- the COMMITTED max-form artifact, parsed from max_bytes.
+    max_bytes -- its raw bytes, so the comparator can be sha-pinned against the
+                 additive run's own P0 record of what it was scored against.
+
+    hashlib is imported locally rather than at module scope on purpose: this
+    landing is one of six applied in the same wave and the shared import block
+    is the one place they would collide.
+    """
+    import hashlib
+    tex = re.sub(r"(?<!\\)%.*", "", tex)
+    r4, r5 = a["roots_additive"]["4"], a["roots_additive"]["4.991"]
+    c4, c5 = a["committed_max_form"]["4"], a["committed_max_form"]["4.991"]
+    m4, m5 = mx["root"]["4"], mx["root"]["4.991"]
+    prod_phi1_pp = mx["ladder"]["4.991|1"]["marginal_pp"]
+    add_phi1_pp = r5["additive_marginal_at_phi1_pp"]
+    lits = {
+        # the PRE-EXISTING production pair the landing now leans on
+        "max_pair": (f"the marginal at $+{m5['marginal_pp']:.1f}$ points at the "
+                     f"headline floor and $+{m4['marginal_pp']:.1f}$ at the "
+                     "in-sample calibration") in tex,
+        # the landing's own passage
+        "both_anchors": f"$+{r5['marginal_pp']:.1f}$ points at both anchors" in tex,
+        "roots_pair": (f"$\\phi^{{*}} = {r5['phi_star']:.3f}$ against "
+                       f"${m5['phi_star']:.3f}$ at the headline floor") in tex,
+        "e3_bar": (f"clearing the $+{a['expectations']['E3_bar_pp']:.1f}$-point "
+                   "bar fixed before the run") in tex,
+        "cut_additive": (f"cuts the additive form's own $+{add_phi1_pp:.1f}$ to "
+                         f"$+{r5['marginal_pp']:.1f}$") in tex,
+        "cut_production": (f"the production form's $+{prod_phi1_pp:.1f}$ to "
+                           f"$+{m5['marginal_pp']:.1f}$") in tex,
+        "where_it_lands": ("above the headline at both anchors and near the top "
+                           "of the quoted interval under the additive form") in tex,
+        "censoring_share": (f"pinned to the floor in "
+                            f"{m5['floor_bind_share'] * 100:.1f}\\% of evaluated "
+                            "loan-months and the maximum truncates") in tex,
+        "never_truncates": "combines the two hazards on the survival scale" in tex,
+        "dominates_no_less": "dominates no less often at the additive root" in tex,
+        "placement": ("belongs with the counterweights above rather than with "
+                      "the ladder") in tex,
+        # the scope repairs a landing may not lose
+        "both_forms_biased": "documents an upward bias under both forms" in tex,
+        "production_scoped": ("under the production form the corrected member "
+                              "lies below the headline") in tex,
+        "intro_counterpart": ("re-solved under the additive form, the calibrated "
+                              "companion below moves it up instead") in tex,
+        "counterweight_pointer": ("the housing-activity calibration below, "
+                                  "re-solved under that form, joins them") in tex,
+        # +8.5 is INSIDE the interval, so the paragraph's closing clause had to
+        # stop saying the counterweights sit above it
+        "closing_scoped": ("the form-side counterweights sit at its top or "
+                           "above it") in tex,
+        # the tab:assembly row -- the edit the condition names, in three cells
+        "row_both_numbers": (f"$+{m5['marginal_pp']:.1f}$ (max) / "
+                             f"$+{r5['marginal_pp']:.1f}$ (additive)") in tex,
+        "row_vs_cell": "below the interval / above the headline" in tex,
+        "row_form_conditional": ("form-conditional scaled-null variant; "
+                                 "upward-bias entry under both forms") in tex,
+        "row_roots": (f"roots $\\phi^{{*}} = {m5['phi_star']:.3f}$ and "
+                      f"${r5['phi_star']:.3f}$ at the headline floor") in tex,
+        "run_tag": "\\texttt{scaled\\_null\\_housing\\_activity\\_additive}" in tex,
+    }
+    # (i) the additive member is written WITH the counterweights, after the
+    #     lower-half posture it would otherwise falsify
+    i_low = tex.find("every correction listed above falls in its lower half")
+    i_ctr = tex.find("the housing-activity calibration below, re-solved under "
+                     "that form, joins them")
+    i_add = tex.find(SNHA_ADDITIVE_PROSE)
+    ordered = -1 < i_low < i_ctr < i_add
+    paras = [ln for ln in tex.split("\n") if ln.startswith(ASSEMBLY_OPENER)]
+    in_paragraph = (len(paras) == 1 and SNHA_ADDITIVE_PROSE in paras[0]
+                    and ("belongs with the counterweights above rather than "
+                         "with the ladder") in paras[0])
+    # the run's own gates: a landing may not survive its own failures
+    roots_ok = all((not r["no_root"]) and r["converged"]
+                   and abs(r["residual_b"]) <= r["tolerance_b"]
+                   for r in (r4, r5))
+    pg = a["parity_gates"]
+    parity_ok = (
+        all(v["pass"] for v in pg["P1_additive_endpoint_parity"].values())
+        and all(v["pass"] for v in pg["P2_max_form_parity"].values())
+        and pg["P3_baseline_identity"]["vs_h0_psa"] == 0.0
+        and pg["P3_baseline_identity"]["vs_baseline_hazard"] == 0.0
+        and pg["P4_restoration_and_bind_anchor"]["restored"] is True
+        and abs(pg["P5_ratio_recomputed"] - 1.272727272727273) < 1e-12
+        and abs(pg["P5_floor_read_live_pct"] - 4.991) < 1e-9)
+    # (iv) the comparator is the COMMITTED max run, by value AND by bytes
+    tie = all(abs(c[k] - m[k]) < 1e-12
+              for c, m in ((c4, m4), (c5, m5))
+              for k in ("phi_star", "marginal_pp", "floor_bind_share",
+                        "required_lift_b"))
+    sha_ok = (hashlib.sha256(max_bytes).hexdigest()
+              == pg["P0_sha_pins"]["hazard/data/"
+                                   "scaled_null_housing_activity_results.json"])
+    # (ii) the two claims that are arguments rather than literals
+    floor_invariant = f"{r4['marginal_pp']:.1f}" == f"{r5['marginal_pp']:.1f}"
+    no_less_often = r5["floor_bind_share"] >= m5["floor_bind_share"]
+    ok = (all(lits.values()) and ordered and in_paragraph and roots_ok
+          and parity_ok and tie and sha_ok and floor_invariant and no_less_often
+          and bool(a["expectations"]["E2_root_exists_both_floors"])
+          and bool(a["expectations"]["E3_pass"]))
+    return ok, {"missing": sorted(k for k, v in lits.items() if not v),
+                "ordered": ordered, "in_paragraph": in_paragraph,
+                "cross_artifact_tie": tie, "comparator_sha_ok": sha_ok,
+                "floor_invariant": floor_invariant,
+                "additive_pp": (round(r4["marginal_pp"], 4),
+                                round(r5["marginal_pp"], 4)),
+                "bind_max_then_additive": (round(m5["floor_bind_share"], 4),
+                                           round(r5["floor_bind_share"], 4))}
+
+
+1# --- R32 C-74 (gate #116): THE GINNIE SHARE'S GAP RESPONSE, BRACKETED ------
+# The committed overlay scores the 20.4% Ginnie face share by the observed
+# Ginnie speed in BOTH Path B legs, so that share's central-minus-null
+# difference is exactly zero and the marginal correction is pure
+# conventional-share scaling (0.797x). C-74 asks for a WEAKER Ginnie marginal
+# MEASURED rather than NONE ASSUMED. What this design can deliver is a bracket,
+# not a measurement, and the two ways the exhibit can be overclaimed are exactly
+# what a concision pass would cut, so both are pinned:
+#
+#   (a) THE RISE IS FORCED. A share contributing exactly zero must contribute
+#       more at any positive response, so the corrected scaling exceeds the
+#       committed 0.797x by arithmetic. Reporting that as a finding would repeat
+#       the error the paper already names about its own headline sign.
+#   (b) A LEVEL DOES NOT IDENTIFY A SLOPE. The measured object is a level
+#       difference in voluntary speed at the same window rate path; the
+#       elasticity is a slope; the mapping between them is assumed. The BRACKET
+#       is the result and no cell in it is a measured Ginnie marginal.
+#
+# The two paths below belong with the other *_RESULTS constants near the top of
+# the module (OVERLAY_RESULTS is line 45); they sit here only so the gate lands
+# as one contiguous block.
+GINNIEATT_RESULTS = (ROOT / "hazard" / "data"
+                     / "ginnie_overlay_attenuated_results.json")
+GINNIEOFF_RESULTS = (ROOT / "hazard" / "data"
+                     / "ginnie_overlay_offwindow_results.json")
+
+# PROSE spans, and deliberately so. They are pinned to the ONE line carrying
+# both the run tag and the 0.797 clause, so relocating an honesty clause to a
+# footnote fails the gate even when the words survive elsewhere in the file.
+# Every NUMBER this gate checks is derived inside the check from the run
+# artifact and tied live to the two COMMITTED Ginnie artifacts, so no cell
+# literal lives in this file and a rerun that moved a cell cannot be papered
+# over by editing a dict.
+GINNIE_ATTENUATED_SPANS = {
+    # the construction, and that it is a transplant rather than a
+    # Ginnie-specific estimate (spec SS8.2 -- without this the bracket reads as
+    # a measurement on Ginnie collateral, which this design cannot deliver)
+    "transplant": "transplanted, not estimated on Ginnie collateral",
+    "identity_defines_the_fraction": "with the wedge fixed by requiring that a "
+                                     "full-strength Ginnie response return the "
+                                     "un-overlaid marginal",
+    # HONESTY CONSTRAINT (b): a LEVEL does not identify a SLOPE. Four spans,
+    # because the failure mode is a later pass keeping the numbers and dropping
+    # the scope, after which a reader quotes one cell as the measured Ginnie
+    # marginal.
+    "level_scope": "a level, and a voluntary-only one",
+    "level_not_slope": "An elasticity is a slope, and nothing here maps a level "
+                       "onto one",
+    "bracket_not_chosen": "so I bracket the mapping rather than choose it",
+    "no_single_cell": "none of the four is a measured Ginnie marginal",
+    # spec SS8.3: the published series is full-universe Ginnie collateral while
+    # SOMA's holdings are seasoned and low-coupon, so the overlay if anything
+    # OVERSTATES the correction. That direction carries into the speed ratio.
+    "full_universe_overstatement": "read off the same full-universe series with "
+                                   "the same overstatement",
+    # the open sign was pre-authorised BOTH ways (spec SS5 E4); if the a > 1
+    # reading is quoted it must be labelled amplification, not re-described as
+    # attenuation (spec SS7 Branch C)
+    "amplification_named": "which is amplification, not attenuation",
+    # HONESTY CONSTRAINT (a): the rise above the committed scaling is FORCED.
+    # Dropping this turns a tautology into a finding -- the same error the paper
+    # already names about its own headline sign.
+    "rise_is_forced": "is arithmetic, not evidence",
+    "forced_mechanism": "a share contributing exactly zero must contribute more "
+                        "at any positive response",
+    "rest_nothing_on_it": "and I rest nothing on it",
+    # the supplement SCOPES the committed +4.4 estimand; it does not correct it
+    "scopes_not_corrects": "stands unrevised, scoped by the bracket rather than "
+                           "corrected by it",
+}
+
+# WHOLE-FILE spans: the cross-reference the bracket adds at the assumability
+# sentence in SS I, and the hedge that sentence's next clause carries. They are
+# pinned TOGETHER on purpose. The cross-reference without "ceilings, not sizes"
+# would read as SIZING the assumption carve-out, and nothing in this design
+# measures realized take-up (spec SS8.5). The spec's Branch A wording -- "so the
+# carve-out is small" -- was therefore NOT landed; this pair is what replaces it.
+GINNIE_ATTENUATED_FILE_SPANS = {
+    "assumability_link": "to bracket what a Ginnie share that is not gap-inert "
+                         "would contribute, on a mapping it assumes rather than "
+                         "measures",
+    "ceilings_not_sizes": "Both bounds are ceilings, not sizes",
+}
+
+
+def ginnie_attenuated_check(tex, g, ov, gof):
+    """Gate #116's rule (R32, C-74): the Ginnie share's gap response, bracketed.
+
+    Every printed literal is DERIVED here from the run artifact, and the a = 0
+    cell is tied LIVE to both committed Ginnie artifacts at full precision, so a
+    rerun that moved any cell cannot leave a stale digit in SS V.B and a wrong
+    number cannot be introduced by editing this file alone.
+
+    Beyond presence this binds the exhibit's two honesty constraints AND THEIR
+    ORDER, because each is what a concision pass would cut and each is the
+    difference between a scoped bracket and an overclaim:
+
+    (i) THE RISE IS FORCED. Under the committed overlay the Ginnie share
+    contributes exactly zero marginal, so the corrected scaling exceeds the
+    committed 0.797x for every positive response, by arithmetic.
+
+    (ii) A LEVEL DOES NOT IDENTIFY A SLOPE. What the series measures is a level
+    difference in voluntary speed at the same window rate path; the elasticity
+    is a slope; nothing maps one onto the other. The BRACKET is the result and
+    no single cell is a measured Ginnie marginal.
+
+    The printed sequence must come first, then (i), then (ii): a rewrite that
+    leads with the bracket verdict and buries the forced-rise disclaimer after
+    it reads as a finding followed by a hedge, which is the reverse of what the
+    spec commits to. That order is asserted, not just the presence.
+
+    A third span keeps this a SCOPING of the committed 0.797x estimand rather
+    than a correction of it: the +4.4 overlay member is accurate as printed and
+    stays unrevised.
+
+    The printed 0.797x is NOT typed here. It is rebuilt from the in-sample
+    scaling (marginal(0) / M_full = 0.797226 -> "0.797"), and the off-window
+    scaling is separately asserted to agree with it to better than 5e-4, which
+    is finer than the printed precision. The manuscript's own off-window value
+    is 0.797518, which rounds to 0.798; the paper prints 0.797 at five sites and
+    that pre-existing rendering is not this gate's to change.
+
+    The run tag is separately required to occur at least twice (prose +
+    tab:runindex), and the two whole-file spans keep the SS I cross-reference
+    and its hedge alive together.
+    """
+    tex_nc = re.sub(r"(?<!\\)%.*", "", tex)
+    tag = "\\texttt{ginnie\\_overlay\\_attenuated}"
+    lines = [ln for ln in tex_nc.split("\n") if tag in ln and "0.797" in ln]
+    info: dict = {"prose_lines": len(lines)}
+    if len(lines) != 1:
+        return False, {**info, "missing": ["prose_line"], "artifact_ok": None,
+                       "ordered": None, "in_sample_pp": [], "off_window_pp": [],
+                       "E3_pass": None}
+    line = lines[0]
+
+    order = ("M0_committed", "M2_primary_1_over_r", "M1_no_differential",
+             "M3_amplification_r")
+    ins, off = g["bracket_in_sample"], g["bracket_off_window"]
+    ins_pp = [ins[k]["marginal_pp"] for k in order]
+    off_pp = [off[k]["marginal_pp"] for k in order]
+    a0 = ins["M0_committed"]["a"]
+    a2 = ins["M2_primary_1_over_r"]["a"]
+    a1 = ins["M1_no_differential"]["a"]
+    a3 = ins["M3_amplification_r"]["a"]
+    m, p, e = g["measurement"], g["parity"], g["expectations"]
+    r = m["speed_ratio_r_freddie"]
+    conv_off = gof["conventional_offwindow"]["marginal_pp"]
+    scale_off0 = gof["marginal_scale_vs_conventional"]
+    scale_ins0 = ins_pp[0] / m["m_full_in_sample_pp"]
+
+    def seq(v):
+        return f"${v[0]:+.1f}$, ${v[1]:+.1f}$, ${v[2]:+.1f}$ and ${v[3]:+.1f}$"
+
+    lits = {k: v in line for k, v in GINNIE_ATTENUATED_SPANS.items()}
+    lits.update({k: v in tex_nc
+                 for k, v in GINNIE_ATTENUATED_FILE_SPANS.items()})
+    lits.update({
+        "in_sample_sequence": f"{seq(ins_pp)} points across those four" in line,
+        "off_window_sequence": seq(off_pp) in line,
+        "grid_attenuated": f"${a2 * 100:.1f}$\\% of the conventional response" in line,
+        "grid_unit": f"${a1 * 100:.0f}$\\% (no differential)" in line,
+        "grid_amplified": (f"${a3 * 100:.1f}$\\% (proportional-hazard "
+                           "preservation") in line,
+        "ratio_stated": f"${r:.3f}$ times as fast" in line,
+        "ratio_in_rationale": f"a book running ${r:.3f}$ times faster" in line,
+        "differential": (f"runs ${m['crr_differential_ginnie_minus_freddie_pp']:.2f}$ "
+                         "points above Freddie's") in line,
+        "window_months": f"the window's {p['P2_window_months']} months" in line,
+        "forced_scale_literal": (f"rises above the committed ${scale_ins0:.3f}\\times$ "
+                                 "at every positive response") in line,
+        # SCOPED to the index row itself. In tab:runindex a row OPENS with the
+        # tag followed by " & "; in prose and in tab:assembly the tag appears as
+        # "(run <tag>)". So this binds the index entry regardless of how many
+        # times the run is cited elsewhere -- the count >= 2 it replaces went
+        # blind the moment a third citation landed.
+        "run_tag_indexed": (tag + " & ") in tex_nc,
+    })
+
+    # the printed differential and ratio must fall out of the window means the
+    # run recorded, not out of a constant
+    wm = p["P2_window_mean_crr_pct"]
+    derived_ok = (
+        abs((wm["ginnie"] - wm["freddie"])
+            - m["crr_differential_ginnie_minus_freddie_pp"]) < 1e-9
+        and abs(wm["ginnie"] / wm["freddie"] - r) < 1e-9
+    )
+    # the grid is 0, 1/r, 1, r -- derived, so a runner that hard-coded 0.814
+    # would fail here
+    a_grid_ok = (a0 == 0.0 and a1 == 1.0
+                 and abs(a2 * r - 1.0) < 1e-9 and a3 == r)
+    # THE PARITY ANCHOR, live and cross-artifact: the a = 0 cell IS the committed
+    # overlay at both calibrations, bit for bit, and its off-window ratio IS the
+    # 0.797 scaling the committed run wrote
+    anchor_ok = (ins_pp[0] == ov["variants"]["crr_only"]["marginal_pp"]
+                 and off_pp[0] == gof["overlay_offwindow"]["primary"]["marginal_pp"]
+                 and abs(p["P1_crr_only_marginal_pp"]
+                         - ov["variants"]["crr_only"]["marginal_pp"]) < 1e-12
+                 and abs(off_pp[0] / conv_off - scale_off0) < 1e-12)
+    # the identity that makes the fraction mean what its name says: a full
+    # response returns the un-overlaid marginal at BOTH calibrations, and the
+    # off-window arm is bound to the committed run's own conventional leg
+    ident = p["P3_marginal_at_a1_vs_M_full"]
+    tol = ident["tol_pp"]
+    identity_ok = (abs(ident["in_sample"][0] - ident["in_sample"][1]) <= tol
+                   and abs(ident["off_window"][0] - ident["off_window"][1]) <= tol
+                   and abs(ins_pp[2] - m["m_full_in_sample_pp"]) <= tol
+                   and abs(off_pp[2] - conv_off) <= tol)
+    # monotone, and every SCALING past the first strictly above it: the
+    # arithmetic the prose calls forced, re-derived rather than read off a flag,
+    # and compared multiplier-to-multiplier as the prose now states it
+    mono = (all(x < y for x, y in zip(ins_pp, ins_pp[1:]))
+            and all(x < y for x, y in zip(off_pp, off_pp[1:])))
+    s_ins = [x / m["m_full_in_sample_pp"] for x in ins_pp]
+    s_off = [x / conv_off for x in off_pp]
+    forced = (all(s > s_ins[0] for s in s_ins[1:])
+              and all(s > s_off[0] for s in s_off[1:]))
+    # the printed 0.797 stands for both calibrations; they must agree inside the
+    # printed precision or the single literal is misleading
+    scale_agreement_ok = abs(scale_off0 - scale_ins0) < 5e-4
+
+    # ORDER: numbers, then the forced-rise disclaimer, then the bracket verdict
+    i_seq = line.find(seq(off_pp))
+    i_forced = line.find(GINNIE_ATTENUATED_SPANS["rise_is_forced"])
+    i_cell = line.find(GINNIE_ATTENUATED_SPANS["no_single_cell"])
+    ordered = -1 < i_seq < i_forced < i_cell
+
+    art_ok = (
+        bool(p["P0b_artifacts_byte_identical"])
+        and p["P2_window"] == ["2022-06", "2025-11"]
+        and p["P2_window_months"] == 42
+        and abs(p["P4_comparator_shift_pp"]) < p["P4_tol_pp"]
+        and derived_ok and a_grid_ok and anchor_ok and identity_ok
+        and mono and forced and scale_agreement_ok
+        and bool(e["E1_a0_reproduces_committed_overlay"])
+        and bool(e["E2_monotone_in_a"])
+        and bool(e["E5_rise_is_forced_not_a_finding"])
+        and bool(g["spec"]["no_engine_runs"])
+    )
+    ok = all(lits.values()) and art_ok and ordered
+    return ok, {**info,
+                "missing": sorted(k for k, v in lits.items() if not v),
+                "artifact_ok": art_ok,
+                "ordered": ordered,
+                "in_sample_pp": [round(v, 4) for v in ins_pp],
+                "off_window_pp": [round(v, 4) for v in off_pp],
+                "E3_pass": bool(e["E3_pass"])}
+
+
+# --- R32 C-75 (gate #117): THE RE-DERIVED BUYBACK DISCOUNT -----------------
+# The committed bracket's discount was ASSERTED: buyback_credit_bracket.py:107
+# hard-codes D_GRID = [0.32, 0.34, 0.36, 0.38] and :33 calls it "the
+# manuscript's committed proxy range". Run buyback_discount_rederived prices
+# each month's retired face at its own prepayment-consistent PV, off the leg's
+# own CPR path and the window's own rate path, and the answer is a POINT: the
+# committed range was a range only because the asserted grid had four points.
+#
+# Every printed figure is DERIVED below, and every committed constant it rests
+# on is tied LIVE to two artifacts this run did not write --- the committed
+# bracket's own results and danish_us_intercept's --- so no number the gate
+# enforces is a literal typed into this file. What is written out is the prose
+# those figures would be meaningless without, and six properties beyond
+# presence, each a way this could quietly rot back:
+#
+#   (a) the SUPERSEDED RANGE must be gone. It was live at five .tex sites, and
+#       one of them (the trilemma paragraph) printed a HYPHENATED variant that
+#       gate #103's substring never matched -- so #103 would have stayed green
+#       over a retired figure. Absence is therefore checked in both spellings;
+#   (b) the POINT-NOT-RANGE statement, because a reader who finds one number
+#       where a range used to be will assume a range was narrowed, rather than
+#       that its width was never estimated in the first place;
+#   (c) the ZERO-MONTHS fact, which is what makes "the committed grid was
+#       uniformly too deep" a measurement rather than a statement about an
+#       average;
+#   (d) the PROVENANCE HEDGE. The spec (SS2.3, SS6/P4) calls the no-prepayment
+#       reading of the committed grid "plausible but not exactly reproduced"
+#       and uses it as a non-targeting band check. Both the consistency
+#       wording and the hedge that scopes it are pinned, so the clause cannot
+#       be upgraded into a finding the run does not carry;
+#   (e) the D_crit OWNERSHIP clause. D_crit is gap_par/E on the committed
+#       chain, declared in the spec BEFORE the run so that E4 was falsifiable.
+#       Without the ownership clause the threshold reads as an output of the
+#       re-derivation, which would retrofit the prediction;
+#   (f) gap_face, which this run CANNOT move. It is an identity, and a later
+#       edit that helpfully "updates" it alongside the cash figure would be
+#       wrong. Pinning it here is cheap insurance against that edit.
+#
+# The two-grain disclosure (SS8.3: D_t is priced on the SOMA book's single-pool
+# tabulation while F_t comes from the microsimulated panel's roll-off) is
+# pinned for the same reason: the run inherits that seam and the spec commits
+# the landing to naming it rather than implying one object was priced end to
+# end.
+BUYBACK_DISCOUNT_SPANS = {
+    "run_tag": "\\texttt{buyback\\_discount\\_rederived}",
+    "asserted_not_derived": "The committed grid was asserted, not derived",
+    "prepay_consistent": "prices each month's retired face at its own "
+                         "prepayment-consistent present value",
+    "wac_basis": "aged to that month at the 2.49\\% weighted-average coupon",
+    "two_grains": "The price and the face come from two populations",
+    "seam_inherited": "the seam the committed early-face netting already "
+                      "carries, inherited here rather than repaired",
+    "point_not_range": "That is a point, not a range",
+    "zero_months": "none of the forty-two months reaches the committed "
+                   "grid's floor",
+    "no_prepay_provenance": "consistent with a no-prepayment annuity priced "
+                            "at a representative state",
+    "provenance_not_exact": "plausible rather than exactly reproduced",
+    "verdict_survives": "shrinks the reversal without retiring it",
+    "d_crit_ownership": "arithmetic on the committed chain, fixed before the "
+                        "run rather than produced by it",
+}
+
+# the grid's own length, spelled the way the paragraph spells it; .get() so an
+# out-of-range grid yields a numeral that will simply miss, never a KeyError.
+_GRID_WORDS = {1: "one", 2: "two", 3: "three", 4: "four",
+               5: "five", 6: "six", 7: "seven", 8: "eight"}
+
+
+def buyback_discount_rederived_check(tex, d, cb_art, dan):
+    """Gate #117's rule (R32, C-75): the buyback discount, re-derived."""
+    tex_nc = re.sub(r"(?<!\\)%.*", "", tex)
+    r, p, cb = d["rederived"], d["parity"], d["committed_bracket"]
+    bv = cb_art["verdict"]
+    pt = dan["point"]
+    grid = cb["D_GRID"]
+    anchor = p["P4_provenance_anchor"]
+    months = d["months"]
+    E = p["P2_E_b"]
+    gap_par = p["P2_committed_constants"]["gap_par"]["got"]
+    dbar = r["face_weighted_mean_discount"]
+    gc = r["gap_cash_b"]
+    n_pts = _GRID_WORDS.get(len(grid), len(grid))
+
+    lits = dict(BUYBACK_DISCOUNT_SPANS)
+    lits.update({
+        "dbar": f"face-weighted mean of {dbar * 100:.1f}\\%",
+        "haircut": f"\\${r['haircut_b']:.1f} billion haircut",
+        "gap_cash": f"cash gap of $-\\${abs(gc):.1f}$ billion",
+        "monthly_range": (f"from {r['monthly_D_min'] * 100:.1f}\\% "
+                          f"to {r['monthly_D_max'] * 100:.1f}\\%"),
+        "grid_span": (f"the committed {grid[0] * 100:.0f}--"
+                      f"{grid[-1] * 100:.0f}\\% span was a range only by "
+                      f"virtue of a {n_pts}-point asserted grid"),
+        "provenance": (f"returns {anchor['discount'] * 100:.1f}\\% at zero "
+                       f"prepayment on a "
+                       f"{anchor['state']['coupon'] * 100:.1f}\\% coupon "
+                       f"against a {anchor['state']['market'] * 100:.1f}\\% "
+                       f"market rate"),
+        "own_state": (f"the leg itself prepays at "
+                      f"{p['P5_mean_danish_cpr_pct']:.2f}\\% against a window "
+                      f"averaging {p['P5_market_rate_pct']['mean']:.2f}\\%"),
+        "d_crit": (f"the verdict turns at a "
+                   f"{r['D_crit'] * 100:.1f}\\% discount"),
+        # CONTEXTFUL ON PURPOSE. The bare literal occurs 19x in the manuscript,
+        # so pinning it would go green over the very edit item (f) of this
+        # header says it guards against: a later hand "updating" the single
+        # face-accounting site alongside the cash figure. Verified: this phrase
+        # occurs exactly once in both variants.
+        "gap_face_unmoved": (f"the gap stands at $+\\${r['gap_face_b']:.1f}$ "
+                             "billion under the balance-adjustment reading"),
+    })
+    missing = sorted(k for k, lit in lits.items() if lit not in tex_nc)
+
+    # (a) both spellings the superseded range was live in
+    retired = [lit for lit in ("$-\\$89.4$ to $-\\$117.7$ billion",
+                               "$-\\$89.4$-to-$-\\$117.7$ billion")
+               if lit in tex_nc]
+
+    # the committed constants, tied to the two artifacts that own them
+    cash_rows = bv["cash_rows"]
+    tie_ok = (
+        pt["institutional_gap_shared_b"] == gap_par == r["gap_face_b"]
+        and pt["us_trapped_shared_b"]
+        == p["P2_committed_constants"]["us_shared"]["got"]
+        and pt["danish_trapped_shared_b"]
+        == p["P2_committed_constants"]["dk_shared"]["got"]
+        and pt["mean_danish_cpr_pct"] == p["P5_mean_danish_cpr_pct"]
+        == p["P2_committed_constants"]["mean_danish_cpr_pct"]["got"]
+        and [row["D"] for row in cash_rows] == grid
+        and bv["gap_cash_range_b"] == cb["gap_cash_range_b"]
+        and bv["code"] == cb["code"]
+        and bv["early_face_E_b"] == E
+        and bv["gap_face_b"] == r["gap_face_b"] == gap_par
+        and all(p["P3_chain_bit_identical"][f"D_{row['D']}"]["committed"]
+                == row["gap_cash_b"]
+                and p["P3_chain_bit_identical"][f"D_{row['D']}"]["got"]
+                == row["gap_cash_b"]
+                for row in cash_rows)
+    )
+
+    e4_lo, e4_hi = d["expectations"]["E4_band"]
+    art_ok = (
+        len(grid) == 4
+        and p["P0a_wal_table_import_safe"] is True
+        and p["P0b_artifacts_byte_identical_after_import"] is True
+        and p["P1_schedule_wal_equals_cell_wal"]["max_abs_diff"] < 1e-12
+        and all(x["pass"] is True for x in p["P1_v15_printed"].values())
+        and all(x["got"] == x["want"]
+                for x in p["P2_committed_constants"].values())
+        and all(x["exact"] is True
+                for x in p["P3_chain_bit_identical"].values())
+        # P4: the primitive reproduces where the committed grid came from,
+        # as a band check against the grid itself and at the ZERO-CPR state
+        and grid[0] < anchor["discount"] < grid[-1]
+        and anchor["state"]["cpr"] == 0.0
+        and len(months) == d["spec"]["window_months"] == 42
+        # (c) uniformly too deep, month by month and not on the average
+        and r["months_at_or_above_committed_floor"] == 0
+        and all(m["below_committed_grid_floor"] is True for m in months)
+        and max(m["discount_D"] for m in months) < grid[0]
+        # E1: the monthly decomposition telescopes and is well posed
+        and abs(sum(m["early_face_b"] for m in months) - E) < 1e-9
+        and min(m["early_face_b"] for m in months) > 0
+        # every printed aggregate re-derived from the 42 rows
+        and abs(sum(m["discount_D"] * m["early_face_b"] for m in months) / E
+                - dbar) < 1e-12
+        and abs(r["haircut_b"] / E - dbar) < 1e-12
+        # the chain is the committed one with ONLY D changed
+        and abs(gc - (gap_par - dbar * E)) < 1e-9
+        and abs(r["D_crit"] - gap_par / E) < 1e-12
+        and r["D_crit"] < min(m["discount_D"] for m in months)
+        # the three scope statements the prose makes, made by the artifact
+        and "2.49% WAC" in d["spec"]["method"]
+        and "two populations" in d["spec"]["grain_note"]
+        and cb["provenance"].startswith("asserted, never derived")
+        and "before the run" in r["D_crit_note"]
+        # (f) the face incidence is an identity this run cannot move
+        and r["gap_face_b"] == gap_par
+        # the verdict as printed: still reversing, strictly inside the
+        # committed range's near edge
+        and r["verdict_code"] == "REVERSES" and gc < 0
+        and abs(gc) < abs(cb["gap_cash_range_b"][1])
+        and all(d["expectations"][k] is True for k in (
+            "E1_monthly_face_positive_and_telescopes", "E2_pv_monotone",
+            "E3_every_month_below_committed_grid_floor", "E4_pass",
+            "E5_reverses_and_smaller"))
+        and e4_lo <= d["expectations"]["E4_dbar"] < e4_hi
+    )
+    return (not missing and not retired and tie_ok and art_ok,
+            {"missing": missing, "retired_range_present": retired,
+             "cross_artifact_tie": tie_ok, "artifact_ok": art_ok,
+             "dbar_pct": round(dbar * 100, 4), "gap_cash_b": round(gc, 4),
+             "months_at_floor": r["months_at_or_above_committed_floor"]})
+
+
+# --- R32 C-79 (gate #120): THE DANISH LEG WITH AN INTEREST-ONLY SHARE ------
+# The concession at .tex:629 said the Danish interest-only share "would cut
+# scheduled amortization ... and so move the shortfall in the opposite
+# direction from the payoff rule". Run danish_interest_only_share turns that
+# direction into a crossing: zeroing scheduled amortization on a share sigma
+# of the DANISH leg alone carries the face gap along gap_par - sigma*sched,
+# which crosses zero at 30.8%, and carrying the deferred balance forward at
+# the Danish leg's own speed lifts the crossing to 34.3%. Denmark's own
+# verified share (45%) is above both, so the gap reverses under FACE
+# accounting -- a different reversal from C-75's cash-haircut one, by a
+# different mechanism.
+#
+# Every printed figure below is DERIVED from the run's artifact, and every
+# committed constant it rests on is tied LIVE to two artifacts this run did
+# not write (danish_us_intercept's point, and the committed buyback bracket's
+# early face), so no number this gate enforces is a literal typed into this
+# file. Beyond presence, six properties, each a way this could quietly rot:
+#
+#   (a) THE OLD CONCESSION AND THE OLD FLAT FACE SENTENCE MUST STAY GONE.
+#       Both are checked by absence. The second is the D4 site: ".tex:660
+#       previously read "gross institutional relief under face accounting,
+#       not a net social gain" full stop, which after this run reads as
+#       unconditional. Reverting either one turns this gate red;
+#   (b) THE BREAK-EVEN IS THE DELIVERABLE, and it is stated BEFORE the
+#       imported share. The crossing needs no external input; the 45% is a
+#       pre-window, whole-market, deferred-amortisation read. File order is
+#       checked, not merely presence, because a later edit that leads with
+#       the import would make an imported institutional parameter the claim;
+#   (c) THE THREE LIMITS TRAVEL. Every line that prints "45% of outstanding
+#       mortgage volumes" must carry all four limit spans. This is what stops
+#       the share being quoted a second time somewhere bare;
+#   (d) THE DOUBLE-COUNTING ACCOUNT MUST STAY RETRACTED. An earlier draft
+#       said stacking C-75's cash haircut and this face reversal "would
+#       charge the same dollars twice". That is FALSE: E = dk_total - sched
+#       already excludes the scheduled dollars the IO share removes, so the
+#       pools are DISJOINT; what they share is a balance path, and at
+#       sigma > 0 the deferred balance's own prepayment ADDS to the early
+#       face, so a naive sum UNDERSTATES the haircut. Every occurrence of
+#       "the same dollars twice" must therefore sit under a "rather than";
+#   (e) NO JOINT CELL. The artifact's sigma grid is pinned to the committed
+#       grid plus the two break-evens, so a composed cell cannot appear in it
+#       and then be quoted;
+#   (f) THE CHAIN, re-derived cell by cell: gap1 = gap_par - sigma*sched,
+#       gap2 = gap1 + offset, sigma = 0 returns gap_par exactly with a zero
+#       offset, both orders strictly decreasing in sigma, and each break-even
+#       cell returning zero at its own order.
+DANISH_IO_SHARE_SPANS = {
+    "run_tag": "\\texttt{danish\\_interest\\_only\\_share}",
+    # the sign was the manuscript's own; this run gets no credit for it
+    "no_credit_for_sign": "the direction was already conceded here",
+    # C-74's defect, named: a share scored in BOTH legs contributes zero
+    "danish_leg_only": "scoring it in both legs would neutralize it exactly",
+    "us_zero_held_fixed": "the U.S. leg's effective zero stays held fixed",
+    # the inherited basis seam, disclosed rather than repaired
+    "basis_note": "the U.S. leg's scheduled path over the window and this "
+                  "paper's own proxy for the scheduled component",
+    # P4: the second-order term is reported BESIDE the first, never folded in
+    "second_order_separate": "the offset is reported beside the first-order "
+                             "effect rather than folded into it",
+    "offset_open_ex_ante": "it was the one limb I could not sign in advance",
+    "limit_prewindow": "pre-window (February 2020 against a June "
+                       "2022--November 2025 window)",
+    "limit_deferred": "deferred amortisation (\\emph{afdragsfrihed}), "
+                      "conventionally capped at ten years",
+    "limit_not_permanent": "the share of volume currently \\emph{in} an "
+                           "interest-only period and not a permanent product "
+                           "feature",
+    "limit_population": "whole-market outstanding volumes rather than the "
+                        "owner-occupied thirty-year callable segment",
+    "breakeven_needs_nothing": "it is arithmetic on the committed chain and "
+                               "needs no Danish input",
+    "breakeven_is_reported": "which is why I lead with it",
+    "accounting_layer": "the hazard is untouched and only the amortization "
+                        "path moves",
+    "not_a_resimulation": "not what a re-simulated interest-only book would "
+                          "return",
+    # the D4 re-scopes, at the table and at the closing sentence
+    "tablenote_scope": "the row holds the Danish product mix fixed",
+    "face_scope": "gross institutional relief under face accounting and a "
+                  "held-fixed Danish product mix",
+    "face_scope_why": "what carries the relief is not face accounting alone "
+                      "but face accounting on a transplant that changes the "
+                      "payoff rule and nothing else",
+    # the non-composition account, in the corrected direction
+    "no_stack": "The two reversals do not stack",
+    "shared_balance_path": "but they share a balance path",
+    "understatement": "understate the haircut, not double-count it",
+    "no_joint_cell": "Their sum is not the joint cell, and no joint cell is "
+                     "run here",
+    "citation": "\\citep{nationalbanken2020}",
+}
+
+# The two sentences this landing RETIRES. The first is the unmeasured
+# concession; the second is the unconditional face-accounting claim.
+DANISH_IO_RETIRED = (
+    "which would cut scheduled amortization, the null's largest component, "
+    "and so move the shortfall in the opposite direction from the payoff rule",
+    "is gross institutional relief under face accounting, not a net social "
+    "gain",
+)
+
+
+def danish_interest_only_share_check(tex, io, dan, cb):
+    """Gate #120's rule (R32, C-79): the Danish leg with an interest-only share."""
+    tex_nc = re.sub(r"(?<!\\)%.*", "", tex)
+    p, be, s45 = io["parity"], io["break_even"], io["at_sourced_share"]
+    src, exp = io["source"], io["expectations"]
+    pt, bv = dan["point"], cb["verdict"]
+    gap_par = p["P1_gap_par"]
+    sched = p["P1_sched_total_b"]
+    E = p["P1_buyback_identity_E_b"]
+    cpr = p["P3_mean_danish_cpr_pct"]
+    # the SOURCED share, with the artifact's own fallback so an unsourced
+    # branch-D artifact cannot raise here -- it fails art_ok instead
+    share = s45["io_share"]
+    off45 = s45["second_order_offset_b"]
+    be1, be2 = be["first_order"], be["second_order"]
+    cells = sorted(io["cells"].values(), key=lambda c: c["io_share"])
+
+    sourced_lit = f"{share * 100:.0f}\\% of outstanding mortgage volumes"
+    crossing1 = f"crosses zero at an interest-only share of {be1 * 100:.1f}\\%"
+
+    lits = dict(DANISH_IO_SHARE_SPANS)
+    lits.update({
+        "sched_basis": (f"cuts the face gap by $\\chi$ times "
+                        f"\\${sched:.2f} billion"),
+        "crossing_first": crossing1,
+        "crossing_second": f"lifts the crossing to {be2 * 100:.1f}\\%",
+        # CONTEXTFUL ON PURPOSE, all three of these. The bare numerals
+        # collide: "30.8" is also the bootstrap understatement factor
+        # (30.8x, three sites) and "$+\\$19.2$ billion" is gate #102's
+        # moving-share bracket cell, so a bare-numeral pin would be
+        # ambiguous and could go green over the wrong site.
+        "danish_speed": (f"the Danish leg's own {cpr:.2f}\\% speed returns "
+                         f"\\${off45:.1f} billion of extra early roll-off at "
+                         f"a {share * 100:.0f}\\% share"),
+        "gap_at_sourced": (f"the face gap is "
+                           f"$-\\${abs(s45['gap_second_order_b']):.1f}$ "
+                           f"billion after that feedback"),
+        "sourced_share": f"interest-only loans at {sourced_lit}",
+        "tablenote_crossing": (f"above a Danish interest-only share of "
+                               f"{be2 * 100:.1f}\\% the face gap reverses too"),
+        "conclusion_crossing": (f"the interest-only crossing above sits at "
+                                f"{be2 * 100:.1f}\\%"),
+        "disjoint_pools": (f"the \\${E:.1f} billion of early face the buyback "
+                           f"credit haircuts is Danish roll-off net of the "
+                           f"scheduled component"),
+        "feedback_size": (f"the deferred balance's own prepayment "
+                          f"(\\${off45:.1f} billion at a "
+                          f"{share * 100:.0f}\\% share) adds to it"),
+    })
+    missing = sorted(k for k, lit in lits.items() if lit not in tex_nc)
+    retired = [lit for lit in DANISH_IO_RETIRED if lit in tex_nc]
+
+    # (b) the break-even is stated BEFORE the imported share. .find(), never
+    # .index(): a missing span must leave this False, not raise.
+    i_cross = tex_nc.find(crossing1)
+    i_src = tex_nc.find(lits["sourced_share"])
+    order_ok = 0 <= i_cross < i_src
+
+    # (c) the limits travel with EVERY printing of the imported share
+    limit_keys = ("limit_prewindow", "limit_deferred", "limit_not_permanent",
+                  "limit_population")
+    src_lines = [ln for ln in tex_nc.split("\n") if sourced_lit in ln]
+    limits_travel = bool(src_lines) and all(
+        all(lits[k] in ln for k in limit_keys) for ln in src_lines)
+
+    # (d) the double-counting account must stay retracted -- enforced by
+    # ABSENCE, not by a negated restatement. An earlier draft explained the
+    # non-composition as "would charge the same dollars twice". That is FALSE:
+    # E = dk_total - sched already EXCLUDES the scheduled dollars an
+    # interest-only share removes, so the two pools are disjoint and nothing is
+    # charged twice. The first version of THIS gate required the phrase to be
+    # present in negated form, which put the false account on the page for a
+    # skimming reader to carry away. It is now required to be absent outright;
+    # the true balance-path account that replaces it is pinned separately by
+    # no_stack / shared_balance_path / understatement / no_joint_cell, so
+    # deleting the retraction still turns the gate red.
+    same_dollars_ok = "the same dollars twice" not in tex_nc
+
+    # the committed constants, tied to the two artifacts that own them
+    tie_ok = (
+        gap_par == pt["institutional_gap_shared_b"]
+        and cpr == pt["mean_danish_cpr_pct"]
+        and E == bv["early_face_E_b"]
+        and gap_par == bv["gap_face_b"]
+    )
+
+    # (e) the grid is the committed one plus the two break-evens: no joint
+    # cell can be hiding in it
+    grid_ok = sorted(round(c["io_share"], 12) for c in cells) == sorted(
+        {0.0, 0.10, 0.20, 0.30, 0.45, 0.50,
+         round(be1, 12), round(be2, 12)})
+    c1 = io["cells"].get(f"sigma_{be1:.6f}")
+    c2 = io["cells"].get(f"sigma_{be2:.6f}")
+    e3_lo, e3_hi = exp["E3_band"]
+
+    art_ok = (
+        io["run_tag"] == "danish_interest_only_share"
+        and io["spec"]["no_engine_runs"] is True
+        and io["spec"]["window_months"] == 42
+        and len(p["P0_sha_pins"]) == 3
+        and p["P0b_artifacts_byte_identical"] is True
+        and p["P3_sched_positive_every_month"] is True
+        and p["P4_second_order_reported_separately"] is True
+        and grid_ok
+        # (f) the chain, cell by cell, with ONLY sigma moving
+        and all(abs(c["gap_first_order_b"]
+                    - (gap_par - c["io_share"] * sched)) < 1e-9
+                for c in cells)
+        and all(abs(c["gap_second_order_b"]
+                    - (c["gap_first_order_b"] + c["second_order_offset_b"]))
+                < 1e-12 for c in cells)
+        # E1: sigma = 0 is the parity anchor, exactly, at both orders
+        and cells[0]["io_share"] == 0.0
+        and cells[0]["second_order_offset_b"] == 0.0
+        and abs(cells[0]["gap_first_order_b"] - gap_par) < 1e-12
+        and abs(cells[0]["gap_second_order_b"] - gap_par) < 1e-12
+        # E2: strictly decreasing at both orders, offset strictly rising
+        and all(a["gap_first_order_b"] > b["gap_first_order_b"]
+                for a, b in zip(cells, cells[1:]))
+        and all(a["gap_second_order_b"] > b["gap_second_order_b"]
+                for a, b in zip(cells, cells[1:]))
+        and all(a["second_order_offset_b"] < b["second_order_offset_b"]
+                for a, b in zip(cells, cells[1:]))
+        # both crossings really cross, at their own order
+        and abs(be1 * sched - gap_par) < 1e-12
+        and c1 is not None and abs(c1["gap_first_order_b"]) < 1e-9
+        and c2 is not None and abs(c2["gap_second_order_b"]) < 1e-9
+        # the offset can only RAISE the bar, and the import clears both
+        and be1 < be2 < share
+        and abs(s45["gap_first_order_b"] - (gap_par - share * sched)) < 1e-9
+        and off45 > 0
+        and s45["gap_second_order_b"] < 0 and s45["reverses"] is True
+        # the imported share is SOURCED, and its three limits are the
+        # artifact's own rather than this file's
+        and src.get("sourced") is True
+        and src.get("io_share") == share
+        and src.get("publisher") == "Danmarks Nationalbank"
+        and src.get("publication_date") == "2020-02-04"
+        and (f"{share * 100:.0f} per cent of outstanding mortgage volumes"
+             in src.get("verbatim", ""))
+        and len(src.get("limits", [])) == 3
+        and any("PRE-WINDOW" in x for x in src.get("limits", []))
+        and any("DEFERRED AMORTISATION" in x for x in src.get("limits", []))
+        and any("whole-market" in x for x in src.get("limits", []))
+        # the expectations, as the spec fixed them before the run
+        and e3_lo < be2 <= e3_hi
+        and exp["E3_sigma_star_second_order"] == be2
+        and all(exp[k] is True for k in (
+            "E1_anchor_exact", "E2_monotone_both_orders", "E3_pass",
+            "E4_sourced_share_reverses_under_face_accounting"))
+    )
+    return (not missing and not retired and order_ok and limits_travel
+            and same_dollars_ok and tie_ok and art_ok,
+            {"missing": missing, "retired_present": retired,
+             "breakeven_before_import": order_ok,
+             "limits_travel": limits_travel,
+             "double_counting_retracted": same_dollars_ok,
+             "cross_artifact_tie": tie_ok, "artifact_ok": art_ok,
+             "grid_ok": grid_ok,
+             "breakeven_pct": (round(be1 * 100, 4), round(be2 * 100, 4)),
+             "gap_at_sourced_b": round(s45["gap_second_order_b"], 4)})
+
+# --- R32 C-128 (gate #121): THE REALIZED-SIDE BOUNDARY ALLOCATION ---------
+# Section VII.B prices the CAP-side settlement convolution at -$42.0bn
+# (-5.5%) and says, in terms, that "the realized series is untouched". That
+# leg is not symmetric. The pre-QT cap is ZERO, so convolving it can only lose
+# mass at the window's END; the realized series is non-zero before the window,
+# so seventeen pre-QT months of roll-off exist to settle INTO its start. Run
+# realized_boundary_allocation convolves BOTH legs. The two edge effects
+# partially offset -- $4.5bn in against $21.2bn out, giving back $16.6bn of
+# the cap-side $42.0bn -- so the benchmark lands at $739.4bn, a -$25.4bn
+# shift, 3.32% of the committed benchmark and inside the pre-fixed 10% bar.
+#
+# Every printed figure is DERIVED from the artifact, and the two committed
+# benchmarks this run had to reproduce are tied LIVE to
+# settlement_months_benchmark -- an artifact this run did not write -- so no
+# number this gate enforces is a literal typed into this file. Beyond
+# presence, four properties, each a way this could quietly rot:
+#
+#   (a) THE CAP-ONLY ACCOUNT MUST STILL COME FIRST. The committed convention
+#       is the cap-side one and the both-aligned figure is a rider on it.
+#       File order is checked, not merely presence, because an edit that led
+#       with -$25.4bn would make a sensitivity read as the committed number;
+#   (b) THE OFFSET IS DECOMPOSED, NOT ASSERTED. mass_in - mass_out must equal
+#       both_aligned - cap_only for EVERY kernel, AND mass_out must re-derive
+#       from benchmark_monthly_rebuild's own monthly series -- a run C-128
+#       never reads. The second half is not decoration. REPAIRED 2026-07-30:
+#       the first version of this run weighted the last pre-window month by
+#       k[1] instead of k[1]+k[2] and then defined mass_out as the residual
+#       r_tot_cal + mass_in - r_tot_set, so mass_in - mass_out collapsed to
+#       r_tot_set - r_tot_cal for ANY mass_in and this clause was VACUOUS. It
+#       shipped $4.5bn/$21.2bn for eight hours when the true masses are
+#       $6.8bn/$23.4bn. The identity alone still cannot see a CORRELATED shift
+#       in both masses -- which is exactly the shape that bug had -- so the
+#       external anchor is what makes this clause bite;
+#   (c) THE PRE-COMMITMENT SPLIT MUST SURVIVE. E3 fixed the DIRECTION before
+#       the run and deliberately left the residual's SIGN open. Prose
+#       claiming the sign was predicted turns this red;
+#   (d) THE THRESHOLD IS THE ARTIFACT'S. E4's 10% bar is read from the run
+#       and never typed here, and the realized-side shift must clear it.
+RBA_SPANS = {
+    "run_tag": "\\texttt{realized\\_boundary\\_allocation}",
+    "direction": "moves the benchmark less, not more",
+    "why_asymmetric": "The pre-QT cap is zero, so the cap leg loses mass only "
+                      "at the window's end",
+    "sign_open": "the sign of the residual deliberately was not",
+    "direction_precommitted": "That the two edge effects would partially "
+                              "offset was fixed before the run",
+    "stays_calendar": "the production convention remains calendar on both legs",
+    "not_a_rebasing": "stays a disclosed sensitivity rather than a re-basing",
+    # The both-legs block sits between the cap-only figures and the sentence
+    # that reads them, so the referent must be NAMED. Landing this block
+    # unnamed left "the variant" pointing at the both-legs leg, whose
+    # re-basing factor is 1.034, under a sentence asserting 1.058.
+    "cap_only_referent": "What the cap-only variant establishes",
+    "cap_only_referent_2": "The cap-only variant also bears",
+    # the tab:runindex row, pinned by its DESCRIPTION rather than by the
+    # tag: the tag also sits in the prose citation, so a tag-only pin
+    # would stay green over a deleted row.
+    "runindex_row": "Window-boundary allocation priced on the realized "
+                    "leg as well as the cap",
+}
+
+
+def realized_boundary_allocation_check(tex, rba, smb, bmr):
+    """Gate #121's rule (R32, C-128): the realized-side boundary allocation."""
+    tex_nc = re.sub(r"(?<!\\)%.*", "", tex)
+    par, leg, exp = rba["parity"], rba["legs"], rba["expectations"]
+    pro, slow, fast = leg["production"], leg["slower"], leg["faster"]
+    both = pro["benchmark_both_aligned_b"]
+    shift_both = pro["shift_both_b"]
+    cap_edge = pro["cap_edge_loss_b"]
+    m_in = abs(pro["realized_boundary_mass_in_b"])
+    m_out = abs(pro["realized_boundary_mass_out_b"])
+    pct = abs(pro["shift_both_pct_of_committed"])
+    give_back = abs(pro["shift_cap_only_b"]) - abs(shift_both)
+    pw = par["P4_pre_window_months"]
+    # The prose spells out how far back the kernel REACHES, not how many
+    # pre-window months happen to exist. Those are different numbers and the
+    # manuscript briefly conflated them: 17 months exist (START_DATE), but a
+    # length-3 kernel can only ever see len(k)-1 = 2 of them, so 15 of the 17
+    # contribute exactly zero to every field this gate checks. Deriving the
+    # word from the kernel means the span tracks the quantity that matters.
+    reach = len(par["P3_kernel"]) - 1
+    reach_word = {2: "two", 3: "three", 4: "four"}.get(reach, str(reach))
+
+    cap_only_lit = ("the benchmark moves by exactly that \\$42.0 billion")
+
+    lits = dict(RBA_SPANS)
+    lits.update({
+        "pre_window": (f"the {reach_word} months the kernel reaches back into "
+                       f"settle into its start"),
+        "boundary_decomp": (f"the realized leg gains \\${m_in:.1f} billion "
+                            f"there against \\${m_out:.1f} billion leaving at "
+                            f"the end"),
+        "gives_back": (f"giving back \\${give_back:.1f} billion of the "
+                       f"cap-side \\${cap_edge:.1f} billion"),
+        "both_aligned": f"lands the benchmark at \\${both:.1f} billion",
+        # CONTEXTFUL ON PURPOSE. "3.3" and the bracket endpoints are common
+        # numerals in this manuscript; a bare-numeral pin could go green over
+        # an unrelated site.
+        "shift": (f"a shift of $-\\${abs(shift_both):.1f}$ billion or "
+                  f"$-{pct:.1f}$\\%"),
+        "bracket": (f"bracket at $-\\${abs(fast['shift_both_b']):.1f}$ and "
+                    f"$-\\${abs(slow['shift_both_b']):.1f}$ billion"),
+        "threshold_share": (f"at {pct:.1f}\\% of the committed benchmark the "
+                            f"boundary treatment"),
+    })
+    missing = sorted(k for k, lit in lits.items() if lit not in tex_nc)
+
+    # (a) the committed cap-only account still leads. .find(), never .index():
+    # a missing span must leave this False rather than raise.
+    i_cap = tex_nc.find(cap_only_lit)
+    i_both = tex_nc.find(lits["direction"])
+    order_ok = 0 <= i_cap < i_both
+
+    # the two committed benchmarks belong to a run this one did not write
+    tie_ok = (
+        par["P2_committed_calendar"] == smb["calendar_benchmark_b"]
+        and par["P2_committed_cap_only"] == smb["legs"]["production"]["benchmark_b"]
+        and par["P1_calendar_reproduces"] == smb["calendar_benchmark_b"]
+        and par["P1_cap_only_reproduces"] == smb["legs"]["production"]["benchmark_b"]
+        and par["P3_kernel"] == smb["kernel_production"]
+        and par["P3_n_qt_active_months"] == smb["n_qt_active_months"]
+        and par["E2_cap_edge_loss_b"] == smb["window_edge_cap_mass_lost_b"]
+    )
+
+    # (b) the decomposition, re-derived for every kernel rather than read off
+    # the production row's summary
+    decomp_ok = all(
+        abs((lg["realized_boundary_mass_in_b"] - lg["realized_boundary_mass_out_b"])
+            - (lg["benchmark_both_aligned_b"] - lg["benchmark_cap_only_b"])) < 1e-6
+        and abs(lg["shift_both_b"]
+                - (lg["benchmark_both_aligned_b"] - smb["calendar_benchmark_b"])) < 1e-9
+        and abs(lg["shift_cap_only_b"]
+                - (lg["benchmark_cap_only_b"] - smb["calendar_benchmark_b"])) < 1e-9
+        # E3 for every kernel: aligning both legs moves LESS than cap-only
+        and abs(lg["shift_both_b"]) < abs(lg["shift_cap_only_b"])
+        for lg in (pro, slow, fast))
+
+    # THE ANCHOR. mass_out re-derived from benchmark_monthly_rebuild's own
+    # monthly series, which C-128 never reads: the month i places before the
+    # window end loses sum(k[i+1:]) past it. The window's own months are taken
+    # from that artifact too (its first clip month IS the window's opening
+    # month), so no date is typed here. This pins one side of the
+    # decomposition ABSOLUTELY, which the P5 identity cannot do.
+    net = bmr["monthly_net_rolloff_b"]
+    months = sorted(net)
+    i0 = months.index(bmr["parity"]["P1_clip_months"][0])
+    win_months = months[i0:i0 + bmr["spec"]["window_months"]]
+    anchor_ok = len(win_months) == bmr["spec"]["window_months"] and all(
+        abs(lg["realized_boundary_mass_out_b"]
+            + sum(sum(lg["kernel"][i + 1:]) * net[win_months[-1 - i]]
+                  for i in range(len(lg["kernel"]) - 1))) < 1e-6
+        for lg in (pro, slow, fast))
+
+    art_ok = (
+        rba["run_tag"] == "realized_boundary_allocation"
+        and rba["status"] == "OK"
+        and rba["pre_committed"] is True
+        and rba["spec"]["no_engine_runs"] is True
+        and rba["spec"]["production_convention_stays_calendar"] is True
+        and rba["spec"]["kernel_imported_not_estimated"] is True
+        and par["P5_boundary_decomposition_sums"] is True
+        # P4: a kernel of length 3 needs at least 3 pre-window months, or the
+        # run would have convolved against zeros and fabricated the asymmetry
+        and pw >= len(par["P3_kernel"])
+        and decomp_ok
+        # (c) the direction was predicted; the SIGN was deliberately not
+        and exp["E3_both_moves_less_than_cap_only"] is True
+        and exp["E3_sign_deliberately_not_predicted"] is True
+        and exp["E3_shift_both_b"] == shift_both
+        and exp["E3_shift_cap_only_b"] == pro["shift_cap_only_b"]
+        # (d) the disclosure bar is the artifact's own, and it is cleared
+        and exp["E4_pass"] is True
+        and abs(exp["E4_shift_share_of_committed"]
+                - abs(shift_both) / smb["calendar_benchmark_b"]) < 1e-12
+        and exp["E4_shift_share_of_committed"] < exp["E4_max_share"]
+        and abs(pct / 100.0 - exp["E4_shift_share_of_committed"]) < 1e-12
+    )
+    return (not missing and order_ok and tie_ok and art_ok and anchor_ok,
+            {"missing": missing, "cap_only_leads": order_ok,
+             "cross_artifact_tie": tie_ok, "artifact_ok": art_ok,
+             "decomposition_ok": decomp_ok, "mass_out_anchored": anchor_ok,
+             "both_aligned_b": round(both, 4),
+             "shift_both_b": round(shift_both, 4),
+             "share_pct": round(pct, 4)})
+
+
+# --- R32 C-127 (gate #122): THE BENCHMARK'S MONTHLY SERIES, REBUILT --------
+# The benchmark's realized series is built by differencing weekly Wednesday
+# current-face levels, which yields four exact-zero months. R2's objection was
+# that rebuilding from published monthly SOMA principal payments, or from
+# per-CUSIP factor changes, would retire them and reopen the monthly-timing
+# question on a clean comparator. Run benchmark_monthly_rebuild probed both
+# routes. NEITHER is usable: there is no monthly principal-payment endpoint
+# (both return HTTP 400; the summary carries levels only), and the per-CUSIP
+# route recovers face LEVELS, not principal -- gross declines run $2,186bn
+# against a $652.8bn net, ~3.35x, because face also falls on reinvestment
+# settlement and roll. Netted, it reproduces the committed month-end
+# differencing to 6.8e-11 bn and returns the same four low months.
+#
+# This landed on BRANCH D, not Branch A: E3 predicted all four clip months
+# would carry a stale published week and 2022-06 carries none. The manuscript
+# therefore states the exception, and states that staleness is ORDINARY --
+# 59 of 192 weeks and 36 of 44 months carry one -- rather than diagnostic.
+# Three properties beyond presence:
+#
+#   (a) THE EXCEPTION MAY NOT BE ROUNDED AWAY. A later edit tightening this
+#       to "all four" is the exact overclaim Branch D exists to prevent, so
+#       "three of the four" and the June-2022 exception are both pinned, and
+#       the artifact's own E3 flag must stay False;
+#   (b) STALENESS MAY NOT BE PROMOTED TO A MECHANISM. The ordinary-rather-
+#       than-diagnostic clause and its two counts are required, and the
+#       counts are DERIVED from the artifact's own stale-week map;
+#   (c) THE ZEROS ARE TIED TO THE RUN THAT OWNS THEM. Each clip month's
+#       rebuilt net roll-off must equal the NEGATION of
+#       h1_zero_months_diagnosis's raw month-end diff, an artifact this run
+#       did not write, and that run's ARTIFACT verdict must still stand.
+BMR_SPANS = {
+    "run_tag": "\\texttt{benchmark\\_monthly\\_rebuild}",
+    "probed": "was probed rather than assumed, and neither route is usable",
+    "no_monthly": "No monthly SOMA principal-payment series is published",
+    "levels_only": "the summary endpoint carries holdings levels only, and "
+                   "both monthly endpoints return HTTP 400",
+    "levels_not_principal": "recovers face levels rather than principal "
+                            "payments",
+    "why_gross": "since face also falls on reinvestment settlement and roll",
+    # (a) the Branch-D scoping, both halves
+    "three_of_four": "Three of the four sit on a week the New York Fed "
+                     "republished unchanged and June 2022 does not",
+    # (b) staleness is not a mechanism
+    "not_diagnostic": "republication is ordinary rather than diagnostic",
+    "scope": "what the rebuild establishes is that the alternative source is "
+             "unavailable and the zeros survive it, not a second mechanism",
+    # same reasoning as gate #121: pin the row's description, not its tag
+    "runindex_row": "rebuilt from per-CUSIP SOMA holdings: sourceability "
+                    "of the alternative constructions",
+}
+
+# The overclaim this gate exists to keep out. Branch D turns on 2022-06
+# carrying NO stale week, so any prose asserting all four do is FALSE.
+#
+# WIDENED 2026-07-30. These were three lowercase substrings matched
+# case-sensitively, so the sentence-initial spelling of the exact claim the
+# gate exists to block -- "All four clip months sit on a week the New York Fed
+# republished unchanged" -- passed green, as did five ordinary paraphrases.
+# Matching is now case-insensitive over a regex FAMILY. The negative lookbehind
+# is a deliberate carve-out: a future "not all four clip months carry one" is a
+# TRUE sentence and must not turn the gate red.
+BMR_OVERCLAIM = (
+    r"all\s+(?:of\s+)?(?:the\s+)?four\s+clip\s+months",
+    r"(?:all|each|every)\s+(?:one\s+)?(?:of\s+)?(?:the\s+)?four\s+"
+    r"(?:clip\s+months\s+)?(?:sits?|carries|carry)\b",
+    r"the\s+four\s+clip\s+months\s+(?:all|each)\b",
+    r"all\s+four\s+(?:sits?|carry|carries)\b",
+)
+BMR_OVERCLAIM_GUARD = r"(?<!not )(?<!Not )"
+
+
+def benchmark_monthly_rebuild_check(tex, bmr, h1z, expect):
+    """Gate #122's rule (R32, C-127): the benchmark's monthly series rebuilt."""
+    tex_nc = re.sub(r"(?<!\\)%.*", "", tex)
+    par, exp, src = bmr["parity"], bmr["expectations"], bmr["sourceability"]
+    stale = bmr["stale_weeks_by_month"]
+    net = bmr["monthly_net_rolloff_b"]
+    clip = list(par["P1_clip_months"])
+    rows = h1z["parity_gates"]["P1_zeros_reproduce"]["rows"]
+
+    n_weeks = par["P4_weeks_retrieved"]
+    n_months = len(net)
+    n_stale_weeks = sum(len(v) for v in stale.values())
+    n_stale_months = len(stale)
+    recon = exp["E4_reconstructed_window_total_b"]
+    implied = exp["E4_implied_realized_total_b"]
+    gross = exp["gross_declines_b"]
+    median = exp["E5_window_median_paydown_b"]
+    pays = [exp["E5_clip_month_paydowns_b"][m] for m in clip]
+
+    lits = dict(BMR_SPANS)
+    lits.update({
+        "gross_vs_net": (f"gross face declines run \\${gross:,.0f} billion "
+                         f"against a \\${implied:.1f} billion net").replace(
+                             ",", "{,}"),
+        "weeks": f"netted over {n_weeks} weekly as-of dates",
+        # the reconciliation, printed at the precision that makes it a
+        # reconciliation rather than a rounding
+        "reconciles": (f"reproduces the committed month-end differencing, "
+                       f"\\${recon:.4f} billion against \\${implied:.4f} "
+                       f"billion"),
+        "low_months": (f"returns the same four low months at "
+                       f"$-\\${abs(pays[0]):.1f}$, \\${pays[1]:.1f}, "
+                       f"\\${pays[2]:.1f} and \\${pays[3]:.1f} billion "
+                       f"against a \\${median:.1f} billion window median"),
+        # (b) DERIVED counts -- a changed stale map moves these literals
+        "stale_counts": (f"{n_stale_weeks} of those {n_weeks} weeks and "
+                         f"{n_stale_months} of the {n_months} months they "
+                         f"span carry one"),
+    })
+    missing = sorted(k for k, lit in lits.items() if lit not in tex_nc)
+    overclaimed = [pat for pat in BMR_OVERCLAIM
+                   if re.search(BMR_OVERCLAIM_GUARD + pat, tex_nc, re.I)]
+
+    # (c) each clip month's rebuilt net roll-off is the NEGATION of the
+    # month-end diff owned by h1_zero_months_diagnosis
+    tie_ok = (
+        sorted(clip) == sorted(rows)
+        and all(abs(net[m] + rows[m]["raw_me_diff_b"]) < 1e-6 for m in clip)
+        and all(rows[m]["clip_binds"] is True for m in clip)
+        and h1z["verdict"]["outcome"] == "ARTIFACT"
+        and h1z["classification_summary"]["spike_followed_all_artifact"] is True
+        and par["P1_committed_benchmark_b"] == expect["cap_benchmark_b"]
+    )
+
+    # the counts the prose prints are the artifact's own map, recomputed
+    counts_ok = (
+        n_stale_weeks == sum(len(v) for v in stale.values())
+        and all(w in [x["asof"] for x in bmr["weeks"]]
+                for v in stale.values() for w in v)
+        and n_weeks == len(bmr["weeks"]) == par["P4_asof_dates"]
+    )
+
+    art_ok = (
+        bmr["run_tag"] == "benchmark_monthly_rebuild"
+        and bmr["status"] == "OK"
+        and bmr["spec"]["cap_side_untouched"] is True
+        and bmr["spec"]["no_engine_runs"] is True
+        and bmr["spec"]["window_months"] == 42
+        and not par["P4_fetch_failures"]
+        and par["E2_decomposition_exhaustive"] is True
+        and counts_ok
+        # sourceability: BOTH of R2's routes, as the run found them
+        and src["summary_has_paydown_field"] is False
+        and src["monthly_principal_payment_series_available"] is False
+        and all(v == "400" for v in src["monthly_endpoints"].values())
+        # E4: the settling test, inside its own pre-fixed tolerance
+        and exp["E4_pass"] is True
+        and exp["E4_month_end_reproduces_exactly"] is True
+        and abs(recon - implied) == exp["E4_abs_diff_b"]
+        and abs(recon - implied) < exp["E4_tol_frac"] * implied
+        # E5: the reconstruction does NOT retire the zeros
+        and exp["E5_reconstruction_still_shows_low_months"] is True
+        and all(abs(p) < 0.5 * median for p in pays)
+        # (a) BRANCH D. 2022-06 carries no stale week and the artifact says so
+        and exp["E3_all_clip_months_have_a_stale_week"] is False
+        and sum(1 for m in clip
+                if exp["E3_stale_weeks_in_clip_months"][m]) == len(clip) - 1
+        and not exp["E3_stale_weeks_in_clip_months"]["2022-06"]
+        # gross is not net, by the factor the comment records
+        and gross > 3 * implied
+    )
+    return (not missing and not overclaimed and tie_ok and art_ok,
+            {"missing": missing, "overclaimed": overclaimed,
+             "cross_artifact_tie": tie_ok, "artifact_ok": art_ok,
+             "counts_ok": counts_ok,
+             "stale": f"{n_stale_weeks}/{n_weeks}wk {n_stale_months}/{n_months}mo",
+             "reconciles_to_b": f"{abs(recon - implied):.2e}"})
+
+
+
+
+# --- V20 spec runs (gates #123/#124/#125): THE THREE PANEL COMPANIONS -------
+# Landed 2026-08-04 under SPEC_V20_{A,B,C} (adopted, committed before the runs).
+# Each is a live cross-artifact tie: the printed sentences must carry the
+# artifact's own values at the artifact's own precision, the artifact's landing
+# branch must be the L1 branch the spec names, and the artifact's own parity
+# gates must have passed. No literal lives in any of the three gates.
+def compounding_null_check(tex: str, art: dict) -> tuple[bool, dict]:
+    cc = art["compounding_consistent"]
+    span_m = (f"the marginal is $+{cc['marginal_cc_pp']:.2f}$ points "
+              f"(\\${cc['marginal_cc_b']:.1f} billion; central "
+              f"{cc['central_recovery_cc_shared_pct']:.1f}\\%, null "
+              f"{cc['null_recovery_cc_shared_pct']:.1f}\\% shared)")
+    span_b = f"bias at ${art['bias_priced_pp']:.2f}$ points"
+    ga = art["gates"]
+    info = {
+        "marginal_span": span_m in tex,
+        "bias_span": span_b in tex,
+        "branch_L1": art["landing_branch"] == "L1_within_1pp",
+        "runner_gates": bool(all(ga["G_A1a"].values()) and all(ga["G_A1b"].values())),
+        "signing_held": cc["marginal_cc_pp"]
+                        <= art["committed_anchors"]["marginal_pp"] + 1e-9,
+        "cc_pp": round(cc["marginal_cc_pp"], 4),
+    }
+    return all(v for k, v in info.items() if k != "cc_pp"), info
+
+
+def null_floor_interval_gate_check(tex: str, art: dict) -> tuple[bool, dict]:
+    lo, hi = art["binding_interval_pct"]
+    span = f"$[{lo:.1f}, {hi:.1f}]$\\%"
+    gb = art["gates"]["G_B1b_offnode"]
+    info = {
+        "span_count_ge_2": tex.count(span) >= 2,
+        "branch_L1": art["landing_branch"] == "L1_lands",
+        "no_new_sampling": bool(art["gates"]["no_new_sampling"]),
+        "offnode_within_tol": gb["max_err_pp"] <= gb["tol_pp"],
+        "interval": [round(lo, 2), round(hi, 2)],
+    }
+    return all(v for k, v in info.items() if k != "interval"), info
+
+
+def fewcluster_coverage_check(tex: str, art: dict, ladder: dict) -> tuple[bool, dict]:
+    gsc = art["cells"]["gaussian"]["coverage_pct"]
+    t5c = art["cells"]["t5"]["coverage_pct"]
+    spans = [
+        f"covers {gsc['restricted_webb']:.1f}\\% under Gaussian and "
+        f"{t5c['restricted_webb']:.1f}\\% under $t_5$",
+        # V20-N1: the Webb rung's own coverage must be disclosed beside it
+        f"{gsc['webb_wild_t']:.1f}\\%/{t5c['webb_wild_t']:.1f}\\% for the Webb wild-$t$",
+        f"{gsc['cr1_t']:.1f}\\%/{t5c['cr1_t']:.1f}\\% for CR1",
+        f"{gsc['percentile']:.1f}\\%/{t5c['percentile']:.1f}\\% for the "
+        f"demoted percentile read",
+    ]
+    # V20-N1 (SPEC_V20_C section 4, the live tie the first landing omitted):
+    # the quoted binding interval must be the interval of the construction the
+    # artifact's decision-rule field selected -- DERIVED from the ladder
+    # artifact, never typed here. The run's own landing_branch string
+    # ("L1_webb_retains") contradicts the frozen rule (webb_wild_t fails the
+    # coverage bar); it is sha-pinned, left unedited, and deliberately NOT
+    # asserted -- the adjudication is recorded in the manuscript's ladder note.
+    _rung_key = {"restricted_webb": "wcr_inverted",
+                 "webb_wild_t": "wild_t_webb",
+                 "cr2_bm": "cr2_t_interval_df_bm"}[art["binding_construction"]]
+    _rd = ladder["reads"]["R2_2018_gap<=-0.0025_age>=12"][_rung_key]
+    _blo, _bhi = _rd["marginal_ci95_pp"]
+    binding_span = f"$[{_blo:+.1f}, {_bhi:+.1f}]$"
+    info = {
+        "spans_present": all(sp in tex for sp in spans),
+        "binding_interval_quoted": binding_span in tex,
+        "rule_applied": (art["binding_construction"] in art["qualifying"]
+                         and gsc["webb_wild_t"] < 93.0),
+        "oracle_bounds": all(94.0 <= v <= 96.0
+                             for v in art["gates"]["G_C1_oracle"].values()),
+        "binding": art["binding_construction"],
+        "binding_span": binding_span,
+    }
+    return all(v for k, v in info.items()
+               if k not in ("binding", "binding_span")), info
+
+
 def main() -> int:
-    tex = TEX.read_text()
+    # V20 CLOSING SESSION RESCOPE: app:ledger and app:verdicts migrated to the
+    # standalone paper/v18/replication_appendices.tex (EIC-W1/R2-W5; byte-identical
+    # bodies, xr-resolved refs). The gated corpus for span, count, run-citation,
+    # runindex-row, and verdict-ledger checks is the manuscript PLUS that file,
+    # which is the same content the suite gated before the migration. Abstract-
+    # scoped and variant-diff gates below still read the manuscript files alone.
+    tex = TEX.read_text() + "\n" + (ROOT / "paper" / "v18" / "replication_appendices.tex").read_text()
     failures = 0
 
     for phrase in ZERO_COUNT:
@@ -1723,7 +3969,12 @@ def main() -> int:
         "point_pp": "$+5.6$" in tex,
         "range_pp": "$+4.3$ to $+6.8$" in tex,
         "heldout": "$+\\$45.1$ billion" in tex,
-        "insample_demoted": "in-sample calibration point" in tex,
+        # SCOPED (was a bare whole-file presence check, which any headline
+        # reversal would have satisfied): the ABSTRACT must carry the
+        # off-window point and must NOT reinstate the in-sample one.
+        "insample_demoted": ("in-sample calibration point" in tex
+                             and "$+5.6$" in _abstract_of(tex)
+                             and "$+9.2$" not in _abstract_of(tex)),
         "clean_band": "4.70--5.33\\%" in tex,
     }
     oos_ok = (
@@ -2130,7 +4381,12 @@ def main() -> int:
         "dispersion_split": "3.9\\%" in tex and "96.1\\%" in tex,
         # the verdict, in the manuscript's own words, in body and abstract
         "levels_only_body": "restrict every claim in this paper to levels" in tex,
-        "levels_only_abstract": "it identifies levels only" in tex,
+        # ROUND-32 (C-R1a): the abstract's bare "identifies levels only" was
+        # self-refuting beside Section V.E's "does not identify levels" -- the
+        # word carried the TIMING concession here and the LEVEL claim there,
+        # with nothing signposting the difference. The abstract now states both
+        # truths, and this pin follows the timing half to its new wording.
+        "levels_only_abstract": "not a level and not monthly timing" in tex,
         # the retired early-draft retention share must not reappear
         "no_stale_934": "93.4\\%" not in tex,
     }
@@ -3484,8 +5740,9 @@ def main() -> int:
             f"against {_prod['shared']['central_share_pct']:.1f}\\% at the "
             f"in-window calibration" in tex,
         "abstract_null_and_central_kept":
-            f"still accounts for {_h['null_shared_share_pct']:.1f}\\% of it" in tex
-            and f"accounts for {_h['central_shared_share_pct']:.1f}\\%." in tex,
+            f"accounts for {_h['null_shared_share_pct']:.1f}\\% of it" in tex
+            and f"accounts for {_h['central_shared_share_pct']:.1f}\\%, on the "
+                f"benchmark-consistent basis" in tex,
         "miss_both_calibrations":
             f"the miss is {_h['miss_vs_benchmark_pp']:.1f} points on the headline "
             f"calibration and {_prod['miss_vs_benchmark_pp']:.1f} points on the "
@@ -4025,6 +6282,10 @@ def main() -> int:
             if s["refi_inplace_cpr"] == rfs["best_estimate_refi"]][0]["gap_pathB_b"]
     dn_flip_ok = (_lvl < 0 < dn_gap_b) and rfs["breakeven_refi"]["path_b"] > 0
     _oos_point = _oos["headline_oos_marginal"]["clean_marginal_b_point_at_6.5"]
+    # the band's own run, and the count of sites its upper endpoint reaches
+    _dfg = json.loads(DANFG_RESULTS.read_text())
+    _dfg_lo, _dfg_hi = _dfg["band_0_3_b"]
+    _DFG_UPPER_SITES = 5
     dn_lits = {
         "trapped_levels":
             f"\\${dn_dk_b:.1f} billion against \\${dn_us_b:.1f} billion" in tex,
@@ -4033,6 +6294,23 @@ def main() -> int:
              f"({dn_gap_b / _bench * 100:.1f}\\% of the benchmark)") in tex,
         "sweep_ceiling":
             f"$+\\${max(dn_sweep_gaps):,.1f}$ billion".replace(",", "{,}") in tex,
+        # THE BAND, BOTH ENDS. Added 2026-07-30: the lower endpoint carried the
+        # anti-drift guarantee at three places and the UPPER carried none, at
+        # five print sites -- so perturbing every one of them left ALL GATES
+        # PASS. Both endpoints are read from the band's own run, and the four
+        # spans below cover all five occurrences exactly (2+1+1+1), so no site
+        # can be deleted behind another.
+        "band_range": (f"$+\\${_dfg_lo:.1f}$ to $+\\${_dfg_hi:.1f}$ billion "
+                       f"over 0--3\\% refinance-in-place") in tex,
+        "band_abstract_ceiling": (f"a band swept to $+\\${_dfg_hi:.1f}$ billion "
+                                  f"at 3\\% refinance-in-place") in tex,
+        "band_finegrid_sweep": (f"the gap runs from $+\\${_dfg_lo:.1f}$ billion "
+                                f"at 0\\% to $+\\${_dfg_hi:.1f}$ billion at "
+                                f"3\\%") in tex,
+        "band_table": f"band $+\\${_dfg_lo:.1f}$--$+\\${_dfg_hi:.1f}$B" in tex,
+        # every printed occurrence of the upper endpoint is accounted for
+        "band_upper_fully_covered":
+            tex.count(f"{_dfg_hi:.1f}") == _DFG_UPPER_SITES,
         "danish_level_flip": f"$-\\${abs(_lvl):.1f}$ billion" in tex,
         "breakeven": f"{rfs['breakeven_refi']['path_b'] * 100:.1f}\\% CPR" in tex,
         "mean_cprs": (f"{_pt['mean_danish_cpr_pct']:.2f}\\%" in tex
@@ -4090,8 +6368,12 @@ def main() -> int:
     # complete set.
     dn_context_ok = not dn_unqualified and tex.count("positive at every") >= 6
     dn_claims = tex.count("\\texttt{danish\\_us\\_intercept}")
+    dn_band_ok = (bool(_dfg.get("parity_gates_all_pass"))
+                  and abs(_dfg["parity_gates"]["G4_cell3pct"]["got"]
+                          - _dfg_hi) < 1e-9
+                  and _dfg_lo < _dfg_hi)
     dn_ok = (dn_forced_ok and dn_premise_ok and dn_flip_ok and dn_context_ok
-             and dn_claims >= 1 and all(dn_lits.values()))
+             and dn_claims >= 1 and dn_band_ok and all(dn_lits.values()))
     failures += 0 if dn_ok else 1
     print(
         f"[{'PASS' if dn_ok else 'FAIL'}] cross-check danish forced-positivity "
@@ -4172,9 +6454,33 @@ def main() -> int:
     }
     # the width disclosure must travel with the claim: §VII.B, the limitations
     # section, and the conclusion each quote the number where a reader meets it.
-    fn_sites = tex.count(f"{fn_width:.2f}")
+    # The disclosure must TRAVEL WITH THE CLAIM, so it is pinned by three
+    # contextful spans built from fn_width -- not by counting the bare numeral.
+    # `tex.count("11.06") >= 3` matched 5 sites of which only 2 were pinned
+    # anywhere, so ANY TWO of the three unpinned sites could be deleted with
+    # the gate still green -- including the conclusion clause, which is the
+    # whole point of the round-20 relabel. A %-commented site also counted,
+    # since this checked `tex` rather than the comment-stripped copy.
+    _tex_nc67 = re.sub(r"(?<!\\)%.*", "", tex)
+    # one contextful span PER SITE -- all five, each unique, so no site can be
+    # deleted behind the others. Both figures are derived, never typed.
+    fn_span_lits = {
+        "headline_note": (f"the pre-committed envelope it clears is "
+                          f"{fn_width:.2f} points wide"),
+        "fannie_section": (f"an {fn_width:.2f}-point window around a "
+                           f"{fn_fred_pp:.2f}-point Freddie estimate"),
+        "uncertainty_note": (f"that envelope is {fn_width:.2f} points wide and "
+                             f"the agreement, not the gate"),
+        "conclusion": f"whose envelope gate is {fn_width:.2f} points wide",
+        "verdict_ledger": (f"the {fn_width:.2f}-point envelope judged too wide "
+                           f"to carry information"),
+    }
+    fn_missing_spans = sorted(k for k, v in fn_span_lits.items()
+                              if v not in _tex_nc67)
+    fn_sites = _tex_nc67.count(f"{fn_width:.2f}")
     fn_ok = (fn_ref_ok and fn_shape_ok and fn_box_pinned_ok and fn_internal_ok
-             and fn_sites >= 3 and all(fn_lits.values()))
+             and not fn_missing_spans and fn_sites == len(fn_span_lits)
+             and all(fn_lits.values()))
     failures += 0 if fn_ok else 1
     print(
         f"[{'PASS' if fn_ok else 'FAIL'}] cross-check fannie envelope width: "
@@ -4185,8 +6491,8 @@ def main() -> int:
         f"{_fan['universe']['staged_loans_total']:,} staged loans "
         f"(marginal DERIVED from trapped levels, internal-consistency="
         f"{fn_internal_ok}), gate-still-passes={fn_shape_ok}, "
-        f"width disclosed at {fn_sites} sites "
-        f"(want >=3), literals="
+        f"width disclosed at {fn_sites} sites, all {len(fn_span_lits)} "
+        f"contextfully pinned (missing={fn_missing_spans or 'none'}), literals="
         f"{ {k: v for k, v in fn_lits.items() if not v} or 'all present'}"
     )
 
@@ -4219,7 +6525,26 @@ def main() -> int:
     # variant must therefore differ from the canonical file in the ABSTRACT LINE
     # ONLY; anything else means it has drifted and must be regenerated.
     _canon_lines = TEX.read_text().split("\n")
+    # The exemption is the ABSTRACT, located STRUCTURALLY. It used to be "any
+    # line whose text starts with \noindent", which was true-by-accident: at
+    # the commit that introduced this rule the canonical file had exactly one
+    # such line (the abstract) and the commit message recorded "the exemption
+    # is exactly one line, not a loophole". NINE more \noindent lines have
+    # been added since -- eight of them "Notes to Table~..." blocks, plus the
+    # Online Appendix divider -- silently widening the exemption tenfold, so
+    # the entire table-notes apparatus of a 157pp manuscript could carry
+    # retired numbers in a variant with the suite green. A prior session
+    # demonstrated exactly that with 93.4\%, the literal gate #59 exists to
+    # exclude. Bounds are DERIVED, never hardcoded: a literal abstract line
+    # number goes stale the first time a line is inserted above it.
+    _ab_lo = next((i for i, _l in enumerate(_canon_lines, 1)
+                   if _l.strip().startswith("\\begin{abstract}")), None)
+    _ab_hi = next((i for i, _l in enumerate(_canon_lines, 1)
+                   if _l.strip().startswith("\\end{abstract}")), None)
     var_bad = []
+    if _ab_lo is None or _ab_hi is None or _ab_hi <= _ab_lo:
+        var_bad.append("canonical: abstract environment not locatable, so no "
+                       "variant difference can be certified as abstract-only")
     for _p in TEX_VARIANTS:
         if _p == TEX:
             continue
@@ -4233,7 +6558,9 @@ def main() -> int:
                            f"{len(_canon_lines)} canonical)")
         else:
             _diff = [i + 1 for i in range(len(_vl)) if _vl[i] != _canon_lines[i]]
-            _non_abstract = [n for n in _diff if _canon_lines[n - 1].strip()[:9] != "\\noindent"]
+            _non_abstract = [n for n in _diff
+                             if not (_ab_lo is not None and _ab_hi is not None
+                                     and _ab_lo < n < _ab_hi)]
             if _non_abstract:
                 var_bad.append(f"{_p.name}: body drift at lines "
                                f"{_non_abstract[:8]}{'…' if len(_non_abstract) > 8 else ''}")
@@ -4565,7 +6892,10 @@ def main() -> int:
              and abs(fu_pb["adjusted_floor_pct"] - 5.507748455937158) < 1e-9
              and abs(fu_pb["imputed_weight_share"] - 0.8398743947117693) < 1e-9)
     fu_tex_ok = (tex.count("$+3.0$ to $+8.0$") >= 2
-                 and tex.count("$+2.9$ to $+8.7$") >= 4
+                 # V20-N1: the binding interval is the restricted inversion's;
+                 # the Webb rung's read is retained beside it, not as binding.
+                 and tex.count("$+2.3$ to $+9.1$") >= 4
+                 and tex.count("$+2.9$ to $+8.7$") >= 2
                  and "floor\\_uncertainty" in tex
                  and "floor\\_inference\\_correction" in tex
                  and "open below $+4.3$" in tex
@@ -4906,6 +7236,18 @@ def main() -> int:
           f"ordered={_fl.get('ordered')}, "
           f"artifact_ok={_fl.get('artifact_ok')}, "
           f"missing={_fl['missing'] or 'none'}")
+    _ficv2 = json.loads(FICV2_RESULTS.read_text())
+    _ficv3 = json.loads(FICV3_RESULTS.read_text())
+    mtw_ok, _mtw = month_twoway_clusters_check(tex, _ficv2, _ficv3)
+    failures += 0 if mtw_ok else 1
+    print(f"[{'PASS' if mtw_ok else 'FAIL'}] month and two-way cluster rungs "
+          f"(gate #115): G_month={_mtw['G_month']}, "
+          f"webb_rank={_mtw['webb_rank']}/{_mtw['n_undemoted']} undemoted, "
+          f"censored={_mtw['n_censored']}, "
+          f"widest_interior={_mtw['widest_interior']}, "
+          f"se_month={_mtw['se_shrink_pct']}% smaller, "
+          f"se_2way={_mtw['se_grow_pct']}% larger, "
+          f"missing={_mtw['missing'] or 'none'}")
     _wnt = json.loads(WALNT_RESULTS.read_text())
     _oos_wnt = json.loads((ROOT / "hazard" / "data"
                            / "oos_identification_results.json").read_text())
@@ -4915,6 +7257,84 @@ def main() -> int:
           f"row_present={_wn['present']}, tag_citations={_wn['tag_citations']}, "
           f"anchor_pct={_wn['anchor_pct']}, "
           f"stale_sentence_gone={_wn['stale_sentence_gone']}")
+    _eb_cap = json.loads(EXPECT_RESULTS.read_text())
+    # V20-N1: band re-derived at the adjudicated binding interval (restricted inversion)
+    cmu_ok, _cmu = cap_monthly_units_check(tex, _eb_cap, _eb_cap["cap_benchmark_b"], 2.3, 9.1)
+    failures += 0 if cmu_ok else 1
+    print(f"[{'PASS' if cmu_ok else 'FAIL'}] cap result in $bn/month (gate #111): "
+          f"ceiling={_cmu['cap_per_month']}, "
+          f"achievable={_cmu['achievable_per_month']}, "
+          f"missing={_cmu['missing'] or 'none'}")
+    _dls = json.loads(DLS_RESULTS.read_text())
+    dls_ok, _dl = depth_ladder_shape_check(tex, _dls)
+    failures += 0 if dls_ok else 1
+    print(f"[{'PASS' if dls_ok else 'FAIL'}] 2018 depth ladder shape (gate #114): "
+          f"plateau_cov={_dl['plateau_cov_pct']}%, tail_cov={_dl['tail_cov_pct']}%, "
+          f"missing={_dl['missing'] or 'none'}")
+    _ffm = json.loads(FFM_RESULTS.read_text())
+    ffm_ok, _ff = floor_form_mixture_check(tex, _ffm)
+    failures += 0 if ffm_ok else 1
+    print(f"[{'PASS' if ffm_ok else 'FAIL'}] floor-form mixture curve "
+          f"(gate #126): omega0={_ff['omega0_off']}pp omega1={_ff['omega1_off']}pp "
+          f"at the off-window floor; floor transmission {_ff['d_max']} (max) vs "
+          f"{_ff['d_add']} (additive); paper-semantics omega={_ff['named_s']}; "
+          f"missing={_ff['missing'] or 'none'}")
+    _snha_max_bytes = SNHAMAX_RESULTS.read_bytes()
+    _snha = json.loads(SNHAADD_RESULTS.read_text())
+    _snha_max = json.loads(_snha_max_bytes)
+    snha_ok, _sn = snha_additive_check(tex, _snha, _snha_max, _snha_max_bytes)
+    failures += 0 if snha_ok else 1
+    print(f"[{'PASS' if snha_ok else 'FAIL'}] Aladangady calibration is "
+          f"form-conditional (gate #118): additive {_sn['additive_pp']}pp at the "
+          f"two anchors, bind (max, additive)={_sn['bind_max_then_additive']}, "
+          f"ordered={_sn['ordered']}, in_paragraph={_sn['in_paragraph']}, "
+          f"cross_artifact_tie={_sn['cross_artifact_tie']}, "
+          f"comparator_sha_ok={_sn['comparator_sha_ok']}, "
+          f"missing={_sn['missing'] or 'none'}")
+    _mtc = json.loads(MTC_RESULTS.read_text())
+    mtc_ok, _mt = marginal_transaction_counts_check(tex, _mtc)
+    failures += 0 if mtc_ok else 1
+    print(f"[{'PASS' if mtc_ok else 'FAIL'}] marginal in transaction counts (gate #113): "
+          f"book_count={_mt['book_count']:,}, "
+          f"comparator_sourced={_mt['comparator_sourced']}, "
+          f"E3_pass={_mt['E3_pass']}, missing={_mt['missing'] or 'none'}")
+    _epab = json.loads(EPAGE_RESULTS.read_text())
+    _ecw = json.loads(ECWITHIN_RESULTS.read_text())
+    epab_ok, _ep = episode_age_bands_check(tex, _epab, _ecw)
+    failures += 0 if epab_ok else 1
+    print(f"[{'PASS' if epab_ok else 'FAIL'}] episode gradient with loan age "
+          f"held fixed (gate #119): point={_ep['age_point_pp']}pp, "
+          f"CI={_ep['age_ci_pp']}, covers_implied={_ep['covers_implied']}, "
+          f"committed_excluded={_ep['committed_excluded']}, "
+          f"age_only_share={_ep['age_only_share_pct']}%, "
+          f"artifact_ok={_ep['artifact_ok']}, "
+          f"missing={_ep['missing'] or 'none'}")
+    _sccg = json.loads(SCCG_RESULTS.read_text())
+    sccg_ok, _sc = state_contingent_cap_check(tex, _sccg)
+    failures += 0 if sccg_ok else 1
+    print(f"[{'PASS' if sccg_ok else 'FAIL'}] state-contingent cap grid (gate #112): "
+          f"cells={_sc['cells_b_per_month']} $bn/month, E3_pass={_sc['E3_pass']}, "
+          f"missing={_sc['missing'] or 'none'}")
+    _wnrb = json.loads(WALNRB_RESULTS.read_text())
+    _amort = json.loads(COUPONAMORT_RESULTS.read_text())
+    wnrb_ok, _wb = wal_note_rate_basis_check(tex, _wnrb, _amort)
+    failures += 0 if wnrb_ok else 1
+    print(f"[{'PASS' if wnrb_ok else 'FAIL'}] note-rate-basis WAL row (gate #110): "
+          f"row_present={_wb['row_present']}, "
+          f"abm_row_present={_wb['abm_row_present']}, "
+          f"basis_effect_present={_wb['effect_present']}, "
+          f"cross_artifact_tie={_wb['cross_artifact_tie']}, "
+          f"disclaimer={_wb['disclaimer_present']}, "
+          f"tag_citations={_wb['tag_citations']}")
+    _gat = json.loads(GINNIEATT_RESULTS.read_text())
+    _gov_c74 = json.loads(OVERLAY_RESULTS.read_text())
+    _goff_c74 = json.loads(GINNIEOFF_RESULTS.read_text())
+    gat_ok, _ga = ginnie_attenuated_check(tex, _gat, _gov_c74, _goff_c74)
+    failures += 0 if gat_ok else 1
+    print(f"[{'PASS' if gat_ok else 'FAIL'}] Ginnie response bracket (gate #116): "
+          f"in-sample={_ga['in_sample_pp']}pp, off-window={_ga['off_window_pp']}pp, "
+          f"ordered={_ga['ordered']}, E3_pass={_ga['E3_pass']}, "
+          f"artifact_ok={_ga['artifact_ok']}, missing={_ga['missing'] or 'none'}")
     print(f"[{'PASS' if cl_ok else 'FAIL'}] convolved sampling line (gate #105): "
           f"{len(CONVOLVED_LINE_SPANS) - len(_cl['missing'])}/"
           f"{len(CONVOLVED_LINE_SPANS)} spans present, "
@@ -4925,12 +7345,116 @@ def main() -> int:
           f"{len(BUYBACK_BRACKET_SPANS)} spans present, "
           f"missing={_bb['missing'] or 'none'}")
 
+    b1_ok, _b1 = beta1_sign_check(tex)
+    failures += 0 if b1_ok else 1
+    print(f"[{'PASS' if b1_ok else 'FAIL'}] beta_1 sign agreement (gate #109): "
+          f"tab:params sign={_b1['params_sign']:+d}, "
+          f"tab:lowband cells={_b1['cells_found']} "
+          f"signs={_b1['lowband_signs']}, "
+          f"replicator_note={_b1['replicator_note']}")
+
+    _bdr = json.loads(BDR_RESULTS.read_text())
+    _bbcb = json.loads(BBCB_RESULTS.read_text())
+    _bdan = json.loads(DANUSINT_RESULTS.read_text())
+    bdr_ok, _bd = buyback_discount_rederived_check(tex, _bdr, _bbcb, _bdan)
+    failures += 0 if bdr_ok else 1
+    print(f"[{'PASS' if bdr_ok else 'FAIL'}] re-derived buyback discount (gate "
+          f"#117): Dbar={_bd['dbar_pct']}%, gap_cash={_bd['gap_cash_b']} $bn, "
+          f"months_at_or_above_floor={_bd['months_at_floor']}, "
+          f"retired_range={_bd['retired_range_present'] or 'gone'}, "
+          f"cross_artifact_tie={_bd['cross_artifact_tie']}, "
+          f"artifact_ok={_bd['artifact_ok']}, "
+          f"missing={_bd['missing'] or 'none'}")
+
+    # R32 C-79 (gate #120). Reuses the two artifacts loaded just above --
+    # danish_us_intercept owns gap_par and the Danish mean CPR, the committed
+    # buyback bracket owns the early face -- so the tie is to runs this one
+    # did not write. Every field printed below is computed by the call above
+    # it; nothing here reads a variable that does not yet exist.
+    _dios = json.loads(DIOS_RESULTS.read_text())
+    dios_ok, _di = danish_interest_only_share_check(tex, _dios, _bdan, _bbcb)
+    failures += 0 if dios_ok else 1
+    print(f"[{'PASS' if dios_ok else 'FAIL'}] Danish interest-only share (gate "
+          f"#120): break-evens={_di['breakeven_pct']}%, "
+          f"gap_at_sourced={_di['gap_at_sourced_b']} $bn, "
+          f"breakeven-stated-first={_di['breakeven_before_import']}, "
+          f"limits-travel={_di['limits_travel']}, "
+          f"double-counting-retracted={_di['double_counting_retracted']}, "
+          f"grid_ok={_di['grid_ok']}, "
+          f"retired={_di['retired_present'] or 'gone'}, "
+          f"cross_artifact_tie={_di['cross_artifact_tie']}, "
+          f"artifact_ok={_di['artifact_ok']}, "
+          f"missing={_di['missing'] or 'none'}")
+
+    # R32 C-128 (gate #121). The two committed benchmarks this run had to
+    # reproduce belong to settlement_months_benchmark, loaded here rather
+    # than re-derived, so the tie is to a run this one did not write.
+    _rba = json.loads(RBA_RESULTS.read_text())
+    _smb121 = json.loads(SMB_RESULTS.read_text())
+    _bmr = json.loads(BMR_RESULTS.read_text())
+    rba_ok, _rb = realized_boundary_allocation_check(tex, _rba, _smb121, _bmr)
+    failures += 0 if rba_ok else 1
+    print(f"[{'PASS' if rba_ok else 'FAIL'}] realized boundary allocation "
+          f"(gate #121): both_aligned={_rb['both_aligned_b']} $bn, "
+          f"shift={_rb['shift_both_b']} $bn ({_rb['share_pct']}%), "
+          f"cap_only_leads={_rb['cap_only_leads']}, "
+          f"decomposition={_rb['decomposition_ok']}, "
+          f"mass_out_anchored={_rb['mass_out_anchored']}, "
+          f"cross_artifact_tie={_rb['cross_artifact_tie']}, "
+          f"artifact_ok={_rb['artifact_ok']}, "
+          f"missing={_rb['missing'] or 'none'}")
+
+    # R32 C-127 (gate #122), BRANCH D. The clip months and the ARTIFACT
+    # verdict this disclosure strengthens belong to h1_zero_months_diagnosis;
+    # the cap-relative benchmark belongs to expectation_benchmark.
+    _h1z = json.loads(H1Z_RESULTS.read_text())
+    _xb122 = json.loads(EXPECT_RESULTS.read_text())
+    bmr_ok, _bm = benchmark_monthly_rebuild_check(tex, _bmr, _h1z, _xb122)
+    failures += 0 if bmr_ok else 1
+    print(f"[{'PASS' if bmr_ok else 'FAIL'}] benchmark monthly rebuild "
+          f"(gate #122): reconciles to {_bm['reconciles_to_b']} $bn, "
+          f"stale={_bm['stale']}, counts_ok={_bm['counts_ok']}, "
+          f"overclaimed={_bm['overclaimed'] or 'none'}, "
+          f"cross_artifact_tie={_bm['cross_artifact_tie']}, "
+          f"artifact_ok={_bm['artifact_ok']}, "
+          f"missing={_bm['missing'] or 'none'}")
+
     va_ok, _va = verdict_audit_check(tex)
     failures += 0 if va_ok else 1
     print(f"[{'PASS' if va_ok else 'FAIL'}] verdict-adjudication audit (gate #104): "
           f"{len(VERDICT_AUDIT_SPANS) - len(_va['missing'])}/"
           f"{len(VERDICT_AUDIT_SPANS)} spans present, "
           f"missing={_va['missing'] or 'none'}")
+
+    _cn = json.loads(CN_RESULTS.read_text())
+    cn_ok, _cni = compounding_null_check(tex, _cn)
+    failures += 0 if cn_ok else 1
+    print(f"[{'PASS' if cn_ok else 'FAIL'}] compounding-consistent null "
+          f"(gate #123): cc marginal {_cni['cc_pp']}pp, "
+          f"spans={_cni['marginal_span']}/{_cni['bias_span']}, "
+          f"branch_L1={_cni['branch_L1']}, runner_gates={_cni['runner_gates']}, "
+          f"signing={_cni['signing_held']}")
+
+    _nfi = json.loads(NFI_RESULTS.read_text())
+    nfi_ok, _nfii = null_floor_interval_gate_check(tex, _nfi)
+    failures += 0 if nfi_ok else 1
+    print(f"[{'PASS' if nfi_ok else 'FAIL'}] null floor interval (gate #124): "
+          f"{_nfii['interval']}, span_x2={_nfii['span_count_ge_2']}, "
+          f"branch_L1={_nfii['branch_L1']}, "
+          f"offnode_ok={_nfii['offnode_within_tol']}")
+
+    _fcc = json.loads(FCC_RESULTS.read_text())
+    # V20-N1: the ladder artifact supplies the binding construction's interval
+    _fi2_ladder = json.loads(
+        (ROOT / "hazard" / "data"
+         / "floor_inference_correction_v2_results.json").read_text())
+    fcc_ok, _fcci = fewcluster_coverage_check(tex, _fcc, _fi2_ladder)
+    failures += 0 if fcc_ok else 1
+    print(f"[{'PASS' if fcc_ok else 'FAIL'}] few-cluster coverage (gate #125): "
+          f"binding={_fcci['binding']} (interval {_fcci['binding_span']} "
+          f"quoted={_fcci['binding_interval_quoted']}), "
+          f"spans={_fcci['spans_present']}, rule_applied={_fcci['rule_applied']}, "
+          f"oracle={_fcci['oracle_bounds']}")
 
     print(f"\n{'ALL GATES PASS' if failures == 0 else f'{failures} GATE(S) FAILED'}")
     return 0 if failures == 0 else 1
