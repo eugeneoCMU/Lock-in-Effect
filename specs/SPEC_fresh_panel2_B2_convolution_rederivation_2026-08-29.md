@@ -8,7 +8,20 @@ after SPEC FP2-B1 has LANDED (runs done, v2/v3 artifacts regenerated) — on
 the committed [2.0, 6.0] grid the floor-read layer's tail hits the same edge
 and the convolution inherits the censoring it is supposed to cure.**
 
-**Amendment log:** (none)
+**Amendment log:**
+- **FP2-B2-A1 (2026-08-29, PRE-RUN, before first execution).** The floor
+  layer's quantile function is the NESTED-CI construction, not the
+  envelope-H crossing the draft sketched: per grid point i compute the
+  interpolated-percentile position U_i of t_obs in the sorted restricted t*
+  draws (the exact inverse of np.percentile's linear rule) and
+  α_i = min(U_i, 1−U_i); the layer quantile at u < 0.5 is the first grid
+  point with α_i ≥ u, mirrored above 0.5. At u = 0.025/0.975 this IS the
+  committed equal-tailed retention rule, so Q2's bit-exact tie to the
+  committed retained set holds by construction — the envelope-H version
+  could miss it by one grid step (one-sided-ECDF vs interpolated-percentile
+  discreteness). Nesting of the level sets makes the quantile function
+  monotone with no envelope step; the unimodality of α is reported as a
+  diagnostic only.
 
 **Panel trace:** fresh-panel-2 f3, PARTIAL (2026-08-29). The committed
 convolved pair [+2.7959, +8.9922] (`layer_convolution_results.json`
