@@ -56,12 +56,15 @@ PINS = {
         "ab8bb3b4df49890c0c9fb7dcc0e250f5e4c427f11b557122f4b4d6e43875c02c",
     HAZ / "floor_inference_correction.py":
         "df6592dacda71d323c597d1d48a2328c6753a14032509b80acb5a16e4a87f969",
+    # v2.py / mdr.py / V2_ARTIFACT re-pinned 2026-08-29 to the FP2-B1-amended
+    # sources and the regenerated (extended-grid) v2 artifact; fu.py and v1
+    # are untouched by FP2-B1 and keep their original pins.
     HAZ / "floor_inference_correction_v2.py":
-        "b51a1c51bd82f5eff1f127f43fae29a5d73cb48a25ea9a95ab9df5ad83744a01",
+        "2ecff971f96cd1f679a22eb058b8e008c9853142ff6d50a6a825ff37e1e40909",
     HAZ / "matched_depth_reconciliation.py":
-        "113ac9c70d1e78a282c004de9971f42f03f770c028e495f2a65a1129fbefb0a2",
+        "96fd5f2764c42bbd0ca4852b1ec7e1b7d972e339134655f47d924f0852b91e89",
     FU_ARTIFACT: "83a90ee247315ca771fb6dec512578c012434f67c5d216acdf019d3783beb4f3",
-    V2_ARTIFACT: "44e60a5b7153ceeee76820072f693bbc096937b0c34ed9a137a65a7514c79ddb",
+    V2_ARTIFACT: "bc622a83d42fc1701bd3d4fa56eac80d6758dc3054462945207f743159387e5e",
 }
 
 R2 = "R2_2018_gap<=-0.0025_age>=12"
@@ -226,12 +229,13 @@ def main() -> None:
                    f"{PIN_POINT_CPR!r}/{PIN_N}/{PIN_G_STRATUM}")
     print(f"  P2 R2: {cpr:.9f}%  n={n}  G_stratum={g_str}  [PASS]")
 
-    mapping = mdr.FloorMapping()
+    mapping = mdr.FloorMapping(extended=True)   # FP2-B1 extended grid
     v2.mapping_global = mapping
 
     # ---- P4: truncation, not exclusion --------------------------------------
-    probe = v2.map_endpoint(mapping, 7.5)          # deliberately outside [2.0, 6.0]
-    if not probe["truncated_at_grid_edge"] or abs(probe["mapped_at_pct"] - 6.0) > 1e-12:
+    # deliberately outside [2.0, 7.0] (FP2-B1 extended grid; edge was 6.0)
+    probe = v2.map_endpoint(mapping, 7.5)
+    if not probe["truncated_at_grid_edge"] or abs(probe["mapped_at_pct"] - 7.0) > 1e-12:
         stop("P4", f"grid-edge convention is not v1's truncation: {probe}")
 
     # ---- E2 (STOP): feasibility BEFORE any interval is read ------------------
