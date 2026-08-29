@@ -134,7 +134,7 @@ def main() -> None:
     q1_ok = (v2art["status"] == "OK" and v2art["parity_gates_all_pass"]
              and wcr["smm_ci95"] == list(COMMITTED_SMM_CI)
              and wcr["marginal_ci95_pp"] == list(REDERIVED_BINDING_PP)
-             and float(mapping.x.max()) == 7.0
+             and abs(float(mapping.x.max()) - 7.0) < 1e-12
              and wcr["n_retained"] == COMMITTED_N_RETAINED)
     gates["Q1_input_freshness"] = {
         "pass": bool(q1_ok), "v2_status": v2art["status"],
