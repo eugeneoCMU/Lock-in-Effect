@@ -71,9 +71,9 @@ def test_each_literal_removal_fails(key):
     # TRACE for every row: the perturbed string breaks the derived literal
     # named in the comment, so that key enters `missing` and ok=False.
     ("$+3.1$ to $+8.4$", "$+3.2$ to $+8.4$", 1),            # month_row
-    ("$+2.3$ to $+9.3$", "$+2.3$ to $+9.4$", 1),            # two_way_row
-    ("from 5.20 to 5.33 points of width",
-     "from 5.20 to 5.34 points of width", 1),                # e3_widths
+    ("$+2.2$ to $+9.3$", "$+2.2$ to $+9.4$", 1),            # two_way_row
+    ("from 5.23 to 5.36 points of width",
+     "from 5.23 to 5.37 points of width", 1),                # e3_widths
     ("18\\% \\emph{smaller}", "19\\% \\emph{smaller}", 1),  # se_shrinks
     ("16\\% \\emph{above}", "17\\% \\emph{above}", 1),      # se_grows_twoway
     ("$2^{6} = 64$", "$2^{6} = 32$", 1),                    # nc4_sign_vectors
@@ -143,46 +143,52 @@ def test_the_refuted_attribution_cannot_return():
 
 
 def test_the_censored_count_is_derived_from_the_artifacts():
-    """Three of the eleven undemoted rungs are censored at the 6.0% edge, and
-    all three are censored on the LOWER marginal edge only -- which is why all
-    three print the same $+2.3$ and why the note says they run below it."""
-    assert _INFO["n_censored"] == 3
+    """FP2-B1: nothing is censored any more. The three rungs whose lower-edge
+    floors run past the grid's FORMER 6.0% end (the ones the extension
+    decensored) now map at their own floors, carry DISTINCT lower values, and
+    every one of those values sits below the old edge's $+2.3$ row value --
+    which is why the note says they decensor below it."""
+    assert _INFO["n_censored"] == 0
+    lows = []
     for c in (RD["cr3_t_interval_df_bm"], RD["wcr_inverted"], TW["t_interval"]):
-        assert c["lower_pp_edge"]["truncated_at_grid_edge"] is True
+        assert c["lower_pp_edge"]["truncated_at_grid_edge"] is False
         assert c["upper_pp_edge"]["truncated_at_grid_edge"] is False
-        assert c["lower_pp_edge"]["mapped_at_pct"] == 6.0
         assert c["lower_pp_edge"]["floor_pct"] > 6.0
-        assert c["marginal_ci95_pp"][0] == TW["t_interval"]["marginal_ci95_pp"][0]
+        assert c["lower_pp_edge"]["mapped_at_pct"] == c["lower_pp_edge"]["floor_pct"]
+        assert c["marginal_ci95_pp"][0] < 2.280914554561832
+        lows.append(c["marginal_ci95_pp"][0])
+    assert len(set(lows)) == 3, "decensored lower endpoints must be distinct"
 
 
-def test_the_rungs_printed_wider_are_exactly_the_censored_ones():
+def test_the_rungs_printed_wider_are_exactly_the_decensored_ones():
     """The note's sentence is a set claim, not a count claim. Widths: cr2_bm
-    6.739981 < restricted 6.828409 < two_way 7.058133 < cr3_bm 7.283615, and
-    those three are exactly the censored set.
+    6.750 < two_way 7.122 < restricted 7.238 < cr3_bm 7.555, and those three
+    are exactly the rungs whose floors ran past the old 6.0% edge.
 
-    TRACE: narrowing the two-way rung to [3.5, 8.0] (width 4.5) leaves it
-    censored but drops it out of printed_wider, so printed_wider (2 members)
-    != censored_set (3 members) and ok=False, while n_censored stays 3.
+    TRACE: narrowing the two-way rung to [3.5, 8.0] (width 4.5) leaves its
+    floor past the old edge but drops it out of printed_wider, so
+    printed_wider (2 members) != decensored set (3 members) and ok=False,
+    while n_censored stays 0.
     """
     d = copy.deepcopy(V3)
     d["two_way"]["t_interval"]["marginal_ci95_pp"] = [3.5, 8.0]
     ok, info = month_twoway_clusters_check(TEX, V2, d)
-    assert not ok and info["n_censored"] == 3
+    assert not ok and info["n_censored"] == 0
 
 
-def test_the_widest_interior_rung_is_unmoved_by_this_landing():
-    """The note keeps calling CR2 at Bell--McCaffrey df the widest rung with
-    both endpoints interior. The month rung is the one that could have
-    falsified that, so the comparison is made explicitly and the guard is
-    exercised.
+def test_the_widest_rung_is_cr3_bm_once_measured():
+    """FP2-B1: with every endpoint interior, the widest rung outright is CR3
+    at Bell--McCaffrey df, its true width finally measured. The month rung is
+    the one that could falsify that, so the comparison is made explicitly and
+    the guard is exercised.
 
-    TRACE: widening the month rung to [1.0, 9.0] (width 8.0, interior on both
-    edges) makes it the widest interior rung, so widest_interior becomes
-    'month_cr1' and the == 'cr2_bm' conjunct fails.
+    TRACE: widening the month rung to [1.0, 9.0] (width 8.0) makes it the
+    widest rung, so widest_interior becomes 'month_cr1' and the == 'cr3_bm'
+    conjunct fails.
     """
-    assert _INFO["widest_interior"] == "cr2_bm"
+    assert _INFO["widest_interior"] == "cr3_bm"
     m = MO["cr1_t_interval"]["marginal_ci95_pp"]
-    c = RD["cr2_t_interval_df_bm"]["marginal_ci95_pp"]
+    c = RD["cr3_t_interval_df_bm"]["marginal_ci95_pp"]
     assert (m[1] - m[0]) < (c[1] - c[0])
     d = copy.deepcopy(V3)
     d["rungs"]["month"]["cr1_t_interval"]["marginal_ci95_pp"] = [1.0, 9.0]
@@ -234,29 +240,40 @@ def test_e4_missed_and_the_manuscript_says_so():
     assert V3["expectations"]["E4_upper_endpoint_truncates"] is False
     for edge in ("lower_pp_edge", "upper_pp_edge"):
         assert MO["cr1_t_interval"][edge]["truncated_at_grid_edge"] is False
-    assert TW["t_interval"]["lower_pp_edge"]["truncated_at_grid_edge"] is True
+    # FP2-B1: the two-way rung ran past the old edge but is decensored now
+    assert TW["t_interval"]["lower_pp_edge"]["truncated_at_grid_edge"] is False
+    assert TW["t_interval"]["lower_pp_edge"]["floor_pct"] > 6.0
     assert LITS["e4_miss"] in TEX
 
 
-def test_only_the_unprinted_rademacher_month_variant_censors():
+def test_only_the_unprinted_rademacher_month_variant_ran_past_the_edge():
     """The miss statement is scoped to the PRINTED row for a reason: the month
-    rung's Rademacher variant does reach past 6.0% (floor 6.141792853297579).
-    If any other month-axis variant started truncating, 'Among the month rung's
-    own variants only the unprinted Rademacher one' would go stale.
+    rung's Rademacher variant does reach past the old 6.0% edge (floor
+    6.141792853297579), decensored by the FP2-B1 extension. If any other
+    month-axis variant's floor crossed it, 'Among the month rung's own
+    variants only the unprinted Rademacher one' would go stale. And nothing
+    truncates any more, which the gate asserts outright.
 
-    TRACE: flagging cr2_t_interval's lower edge truncated makes the derived
-    list ['cr2_t_interval', 'wild_t_rademacher'] != ['wild_t_rademacher'].
+    TRACE: flagging cr2_t_interval's lower edge truncated fails the
+    no-truncation conjunct; pushing its floor past 6.0 breaks the set
+    equality ['cr2_t_interval', 'wild_t_rademacher'] != ['wild_t_rademacher'].
     """
     trunc = [k for k in _MONTH_VARIANTS
              if MO[k]["lower_pp_edge"]["truncated_at_grid_edge"]
              or MO[k]["upper_pp_edge"]["truncated_at_grid_edge"]]
-    assert trunc == ["wild_t_rademacher"]
-    assert MO["wild_t_rademacher"]["lower_pp_edge"]["floor_pct"] > 6.0
+    assert trunc == []
+    past = [k for k in _MONTH_VARIANTS
+            if MO[k]["lower_pp_edge"]["floor_pct"] > 6.0]
+    assert past == ["wild_t_rademacher"]
     d = copy.deepcopy(V3)
     d["rungs"]["month"]["cr2_t_interval"]["lower_pp_edge"][
         "truncated_at_grid_edge"] = True
     ok, _ = month_twoway_clusters_check(TEX, V2, d)
     assert not ok
+    d2 = copy.deepcopy(V3)
+    d2["rungs"]["month"]["cr2_t_interval"]["lower_pp_edge"]["floor_pct"] = 6.2
+    ok2, _ = month_twoway_clusters_check(TEX, V2, d2)
+    assert not ok2
 
 
 def test_nc4_is_the_artifacts_own_resolution_floor():

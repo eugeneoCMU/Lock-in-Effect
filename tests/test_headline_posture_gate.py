@@ -77,7 +77,7 @@ def test_point_before_range_fails(tex, abstract):
         "Lock-in itself adds, with $+5.6$ points, \\$42.6 billion, the production "
         "form's endpoint, inside it, most of the margin. "
         "What lock-in itself adds is a range rather than a number: "
-        "$+2.3$ to $+9.1$ points under the production floor form (the floor "  # V20-N1
+        "$+1.9$ to $+9.1$ points under the production floor form (the floor "  # V20-N1
         "read's sampling error at the central elasticity, wild-cluster on 31 "
         "clusters), a form-conditional hull of $+3.5$ to $+13.1$; measured "
         "corrections to the floor and the accounting basis move it in both "
@@ -146,6 +146,6 @@ def test_benign_rewrites_stay_green(tex, old, new):
 def test_abstract_posture_agrees_with_section_ve(tex):
     ve = [ln for ln in tex.split("\n") if ln.startswith("A seventh qualification")]
     assert len(ve) == 1, "Section V.E's assembly paragraph is missing or duplicated"
-    assert "$+2.3$ to $+9.1$ points" in ve[0], "V.E no longer quotes the binding interval"  # V20-N1
+    assert "$+1.9$ to $+9.1$ points" in ve[0], "V.E no longer quotes the binding interval"  # V20-N1
     assert "no interior member is privileged, and the range rather than any point is what the design delivers" in ve[0], (
         "V.E no longer states the range-carries reading of Section V.E")

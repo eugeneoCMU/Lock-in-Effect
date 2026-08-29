@@ -25,13 +25,13 @@ VARIANT = (ROOT / "paper" / "final"
 EB = json.loads((ROOT / "hazard" / "data"
                  / "expectation_benchmark_results.json").read_text())
 BENCH = EB["cap_benchmark_b"]
-LO, HI = 2.3, 9.1  # V20-N1: adjudicated binding interval (restricted inversion)
+LO, HI = 1.9, 9.1  # FP2-B1: decensored binding interval (restricted inversion)
 
 CEILING = "\\$33.75 billion per month"
 UNIFORM = "\\$17.6 billion per month"
 SETTLED = "\\$20.0 billion per month"
 RATIOS = "ratios of 1.91 and 1.69"
-BAND = "\\$0.42 to \\$1.66 billion per month"
+BAND = "\\$0.35 to \\$1.66 billion per month"
 SCOPE = ("That band attaches to the identified marginal, not to the two "
          "projection levels")
 
@@ -106,5 +106,5 @@ def test_derived_values_match_the_artifact():
     assert round(EB["supplementary_projection_wedge"]["cap_target_window_b"] / M, 2) == 33.75
     assert round(EB["window"]["projected_runoff_window_b"] / M, 1) == 17.6
     assert round(EB["settlement_aware_allocation"]["projected_runoff_window_b"] / M, 1) == 20.0
-    assert round(BENCH * LO / 100 / M, 2) == 0.42
+    assert round(BENCH * LO / 100 / M, 2) == 0.35
     assert round(BENCH * HI / 100 / M, 2) == 1.66
