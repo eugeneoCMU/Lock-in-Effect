@@ -32,13 +32,13 @@ from liveness_gates import (  # noqa: E402
     snha_additive_check,
 )
 
-VARIANT_PATH = ROOT / "paper" / "v18" / "revised_paper_v18_long_abstract.tex"
+VARIANT_PATH = ROOT / "paper" / "final" / "paper_final_v1_long_abstract.tex"
 MAX_PATH = ROOT / "hazard" / "data" / "scaled_null_housing_activity_results.json"
 ADD_PATH = (ROOT / "hazard" / "data"
             / "scaled_null_housing_activity_additive_results.json")
 
 # V20 closing-session rescope: the runindex row lives in replication_appendices.tex
-_REPLAPPX = (ROOT / "paper" / "v18" / "replication_appendices.tex").read_text()
+_REPLAPPX = (ROOT / "paper" / "final" / "replication_appendices.tex").read_text()
 TEXT = TEX.read_text() + "\n" + _REPLAPPX
 VARIANT = VARIANT_PATH.read_text() + "\n" + _REPLAPPX
 MAXB = MAX_PATH.read_bytes()

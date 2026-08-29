@@ -41,10 +41,10 @@ from liveness_gates import (  # noqa: E402
     buyback_discount_rederived_check,
 )
 
-TEX = (ROOT / "paper" / "v18" / "revised_paper_v18.tex").read_text()
-VARIANT = (ROOT / "paper" / "v18"
-           / "revised_paper_v18_long_abstract.tex").read_text()
-LETTER = (ROOT / "paper" / "v18"
+TEX = (ROOT / "paper" / "final" / "paper_final_v1.tex").read_text()
+VARIANT = (ROOT / "paper" / "final"
+           / "paper_final_v1_long_abstract.tex").read_text()
+LETTER = (ROOT / "paper" / "final"
           / "response_to_referees_round22.tex").read_text()
 GATES_SRC = (ROOT / "tools" / "liveness_gates.py").read_text()
 D = json.loads((ROOT / "hazard" / "data"

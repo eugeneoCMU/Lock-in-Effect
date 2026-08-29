@@ -204,7 +204,7 @@ them. They are ALREADY COMMITTED and are not this script's to recompute; two
 of the three are additionally replayed as G4 level gates.
   CORRECTION TO THE AUDIT BRIEF THAT COMMISSIONED THIS RUN: the brief holds
   that these levels are undisclosed in the .tex. They are not. All three are
-  already stated at paper/v18/revised_paper_v18.tex line 784
+  already stated at paper/final/paper_final_v1.tex line 784
   (Section~\ref{sec:robustness-floor}): "at the 4.991\% headline anchor the
   additive central leg recovers 55.9\% of the benchmark against a 44.7\%
   null, and at the 4.695\% and 5.334\% anchors 59.3\% and 52.0\%", and

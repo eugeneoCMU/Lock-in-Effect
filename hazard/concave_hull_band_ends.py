@@ -12,7 +12,7 @@ HANDOFF_round22.md §6.3 / PLAN_remaining_work.md §5. Liveness gate #95.
 
 WHAT IS OPEN, AND WHERE THE MANUSCRIPT SAYS SO
 ----------------------------------------------
-paper/v18/revised_paper_v18.tex L789, verbatim:
+paper/final/paper_final_v1.tex L789, verbatim:
   "The hull is not shown \\emph{complete} over form $\\times$ transform---this
    cell was run at the central elasticity, and its band ends are not"
 That sentence is the whole reason this run exists. It is honest today and this

@@ -26,9 +26,9 @@ from pathlib import Path
 import pytest
 
 ROOT = Path(__file__).resolve().parents[1]
-TEX = (ROOT / "paper" / "v18" / "revised_paper_v18.tex").read_text()
-VARIANT = (ROOT / "paper" / "v18"
-           / "revised_paper_v18_long_abstract.tex").read_text()
+TEX = (ROOT / "paper" / "final" / "paper_final_v1.tex").read_text()
+VARIANT = (ROOT / "paper" / "final"
+           / "paper_final_v1_long_abstract.tex").read_text()
 
 BOTH = pytest.mark.parametrize("tex", [TEX, VARIANT], ids=["canonical", "variant"])
 

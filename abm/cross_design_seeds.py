@@ -23,7 +23,7 @@ The sibling 50-seed run that DOES exist (abm/monte_carlo_simulation.py, seeds
 0-49, committed abm/monte_carlo_results.csv) has SD $24.834907519213886B on a
 $764.7482532227002B benchmark (3.247 points), but it varies only layer (i), on
 the SYNTHETIC population, and it never varies the calibration. So the sentence
-this run exists to test — paper/v18/revised_paper_v18.tex line 72
+this run exists to test — paper/final/paper_final_v1.tex line 72
 (tab:headline): "the operative uncertainty is calibration, not seed noise
 (single-choice swings span 20.9--59.3%)" — compares a seed band measured on
 one population against a calibration swing measured on another. The seed band
@@ -1125,7 +1125,7 @@ def main() -> None:
         "tex_line72_test": {
             "claim": ("the operative uncertainty is calibration, not seed "
                       "noise (single-choice swings span 20.9--59.3%)"),
-            "site": "paper/v18/revised_paper_v18.tex line 72 (tab:headline)",
+            "site": "paper/final/paper_final_v1.tex line 72 (tab:headline)",
             "committed_calibration_swing_pp": CAL_SWING_PP,
             "leg_a_recalibrated_band_width_pp": band_width,
             "leg_a_recalibrated_sd_pp": sd_pp,

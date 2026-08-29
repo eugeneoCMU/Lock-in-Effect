@@ -50,6 +50,6 @@ jobs:
         # They must be byte-identical apart from line 31, the abstract. A half-applied
         # edit to one edition is otherwise invisible.
         run: |
-          diff <(sed '31d' paper/v18/revised_paper_v18.tex) \
-               <(sed '31d' paper/v18/revised_paper_v18_long_abstract.tex) \
+          diff <(sed '31d' paper/final/paper_final_v1.tex) \
+               <(sed '31d' paper/final/paper_final_v1_long_abstract.tex) \
             && echo "editions in sync (identical apart from the abstract)"

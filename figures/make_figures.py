@@ -310,7 +310,7 @@ def fig5_cross_design_bars():
              color=C_SURV, ha="right", va="top")
     ax1.axhline(threshold, color=C_GRAY, lw=1.1, ls="--")
     ax1.text(-0.42, threshold + 1.5,
-             f"pre-registered {threshold:.0f}% threshold",
+             f"pre-committed {threshold:.0f}% threshold",
              fontsize=8, color=C_GRAY)
     ax1.bar(xs, shares, width=0.6, color=colors, alpha=0.9)
     for x, s in zip(xs, shares):

@@ -41,8 +41,8 @@ from pathlib import Path
 import pytest
 
 _ROOT = Path(__file__).resolve().parents[1]
-_TEX = _ROOT / "paper" / "v18" / "revised_paper_v18.tex"
-_VARIANT = _ROOT / "paper" / "v18" / "revised_paper_v18_long_abstract.tex"
+_TEX = _ROOT / "paper" / "final" / "paper_final_v1.tex"
+_VARIANT = _ROOT / "paper" / "final" / "paper_final_v1_long_abstract.tex"
 
 CANONICAL = _TEX.read_text()
 VARIANT = _VARIANT.read_text()

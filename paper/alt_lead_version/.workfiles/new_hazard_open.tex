@@ -1,0 +1,36 @@
+\section{The Hazard Framework: A Structurally Distinct Estimator}\label{sec:hazard}
+
+This is the estimator on which the paper's central decomposition rests. The ABM of Section~\ref{sec:abm} does not approach the hazard framework's aggregate recovery. And no estimator's monthly co-movement with the empirical path survives removal of the window's shared trend, Path B's included; Section~\ref{sec:hazard-interp} quantifies that limitation, because it bears on each recovery figure's evidential weight.
+
+\subsection{Motivation}\label{sec:hazard-motivation}
+
+Section~\ref{sec:abm}'s pattern is difficult to reconcile with the hypothesis that the residual reflects a missing rational or behavioral household mechanism that a sufficiently rich utility function would eventually capture. It is more consistent with binding constraints on the empirical prepayment path lying at least partly outside the household decision function: loan-level heterogeneity, servicer pipeline dynamics, and cohort-level path dependence that a fixed, representative-household population struggles to represent.
+
+The hazard framework of Section~\ref{sec:method-estimators} is built to test this hypothesis. It abandons the household utility function---no mobility-desire parameter, no loss-aversion coefficient, no utility-maximizing decision rule---and models loan-level survival directly, using proportional hazards (proportional above a baseline turnover floor; Section~\ref{sec:pathb}) estimated on real loan-level data; the closed-population survivor-selection failure of Section~\ref{sec:abm-results} motivates a cohort-level treatment of burnout, not a per-loan one. It retains the ABM's \$764.7 billion empirical benchmark and QT window definition, and comprises the two paths of Table~\ref{tab:specbox}. I use competing risks in the sense of \citet{deng2000}, who estimate prepayment and default as dependent competing hazards over unobserved borrower heterogeneity.
+
+\begin{table}[H]
+\centering
+\caption{Compact specification of the two hazard paths. Every entry restates
+content specified in Sections~\ref{sec:patha} and~\ref{sec:pathb} or
+Appendix~\ref{app:params}.}
+\label{tab:specbox}
+\footnotesize
+\begin{threeparttable}
+\begin{tabular}{@{}p{2.2cm}p{5.9cm}p{5.9cm}@{}}
+\toprule
+ & Path A (estimated cohort hazard) & Path B (literature-calibrated microsimulation) \\
+\midrule
+Unit; sample & stratum-month; full Freddie 2017--2021 origination universe (296 four-way cells) & loan-month; stratified 75{,}000-loan draw from the same universe \\
+Outcome; estimation & prepaid UPB with log-exposure offset; Poisson pseudo-maximum likelihood, log link \eqref{eq:pathA} & monthly prepayment hazard \eqref{eq:pathB}; nothing estimated on the benchmark; every parameter fixed a priori, though the dominant level-setter (the turnover floor) is calibrated in-window (Sections~\ref{sec:pathb}, \ref{sec:robustness-floor}; Appendix~\ref{app:params}) \\
+Age profile & seasoning spline, knots $\{12,24,36,60,84,120\}$ months (seven columns) & 100~PSA ramp to 6\% CPR at month 30 \\
+Rate-gap term & estimated: $+0.65$ standardized ($+0.29$ per 100 bp), spec v4 & imported from \citet{liebersohn2024} via \eqref{eq:beta1}; 5.5--7.7\% band \\
+Stratification & 295 stratum fixed effects (vintage $\times$ coupon $\times$ FICO $\times$ LTV) & stratum-level burnout state $B_{s(i),t}$; standardized FICO/LTV ex-ante priors \\
+Time effects & eleven calendar-month dummies (spec v4) and the dynamic friction index & none; competing default hazard \eqref{eq:default} and the Markov delinquency pipeline; the omitted housing-activity level term is priced rather than modelled, by the scaled-null variant of Section~\ref{sec:identification} (run \texttt{scaled\_null\_housing\_activity}) \\
+Turnover floor & none (stratum fixed effects set baseline levels) & 4\% CPR floor, max form; competing-risks form tested (Section~\ref{sec:robustness-floor}) \\
+Inference & stratum-cluster and temporal moving-block bootstraps (Table~\ref{tab:bootstrap}); no claim survives them---the rate-gap coefficient's sign is not distinguishable from zero under any bias-respecting construction (Section~\ref{sec:patha}) & stratified loan-level bootstrap (200 replicates) for sampling; calibration box for parameters (Section~\ref{sec:robustness-floor}) \\
+Validation & temporal holdout, reported as a diagnostic only (Section~\ref{sec:patha}) & Fannie Mae external replication (marginal $+8.68$ points against Freddie's $+9.20$; the pre-committed envelope it clears is 11.06 points wide) and the synthetic companion at 106.0\% (Sections~\ref{sec:pathb-fannie}, \ref{sec:robustness-synthesis}) \\
+Role & aggregate context only; does not corroborate the result; excluded from headline figures & headline estimator: at the off-window floor central 91.3\%, $\beta_1 = 0$ null 85.7\%, marginal $+5.6$ points; at the in-sample calibration point 97.9\%, 88.7\%, $+9.2$ points (all shared basis) \\
+\bottomrule
+\end{tabular}
+\end{threeparttable}
+\end{table}

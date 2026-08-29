@@ -12,7 +12,7 @@ floor_form_offwindow.py / concave_marginal.py).
 -------------------------------------------------------------------------------
 REFEREE OBJECTION (round 22, item B4 CONFIRMED)
 -------------------------------------------------------------------------------
-Section VII.A (sec:robustness-scale, paper/v18/revised_paper_v18.tex
+Section VII.A (sec:robustness-scale, paper/final/paper_final_v1.tex
 reports a mean simulated CPR of 15.616% at N = 10,000 and N = 75,000 and
 concludes that population size changes precision, not central tendency.  Five
 downstream sites lean on it:,,,,.

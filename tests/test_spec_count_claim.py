@@ -18,9 +18,9 @@ import pytest
 
 ROOT = Path(__file__).resolve().parents[1]
 SPECS = ROOT / "specs"
-_REPLAPPX = (ROOT / "paper" / "v18" / "replication_appendices.tex").read_text()
-TEX = [ROOT / "paper" / "v18" / "revised_paper_v18.tex",
-       ROOT / "paper" / "v18" / "revised_paper_v18_long_abstract.tex"]
+_REPLAPPX = (ROOT / "paper" / "final" / "replication_appendices.tex").read_text()
+TEX = [ROOT / "paper" / "final" / "paper_final_v1.tex",
+       ROOT / "paper" / "final" / "paper_final_v1_long_abstract.tex"]
 
 NUMBER_WORDS = {
     10: "Ten", 11: "Eleven", 12: "Twelve", 13: "Thirteen", 14: "Fourteen", 15: "Fifteen",

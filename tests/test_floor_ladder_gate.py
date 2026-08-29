@@ -21,9 +21,9 @@ from liveness_gates import (  # noqa: E402
     floor_ladder_check,
 )
 
-TEX = (ROOT / "paper" / "v18" / "revised_paper_v18.tex").read_text()
-VARIANT = (ROOT / "paper" / "v18"
-           / "revised_paper_v18_long_abstract.tex").read_text()
+TEX = (ROOT / "paper" / "final" / "paper_final_v1.tex").read_text()
+VARIANT = (ROOT / "paper" / "final"
+           / "paper_final_v1_long_abstract.tex").read_text()
 ART = json.loads((ROOT / "hazard" / "data"
                   / "floor_inference_correction_v2_results.json").read_text())
 RD = ART["reads"][FLOOR_LADDER_READ]

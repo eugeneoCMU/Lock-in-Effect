@@ -31,15 +31,15 @@ import sys
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
-TEX = ROOT / "paper" / "v18" / "revised_paper_v18.tex"
+TEX = ROOT / "paper" / "final" / "paper_final_v1.tex"
 # ROUND 22 (C4): every manuscript variant on disk, not just the canonical one.
-# paper/v18/revised_paper_v18_simple_abstract.tex was byte-identical to the
+# paper/final/paper_final_v1_simple_abstract.tex was byte-identical to the
 # canonical file except for its abstract, was UNTRACKED, and was therefore
 # entirely ungated -- run against gate #68's shipped rule it failed with 5 of 8
 # spans missing, silently reversing round 20's calibration-label discipline and
 # round 21's Danish dual label. A variant that ships is a variant that must be
 # checked, so the abstract gate is applied to all of them.
-TEX_VARIANTS = sorted((ROOT / "paper" / "v18").glob("revised_paper_v18*.tex"))
+TEX_VARIANTS = sorted((ROOT / "paper" / "final").glob("paper_final_v1*.tex"))
 MANIFEST = ROOT / "abm" / "data" / "runs" / "run-2026-07-04-15yr-foldin" / "manifest.json"
 FANNIE_RESULTS = ROOT / "hazard" / "data" / "fannie_replication_results.json"
 OVERLAY_RESULTS = ROOT / "hazard" / "data" / "ginnie_cpr_overlay_results.json"
@@ -383,7 +383,7 @@ RELOCATED_TO_BODY = {
     # ROUND-27 abstract cut: the cross-design seed hedge and the book-
     # composition reweight left the abstract with their claims; each is
     # pinned against its body statement (SS IV lead; tab:headline caption).
-    "crossdesign_seed_body": "60.2\\% averaged over fifty seeds---above the "
+    "crossdesign_seed_body": "60.2\\% averaged over fifty seeds, above the "
                              "50\\% threshold",
     "crossdesign_reweight_body": "76.3\\% at the book's composition",
     # ROUND-27 option-2 cut: the expectations pair's body pins. Each joins
@@ -661,7 +661,7 @@ ABM_LEAD_SPANS = {
 #   (c) every current-state figure §7 quotes must still exist in the manuscript.
 #       §7 is the section that speaks in the present tense, so it is the section
 #       that must track.
-LETTER = ROOT / "paper" / "v18" / "response_to_referees_round22.tex"
+LETTER = ROOT / "paper" / "final" / "response_to_referees_round22.tex"
 LETTER_CURRENT_SECTION = "\\section{Changes since this response was drafted}"
 LETTER_RETIRED_HULL = "$+3.9$ to $+13.1$"
 LETTER_HISTORICAL_MARKER = "range that stood at\nthe time at $+3.9$ to $+13.1$ points. That range has since widened"
@@ -774,12 +774,19 @@ CONVOLVED_LINE_SPANS = {
     # caveat without the comonotone bound understates how wrong independence
     # could be; and the lower-bound inheritance is what stops the line being
     # read as calibrated coverage.
+    # FRESH-PANEL-2 (2026-08-29): the one-number recommendation moved OFF the
+    # convolution — it was computed on the demoted Webb rung and never
+    # re-derived under the adjudicated binding layer, so as printed it is
+    # anti-conservative (narrower than the binding interval itself). The prose
+    # now labels it a lower bound on the re-derived pair and points the
+    # one-number reader at the binding interval; this span protects that
+    # redirection the way its predecessor protected the recommendation.
     "run_tag": "\\texttt{layer\\_convolution}",
     "pair": "$[+2.80, +8.99]$",
     "independence_caveat": "independence is assumed, not measured",
     "comonotone_bound": "under maximal positive dependence the width is $8.12$pp",
-    "one_number_reading": "the interval a reader who wants one number for "
-                          "sampling error should use",
+    "one_number_reading": "a reader who wants one number for sampling error "
+                          "should take the binding interval itself",
     "non_substitution": "an assumption rather than a measurement",
     "lower_bound_inheritance": "makes the convolved line a lower bound as well",
 }
@@ -1494,7 +1501,7 @@ MONTH_TWOWAY_SPANS = {
     "e5_not_predicted": "whether it would be computable at all I deliberately "
                         "did not predict",
     # E4, landed as the miss it is
-    "e4_miss": "and it is not---both endpoints of the printed rung are "
+    "e4_miss": "and it is not: both endpoints of the printed rung are "
                "interior, and of the two new rows only the two-way one censors",
     # ...with the one month-axis interval that DOES truncate named, so the
     # miss statement cannot be read past its own scope
@@ -1630,15 +1637,15 @@ def month_twoway_clusters_check(tex, v2, v3):
     lits["se_grows_twoway"] = (f"{grow_pct}\\% \\emph{{above}} the "
                                "stratum-clustered one")
     lits["month_bm_below_four"] = (
-        f"is {mo['df_bm_by_estimator']['cr1']:.1f}---below the "
+        f"is {mo['df_bm_by_estimator']['cr1']:.1f}, below the "
         f"{_CARD(nc1_thresh - 1)} my pre-committed "
         "too-few-clusters rule was written to protect")
     lits["nc1_trigger_quiet"] = (f"that rule's own $G < {nc1_thresh}$ trigger "
                                  "did not fire")
     # Section V.E's month range, reconciled against the read's actual support
     lits["july_tail_disclosure"] = (
-        f"read in {name(dense[0])}--{name(dense[-1])}---"
-        f"{_CARD(cmpm[sparse])} {name(sparse)} cohort-months aside---")
+        f"read in {name(dense[0])}--{name(dense[-1])} ("
+        f"{_CARD(cmpm[sparse])} {name(sparse)} cohort-months aside)")
     lits["nc4_sign_vectors"] = (f"$2^{{{G}}} = "
                                 f"{int(rad['distinct_sign_vectors'])}$ "
                                 "distinct Rademacher sign vectors")
@@ -1840,8 +1847,8 @@ def episode_age_bands_check(tex: str, a: dict, w: dict) -> tuple[bool, dict]:
         # one contextual literal for the age-only limb: the component, the total
         # it is a share of, and the share itself, in the order they are printed
         "age_only_and_share": (
-            f"puts ${age_b:+.2f}$ of the raw ${total:+.2f}$ --- "
-            f"${age_b / total * 100:.1f}\\%$ --- on seasoning composition") in tex_nc,
+            f"puts ${age_b:+.2f}$ of the raw ${total:+.2f}$ "
+            f"(${age_b / total * 100:.1f}\\%$) on seasoning composition") in tex_nc,
         "composition_moves": (
             f"moving total composition from ${com_b:+.2f}$ to "
             f"${aug_b:+.2f}$") in tex_nc,
@@ -3245,12 +3252,12 @@ def fewcluster_coverage_check(tex: str, art: dict, ladder: dict) -> tuple[bool, 
 
 def main() -> int:
     # V20 CLOSING SESSION RESCOPE: app:ledger and app:verdicts migrated to the
-    # standalone paper/v18/replication_appendices.tex (EIC-W1/R2-W5; byte-identical
+    # standalone paper/final/replication_appendices.tex (EIC-W1/R2-W5; byte-identical
     # bodies, xr-resolved refs). The gated corpus for span, count, run-citation,
     # runindex-row, and verdict-ledger checks is the manuscript PLUS that file,
     # which is the same content the suite gated before the migration. Abstract-
     # scoped and variant-diff gates below still read the manuscript files alone.
-    tex = TEX.read_text() + "\n" + (ROOT / "paper" / "v18" / "replication_appendices.tex").read_text()
+    tex = TEX.read_text() + "\n" + (ROOT / "paper" / "final" / "replication_appendices.tex").read_text()
     failures = 0
 
     for phrase in ZERO_COUNT:

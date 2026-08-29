@@ -31,9 +31,9 @@ from liveness_gates import (  # noqa: E402
     month_twoway_clusters_check,
 )
 
-TEX = (ROOT / "paper" / "v18" / "revised_paper_v18.tex").read_text()
-VARIANT = (ROOT / "paper" / "v18"
-           / "revised_paper_v18_long_abstract.tex").read_text()
+TEX = (ROOT / "paper" / "final" / "paper_final_v1.tex").read_text()
+VARIANT = (ROOT / "paper" / "final"
+           / "paper_final_v1_long_abstract.tex").read_text()
 V2 = json.loads((ROOT / "hazard" / "data"
                  / "floor_inference_correction_v2_results.json").read_text())
 V3 = json.loads((ROOT / "hazard" / "data"
@@ -277,7 +277,7 @@ def test_the_month_bm_df_is_below_the_rules_own_threshold():
     threshold was crossed anyway (3.9301121142080606 < 4), and the note says so.
 
     TRACE: raising df_bm_by_estimator.cr1 to 4.5 rewrites the derived literal
-    to 'is 4.5---below the four ...', which is not in the tex, and also fails
+    to 'is 4.5, below the four ...', which is not in the tex, and also fails
     the df < threshold - 1 conjunct.
     """
     thr = V3["not_computable"]["NC1_too_few_month_clusters"]["threshold"]

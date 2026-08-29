@@ -4159,7 +4159,7 @@ means dropping a disclosure.
 
 ## 38. Round-24d: the response letter, and the gate that reads it (2026-07-27)
 
-`paper/v18/response_to_referees_round22.tex` was drafted on 26 July and never sent. Within a
+`paper/final/response_to_referees_round22.tex` was drafted on 26 July and never sent. Within a
 day it was wrong in two places, and nothing caught it — **every gate in the suite reads the
 manuscript and no gate read the letter.** A wrong number in the manuscript meets a hundred
 checks; a wrong number in the letter meets a referee.
@@ -4265,7 +4265,7 @@ Gotchas earned:
 - **The fig:gapsweep diet deviated from spec deliberately:** the forced-positivity clause stayed in-caption because it is the ±450-char forced-marker for the caption's "positive at every" occurrence (gate #66); routing it to the Notes block risked the window arithmetic.
 - **Gate #98 now has two span classes:** the paragraph-scoped `ASSEMBLY_SPANS` and the whole-file `ASSEMBLY_TABLE_SPANS` (tab:assembly label, anchor sentence, composed-row and Fonseca-row wording). The battery's table cases assert span uniqueness before mutating, so the round-24c vacuity class is structurally excluded.
 - **Wave 2b resolved #14's head ambiguity at zero cost:** the `\subsection` + `sec:patha` label stayed as the V.D stub's head, so all ~26 "(Section~\ref{sec:patha})" callers resolve unchanged — no repoint wave. The moved timing paragraph's concession sentence stays verbatim behind a new pointer sentence that re-anchors its "these exhibits" referent.
-- **Two-PDF packaging:** references now print before `\appendix` (natbib collects appendix cites regardless), so one compilation splits cleanly: `qpdf build/revised_paper_v18.pdf --pages . 1-82 -- main.pdf` and `--pages . 83-126 -- online_appendix.pdf` (page numbers from the aux; recompute after any reflow).
+- **Two-PDF packaging:** references now print before `\appendix` (natbib collects appendix cites regardless), so one compilation splits cleanly: `qpdf build/paper_final_v1.pdf --pages . 1-82 -- main.pdf` and `--pages . 83-126 -- online_appendix.pdf` (page numbers from the aux; recompute after any reflow).
 - **The appendix wording pass reused the round-26 method at full discipline:** 404 pins extracted from `liveness_gates.py` via `ast` into a validator enforcing old-string uniqueness, digit/math/backslash token-sequence identity, and post-apply pin survival; 12/12 Opus-agent proposals passed and applied.
 
 ## 42. Round-27: the #21 vintage-segment run is NOT_FEASIBLE — feasibility determination, no execution (2026-07-28)

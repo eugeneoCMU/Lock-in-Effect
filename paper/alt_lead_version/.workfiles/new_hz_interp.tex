@@ -1,0 +1,61 @@
+\subsection{Interpretation}\label{sec:hazard-interp}
+
+Table~\ref{tab:estimators} summarizes the three estimators evaluated in this paper against the common \$764.7 billion empirical benchmark.
+
+\begin{table}[!tp]
+\centering
+\footnotesize
+\begin{threeparttable}
+\caption{Estimator comparison against the \$764.7 billion empirical trapped-liquidity benchmark.}
+\label{tab:estimators}
+\renewcommand{\arraystretch}{0.92}
+\setlength{\itemsep}{0pt}
+\begin{tabular}{@{}>{\raggedright\arraybackslash}p{3.2cm}>{\raggedleft\arraybackslash}p{2.4cm}>{\raggedleft\arraybackslash}p{2.4cm}>{\raggedright\arraybackslash}p{2.3cm}>{\raggedright\arraybackslash}p{4.0cm}@{}}
+\toprule
+Estimator & Trapped liquidity & \% of benchmark & CPR path corr. (lag) & Path diagnostics \\
+\midrule
+Empirical benchmark (SOMA, phased cap, 30+15yr) & \$764.7B & 100.0\% & -- & mean CPR 5.14\% (ABM-basis back-out; hazard-basis 5.52\%, 5.79\% at the note-rate WAC) \\
+Production ABM (Section~\ref{sec:abm-results}) & \$103.7B seed mean (frozen draw \$91.0B) & 13.6\% (seed band 10--17\%; frozen draw 11.9\%) & $r = -0.318$ (0) & mean CPR 11.68\%; raw $R^2$ = $-6.984$ \\
+Hazard Path B: literature microsimulation & \$818.5B & 107.0\% (band 105.9--108.2\%) & $r = +0.404$ ($-3$) & mean CPR 4.76\%; $r = +0.190$ at lag 0; 3-month offset (empirical leads; reference only, Section~\ref{sec:pathb}) \\
+Hazard Path B: concave-gap variant (Section~\ref{sec:pathb}) & \$808.4B & 105.7\% & $r = +0.281$ (0) & piecewise transform, kink 200 bp; robustness on the log-linear extrapolation \\
+Hazard Path A: stratum-month Poisson PML (spec v4, calendar-month) & \$928.9B & 121.5\% & $r = -0.438$ ($-2$) & mean CPR 3.34\%; holdout diagnostics under spec v3 \\
+Cross-design ABM, real covariates, recalibrated (Section~\ref{sec:robustness-crossdesign}) & \$453.5B & 59.3\% (fifty-seed mean 60.2\%) & $r = -0.336$ (0) & mean CPR 8.14\%; no positive alignment at any lag \\
+Cross-design ABM, real covariates, frozen calibration (Section~\ref{sec:robustness-crossdesign}) & \$159.5B & 20.9\% & $r = -0.311$ (0) & mean CPR 11.63\%; no positive alignment at any lag \\
+Hazard Path B: Fannie Mae external replication (Section~\ref{sec:pathb}) & \$821.0B & 107.4\% & -- & null 98.7\%; marginal $+8.68$pp \\
+\bottomrule
+\end{tabular}
+\end{threeparttable}
+\end{table}
+
+\noindent{\footnotesize \emph{Notes to Table~\ref{tab:estimators}.} The Fannie Mae replication's path-correlation cell is dashed because the committed artifact carries headline statistics only (Section~\ref{sec:pathb}); the Danish counterfactual specifications are collected in Table~\ref{tab:danish}. The benchmark row's ``30+15yr'' scope is not symmetric: 15-year holdings enter the empirical back-out and the ABM through the structural-only fold-in of Appendix~\ref{sec:robustness-pipeline}, which every production ABM figure in this row uses, while the hazard rows exclude 15-year face (Table~\ref{tab:composition}, Term row). Peak-lag entries select the maximum-magnitude cross-correlation (max $|r|$) within a $\pm$3-month window; under a most-positive-$r$ convention the ABM's best alignment is $+0.19$ at lag $-3$, and Path B's lag $-3$ peak satisfies both. Path B's raw lag-0 $+0.190$ is carried by the window's shared trend: in first differences ($-0.23$) and after linear detrending ($-0.20$) the co-movement is indistinguishable from zero ($\pm 0.31$ at $n = 41$), as it is for every estimator; detrended, all three cluster at $-0.20$ to $-0.30$, which strengthens the offsetting-errors reading of Path A's aggregate fit. Moving-block bootstrap 95\% intervals (block length 6): ABM lag-0 $[-0.60, +0.04]$; Path A lag-0 $[-0.68, -0.02]$; Path B lag-0 $[-0.13, +0.44]$, peak lag $[-0.21, +0.49]$ (Section~\ref{sec:pathb}).\par}
+
+\begin{table}[H]
+\centering
+\footnotesize
+\begin{threeparttable}
+\caption{Recovery of the \$764.748 billion benchmark by accounting basis. Every U.S. hazard leg is quoted on one of these bases: the shared basis nets the common \$69.56 billion curtailment flow from the standalone-scorer figure (a flat 9.1 percentage points), and the composed basis applies the same netting to the book-coupon-reweighted (full-book) figure. The lock-in marginal (central minus $\beta_1 = 0$ null) is basis-invariant because the netting cancels.}
+\label{tab:bases}
+\begin{tabular}{@{}lrrrrr@{}}
+\toprule
+Hazard leg & Standalone & Shared & Full-book & Composed & Cum.\ runoff \\
+ & (scorer) & ($-9.1$pp) & (book WAC) & ($-9.1$pp) & error (\$B) \\
+\midrule
+Path B, central (in-sample calibration) & 107.0\% & 97.9\% & 109.1\% & 100.0\% & $+53.8$ \\
+Path B, $\beta_1 = 0$ null (in-sample calibration) & 97.8\% & 88.7\% & -- & -- & $-16.6$ \\
+\addlinespace
+Path B, central (off-window floor) & 100.4\% & 91.3\% & -- & -- & $+2.8$ \\
+Path B, $\beta_1 = 0$ null (off-window floor) & 94.8\% & 85.7\% & -- & -- & $-39.8$ \\
+\addlinespace
+Path A (spec v4) & 121.5\% & 112.4\% & 127.5\% & 118.4\% & $+164.1$ \\
+Path B, concave-gap & 105.7\% & 96.6\% & -- & -- & $+43.7$ \\
+\bottomrule
+\end{tabular}
+\end{threeparttable}
+\end{table}
+
+\noindent{\footnotesize \emph{Notes to Table~\ref{tab:bases}.} A prior fact frames the whole table. The engine renormalises the simulated pool to realized Fed holdings every month. A leg's dollar roll-off is therefore a \emph{rate} applied to an exogenous level, and its balance path cannot drift from the realized one. No recovery percentage here is a balance-path fit, and none can compound error across months. Each is close to a restatement of that leg's window-mean CPR against the empirical 5.14\% (ABM basis). That is why the sampling intervals are as tight as they are. It is also a limit on what any of these levels can corroborate. The final column is each leg's terminal cumulative runoff error, realized minus simulated roll-off (equivalently, simulated minus realized trapped liquidity). Recovery is an affine transform of it, $\text{recovery} = 1 + \text{error}/764.7$, so a large additive constant sits inside every percentage in the first four columns and makes all of them look better. Two things the percentages hide. Path~B's in-sample 107.0\% is an \emph{over}-prediction of trapped liquidity of \$53.8 billion. That is an 8.2\% \emph{under}-prediction of the \$652.8 billion of runoff actually realized---the referent flips even though the map does not. And the headline off-window central leg, at 91.3\% shared, carries the smallest error of any leg here on the standalone scorer: $+\$2.8$ billion, 0.4\% of realized runoff. Errors as a share of realized runoff: $+8.2\%$, $-2.5\%$, $+0.4\%$, $-6.1\%$, $+25.1\%$, $+6.7\%$ down the rows. The lock-in marginal is unaffected: it is a difference of two trapped aggregates from which the constant cancels, the same fact as its basis-invariance. That netting layer is a constant curtailment flow over a constant cap benchmark, identical across all five committed estimators spanning 29.6 points of standalone recovery, so it is path-invariant and therefore floor-invariant (\texttt{calibration\_reconciliation}); Sections~\ref{sec:method-benchmark} and~\ref{sec:robustness-hybrid} derive it. The book-WAC and composed columns are the committed mixed-basis measurements (note rates bucketed against pass-through coupons), in-sample-calibration quantities not extrapolated to the off-window floor, as are Path A and the concave-gap variant. The ABM rows run through the accounting layer natively (Figure~\ref{fig:recovery}).\par}
+
+The two hazard paths land closer to the empirical benchmark than any synthetic-population ABM specification tested here, the falsified burnout attempt included. Overshooting less is not validation. Path A overshoots by \$164.1 billion, its terminal cumulative runoff error and a 25.1\% under-prediction of realized runoff, with a monthly path fit no better than the ABM's, no useful propagated precision in forward simulation, which excludes it from headline figures, and a rate-gap coefficient not statistically distinguishable from zero under any bias-respecting construction (Section~\ref{sec:patha}). My claim is narrower than ``the hazard framework fits'' and narrower again than ``lands within 2.1\% of the benchmark'': that 2.1-point miss belongs to the in-sample calibration point, so quoting it beside a marginal measured at the off-window floor mixes two calibrations. At the off-window floor Path B's 91.3\% on the benchmark-consistent accounting basis is a miss of 8.7 points, and 88.2--93.7\% across that floor's defensible range, a miss of 6.3 to 11.8 points. What survives is order-of-magnitude comparison, not precision. I attach no timing credential: the benchmark side is itself disqualified, its four exact-zero months clip-induced boundary artifacts of the reporting series (Appendix~\ref{sec:robustness-seasonalfloor}, run \texttt{h1\_zero\_months\_diagnosis}), and the $\beta_1 = 0$ null peaks at lag $-3$ as well. The design identifies the lock-in marginal, defined and bounded once in Section~\ref{sec:identification}, not the lag structure. No synthetic-population household-choice specification I tested lands within 45\% of the benchmark, and I restrict that to synthetic-population specifications: Section~\ref{sec:robustness-crossdesign}'s real-covariate cross-design variant does land within 45\% (59.3\%, and 76.3\% once that covariate population is reweighted to the book's own coupon $\times$ vintage composition, within 24\%), complicating the paradigm interpretation this paragraph would otherwise support---and the reweighted reading makes the complication larger, not smaller.
+
+The hazard framework's only behavioral content is loan-level covariates, a cohort-level burnout term, and literature-calibrated elasticities---no analogue to mobility desire, loss aversion, or utility maximization. Its comparative success might be read as evidence for the loan-level and institutional mechanisms Section~\ref{sec:abm}'s synthetic-population ABM does not represent: FICO, LTV, and geography heterogeneity; servicer forbearance and pipeline delay; cohort-level burnout. The paper's own measurements cap that reading. Those mechanisms ablate to a point or less each: burnout 0.86 points at the in-sample floor and 0.45 at the off-window floor, FICO/LTV 1.3 points, the delinquency pipeline \$0.39 billion, with no servicer channel beyond it modeled; Section~\ref{sec:robustness-synthesis}'s synthetic companion recovers a comparable aggregate level with no real loan-level structure at all. The level therefore supports the rate-inelastic decomposition, those mechanisms bounded small and candidates only for the residual. Section~\ref{sec:robustness-scale}'s scale-sensitivity replication rules out the ABM/hazard sample-size difference as the driver of the gap, but its data-source asymmetry remains unresolved and Section~\ref{sec:robustness-crossdesign}'s cross-design test addresses that difference only partially. Nor does the rate-gap coefficient's sign stability across both hazard specifications indicate that the underlying par-payoff penalty is doing real work. Only Path A estimates that coefficient; Path B imports it from \citet{liebersohn2024} as a signed elasticity band that cannot come out the other way, its verification content limited by Section~\ref{sec:pathb} to the marginal's bounded interval. Their agreement, having no freedom to disagree, is an orientation check on unit and sign conventions, not corroboration; the evidence that the penalty has a real effect is the external literature. The aggregation structure of loan-level survival is the minimum a model of this shortfall must get right: the price of the TBA market's homogeneity appears to be paid at least in part through loan-level and institutional frictions the synthetic-population household model does not represent---frictions a market-value repurchase design would substantially relieve (Appendix~\ref{sec:abm-danish}).
+\clearpage

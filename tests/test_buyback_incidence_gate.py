@@ -17,7 +17,7 @@ from liveness_gates import (  # noqa: E402
     buyback_bracket_check,
 )
 
-TEX = (ROOT / "paper" / "v18" / "revised_paper_v18.tex").read_text()
+TEX = (ROOT / "paper" / "final" / "paper_final_v1.tex").read_text()
 
 
 def test_gate_passes_on_the_manuscript():
@@ -46,7 +46,7 @@ def test_reverting_to_the_signed_claim_fails():
 
 
 def test_variant_carries_the_spans_too():
-    var = (ROOT / "paper" / "v18"
-           / "revised_paper_v18_long_abstract.tex").read_text()
+    var = (ROOT / "paper" / "final"
+           / "paper_final_v1_long_abstract.tex").read_text()
     ok, info = buyback_bracket_check(var)
     assert ok, f"long-abstract variant missing spans: {info}"

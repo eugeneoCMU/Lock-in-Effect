@@ -39,12 +39,12 @@ import sys
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
-BUILD = ROOT / "paper" / "v18" / "build_split"
+BUILD = ROOT / "paper" / "final" / "build_split"
 DEFAULTS = [
-    BUILD / "revised_paper_v18.pdf",
-    BUILD / "revised_paper_v18_main.pdf",
-    BUILD / "revised_paper_v18_online_appendix.pdf",
-    BUILD / "revised_paper_v18_long_abstract.pdf",
+    BUILD / "paper_final_v1.pdf",
+    BUILD / "paper_final_v1_main.pdf",
+    BUILD / "paper_final_v1_online_appendix.pdf",
+    BUILD / "paper_final_v1_long_abstract.pdf",
 ]
 # a glyph's origin may sit a hair outside the box through rounding; a descender
 # at the very bottom margin is fine. 2pt is far below the 12pt line height, so
@@ -122,10 +122,10 @@ def main(argv: list[str]) -> int:
     # in length from the canonical file.
     if not argv[1:]:
         seen = {p.name: scan(p)["pages"] for p in DEFAULTS if p.exists()}
-        canon = seen.get("revised_paper_v18.pdf")
-        parts = (seen.get("revised_paper_v18_main.pdf"),
-                 seen.get("revised_paper_v18_online_appendix.pdf"))
-        variant = seen.get("revised_paper_v18_long_abstract.pdf")
+        canon = seen.get("paper_final_v1.pdf")
+        parts = (seen.get("paper_final_v1_main.pdf"),
+                 seen.get("paper_final_v1_online_appendix.pdf"))
+        variant = seen.get("paper_final_v1_long_abstract.pdf")
         if canon is not None and all(x is not None for x in parts):
             split_ok = parts[0] + parts[1] == canon
             failures += 0 if split_ok else 1

@@ -16,9 +16,9 @@ from liveness_gates import (  # noqa: E402
     convolved_line_check,
 )
 
-TEX = (ROOT / "paper" / "v18" / "revised_paper_v18.tex").read_text()
-VARIANT = (ROOT / "paper" / "v18"
-           / "revised_paper_v18_long_abstract.tex").read_text()
+TEX = (ROOT / "paper" / "final" / "paper_final_v1.tex").read_text()
+VARIANT = (ROOT / "paper" / "final"
+           / "paper_final_v1_long_abstract.tex").read_text()
 
 
 def test_gate_passes_on_the_manuscript():

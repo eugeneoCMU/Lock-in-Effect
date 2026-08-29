@@ -24,7 +24,7 @@ than smoothed over.
 THE QUESTION
 ------------
 The manuscript identifies the lock-in channel as a DIFFERENTIAL, not a level:
-  paper/v18/revised_paper_v18.tex L469  "The design does not identify the aggregate
+  paper/final/paper_final_v1.tex L469  "The design does not identify the aggregate
   recovery level: the level is floor-dominated, and the beta_1 = 0 null ... already
   recovers 85.7% of the benchmark"
 Path B therefore reports central - null = +5.6 points. The ABM has no null: its 13.6%

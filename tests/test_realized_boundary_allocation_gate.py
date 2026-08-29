@@ -54,11 +54,11 @@ from liveness_gates import (  # noqa: E402
 
 # V20 closing-session rescope: app:ledger/app:verdicts live in the standalone
 # replication_appendices.tex; the gated corpus is manuscript + that file.
-TEX = ((ROOT / "paper" / "v18" / "revised_paper_v18.tex").read_text()
-       + "\n" + (ROOT / "paper" / "v18" / "replication_appendices.tex").read_text())
-VARIANT = (ROOT / "paper" / "v18"
-           / "revised_paper_v18_long_abstract.tex").read_text() \
-    + "\n" + (ROOT / "paper" / "v18" / "replication_appendices.tex").read_text()  # V20 rescope
+TEX = ((ROOT / "paper" / "final" / "paper_final_v1.tex").read_text()
+       + "\n" + (ROOT / "paper" / "final" / "replication_appendices.tex").read_text())
+VARIANT = (ROOT / "paper" / "final"
+           / "paper_final_v1_long_abstract.tex").read_text() \
+    + "\n" + (ROOT / "paper" / "final" / "replication_appendices.tex").read_text()  # V20 rescope
 GATES_SRC = (ROOT / "tools" / "liveness_gates.py").read_text()
 RBA = json.loads((ROOT / "hazard" / "data"
                   / "realized_boundary_allocation_results.json").read_text())
