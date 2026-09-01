@@ -71,10 +71,10 @@ Cap-relative benchmark \$764.7B & accounting identity on the actual-holdings pat
 Expectations complement \$87.8B (11.5\%); ex-ante share 75.6--88.5\% & expectations-based complement & Section~\ref{sec:method-benchmark} & \texttt{expectation\_benchmark} \\
 $\beta_1 = 0$ null 88.7\% (97.8\% standalone), in-sample calibration; 85.7\% (94.8\% standalone) at the off-window floor & shared (standalone in parentheses) & Table~\ref{tab:bases} & Path B null leg; off-window legs \texttt{calibration\_reconciliation} \\
 Lock-in marginal, off-window floor, $+5.6$pp $= +\$42.6$B (headline) & basis-invariant & Eq.~\eqref{eq:marginal}; Table~\ref{tab:oosfloor} & central $-$ null paired legs at the off-window floor; \texttt{oos\_identification} \\
-Binding layer on the headline marginal, $[+1.9, +9.1]$pp & basis-invariant & Table~\ref{tab:uncertainty}; Section~\ref{sec:robustness-floor} & \texttt{floor\_inference\_correction\_v2} (restricted wild-cluster inversion; the Webb rung $[+2.9, +8.7]$ is demoted) \\
+Binding layer on the headline marginal, $[+1.9, +9.1]$pp & basis-invariant & Table~\ref{tab:uncertainty}; Section~\ref{sec:robustness-floor} & \texttt{floor\_inference\_correction\_v2} (restricted wild-cluster inversion; the Webb rung $[+2.8, +8.7]$ is demoted) \\
 Lock-in marginal $+9.2$pp $= +\$70.3$B (in-sample point) & basis-invariant & Eq.~\eqref{eq:marginal} & central $-$ null paired legs; \texttt{marginal\_decomposition}, \texttt{marginal\_monthly\_decomposition} \\
 Path B central 97.9\% (107.0\% standalone; 100.0\% composed, mixed basis; 98.1\% converted), in-sample calibration; 91.3\% (100.4\% standalone) at the off-window floor & shared / standalone / composed & Table~\ref{tab:bases} & production Path B leg; off-window legs \texttt{calibration\_reconciliation} \\
-Path A 112.4\% (121.5\% standalone) & shared / standalone & Table~\ref{tab:bases} & spec v4 (non-headline corroboration) \\
+Path A 112.4\% (121.5\% standalone) & shared / standalone & Table~\ref{tab:bases} & spec v4 (non-headline aggregate context) \\
 Production ABM 13.6\% seed mean (11.9\% frozen draw) & shared layer, native & Section~\ref{sec:abm-results} & manifest \texttt{run-2026-07-04-15yr-foldin} \\
 Danish rule-only gap $+\$61.2$B & rule-only counterfactual gap (U.S.-intercept anchor; face denomination) & Table~\ref{tab:danish} & \texttt{danish\_us\_intercept}; incidence bracket \texttt{buyback\_credit\_bracket} \\
 Ginnie overlay marginal $+7.3$pp; differential $+\$38.5$B & shared & Section~\ref{sec:pathb} & \texttt{ginnie\_cpr\_overlay} \\

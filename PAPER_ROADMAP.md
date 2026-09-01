@@ -662,7 +662,7 @@ is the **central** leg at the **in-sample 4.0%** floor (36.27%); see 2.1's trap.
   "conservative" describes the adopted central, not the outside anchors.
 
 **§V.D–F — Path A, Identification, Interpretation (293–513).** Path A: excluded
-corroboration (112.4% shared / 121.5% standalone); its H₀: β_g ≤ 0 test does not
+aggregate context (112.4% shared / 121.5% standalone); its H₀: β_g ≤ 0 test does not
 reject under any bias-respecting scheme (p = 0.093–0.412). The estimand is
 eq:marginal — the difference of two runs — and §V.E's **seven numbered
 qualifications** are the paper's epistemic core: (1) the identified content is the
