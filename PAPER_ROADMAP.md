@@ -51,7 +51,7 @@ floor of housing turnover, just never *because* rates moved — already accounts
 **85.7%** of the shortfall (headline calibration, main accounting basis, production
 floor form; only **35.6%** under the additive form, and see 2.1 for what the null
 does and does not contain). Switching the rate response **on** adds a **lock-in
-marginal** the paper deliberately reports as a range: **+2.3 to +9.1 percentage
+marginal** the paper deliberately reports as a range: **+1.9 to +9.1 percentage
 points** of the benchmark, roughly **$1 billion a month**. The caps were set 1.7–1.9× above what the Fed's own projections said was
 achievable, so most of the "shortfall" was arithmetic, anticipated, and rate-
 inelastic — while the real cost of lock-in lands on households who could not move,
@@ -76,7 +76,7 @@ labeled otherwise.
 | 2 | Rate-inelastic baseline (β₁ = 0 null) | **85.7%** at the off-window floor; 88.7% in-sample; only 35.6% under the additive form | The paper’s central decomposition fact: the floor form, not fine calibration, is what swings it. |
 | 3 | Path B central level | **91.3%** at the off-window floor; 97.9% in-sample (107.0% standalone basis) | Level is floor-dominated → explicitly *not* evidence for the elasticity. |
 | 4 | Lock-in marginal (the identified object) | **+5.6 pp = $42.6B** at the off-window floor (anchor convention); **+9.2 pp = $70.3B** at the in-sample point | The two floors bracket two *estimands*, not two readings of one number (Section 5, pair 1). |
-| 5 | Binding interval on the marginal | **[+2.3, +9.1] pp** (wild-cluster restricted inversion, 31 clusters) | The only quoted range with a coverage property. The identified content is this range, not any interior point. |
+| 5 | Binding interval on the marginal | **[+1.9, +9.1] pp** (wild-cluster restricted inversion, 31 clusters) | The only quoted range with a coverage property. The identified content is this range, not any interior point. |
 | 6 | Production ABM | **13.6%** fifty-seed mean ($103.7B); frozen seed-42 draw 11.9% ($91.0B) | Seed mean is the headline; the frozen draw is only the reproducibility anchor. |
 | 7 | Expectations-based complement | **$87.8B** vs the Fed’s own May-2022 projection; lock-in ≈ half of it (23–80% across floors/allocations, all upper bounds) | Second denominator; caps were expected non-binding, so this is the “surprise” part. |
 | 8 | Cap-design arithmetic | Caps set **1.7–1.9×** the Fed’s own contemporaneous projection | Third contribution; computable ex ante. |
@@ -411,12 +411,12 @@ recognize them, not so you can use them. "Never say" flags actively wrong forms.
 | **depth** (of out-of-the-moneyness) | The gap threshold (≤0 / ≤−0.25 / ≤−0.5 pt) at which a floor read is defined — a second axis besides *when* the months are read. The +9.2→+5.6 demotion is 73.7% window, **26.3% depth** ($20.9B / $7.4B); at matched depth the in-sample point is $63.5B. | "depth cut", "depth ladder" | describing the demotion as purely an out-of-sampleness effect |
 | **rate gap** | Loan coupon minus prevailing market rate (100 bp units in eq:pathB); negative = locked in. | "gap"; "coupon gap"/"yield gap" only inside the Danish/Berger discussion | mixing its units: g is in 100 bp units, g̃ decimal, ABM's r is a rate *level* |
 | **Path B** (the headline estimator) | Loan-level literature-calibrated microsimulation, competing prepayment/default risks, stratified 75,000-loan Freddie draw (40,234 window-start survivors). Every headline level and marginal is Path B's. | "microsimulation form"; **hybrid pipeline** = Path B CPR scored through the ABM accounting layer (carries the Danish legs) | — |
-| **Path A** (the excluded corroboration leg) | Stratum-month discrete-time hazard, Poisson pseudo-ML, full 2017–21 origination universe (296 cells / 295 fixed effects). "Aggregate context only"; excluded from every headline by pre-commitment; its rate-gap coefficient's sign is *not distinguishable from zero* under any bias-respecting construction. | "cohort-hazard form" | citing its 112.4% (shared) / 121.5% (standalone) as support for anything |
+| **Path A** (the excluded aggregate-context leg) | Stratum-month discrete-time hazard, Poisson pseudo-ML, full 2017–21 origination universe (296 cells / 295 fixed effects). "Aggregate context only"; excluded from every headline by pre-commitment; its rate-gap coefficient's sign is *not distinguishable from zero* under any bias-respecting construction. | "cohort-hazard form" | citing its 112.4% (shared) / 121.5% (standalone) as support for anything |
 | **the hazard framework** | The container for Paths A **and** B, used only for the paradigm contrast with the ABM. | "hazard side/leg/path" | attaching numbers to it — numbers belong to Path B or Path A by name |
 | **the ABM** (synthetic-population stress test) | 10,000-household agent-based model, utility-maximizing relocation rule, synthetic population drawn to FRED medians. A stress test, not an estimate. | "production ABM", "household-choice model" | "the ABM shows household choice doesn't explain the shortfall" without the qualifier **synthetic-population** |
 | **accounting basis** (four) | standalone-scorer / **shared** (main-text: nets the common $69.56B curtailment flow = flat 9.1 pp) / full-book (reweights to book coupon mix) / composed (both). Pure presentation; cancels from every marginal. | "benchmark-consistent shared", "the shared layer"; pick one hyphenation of "standalone-scorer" | "berger basis", "cap-shortfall basis" (neither exists in the paper) |
 | **face vs cash accounting** | The Danish leg's *incidence* axis — retired balance credited at face vs net of the market discount. Flips the institutional gap's sign (+$61.2B face → −$51.0B cash). Face answers the benchmark question, cash the reserve-drain question; the difference is the par windfall, a transfer. | "cash-haircut reading", "balance-adjustment reading" | confusing this axis with the four accounting bases (which never flip signs) |
-| **the binding interval** [+2.3, +9.1] pp | The floor read's own sampling error propagated at the central elasticity: wild-cluster **restricted inversion**, 31 clusters, selected by a pre-committed coverage rule (measured coverage 94.3%/95.1%). Webb [+2.9, +8.7] and CR2 Bell–McCaffrey [+2.4, +9.1] stand *beside* it. Prices one layer only; no elasticity sampling error exists anywhere in the paper. | "binding layer", "quoted interval" | preferring the narrower percentile [+3.0, +8.0] — it under-covers, and its construction silently excluded 26/1000 off-grid draws |
+| **the binding interval** [+1.9, +9.1] pp | The floor read's own sampling error propagated at the central elasticity: wild-cluster **restricted inversion**, 31 clusters, selected by a pre-committed coverage rule (measured coverage 94.3%/95.1%). Webb [+2.8, +8.7] and CR2 Bell–McCaffrey [+2.4, +9.1] stand *beside* it. Prices one layer only; no elasticity sampling error exists anywhere in the paper. | "binding layer", "quoted interval" | preferring the narrower percentile [+3.0, +8.0] — it under-covers, and its construction silently excluded 26/1000 off-grid draws |
 | **the calibration box** (+2.1 to +13.2) | The pre-committed 7-floor × 3-band grid (21 cells; a *separate* 27-cell joint floor-ladder × band rerun also exists). A grid over conventions with **no coverage property** — the elasticity band is Liebersohn–Rothstein's *specification* range, not an estimate with a standard error. | "the box"; beware "envelope" (also names the 11.06-pt Fannie gate — don't reuse the word) | treating box membership as statistical confidence |
 | **production floor form (hard maximum) vs additive form** | *How* the floor combines with the voluntary hazard: production takes max(floor, hazard) — censoring the elasticity where the floor binds; additive combines on the survival scale, never censoring. First-order: flips the null 85.7%↔35.6% and the marginal +5.6↔+11.2. The **mixture curve** in ω replaces the two-point fork. | "max form", "competing-risks form/combination", "form-conditional hull" (+3.5 to +13.1) | reading the additive +11.2 as stronger evidence for lock-in (the fork is about censoring, not the elasticity) |
 | **U.S.-intercept anchor (rule-only)** | The production Danish transplant: Berger et al.'s moving-flatness, level anchored at the U.S. zero-gap hazard, floor retained — only the payoff rule changes. +$61.2B. The two other named anchors: **Danish-level** (bracketing, −$99.9B), **mechanism-extrapolated** (+$925.5B, superseded — the paper's own earlier figure, corrected by an order of magnitude). | "rule-only transplant" | "the Danish counterfactual" bare, without one of the three anchor labels |
@@ -453,7 +453,7 @@ distinction; getting any of these backwards is a substantive error, not a nuance
 6. **Cap-relative benchmark ($764.7B) vs expectations-based complement ($87.8B).**
    Two denominators for one episode (never-binding caps vs the Fed's own May-2022
    projection). The marginal is ~5.6% of the first and ~49% of the second.
-7. **Binding interval [+2.3, +9.1] vs calibration box [+2.1, +13.2] vs hull
+7. **Binding interval [+1.9, +9.1] vs calibration box [+2.1, +13.2] vs hull
    [+3.5, +13.1].** A sampling interval with measured coverage vs a convention grid
    vs a two-form envelope. Their widths are NOT close (6.8 vs 11.1 vs 9.6 points),
    and only the first has any coverage property. The hull may never be quoted alone
@@ -682,9 +682,9 @@ transports (+4.70 calendar-standardizing vs +10.69 activity-matched) deliberatel
 stay un-netted.
 
 - **The inference ladder** (tab:ladder): binding = restricted wild-cluster inversion
-  [+2.3, +9.1], selected by a pre-committed coverage rule (94.3%/95.1% measured) —
+  [+1.9, +9.1], selected by a pre-committed coverage rule (94.3%/95.1% measured) —
   with the disclosed caveat that the rule was applied *after* seeing which way it
-  fell. Webb [+2.9, +8.7] demoted from binding, stands beside; CR2 Bell–McCaffrey
+  fell. Webb [+2.8, +8.7] demoted from binding, stands beside; CR2 Bell–McCaffrey
   [+2.4, +9.1] qualifies; percentile [+3.0, +8.0] under-covers (and silently
   excluded 26/1000 off-grid draws — truncation would print [+2.28, +8.01]).
 - The PSA seasoning-ramp sweep is the widest within-form convention layer; aggregate
@@ -910,7 +910,7 @@ tab:bootstrap = 21, tab:seasonalfloor = 25.
 | **F — Panel, uncertainty, ridge** | Verifies the ridge device (numerical no-op; warm-start convention; production point survives dropping inestimable strata); Table 20 (fitted on the full universe, not the 75k sample), Table 21 (both bootstrap schemes). | The ridge-selection holdout later serves as the out-of-sample diagnostic, so the reported RMSE is weakly selection-favored — a carried caveat. |
 | **G — Theil / dynamic fit** | Localizes each estimator's monthly error (ABM = level bias; Path B = under-dispersion; Path A intermediate); no estimator beats a naive no-change forecast (U₂ > 1). | Two known text-vs-table wobbles on Path A's Theil shares (26.5/63.0 prose vs 30.6/58.8 table; U₁ 0.431 vs 0.438) — flagged by review, unresolved; don't silently reconcile. |
 | **H — Composition shift** | Quantifies Freddie-sample vs SOMA-book covariate shift (PSI); every shift carries a committed signed bound; missing dimensions covered by a Freddie–Fannie stability check. | — |
-| **I — Floor-sweep mechanics** | Where the floor machinery lives: the **failed** ±2pp stability rule (moved +10.8 → +5.5; reinterpreted as max-form censoring mechanics), the pooled off-window read's rejection, the 2018-leg operative anchor, the depth ladder, and the twelve-rung inference ladder (tab:ladder). | Ladder wrinkles: the artifact's `landing_branch` string records L1 ("Webb retains"), contradicting the frozen rule — the tablenote is the adjudication; three wide rungs' lower endpoints are censored at the grid's 6.0% edge (true intervals run below the printed +2.3); CR1 = CR3 at one decimal is a leverage accident. |
+| **I — Floor-sweep mechanics** | Where the floor machinery lives: the **failed** ±2pp stability rule (moved +10.8 → +5.5; reinterpreted as max-form censoring mechanics), the pooled off-window read's rejection, the 2018-leg operative anchor, the depth ladder, and the twelve-rung inference ladder (tab:ladder). | Ladder wrinkles: the artifact's `landing_branch` string records L1 ("Webb retains"), contradicting the frozen rule — the tablenote is the adjudication; three wide rungs' lower endpoints WERE censored at the grid's former 6.0% edge; the FP2-B1 extension decensored them (+2.0/+1.9/+2.2, each below the +2.3 that edge printed); CR1 = CR3 at one decimal is a leverage accident. |
 | **J — Behavioral extension mechanics** | Each ABM extension moves the wrong way or for the wrong reason: loss aversion = recalibration artifact; curtailment's drop was predicted ex ante; the multi-vintage drop *inverts* the stated hypothesis and is left undiagnosed. | The DTI sweep is non-monotone with 43% at its minimum — looks like cherry-picking, but the decomposition shows the pattern doesn't survive holding θ fixed. |
 | **K — WAL quantification** | The duration mechanism in maturity units; documents tab:wal (printed in §VI). | The Berger-recalibrated Danish CPR surface is near-flat (~quarter point across the grid) — the moving-flatness underneath the WAL rate-invariance claim. |
 | **L — 15-year fold-in + units fix** | Why the fold-in is structural-only (the fully native treatment produced out-of-bounds values), and the rate-gap **units correction**: applied to a decimal gap the imported coefficient was numerically inert; production applies it per 100 bp. Disabling either change exactly reproduces the superseded figures. | This is the appendix behind both the spec fork (§VII.A) and superseded figure #7. |
@@ -963,7 +963,7 @@ benchmark; the $87.8B expectations complement (allocation-conditional); the
 
 **Identified (within-model; the paper's own "identifies")**: the lock-in marginal
 as a **bounded range**, stated separately by form; the binding interval
-[+2.3, +9.1]; the marginal's basis-invariance; the window/depth demotion
+[+1.9, +9.1]; the marginal's basis-invariance; the window/depth demotion
 decomposition; the distributional-incidence tilt (the one placebo-surviving
 composition result); the cross-design threshold crossing as a fact about the test.
 
@@ -1062,9 +1062,9 @@ region share a bracket.
 
 | Interval (pp) | What it is | Status |
 |---|---|---|
-| **[+2.3, +9.1]** | Floor read's own sampling error at central δ: restricted wild-cluster inversion, 31 clusters, measured coverage 94.3%/95.1% | **BINDING** (pre-committed coverage rule; note: applied after seeing which way it fell) |
+| **[+1.9, +9.1]** | Floor read's own sampling error at central δ: restricted wild-cluster inversion, 31 clusters, measured coverage 94.3%/95.1% | **BINDING** (pre-committed coverage rule; note: applied after seeing which way it fell) |
 | [+2.4, +9.1] | CR2 Bell–McCaffrey rung | qualifies, stands beside |
-| [+2.9, +8.7] | Webb wild-t rung | demoted beside (coverage 90.8%/91.4% vs the bar) — not "superseded history", still printed |
+| [+2.8, +8.7] | Webb wild-t rung | demoted beside (coverage 90.8%/91.4% vs the bar) — not "superseded history", still printed |
 | [+3.0, +8.0] | Percentile read of the same layer | demoted: under-covers; excluded 26/1000 off-grid draws (truncating gives [+2.28, +8.01]) |
 | [+4.63, +6.92] | Loan/stratum cluster bootstrap (a *different* layer; 25.8 effective clusters) | lower bound on sampling uncertainty |
 | [+2.80, +8.99] | The two layers convolved as independent | itself a lower bound |
@@ -1081,7 +1081,7 @@ region share a bracket.
 
 | Unit | Means | Examples |
 |---|---|---|
-| **pp / "points"** | percentage points **of the $764.7B benchmark** (~$7.65B per point) | +5.6 pp, [+2.3, +9.1] |
+| **pp / "points"** | percentage points **of the $764.7B benchmark** (~$7.65B per point) | +5.6 pp, [+1.9, +9.1] |
 | **%** | a recovery level or a share of a book/pool | 91.3%, 20.4% Ginnie, 43% DTI |
 | **bp** | basis points of interest rate | 100 bp gap unit, 150 bp freeze trigger |
 | **points of CPR** | floor-read errors and floor levels | floor SE 0.39–0.46, the 4.99% floor |
@@ -1102,7 +1102,7 @@ which.
   curtailment-stage recovery.
 - **88.7%** — the null's in-sample shared recovery *and* the 6.0%-floor-row bind
   share in tab:floorband.
-- **+2.3** — binding interval's lower edge *and* the marginal implied by the
+- **+2.3** — the binding interval's FORMER grid-censored lower edge (now +1.9) *and* the marginal implied by the
   *disqualified* pooled 6.07% floor read (opposite rhetorical roles).
 - **59.3%** — cross-design recalibrated recovery *and* the SMD parity-gate replay
   (59.303%) *and* the additive central leg's recovery at the 4.695% anchor.
