@@ -455,7 +455,7 @@ distinction; getting any of these backwards is a substantive error, not a nuance
    projection). The marginal is ~5.6% of the first and ~49% of the second.
 7. **Binding interval [+1.9, +9.1] vs calibration box [+2.1, +13.2] vs hull
    [+3.5, +13.1].** A sampling interval with measured coverage vs a convention grid
-   vs a two-form envelope. Their widths are NOT close (6.8 vs 11.1 vs 9.6 points),
+   vs a two-form envelope. Their widths are NOT close (7.2 vs 11.1 vs 9.6 points),
    and only the first has any coverage property. The hull may never be quoted alone
    — always together with the binding interval.
 8. **The hazard framework vs Path B.** Framework = A + B; headline numbers are B
@@ -1067,7 +1067,7 @@ region share a bracket.
 | [+2.8, +8.7] | Webb wild-t rung | demoted beside (coverage 90.8%/91.4% vs the bar) — not "superseded history", still printed |
 | [+3.0, +8.0] | Percentile read of the same layer | demoted: under-covers; excluded 26/1000 off-grid draws (truncating gives [+2.28, +8.01]) |
 | [+4.63, +6.92] | Loan/stratum cluster bootstrap (a *different* layer; 25.8 effective clusters) | lower bound on sampling uncertainty |
-| [+2.80, +8.99] | The two layers convolved as independent | itself a lower bound |
+| [+1.71, +9.38] | The two layers convolved as independent | itself a lower bound |
 | [+9.17, +9.23] / [+8.27, +10.19] | In-sample point's within-stratum / stratum-cluster intervals (around +9.2, not +5.6) | first is RETRACTED (30.8× understatement in-window; the ~37× figure is the off-window measurement); second is the operative scheme |
 | — grids below: **no coverage property** — | | |
 | [+4.3, +6.8] | Defensible off-window floor range (max form) | calibration range |
