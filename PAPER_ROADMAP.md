@@ -251,8 +251,8 @@ transform. Nothing about β₁ is estimated in this paper.
 **The estimand and the band.** They estimate that a 100 bp rise in the prevailing
 rate above the locked-in coupon reduces **quarterly mobility probability** by
 **5.5% to 7.7%**, depending on specification. That proportional decline is δ. The
-paper adopts the **6.5% midpoint ex ante** as central, band edges as sensitivity
-bounds.
+paper's **adopted central value is 6.5%, fixed ex ante** — not the band's arithmetic
+midpoint, which is 6.6% — with the band edges as sensitivity bounds.
 
 **The transform (eq:beta1).** Their estimand is a quarterly probability; eq:pathB
 needs a monthly proportional-hazard coefficient. The survival-function conversion:
@@ -269,7 +269,7 @@ not use** — it survives only in the appendix.
 | δ | Role | \|β₁\| | Marginal it produces |
 |---|---|---|---|
 | 5.5% | L&R band low | 0.0577 | band low edge |
-| **6.5%** | **L&R midpoint, adopted ex ante** | **0.068571** (prints 0.069 in tab:params) | **+$70.3B / +9.2 pp in-sample; +$42.6B / +5.6 pp at the headline floor** |
+| **6.5%** | **L&R band, adopted central value, fixed ex ante** | **0.068571** (prints 0.069 in tab:params) | **+$70.3B / +9.2 pp in-sample; +$42.6B / +5.6 pp at the headline floor** |
 | 7.7% | L&R band high | 0.0817 | +$79.5B / +10.4 pts at the production floor |
 | 9.0% | Fonseca–Liu, *outside* anchor | ≈0.096 | +$87.9B / +11.5 pts at the production floor |
 
@@ -476,8 +476,8 @@ distinction; getting any of these backwards is a substantive error, not a nuance
     attribution — and lands at +0.9 pp under the production form, *outside* the
     binding interval (form-conditional: +8.5 under the additive form).
 12. **The elasticity band (5.5–7.7%) vs a confidence interval.** It is
-    Liebersohn–Rothstein's specification range with the adopted midpoint at its
-    centre. No sampling error of theirs is propagated anywhere.
+    Liebersohn–Rothstein's specification range, with the adopted central value
+    6.5% sitting inside it. No sampling error of theirs is propagated anywhere.
 13. **Recalibrated (59.3% / 60.2% / 76.3%) vs frozen (20.9% / 22.0% / 12.6%)
     cross-design variants.** Identical real covariates; they differ only in whether
     θ is re-derived to hold the 4–5% turnover floor. The frozen leg misses that
@@ -636,9 +636,9 @@ household decision function. Path B: stratified 75,000-loan Freddie draw (40,234
 window-start survivors), 100 PSA seasoning ramp, floor = SMM-equivalent of 4% annual
 CPR broadcast flat (acyclical, flat in age — flagged, deliberately not swept: the
 age-rising pattern is carried by the refi-contaminated 2019 leg), imported
-elasticity β₁ = 0.0686 (Liebersohn–Rothstein 5.5–7.7% band, 6.5% midpoint adopted ex
-ante, converted via eq:beta1; P_q = 0.06 is a conversion auxiliary the transform is
-insensitive to). Central run $818.5B = 107.0% standalone. **Two** named transport
+elasticity β₁ = 0.0686 (Liebersohn–Rothstein 5.5–7.7% band, 6.5% the adopted central
+value, fixed ex ante, converted via eq:beta1; P_q = 0.06 is a conversion auxiliary
+the transform is insensitive to). Central run $818.5B = 107.0% standalone. **Two** named transport
 assumptions travel with the import — aggregation/response homogeneity (named, not
 priced; the source estimand is a ZIP-code-level moving hazard) and survival selection
 (signed toward attenuation, priced by the ξ-bracket) — plus a **separate mapping**
@@ -766,7 +766,7 @@ the Danish counterfactual.
   payoff rule. The paper's closing verdict: the mobility relief such a rule would
   provide "remains the better-supported and larger effect."
 - Traps: +$61.2B is at the **in-sample** floor (compare $70.3B; the off-window
-  counterpart is +$28.2B); $0.42–1.66B per *month* (marginal in foregone principal)
+  counterpart is +$28.2B); $0.35–1.66B per *month* (marginal in foregone principal)
   vs ~$1B per *year* (negative carry); tab:danish's rows b and c share a U.S.-leg
   label with different values ($84.5B ABM-basis vs $749.0B hybrid) — row b is
   deliberately not the $91.0B headline because both legs must share one calibration
@@ -931,7 +931,7 @@ The audit trail, two sections:
   `bootstrap_pathb_cluster` appears twice, once per floor) indexes every cited run.
   Two disclosed permanences: **two freezes ran on uncommitted trees**, so the ABM
   headline is not commit-addressable (identify specs by manifest and content, not
-  git commit); and spec-before-run is only *partly checkable* from the document (25
+  git commit); and spec-before-run is only *partly checkable* from the document (27
   standalone specs in `specs/`; the rest rest on script headers).
 - **L2 — Verdict appendix (`tab:verdicts`).** Every pre-committed rule with its
   post-run adjudication — the paper's own "read the credential net of this" device.
@@ -943,8 +943,9 @@ The audit trail, two sections:
   was superseded by the pre-committed coverage rule; the in-window floor was
   demoted (the +9.2 → +5.6 event); the pooled-read disqualification was itself
   re-adjudicated as weaker (conclusion retained); the within-stratum CI was
-  retracted (37×); the κ grid was re-labeled dispersion; the timing rule was
-  withheld to levels; the cross-design threshold was enforced (the withdrawal);
+  retracted (30.8× in-window against 37× off-window); the κ grid was re-labeled
+  dispersion; the timing rule was withheld to levels; the cross-design threshold was
+  enforced (the withdrawal);
   the ABM-null probe is stamped `pre_committed: false`; a FRED revision halted one
   parity tier (tolerance kept, re-run — not a failed test); the Danish redemption
   validation forced the gap to a band. Trap: "108 green gates" appears as evidence
@@ -1017,8 +1018,9 @@ standalone; sign not distinguishable from zero; no forward precision).
 7. **The Danish-level anchor as production** (−$99.9B; demoted to bracket).
 8. **The mechanism-extrapolated Danish gap** ($925.5B; superseded, order of
    magnitude).
-9. **The within-stratum bootstrap CI [+9.17, +9.23]** (retracted; ~37×
-   understatement).
+9. **The within-stratum bootstrap CI [+9.17, +9.23]** (retracted; this interval is
+   the in-window one, and its understatement of the cluster read is **30.8×** — the
+   ~37× figure is the *off-window* measurement).
 10. **Webb [+2.9, +8.7] as the binding layer** (demoted beside the restricted
     inversion by the pre-committed coverage rule).
 11. **The "broad-based" homogeneity label** (placebo-earned; only the >30×
@@ -1067,14 +1069,14 @@ region share a bracket.
 | [+2.8, +8.7] | Webb wild-t rung | demoted beside (coverage 90.8%/91.4% vs the bar) — not "superseded history", still printed |
 | [+3.0, +8.0] | Percentile read of the same layer | demoted: under-covers; excluded 26/1000 off-grid draws (truncating gives [+2.28, +8.01]) |
 | [+4.63, +6.92] | Loan/stratum cluster bootstrap (a *different* layer; 25.8 effective clusters) | lower bound on sampling uncertainty |
-| [+1.71, +9.38] | The two layers convolved as independent | itself a lower bound |
+| [+1.71, +9.38] | The two layers convolved as independent, re-derived on the restricted rung (run `layer_convolution_restricted`) | **the one-number sampling recommendation** — 7.68pp wide against the binding interval's 7.24, so the Batch-A "lower bound on the re-derived pair" label retired; independence still puts it at the *lower* edge of the dependence bracket (comonotone width 9.67pp) |
 | [+9.17, +9.23] / [+8.27, +10.19] | In-sample point's within-stratum / stratum-cluster intervals (around +9.2, not +5.6) | first is RETRACTED (30.8× understatement in-window; the ~37× figure is the off-window measurement); second is the operative scheme |
 | — grids below: **no coverage property** — | | |
 | [+4.3, +6.8] | Defensible off-window floor range (max form) | calibration range |
 | [+3.9, +7.5] | Same, jointly with the elasticity band | calibration range |
 | [+2.1, +13.2] | The calibration box (7 floors × 3 elasticities; a separate 27-cell joint sweep also exists) | convention grid |
 | [+3.5, +13.1] | Form-conditional hull (widened at bottom from +3.89) | two-form envelope; quote only beside the binding interval |
-| [+3.3, +16.5] | PSA level sweep | widest within-form convention layer |
+| [+3.3, +16.5] | PSA level sweep (75–150 PSA on both legs) **at the in-sample calibration**; the same sweep at the off-window floor runs +0.9 to +15.6 | widest within-form convention layer |
 | [+0.9, +15.6] | Convention envelope across named variants | no coverage; the scaled null's +0.9 sits outside the binding interval |
 
 ### 8.3 Four unit systems that all print as small numbers
@@ -1115,6 +1117,25 @@ which.
   the U.S. (1,683,124) and Danish (1,683,082) panels.
 - **+3.7** — the age-standardized floor's directly measured marginal *and* the
   vintage overlay's (3.67 vs 3.70; a printed rounding accident).
+- **11.5** — the $87.8B expectations shortfall as **11.5% of the cap-relative
+  benchmark** *and* the Fonseca–Liu outside anchor's **+11.5 points** (+$87.9B) at
+  the production floor. Unrelated objects; the manuscript itself calls the near-equal
+  dollar figures "a coincidence of magnitude". (A third: the same absolute bound is
+  11.5% of the +$42.6B headline marginal.)
+- **1.9** — the binding interval's **lower endpoint** (+1.9pp, since FP2-B1
+  decensored it) *and* the **1.9-point width** of the in-sample stratum-cluster read
+  [+8.27, +10.19] that the calibration box's 11.1 points is compared against *and*
+  the +1.9 by which covariate endpoints move the in-sample marginal (tab:uncertainty).
+  Also 1.7–1.9× as the ratio of the shortfall to the Fed's own contemporaneous
+  runoff projection.
+- **91.0** — the ABM's **$91.0B frozen seed-42 production draw** *and* the **91.0%**
+  heavy-tail (t₅) leg of the pre-committed coverage bar (93.0%/91.0%) that selects the
+  restricted inversion. Different units entirely; and 91.3% (off-window Path B
+  recovery) sits one tenth away as a third object.
+- **30.8** — the within-stratum bootstrap's **30.8× in-window understatement** of
+  loan-sampling uncertainty *and* the **30.8% interest-only share** at which the
+  Danish rule-only face gap crosses zero (before the 5.61% roll-off feedback lifts
+  the crossing to 34.3%).
 
 ### 8.5 Confusable clusters (each line is one family; members are NOT interchangeable)
 
@@ -1147,8 +1168,8 @@ which.
   4.991, 5.334 (the 2018 depth reads; 4.99 = mid-grid) / 5.185–5.19 (like-for-like
   Freddie pooled) / 5.2156 (calendar-standardized) / 5.51 (age-standardized, 84%
   imputed) / 5.52 (Fannie) / 6.07–6.1 (rejected pooled read) / 6.91 (rejected 2019
-  leg) / 3.1533 (activity-matched transport). **5.5–7.7% with midpoint 6.5% is not
-  a floor** — it is δ, the elasticity band.
+  leg) / 3.1533 (activity-matched transport). **5.5–7.7% with adopted central value
+  6.5% is not a floor** — it is δ, the elasticity band.
 - **Empirical vs simulated CPR**: back-outs 5.14 (ABM basis, default) / 5.52
   (hazard basis) / 5.79 (note-rate WAC); simulated means 4.76 (Path B) / 11.68
   (ABM) / 3.34 (Path A) / 5.61 vs 3.39 (Danish legs, U.S.-intercept vs
@@ -1243,9 +1264,9 @@ convention is ≥ 1 per tag, but several gates and tests pin *exact* per-tag cou
 assembly + prose + index), so never add or delete a run citation without grepping
 `tools/liveness_gates.py` and `tests/` for that tag first;
 verification = `python3 tools/liveness_gates.py` (129 gates) + `python3 -m pytest
-tests/ -q` (1,139 tests, 1 skip); ~644 literal spans in the manuscript and 119 in
+tests/ -q` (1,166 tests, 1 skip); ~644 literal spans in the manuscript and 119 in
 the appendices are gate/test-pinned — run the protected-span check *before* editing
-the tex. Never execute anything under `abm/` or `hazard/` (pre-registered runs;
+the tex. Never execute anything under `abm/` or `hazard/` (pre-committed runs;
 spec-before-run). Reading JSON artifacts is always fine.
 
 ## 11. How the paper got here — the demotion history
@@ -1253,16 +1274,51 @@ spec-before-run). Reading JSON artifacts is always fine.
 The current text is the residue of ~30 adversarial rounds. The big state changes,
 newest first, with durable records:
 
+- **Path A vocabulary standardization** (2026-09-01): "corroborate" was reserved for
+  the external anchors (Graybill, Fonseca, na2024) that earn it and stripped from every
+  Path A site — tex:174 "corroborates at 112.4%" became "lands at", tex:291
+  "aggregate-corroboration status" became "aggregate-context status only", and tex:295
+  lost both its tail ("aggregate context only") and its opening appositive
+  ("aggregate-context leg"), the latter invisible to the `.{40}corroborat.{60}` audit
+  sweep because the token sits at column 24. The same pass pulled this file and
+  `replication_appendices.tex` up to the re-landed intervals (eight binding-interval
+  sites and three Webb sites here; the appendices' Webb rung +2.9 → +2.8; their :77
+  "non-headline corroboration" → "non-headline aggregate context") and cleared two
+  derived residuals: a look-alike-pair width still computed as 9.1 − 2.3 = 6.8 (it is
+  7.2) and this file's taxonomy row still printing the pre-rederivation convolved pair
+  [+2.80, +8.99]. Commits `9def7c1`, `99fa5bc`, `000849a`, `e3697b8`, `1fc54d4`; gates
+  and tests unmoved throughout.
+- **Fresh-Panel-2 batches** (2026-08-29): the panel's one surviving critical finding
+  was that the binding interval's lower endpoint was **grid-censored** at the floor
+  grid's 6.0% edge — the printed +2.3 was the 6.0 row's value, not a measurement.
+  Batch A propagated that (already artifact-derived) disclosure to all nine print sites,
+  withdrew the convolved pair's one-number recommendation, and fixed fig5's
+  "pre-registered" label; the abstract went 263 → 273 words. Batch B measured what the
+  flag disclosed: run `floor_grid_extension` added four paired-leg rows out to 7.00%
+  (four parity gates PASS, all five ex-ante bands hit), v2/v3 were regenerated under
+  `FloorMapping(extended=True)`, and **the binding interval decensored to
+  [+1.9, +9.1]** ($14.31B–$69.66B), the Webb rung moving with it to [+2.8, +8.7]. Run
+  `layer_convolution_restricted` then re-derived the convolved pair on the adjudicated
+  rung at **[+1.71, +9.38]** (width 7.68 against the binding 7.24, zero truncation), all
+  three of *its* ex-ante bands missed and reported as misses; the one-number
+  recommendation returned, pointing there. Flow terms $0.42 → $0.35–1.66B per month;
+  abstract back to 263; spec count 25 → 27; 1,166 tests and all gates green. Records:
+  `specs/RECORD_fresh_panel2_batchA.md`, `specs/RECORD_fresh_panel2_batchB.md`.
 - **v20 review-fix round** (2026-08): paradigm reading formally withdrawn (gated by
   `tests/test_paradigm_withdrawal_gate.py`, 18 collected tests); §VII.D repaired
   (was still calling the withdrawn reading corroborated); the §VII.A spec-fork
   explanation written; berger2026 qualified everywhere; readability pass (sentences
   split ~44 → ~28 words mean). Handoff: `specs/RECORD_v20_review_fixes_handoff.md`.
-- **N1 relanding** (v20): the binding interval became **[+2.3, +9.1]** via the
-  restricted inversion under the frozen coverage rule; Webb [+2.9, +8.7] demoted
-  beside (it was briefly the binding layer — an inconsistency at line 1298's
-  intro sentence vs the ladder note is a known leftover). Record:
-  `specs/RECORD_v20_N1_relanding.md`.
+- **N1 relanding** (v20, 2026-08-05): the binding interval became **[+2.3, +9.1]** via
+  the restricted inversion under the frozen coverage rule (restricted covers 94.3/95.1
+  against the pre-committed 93.0/91.0 bar; Webb covers 90.8/91.4 and fails), and the
+  Webb rung — briefly the binding layer — was demoted beside it, printing
+  **[+2.9, +8.7]** at the time. Both are pre-extension prints of the *same two rungs*:
+  FP2-B1 later re-mapped them to **[+1.9, +9.1]** and **[+2.8, +8.7]**, so +2.3 and +2.9
+  are censored-grid edges, not different constructions, and current text quoting +2.9 as
+  the Webb rung is stale rather than alternative. (An inconsistency at line 1298's intro
+  sentence vs the ladder note was a known leftover of this round; not re-checked since
+  the FP2-B re-printing.) Record: `specs/RECORD_v20_N1_relanding.md`.
 - **Panel review driving the round**: `panel_review_v19.md` +
   `improvement_plan_v19.md` + `specs/RESPONSE_v20_panel_draft.md`.
 - **R28–29** (2026-07): the floor renamed **"baseline turnover floor"** globally

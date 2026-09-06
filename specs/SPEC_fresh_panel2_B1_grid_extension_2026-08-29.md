@@ -8,7 +8,13 @@ A5 box-edge sentence as drafted in §5.4; A6 tab:oosfloor gains
 provenance-marked extension rows. Committed BEFORE any run per Protocol
 spec-before-run.**
 
-**Amendment log:** (none)
+**Amendment log:** 2026-09-05 (documentation only, no re-run) — §P4's "31
+committed uncensored endpoints" is a miscount carried into the record: the run
+enumerated **30** (`floor_grid_extension_results.json`,
+`parity_gates.P4_blast_radius.n_endpoints_5_to_6` = 30; 31 is the few-cluster
+design's cluster count). The bound, the tolerance and the reported movement are
+unaffected. Line 84 is left verbatim as the frozen pre-run text; see
+`specs/RECORD_fresh_panel2_batchB.md` §"Addendum 2026-09-05".
 
 **Panel trace:** fresh-panel-2 f1, CONFIRMED CRITICAL (2026-08-29, workflow
 `wf_c9ee855c-174`): the binding interval's lower endpoint is grid-censored. The

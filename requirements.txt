@@ -23,5 +23,8 @@ google-auth-httplib2
 google-api-python-client
 
 # Optional, imported lazily inside functions and not needed for the test suite:
-#   pypdf   -> tools/render_gate.py   (PDF render checks; its test skips without a built PDF)
-#   PyMuPDF -> tools/extract_gmar_dec25.py  (imports as `fitz`)
+#   pypdf      -> tools/render_gate.py   (PDF render checks; its test skips without a built PDF)
+#   PyMuPDF    -> tools/extract_gmar_dec25.py  (imports as `fitz`)
+#   pylatexenc -> tools/tex_validate.py  (the LaTeX-walker parse check; without it that
+#                 one check reports "pylatexenc unavailable - parse check skipped" and the
+#                 other five still run)

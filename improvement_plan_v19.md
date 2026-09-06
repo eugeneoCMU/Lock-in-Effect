@@ -1,5 +1,12 @@
 # Improvement Plan — `revised_paper_v19.pdf` → v20
 
+> **SUPERSEDED 2026-09-05.** A 2026-08-04 planning input. The round it plans has
+> since executed — the v20 review fixes, N1's re-landing, and Fresh-Panel-2
+> Batches A and B — so the `[+2.9, +8.7]` binding interval quoted throughout is
+> superseded by **[+1.9, +9.1]** (Webb's [+2.8, +8.7] is reported beside it, no
+> longer as the binding layer). Kept as the record of what was planned; the body
+> below is left as written.
+
 **Input:** the five-reviewer panel package (`~/Downloads/revised_paper_v19_PANELREV.md`, 2026-08-04). Decision: Major Revision, panel mean ≈ 68.1/100.
 **Coverage rule:** every panel item is accounted for below — 5 must-fix (R1–R5), 10 should-fix (S1–S10), the Priority-3 list, DA C1–C5 (required responses), DA M1–M6, DA m1–m6, the DA's 6 alternative paths, and all 29 Questions for Authors. Nothing is silently dropped; the traceability table at the end maps every ID to a plan item or an explicit no-action disposition.
 **Overall effort:** Substantial — ~2.5–4 calendar weeks. The load is dominated by the restructure (Phase 3); only three items need new runs, all small.

@@ -9,7 +9,8 @@ Headline dollar and CPR figures cited in `TECHNICAL.md` and the paper must match
 
 Lineage: `run-2026-07-04` → `run-2026-07-04-15yr-foldin` →
 `run-2026-07-05-native15yr` → `run-2026-07-05-berger`. The paper's
-Table 2 ABM row quotes the `run-2026-07-04-15yr-foldin` freeze
+Table 8 (`tab:estimators`) ABM row -- and its summary row in Table 1
+(`tab:headline`) -- quotes the `run-2026-07-04-15yr-foldin` freeze
 (see TECHNICAL.md §12 for which tag carries which headline).
 
 ```bash

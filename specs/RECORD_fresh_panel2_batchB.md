@@ -110,3 +110,46 @@ gates+tests before each edit family.
 - A4/A5 wording landed under the blanket "work on it" adoption; both are
   Eugene-revisable words, and the verdict-appendix convention preserves history
   either way.
+
+## Addendum 2026-09-05 (review)
+
+Nothing above is rewritten. This section records what a later read found when the
+record's counts were checked against the frozen artifacts and the landed text.
+
+**Counts that were re-derived and differ.**
+
+- §B1, line 26 — "the 31 committed uncensored (5,6)-interval endpoints". The frozen
+  artifact says 30: `hazard/data/floor_grid_extension_results.json`,
+  `parity_gates.P4_blast_radius.n_endpoints_5_to_6` = 30. 31 is the *cluster* count
+  (the 31 clusters of the few-cluster coverage design quoted two paragraphs away in
+  the manuscript), the likely source of the slip. The movement figure is unaffected
+  and correct as printed:
+  `max_abs_pp_delta` = 0.0343pp against the 0.0902 bound (and $0.262B against $0.69B).
+- §"Phase 3", line 82 — "(13/13 rows covered)". `tab:assembly` carries **19** rows,
+  not 13. Every one of the 19 is admitted by the A4 rule as landed, so the claim the
+  sentence was making survives; only the arithmetic was wrong. (Counted as row
+  terminators between `\endhead` and `\bottomrule`.)
+- §"Phase 3", line 54 — "9 prose + 4 bracket instances per file" is one file's line
+  count read as both files' instance count. At `9f13504` the canonical carries
+  **11 prose occurrences on 9 lines** (`:336` alone carries three) and the variant
+  **10 on 8** (the abstract site `:31` is canonical-only, per gate #99). The bracket
+  form is 4 occurrences on 4 lines in both, as stated.
+- §"Phase 3", line 55 — "zero old-literal stragglers (grep-verified)". The grep
+  missed one site: `:105` still read `+2.3` after `f37ad81`, and was fixed the
+  following round in **9f13504** ("tex:105 rejoins the binding interval"). The two
+  deliberate `+2.3` survivors (`:725`, `:1332`) are unaffected.
+- §"Phase 3", line 55 — "the seven other-sense 'censored' uses untouched" counts
+  *lines*, not occurrences: those seven lines carry eight occurrences (`:336` uses
+  the word twice). Counting the whole file instead, `paper_final_v1.tex` at
+  `f37ad81` has nine lines and twelve occurrences of "censored", the extra three
+  being the decensor narrative at `:1332`.
+
+**Build layer — the "PDF not rebuilt" item under "Flagged, deliberately NOT done
+here" is closed.** A working **tectonic 0.15.0** exists at
+`~/Downloads/texbuild/tectonic`; it is simply not on `PATH`, which is what the
+records meant by "no tectonic/pdflatex on PATH". The manuscript was rebuilt with it
+on **2026-09-05: 146 pages** for the canonical (147 for the long-abstract variant),
+render gate PASS. The off-sheet check that could not run then does now, and it
+**failed at five tables**, all of which have since been fixed — see
+`specs/PLAN_review_2026-09-05.md` §A.6 for the table-by-table list and the build and
+split commands.

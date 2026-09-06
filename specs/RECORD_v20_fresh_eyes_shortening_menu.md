@@ -314,6 +314,8 @@ landing would move the quoted binding interval; the alternative is an
 explicit adjudicated deviation in the verdict ledger. Either way the choice
 is Eugene's and is recorded here rather than taken.
 
+**Pointer added 2026-09-05.** That choice was made: N1 landed the same day under the frozen rule — `specs/RECORD_v20_N1_relanding.md` §4 ("EXECUTED (2026-08-05, same day, single batch)") — carrying the quoted binding interval to `[+2.3, +9.1]`. FP2 Batch B then decensored the lower endpoint on 2026-08-29 and the binding interval has read **`[+1.9, +9.1]`** since (`specs/RECORD_fresh_panel2_batchB.md`), with Webb's `[+2.8, +8.7]` reported beside it. Every `[+2.9, +8.7]` above is therefore historical.
+
 ## 8. Verification log for the landed trims
 
 - Pin scan: AST string-literal extraction over `tools/liveness_gates.py` +

@@ -1,5 +1,14 @@
 # HANDOFF — v20 review-fix round (2026-08-11)
 
+> **SUPERSEDED 2026-09-05.** Written 2026-08-11, before the v18→final reorg. The
+> canonical file is `paper/final/paper_final_v1.tex` (with
+> `paper_final_v1_long_abstract.tex`) on `main` since 2026-08-29, not any
+> `paper/v18/` path this handoff names; the repository is **public** (`gh repo
+> view`), which closes the visibility item; and a working `tectonic` 0.15.0 exists
+> at `~/Downloads/texbuild/tectonic`, which closes the "no LaTeX engine" item.
+> For the state of the round that followed, see
+> `specs/RECORD_fresh_panel2_batchB.md`. The body below is left as written.
+
 Everything a fresh session needs to continue. Read this first; it is written to be
 sufficient on its own.
 

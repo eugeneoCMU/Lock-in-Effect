@@ -2,7 +2,7 @@
 form-conditional).
 
 This landing's failure mode is PLACEMENT, not arithmetic. The additive member is
-+8.5 points -- INSIDE the +2.9 to +8.7 binding interval, in its UPPER half --
++8.5 points -- INSIDE the +1.9 to +9.1 binding interval, in its UPPER half --
 while gate #98 pins the claim that every correction listed above that interval
 falls in its LOWER half. Writing this member into the downward ladder would
 falsify a pinned sentence without touching it, so the three relocation tests are
@@ -396,7 +396,11 @@ def test_both_anchors_agree_to_the_printed_decimal():
 
 def test_the_additive_member_is_inside_the_binding_interval():
     """The prose says 'near the top of the quoted interval', never above it: the
-    member is 8.4912 against an upper edge of 8.7."""
+    member is 8.4912. The binding interval has read [+1.9, +9.1] since FP2 Batch B
+    (2026-08-29), so the member sits 0.6 below its upper edge, not 0.2. The bounds
+    asserted below are the Webb-era [+2.9, +8.7] edges, left deliberately: they lie
+    strictly inside the current interval, so the check is the stronger one and still
+    fails the moment the member escapes upward."""
     assert 2.9 < A["roots_additive"]["4.991"]["marginal_pp"] < 8.7
     assert A["roots_additive"]["4.991"]["marginal_pp"] > (2.9 + 8.7) / 2
 

@@ -1,11 +1,23 @@
 # Reduced-Form Hazard Framework (Freddie Mac Loan-Level Data)
 
-> **Currency note (July 2026):** figures in this runbook predate the β₁ units
-> fix and follow-on analyses. Path B is currently **$818.5B / 107.0%** (band
-> 105.9–108.2%), Path A **$928.9B / 121.5%** (spec v4 calendar-month,
-> `run-2026-07-14-pathA-seasonal`; spec v3 prior $915B / 119.7%, full-book
-> variant 126.1%); the Danish regime now uses the Berger two-channel
-> calibration. See the root
+> **Currency note (updated September 2026):** figures in this runbook predate the
+> β₁ units fix and follow-on analyses. On the framework's own standalone scorer,
+> Path B is currently **$818.5B / 107.0%** (band 105.9–108.2%), Path A
+> **$928.9B / 121.5%** (spec v4 calendar-month, `run-2026-07-14-pathA-seasonal`;
+> spec v3 prior $915B / 119.7%, full-book variant 126.1%); the Danish regime now
+> uses the Berger two-channel calibration.
+>
+> Those are not the manuscript's headline objects. On the shared accounting basis
+> at the off-window floor, this framework's four labelled headline objects are:
+> the **β₁=0 null recovers 85.7%** of the $764.7B benchmark; the **lock-in
+> marginal is +5.6 pp / $42.6B**; the **binding interval on that marginal is
+> [+1.9, +9.1]** (the restricted wild-cluster inversion, selected by the frozen
+> coverage rule of `fewcluster_coverage`; the Webb wild-*t*'s [+2.8, +8.7] is
+> reported beside it, no longer as the binding layer); and the **convolved pair
+> that sums the floor read's sampling layer and the loan-cluster bootstrap layer
+> is [+1.71, +9.38]** (`layer_convolution_restricted` — the one number to quote
+> for sampling error, independence assumed rather than measured).
+> See the root
 > [TECHNICAL.md §15–§25](../TECHNICAL.md#15-robustness-fix-program-july-2026).
 
 Complements the archived agent-based pipeline in [`../abm/`](../abm/) with two hazard paths:
@@ -163,6 +175,10 @@ python3 simulate.py
 | `data/marginal_decomposition_results.json` | Round-15 Q3 marginal decomposition (liveness-gated) |
 | `data/ginnie_cpr_overlay_results.json` | Round-15 Q2 Ginnie overlay + `gmar_dec25_cpr_series.json` provenance (liveness-gated) |
 | `data/expectation_benchmark_results.json` | Q10 expectations benchmark (liveness-gated) |
+| `data/h0_reanchor_results.json` | Run `h0_reanchor` (`specs/SPEC_R32_h0_reanchor.md`): transports the age profile of Path A's estimated seasoning spline onto the Path B baseline. Keys: `production_pair` / `identity_pair` / `cross_route_pair`, `exposure_census`, per-replicate marginals over 200 bootstrap replicates of which 107 are usable. Not liveness-gated (no gate or test reads it); its adjudication is `specs/RECORD_R32_h0_reanchor_G2_adjudication.md` |
+| `data/fewcluster_coverage_results.json` | Run `fewcluster_coverage` (`specs/SPEC_V20_C_fewcluster_coverage_2026-08-04.md`): designed coverage simulation at the floor read's committed leverage profile. Keys: `cells` (coverage per construction × Gaussian/t₅ disturbance), `qualifying`, `binding_construction` — this is the frozen rule that lands the binding layer on the restricted inversion (liveness-gated) |
+| `data/floor_grid_extension_results.json` | Run `floor_grid_extension` (`specs/SPEC_fresh_panel2_B1_grid_extension_2026-08-29.md`): extends the floor→marginal PCHIP grid past 6.0% to 7.0% so the binding interval's lower endpoint stops being grid-censored. Keys: `rows`, `parity_gates` P1–P5 with `parity_gates_all_pass`, `predictions_hit_miss`, `interpolation_rule` (liveness-gated) |
+| `data/layer_convolution_results.json` | Run `layer_convolution_restricted` (`specs/SPEC_fresh_panel2_B2_convolution_rederivation_2026-08-29.md`): sums the floor read's confidence distribution and the loan-cluster bootstrap into one sampling-error statement. Keys: `layers`, `convolved_primary` ([+1.71, +9.38]pp), `convolved_percentile_secondary`, `dependence_bracket`, `expectation_check`, `supersedes` (the earlier C2 Webb-layer artifact, which survives in git history) (liveness-gated) |
 
 ## CPR timing and SOMA settlement
 
@@ -192,11 +208,11 @@ The empirical cohort path shows wrong-sign contemporaneous correlation (lag 0). 
 | **Literature microsim** | $747B | **97.7%** | Rothstein band | −0.5 (prior) | — |
 | **Empirical cohort GLM** | $915B | **119.7%** | +0.67 (OK) | **−0.13 (OK)** | −0.037 (OK) |
 
-All three pre-registered coefficient signs pass on the empirical path after **spec v3** (stratum FE + within-stratum demeaned burnout). Vintage-year FE (spec v2) left burnout positive (+0.76); tightening FE to 295 four-way strata fixed the sign.
+All three pre-committed coefficient signs pass on the empirical path after **spec v3** (stratum FE + within-stratum demeaned burnout). Vintage-year FE (spec v2) left burnout positive (+0.76); tightening FE to 295 four-way strata fixed the sign.
 
 **Spec evolution:** v1 (decimal rate gap, unstable β≈40) → v2 (bps scaling + vintage FE) → v3 (stratum FE + demeaned burnout + mild Ridge α=1e-5–1e-4) → **v4** (v3 + eleven calendar-month seasonal dummies; production since the 2026-07-14 freeze — [TECHNICAL.md §22.5](../TECHNICAL.md#225-pre-submission-freeze-execution-2026-07-14-path-a-spec-v4-adoption-and-restatement)). The §"Model specification" formula above describes v3; the ridge is a numerical no-op at production magnitudes (manuscript App. C).
 
-## Pre-registered expectations
+## Pre-committed expectations
 
 | Hypothesis | Expected sign | Empirical (spec v3) | ABM benchmark |
 |---|---|---|---|

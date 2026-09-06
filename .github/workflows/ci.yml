@@ -11,10 +11,13 @@ name: CI
 # that has nothing to do with the commit, so it is left out until that hard dependency is
 # made optional. Run it locally, where the data is present.
 #
-# The pytest suite has no such problem: on a clean checkout it is 1161 passed, 2 skipped,
-# and both skips announce themselves (the un-shipped parquet, and a PDF that is only built
-# locally). tests/test_printed_values_reconcile.py -- which re-derives the manuscript's
-# printed values from their committed artifacts -- runs in full here, because every
+# The pytest suite has no such problem. Locally it is 1166 passed, 1 skipped (the PDF
+# render gate, which skips when no built PDF is present); a clean checkout shows one more
+# skip and one fewer pass, because the parquet-dependent reconciliation test skips on the
+# un-shipped Freddie data. Both skips announce themselves. Counts move with every round --
+# this run is the authoritative one, not any number written here.
+# tests/test_printed_values_reconcile.py -- which re-derives the manuscript's printed
+# values from their committed artifacts -- otherwise runs in full here, because every
 # artifact it reads is tracked.
 
 on:

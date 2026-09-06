@@ -80,7 +80,7 @@ python3 hazard/extension_risk.py --mode literature
 python3 -m pytest tests/
 ```
 
-Expected on a fresh clone: **1161 passed, 2 skipped**. Both skips name themselves — the un-shipped Freddie parquet, and a PDF that is only built locally.
+Locally the suite is 1166 passed, 1 skipped (the PDF render gate, which skips when no built PDF is present); a fresh clone shows one more skip and one fewer pass, because the parquet-dependent reconciliation test skips on the un-shipped Freddie data. Both skips name themselves in the pytest output. Counts move with every round, so treat them as indicative: the CI run on the latest commit is authoritative.
 
 `python3 tools/liveness_gates.py` (129 manuscript gates) needs the un-shipped Freddie data: on a clean clone it passes 75 gates and then exits with `FileNotFoundError` on `hazard/data/cohort_month_panel.parquet`, so gates 76–129 do not run. It is not part of the recipient-facing check for that reason.
 
@@ -108,7 +108,7 @@ Lock-in-Effect/
 │   └── data/              # panel, coefficients, results (raw/ gitignored)
 ├── common/                # shared calibration + Fannie ingestion helpers
 ├── figures/               # gated publication figures (artifact-fed)
-├── tools/                 # liveness_gates.py (33 manuscript-vs-artifact
+├── tools/                 # liveness_gates.py (129 manuscript-vs-artifact
 │                          # gates), timing_sweep.py (+ golden-fixture test)
 └── tests/                 # unit tests + frozen-run golden fixtures
 ```
@@ -123,5 +123,7 @@ See [TECHNICAL.md §12](TECHNICAL.md#12-current-headline-numbers) for the full t
 | **ABM** (native 15yr gate, `run-2026-07-05-berger`) | $84.5B | 11.1% |
 | **Hazard Path B** (literature microsim, post-β₁-fix) | $818.5B | **107.0%** (band 105.9–108.2%) |
 | **Hazard Path A** (empirical cohort GLM, spec v4 calendar-month, `run-2026-07-14-pathA-seasonal`) | $928.9B | 121.5% (spec v3 prior: $915B / 119.7%) |
+
+**These rows are standalone-scorer values, not the manuscript's spine.** The paper headline is stated on the *shared* accounting basis at the off-window floor: the β₁=0 null recovers **85.7%** of the benchmark, the lock-in marginal is **+5.6 pp / $42.6B**, and the binding interval on it is **[+1.9, +9.1]** (the Webb wild-*t*'s [+2.8, +8.7] is reported beside it, no longer as the binding layer). The production ABM there is `run-2026-07-04-15yr-foldin` — **13.6%** on the fifty-seed mean, 11.9% on the frozen seed-42 draw; the `run-2026-07-05-berger` row in the table above is the native-15-year-gate variant.
 
 Key follow-on findings (§16–§25): Path B's recovery is a **marginal-distribution result** (permutation p=0.001, effect only 0.27%) and holds at **106.0% on a fully synthetic population** — the survival structure, not the Freddie data, recovers the benchmark; the ABM needs real covariates to reach even 59.3%. The **Danish institutional gap collapses to ≈0** once Berger et al.'s estimated elasticities replace the U.S.-extrapolated mobility function (+$925.5B → −$99.9B, sign not robust). See [TECHNICAL.md §16–§20.1](TECHNICAL.md#16-permutation-test--does-path-b-depend-on-joint-covariate-structure).

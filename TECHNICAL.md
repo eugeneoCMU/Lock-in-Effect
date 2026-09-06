@@ -61,8 +61,12 @@ For module-level runbooks, see [README.md](README.md). For hazard pipeline specs
 51. [Round-32 / C-78: the episode gradient with loan age held fixed — run `episode_gradient_age_bands`, LANDS Branch A (2026-07-30)](#51-round-32--c-78-the-episode-gradient-with-loan-age-held-fixed--run-episodegradientagebands-lands-branch-a-2026-07-30)
 52. [Round-32 / C-127: the benchmark's monthly series rebuilt from per-CUSIP SOMA holdings — run `benchmark_monthly_rebuild`, LANDS Branch D (2026-07-30)](#52-round-32--c-127-the-benchmarks-monthly-series-rebuilt-from-per-cusip-soma-holdings--run-benchmarkmonthlyrebuild-lands-branch-d-2026-07-30)
 53. [Round-32 / C-128: the realized-side window-boundary allocation — run `realized_boundary_allocation`, LANDS Branch A, then REPAIRED (2026-07-30)](#53-round-32--c-128-the-realized-side-window-boundary-allocation--run-realizedboundaryallocation-lands-branch-a-then-repaired-2026-07-30)
+    - [53a. V20 panel-revision runs (2026-08-04)](#53a-v20-panel-revision-runs-2026-08-04)
+54. [`tab:danish`'s two stale Danish CPR cells, and the gate hole that let them stand (2026-08-17)](#54-tabdanishs-two-stale-danish-cpr-cells-and-the-gate-hole-that-let-them-stand-2026-08-17)
+55. [§20's Berger GE anchor updated 1bp → 20 bps (author-directed, 2026-08-18)](#55-20s-berger-ge-anchor-updated-1bp--20-bps-author-directed-2026-08-18)
+56. [Fresh-Panel-2: the binding interval decensored, the convolution re-derived, and Path A's vocabulary standardized (2026-08-29 / 2026-09-01)](#56-fresh-panel-2-the-binding-interval-decensored-the-convolution-re-derived-and-path-as-vocabulary-standardized-2026-08-29--2026-09-01)
 
-> **Numbering caveat.** Section numbers 29, 30, 31, 32 are each used TWICE in the body (a parallel-landing collision). The entries above point at the FIRST occurrence. They are not renumbered because §43 is cited by two committed pre-run specs as the spec-before-run protocol, and renumbering the block would shift it.
+> **Numbering caveat.** Section numbers 29, 30, 31, 32 are each used TWICE in the body (a parallel-landing collision). The entries above point at the FIRST occurrence. They are not renumbered because §43 is cited by two committed pre-run specs as the spec-before-run protocol, and renumbering the block would shift it. The V20 panel-revision block landed as a *second* "§46" between §53 and §54, colliding with §46 (Round-32 / C-94); it was renumbered **53a** on 2026-09-06 — a suffix rather than a 54, so that the §54/§55 anchors already cited from §54's closing note do not shift. `specs/RECORD_v20_compression_budget.md` cites a "TECHNICAL §46" whose subject (a Phase-2 mid-sentence incident) appears under neither §46 nor 53a; that reference was already dangling before the renumbering.
 
 Appendices: [A — File Map](#appendix-a--file-map) · [B — ABM-Era Granular Archaeology](#appendix-b--abm-era-granular-archaeology)
 
@@ -930,8 +934,8 @@ destroyed. `fico_bucket`/`ltv_bucket` and `stratum_id` are recomputed from the
 permuted values (recipe verified to reproduce the stored `stratum_id`
 75000/75000), and the stratum-level burnout broadcast follows the new
 assignments. The microsim is otherwise unchanged — same hazard form, same β₁
-(Rothstein 6.5% midpoint), same competing-risks logic, same draw seed. The
-reported null uses **999 independent permutations** (exact-p floor 1/1000);
+(Rothstein adopted central value 6.5%), same competing-risks logic, same draw
+seed. The reported null uses **999 independent permutations** (exact-p floor 1/1000);
 the reproduce command's default `--n 100` runs a faster 100-draw check
 consistent with the 50-seed Monte Carlo convention.
 
@@ -4768,7 +4772,7 @@ re-basing factor's antecedent, since inserting the both-legs block left "the
 variant" pointing at a leg whose factor is 1.034.
 
 
-## §46. V20 panel-revision runs (2026-08-04)
+## 53a. V20 panel-revision runs (2026-08-04)
 
 Three spec-before-run companions to the v19 panel review, all adopted by author
 instruction, all landing on their L1 branches, gates #123–#125 + 13-test battery:
@@ -4876,3 +4880,205 @@ margin thin enough that this question is live rather than academic.
 Note the 18 bps figure that appears in `origin/cursor/r33a-finding5-0aaf` is NOT
 the baseline — it is the no-deductibility tax variant (§4.10.4) and the
 Fonseca–Liu-1.20 recalibration (§4.10.6). See §54's closing note.
+
+
+## 56. Fresh-Panel-2: the binding interval decensored, the convolution re-derived, and Path A's vocabulary standardized (2026-08-29 / 2026-09-01)
+
+**What the N1 adjudication had already forced (2026-08-05).** SPEC_V20_C's frozen
+selection rule reads §53a's coverage artifact and takes the *narrowest qualifying*
+construction. `hazard/data/fewcluster_coverage_results.json` qualifies exactly two —
+`cr2_bm` and `restricted_webb` (94.34 / 95.08 Gaussian/t5 against the pre-committed
+93.0 / 91.0 bar) — while the Webb wild-t the manuscript had been quoting as binding
+covers 90.84 / 91.42 and therefore fails. The artifact's own `landing_branch` string
+still reads `"L1_webb_retains"`, which the rule contradicts; it is a sha-pinned
+replication object and was left unedited, with the manuscript, gate #125 and the
+ladder note carrying the corrected landing (`specs/RECORD_v20_N1_relanding.md`,
+planned and executed the same day). The binding layer became the **restricted
+wild-cluster inversion**, `[+2.2809, +9.1093]`pp, printing **+2.3 to +9.1**, with Webb
+retained beside it as a demoted rung; gate #125 stopped asserting a branch and began
+deriving the quoted span live from `binding_construction`. That re-landing is what
+made the next round's finding possible: it moved the binding lower endpoint to floor
+6.1813%, past the committed floor→marginal grid's 6.0% edge.
+
+**Fresh-Panel-2, Batch A — text only (2026-08-29;
+`specs/RECORD_fresh_panel2_batchA.md`).** A fresh-eyes ARS panel on
+`paper/final/paper_final_v1.tex` returned a raw Major Revision at 69.4; adversarial
+verification refuted three of its six top findings and partialized two. One survived
+whole — f1, the printed lower endpoint was **grid-censored**. `floor_sweep_results.json`'s
+grid ends at 6.0%, so the restricted inversion's 6.1813% endpoint was mapped *at* 6.0
+and the printed +2.3 was the 6.0 row's value ($17.44325421351391B /
+2.280914554561832pp), not a measurement. Gate #115 had already derived the fact and
+the ladder note already carried it, but `[+2.3, +9.1]` printed unflagged at nine
+sites. Batch A propagated the existing, artifact-derived disclosure and added no
+claim: the flag went into the abstract (263 → 273 words), the intro and §II first
+uses, `tab:headline`, §IV.D twice, `tab:uncertainty`'s headline row, §VII.F and the
+conclusion, and the ladder body gained "lower edge censored" on the CR3–BM and
+restricted-inversion rows (the censored set is exactly three, per gate #115's
+`n_censored`). Two further items landed here. The §V.E convolved-pair recommendation
+was **withdrawn**: it had been computed on the demoted Webb rung and never re-derived,
+so at 6.19pp it was narrower than the 6.83pp binding interval a faithful re-derivation
+must exceed — anti-conservative as printed. It was relabelled "a lower bound on the
+re-derived pair" and the one-number reader was pointed at the binding interval itself
+(gate #105's `CONVOLVED_LINE_SPANS["one_number_reading"]`). And `paper/final/fig5_cross_design.png`
+— the copy the manuscript actually includes — was replaced with the regenerated PNG
+reading "pre-committed 50% threshold"; only the `figures/` copy had been fixed, and the
+included one still said "pre-registered". 1,163 passed / 1 skipped; ALL GATES PASS.
+
+**Batch B / B1 — run `floor_grid_extension`
+(`specs/SPEC_fresh_panel2_B1_grid_extension_2026-08-29.md`, adopted with every
+recommended option and committed before the run).** The runner imports `floor_sweep`
+and reuses `_run_scored` verbatim — same committed 75k loan sample (40,234
+window-start survivors), RNG_SEED 42, one shared macro frame, raw-basis scoring, fresh
+runs, caches not consulted — and adds paired legs (δ = 6.5 central, β₁ = 0 null) at
+floor annual CPR {6.25, 6.50, 6.75, 7.00}%, ten engine runs in 134.3s.
+`hazard/data/floor_grid_extension_results.json`, key `rows`:
+
+| floor annual CPR | lock-in marginal (pp) | ($B) |
+|---|---|---|
+| 6.25% | +1.7326 | 13.25 |
+| 6.50% | +1.2836 | 9.82 |
+| 6.75% | +0.9272 | 7.09 |
+| 7.00% | +0.6534 | 5.00 |
+
+Four blocking parity gates, all PASS (`parity_gates_all_pass`). **P1** — fresh paired
+legs at 6.0% reproduce the committed row bit-exactly on every numeric field (`diffs`
+empty); the parity row is checked, never merged, and the extended mapping keeps the
+committed 6.0 row. **P2** — weakly decreasing and strictly positive across
+{6.0 … 7.00}. **P3**, the only genuinely out-of-sample check above 6.0 — the extended
+PCHIP at 6.91% returns $5.681290B against the *independent* committed engine read of
+$5.686265B in `oos_identification_results.json` (never a knot, produced by a different
+committed run): |Δ| $0.00498B against a $0.69B tolerance. 7.00% was in the grid
+precisely so that 6.91 would be an interior fidelity point rather than an
+extrapolation. **P4** — refitting PCHIP turns 6.0 into an interior knot, so the
+interpolant moves only on (5.0, 6.0); every piece below 5.0 is bit-identical, asserted
+rather than assumed on a probe that includes the binding *upper* endpoint (floor
+4.033460 → +9.109324, `pp_delta` 0.0). Maximum movement over the committed uncensored
+endpoints with floors in (5.0, 6.0) was 0.0343pp against the 0.0902 bound
+(`parity_gates.P4_blast_radius`, `n_endpoints_5_to_6` = 30). All **five ex-ante
+prediction bands HIT** — two-way +2.2169, CR3–BM +2.0093, month-Rademacher +1.9536,
+restricted +1.8710, R1 wcr +1.0270 — which for this repository's prediction ledger is
+the unusual direction.
+
+`matched_depth_reconciliation.FloorMapping` gained **opt-in `extended=True`**: it reads
+the extension artifact and asserts that artifact's 6.0 parity row against the committed
+row before merging, and the default `False` stays bit-preserving for every other
+consumer. `floor_inference_correction_v2`/`v3` were regenerated under it. v2's SMM-level
+quantities and floor-unit CIs came back bit-identical (`wcr_inverted.smm_ci95` unchanged
+at `[0.003425004498583382, 0.005303011878727873]`) — the mapping enters only at the
+floor→pp step, which is what proves N1 was not reopened. **The binding interval
+decensored to `[+1.8709537466170403, +9.109324011557733]`pp /
+`[$14.31B, $69.66B]`**, printing **+1.9 to +9.1**, with `lower_pp_edge.truncated_at_grid_edge`
+now `false` at both ends. The Webb rung re-mapped to `[+2.8252, +8.6780]` and now prints
+**+2.8 to +8.7**: the +2.9 lower edge that stands in every pre-extension sentence is an
+artifact of the same censoring, not a different rung, and the two must not be conflated
+when reading older text.
+
+**Batch B / B2 — run `layer_convolution_restricted`
+(`specs/SPEC_fresh_panel2_B2_convolution_rederivation_2026-08-29.md`, construction α
+with pre-run amendment FP2-B2-A1).** Ordered after B1 by spec constraint: on the
+[2.0, 6.0] grid the floor-read layer's tail hits the very edge the convolution exists to
+cure. The floor layer is the nested-CI confidence distribution of the committed
+restricted inversion — per grid point, α_i = min(U_i, 1−U_i) on the interpolated-percentile
+position of `t_obs` in the sorted restricted `t*` draws, which at u = 0.025/0.975 *is* the
+committed equal-tailed retention rule, so the tie to the committed retained set holds by
+construction rather than by luck. Q2 confirms it: `alpha_set_equals_retained_set` true,
+`n_retained` 247, and the layer's own endpoints map to
+`[1.8709537466170403, 9.109324011557733]` — `mapped_pp == want_pp` — so the construction
+reproduces the interval it convolves. The loan layer is C2's unchanged 200 committed
+cluster draws about 5.5715581829, `[+4.6309, +6.9244]`pp. Exact outer sum, 9,999 × 200 =
+1,999,800 pairs: **convolved primary `[+1.70808, +9.38308]`pp / `[$13.06B, $71.76B]`**,
+width 7.675pp against the binding interval's 7.238pp (Q3's required direction; excess
+0.437pp, ratio 1.060), truncation count 0 on the primary line, comonotone width 9.673pp
+bracketing the independent sum from above. Because truncation was zero, Batch A's "lower
+bound on the re-derived pair" label **retired** and the one-number sampling
+recommendation returned, pointing at the re-derived pair (`verdict.manuscript_action`).
+**All three ex-ante bands MISSED** — lower +1.71 against [1.2, 1.7], upper +9.38 against
+[9.6, 10.0], width 7.68 against [8.3, 8.7] — each in the conservative direction, the
+convolution having moved *less* off the binding interval than predicted; they are
+recorded as misses in `expectation_check` and in the verdict appendix rather than
+quietly re-banded. `hazard/data/layer_convolution_results.json` was rewritten, not
+mutated; the C2 artifact survives in git history per the freeze convention.
+
+**The landing (Phase 3, both variants; abstract canonical-only per gate #99;
+`specs/RECORD_fresh_panel2_batchB.md`).** The binding interval was re-printed at every
+site (nine prose plus four bracket instances per file), grep-verified with zero
+old-literal stragglers. All nine Batch-A censoring flags came **out**, the seven
+other-sense uses of "censored" untouched. `tab:ladder` was re-printed wholesale from the
+regenerated artifacts, including four rounding-boundary moves on rungs that were never
+censored (CR1 t +3.2 → +3.1, CR2 t +3.0 → +2.9, CR3 t and CR1–BM +2.8 → +2.7, Webb
++2.9 → +2.8; the CR1-BM/CR3 printed tie persists); the three decensored rows read CR3–BM
++2.0/+9.6, restricted +1.9/+9.1, two-way +2.2/+9.3, the last replacing its censor flag
+with "both clustering dimensions at once". The ladder note converted from a censoring
+adjudication into an extension record, its E4-miss history preserved in past tense, and
+the E3 widths were re-derived (5.23 / 5.36). The A5 box-edge sentence landed **verbatim
+as pre-committed in SPEC B1 §5.4** — written before the number existed — at the :336
+assembly site, and the A4 admission rule landed at the same site after row-by-row
+verification (the b5 joint cell *is* a row, so a joint-cell clause was added, plus a
+directional clause for the gradient exhibit; 13/13 rows covered). The convolution sites
+took the returned one-number recommendation in place of Batch A's redirect, with
+`tab:uncertainty`'s pair, run tag, comonotone bound ($9.67$pp) and $0.32\times$ width
+ratio updated. §VI.B's flow terms were recomputed mechanically from the new endpoint
+through the committed conversion: **$0.42 → $0.35 to $1.66 billion per month** (gate
+#111, now called at (1.9, 9.1)). `tab:oosfloor` gained four provenance-marked extension
+rows and a note d, while the calibration box's committed grid and its +2.1/+13.2
+literals stayed untouched at every site — structurally, the extension is δ = 6.5-only, so
+no box cell exists to add. The abstract went **273 → 263 words** (the censoring phrase
+out, nothing else moved), with gate #101 and its test anchors re-synced and 273 joining
+the stale-count battery. `replication_appendices.tex` re-printed its crosswalk row,
+moved its spec count 25 → 27, and gained two verdict rows (B1 enforced/hits, B2
+enforced/misses-reported). Gates were re-synced in lockstep: **#125** auto-tied; **#115**
+rewritten to the zero-censoring world (decensored-set identity against printed-wider,
+widest = CR3–BM, month-Rademacher past-edge scope, literals derived from the extension
+artifact); **#107**'s Webb mapped pin re-derived, its floor-unit pins unchanged;
+**#105**'s spans plus an artifact check against the B2 schema; **#111** re-called at the
+new endpoints. Six test batteries moved with them (month_twoway, floor_ladder,
+cap_monthly_units, headline_posture, response_letter, spec_count). Verification:
+**1,166 passed / 1 skipped**, `tools/liveness_gates.py` **ALL GATES PASS**,
+`tools/tex_validate.py` clean on both variants; every tex edit applied by counted
+replacement with an abort on count mismatch, and an AST pin scan run over gates and
+tests before each edit family.
+
+**Flagged and deliberately not done in Batch B.** The pre-existing stale claim at :336 —
+"all but one above the $+8.7$ upper edge of the binding interval quoted below", where
++8.7 has been the Webb-era edge since N1 — was out of the batch's spec scope and left for
+an author decision, because re-deriving "all but one" needs the h0_reanchor replicate
+set; it still stands at 1fc54d4 and is repaired only in the following round's
+uncommitted working tree. Also untouched: the panel's unverified P2 batch, the PDF
+rebuild (no tectonic or pdflatex on PATH, so page counts and the split boundary are
+unverified), and the push, which is Eugene-only by repository convention.
+
+**The Path A vocabulary standardization (2026-09-01).** The paper said both things about
+the same exhibit. Four sites plus tex:48 and tex:738 called Path A "aggregate-context,
+non-corroborating" / "does not corroborate", against a minority that called it
+"corroborates at 112.4%" (tex:174), "aggregate-corroboration status" (tex:291) and
+"reported as corroboration only" (tex:295). The roadmap's never-say column forbids citing
+112.4% as support for anything, so the minority converged on the majority formula —
+"lands at" (tex:48's own verb), "aggregate-context status only", "aggregate context
+only" (`9def7c1`). A fourth minority site surfaced immediately afterwards: tex:295 opened
+with the appositive "Path A is the aggregate corroboration leg", assigning exactly the
+status the same line's tail had just been edited to deny, and it had been invisible to
+the `.{40}corroborat.{60}` audit sweep because the token sits at column 24 and the pattern
+demands 40 characters of left context — a grep blind spot now recorded in the fix ledger
+(`99fa5bc`). "Corroborate" now belongs solely to the external anchors (Graybill,
+Fonseca, na2024) that earn it. The same day's sweep also caught the derived numbers that
+had not followed the re-landed intervals: eight current-state binding-interval sites and
+three Webb sites in `PAPER_ROADMAP.md` still carried pre-extension values, its censoring
+claim went past tense, and its collision glossary relabelled +2.3 the *former* edge
+(`000849a`); `replication_appendices.tex` still printed the pre-extension Webb rung
+[+2.9, +8.7] in both production variants — declared clean by a grep that never swept the
+Webb family — and its :77 "non-headline corroboration" became "non-headline aggregate
+context" (`e3697b8`); and a final whole-branch review found two residuals of the same two
+families, a look-alike-pair width still derived as 9.1 − 2.3 = 6.8 (it is 7.2) and a
+taxonomy row still printing the pre-rederivation convolved pair [+2.80, +8.99]
+(`1fc54d4`). Three sites were reviewed and deliberately left standing: the long-abstract
+variant's line 31, which is the archived abstract and carries seventeen gate-pinned
+literals by design; tex:725's +2.3, which is the disqualified pooled 6.07% read, a
+different quantity; and tex:1332's +2.3, which is the decensor narrative that
+`test_month_twoway_clusters_gate`'s docstring pins as history. Gates and tests were
+unmoved across the whole standardization.
+
+**Spec count.** This file has never carried a count of pre-committed specifications, and
+the number is easy to quote stale from the manuscript, so it is recorded here once:
+`specs/` holds **27** `SPEC_` files, and `replication_appendices.tex` prints
+"Twenty-seven standalone pre-committed specifications" to match. `test_spec_count_claim`
+exists for exactly this drift and moved with the 25 → 27 change in Batch B's Phase 3.
