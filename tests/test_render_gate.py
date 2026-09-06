@@ -91,3 +91,47 @@ def test_built_pdf_has_no_offpage_content(pdf):
         f"first few: {result['offpage'][:3]}")
     assert result["unresolved"] == 0, f"{pdf.name}: unresolved cross-references"
     assert result["pages"] > 1
+
+
+# --- the extent check (2026-09): origins are not widths -------------------
+# The origin test above passed a build in which five tables ran off the right
+# edge of the paper, one of them the inference ladder's Status column on the
+# binding-layer row. Every glyph STARTED inside the text block, so every origin
+# was legal; what left the sheet was the span's width. These tests pin the
+# check that reads extents, on synthetic pages, so they run without a build.
+fitz = pytest.importorskip("fitz", reason="PyMuPDF absent; extent check inert")
+
+
+def _one_page(tmp_path, text, x, name):
+    """A one-page PDF with `text` drawn with its left edge at x."""
+    doc = fitz.open()
+    page = doc.new_page(width=612, height=792)
+    page.insert_text((x, 400), text, fontsize=11)
+    out = tmp_path / name
+    doc.save(str(out))
+    doc.close()
+    return out
+
+
+def test_text_inside_the_sheet_is_not_flagged(tmp_path):
+    pdf = _one_page(tmp_path, "a line that stays well inside", 72, "ok.pdf")
+    assert rg.overrun(pdf) == []
+
+
+def test_a_span_running_past_the_paper_edge_is_flagged(tmp_path):
+    # starts on the sheet (origin legal, so is_offpage cannot see it) and ends
+    # past it -- exactly the shape of the five clipped tables.
+    pdf = _one_page(tmp_path, "a row whose last column is clipped away", 480,
+                    "over.pdf")
+    bad = rg.overrun(pdf)
+    assert len(bad) == 1, bad
+    pno, past, _ = bad[0]
+    assert pno == 1 and past > 0
+
+
+def test_the_origin_check_alone_misses_that_page(tmp_path):
+    """The regression this check exists for: origins clean, extents not."""
+    pdf = _one_page(tmp_path, "a row whose last column is clipped away", 480,
+                    "over2.pdf")
+    assert rg.scan(pdf)["offpage"] == []
+    assert rg.overrun(pdf) != []

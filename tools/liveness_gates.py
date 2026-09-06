@@ -203,6 +203,29 @@ ZERO_COUNT = [
     "at the committed proxy discounts",
     "at the paper's own proxy discounts",
     "across the committed 32--38\\% discount grid",
+    # FRESH-PANEL-2 / 2026-09 review: the intervals FP2 Batch B retired. Nothing
+    # guarded these -- the batch re-printed every site by hand and verified the
+    # result by grep, and the grep missed one (:105 kept "+2.3" and was caught a
+    # round later, in 9f13504). A retired interval is exactly the class this
+    # list exists for, so the successor of a hand grep is an entry here.
+    # The bracket forms only: the bare pair "+2.3" / "+9.1" recurs legitimately
+    # as a ladder row and as decensor history, and "$+2.8$ to $+8.7$" is the
+    # Webb rung the paper still reports BESIDE the binding layer.
+    "$+2.3$ to $+9.1$",
+    "$[+2.3, +9.1]$",
+    "$[+2.9, +8.7]$",
+    # NOT listed: "$[+2.80, +8.99]$", the Webb-rung convolved pair. It is zero
+    # in both manuscript variants, but the run index and the response letter
+    # both print it deliberately, as the superseded pair they are recording;
+    # this list is scanned over the appendices too, so pinning it here would
+    # forbid the history rather than the claim.
+    # the pre-decensoring flow-terms floor, superseded by \$0.35 (gate #111)
+    "\\$0.42 to \\$1.66",
+    # the Batch-A censoring disclosures. The grid now runs to 7.0%, so the
+    # lower endpoint is measured; there is nothing left to disclose, and a
+    # reverted site would otherwise print a flag for a censoring that ended.
+    "lower endpoint censored",
+    "lower edge censored",
 ]
 
 EXACTLY_ONE = [
@@ -774,13 +797,22 @@ CONVOLVED_LINE_SPANS = {
     # caveat without the comonotone bound understates how wrong independence
     # could be; and the lower-bound inheritance is what stops the line being
     # read as calibrated coverage.
-    # FRESH-PANEL-2 (2026-08-29): the one-number recommendation moved OFF the
-    # convolution — it was computed on the demoted Webb rung and never
-    # re-derived under the adjudicated binding layer, so as printed it is
+    # FRESH-PANEL-2 BATCH A (2026-08-29): the one-number recommendation moved
+    # OFF the convolution — it had been computed on the demoted Webb rung and
+    # never re-derived under the adjudicated binding layer, so as printed it was
     # anti-conservative (narrower than the binding interval itself). The prose
-    # now labels it a lower bound on the re-derived pair and points the
-    # one-number reader at the binding interval; this span protects that
-    # redirection the way its predecessor protected the recommendation.
+    # labelled it a lower bound on the re-derived pair and pointed the
+    # one-number reader at the binding interval instead.
+    # FRESH-PANEL-2 BATCH B (2026-08-29, same day, superseding the above): the
+    # convolution WAS re-derived on the restricted rung over the extended grid
+    # (run layer_convolution_restricted). Width 7.675pp now exceeds the binding
+    # 7.238pp and truncation is zero, so the Batch-A label ("a lower bound on
+    # the re-derived pair") RETIRED and the recommendation RETURNED — pointing
+    # at the re-derived pair [+1.71, +9.38], which is what the spans below pin.
+    # Not a redirection any more: this span protects the recommendation itself,
+    # as its round-28 predecessor did. The lower_bound_inheritance span below is
+    # a DIFFERENT statement (round-28: one input to the sum is itself a lower
+    # bound, so the summed line inherits that) and still stands.
     "run_tag": "\\texttt{layer\\_convolution\\_restricted}",
     "pair": "$[+1.71, +9.38]$",
     "independence_caveat": "independence is assumed, not measured",
@@ -1997,8 +2029,11 @@ SNHAMAX_RESULTS = (ROOT / "hazard" / "data"
 # Four things this gate binds past presence, because each is a way this landing
 # could go wrong quietly:
 #
-# (i)   PLACEMENT. +8.5 sits in the UPPER half of the +2.9 to +8.7 binding
-#       interval -- INSIDE it, about 0.2 below the upper edge, NOT above it.
+# (i)   PLACEMENT. +8.5 sits in the UPPER half of the binding interval --
+#       INSIDE it, NOT above it. The interval is +1.9 to +9.1 since FP2 Batch B
+#       decensored its lower endpoint (2026-08-29), so +8.5 sits 0.6 below the
+#       upper edge; it was +2.9 to +8.7 and 0.2 below the edge when this header
+#       was written, and the placement claim is unchanged either way.
 #       Gate #98 pins "every correction listed above falls in its lower half",
 #       a claim scoped to the ladder ABOVE the binding-interval sentence, so
 #       writing this member up into that ladder would falsify a pinned sentence
@@ -7508,6 +7543,70 @@ def main() -> int:
           f"quoted={_fcci['binding_interval_quoted']}), "
           f"spans={_fcci['spans_present']}, rule_applied={_fcci['rule_applied']}, "
           f"oracle={_fcci['oracle_bounds']}")
+
+    # --- gate #129: the replicate counts the assembly quotes -----------------
+    # The sentence at the assembly compares the h0_reanchor replicate marginals
+    # against two edges. It compared them against ONE edge, +8.7, for three
+    # rounds after +8.7 stopped being the binding interval's upper edge, and
+    # nothing noticed: the count is arithmetic over a committed artifact that
+    # no gate opened. Both counts are recomputed here rather than trusted.
+    _h0 = json.loads(
+        (ROOT / "hazard" / "data" / "h0_reanchor_results.json").read_text())
+    _reps = [r["marginal_pp"] for r in _h0["per_replicate"]]
+    _above_webb = sum(1 for x in _reps if x > 8.7)
+    _above_binding = sum(1 for x in _reps if x > 9.1)
+    _h0_spans = {
+        # "all but one" is a claim about the count, so it is derived, not typed
+        "webb_all_but_one": _above_webb == len(_reps) - 1,
+        "webb_edge_named": "$+8.7$ upper edge of the Webb rung" in tex,
+        "binding_count": f"{_above_binding} of the {len(_reps)}" in tex,
+        "binding_edge_named": "$+9.1$ upper edge of the binding interval" in tex,
+    }
+    h0_ok = all(_h0_spans.values())
+    failures += 0 if h0_ok else 1
+    print(f"[{'PASS' if h0_ok else 'FAIL'}] h0-reanchor replicate counts "
+          f"(gate #129): {_above_webb}/{len(_reps)} above $+8.7$, "
+          f"{_above_binding}/{len(_reps)} above $+9.1$; spans={_h0_spans}")
+
+    # --- gate #127: the four grid-extension rows the lower endpoint rests on --
+    # tab:oosfloor gained four provenance-marked rows in FP2 Batch B, and the
+    # binding interval's +1.9 is read off the mapping they extend. Gate #115
+    # opens this artifact but checks the decensored SET, not these rows, so a
+    # mistyped row would have printed a floor-to-marginal map the interval does
+    # not come from.
+    _fge = json.loads(
+        (ROOT / "hazard" / "data" / "floor_grid_extension_results.json").read_text())
+    # The whole row is rebuilt from the artifact, not just its two numbers, so
+    # a floor paired with the wrong marginal cannot pass on both halves being
+    # present somewhere in the file.
+    _rows = _fge["rows"] if isinstance(_fge.get("rows"), list) else []
+    _fge_rows = [
+        "Grid extension & paired re-run\\tnote{d} & "
+        f"{_r['floor_annual_cpr_pct']:.2f}\\% & --- & "
+        f"$+{_r['lockin_marginal_share_pp']:.1f}$ & --- \\\\"
+        for _r in _rows
+    ]
+    _fge_missing = [r for r in _fge_rows if r not in tex]
+    fge_ok = bool(_fge_rows) and not _fge_missing and _fge["parity_gates_all_pass"]
+    failures += 0 if fge_ok else 1
+    print(f"[{'PASS' if fge_ok else 'FAIL'}] grid-extension rows (gate #127): "
+          f"{len(_fge_rows)} rows rebuilt from the artifact, "
+          f"missing={len(_fge_missing)}, "
+          f"parity_gates_all_pass={_fge['parity_gates_all_pass']}")
+
+    # --- gate #128: "pre-registered" is reserved, and the paper says so once --
+    # PAPER_ROADMAP section 3 rule 6. The manuscript reserves the term for
+    # third-party registries in one sentence and uses "pre-committed" for its
+    # own rules everywhere else; a second use had survived at the ABM
+    # admissibility qualification until the 2026-09 review found it by reading.
+    _prereg = tex.count("pre-registered")
+    _reservation = "I reserve ``pre-registered'' for third-party registries"
+    _reserved = tex.count(_reservation)
+    vocab_ok = _reserved >= 1 and _prereg == _reserved
+    failures += 0 if vocab_ok else 1
+    print(f"[{'PASS' if vocab_ok else 'FAIL'}] reserved vocabulary "
+          f"(gate #128): 'pre-registered' occurs {_prereg}x, all of them "
+          f"inside the {_reserved} reservation sentence(s)")
 
     print(f"\n{'ALL GATES PASS' if failures == 0 else f'{failures} GATE(S) FAILED'}")
     return 0 if failures == 0 else 1
