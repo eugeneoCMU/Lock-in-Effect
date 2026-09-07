@@ -80,7 +80,7 @@ python3 hazard/extension_risk.py --mode literature
 python3 -m pytest tests/
 ```
 
-Locally the suite is 1166 passed, 1 skipped (the PDF render gate, which skips when no built PDF is present); a fresh clone shows one more skip and one fewer pass, because the parquet-dependent reconciliation test skips on the un-shipped Freddie data. Both skips name themselves in the pytest output. Counts move with every round, so treat them as indicative: the CI run on the latest commit is authoritative.
+Every test is expected to pass. Two skip themselves and say so in the pytest output: the PDF render-gate integration test when no built PDF is present (build it with `tectonic`, output into `paper/final/build_split/`), and the reconciliation test that needs the un-shipped Freddie parquet. No count is written here on purpose — it moves every round, and a stale count reads as a failure. The CI run on the latest commit is authoritative.
 
 `python3 tools/liveness_gates.py` (129 manuscript gates) needs the un-shipped Freddie data: on a clean clone it passes 75 gates and then exits with `FileNotFoundError` on `hazard/data/cohort_month_panel.parquet`, so gates 76–129 do not run. It is not part of the recipient-facing check for that reason.
 

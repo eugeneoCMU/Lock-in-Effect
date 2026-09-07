@@ -11,11 +11,11 @@ name: CI
 # that has nothing to do with the commit, so it is left out until that hard dependency is
 # made optional. Run it locally, where the data is present.
 #
-# The pytest suite has no such problem. Locally it is 1166 passed, 1 skipped (the PDF
-# render gate, which skips when no built PDF is present); a clean checkout shows one more
-# skip and one fewer pass, because the parquet-dependent reconciliation test skips on the
-# un-shipped Freddie data. Both skips announce themselves. Counts move with every round --
-# this run is the authoritative one, not any number written here.
+# The pytest suite has no such problem: every test is expected to pass, and the only two that
+# skip announce themselves -- the PDF render gate (no built PDF in a checkout) and the
+# parquet-dependent reconciliation test (the un-shipped Freddie data). No expected count is
+# written here on purpose: it moves every round, and a stale one reads as a failure. This
+# run is the authority.
 # tests/test_printed_values_reconcile.py -- which re-derives the manuscript's printed
 # values from their committed artifacts -- otherwise runs in full here, because every
 # artifact it reads is tracked.
@@ -50,9 +50,25 @@ jobs:
         run: python -m pytest tests/ -q --no-header -rs
 
       - name: Confirm the two manuscript editions stay in sync
-        # They must be byte-identical apart from line 31, the abstract. A half-applied
-        # edit to one edition is otherwise invisible.
+        # They must be byte-identical apart from ONE line, the abstract. A
+        # half-applied edit to one edition is otherwise invisible.
+        # The differing line is located, not typed: this step hard-coded "31"
+        # until a 2026-09 preamble addition moved the abstract to 38 and the
+        # check began comparing the wrong line.
         run: |
-          diff <(sed '31d' paper/final/paper_final_v1.tex) \
-               <(sed '31d' paper/final/paper_final_v1_long_abstract.tex) \
-            && echo "editions in sync (identical apart from the abstract)"
+          python3 - <<'PY'
+          import sys
+          a = open("paper/final/paper_final_v1.tex").read().split("\n")
+          b = open("paper/final/paper_final_v1_long_abstract.tex").read().split("\n")
+          if len(a) != len(b):
+              sys.exit(f"editions differ in length: {len(a)} vs {len(b)} lines")
+          diff = [i + 1 for i, (x, y) in enumerate(zip(a, b)) if x != y]
+          if len(diff) != 1:
+              sys.exit(f"editions differ on {len(diff)} lines, expected exactly 1 (the abstract): {diff[:20]}")
+          line = diff[0]
+          begin = next(i for i, l in enumerate(a, 1) if "\\begin{abstract}" in l)
+          end = next(i for i, l in enumerate(a, 1) if "\\end{abstract}" in l)
+          if not begin < line < end:
+              sys.exit(f"the one differing line ({line}) is outside the abstract ({begin}-{end})")
+          print(f"editions in sync (identical apart from the abstract, line {line})")
+          PY

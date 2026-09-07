@@ -3,6 +3,13 @@
 \usepackage[margin=1in]{geometry}
 \usepackage{amsmath,amssymb}
 \usepackage{graphicx}
+% A clone receives no PNG under paper/ (the .gitignore paper/** rule), so the
+% bare \includegraphics names below resolve only for someone who already holds
+% the untracked copies. These are the tracked originals: figures/ carries the
+% twelve generated figures, and the Monte Carlo panel belongs to the fold-in
+% production run (abm/monte_carlo_trapped_liquidity.png is the Berger run and is
+% NOT the panel this manuscript prints).
+\graphicspath{{./}{../../figures/}{../../abm/data/runs/run-2026-07-04-15yr-foldin/}}
 \usepackage{float}
 \usepackage{array}
 \usepackage{longtable}
@@ -1146,7 +1153,7 @@ The decomposition also carries its time axis. The monthly marginal path is the c
 
 \begin{figure}[H]
 \centering
-\includegraphics[width=0.94\textwidth]{fig12_marginal_timing.png}
+\includegraphics[width=0.94\textwidth]{fig12_marginal_timing}
 \caption{Monthly lock-in marginal by coupon bucket. Stacked areas are the per-bucket monthly marginals from the month-by-cell capture of the group-ablation engine; the dark line is the aggregate central-minus-null path, whose sum reproduces the $+\$70.3$ billion in-sample marginal bit-exactly. Dotted rules mark the window's thirds; the marker is the November 2023 peak. The stack differs from the aggregate by the decomposition's 1.03\% terminal additivity residual, asserted in the generator.}
 \label{fig:marginaltiming}
 \end{figure}
