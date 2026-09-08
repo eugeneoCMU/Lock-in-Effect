@@ -39,12 +39,12 @@ import sys
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
-BUILD = ROOT / "paper" / "v18" / "build_split"
+BUILD = ROOT / "paper" / "final" / "build_split"
 DEFAULTS = [
-    BUILD / "revised_paper_v18.pdf",
-    BUILD / "revised_paper_v18_main.pdf",
-    BUILD / "revised_paper_v18_online_appendix.pdf",
-    BUILD / "revised_paper_v18_long_abstract.pdf",
+    BUILD / "paper_final_v1.pdf",
+    BUILD / "paper_final_v1_main.pdf",
+    BUILD / "paper_final_v1_online_appendix.pdf",
+    BUILD / "paper_final_v1_long_abstract.pdf",
 ]
 # a glyph's origin may sit a hair outside the box through rounding; a descender
 # at the very bottom margin is fine. 2pt is far below the 12pt line height, so
@@ -64,6 +64,42 @@ def is_offpage(dx: float, dy: float, box: tuple[float, float, float, float],
     e = EPS if eps is None else eps
     x0, y0, x1, y1 = box
     return dy < y0 - e or dy > y1 + e or dx < x0 - e or dx > x1 + e
+
+
+def overrun(pdf: Path) -> list[tuple[int, float, str]] | None:
+    """Pages whose typeset text EXTENDS past the sheet, not merely starts past it.
+
+    is_offpage() tests a glyph's ORIGIN. A table row that begins inside the text
+    block and runs off the right-hand edge has every origin on the sheet, so the
+    origin test passes it. That is not hypothetical: the 2026-09 review found
+    five tables in a gate-green build whose last column was clipped away by the
+    paper's edge, one of them the inference ladder's Status column on the
+    binding-layer row, and this gate had reported ALL RENDER CHECKS PASS.
+
+    Origins cannot see it because the defect is a width, so this reads span
+    bounding boxes instead. PyMuPDF supplies them; when it is absent the check
+    reports itself unavailable rather than passing silently, because a check
+    that goes quiet when its dependency is missing is how the first one failed.
+    """
+    try:
+        import fitz
+    except ImportError:
+        return None
+    bad: list[tuple[int, float, str]] = []
+    with fitz.open(str(pdf)) as doc:
+        for pno, page in enumerate(doc, 1):
+            sheet = page.rect.width
+            worst, text = 0.0, ""
+            for block in page.get_text("dict")["blocks"]:
+                for line in block.get("lines", []):
+                    for span in line["spans"]:
+                        if not span["text"].strip():
+                            continue
+                        if span["bbox"][2] > worst:
+                            worst, text = span["bbox"][2], span["text"]
+            if worst > sheet:
+                bad.append((pno, worst - sheet, text.strip()[-60:]))
+    return bad
 
 
 def scan(pdf: Path) -> dict:
@@ -116,16 +152,28 @@ def main(argv: list[str]) -> int:
             print(f"         p{pno} at ({dx:.1f}, {dy:.1f}): {text!r}")
         if len(r["offpage"]) > 8:
             print(f"         ... and {len(r['offpage']) - 8} more")
+
+        over = overrun(pdf)
+        if over is None:
+            print(f"[SKIP] text stays on the sheet: {pdf.name} — PyMuPDF not "
+                  f"installed, so span extents were not read")
+        else:
+            failures += 0 if not over else 1
+            print(f"[{'PASS' if not over else 'FAIL'}] text stays on the sheet: "
+                  f"{pdf.name}, spans past the paper edge={len(over)}"
+                  f"{f' on pages {[p for p, *_ in over]}' if over else ''}")
+            for pno, past, text in over[:8]:
+                print(f"         p{pno} runs {past:.1f}pt past the edge: {text!r}")
     # The split is cut BY HAND after every rebuild and nothing verified it.
     # These two invariants are structural rather than numeric, so they never
     # need retuning: pages must be conserved, and the variant must not drift
     # in length from the canonical file.
     if not argv[1:]:
         seen = {p.name: scan(p)["pages"] for p in DEFAULTS if p.exists()}
-        canon = seen.get("revised_paper_v18.pdf")
-        parts = (seen.get("revised_paper_v18_main.pdf"),
-                 seen.get("revised_paper_v18_online_appendix.pdf"))
-        variant = seen.get("revised_paper_v18_long_abstract.pdf")
+        canon = seen.get("paper_final_v1.pdf")
+        parts = (seen.get("paper_final_v1_main.pdf"),
+                 seen.get("paper_final_v1_online_appendix.pdf"))
+        variant = seen.get("paper_final_v1_long_abstract.pdf")
         if canon is not None and all(x is not None for x in parts):
             split_ok = parts[0] + parts[1] == canon
             failures += 0 if split_ok else 1
@@ -133,10 +181,21 @@ def main(argv: list[str]) -> int:
                   f"canonical document: {parts[0]} + {parts[1]} = "
                   f"{parts[0] + parts[1]} against {canon}pp")
         if canon is not None and variant is not None:
-            var_ok = variant == canon
+            # The two editions differ at line 31 and nowhere else (CI diffs them
+            # with that line removed, and four tests hold their line counts
+            # equal), so any BODY drift is caught upstream and what remains here
+            # is the abstract's own overflow. The archived long abstract runs 629
+            # words against the canonical 263, which costs exactly one page; an
+            # equality test could therefore never pass, and this check had never
+            # run to discover that, because no build was ever left in the tree.
+            # One page of slack keeps the invariant that the check was written
+            # for -- the variant must not drift in length -- while letting the
+            # difference the abstracts guarantee through.
+            var_ok = abs(variant - canon) <= 1
             failures += 0 if var_ok else 1
-            print(f"[{'PASS' if var_ok else 'FAIL'}] variant length matches the "
-                  f"canonical document: {variant}pp against {canon}pp")
+            print(f"[{'PASS' if var_ok else 'FAIL'}] variant length within one "
+                  f"page of the canonical document: {variant}pp against "
+                  f"{canon}pp")
 
     print(f"\n{'ALL RENDER CHECKS PASS' if not failures else f'{failures} RENDER CHECK(S) FAILED'}")
     return 1 if failures else 0

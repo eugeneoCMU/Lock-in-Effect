@@ -36,12 +36,12 @@ from liveness_gates import (  # noqa: E402
 
 # V20 closing-session rescope: app:ledger/app:verdicts live in the standalone
 # replication_appendices.tex; the gated corpus is manuscript + that file.
-TEX = ((ROOT / "paper" / "v18" / "revised_paper_v18.tex").read_text()
-       + "\n" + (ROOT / "paper" / "v18" / "replication_appendices.tex").read_text())
+TEX = ((ROOT / "paper" / "final" / "paper_final_v1.tex").read_text()
+       + "\n" + (ROOT / "paper" / "final" / "replication_appendices.tex").read_text())
 OPENER = "Pure conventional-share scaling is what a gap-inert Ginnie share gives."
-VARIANT = (ROOT / "paper" / "v18"
-           / "revised_paper_v18_long_abstract.tex").read_text() \
-    + "\n" + (ROOT / "paper" / "v18" / "replication_appendices.tex").read_text()  # V20 rescope
+VARIANT = (ROOT / "paper" / "final"
+           / "paper_final_v1_long_abstract.tex").read_text() \
+    + "\n" + (ROOT / "paper" / "final" / "replication_appendices.tex").read_text()  # V20 rescope
 HAZ = ROOT / "hazard" / "data"
 G = json.loads((HAZ / "ginnie_overlay_attenuated_results.json").read_text())
 OV = json.loads((HAZ / "ginnie_cpr_overlay_results.json").read_text())
@@ -451,15 +451,15 @@ def test_the_two_honesty_clauses_must_stay_in_order():
     can catch it -- and the assertion on info['ordered'] proves that is what
     fired."""
     old = ("That the scaling rises above the committed $0.797\\times$ at every "
-           "positive response is arithmetic, not evidence---a share contributing "
-           "exactly zero must contribute more at any positive response---and I "
+           "positive response is arithmetic, not evidence (a share contributing "
+           "exactly zero must contribute more at any positive response), and I "
            "rest nothing on it. The bracket, not any cell in it, is the result: "
            "none of the four is a measured Ginnie marginal, and")
     new = ("The bracket, not any cell in it, is the result: none of the four is "
            "a measured Ginnie marginal. That the scaling rises above the "
            "committed $0.797\\times$ at every positive response is arithmetic, "
-           "not evidence---a share contributing exactly zero must contribute "
-           "more at any positive response---and I rest nothing on it, and")
+           "not evidence (a share contributing exactly zero must contribute "
+           "more at any positive response), and I rest nothing on it, and")
     assert TEX.count(old) == 1, "the ordering mutation is vacuous"
     ok, info = ginnie_attenuated_check(TEX.replace(old, new), G, OV, GOF)
     assert not ok, "the clause order is not pinned"

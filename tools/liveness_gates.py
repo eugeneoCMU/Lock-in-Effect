@@ -31,15 +31,15 @@ import sys
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
-TEX = ROOT / "paper" / "v18" / "revised_paper_v18.tex"
+TEX = ROOT / "paper" / "final" / "paper_final_v1.tex"
 # ROUND 22 (C4): every manuscript variant on disk, not just the canonical one.
-# paper/v18/revised_paper_v18_simple_abstract.tex was byte-identical to the
+# paper/final/paper_final_v1_simple_abstract.tex was byte-identical to the
 # canonical file except for its abstract, was UNTRACKED, and was therefore
 # entirely ungated -- run against gate #68's shipped rule it failed with 5 of 8
 # spans missing, silently reversing round 20's calibration-label discipline and
 # round 21's Danish dual label. A variant that ships is a variant that must be
 # checked, so the abstract gate is applied to all of them.
-TEX_VARIANTS = sorted((ROOT / "paper" / "v18").glob("revised_paper_v18*.tex"))
+TEX_VARIANTS = sorted((ROOT / "paper" / "final").glob("paper_final_v1*.tex"))
 MANIFEST = ROOT / "abm" / "data" / "runs" / "run-2026-07-04-15yr-foldin" / "manifest.json"
 FANNIE_RESULTS = ROOT / "hazard" / "data" / "fannie_replication_results.json"
 OVERLAY_RESULTS = ROOT / "hazard" / "data" / "ginnie_cpr_overlay_results.json"
@@ -203,6 +203,29 @@ ZERO_COUNT = [
     "at the committed proxy discounts",
     "at the paper's own proxy discounts",
     "across the committed 32--38\\% discount grid",
+    # FRESH-PANEL-2 / 2026-09 review: the intervals FP2 Batch B retired. Nothing
+    # guarded these -- the batch re-printed every site by hand and verified the
+    # result by grep, and the grep missed one (:105 kept "+2.3" and was caught a
+    # round later, in 9f13504). A retired interval is exactly the class this
+    # list exists for, so the successor of a hand grep is an entry here.
+    # The bracket forms only: the bare pair "+2.3" / "+9.1" recurs legitimately
+    # as a ladder row and as decensor history, and "$+2.8$ to $+8.7$" is the
+    # Webb rung the paper still reports BESIDE the binding layer.
+    "$+2.3$ to $+9.1$",
+    "$[+2.3, +9.1]$",
+    "$[+2.9, +8.7]$",
+    # NOT listed: "$[+2.80, +8.99]$", the Webb-rung convolved pair. It is zero
+    # in both manuscript variants, but the run index and the response letter
+    # both print it deliberately, as the superseded pair they are recording;
+    # this list is scanned over the appendices too, so pinning it here would
+    # forbid the history rather than the claim.
+    # the pre-decensoring flow-terms floor, superseded by \$0.35 (gate #111)
+    "\\$0.42 to \\$1.66",
+    # the Batch-A censoring disclosures. The grid now runs to 7.0%, so the
+    # lower endpoint is measured; there is nothing left to disclose, and a
+    # reverted site would otherwise print a flag for a censoring that ended.
+    "lower endpoint censored",
+    "lower edge censored",
 ]
 
 EXACTLY_ONE = [
@@ -383,7 +406,7 @@ RELOCATED_TO_BODY = {
     # ROUND-27 abstract cut: the cross-design seed hedge and the book-
     # composition reweight left the abstract with their claims; each is
     # pinned against its body statement (SS IV lead; tab:headline caption).
-    "crossdesign_seed_body": "60.2\\% averaged over fifty seeds---above the "
+    "crossdesign_seed_body": "60.2\\% averaged over fifty seeds, above the "
                              "50\\% threshold",
     "crossdesign_reweight_body": "76.3\\% at the book's composition",
     # ROUND-27 option-2 cut: the expectations pair's body pins. Each joins
@@ -461,7 +484,7 @@ ASSEMBLY_SPANS = {
     # V20-N1 re-landing (2026-08-05): interval re-pinned to the restricted
     # inversion selected by SPEC_V20_C's frozen rule; scoping unchanged.
     "posture_binding_layer": "The widest layer that does have a coverage property is the "
-                             "floor reads' own sampling error, $+2.3$ to $+9.1$ points "
+                             "floor reads' own sampling error, $+1.9$ to $+9.1$ points "
                              "after wild-cluster correction",
     "posture_lower_half": "every correction listed above falls in its lower half",
     # (c) the censoring share (HANDOFF_round24 §4) and the framing that
@@ -522,7 +545,7 @@ ABSTRACT_POSTURE = {
     # read is demoted to a labeled mention inside the same parenthetical.
     # V20 panel revision (2026-08-04): pin re-synced to the compressed abstract;
     # the span's purpose is unchanged, the phrasing follows the manuscript.
-    "interval": "$+2.3$ to $+9.1$ points under the production floor form",  # V20-N1 re-landed
+    "interval": "$+1.9$ to $+9.1$ points under the production floor form",  # FP2-B1 decensored
     # ROUND-28 (DA-C3): the abstract must say WHAT the interval bounds. "pins"
     # claimed the design pinned the elasticity's contribution; the interval is
     # the floor read's sampling error at a FIXED elasticity, which contributes
@@ -587,7 +610,7 @@ def abstract_posture_check(tex: str) -> tuple[bool, dict]:
     abstract = tex_nc[_i + len(ABSTRACT_BOUNDS[0]):_j] if found else ""
     missing = sorted(k for k, v in ABSTRACT_POSTURE.items() if v not in abstract)
     # the range must be stated BEFORE the point it contains
-    i_range = abstract.find("$+2.3$ to $+9.1$")  # V20-N1: binding interval re-landed
+    i_range = abstract.find("$+1.9$ to $+9.1$")  # FP2-B1: decensored binding interval
     i_point = abstract.find("$+5.6$ points")
     ordered = i_range != -1 and i_point != -1 and i_range < i_point
     return (found and not missing and ordered,
@@ -661,15 +684,15 @@ ABM_LEAD_SPANS = {
 #   (c) every current-state figure §7 quotes must still exist in the manuscript.
 #       §7 is the section that speaks in the present tense, so it is the section
 #       that must track.
-LETTER = ROOT / "paper" / "v18" / "response_to_referees_round22.tex"
+LETTER = ROOT / "paper" / "final" / "response_to_referees_round22.tex"
 LETTER_CURRENT_SECTION = "\\section{Changes since this response was drafted}"
 LETTER_RETIRED_HULL = "$+3.9$ to $+13.1$"
 LETTER_HISTORICAL_MARKER = "range that stood at\nthe time at $+3.9$ to $+13.1$ points. That range has since widened"
 LETTER_CURRENT_LITERALS = [
     "$+3.5$ to $+13.1$",   # the hull, as it now stands
     "$+3.0$ to $+8.0$",    # the demoted percentile read (still quoted, labeled)
-    "$+2.3$ to $+9.1$",    # V20-N1: the adjudicated binding layer
-    "$+2.9$ to $+8.7$",    # the Webb rung, retained beside it
+    "$+1.9$ to $+9.1$",    # FP2-B1: the decensored binding layer
+    "$+2.8$ to $+8.7$",    # the Webb rung under the extended map
     "$+3.53$", "$+10.83$",  # the cell that widened it, and the concave ceiling
     "$+270.4$", "$-105.3$",  # the ABM null's sign disagreement
     "68.8\\%", "35.8\\%",   # the censoring shares, central and null legs
@@ -774,12 +797,28 @@ CONVOLVED_LINE_SPANS = {
     # caveat without the comonotone bound understates how wrong independence
     # could be; and the lower-bound inheritance is what stops the line being
     # read as calibrated coverage.
-    "run_tag": "\\texttt{layer\\_convolution}",
-    "pair": "$[+2.80, +8.99]$",
+    # FRESH-PANEL-2 BATCH A (2026-08-29): the one-number recommendation moved
+    # OFF the convolution — it had been computed on the demoted Webb rung and
+    # never re-derived under the adjudicated binding layer, so as printed it was
+    # anti-conservative (narrower than the binding interval itself). The prose
+    # labelled it a lower bound on the re-derived pair and pointed the
+    # one-number reader at the binding interval instead.
+    # FRESH-PANEL-2 BATCH B (2026-08-29, same day, superseding the above): the
+    # convolution WAS re-derived on the restricted rung over the extended grid
+    # (run layer_convolution_restricted). Width 7.675pp now exceeds the binding
+    # 7.238pp and truncation is zero, so the Batch-A label ("a lower bound on
+    # the re-derived pair") RETIRED and the recommendation RETURNED — pointing
+    # at the re-derived pair [+1.71, +9.38], which is what the spans below pin.
+    # Not a redirection any more: this span protects the recommendation itself,
+    # as its round-28 predecessor did. The lower_bound_inheritance span below is
+    # a DIFFERENT statement (round-28: one input to the sum is itself a lower
+    # bound, so the summed line inherits that) and still stands.
+    "run_tag": "\\texttt{layer\\_convolution\\_restricted}",
+    "pair": "$[+1.71, +9.38]$",
     "independence_caveat": "independence is assumed, not measured",
-    "comonotone_bound": "under maximal positive dependence the width is $8.12$pp",
-    "one_number_reading": "the interval a reader who wants one number for "
-                          "sampling error should use",
+    "comonotone_bound": "under maximal positive dependence the width is $9.67$pp",
+    "one_number_reading": "a reader who wants one number for sampling error "
+                          "should take that convolved pair",
     "non_substitution": "an assumption rather than a measurement",
     "lower_bound_inheritance": "makes the convolved line a lower bound as well",
 }
@@ -815,10 +854,10 @@ FLOOR_LADDER_SPANS = {
     # run-tag credit, which is only honest because the t(30) rung is
     # bit-identical in the committed run; (d) the designer-units restatement,
     # which is the SAME read's Webb interval expressed in floor units, so a
-    # drift between it and the $+2.9$ to $+8.7$ the paper quotes is a defect.
-    "cr1_conventional": "CR1 $t$ & $+3.2$ to $+8.3$ & $t(30)$, $G-1$ & no "
+    # drift between it and the $+2.8$ to $+8.7$ the paper quotes is a defect.
+    "cr1_conventional": "CR1 $t$ & $+3.1$ to $+8.3$ & $t(30)$, $G-1$ & no "
                         "leverage adjustment",
-    "cr1_bell_mccaffrey": "CR1 $t$, Bell--McCaffrey & $+2.8$ to $+8.8$ & "
+    "cr1_bell_mccaffrey": "CR1 $t$, Bell--McCaffrey & $+2.7$ to $+8.8$ & "
                           "$t(6.2)$, data-driven & small-sample df",
     "df_ownership": "the 6.2 and 5.1 shown are CR1's and CR2's, and CR3's own "
                     "is smaller still",
@@ -843,8 +882,8 @@ FLOOR_LADDER_SPANS = {
     # and covers both automatically; that file needs no edit.
     "ladder_month_row": "CR1 $t$, month clusters & $+3.1$ to $+8.4$ & "
                         "$t(5)$, $G-1$ & wider on df alone",
-    "ladder_two_way_row": "Two-way, stratum $\\times$ month & $+2.3$ to $+9.3$ "
-                          "& $t(5)$, $\\min(G)-1$ & lower edge censored",
+    "ladder_two_way_row": "Two-way, stratum $\\times$ month & $+2.2$ to $+9.3$ "
+                          "& $t(5)$, $\\min(G)-1$ & both clustering dimensions at once",
 }
 
 FLOOR_LADDER_READ = "R2_2018_gap<=-0.0025_age>=12"
@@ -892,9 +931,14 @@ def convolved_line_check(tex: str) -> tuple[bool, dict]:
         lc.get("status") == "OK"
         and lc.get("parity_gates_all_pass") is True
         and ci[0] is not None
-        and f"[{ci[0]:+.2f}, {ci[1]:+.2f}]" == "[+2.80, +8.99]"
-        and prim.get("width_pp", 0) > 5.822976726802727
-        and lc.get("floor_invariance_probe", {}).get("within_tolerance") is True
+        and f"[{ci[0]:+.2f}, {ci[1]:+.2f}]" == "[+1.71, +9.38]"
+        # FP2-B2: wider than the RE-DERIVED binding interval (the artifact's
+        # own Q3 gate), no truncation on the primary line (the condition that
+        # retired the lower-bound label), and the printed comonotone bound
+        # reproduces from the artifact
+        and lc.get("verdict", {}).get("no_truncation_on_primary") is True
+        and prim.get("width_pp", 0) > lc.get("verdict", {}).get("binding_width_pp", 1e9)
+        and f"{lc.get('dependence_bracket', {}).get('comonotone_width_pp', 0):.2f}" == "9.67"
     )
     info["artifact_ok"] = art_ok
     return (not missing) and art_ok, info
@@ -909,7 +953,7 @@ def floor_ladder_check(tex: str) -> tuple[bool, dict]:
     if missing:
         return False, info
     ordered = (tex_nc.index(FLOOR_LADDER_SPANS["cr1_conventional"])
-               < tex_nc.index("CR2 $t$ & $+3.0$ to $+8.6$")
+               < tex_nc.index("CR2 $t$ & $+2.9$ to $+8.6$")
                and tex_nc.index(FLOOR_LADDER_SPANS["cr1_bell_mccaffrey"])
                < tex_nc.index("CR2 $t$, Bell--McCaffrey"))
     info["ordered"] = ordered
@@ -936,8 +980,8 @@ def floor_ladder_check(tex: str) -> tuple[bool, dict]:
         and fi.get("parity_gates_all_pass") is True
         and rd.get("n_clusters") == 31
         # the two CR1 rungs reproduce their printed cells from full precision
-        and f"${c1[0]:+.1f}$ to ${c1[1]:+.1f}$" == "$+3.2$ to $+8.3$"
-        and f"${c1b[0]:+.1f}$ to ${c1b[1]:+.1f}$" == "$+2.8$ to $+8.8$"
+        and f"${c1[0]:+.1f}$ to ${c1[1]:+.1f}$" == "$+3.1$ to $+8.3$"
+        and f"${c1b[0]:+.1f}$ to ${c1b[1]:+.1f}$" == "$+2.7$ to $+8.8$"
         and cr1.get("df_used") == 30.0
         and cr1.get("df_kind") == "G_minus_1"
         and cr1bm.get("df_kind") == "bell_mccaffrey_imbens_kolesar"
@@ -956,7 +1000,10 @@ def floor_ladder_check(tex: str) -> tuple[bool, dict]:
         and f"{wcrf[0]:.3f}\\% to {wcrf[1]:.3f}\\%" == "4.033\\% to 6.181\\%"
         and f"{wf[0]:.3f}\\% to {wf[1]:.3f}\\%" == "4.177\\% to 5.800\\%"
         and webb["upper_pp_edge"]["floor_pct"] < webb["lower_pp_edge"]["floor_pct"]
-        and abs(webb["marginal_ci95_pp"][0] - 2.8549950653913494) < 1e-9
+        # FP2-B1: the lower pp endpoint is a mapped value and re-derives under
+        # the extended grid (floor 5.800% sits in the refit's (5,6) interval);
+        # the upper endpoint's floor is below 5.0 and is bit-invariant.
+        and abs(webb["marginal_ci95_pp"][0] - 2.8252003470251736) < 1e-9
         and abs(webb["marginal_ci95_pp"][1] - 8.677971792194077) < 1e-9
     )
     info["artifact_ok"] = art_ok
@@ -1440,13 +1487,14 @@ def floor_form_mixture_check(tex: str, ffm: dict) -> tuple[bool, dict]:
 #
 #   (i)   the Webb row's rank among the undemoted rungs (third of nine ->
 #         fourth of eleven), and it is stated at TWO sites;
-#   (ii)  how many rungs are censored at the 6.0% grid edge (two -> three) --
-#         checked as a SET equality against the rungs printed wider than
-#         CR2-BM, not as a count that could match by luck;
-#   (iii) which rung is the widest with both endpoints interior -- CR2 at
-#         Bell-McCaffrey df, UNCHANGED by this landing, and the gate proves
-#         that rather than assuming it, because the month rung is the one that
-#         could have falsified it;
+#   (ii)  FP2-B1: which rungs' lower-edge floors ran past the grid's FORMER
+#         6.0% edge (the three the extension decensored) -- checked as a SET
+#         equality against the rungs printed wider than CR2-BM, not as a
+#         count that could match by luck; nothing is censored any more, and
+#         the gate asserts that too;
+#   (iii) which rung is the widest -- CR3 at Bell-McCaffrey df once its true
+#         width is measured -- and the gate proves it rather than assuming
+#         it;
 #   (iv)  Section V.E's "the 2018 leg is read in August--December", which the
 #         six-month support contradicted until the July disclosure landed.
 #
@@ -1493,13 +1541,15 @@ MONTH_TWOWAY_SPANS = {
     # E5: computability was a first-class branch, not a prediction
     "e5_not_predicted": "whether it would be computable at all I deliberately "
                         "did not predict",
-    # E4, landed as the miss it is
-    "e4_miss": "and it is not---both endpoints of the printed rung are "
-               "interior, and of the two new rows only the two-way one censors",
-    # ...with the one month-axis interval that DOES truncate named, so the
+    # E4, landed as the miss it is (FP2-B1: past tense — the edge is gone,
+    # the history stays)
+    "e4_miss": "and it does not: both endpoints of the printed rung are "
+               "interior, and of the two new rows only the two-way one "
+               "reached past that edge",
+    # ...with the one month-axis interval past the old edge named, so the
     # miss statement cannot be read past its own scope
     "rademacher_scope": "Among the month rung's own variants only the "
-                        "unprinted Rademacher one reaches past that edge.",
+                        "unprinted Rademacher one reaches past it",
     # NC-4: why Webb stays primary at this cluster unit
     "nc4_webb_primary": "which is why the Webb six-point weights are primary "
                         "here, as they are above",
@@ -1576,20 +1626,35 @@ def month_twoway_clusters_check(tex, v2, v3):
     n_censored = sum(censored(c) for c in rungs.values())
     interior = {k: width(v) for k, v in rungs.items() if not censored(v)}
     widest_interior = max(interior, key=interior.get)
-    # the note says the rungs printed WIDER than CR2-BM are exactly the
-    # censored ones; that is a set identity, not a count coincidence
+    # FP2-B1: nothing is censored any more; the note's claim is now that the
+    # rungs printed WIDER than CR2-BM are exactly the ones whose lower-edge
+    # floors ran past the grid's former 6.0% end (and were censored to it
+    # until the extension). Still a set identity, not a count coincidence.
+    OLD_GRID_EDGE_PCT = 6.0
+
+    def past_old_edge(c):
+        return bool(c["lower_pp_edge"]["floor_pct"] > OLD_GRID_EDGE_PCT)
+
     printed_wider = {k for k, v in rungs.items()
                      if width(v) > width(rungs["cr2_bm"])}
     censored_set = {k for k, v in rungs.items() if censored(v)}
+    decensored_set = {k for k, v in rungs.items() if past_old_edge(v)}
     stratum_only = {k: v for k, v in rungs.items()
                     if k not in ("month_cr1", "two_way")}
-    stratum_censored = {k for k, v in stratum_only.items() if censored(v)}
+    stratum_past = {k for k, v in stratum_only.items() if past_old_edge(v)}
     stratum_widest = set(sorted(stratum_only,
                                 key=lambda k: width(stratum_only[k]))
-                         [-len(stratum_censored):]) if stratum_censored else set()
+                         [-len(stratum_past):]) if stratum_past else set()
     month_censoring = {k: bool(mo[k]["lower_pp_edge"]["truncated_at_grid_edge"]
                                or mo[k]["upper_pp_edge"]["truncated_at_grid_edge"])
                        for k in _MONTH_VARIANTS}
+    month_past_edge = {k for k in _MONTH_VARIANTS
+                       if mo[k]["lower_pp_edge"]["floor_pct"] > OLD_GRID_EDGE_PCT}
+    # the old edge's row value ("+2.3"), derived from the extension artifact's
+    # bit-exact parity pair, never hard-coded here
+    _ext = json.loads((ROOT / "hazard" / "data"
+                       / "floor_grid_extension_results.json").read_text())
+    old_edge_pp = _ext["parity_row_6_0"]["lockin_marginal_share_pp"]
     shrink_pct = round((1 - mo["se_cr1_smm"] / rd["se_cr1_smm"]) * 100)
     grow_pct = round((tw["se_2way_smm"] / rd["se_cr1_smm"] - 1) * 100)
     rad = mo["wild_t_rademacher"]
@@ -1609,7 +1674,7 @@ def month_twoway_clusters_check(tex, v2, v3):
         "wider on df alone")
     lits["two_way_row"] = (
         f"Two-way, stratum $\\times$ month & {cell(tw['t_interval'])} & "
-        f"$t({tw['df_2way']})$, $\\min(G)-1$ & lower edge censored")
+        f"$t({tw['df_2way']})$, $\\min(G)-1$ & both clustering dimensions at once")
     lits["note_month_unit"] = (
         f"the month rung groups the {mo['n_cohort_months']} cohort-months by "
         f"the {_CARD(G)} calendar months the 2018 leg populates, "
@@ -1630,15 +1695,15 @@ def month_twoway_clusters_check(tex, v2, v3):
     lits["se_grows_twoway"] = (f"{grow_pct}\\% \\emph{{above}} the "
                                "stratum-clustered one")
     lits["month_bm_below_four"] = (
-        f"is {mo['df_bm_by_estimator']['cr1']:.1f}---below the "
+        f"is {mo['df_bm_by_estimator']['cr1']:.1f}, below the "
         f"{_CARD(nc1_thresh - 1)} my pre-committed "
         "too-few-clusters rule was written to protect")
     lits["nc1_trigger_quiet"] = (f"that rule's own $G < {nc1_thresh}$ trigger "
                                  "did not fire")
     # Section V.E's month range, reconciled against the read's actual support
     lits["july_tail_disclosure"] = (
-        f"read in {name(dense[0])}--{name(dense[-1])}---"
-        f"{_CARD(cmpm[sparse])} {name(sparse)} cohort-months aside---")
+        f"read in {name(dense[0])}--{name(dense[-1])} ("
+        f"{_CARD(cmpm[sparse])} {name(sparse)} cohort-months aside)")
     lits["nc4_sign_vectors"] = (f"$2^{{{G}}} = "
                                 f"{int(rad['distinct_sign_vectors'])}$ "
                                 "distinct Rademacher sign vectors")
@@ -1648,11 +1713,23 @@ def month_twoway_clusters_check(tex, v2, v3):
     # still computed (and reported in this gate's printout) but the tex pin is
     # the frozen-rule selection language.
     lits["webb_rank"] = "narrowest construction clearing the"
-    lits["censored_count"] = (f"The {_CARD(n_censored)} rungs printed "
-                              "wider still understate their own width")
+    # FP2-B1: the censoring adjudication became an extension record. The
+    # count, the three decensored cells, the old edge's row value and the
+    # run tag are all derived, none written here.
+    lits["printed_wider_extension"] = (
+        f"The {_CARD(len(printed_wider))} rungs printed wider than that")
+    lits["decensored_values"] = (
+        f"the three decensor to "
+        f"${rungs['cr3_bm']['marginal_ci95_pp'][0]:+.1f}$, "
+        f"${rungs['restricted']['marginal_ci95_pp'][0]:+.1f}$ and "
+        f"${rungs['two_way']['marginal_ci95_pp'][0]:+.1f}$, each below the "
+        f"${old_edge_pp:+.1f}$ the edge printed")
+    lits["extension_run_credit"] = "\\texttt{floor\\_grid\\_extension}"
     lits["two_widest_censored"] = (
-        f"as the {_CARD(len(stratum_censored))} widest stratum rungs "
-        "already are")
+        f"as the {_CARD(len(stratum_past))} widest stratum rungs' did")
+    lits["month_rademacher_decensored"] = (
+        f"decensored by the same extension, its lower edge is "
+        f"${mo['wild_t_rademacher']['marginal_ci95_pp'][0]:+.1f}$")
 
     missing = sorted(k for k, v in lits.items() if v not in tex_nc)
     ok = (
@@ -1663,12 +1740,16 @@ def month_twoway_clusters_check(tex, v2, v3):
         # no stale rank phrase survives anywhere.
         and tex_nc.count(lits["widest_interior"]) == 2
         and "undemoted rungs" not in tex_nc
-        # the claim this landing must NOT have falsified
-        and widest_interior == "cr2_bm"
-        # "the three rungs printed wider still ... are censored to it"
-        and printed_wider == censored_set
-        # the censored stratum rungs really are its widest ones
-        and stratum_censored == stratum_widest
+        # FP2-B1: nothing is censored any more, anywhere on the ladder
+        and n_censored == 0 and censored_set == set()
+        # with every endpoint interior the widest rung outright is CR3-BM,
+        # its true width finally measured
+        and widest_interior == "cr3_bm"
+        # "the three rungs printed wider than that" are exactly the ones
+        # whose lower-edge floors ran past the old 6.0% edge
+        and printed_wider == decensored_set
+        # ...and the formerly-censored stratum rungs really are its widest
+        and stratum_past == stratum_widest
         # E3 passed on width, at BOTH new cluster units
         and bool(e3["E3_month_widens"])
         and e3["E3_month_cr1_width_pp"] > e3["E3_committed_cr1_width_pp"]
@@ -1681,14 +1762,18 @@ def month_twoway_clusters_check(tex, v2, v3):
         and tw["se_2way_smm"] > rd["se_cr1_smm"]
         # NC-1's substantive threshold was crossed even though it did not fire
         and mo["df_bm_by_estimator"]["cr1"] < nc1_thresh - 1
-        # E4 missed, and the two rows' truncation is as printed
+        # E4 missed (the history the note preserves), and the two rows'
+        # geometry is as printed: the month rung interior on both ends, the
+        # two-way rung the one that ran past the old edge (now decensored)
         and e3["E4_upper_endpoint_truncates"] is False
         and not censored(rungs["month_cr1"])
-        and censored(rungs["two_way"])
+        and not censored(rungs["two_way"])
+        and past_old_edge(rungs["two_way"])
         and not rungs["two_way"]["upper_pp_edge"]["truncated_at_grid_edge"]
-        # ...and the ONE month-axis interval that does truncate is the
+        # ...and the ONE month-axis interval past the old edge is the
         # unprinted Rademacher variant the note names
-        and [k for k, v in month_censoring.items() if v] == ["wild_t_rademacher"]
+        and not any(month_censoring.values())
+        and sorted(month_past_edge) == ["wild_t_rademacher"]
         # feasibility was measured before any interval was read, and the
         # branches that would have forbidden a printed row did not fire
         and bool(v3["feasibility"]["computed_before_any_interval_was_read"])
@@ -1840,8 +1925,8 @@ def episode_age_bands_check(tex: str, a: dict, w: dict) -> tuple[bool, dict]:
         # one contextual literal for the age-only limb: the component, the total
         # it is a share of, and the share itself, in the order they are printed
         "age_only_and_share": (
-            f"puts ${age_b:+.2f}$ of the raw ${total:+.2f}$ --- "
-            f"${age_b / total * 100:.1f}\\%$ --- on seasoning composition") in tex_nc,
+            f"puts ${age_b:+.2f}$ of the raw ${total:+.2f}$ "
+            f"(${age_b / total * 100:.1f}\\%$) on seasoning composition") in tex_nc,
         "composition_moves": (
             f"moving total composition from ${com_b:+.2f}$ to "
             f"${aug_b:+.2f}$") in tex_nc,
@@ -1944,8 +2029,11 @@ SNHAMAX_RESULTS = (ROOT / "hazard" / "data"
 # Four things this gate binds past presence, because each is a way this landing
 # could go wrong quietly:
 #
-# (i)   PLACEMENT. +8.5 sits in the UPPER half of the +2.9 to +8.7 binding
-#       interval -- INSIDE it, about 0.2 below the upper edge, NOT above it.
+# (i)   PLACEMENT. +8.5 sits in the UPPER half of the binding interval --
+#       INSIDE it, NOT above it. The interval is +1.9 to +9.1 since FP2 Batch B
+#       decensored its lower endpoint (2026-08-29), so +8.5 sits 0.6 below the
+#       upper edge; it was +2.9 to +8.7 and 0.2 below the edge when this header
+#       was written, and the placement claim is unchanged either way.
 #       Gate #98 pins "every correction listed above falls in its lower half",
 #       a claim scoped to the ladder ABOVE the binding-interval sentence, so
 #       writing this member up into that ladder would falsify a pinned sentence
@@ -3245,12 +3333,12 @@ def fewcluster_coverage_check(tex: str, art: dict, ladder: dict) -> tuple[bool, 
 
 def main() -> int:
     # V20 CLOSING SESSION RESCOPE: app:ledger and app:verdicts migrated to the
-    # standalone paper/v18/replication_appendices.tex (EIC-W1/R2-W5; byte-identical
+    # standalone paper/final/replication_appendices.tex (EIC-W1/R2-W5; byte-identical
     # bodies, xr-resolved refs). The gated corpus for span, count, run-citation,
     # runindex-row, and verdict-ledger checks is the manuscript PLUS that file,
     # which is the same content the suite gated before the migration. Abstract-
     # scoped and variant-diff gates below still read the manuscript files alone.
-    tex = TEX.read_text() + "\n" + (ROOT / "paper" / "v18" / "replication_appendices.tex").read_text()
+    tex = TEX.read_text() + "\n" + (ROOT / "paper" / "final" / "replication_appendices.tex").read_text()
     failures = 0
 
     for phrase in ZERO_COUNT:
@@ -6894,8 +6982,8 @@ def main() -> int:
     fu_tex_ok = (tex.count("$+3.0$ to $+8.0$") >= 2
                  # V20-N1: the binding interval is the restricted inversion's;
                  # the Webb rung's read is retained beside it, not as binding.
-                 and tex.count("$+2.3$ to $+9.1$") >= 4
-                 and tex.count("$+2.9$ to $+8.7$") >= 2
+                 and tex.count("$+1.9$ to $+9.1$") >= 4
+                 and tex.count("$+2.8$ to $+8.7$") >= 2
                  and "floor\\_uncertainty" in tex
                  and "floor\\_inference\\_correction" in tex
                  and "open below $+4.3$" in tex
@@ -7259,7 +7347,7 @@ def main() -> int:
           f"stale_sentence_gone={_wn['stale_sentence_gone']}")
     _eb_cap = json.loads(EXPECT_RESULTS.read_text())
     # V20-N1: band re-derived at the adjudicated binding interval (restricted inversion)
-    cmu_ok, _cmu = cap_monthly_units_check(tex, _eb_cap, _eb_cap["cap_benchmark_b"], 2.3, 9.1)
+    cmu_ok, _cmu = cap_monthly_units_check(tex, _eb_cap, _eb_cap["cap_benchmark_b"], 1.9, 9.1)
     failures += 0 if cmu_ok else 1
     print(f"[{'PASS' if cmu_ok else 'FAIL'}] cap result in $bn/month (gate #111): "
           f"ceiling={_cmu['cap_per_month']}, "
@@ -7455,6 +7543,70 @@ def main() -> int:
           f"quoted={_fcci['binding_interval_quoted']}), "
           f"spans={_fcci['spans_present']}, rule_applied={_fcci['rule_applied']}, "
           f"oracle={_fcci['oracle_bounds']}")
+
+    # --- gate #129: the replicate counts the assembly quotes -----------------
+    # The sentence at the assembly compares the h0_reanchor replicate marginals
+    # against two edges. It compared them against ONE edge, +8.7, for three
+    # rounds after +8.7 stopped being the binding interval's upper edge, and
+    # nothing noticed: the count is arithmetic over a committed artifact that
+    # no gate opened. Both counts are recomputed here rather than trusted.
+    _h0 = json.loads(
+        (ROOT / "hazard" / "data" / "h0_reanchor_results.json").read_text())
+    _reps = [r["marginal_pp"] for r in _h0["per_replicate"]]
+    _above_webb = sum(1 for x in _reps if x > 8.7)
+    _above_binding = sum(1 for x in _reps if x > 9.1)
+    _h0_spans = {
+        # "all but one" is a claim about the count, so it is derived, not typed
+        "webb_all_but_one": _above_webb == len(_reps) - 1,
+        "webb_edge_named": "$+8.7$ upper edge of the Webb rung" in tex,
+        "binding_count": f"{_above_binding} of the {len(_reps)}" in tex,
+        "binding_edge_named": "$+9.1$ upper edge of the binding interval" in tex,
+    }
+    h0_ok = all(_h0_spans.values())
+    failures += 0 if h0_ok else 1
+    print(f"[{'PASS' if h0_ok else 'FAIL'}] h0-reanchor replicate counts "
+          f"(gate #129): {_above_webb}/{len(_reps)} above $+8.7$, "
+          f"{_above_binding}/{len(_reps)} above $+9.1$; spans={_h0_spans}")
+
+    # --- gate #127: the four grid-extension rows the lower endpoint rests on --
+    # tab:oosfloor gained four provenance-marked rows in FP2 Batch B, and the
+    # binding interval's +1.9 is read off the mapping they extend. Gate #115
+    # opens this artifact but checks the decensored SET, not these rows, so a
+    # mistyped row would have printed a floor-to-marginal map the interval does
+    # not come from.
+    _fge = json.loads(
+        (ROOT / "hazard" / "data" / "floor_grid_extension_results.json").read_text())
+    # The whole row is rebuilt from the artifact, not just its two numbers, so
+    # a floor paired with the wrong marginal cannot pass on both halves being
+    # present somewhere in the file.
+    _rows = _fge["rows"] if isinstance(_fge.get("rows"), list) else []
+    _fge_rows = [
+        "Grid extension & paired re-run\\tnote{d} & "
+        f"{_r['floor_annual_cpr_pct']:.2f}\\% & --- & "
+        f"$+{_r['lockin_marginal_share_pp']:.1f}$ & --- \\\\"
+        for _r in _rows
+    ]
+    _fge_missing = [r for r in _fge_rows if r not in tex]
+    fge_ok = bool(_fge_rows) and not _fge_missing and _fge["parity_gates_all_pass"]
+    failures += 0 if fge_ok else 1
+    print(f"[{'PASS' if fge_ok else 'FAIL'}] grid-extension rows (gate #127): "
+          f"{len(_fge_rows)} rows rebuilt from the artifact, "
+          f"missing={len(_fge_missing)}, "
+          f"parity_gates_all_pass={_fge['parity_gates_all_pass']}")
+
+    # --- gate #128: "pre-registered" is reserved, and the paper says so once --
+    # PAPER_ROADMAP section 3 rule 6. The manuscript reserves the term for
+    # third-party registries in one sentence and uses "pre-committed" for its
+    # own rules everywhere else; a second use had survived at the ABM
+    # admissibility qualification until the 2026-09 review found it by reading.
+    _prereg = tex.count("pre-registered")
+    _reservation = "I reserve ``pre-registered'' for third-party registries"
+    _reserved = tex.count(_reservation)
+    vocab_ok = _reserved >= 1 and _prereg == _reserved
+    failures += 0 if vocab_ok else 1
+    print(f"[{'PASS' if vocab_ok else 'FAIL'}] reserved vocabulary "
+          f"(gate #128): 'pre-registered' occurs {_prereg}x, all of them "
+          f"inside the {_reserved} reservation sentence(s)")
 
     print(f"\n{'ALL GATES PASS' if failures == 0 else f'{failures} GATE(S) FAILED'}")
     return 0 if failures == 0 else 1

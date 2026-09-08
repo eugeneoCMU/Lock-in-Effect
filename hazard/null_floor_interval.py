@@ -8,7 +8,9 @@ before it ran. Guarded-runner pattern: sha-pinned inputs, frozen artifacts read-
 single JSON output, gates that ABORT. NO engine runs and NO new sampling: the
 sampling layer enters exclusively through the committed floor-scale interval
 endpoints of floor_inference_correction_results.json (the binding R2 read whose
-marginal-scale image is the paper's [+2.9, +8.7]), mapped through a PCHIP built on
+marginal-scale image was the paper's [+2.9, +8.7] when this ran; that image is
+[+1.9, +9.1] since FP2 Batch B decensored the lower endpoint on 2026-08-29, the
+floor-unit endpoints themselves unmoved), mapped through a PCHIP built on
 the committed floor-sweep grid exactly as floor_uncertainty.py maps the marginal
 (same grid, same edge-truncation convention, same $B tolerance for off-node
 agreement with committed engine rows).

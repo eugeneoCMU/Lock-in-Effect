@@ -68,10 +68,13 @@ THE FIVE CHANGES (SPEC C1.2):
      the observed statistic is studentized by the UNRESTRICTED SE_CR1 while
      SE* is recomputed on each restricted resample — recorded in the artifact
      so it is not mistaken for the symmetric textbook variant.
- (5) v1's truncation convention KEPT: an endpoint outside the committed grid
-     [2.0, 6.0]% CPR is mapped AT the nearest edge and flagged
-     truncated_at_grid_edge, never extrapolated and never excluded (that is
-     _map_draws's convention, deliberately not adopted). Flags reported.
+ (5) v1's truncation convention KEPT: an endpoint outside the grid is mapped
+     AT the nearest edge and flagged truncated_at_grid_edge, never
+     extrapolated and never excluded (that is _map_draws's convention,
+     deliberately not adopted). Flags reported. FP2-B1 (2026-08-29): the
+     grid is the committed sweep PLUS the frozen floor_grid_extension rows —
+     support [2.0, 7.0]% CPR; every committed censored endpoint (max 6.6733)
+     now maps inside. Same PCHIP rule, extended support.
 
 STRUCTURAL POINT, FIXED BEFORE THE RUN: the df change CANNOT move the primary
 interval — the wild bootstrap-t reads its critical values off the t*
@@ -93,8 +96,11 @@ GATE_FAILURE and the run stops. Nothing lands in the manuscript.):
      of v1's per-read block reproduces to 1e-12 on all four reads
      (n_clusters, t_crit_G_minus_1, max_leverage, point_cpr_pct,
      cr1/cr2/cr3_t_interval.*, crk_se_pp_approx, wild_t.* incl. t_star_q and
-     marginal_ci95_pp). This is what licenses reading any Webb-vs-Rademacher
-     difference as the WEIGHT CHANGE rather than a refactor.
+     floor_ci95_pct). This is what licenses reading any Webb-vs-Rademacher
+     difference as the WEIGHT CHANGE rather than a refactor. FP2-B1: mapped
+     leaves (MAPPED_LEAF_KEYS) are excluded — they are a deterministic
+     function of the floor-unit values and the adopted extended mapping,
+     and their movement is gated in floor_grid_extension_results.json.
   P5 sum_g h_g = 1 to 1e-12 per read; h_max reproduces the committed
      .reads.*.max_leverage to 1e-12 (0.27808/0.33233/0.38163/0.16608).
   P6 BM/IK equal-cluster self-test returns df = G-1 to 1e-8, at every read's
@@ -189,7 +195,7 @@ TSTAR_RADE_CSV = DATA_DIR / "floor_inference_v2_tstar_R2_rademacher.csv"
 B_WILD = 9999
 SEED = 42
 CENTRAL_PQ = "6.5"
-GRID_LO, GRID_HI = 2.0, 6.0
+GRID_LO, GRID_HI = 2.0, 7.0   # FP2-B1: grid extended past 6.0 (2026-08-29)
 
 # Webb (2014) six-point weights, each w.p. 1/6: E[s]=0, E[s^2]=1, E[s^4]=7/6.
 WEBB_POINTS = np.array([-np.sqrt(1.5), -1.0, -np.sqrt(0.5),
@@ -450,16 +456,31 @@ def weight_moments(s: np.ndarray) -> dict:
 # =========================================================================
 # PARITY PLUMBING
 # =========================================================================
+MAPPED_LEAF_KEYS = frozenset({
+    "marginal_ci95_pp", "marginal_ci95_b", "marginal_pp", "marginal_b",
+    "mapped_at_pct", "truncated_at_grid_edge",
+})  # FP2-B1: mapped leaves are a deterministic function of the floor-unit
+    # values and the ADOPTED extended mapping; the replay's license (reading
+    # Webb-vs-Rademacher as the weight change) rests on floor-unit equality,
+    # which stays bit-exact. Mapped-value movement is priced and gated in
+    # floor_grid_extension_results.json (P4 blast radius).
+
+
 def _parity_walk(want, got, path: str, diffs: list) -> None:
     """Recursive bit-exact comparison of a committed v1 sub-tree against the
     v2 counterpart. Every numeric leaf must agree to PARITY_TOL; bools,
     strings and None must be equal. Every mismatch is named by its full path
-    so a P4 failure is diagnosable without a rerun."""
+    so a P4 failure is diagnosable without a rerun. Mapped leaves
+    (MAPPED_LEAF_KEYS) are skipped under the FP2-B1 extended mapping; the
+    floor-unit leaves (floor_ci95_pct, *_pp_edge.floor_pct) remain compared
+    and are the load-bearing content."""
     if isinstance(want, dict):
         if not isinstance(got, dict):
             diffs.append({"path": path, "want": "dict", "got": type(got).__name__})
             return
         for k, v in want.items():
+            if k in MAPPED_LEAF_KEYS:
+                continue
             if k not in got:
                 diffs.append({"path": f"{path}.{k}", "want": v, "got": "<MISSING>"})
                 continue
@@ -594,9 +615,13 @@ def main() -> None:
     draws, _n_cl = fu.cluster_bootstrap_cpr(selections[R2])
     se_pp = float(np.std(draws, ddof=1))
     ci = np.percentile(draws, [2.5, 97.5])
-    mapping = mdr.FloorMapping()
+    # FP2-B1: the parity reproduction of the COMMITTED percentile pair must
+    # run under the COMMITTED mapping (a parity gate reproduces committed
+    # values); the corrections below use the extended map.
+    mapping_committed = mdr.FloorMapping()
+    mapping = mdr.FloorMapping(extended=True)
     mapping_global = mapping
-    mapped = fu._map_draws(mapping, draws)
+    mapped = fu._map_draws(mapping_committed, draws)
     p2_ok = (abs(se_pp - COMMITTED_R2_SE_PP) < 1e-9
              and abs(ci[0] - COMMITTED_R2_CI95_PCT[0]) < 1e-9
              and abs(ci[1] - COMMITTED_R2_CI95_PCT[1]) < 1e-9

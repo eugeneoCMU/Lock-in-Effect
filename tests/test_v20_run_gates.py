@@ -161,9 +161,12 @@ def test_fcc_fails_when_coverage_moves(tex, fcc):
 
 def test_fcc_fails_when_binding_construction_not_quoted(tex, fcc):
     # V20-N1 TRACE: the live tie (SPEC_V20_C section 4). If the artifact's
-    # decision field named cr2_bm, the manuscript's quoted [+2.3, +9.1] would
-    # no longer be the binding construction's interval ([+2.4, +9.1]) and the
-    # gate must fail. The old branch-string assert is retired: the frozen
+    # decision field named cr2_bm, the manuscript's quoted interval would no
+    # longer be the binding construction's ([+2.4, +9.1] for cr2_bm) and the
+    # gate must fail. The quoted interval is [+1.9, +9.1] since FP2 Batch B
+    # (2026-08-29) decensored the lower endpoint; it read [+2.3, +9.1] when
+    # this comment was written, and the trace holds either way.
+    # The old branch-string assert is retired: the frozen
     # artifact's landing_branch ("L1_webb_retains") contradicts its own rule
     # and is deliberately left unasserted.
     art = copy.deepcopy(fcc)

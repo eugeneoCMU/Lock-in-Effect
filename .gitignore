@@ -99,3 +99,5 @@ hazard/data/_bootstrap_pathb_cluster_tmp.parquet
 abm/data/cross_design_reweight/
 abm/data/cross_design_seeds/
 abm/data/production_scale_test/
+# FP2-B1 per-run parquets (regenerable via hazard/floor_grid_extension.py)
+hazard/data/floor_grid_extension/

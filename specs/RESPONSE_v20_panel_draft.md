@@ -1,5 +1,11 @@
 # Response to the v19 Review Panel — DRAFT (v20 revision in progress)
 
+> **SUPERSEDED 2026-09-05.** This is the working draft of 2026-08-04. The binding
+> interval it argues from has since moved to **[+1.9, +9.1]** (N1's re-landing, then
+> FP2 Batch B on 2026-08-29), and the live response letter is
+> `paper/final/response_to_referees_round22.tex`, not this file. Kept as the record
+> of what was drafted; the body below is left as written.
+
 **Status:** working draft, 2026-08-04. Phase 2 (claim surgery) is landed and green
 (ALL GATES PASS; 1093 tests). Items marked **[PENDING-RUN]** await the author-only
 runs specced in `specs/DRAFT_V20_A/B/C`; items marked **[PHASE-3]** land with the

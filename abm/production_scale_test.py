@@ -12,7 +12,7 @@ floor_form_offwindow.py / concave_marginal.py).
 -------------------------------------------------------------------------------
 REFEREE OBJECTION (round 22, item B4 CONFIRMED)
 -------------------------------------------------------------------------------
-Section VII.A (sec:robustness-scale, paper/v18/revised_paper_v18.tex
+Section VII.A (sec:robustness-scale, paper/final/paper_final_v1.tex
 reports a mean simulated CPR of 15.616% at N = 10,000 and N = 75,000 and
 concludes that population size changes precision, not central tendency.  Five
 downstream sites lean on it:,,,,.
@@ -31,7 +31,9 @@ Three defects, all confirmed against the tree:
       settlement-lag kernel.
   (2) NO PROVENANCE.  The scale test has no committed script, no artifact and
       no liveness gate.  The literal 15.616 appears nowhere in the repository
-      outside the v15r5/v16/v17/v18 .tex sources; it is absent from
+      outside the manuscript sources of that era (v15r5/v16/v17/v18, the last of
+      which is now paper/final/paper_final_v1.tex, renamed 2026-08-29) and the
+      TECHNICAL.md narrative of this same finding; it is absent from
       tab:runindex and tab:crosswalk.
   (3) WRONG REPORTED QUANTITY.  The manuscript claim is about the GAP between
       the ABM's benchmark recovery and the hazard framework's, i.e. about the

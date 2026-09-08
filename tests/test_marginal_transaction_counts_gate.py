@@ -16,9 +16,9 @@ sys.path.insert(0, str(ROOT / "tools"))
 
 from liveness_gates import marginal_transaction_counts_check  # noqa: E402
 
-TEX = (ROOT / "paper" / "v18" / "revised_paper_v18.tex").read_text()
-VARIANT = (ROOT / "paper" / "v18"
-           / "revised_paper_v18_long_abstract.tex").read_text()
+TEX = (ROOT / "paper" / "final" / "paper_final_v1.tex").read_text()
+VARIANT = (ROOT / "paper" / "final"
+           / "paper_final_v1_long_abstract.tex").read_text()
 M = json.loads((ROOT / "hazard" / "data"
                 / "marginal_transaction_counts_results.json").read_text())
 

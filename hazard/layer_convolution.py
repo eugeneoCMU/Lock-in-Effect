@@ -225,9 +225,18 @@ the presentation form and the only free content is the numbers)
  only, per "labeled second line, not a replacement".
  [posture-adjacent] The tex 301 sentence changes how the paper RANKS its
  uncertainty layers. Eugene sees the drafted sentence before it lands. Per A4
- the manuscript now prints $+2.9$ to $+8.7$; every C2.4/C2.7 reference to the
- pre-C1 printed pair maps to the current pair, and the census is re-derived
- with count-asserted replacements at apply time.
+ the manuscript printed $+2.9$ to $+8.7$ when this header was written; every
+ C2.4/C2.7 reference to the pre-C1 printed pair maps to the pair current at
+ apply time, and the census is re-derived with count-asserted replacements then.
+
+ SUPERSEDED (2026-08-29, FP2 Batch B). This is the C2 runner and its floor layer
+ is the demoted Webb wild-t rung on the [2.0, 6.0] grid. The live convolution is
+ hazard/layer_convolution_restricted.py, re-derived on the restricted rung over
+ the extended grid: convolved primary $[+1.71, +9.38]$pp, and it is that pair the
+ one-number recommendation now points at. The manuscript's binding interval is
+ $[+1.9, +9.1]$, not $[+2.9, +8.7]$. This file is kept as the provenance of the
+ superseded artifact (which survives in git history) and is not the runner to
+ re-execute; nothing in its code has been changed.
 
 MUST NOT CHANGE: the binding-layer literal at any of its occurrences;
 $[+4.63, +6.92]$, 25.8 and "factor of $37$" (gate-pinned,

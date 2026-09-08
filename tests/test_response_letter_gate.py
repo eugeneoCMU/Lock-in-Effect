@@ -96,7 +96,7 @@ def test_historical_marker_removed_fails(tex, letter_file):
 
 
 # --- (b) the count that silently rotted -----------------------------------
-@pytest.mark.parametrize("wrong", ["262", "328", "352", "359", "366", "367", "280", "424", "226", "235", "248", "287", "294", "323", "341"])
+@pytest.mark.parametrize("wrong", ["262", "273", "328", "352", "359", "366", "367", "280", "424", "226", "235", "248", "287", "294", "323", "341"])
 def test_wrong_abstract_word_count_fails(tex, letter_file, wrong):
     # V20 re-review round: abstract 229 -> 244 words (two hedge additions); the
     # mutation anchor tracks the letter's live claim.

@@ -143,8 +143,7 @@ def fig1_recovery_dotplot():
              "the shared trend is removed no estimator's co-movement is",
              fontsize=8, color=C_GRAY)
     fig.text(0.005, 0.005,
-             "positive (detrended r: ABM −0.30, Path A −0.29, Path B −0.20; "
-             "§V.C).",
+             "positive (detrended r: ABM −0.30, Path A −0.29, Path B −0.20).",
              fontsize=8, color=C_GRAY)
     fig.tight_layout(rect=(0, 0.07, 1, 1))
     fig.savefig(OUT / "fig1_recovery_by_estimator.png", dpi=DPI)
@@ -170,7 +169,7 @@ def fig2_ccf():
     ax.axhline(0, color="black", lw=0.8)
     ax.axvline(0, color=C_GRAY, lw=0.8, ls=":")
     ax.set_xlabel("Lag (months); a peak at negative lag means the empirical "
-                  "series leads\nand the simulated path trails (§V.C)")
+                  "series leads\nand the simulated path trails")
     ax.set_ylabel("Cross-correlation")
     ax.set_xlim(-6.5, 6.5)
     ax.set_ylim(-0.6, 0.75)
@@ -191,7 +190,7 @@ def fig3_abm_waterfall():
     stages = [(s["label"], s["share_pct"]) for s in early]
     stages.append(("+ production corrections\n(parse, back-out,\namort., kernel)",
                    PREFOLDIN["dollars_b"]["share_explained_pct"]))
-    stages.append(("+ 15yr fold-in\n(production\nheadline)",
+    stages.append(("+ 15yr fold-in\n(production spec,\nseed-42 draw)",
                    FOLDIN["dollars_b"]["share_explained_pct"]))
     stages.append(("Native 15yr gate\n(Berger-run\nvariant)",
                    BERGER["dollars_b"]["share_explained_pct"]))
@@ -229,7 +228,7 @@ def fig3_abm_waterfall():
     fig.text(0.005, 0.035,
              "Behavioral extensions (stages 2-4) were pre-committed with "
              "expected directions; multi-vintage ran against its expected "
-             "direction (§VII.C).",
+             "direction.",
              fontsize=8, color=C_GRAY)
     fig.text(0.005, 0.005,
              "Stages 5-7 are corrections and fold-ins, not behavioral "
@@ -265,7 +264,8 @@ def fig4_refi_sweep():
                     fontsize=8.5, color=color, alpha=0.8,
                     arrowprops=dict(arrowstyle="->", color=color, lw=0.9,
                                     alpha=0.6))
-    ax.annotate("best estimate ≈ 0 (Berger ~1bp GE result):\n"
+    ax.annotate("best estimate ≈ 0\n"
+                "(Berger ~20bp GE result, July 2026 draft):\n"
                 f"rule-only gap +${g_us[0]:.0f}B, no crossing anywhere",
                 xy=(0, g_us[0]), xytext=(1.2, 480), fontsize=9, color="black",
                 arrowprops=dict(arrowstyle="->", lw=1.0))
@@ -275,12 +275,14 @@ def fig4_refi_sweep():
     ax.set_xlabel("Assumed U.S.-transplant refinance-in-place CPR (%/yr)")
     ax.set_ylabel("Institutional gap, U.S. − Danish ($B)")
     ax.legend(loc="upper left", fontsize=8.8, frameon=False)
-    fig.text(0.005, 0.005,
+    fig.text(0.005, 0.035,
              "Positive gap = U.S. par-payoff traps more. Rule-only anchor: "
-             "positive at every sweep point; the sign question is the "
-             "anchor, not the refinance channel (§IV.C).",
+             "positive at every sweep point;",
              fontsize=8, color=C_GRAY)
-    fig.tight_layout(rect=(0, 0.04, 1, 1))
+    fig.text(0.005, 0.005,
+             "the sign question is the anchor, not the refinance channel.",
+             fontsize=8, color=C_GRAY)
+    fig.tight_layout(rect=(0, 0.075, 1, 1))
     fig.savefig(OUT / "fig4_institutional_gap_sensitivity.png", dpi=DPI)
     plt.close(fig)
 
@@ -310,7 +312,7 @@ def fig5_cross_design_bars():
              color=C_SURV, ha="right", va="top")
     ax1.axhline(threshold, color=C_GRAY, lw=1.1, ls="--")
     ax1.text(-0.42, threshold + 1.5,
-             f"pre-registered {threshold:.0f}% threshold",
+             f"pre-committed {threshold:.0f}% threshold",
              fontsize=8, color=C_GRAY)
     ax1.bar(xs, shares, width=0.6, color=colors, alpha=0.9)
     for x, s in zip(xs, shares):
@@ -358,8 +360,8 @@ def fig6_elasticity_band():
     ax.annotate("central estimate (6.5%)", xy=(6.5, dict(zip(x, y))[6.5]),
                 xytext=(6.62, 806), fontsize=9, color=C_SURV,
                 arrowprops=dict(arrowstyle="->", color=C_SURV, lw=1.0))
-    ax.set_xlabel("Liebersohn–Rothstein quarterly mobility decline per 100bp, "
-                  "$P_q$ shock (%)")
+    ax.set_xlabel("Liebersohn–Rothstein quarterly mobility-decline parameter "
+                  "$\\delta$ per 100bp (%)")
     ax.set_ylabel("Path B trapped liquidity ($B)")
     ax.set_ylim(755, 845)
     fig.tight_layout()
@@ -383,7 +385,9 @@ def fig7_architecture():
     _box(ax, 0.2, 7.6, 2.5, 1.5,
          "FRED + NY Fed SOMA\nrates, holdings,\ncoupon cohorts", "#fff3e0")
     _box(ax, 0.2, 5.4, 2.5, 1.5,
-         "Freddie Mac loan level\n75k stratified sample\n(2017–2021)", "#fff3e0")
+         "Freddie Mac loan level\n2017–2021 origination universe\n"
+         "Path A: full universe\nPath B: 75k stratified draw", "#fff3e0",
+         fontsize=8.2)
     _box(ax, 0.2, 3.2, 2.5, 1.5,
          "Literature priors\nPSA, Rothstein band,\nBerger et al. (Danish)", "#fff3e0")
 

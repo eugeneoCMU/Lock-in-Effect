@@ -176,7 +176,7 @@ PASS (gates hold, scale in [0.655, 0.672], variant-invariant within 0.01):
   * tex 263 gains the overlay beside the existing $11.7B level bound (clause
     carried verbatim in the artifact's verdict block).
   * NO composed Ginnie x vintage cell is specified or claimed.  Verified at
-    paper/v18/revised_paper_v18.tex:1156 (the spec cites 1148; the sentence
+    paper/final/paper_final_v1.tex:1156 (the spec cites 1148; the sentence
     sits at 1156 in the current file): of the 2022 vintage's 23.1% of book
     face, 20.7% is conventional and 2.4% is the Ginnie intersection, so
     vintage and agency marginals cannot be added without double-counting that
@@ -310,7 +310,7 @@ COMPOSED_WITH_GINNIE = {
     "status": "NOT_COMPUTED",
     "reason": ("agency x vintage cross-tab incomplete: the 2022 x Ginnie "
                "intersection is 2.4pp of book face (tex 1148 per SPEC S8; the "
-               "sentence sits at revised_paper_v18.tex:1156) but the pre-2017 "
+               "sentence sits at paper_final_v1.tex:1156) but the pre-2017 "
                "x Ginnie intersection is not in the committed artifact"),
 }
 

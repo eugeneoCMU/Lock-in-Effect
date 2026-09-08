@@ -2,7 +2,7 @@
 form-conditional).
 
 This landing's failure mode is PLACEMENT, not arithmetic. The additive member is
-+8.5 points -- INSIDE the +2.9 to +8.7 binding interval, in its UPPER half --
++8.5 points -- INSIDE the +1.9 to +9.1 binding interval, in its UPPER half --
 while gate #98 pins the claim that every correction listed above that interval
 falls in its LOWER half. Writing this member into the downward ladder would
 falsify a pinned sentence without touching it, so the three relocation tests are
@@ -32,13 +32,13 @@ from liveness_gates import (  # noqa: E402
     snha_additive_check,
 )
 
-VARIANT_PATH = ROOT / "paper" / "v18" / "revised_paper_v18_long_abstract.tex"
+VARIANT_PATH = ROOT / "paper" / "final" / "paper_final_v1_long_abstract.tex"
 MAX_PATH = ROOT / "hazard" / "data" / "scaled_null_housing_activity_results.json"
 ADD_PATH = (ROOT / "hazard" / "data"
             / "scaled_null_housing_activity_additive_results.json")
 
 # V20 closing-session rescope: the runindex row lives in replication_appendices.tex
-_REPLAPPX = (ROOT / "paper" / "v18" / "replication_appendices.tex").read_text()
+_REPLAPPX = (ROOT / "paper" / "final" / "replication_appendices.tex").read_text()
 TEXT = TEX.read_text() + "\n" + _REPLAPPX
 VARIANT = VARIANT_PATH.read_text() + "\n" + _REPLAPPX
 MAXB = MAX_PATH.read_bytes()
@@ -396,7 +396,11 @@ def test_both_anchors_agree_to_the_printed_decimal():
 
 def test_the_additive_member_is_inside_the_binding_interval():
     """The prose says 'near the top of the quoted interval', never above it: the
-    member is 8.4912 against an upper edge of 8.7."""
+    member is 8.4912. The binding interval has read [+1.9, +9.1] since FP2 Batch B
+    (2026-08-29), so the member sits 0.6 below its upper edge, not 0.2. The bounds
+    asserted below are the Webb-era [+2.9, +8.7] edges, left deliberately: they lie
+    strictly inside the current interval, so the check is the stronger one and still
+    fails the moment the member escapes upward."""
     assert 2.9 < A["roots_additive"]["4.991"]["marginal_pp"] < 8.7
     assert A["roots_additive"]["4.991"]["marginal_pp"] > (2.9 + 8.7) / 2
 

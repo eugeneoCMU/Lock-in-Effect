@@ -24,7 +24,7 @@ ROOT = Path(__file__).resolve().parent.parent
 _s = importlib.util.spec_from_file_location("lg", ROOT / "tools" / "liveness_gates.py")
 lg = importlib.util.module_from_spec(_s)
 _s.loader.exec_module(lg)
-TEX = (ROOT / "paper" / "v18" / "revised_paper_v18.tex").read_text()
+TEX = (ROOT / "paper" / "final" / "paper_final_v1.tex").read_text()
 
 
 def test_beta1_signs_agree_across_tables():

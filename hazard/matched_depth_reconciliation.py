@@ -115,6 +115,7 @@ from config import FRED_API_KEY  # noqa: E402
 PANEL_PATH = DATA_DIR / "cohort_month_panel.parquet"
 COMMITTED_OOS = DATA_DIR / "oos_identification_results.json"
 COMMITTED_SWEEP = DATA_DIR / "floor_sweep_results.json"
+EXTENSION_SWEEP = DATA_DIR / "floor_grid_extension_results.json"  # FP2-B1
 RESULTS_JSON = DATA_DIR / "matched_depth_reconciliation_results.json"
 
 # oos_identification.py's own grid (parity surface) and this run's extension.
@@ -229,12 +230,30 @@ def parity_gate(df: pd.DataFrame) -> dict:
 # Committed floor -> marginal mapping (NOT re-derived)
 # ======================================================================
 class FloorMapping:
-    """Monotone PCHIP through the frozen floor_sweep_results.json grid."""
+    """Monotone PCHIP through the frozen floor_sweep_results.json grid.
 
-    def __init__(self) -> None:
+    extended=True (SPEC FP2-B1, 2026-08-29) merges the frozen
+    floor_grid_extension rows past 6.0% — same interpolation rule, extended
+    support. The default False is bit-preserving for every committed
+    consumer; only the FP2-B1-amended runners opt in."""
+
+    def __init__(self, extended: bool = False) -> None:
         with open(COMMITTED_SWEEP) as f:
             sweep = json.load(f)
         rows = sorted(sweep["rows"], key=lambda r: r["floor_annual_cpr_pct"])
+        self.extended = bool(extended)
+        if extended:
+            with open(EXTENSION_SWEEP) as f:
+                ext = json.load(f)
+            assert ext["status"] == "OK", "extension artifact status != OK"
+            par, row6 = ext["parity_row_6_0"], next(
+                r for r in rows if r["floor_annual_cpr_pct"] == 6.0)
+            assert (par["lockin_marginal_b"] == row6["lockin_marginal_b"]
+                    and par["lockin_marginal_share_pp"]
+                    == row6["lockin_marginal_share_pp"]), \
+                "extension parity row != committed 6.0 row (FP2-B1 P1)"
+            rows = rows + sorted(ext["rows"],
+                                 key=lambda r: r["floor_annual_cpr_pct"])
         self.x = np.array([r["floor_annual_cpr_pct"] for r in rows])
         self.yb = np.array([r["lockin_marginal_b"] for r in rows])
         self.yp = np.array([r["lockin_marginal_share_pp"] for r in rows])
@@ -281,9 +300,11 @@ class FloorMapping:
             "engine_reads": checks,
             "max_abs_err_b_inside_grid": max(in_grid_err),
             "reproduces_committed_grid_exactly": bool(grid_exact),
-            "note": "PCHIP on the frozen floor_sweep grid; the mapping is not "
-                    "re-derived. Reads above 6.0% are outside the committed "
-                    "grid and are refused, not extrapolated.",
+            "note": (f"PCHIP on the frozen floor_sweep grid"
+                     f"{' + FP2-B1 extension' if self.extended else ''}; the "
+                     f"mapping is not re-derived. Reads above "
+                     f"{float(self.x.max()):g}% are outside the grid and are "
+                     f"refused, not extrapolated."),
         }
 
 

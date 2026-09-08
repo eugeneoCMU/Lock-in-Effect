@@ -39,8 +39,8 @@ from liveness_gates import (  # noqa: E402
     floor_form_mixture_check,
 )
 
-TEX_FILE = ROOT / "paper" / "v18" / "revised_paper_v18.tex"
-APPX_FILE = ROOT / "paper" / "v18" / "replication_appendices.tex"
+TEX_FILE = ROOT / "paper" / "final" / "paper_final_v1.tex"
+APPX_FILE = ROOT / "paper" / "final" / "replication_appendices.tex"
 
 
 @pytest.fixture(scope="module")

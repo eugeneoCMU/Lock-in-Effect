@@ -1,5 +1,12 @@
 # Peer-Review Package — `revised_paper_v19.pdf`
 
+> **SUPERSEDED 2026-09-05.** A 2026-08-04 planning input, reviewing the v19 build.
+> The round it prompted has since executed — the v20 review fixes, N1's re-landing,
+> and Fresh-Panel-2 Batches A and B — so the `[+2.9, +8.7]` binding interval the
+> panel quotes is superseded by **[+1.9, +9.1]** (Webb's [+2.8, +8.7] is reported
+> beside it, no longer as the binding layer). Kept as the record of what the panel
+> said; the body below is left as written.
+
 **Manuscript:** "Mortgage Lock-In and the Federal Reserve's Quantitative Tightening Shortfall," Eugene Ong, Carnegie Mellon University.
 **Build reviewed:** the newest of the three copies in `~/Downloads` (`revised_paper_v19 (2).pdf`, 2026-07-31 22:46, 134 pp.). The three copies differ only in copyedits (hyphenation, one footnote move, a column-header abbreviation); every finding applies to all three. Page citations follow the 134-pp. build and may drift by 1–3 pages against the 130-pp. base copy in later sections.
 **Review protocol:** academic-paper-reviewer full mode — five independent reviewers (EIC + 3 peer reviewers + Devil's Advocate), no cross-referencing during Phase 1; editorial synthesis in Phase 2. All reviewers were read-only and barred from executing any repository code. The coordinator independently verified the panel's load-bearing page-cited claims against the extracted text before synthesis; all checked claims verified.

@@ -9,8 +9,8 @@ numbers are headline and which are demoted, one canonical name for every recurri
 concept, and disambiguation tables for the terms and numbers that look alike but are
 not.
 
-**Source of truth.** `paper/v18/revised_paper_v18.tex` (1,411 lines; `\appendix` at
-line 766) plus `paper/v18/replication_appendices.tex`, both on branch
+**Source of truth.** `paper/final/paper_final_v1.tex` (1,411 lines; `\appendix` at
+line 766) plus `paper/final/replication_appendices.tex`, both on branch
 `claude/v20-review-fixes`. Naming note: the file says "v18" but its content is
 current through the v20 review-fix round (it carries the v20 N1-relanded inference
 ladder, the paradigm withdrawal, and the v20 panel fixes). Line numbers cited below
@@ -45,12 +45,14 @@ June 2022–November 2025.
 The paper's question is *not* "did lock-in slow the runoff?" (the Fed's own staff had
 said so). It is: **how much of that shortfall was ever about household rate
 responses at all?** The answer is: surprisingly little. A model with the rate
-response switched **off** — nothing but scheduled amortization plus a measured floor
-of baseline housing turnover — already accounts for **85.7%** of the shortfall (at
-the paper's headline calibration, on its main accounting basis). Switching the rate
-response **on** adds a **lock-in marginal** the paper deliberately reports as a
-range: **+2.3 to +9.1 percentage points** of the benchmark, roughly **$1 billion a
-month**. The caps were set 1.7–1.9× above what the Fed's own projections said was
+response switched **off** — the same loan-level engine with one coefficient set to
+zero, so loans still prepay at a seasoning-driven baseline speed above a measured
+floor of housing turnover, just never *because* rates moved — already accounts for
+**85.7%** of the shortfall (headline calibration, main accounting basis, production
+floor form; only **35.6%** under the additive form, and see 2.1 for what the null
+does and does not contain). Switching the rate response **on** adds a **lock-in
+marginal** the paper deliberately reports as a range: **+1.9 to +9.1 percentage
+points** of the benchmark, roughly **$1 billion a month**. The caps were set 1.7–1.9× above what the Fed's own projections said was
 achievable, so most of the "shortfall" was arithmetic, anticipated, and rate-
 inelastic — while the real cost of lock-in lands on households who could not move,
 not on the Fed's cash flow.
@@ -74,11 +76,282 @@ labeled otherwise.
 | 2 | Rate-inelastic baseline (β₁ = 0 null) | **85.7%** at the off-window floor; 88.7% in-sample; only 35.6% under the additive form | The paper’s central decomposition fact: the floor form, not fine calibration, is what swings it. |
 | 3 | Path B central level | **91.3%** at the off-window floor; 97.9% in-sample (107.0% standalone basis) | Level is floor-dominated → explicitly *not* evidence for the elasticity. |
 | 4 | Lock-in marginal (the identified object) | **+5.6 pp = $42.6B** at the off-window floor (anchor convention); **+9.2 pp = $70.3B** at the in-sample point | The two floors bracket two *estimands*, not two readings of one number (Section 5, pair 1). |
-| 5 | Binding interval on the marginal | **[+2.3, +9.1] pp** (wild-cluster restricted inversion, 31 clusters) | The only quoted range with a coverage property. The identified content is this range, not any interior point. |
+| 5 | Binding interval on the marginal | **[+1.9, +9.1] pp** (wild-cluster restricted inversion, 31 clusters) | The only quoted range with a coverage property. The identified content is this range, not any interior point. |
 | 6 | Production ABM | **13.6%** fifty-seed mean ($103.7B); frozen seed-42 draw 11.9% ($91.0B) | Seed mean is the headline; the frozen draw is only the reproducibility anchor. |
 | 7 | Expectations-based complement | **$87.8B** vs the Fed’s own May-2022 projection; lock-in ≈ half of it (23–80% across floors/allocations, all upper bounds) | Second denominator; caps were expected non-binding, so this is the “surprise” part. |
 | 8 | Cap-design arithmetic | Caps set **1.7–1.9×** the Fed’s own contemporaneous projection | Third contribution; computable ex ante. |
 | 9 | Danish rule-only counterfactual | **+$61.2B** (face accounting, zero-refinance edge; at the in-sample floor — compare to $70.3B, not $42.6B) | Sign is forced by the anchor; magnitude is the content; flips to −$51.0B under cash accounting. |
+
+### 2.1 What the β₁ = 0 null actually computes
+
+Row 2's one-line gloss — and the abstract's "scheduled amortization plus a turnover
+floor" — compresses a six-term hazard, and it reliably misreads as *amortization
+only*. It is not amortization only. The null prepays the book at a measured mean
+**5.87% annual CPR** at the headline floor — *faster* than the central leg's 5.36%.
+Everything below is Path B; `hazard/no_lockin_null.py` is the run.
+
+**The switch is one scalar.** The null sets `p_q_shock_pct = 0.0`, which feeds
+`rothstein_beta1(0.0)`. That returns exactly zero — the shocked and baseline
+quarterly mobility probabilities coincide, so the log-ratio is log 1, and the
+module asserts the exact-zero before running. Nothing else changes: same 75,000-loan
+sample, same RNG seed, same floor, same scorer, same accounting. The null and the
+central leg are two passes of one engine differing in one number, which is what makes
+their difference (eq:marginal) the paper's identified object.
+
+**The hazard, term by term.** Path B's monthly prepayment hazard
+(`hazard/literature_hazard.py:prepay_hazard`) is
+
+```
+h_vol  = h₀(age) · exp( (−β₁)·100·gap  +  β_fico·z_fico  +  β_ltv·z_ltv  +  β_burn·burnout )
+h_prep = max( h̲ , h_vol )                                     ← production floor form
+```
+
+Setting β₁ = 0 kills the first term inside the exponent and nothing else. What
+survives, with what each is measured to be worth:
+
+| Term | In the null? | What it is | Measured size |
+|---|---|---|---|
+| Scheduled amortization | **yes** | Contractual principal, `scheduled_amortization_smm(coupon, 360, age)`, applied to every surviving loan after the hazard step | The level's backbone; never ablated because it is the contract |
+| `h₀(age)` — 100 PSA seasoning ramp | **yes** | CPR rising 0.2 pp per month of loan age to 6% at month 30, flat thereafter. Voluntary prepayment behavior, on the null's side of the line | Widest within-form convention layer (the PSA sweep); aggregate fit cannot arbitrate it |
+| `h̲` — baseline turnover floor | **yes** | 4.0% annual CPR in-sample, 4.991% at the headline off-window read. Floors *total* turnover, not the strictly-involuntary part | Dominant level-setter. Bind share is cell-specific: 35.79% of the null's 1,683,124 evaluated loan-months at the headline floor, 68.82% of the central leg's (see the trap below) |
+| FICO / LTV covariates | **yes** | `β_fico = −0.15`, `β_ltv = +0.10` on standardized scores | 1.3 points |
+| Cohort burnout | **yes** | `β_burn = −0.5` on stratum cumulative prepaid share | 0.45 pt at the headline floor; 0.86 pt in-sample ($3.48B / $6.58B) |
+| Competing-risk default + delinquency pipeline | **yes** | `h_def = 0.0003 · exp(2.0·stress + …)`, Bernoulli draw, Markov servicer states. Retained as a *competing risk*, not a prepayment channel: `default_upb = 0.0` is hard-coded, so a defaulting loan leaves the active pool without ever being credited as roll-off. The proportional clamp `normalize_competing_hazards` is the identity at production magnitudes | ≤ $0.39B |
+| **Rate-gap term `(−β₁)·100·gap`** | **NO** | The imported Liebersohn–Rothstein elasticity | **This is the marginal: +5.6 pp / $42.6B at the headline floor** |
+
+So six of seven terms survive. The null is the *whole model minus one coefficient*,
+not a stripped-down amortization table.
+
+**The null prepays *faster* than the central leg.** This is the single most useful
+fact for reading the decomposition, and it is measured, not derived. Mean U.S. annual
+CPR over the window (`floor_form_mixture_results.json`, cells `floor|ω|p_q`):
+
+| Cell (production `max` form, ω = 0) | null (p_q = 0) | central (p_q = 6.5) |
+|---|---|---|
+| In-sample 4.0% floor | **5.614%** CPR, floor binds 14.34% | 4.763% CPR, floor binds **36.27%** |
+| Headline 4.991% floor | **5.874%** CPR, floor binds 35.79% | 5.359% CPR, floor binds 68.82% |
+
+The null runs the book off *harder* than the central leg, because lock-in is exactly
+what suppresses prepayment. So the null is not a slower, cut-down model that trails
+the real one — it is the faster one, and it still leaves 85.7% of the shortfall
+unexplained-away. The floor's bind share is the mirror of this: the rate-gap term
+pushes `h_vol` under the floor, so the floor pins the *central* leg roughly twice as
+often as the null in both calibrations.
+
+Where the floor does *not* bind — 64% of the null's 1,683,124 evaluated loan-months
+at the headline floor — the hazard is set by the PSA ramp times the covariate and
+burnout multiplier. The floor is the dominant *level-setter* through its effect on
+the pinned region, not because it governs most loan-months of the null.
+
+**Three rate channels the null keeps.** "Rate-inelastic" is exact; "rate-blind" is
+not, and the difference is load-bearing.
+
+1. **The default leg stays rate-sensitive.** `rate_stress = max(0, market − coupon)`
+   enters `default_hazard` with `γ = 2.0`. It is not switched off by β₁ = 0. On a
+   3 bp/month base it is immaterial (the whole delinquency channel is bounded at
+   $0.39B), but the null is not literally free of rates even inside the hazard.
+2. **The floor is read off realized, partly behavioral turnover.** The read is an
+   exposure-weighted CPR over *all* prepayment on deep-discount cohorts — voluntary
+   moves and cash-out refis mixed with strictly involuntary events, the involuntary
+   share "plausibly well under half". So if lock-in depressed baseline turnover
+   itself, part of what the null books as baseline belongs to the lock-in channel
+   and the rate-inelastic share overstates what is invariant to household behavior.
+   The paper concedes this in the abstract and rules it *unadjudicable below
+   gap ≤ 0*, not refuted.
+   **Do not evidence this with the 6.9%-vs-3.9% contrast.** The 2019 leg's 6.910%
+   is `regime_contaminated` **and** `seasoning_contaminated`, verdict `CONTAMINATED`,
+   filed under `contaminated_upper_anchors` — a falling-rate refi wave, i.e.
+   refi-*inflated*, not lock-in-free. And the paper's own version of the comparison
+   (6.910% at gap ≤ 0 against the retained 2018 leg's 4.991% at gap ≤ −0.25) it
+   calls "not a valid comparison as written" because the depths differ; at matched
+   depth the 2018-vs-2019 spread runs 1.576 / 0.491 / 2.112 / 0.857 points,
+   non-monotone. Direction check: anchoring on the contaminated 6.91% read collapses
+   the marginal to **+$5.69B**, so this correction would gut the marginal, not
+   merely relabel the level.
+3. **The benchmark is a rate-determined object.** The $764.7B denominator exists
+   because rates rose. The null explains a rate-caused gap without a rate term; it
+   does not describe a world without the rate shock.
+
+**Why 85.7% and 35.6% are the same run.** The form fork is not a recalibration —
+it is one line of `prepay_hazard`:
+
+```
+FLOOR_MODE == "max"       →  h_prep = max( h̲ , h_vol )                 [production]
+FLOOR_MODE == "additive"  →  h_prep = 1 − (1 − h̲)(1 − h_vol)           [competing risks]
+```
+
+The difference is exactly `additive − max = min(h̲, h_vol) · (1 − max(h̲, h_vol))`:
+a strictly positive addition at **every** loan-month, largest where the floor does
+*not* bind (there `max()` discards the floor entirely while the additive form stacks
+the whole of it). At the headline floor the null's mean CPR goes **5.874% → 10.408%**
+and its recovery **94.8% → 44.7%** standalone (85.7% → 35.6% shared) — same
+elasticity, same floor, same sample, same loan draw. The paper's own statement of the
+reason: "a 4% involuntary hazard added to moderate voluntary hazards raises book-wide
+prepayment."
+
+**Censoring is the wrong explanation for that level gap, and the right one for the
+marginal.** With β₁ = 0 there is no elasticity in the null to censor — the level gap
+is pure hazard stacking. Censoring is what makes the *marginal* form-dependent:
+under `max()`, wherever the floor pins the hazard, switching the elasticity off
+cannot raise it at all, so the marginal is zero in those cells and falls as the floor
+rises (+9.2 at 4.0%, +5.6 at 4.991%). The additive form never censors, so its
+marginal is nearly floor-invariant (+11.25, moving only +11.29→+11.21 across a 3–5%
+floor range). **The max form's floor-dependence is censoring, not elasticity
+content** — and conflating the two mechanisms is the easy mistake here, because both
+are consequences of the same one-line switch.
+
+**Fit cannot settle the fork.** The additive central leg recovers 55.9% of the
+benchmark at the headline anchor against its 44.7% null — undershooting the max
+form's aggregate level by 43.5 to 45.3 points at every off-window anchor. That looks
+like a decisive argument for the production form and is not available as one:
+reading rule 3 forbids treating the level as evidence, and the paper states the
+headline "is not a position defended by fit". The fork is resolved by the floor's
+*semantics* (what share of the read is strictly involuntary), which is why the
+two-point fork was replaced by the **mixture curve in ω** — and the curve rises to
++9.7 points by ω = 0.25 and plateaus near +11.2, so the paper's own reading of the
+floor (strictly-involuntary share "plausibly well under half") points at the hull's
+upper region while the headline sits at the ω = 0 conservative endpoint.
+
+**Traps specific to this object.**
+- The null is **not** "the mechanical component" and **not** "the non-behavioral
+  baseline" (reading rule 5). β₁ = 0 partitions rate-elastic from rate-inelastic.
+  The PSA ramp is voluntary behavior and it is inside the null.
+- 85.7% (shared) and 94.8% (standalone) are the same run on two bases, exactly
+  9.096 pp apart. 88.7% / 97.8% is that same pair in-sample. Four numbers, one
+  object; mixing a standalone level with a shared one manufactures the retracted
+  18.3-point "real-book gap" (S4).
+- **The two 36% bind shares are different objects.** The paper's "the floor binds in
+  36% of the 1,683,124 evaluated loan-months in the production U.S. run" is the
+  *central* leg at the *in-sample* 4.0% floor (36.27%). The *null* at the *headline*
+  4.991% floor is 35.79% — also "36%", a different cell. At the headline floor the
+  central leg's bind share is 68.8%. Quote the cell, not the rounded number.
+- The null "recovering 85.7%" is a statement of **fit, not prediction** — no
+  outcome-holdout months exist anywhere (reading rule 7).
+- The null reproduces the central leg's three-month lag peak. Nothing about timing
+  distinguishes the two legs (reading rule 4).
+- Distinguish this from the **scaled null** (look-alike pair 11), which additionally
+  rescales the seasoning baseline to φ* = 0.754 and lands at +0.9 pp — outside the
+  binding interval.
+
+### 2.2 Where β₁ itself comes from
+
+2.1 covers what switching β₁ off removes. This covers where its *value* comes from,
+because every headline marginal is that one imported number pushed through one
+transform. Nothing about β₁ is estimated in this paper.
+
+**Source.** Liebersohn & Rothstein, "Household mobility and mortgage rate lock,"
+*Journal of Financial Economics* 164 (2025), 103973; NBER WP 32781 (2024). Cite key
+`liebersohn2024`.
+
+> **Naming trap.** The code says `rothstein_beta1`, `ROTHSTEIN_Q_DECLINE_LOW/MID/HIGH`
+> ([config.py:39-41](hazard/config.py:39)). There is no separate Rothstein paper.
+> Rothstein is the second author of the Liebersohn–Rothstein import the manuscript
+> cites. Code shorthand, one source.
+
+**The estimand and the band.** They estimate that a 100 bp rise in the prevailing
+rate above the locked-in coupon reduces **quarterly mobility probability** by
+**5.5% to 7.7%**, depending on specification. That proportional decline is δ. The
+paper's **adopted central value is 6.5%, fixed ex ante** — not the band's arithmetic
+midpoint, which is 6.6% — with the band edges as sensitivity bounds.
+
+**The transform (eq:beta1).** Their estimand is a quarterly probability; eq:pathB
+needs a monthly proportional-hazard coefficient. The survival-function conversion:
+
+```
+β₁ = −ln[ ( 1 − (1 − (1−δ)·P_q)^(1/3) ) / ( 1 − (1 − P_q)^(1/3) ) ]
+```
+
+The inner terms are the monthly single-month mortalities implied by constant-hazard
+compounding inside the quarter, `1 − P_q = (1 − h_m)³`. The **superseded
+continuous-hazard ("divide-by-3") variant is a distinct object the simulation does
+not use** — it survives only in the appendix.
+
+| δ | Role | \|β₁\| | Marginal it produces |
+|---|---|---|---|
+| 5.5% | L&R band low | 0.0577 | band low edge |
+| **6.5%** | **L&R band, adopted central value, fixed ex ante** | **0.068571** (prints 0.069 in tab:params) | **+$70.3B / +9.2 pp in-sample; +$42.6B / +5.6 pp at the headline floor** |
+| 7.7% | L&R band high | 0.0817 | +$79.5B / +10.4 pts at the production floor |
+| 9.0% | Fonseca–Liu, *outside* anchor | ≈0.096 | +$87.9B / +11.5 pts at the production floor |
+
+**`P_q = 0.06` is a conversion auxiliary, not a measurement.** It occupies the
+transform's quarterly slot and nothing else. It sits well *above* Liebersohn–
+Rothstein's own 1.5% zero-gap quarterly moving level, and is retained because the
+conversion barely notices it:
+
+| P_q | 0.015 | 0.03 | **0.06** | 0.12 |
+|---|---|---|---|---|
+| \|β₁\| at δ = 0.065 | 0.0675 | 0.0679 | **0.0686** | 0.0701 |
+
+Quadrupling the assumed moving level above the source's own moves the imported
+coefficient by under four percent.
+
+**Sign convention.** `rothstein_beta1` returns β₁ **negative** (−0.068571), and
+`prepay_hazard` applies `(−β₁)·(gap·100)` against a negative gap. The paper prints
+β₁ **positive** in eq:pathB. Both conventions are live in the repo; marginal columns
+are unaffected. (Related: the tab:lowband printing trap in the §V entry.)
+
+**Two transport assumptions, plus a separate mapping assumption.** The paper's
+"Transport assumptions" subsection names exactly two; the scope question is
+introduced separately as a mapping assumption. Do not collapse them into "three
+transport assumptions".
+
+1. **Aggregation / response homogeneity.** The source estimand is a **ZIP-code-level
+   moving hazard**, applied here as a loan-level log-hazard coefficient. Named, not
+   priced.
+2. **Survival selection.** Their population is not conditioned on mortgage survival;
+   eq:pathB applies the coefficient to a pool from which **34,734 of the 75,000**
+   sampled loans had already prepaid before the window opened — depleted of exactly
+   the rate-responsive. Signed toward attenuation and priced: under the gamma-frailty
+   identity η = S_pre^ξ, the off-window marginal reads **+5.1 / +4.6 / +3.7** points
+   at ξ = 0.25 / 0.5 / 1 (run `attenuation_sensitivity`). ξ is not estimable in this
+   design and is displayed as the free parameter.
+
+*Mapping assumption — moving-vs-refi scope.* Their estimand is a **moving**
+probability; eq:pathB applies β₁ to the **entire voluntary hazard**, refinancing
+included. The pre-committed μ-bracket prices it (runs `moving_share_bracket`,
+`moving_share_bracket_offwindow`): 1−μ of the voluntary hazard at no response, μ at
+full response, floor unscaled, parity at μ = 1.
+
+| μ | in-sample 4.0% floor | headline 4.991% floor |
+|---|---|---|
+| 1 (production) | +$70.3B | +$42.6B |
+| 0.5 | +$37.7B (+4.9 pts) | +$25.7B (+3.36 pts) |
+| 0.25 | +$19.2B (+2.5 pts) | +$13.9B (+1.82 pts) |
+
+Mildly **super**-proportional at the higher floor, because that floor censors the
+elasticity in more loan-months and censored contributions do not scale with μ
+(the same censoring mechanism as 2.1). The convention is *signed*: applying the
+import to less of the hazard can only shrink the marginal, roughly by its share.
+No termination-reason field exists in the ingested data, so μ is a bracketing
+parameter, never an estimate, and production stays at μ = 1.
+
+**Corroboration from outside the import — both from *above* the band.**
+- **Graybill et al. (2026):** a transaction-record sale-hazard response of roughly
+  **7–11% per percentage point**, in a housing-market-equilibrium setting touching
+  no credit file. Only the 7% low end falls inside 5.5–7.7%; the midpoint sits above
+  the high edge. It also lands on exactly the margin μ varies.
+- **Fonseca & Liu (2024):** ≈9% moving-rate reduction per 100 bp → β₁ ≈ 0.096 →
+  +$87.9B (+11.5 pts), above the L&R high edge yet inside the pre-committed box.
+
+Both are read as **directional corroboration, not competing point estimates** — a
+sale hazard and a moving-rate reduction are not unit-comparable to a
+quarterly-mobility decline. Their joint effect is to make the adopted central
+calibration **conservative** among available literature estimates.
+
+**Traps specific to this object.**
+- **The 5.5–7.7% band is a specification range, not a confidence interval**
+  (look-alike pair 12). No sampling error of Liebersohn–Rothstein's is propagated
+  anywhere in this paper; the only interval with a coverage property is the binding
+  interval on the *floor* read.
+- **The elasticity's evidential basis is the external literature alone.** Path A's
+  own rate-gap coefficient is not statistically distinguishable from zero under any
+  bias-respecting construction, so it corroborates nothing about magnitude.
+- β₁'s **causal** content is inherited from the source, not established here
+  (reading rule 3). "Identifies" means a within-model counterfactual decomposition.
+- The band's monotone response across the sweep is **forced**: eq:beta1 is monotone
+  in δ and the hazard monotone in β₁ at this book's gap configuration, so the
+  ordering composes monotone maps. It is a wiring check, not identified content —
+  the same status as the sign (reading rule 2).
 
 ## 3. Reading rules (the paper's own discipline)
 
@@ -138,12 +411,12 @@ recognize them, not so you can use them. "Never say" flags actively wrong forms.
 | **depth** (of out-of-the-moneyness) | The gap threshold (≤0 / ≤−0.25 / ≤−0.5 pt) at which a floor read is defined — a second axis besides *when* the months are read. The +9.2→+5.6 demotion is 73.7% window, **26.3% depth** ($20.9B / $7.4B); at matched depth the in-sample point is $63.5B. | "depth cut", "depth ladder" | describing the demotion as purely an out-of-sampleness effect |
 | **rate gap** | Loan coupon minus prevailing market rate (100 bp units in eq:pathB); negative = locked in. | "gap"; "coupon gap"/"yield gap" only inside the Danish/Berger discussion | mixing its units: g is in 100 bp units, g̃ decimal, ABM's r is a rate *level* |
 | **Path B** (the headline estimator) | Loan-level literature-calibrated microsimulation, competing prepayment/default risks, stratified 75,000-loan Freddie draw (40,234 window-start survivors). Every headline level and marginal is Path B's. | "microsimulation form"; **hybrid pipeline** = Path B CPR scored through the ABM accounting layer (carries the Danish legs) | — |
-| **Path A** (the excluded corroboration leg) | Stratum-month discrete-time hazard, Poisson pseudo-ML, full 2017–21 origination universe (296 cells / 295 fixed effects). "Aggregate context only"; excluded from every headline by pre-commitment; its rate-gap coefficient's sign is *not distinguishable from zero* under any bias-respecting construction. | "cohort-hazard form" | citing its 112.4% (shared) / 121.5% (standalone) as support for anything |
+| **Path A** (the excluded aggregate-context leg) | Stratum-month discrete-time hazard, Poisson pseudo-ML, full 2017–21 origination universe (296 cells / 295 fixed effects). "Aggregate context only"; excluded from every headline by pre-commitment; its rate-gap coefficient's sign is *not distinguishable from zero* under any bias-respecting construction. | "cohort-hazard form" | citing its 112.4% (shared) / 121.5% (standalone) as support for anything |
 | **the hazard framework** | The container for Paths A **and** B, used only for the paradigm contrast with the ABM. | "hazard side/leg/path" | attaching numbers to it — numbers belong to Path B or Path A by name |
 | **the ABM** (synthetic-population stress test) | 10,000-household agent-based model, utility-maximizing relocation rule, synthetic population drawn to FRED medians. A stress test, not an estimate. | "production ABM", "household-choice model" | "the ABM shows household choice doesn't explain the shortfall" without the qualifier **synthetic-population** |
 | **accounting basis** (four) | standalone-scorer / **shared** (main-text: nets the common $69.56B curtailment flow = flat 9.1 pp) / full-book (reweights to book coupon mix) / composed (both). Pure presentation; cancels from every marginal. | "benchmark-consistent shared", "the shared layer"; pick one hyphenation of "standalone-scorer" | "berger basis", "cap-shortfall basis" (neither exists in the paper) |
 | **face vs cash accounting** | The Danish leg's *incidence* axis — retired balance credited at face vs net of the market discount. Flips the institutional gap's sign (+$61.2B face → −$51.0B cash). Face answers the benchmark question, cash the reserve-drain question; the difference is the par windfall, a transfer. | "cash-haircut reading", "balance-adjustment reading" | confusing this axis with the four accounting bases (which never flip signs) |
-| **the binding interval** [+2.3, +9.1] pp | The floor read's own sampling error propagated at the central elasticity: wild-cluster **restricted inversion**, 31 clusters, selected by a pre-committed coverage rule (measured coverage 94.3%/95.1%). Webb [+2.9, +8.7] and CR2 Bell–McCaffrey [+2.4, +9.1] stand *beside* it. Prices one layer only; no elasticity sampling error exists anywhere in the paper. | "binding layer", "quoted interval" | preferring the narrower percentile [+3.0, +8.0] — it under-covers, and its construction silently excluded 26/1000 off-grid draws |
+| **the binding interval** [+1.9, +9.1] pp | The floor read's own sampling error propagated at the central elasticity: wild-cluster **restricted inversion**, 31 clusters, selected by a pre-committed coverage rule (measured coverage 94.3%/95.1%). Webb [+2.8, +8.7] and CR2 Bell–McCaffrey [+2.4, +9.1] stand *beside* it. Prices one layer only; no elasticity sampling error exists anywhere in the paper. | "binding layer", "quoted interval" | preferring the narrower percentile [+3.0, +8.0] — it under-covers, and its construction silently excluded 26/1000 off-grid draws |
 | **the calibration box** (+2.1 to +13.2) | The pre-committed 7-floor × 3-band grid (21 cells; a *separate* 27-cell joint floor-ladder × band rerun also exists). A grid over conventions with **no coverage property** — the elasticity band is Liebersohn–Rothstein's *specification* range, not an estimate with a standard error. | "the box"; beware "envelope" (also names the 11.06-pt Fannie gate — don't reuse the word) | treating box membership as statistical confidence |
 | **production floor form (hard maximum) vs additive form** | *How* the floor combines with the voluntary hazard: production takes max(floor, hazard) — censoring the elasticity where the floor binds; additive combines on the survival scale, never censoring. First-order: flips the null 85.7%↔35.6% and the marginal +5.6↔+11.2. The **mixture curve** in ω replaces the two-point fork. | "max form", "competing-risks form/combination", "form-conditional hull" (+3.5 to +13.1) | reading the additive +11.2 as stronger evidence for lock-in (the fork is about censoring, not the elasticity) |
 | **U.S.-intercept anchor (rule-only)** | The production Danish transplant: Berger et al.'s moving-flatness, level anchored at the U.S. zero-gap hazard, floor retained — only the payoff rule changes. +$61.2B. The two other named anchors: **Danish-level** (bracketing, −$99.9B), **mechanism-extrapolated** (+$925.5B, superseded — the paper's own earlier figure, corrected by an order of magnitude). | "rule-only transplant" | "the Danish counterfactual" bare, without one of the three anchor labels |
@@ -180,9 +453,9 @@ distinction; getting any of these backwards is a substantive error, not a nuance
 6. **Cap-relative benchmark ($764.7B) vs expectations-based complement ($87.8B).**
    Two denominators for one episode (never-binding caps vs the Fed's own May-2022
    projection). The marginal is ~5.6% of the first and ~49% of the second.
-7. **Binding interval [+2.3, +9.1] vs calibration box [+2.1, +13.2] vs hull
+7. **Binding interval [+1.9, +9.1] vs calibration box [+2.1, +13.2] vs hull
    [+3.5, +13.1].** A sampling interval with measured coverage vs a convention grid
-   vs a two-form envelope. Their widths are NOT close (6.8 vs 11.1 vs 9.6 points),
+   vs a two-form envelope. Their widths are NOT close (7.2 vs 11.1 vs 9.6 points),
    and only the first has any coverage property. The hull may never be quoted alone
    — always together with the binding interval.
 8. **The hazard framework vs Path B.** Framework = A + B; headline numbers are B
@@ -203,8 +476,8 @@ distinction; getting any of these backwards is a substantive error, not a nuance
     attribution — and lands at +0.9 pp under the production form, *outside* the
     binding interval (form-conditional: +8.5 under the additive form).
 12. **The elasticity band (5.5–7.7%) vs a confidence interval.** It is
-    Liebersohn–Rothstein's specification range with the adopted midpoint at its
-    centre. No sampling error of theirs is propagated anywhere.
+    Liebersohn–Rothstein's specification range, with the adopted central value
+    6.5% sitting inside it. No sampling error of theirs is propagated anywhere.
 13. **Recalibrated (59.3% / 60.2% / 76.3%) vs frozen (20.9% / 22.0% / 12.6%)
     cross-design variants.** Identical real covariates; they differ only in whether
     θ is re-derived to hold the 4–5% turnover floor. The frozen leg misses that
@@ -363,15 +636,18 @@ household decision function. Path B: stratified 75,000-loan Freddie draw (40,234
 window-start survivors), 100 PSA seasoning ramp, floor = SMM-equivalent of 4% annual
 CPR broadcast flat (acyclical, flat in age — flagged, deliberately not swept: the
 age-rising pattern is carried by the refi-contaminated 2019 leg), imported
-elasticity β₁ = 0.0686 (Liebersohn–Rothstein 5.5–7.7% band, 6.5% midpoint adopted ex
-ante, converted via eq:beta1; P_q = 0.06 is a conversion auxiliary the transform is
-insensitive to). Central run $818.5B = 107.0% standalone. Three named transport
-assumptions travel with the import: aggregation/response homogeneity (named, not
-priced), survival selection (signed toward attenuation, priced by the ξ-bracket),
-and moving-vs-refi scope (signed to shrink, priced by the μ-bracket, which alone
-spans +$19.2B to +$70.3B in-sample).
+elasticity β₁ = 0.0686 (Liebersohn–Rothstein 5.5–7.7% band, 6.5% the adopted central
+value, fixed ex ante, converted via eq:beta1; P_q = 0.06 is a conversion auxiliary
+the transform is insensitive to). Central run $818.5B = 107.0% standalone. **Two** named transport
+assumptions travel with the import — aggregation/response homogeneity (named, not
+priced; the source estimand is a ZIP-code-level moving hazard) and survival selection
+(signed toward attenuation, priced by the ξ-bracket) — plus a **separate mapping**
+assumption, moving-vs-refi scope (signed to shrink, priced by the μ-bracket, which
+alone spans +$19.2B to +$70.3B in-sample). Full provenance chain in 2.2; the paper
+names two transport assumptions, not three, so do not collapse them.
 Composition bounds: Ginnie $20–47B; vintage $11.7B; coupon-reweight +0.2 pp
-single-convention. The floor binds in 36% of the 1.68M evaluated loan-months.
+single-convention. The floor binds in 36% of the 1.68M evaluated loan-months — that
+is the **central** leg at the **in-sample 4.0%** floor (36.27%); see 2.1's trap.
 
 - Fannie external replication (24 quarters, 17.6M loans, 826M loan-months, spec
   frozen before the run): marginal +8.68 vs Freddie +9.20 — the pre-committed
@@ -386,7 +662,7 @@ single-convention. The floor binds in 36% of the 1.68M evaluated loan-months.
   "conservative" describes the adopted central, not the outside anchors.
 
 **§V.D–F — Path A, Identification, Interpretation (293–513).** Path A: excluded
-corroboration (112.4% shared / 121.5% standalone); its H₀: β_g ≤ 0 test does not
+aggregate context (112.4% shared / 121.5% standalone); its H₀: β_g ≤ 0 test does not
 reject under any bias-respecting scheme (p = 0.093–0.412). The estimand is
 eq:marginal — the difference of two runs — and §V.E's **seven numbered
 qualifications** are the paper's epistemic core: (1) the identified content is the
@@ -406,9 +682,9 @@ transports (+4.70 calendar-standardizing vs +10.69 activity-matched) deliberatel
 stay un-netted.
 
 - **The inference ladder** (tab:ladder): binding = restricted wild-cluster inversion
-  [+2.3, +9.1], selected by a pre-committed coverage rule (94.3%/95.1% measured) —
+  [+1.9, +9.1], selected by a pre-committed coverage rule (94.3%/95.1% measured) —
   with the disclosed caveat that the rule was applied *after* seeing which way it
-  fell. Webb [+2.9, +8.7] demoted from binding, stands beside; CR2 Bell–McCaffrey
+  fell. Webb [+2.8, +8.7] demoted from binding, stands beside; CR2 Bell–McCaffrey
   [+2.4, +9.1] qualifies; percentile [+3.0, +8.0] under-covers (and silently
   excluded 26/1000 off-grid draws — truncation would print [+2.28, +8.01]).
 - The PSA seasoning-ramp sweep is the widest within-form convention layer; aggregate
@@ -490,7 +766,7 @@ the Danish counterfactual.
   payoff rule. The paper's closing verdict: the mobility relief such a rule would
   provide "remains the better-supported and larger effect."
 - Traps: +$61.2B is at the **in-sample** floor (compare $70.3B; the off-window
-  counterpart is +$28.2B); $0.42–1.66B per *month* (marginal in foregone principal)
+  counterpart is +$28.2B); $0.35–1.66B per *month* (marginal in foregone principal)
   vs ~$1B per *year* (negative carry); tab:danish's rows b and c share a U.S.-leg
   label with different values ($84.5B ABM-basis vs $749.0B hybrid) — row b is
   deliberately not the $91.0B headline because both legs must share one calibration
@@ -634,7 +910,7 @@ tab:bootstrap = 21, tab:seasonalfloor = 25.
 | **F — Panel, uncertainty, ridge** | Verifies the ridge device (numerical no-op; warm-start convention; production point survives dropping inestimable strata); Table 20 (fitted on the full universe, not the 75k sample), Table 21 (both bootstrap schemes). | The ridge-selection holdout later serves as the out-of-sample diagnostic, so the reported RMSE is weakly selection-favored — a carried caveat. |
 | **G — Theil / dynamic fit** | Localizes each estimator's monthly error (ABM = level bias; Path B = under-dispersion; Path A intermediate); no estimator beats a naive no-change forecast (U₂ > 1). | Two known text-vs-table wobbles on Path A's Theil shares (26.5/63.0 prose vs 30.6/58.8 table; U₁ 0.431 vs 0.438) — flagged by review, unresolved; don't silently reconcile. |
 | **H — Composition shift** | Quantifies Freddie-sample vs SOMA-book covariate shift (PSI); every shift carries a committed signed bound; missing dimensions covered by a Freddie–Fannie stability check. | — |
-| **I — Floor-sweep mechanics** | Where the floor machinery lives: the **failed** ±2pp stability rule (moved +10.8 → +5.5; reinterpreted as max-form censoring mechanics), the pooled off-window read's rejection, the 2018-leg operative anchor, the depth ladder, and the twelve-rung inference ladder (tab:ladder). | Ladder wrinkles: the artifact's `landing_branch` string records L1 ("Webb retains"), contradicting the frozen rule — the tablenote is the adjudication; three wide rungs' lower endpoints are censored at the grid's 6.0% edge (true intervals run below the printed +2.3); CR1 = CR3 at one decimal is a leverage accident. |
+| **I — Floor-sweep mechanics** | Where the floor machinery lives: the **failed** ±2pp stability rule (moved +10.8 → +5.5; reinterpreted as max-form censoring mechanics), the pooled off-window read's rejection, the 2018-leg operative anchor, the depth ladder, and the twelve-rung inference ladder (tab:ladder). | Ladder wrinkles: the artifact's `landing_branch` string records L1 ("Webb retains"), contradicting the frozen rule — the tablenote is the adjudication; three wide rungs' lower endpoints WERE censored at the grid's former 6.0% edge; the FP2-B1 extension decensored them (+2.0/+1.9/+2.2, each below the +2.3 that edge printed); CR1 = CR3 at one decimal is a leverage accident. |
 | **J — Behavioral extension mechanics** | Each ABM extension moves the wrong way or for the wrong reason: loss aversion = recalibration artifact; curtailment's drop was predicted ex ante; the multi-vintage drop *inverts* the stated hypothesis and is left undiagnosed. | The DTI sweep is non-monotone with 43% at its minimum — looks like cherry-picking, but the decomposition shows the pattern doesn't survive holding θ fixed. |
 | **K — WAL quantification** | The duration mechanism in maturity units; documents tab:wal (printed in §VI). | The Berger-recalibrated Danish CPR surface is near-flat (~quarter point across the grid) — the moving-flatness underneath the WAL rate-invariance claim. |
 | **L — 15-year fold-in + units fix** | Why the fold-in is structural-only (the fully native treatment produced out-of-bounds values), and the rate-gap **units correction**: applied to a decimal gap the imported coefficient was numerically inert; production applies it per 100 bp. Disabling either change exactly reproduces the superseded figures. | This is the appendix behind both the spec fork (§VII.A) and superseded figure #7. |
@@ -655,7 +931,7 @@ The audit trail, two sections:
   `bootstrap_pathb_cluster` appears twice, once per floor) indexes every cited run.
   Two disclosed permanences: **two freezes ran on uncommitted trees**, so the ABM
   headline is not commit-addressable (identify specs by manifest and content, not
-  git commit); and spec-before-run is only *partly checkable* from the document (25
+  git commit); and spec-before-run is only *partly checkable* from the document (27
   standalone specs in `specs/`; the rest rest on script headers).
 - **L2 — Verdict appendix (`tab:verdicts`).** Every pre-committed rule with its
   post-run adjudication — the paper's own "read the credential net of this" device.
@@ -667,8 +943,9 @@ The audit trail, two sections:
   was superseded by the pre-committed coverage rule; the in-window floor was
   demoted (the +9.2 → +5.6 event); the pooled-read disqualification was itself
   re-adjudicated as weaker (conclusion retained); the within-stratum CI was
-  retracted (37×); the κ grid was re-labeled dispersion; the timing rule was
-  withheld to levels; the cross-design threshold was enforced (the withdrawal);
+  retracted (30.8× in-window against 37× off-window); the κ grid was re-labeled
+  dispersion; the timing rule was withheld to levels; the cross-design threshold was
+  enforced (the withdrawal);
   the ABM-null probe is stamped `pre_committed: false`; a FRED revision halted one
   parity tier (tolerance kept, re-run — not a failed test); the Danish redemption
   validation forced the gap to a band. Trap: "108 green gates" appears as evidence
@@ -687,7 +964,7 @@ benchmark; the $87.8B expectations complement (allocation-conditional); the
 
 **Identified (within-model; the paper's own "identifies")**: the lock-in marginal
 as a **bounded range**, stated separately by form; the binding interval
-[+2.3, +9.1]; the marginal's basis-invariance; the window/depth demotion
+[+1.9, +9.1]; the marginal's basis-invariance; the window/depth demotion
 decomposition; the distributional-incidence tilt (the one placebo-surviving
 composition result); the cross-design threshold crossing as a fact about the test.
 
@@ -741,8 +1018,9 @@ standalone; sign not distinguishable from zero; no forward precision).
 7. **The Danish-level anchor as production** (−$99.9B; demoted to bracket).
 8. **The mechanism-extrapolated Danish gap** ($925.5B; superseded, order of
    magnitude).
-9. **The within-stratum bootstrap CI [+9.17, +9.23]** (retracted; ~37×
-   understatement).
+9. **The within-stratum bootstrap CI [+9.17, +9.23]** (retracted; this interval is
+   the in-window one, and its understatement of the cluster read is **30.8×** — the
+   ~37× figure is the *off-window* measurement).
 10. **Webb [+2.9, +8.7] as the binding layer** (demoted beside the restricted
     inversion by the pre-committed coverage rule).
 11. **The "broad-based" homogeneity label** (placebo-earned; only the >30×
@@ -786,26 +1064,26 @@ region share a bracket.
 
 | Interval (pp) | What it is | Status |
 |---|---|---|
-| **[+2.3, +9.1]** | Floor read's own sampling error at central δ: restricted wild-cluster inversion, 31 clusters, measured coverage 94.3%/95.1% | **BINDING** (pre-committed coverage rule; note: applied after seeing which way it fell) |
+| **[+1.9, +9.1]** | Floor read's own sampling error at central δ: restricted wild-cluster inversion, 31 clusters, measured coverage 94.3%/95.1% | **BINDING** (pre-committed coverage rule; note: applied after seeing which way it fell) |
 | [+2.4, +9.1] | CR2 Bell–McCaffrey rung | qualifies, stands beside |
-| [+2.9, +8.7] | Webb wild-t rung | demoted beside (coverage 90.8%/91.4% vs the bar) — not "superseded history", still printed |
+| [+2.8, +8.7] | Webb wild-t rung | demoted beside (coverage 90.8%/91.4% vs the bar) — not "superseded history", still printed |
 | [+3.0, +8.0] | Percentile read of the same layer | demoted: under-covers; excluded 26/1000 off-grid draws (truncating gives [+2.28, +8.01]) |
 | [+4.63, +6.92] | Loan/stratum cluster bootstrap (a *different* layer; 25.8 effective clusters) | lower bound on sampling uncertainty |
-| [+2.80, +8.99] | The two layers convolved as independent | itself a lower bound |
+| [+1.71, +9.38] | The two layers convolved as independent, re-derived on the restricted rung (run `layer_convolution_restricted`) | **the one-number sampling recommendation** — 7.68pp wide against the binding interval's 7.24, so the Batch-A "lower bound on the re-derived pair" label retired; independence still puts it at the *lower* edge of the dependence bracket (comonotone width 9.67pp) |
 | [+9.17, +9.23] / [+8.27, +10.19] | In-sample point's within-stratum / stratum-cluster intervals (around +9.2, not +5.6) | first is RETRACTED (30.8× understatement in-window; the ~37× figure is the off-window measurement); second is the operative scheme |
 | — grids below: **no coverage property** — | | |
 | [+4.3, +6.8] | Defensible off-window floor range (max form) | calibration range |
 | [+3.9, +7.5] | Same, jointly with the elasticity band | calibration range |
 | [+2.1, +13.2] | The calibration box (7 floors × 3 elasticities; a separate 27-cell joint sweep also exists) | convention grid |
 | [+3.5, +13.1] | Form-conditional hull (widened at bottom from +3.89) | two-form envelope; quote only beside the binding interval |
-| [+3.3, +16.5] | PSA level sweep | widest within-form convention layer |
+| [+3.3, +16.5] | PSA level sweep (75–150 PSA on both legs) **at the in-sample calibration**; the same sweep at the off-window floor runs +0.9 to +15.6 | widest within-form convention layer |
 | [+0.9, +15.6] | Convention envelope across named variants | no coverage; the scaled null's +0.9 sits outside the binding interval |
 
 ### 8.3 Four unit systems that all print as small numbers
 
 | Unit | Means | Examples |
 |---|---|---|
-| **pp / "points"** | percentage points **of the $764.7B benchmark** (~$7.65B per point) | +5.6 pp, [+2.3, +9.1] |
+| **pp / "points"** | percentage points **of the $764.7B benchmark** (~$7.65B per point) | +5.6 pp, [+1.9, +9.1] |
 | **%** | a recovery level or a share of a book/pool | 91.3%, 20.4% Ginnie, 43% DTI |
 | **bp** | basis points of interest rate | 100 bp gap unit, 150 bp freeze trigger |
 | **points of CPR** | floor-read errors and floor levels | floor SE 0.39–0.46, the 4.99% floor |
@@ -826,7 +1104,7 @@ which.
   curtailment-stage recovery.
 - **88.7%** — the null's in-sample shared recovery *and* the 6.0%-floor-row bind
   share in tab:floorband.
-- **+2.3** — binding interval's lower edge *and* the marginal implied by the
+- **+2.3** — the binding interval's FORMER grid-censored lower edge (now +1.9) *and* the marginal implied by the
   *disqualified* pooled 6.07% floor read (opposite rhetorical roles).
 - **59.3%** — cross-design recalibrated recovery *and* the SMD parity-gate replay
   (59.303%) *and* the additive central leg's recovery at the 4.695% anchor.
@@ -839,6 +1117,25 @@ which.
   the U.S. (1,683,124) and Danish (1,683,082) panels.
 - **+3.7** — the age-standardized floor's directly measured marginal *and* the
   vintage overlay's (3.67 vs 3.70; a printed rounding accident).
+- **11.5** — the $87.8B expectations shortfall as **11.5% of the cap-relative
+  benchmark** *and* the Fonseca–Liu outside anchor's **+11.5 points** (+$87.9B) at
+  the production floor. Unrelated objects; the manuscript itself calls the near-equal
+  dollar figures "a coincidence of magnitude". (A third: the same absolute bound is
+  11.5% of the +$42.6B headline marginal.)
+- **1.9** — the binding interval's **lower endpoint** (+1.9pp, since FP2-B1
+  decensored it) *and* the **1.9-point width** of the in-sample stratum-cluster read
+  [+8.27, +10.19] that the calibration box's 11.1 points is compared against *and*
+  the +1.9 by which covariate endpoints move the in-sample marginal (tab:uncertainty).
+  Also 1.7–1.9× as the ratio of the shortfall to the Fed's own contemporaneous
+  runoff projection.
+- **91.0** — the ABM's **$91.0B frozen seed-42 production draw** *and* the **91.0%**
+  heavy-tail (t₅) leg of the pre-committed coverage bar (93.0%/91.0%) that selects the
+  restricted inversion. Different units entirely; and 91.3% (off-window Path B
+  recovery) sits one tenth away as a third object.
+- **30.8** — the within-stratum bootstrap's **30.8× in-window understatement** of
+  loan-sampling uncertainty *and* the **30.8% interest-only share** at which the
+  Danish rule-only face gap crosses zero (before the 5.61% roll-off feedback lifts
+  the crossing to 34.3%).
 
 ### 8.5 Confusable clusters (each line is one family; members are NOT interchangeable)
 
@@ -871,8 +1168,8 @@ which.
   4.991, 5.334 (the 2018 depth reads; 4.99 = mid-grid) / 5.185–5.19 (like-for-like
   Freddie pooled) / 5.2156 (calendar-standardized) / 5.51 (age-standardized, 84%
   imputed) / 5.52 (Fannie) / 6.07–6.1 (rejected pooled read) / 6.91 (rejected 2019
-  leg) / 3.1533 (activity-matched transport). **5.5–7.7% with midpoint 6.5% is not
-  a floor** — it is δ, the elasticity band.
+  leg) / 3.1533 (activity-matched transport). **5.5–7.7% with adopted central value
+  6.5% is not a floor** — it is δ, the elasticity band.
 - **Empirical vs simulated CPR**: back-outs 5.14 (ABM basis, default) / 5.52
   (hazard basis) / 5.79 (note-rate WAC); simulated means 4.76 (Path B) / 11.68
   (ABM) / 3.34 (Path A) / 5.61 vs 3.39 (Danish legs, U.S.-intercept vs
@@ -967,9 +1264,9 @@ convention is ≥ 1 per tag, but several gates and tests pin *exact* per-tag cou
 assembly + prose + index), so never add or delete a run citation without grepping
 `tools/liveness_gates.py` and `tests/` for that tag first;
 verification = `python3 tools/liveness_gates.py` (129 gates) + `python3 -m pytest
-tests/ -q` (1,139 tests, 1 skip); ~644 literal spans in the manuscript and 119 in
+tests/ -q` (1,166 tests, 1 skip); ~644 literal spans in the manuscript and 119 in
 the appendices are gate/test-pinned — run the protected-span check *before* editing
-the tex. Never execute anything under `abm/` or `hazard/` (pre-registered runs;
+the tex. Never execute anything under `abm/` or `hazard/` (pre-committed runs;
 spec-before-run). Reading JSON artifacts is always fine.
 
 ## 11. How the paper got here — the demotion history
@@ -977,16 +1274,51 @@ spec-before-run). Reading JSON artifacts is always fine.
 The current text is the residue of ~30 adversarial rounds. The big state changes,
 newest first, with durable records:
 
+- **Path A vocabulary standardization** (2026-09-01): "corroborate" was reserved for
+  the external anchors (Graybill, Fonseca, na2024) that earn it and stripped from every
+  Path A site — tex:174 "corroborates at 112.4%" became "lands at", tex:291
+  "aggregate-corroboration status" became "aggregate-context status only", and tex:295
+  lost both its tail ("aggregate context only") and its opening appositive
+  ("aggregate-context leg"), the latter invisible to the `.{40}corroborat.{60}` audit
+  sweep because the token sits at column 24. The same pass pulled this file and
+  `replication_appendices.tex` up to the re-landed intervals (eight binding-interval
+  sites and three Webb sites here; the appendices' Webb rung +2.9 → +2.8; their :77
+  "non-headline corroboration" → "non-headline aggregate context") and cleared two
+  derived residuals: a look-alike-pair width still computed as 9.1 − 2.3 = 6.8 (it is
+  7.2) and this file's taxonomy row still printing the pre-rederivation convolved pair
+  [+2.80, +8.99]. Commits `9def7c1`, `99fa5bc`, `000849a`, `e3697b8`, `1fc54d4`; gates
+  and tests unmoved throughout.
+- **Fresh-Panel-2 batches** (2026-08-29): the panel's one surviving critical finding
+  was that the binding interval's lower endpoint was **grid-censored** at the floor
+  grid's 6.0% edge — the printed +2.3 was the 6.0 row's value, not a measurement.
+  Batch A propagated that (already artifact-derived) disclosure to all nine print sites,
+  withdrew the convolved pair's one-number recommendation, and fixed fig5's
+  "pre-registered" label; the abstract went 263 → 273 words. Batch B measured what the
+  flag disclosed: run `floor_grid_extension` added four paired-leg rows out to 7.00%
+  (four parity gates PASS, all five ex-ante bands hit), v2/v3 were regenerated under
+  `FloorMapping(extended=True)`, and **the binding interval decensored to
+  [+1.9, +9.1]** ($14.31B–$69.66B), the Webb rung moving with it to [+2.8, +8.7]. Run
+  `layer_convolution_restricted` then re-derived the convolved pair on the adjudicated
+  rung at **[+1.71, +9.38]** (width 7.68 against the binding 7.24, zero truncation), all
+  three of *its* ex-ante bands missed and reported as misses; the one-number
+  recommendation returned, pointing there. Flow terms $0.42 → $0.35–1.66B per month;
+  abstract back to 263; spec count 25 → 27; 1,166 tests and all gates green. Records:
+  `specs/RECORD_fresh_panel2_batchA.md`, `specs/RECORD_fresh_panel2_batchB.md`.
 - **v20 review-fix round** (2026-08): paradigm reading formally withdrawn (gated by
   `tests/test_paradigm_withdrawal_gate.py`, 18 collected tests); §VII.D repaired
   (was still calling the withdrawn reading corroborated); the §VII.A spec-fork
   explanation written; berger2026 qualified everywhere; readability pass (sentences
   split ~44 → ~28 words mean). Handoff: `specs/RECORD_v20_review_fixes_handoff.md`.
-- **N1 relanding** (v20): the binding interval became **[+2.3, +9.1]** via the
-  restricted inversion under the frozen coverage rule; Webb [+2.9, +8.7] demoted
-  beside (it was briefly the binding layer — an inconsistency at line 1298's
-  intro sentence vs the ladder note is a known leftover). Record:
-  `specs/RECORD_v20_N1_relanding.md`.
+- **N1 relanding** (v20, 2026-08-05): the binding interval became **[+2.3, +9.1]** via
+  the restricted inversion under the frozen coverage rule (restricted covers 94.3/95.1
+  against the pre-committed 93.0/91.0 bar; Webb covers 90.8/91.4 and fails), and the
+  Webb rung — briefly the binding layer — was demoted beside it, printing
+  **[+2.9, +8.7]** at the time. Both are pre-extension prints of the *same two rungs*:
+  FP2-B1 later re-mapped them to **[+1.9, +9.1]** and **[+2.8, +8.7]**, so +2.3 and +2.9
+  are censored-grid edges, not different constructions, and current text quoting +2.9 as
+  the Webb rung is stale rather than alternative. (An inconsistency at line 1298's intro
+  sentence vs the ladder note was a known leftover of this round; not re-checked since
+  the FP2-B re-printing.) Record: `specs/RECORD_v20_N1_relanding.md`.
 - **Panel review driving the round**: `panel_review_v19.md` +
   `improvement_plan_v19.md` + `specs/RESPONSE_v20_panel_draft.md`.
 - **R28–29** (2026-07): the floor renamed **"baseline turnover floor"** globally
@@ -1008,7 +1340,7 @@ newest first, with durable records:
 number, status, or canonical term changes in the manuscript, and re-verify any
 number you carry forward against the tex rather than against this file's history.
 
-*Built 2026-08-12 from a 24-agent extraction sweep over `revised_paper_v18.tex`
+*Built 2026-08-12 from a 24-agent extraction sweep over `paper_final_v1.tex`
 and `replication_appendices.tex` (Opus extractors, each adversarially verified
 against the tex by an independent Fable verifier), synthesized by the coordinator
 (Fable), then re-verified whole by a second 5-agent Fable pass that checked every

@@ -1,5 +1,9 @@
 #!/usr/bin/env python3
-"""tex -> md edition converter for revised_paper_v18 (rebuilt round 29).
+"""tex -> md edition converter for the canonical manuscript (rebuilt round 29).
+
+The canonical is paper/final/paper_final_v1.tex (with
+paper_final_v1_long_abstract.tex); it was paper/v18/revised_paper_v18*.tex when
+this converter was written and was renamed in commit 9462128 on 2026-08-29.
 
 The round-15/17 converters lived only in session scratchpads and were lost;
 this rebuild lives in the repo so it cannot be lost again. Format target is

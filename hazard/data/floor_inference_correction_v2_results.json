@@ -404,19 +404,19 @@
           6.218347485719877
         ],
         "marginal_ci95_pp": [
-          2.280914554561832,
+          1.7955668131559297,
           7.74657310100611
         ],
         "marginal_ci95_b": [
-          17.44325421351391,
+          13.731565839056463,
           59.24178247456374
         ],
         "lower_pp_edge": {
           "floor_pct": 6.218347485719877,
-          "mapped_at_pct": 6.0,
-          "truncated_at_grid_edge": true,
-          "marginal_b": 17.44325421351391,
-          "marginal_pp": 2.280914554561832
+          "mapped_at_pct": 6.218347485719877,
+          "truncated_at_grid_edge": false,
+          "marginal_b": 13.731565839056463,
+          "marginal_pp": 1.7955668131559297
         },
         "upper_pp_edge": {
           "floor_pct": 4.44249761759391,
@@ -435,19 +435,19 @@
           6.335680089714013
         ],
         "marginal_ci95_pp": [
-          2.280914554561832,
+          1.5680902264739283,
           8.177923075312163
         ],
         "marginal_ci95_b": [
-          17.44325421351391,
+          11.991942615915207,
           62.54052386834584
         ],
         "lower_pp_edge": {
           "floor_pct": 6.335680089714013,
-          "mapped_at_pct": 6.0,
-          "truncated_at_grid_edge": true,
-          "marginal_b": 17.44325421351391,
-          "marginal_pp": 2.280914554561832
+          "mapped_at_pct": 6.335680089714013,
+          "truncated_at_grid_edge": false,
+          "marginal_b": 11.991942615915207,
+          "marginal_pp": 1.5680902264739283
         },
         "upper_pp_edge": {
           "floor_pct": 4.3229930010750035,
@@ -467,19 +467,19 @@
           6.284328504892123
         ],
         "marginal_ci95_pp": [
-          2.280914554561832,
+          1.665508127187584,
           7.990348155854141
         ],
         "marginal_ci95_b": [
-          17.44325421351391,
+          12.73694430994913,
           61.10604794830673
         ],
         "lower_pp_edge": {
           "floor_pct": 6.284328504892123,
-          "mapped_at_pct": 6.0,
-          "truncated_at_grid_edge": true,
-          "marginal_b": 17.44325421351391,
-          "marginal_pp": 2.280914554561832
+          "mapped_at_pct": 6.284328504892123,
+          "truncated_at_grid_edge": false,
+          "marginal_b": 12.73694430994913,
+          "marginal_pp": 1.665508127187584
         },
         "upper_pp_edge": {
           "floor_pct": 4.375328911803855,
@@ -498,19 +498,19 @@
           6.44278935939332
         ],
         "marginal_ci95_pp": [
-          2.280914554561832,
+          1.377512832913725,
           8.556206812759685
         ],
         "marginal_ci95_b": [
-          17.44325421351391,
+          10.534505327626167,
           65.43344214270131
         ],
         "lower_pp_edge": {
           "floor_pct": 6.44278935939332,
-          "mapped_at_pct": 6.0,
-          "truncated_at_grid_edge": true,
-          "marginal_b": 17.44325421351391,
-          "marginal_pp": 2.280914554561832
+          "mapped_at_pct": 6.44278935939332,
+          "truncated_at_grid_edge": false,
+          "marginal_b": 10.534505327626167,
+          "marginal_pp": 1.377512832913725
         },
         "upper_pp_edge": {
           "floor_pct": 4.213661303955851,
@@ -530,19 +530,19 @@
           6.3596329586439015
         ],
         "marginal_ci95_pp": [
-          2.280914554561832,
+          1.5239247532071483,
           8.264312726561197
         ],
         "marginal_ci95_b": [
-          17.44325421351391,
+          11.65418793057996,
           63.201187217238015
         ],
         "lower_pp_edge": {
           "floor_pct": 6.3596329586439015,
-          "mapped_at_pct": 6.0,
-          "truncated_at_grid_edge": true,
-          "marginal_b": 17.44325421351391,
-          "marginal_pp": 2.280914554561832
+          "mapped_at_pct": 6.3596329586439015,
+          "truncated_at_grid_edge": false,
+          "marginal_b": 11.65418793057996,
+          "marginal_pp": 1.5239247532071483
         },
         "upper_pp_edge": {
           "floor_pct": 4.298563015279422,
@@ -561,19 +561,19 @@
           6.579459079844996
         ],
         "marginal_ci95_pp": [
-          2.280914554561832,
+          1.1610424720957457,
           8.995438129942833
         ],
         "marginal_ci95_b": [
-          17.44325421351391,
+          8.879052024525826,
           68.79245596846648
         ],
         "lower_pp_edge": {
           "floor_pct": 6.579459079844996,
-          "mapped_at_pct": 6.0,
-          "truncated_at_grid_edge": true,
-          "marginal_b": 17.44325421351391,
-          "marginal_pp": 2.280914554561832
+          "mapped_at_pct": 6.579459079844996,
+          "truncated_at_grid_edge": false,
+          "marginal_b": 8.879052024525826,
+          "marginal_pp": 1.1610424720957457
         },
         "upper_pp_edge": {
           "floor_pct": 4.073822469278532,
@@ -603,19 +603,19 @@
           6.5073887842057365
         ],
         "marginal_ci95_pp": [
-          2.280914554561832,
+          1.2718851819727761,
           8.719948765569422
         ],
         "marginal_ci95_b": [
-          17.44325421351391,
+          9.72671971213509,
           66.68565586660648
         ],
         "lower_pp_edge": {
           "floor_pct": 6.5073887842057365,
-          "mapped_at_pct": 6.0,
-          "truncated_at_grid_edge": true,
-          "marginal_b": 17.44325421351391,
-          "marginal_pp": 2.280914554561832
+          "mapped_at_pct": 6.5073887842057365,
+          "truncated_at_grid_edge": false,
+          "marginal_b": 9.72671971213509,
+          "marginal_pp": 1.2718851819727761
         },
         "upper_pp_edge": {
           "floor_pct": 4.163746774081922,
@@ -641,19 +641,19 @@
           6.478777696236959
         ],
         "marginal_ci95_pp": [
-          2.280914554561832,
+          1.3177478817564192,
           8.599714154390426
         ],
         "marginal_ci95_b": [
-          17.44325421351391,
+          10.07745390761127,
           65.76616377784602
         ],
         "lower_pp_edge": {
           "floor_pct": 6.478777696236959,
-          "mapped_at_pct": 6.0,
-          "truncated_at_grid_edge": true,
-          "marginal_b": 17.44325421351391,
-          "marginal_pp": 2.280914554561832
+          "mapped_at_pct": 6.478777696236959,
+          "truncated_at_grid_edge": false,
+          "marginal_b": 10.07745390761127,
+          "marginal_pp": 1.3177478817564192
         },
         "upper_pp_edge": {
           "floor_pct": 4.200594673469327,
@@ -689,19 +689,19 @@
           6.673260732647401
         ],
         "marginal_ci95_pp": [
-          2.280914554561832,
+          1.0270330142330393,
           7.718992622795872
         ],
         "marginal_ci95_b": [
-          17.44325421351391,
+          7.85421703636762,
           59.030861249220486
         ],
         "lower_pp_edge": {
           "floor_pct": 6.673260732647401,
-          "mapped_at_pct": 6.0,
-          "truncated_at_grid_edge": true,
-          "marginal_b": 17.44325421351391,
-          "marginal_pp": 2.280914554561832
+          "mapped_at_pct": 6.673260732647401,
+          "truncated_at_grid_edge": false,
+          "marginal_b": 7.85421703636762,
+          "marginal_pp": 1.0270330142330393
         },
         "upper_pp_edge": {
           "floor_pct": 4.450071674656664,
@@ -811,19 +811,19 @@
           5.702232185478373
         ],
         "marginal_ci95_pp": [
-          3.1532134720806244,
+          3.1190093501799914,
           8.349880202430665
         ],
         "marginal_ci95_b": [
-          24.1141449481194,
+          23.852569523354134,
           63.85556299427652
         ],
         "lower_pp_edge": {
           "floor_pct": 5.702232185478373,
           "mapped_at_pct": 5.702232185478373,
           "truncated_at_grid_edge": false,
-          "marginal_b": 24.1141449481194,
-          "marginal_pp": 3.1532134720806244
+          "marginal_b": 23.852569523354134,
+          "marginal_pp": 3.1190093501799914
         },
         "upper_pp_edge": {
           "floor_pct": 4.274096458140775,
@@ -842,19 +842,19 @@
           5.8346005023867225
         ],
         "marginal_ci95_pp": [
-          2.753082197773479,
+          2.7262453995724063,
           8.79621469284935
         ],
         "marginal_ci95_b": [
-          21.054148017257774,
+          20.848914071794162,
           67.26889821328385
         ],
         "lower_pp_edge": {
           "floor_pct": 5.8346005023867225,
           "mapped_at_pct": 5.8346005023867225,
           "truncated_at_grid_edge": false,
-          "marginal_b": 21.054148017257774,
-          "marginal_pp": 2.753082197773479
+          "marginal_b": 20.848914071794162,
+          "marginal_pp": 2.7262453995724063
         },
         "upper_pp_edge": {
           "floor_pct": 4.139718839173123,
@@ -874,19 +874,19 @@
           5.760767719362514
         ],
         "marginal_ci95_pp": [
-          2.9739539480149197,
+          2.941701464324133,
           8.552679709995655
         ],
         "marginal_ci95_b": [
-          22.743260869091593,
+          22.49661056344536,
           65.406468685924
         ],
         "lower_pp_edge": {
           "floor_pct": 5.760767719362514,
           "mapped_at_pct": 5.760767719362514,
           "truncated_at_grid_edge": false,
-          "marginal_b": 22.743260869091593,
-          "marginal_pp": 2.9739539480149197
+          "marginal_b": 22.49661056344536,
+          "marginal_pp": 2.941701464324133
         },
         "upper_pp_edge": {
           "floor_pct": 4.2147150243605385,
@@ -905,19 +905,19 @@
           5.953705838303913
         ],
         "marginal_ci95_pp": [
-          2.4097883016945523,
+          2.39997998821785,
           9.149768955601752
         ],
         "marginal_ci95_b": [
-          18.42881394357403,
+          18.353805037590334,
           69.97269826187723
         ],
         "lower_pp_edge": {
           "floor_pct": 5.953705838303913,
           "mapped_at_pct": 5.953705838303913,
           "truncated_at_grid_edge": false,
-          "marginal_b": 18.42881394357403,
-          "marginal_pp": 2.4097883016945523
+          "marginal_b": 18.353805037590334,
+          "marginal_pp": 2.39997998821785
         },
         "upper_pp_edge": {
           "floor_pct": 4.018509408535776,
@@ -937,19 +937,19 @@
           5.827783466034631
         ],
         "marginal_ci95_pp": [
-          2.7732237922014704,
+          2.7457355119147557,
           8.774405758790092
         ],
         "marginal_ci95_b": [
-          21.208180508817037,
+          20.997964365483423,
           67.10211477101917
         ],
         "lower_pp_edge": {
           "floor_pct": 5.827783466034631,
           "mapped_at_pct": 5.827783466034631,
           "truncated_at_grid_edge": false,
-          "marginal_b": 21.208180508817037,
-          "marginal_pp": 2.7732237922014704
+          "marginal_b": 20.997964365483423,
+          "marginal_pp": 2.7457355119147557
         },
         "upper_pp_edge": {
           "floor_pct": 4.1466478070028785,
@@ -968,19 +968,19 @@
           6.115977687298146
         ],
         "marginal_ci95_pp": [
-          2.280914554561832,
+          2.0092619224667865,
           9.564529582288625
         ],
         "marginal_ci95_b": [
-          17.44325421351391,
+          15.365795454733572,
           73.14457290952062
         ],
         "lower_pp_edge": {
           "floor_pct": 6.115977687298146,
-          "mapped_at_pct": 6.0,
-          "truncated_at_grid_edge": true,
-          "marginal_b": 17.44325421351391,
-          "marginal_pp": 2.280914554561832
+          "mapped_at_pct": 6.115977687298146,
+          "truncated_at_grid_edge": false,
+          "marginal_b": 15.365795454733572,
+          "marginal_pp": 2.0092619224667865
         },
         "upper_pp_edge": {
           "floor_pct": 3.852917655323951,
@@ -1004,25 +1004,25 @@
           -2.381638733368586,
           2.358323475269443
         ],
-        "t_star_draws_path": "/Users/eugene/somthing/Lock In effect/Lock-in-Effect/.claude/worktrees/paper-v18-review-plan-5b7b5e/hazard/data/floor_inference_v2_tstar_R2_rademacher.csv",
+        "t_star_draws_path": "/Users/eugene/somthing/Lock In effect/Lock-in-Effect/hazard/data/floor_inference_v2_tstar_R2_rademacher.csv",
         "floor_ci95_pct": [
           4.162768984339071,
           5.820006251546072
         ],
         "marginal_ci95_pp": [
-          2.796265669289897,
+          2.768073338725856,
           8.723086701307457
         ],
         "marginal_ci95_b": [
-          21.384392861360496,
+          21.168792505829217,
           66.70965317535038
         ],
         "lower_pp_edge": {
           "floor_pct": 5.820006251546072,
           "mapped_at_pct": 5.820006251546072,
           "truncated_at_grid_edge": false,
-          "marginal_b": 21.384392861360496,
-          "marginal_pp": 2.796265669289897
+          "marginal_b": 21.168792505829217,
+          "marginal_pp": 2.768073338725856
         },
         "upper_pp_edge": {
           "floor_pct": 4.162768984339071,
@@ -1042,25 +1042,25 @@
           -2.3247847481083914,
           2.318667436396434
         ],
-        "t_star_draws_path": "/Users/eugene/somthing/Lock In effect/Lock-in-Effect/.claude/worktrees/paper-v18-review-plan-5b7b5e/hazard/data/floor_inference_v2_tstar_R2_webb.csv",
+        "t_star_draws_path": "/Users/eugene/somthing/Lock In effect/Lock-in-Effect/hazard/data/floor_inference_v2_tstar_R2_webb.csv",
         "floor_ci95_pct": [
           4.176744144633416,
           5.800284985839921
         ],
         "marginal_ci95_pp": [
-          2.8549950653913494,
+          2.8252003470251736,
           8.677971792194077
         ],
         "marginal_ci95_b": [
-          21.833524892174598,
+          21.605670303916636,
           66.3646376959628
         ],
         "lower_pp_edge": {
           "floor_pct": 5.800284985839921,
           "mapped_at_pct": 5.800284985839921,
           "truncated_at_grid_edge": false,
-          "marginal_b": 21.833524892174598,
-          "marginal_pp": 2.8549950653913494
+          "marginal_b": 21.605670303916636,
+          "marginal_pp": 2.8252003470251736
         },
         "upper_pp_edge": {
           "floor_pct": 4.176744144633416,
@@ -1096,19 +1096,19 @@
           6.181251547950084
         ],
         "marginal_ci95_pp": [
-          2.280914554561832,
+          1.8709537466170403,
           9.109324011557733
         ],
         "marginal_ci95_b": [
-          17.44325421351391,
+          14.308086095858464,
           69.66339625878369
         ],
         "lower_pp_edge": {
           "floor_pct": 6.181251547950084,
-          "mapped_at_pct": 6.0,
-          "truncated_at_grid_edge": true,
-          "marginal_b": 17.44325421351391,
-          "marginal_pp": 2.280914554561832
+          "mapped_at_pct": 6.181251547950084,
+          "truncated_at_grid_edge": false,
+          "marginal_b": 14.308086095858464,
+          "marginal_pp": 1.8709537466170403
         },
         "upper_pp_edge": {
           "floor_pct": 4.033460201564454,
@@ -1206,19 +1206,19 @@
           5.361848575678573
         ],
         "marginal_ci95_pp": [
-          4.260507714907375,
+          4.241044404512471,
           9.132752645175067
         ],
         "marginal_ci95_b": [
-          32.58215832817249,
+          32.43331300190814,
           69.84256632512621
         ],
         "lower_pp_edge": {
           "floor_pct": 5.361848575678573,
           "mapped_at_pct": 5.361848575678573,
           "truncated_at_grid_edge": false,
-          "marginal_b": 32.58215832817249,
-          "marginal_pp": 4.260507714907375
+          "marginal_b": 32.43331300190814,
+          "marginal_pp": 4.241044404512471
         },
         "upper_pp_edge": {
           "floor_pct": 4.024843755601159,
@@ -1237,19 +1237,19 @@
           5.549502556843611
         ],
         "marginal_ci95_pp": [
-          3.6370935963901765,
+          3.605407335303338,
           9.608134604489445
         ],
         "marginal_ci95_b": [
-          27.814609746468527,
+          27.57228961829534,
           73.47804155511879
         ],
         "lower_pp_edge": {
           "floor_pct": 5.549502556843611,
           "mapped_at_pct": 5.549502556843611,
           "truncated_at_grid_edge": false,
-          "marginal_b": 27.814609746468527,
-          "marginal_pp": 3.6370935963901765
+          "marginal_b": 27.57228961829534,
+          "marginal_pp": 3.605407335303338
         },
         "upper_pp_edge": {
           "floor_pct": 3.8344151068942067,
@@ -1269,19 +1269,19 @@
           5.423683641185606
         ],
         "marginal_ci95_pp": [
-          4.051828153043721,
+          4.0277300104572085,
           9.295520464113796
         ],
         "marginal_ci95_b": [
-          30.986285023987424,
+          30.801994899497945,
           71.08733037726883
         ],
         "lower_pp_edge": {
           "floor_pct": 5.423683641185606,
           "mapped_at_pct": 5.423683641185606,
           "truncated_at_grid_edge": false,
-          "marginal_b": 30.986285023987424,
-          "marginal_pp": 4.051828153043721
+          "marginal_b": 30.801994899497945,
+          "marginal_pp": 4.0277300104572085
         },
         "upper_pp_edge": {
           "floor_pct": 3.9621708644138054,
@@ -1300,19 +1300,19 @@
           5.699325592197679
         ],
         "marginal_ci95_pp": [
-          3.1622073405985827,
+          3.1279546620651515,
           9.940656881103296
         ],
         "marginal_ci95_b": [
-          24.182925400507628,
+          23.92097863974122,
           76.02099985709961
         ],
         "lower_pp_edge": {
           "floor_pct": 5.699325592197679,
           "mapped_at_pct": 5.699325592197679,
           "truncated_at_grid_edge": false,
-          "marginal_b": 24.182925400507628,
-          "marginal_pp": 3.1622073405985827
+          "marginal_b": 23.92097863974122,
+          "marginal_pp": 3.1279546620651515
         },
         "upper_pp_edge": {
           "floor_pct": 3.6818784531434723,
@@ -1332,19 +1332,19 @@
           5.492520114707499
         ],
         "marginal_ci95_pp": [
-          3.823220551212704,
+          3.7945453807850837,
           9.469683359298067
         ],
         "marginal_ci95_b": [
-          29.23801238225041,
+          29.018719517296542,
           72.41923807595262
         ],
         "lower_pp_edge": {
           "floor_pct": 5.492520114707499,
           "mapped_at_pct": 5.492520114707499,
           "truncated_at_grid_edge": false,
-          "marginal_b": 29.23801238225041,
-          "marginal_pp": 3.823220551212704
+          "marginal_b": 29.018719517296542,
+          "marginal_pp": 3.7945453807850837
         },
         "upper_pp_edge": {
           "floor_pct": 3.8923133344705207,
@@ -1363,19 +1363,19 @@
           5.90937278126672
         ],
         "marginal_ci95_pp": [
-          2.5356312951793405,
+          2.518173805858618,
           10.305828325561324
         ],
         "marginal_ci95_b": [
-          19.3911960380521,
+          19.257690193415332,
           78.81364209986052
         ],
         "lower_pp_edge": {
           "floor_pct": 5.90937278126672,
           "mapped_at_pct": 5.90937278126672,
           "truncated_at_grid_edge": false,
-          "marginal_b": 19.3911960380521,
-          "marginal_pp": 2.5356312951793405
+          "marginal_b": 19.257690193415332,
+          "marginal_pp": 2.518173805858618
         },
         "upper_pp_edge": {
           "floor_pct": 3.46727789543696,
@@ -1405,19 +1405,19 @@
           5.3483798461028575
         ],
         "marginal_ci95_pp": [
-          4.306361082844559,
+          4.287938955296194,
           9.093647171764001
         ],
         "marginal_ci95_b": [
-          32.93282115851588,
+          32.791938259883295,
           69.54350790030061
         ],
         "lower_pp_edge": {
           "floor_pct": 5.3483798461028575,
           "mapped_at_pct": 5.3483798461028575,
           "truncated_at_grid_edge": false,
-          "marginal_b": 32.93282115851588,
-          "marginal_pp": 4.306361082844559
+          "marginal_b": 32.791938259883295,
+          "marginal_pp": 4.287938955296194
         },
         "upper_pp_edge": {
           "floor_pct": 4.03916112788022,
@@ -1443,19 +1443,19 @@
           5.335158107229631
         ],
         "marginal_ci95_pp": [
-          4.35150875101705,
+          4.334112443893456,
           9.062789389094663
         ],
         "marginal_ci95_b": [
-          33.2780871622358,
+          33.145049207382854,
           69.3075235463536
         ],
         "lower_pp_edge": {
           "floor_pct": 5.335158107229631,
           "mapped_at_pct": 5.335158107229631,
           "truncated_at_grid_edge": false,
-          "marginal_b": 33.2780871622358,
-          "marginal_pp": 4.35150875101705
+          "marginal_b": 33.145049207382854,
+          "marginal_pp": 4.334112443893456
         },
         "upper_pp_edge": {
           "floor_pct": 4.050240057997067,
@@ -1491,19 +1491,19 @@
           5.855021298962615
         ],
         "marginal_ci95_pp": [
-          2.6930597615402925,
+          2.668371113878311,
           9.86408383719276
         ],
         "marginal_ci95_b": [
-          20.595127484622772,
+          20.406321482883452,
           75.43540884135432
         ],
         "lower_pp_edge": {
           "floor_pct": 5.855021298962615,
           "mapped_at_pct": 5.855021298962615,
           "truncated_at_grid_edge": false,
-          "marginal_b": 20.595127484622772,
-          "marginal_pp": 2.6930597615402925
+          "marginal_b": 20.406321482883452,
+          "marginal_pp": 2.668371113878311
         },
         "upper_pp_edge": {
           "floor_pct": 3.7192394755498626,
@@ -2315,7 +2315,7 @@
   "verdict": {
     "primary": "R2 Webb wild-t, mapped, pp at 6.5",
     "corrected_pp": [
-      2.8549950653913494,
+      2.8252003470251736,
       8.677971792194077
     ],
     "committed_pp": [
@@ -2327,23 +2327,23 @@
       8.01850965353176
     ],
     "rademacher_replay_pp": [
-      2.796265669289897,
+      2.768073338725856,
       8.723086701307457
     ],
-    "delta_lower_pp": 0.05872939610145256,
+    "delta_lower_pp": 0.028934677735276804,
     "delta_upper_pp": -0.04511490911338001,
-    "abs_delta_lower_pp": 0.05872939610145256,
+    "abs_delta_lower_pp": 0.028934677735276804,
     "abs_delta_upper_pp": 0.04511490911338001,
     "endpoint_tol_pp": 0.1,
-    "width_pp": 5.822976726802727,
+    "width_pp": 5.852771445168903,
     "committed_width_pp": 5.9268210320175605,
-    "width_change_pp": -0.10384430521483345,
+    "width_change_pp": -0.07404958684865726,
     "width_equivalent_band_pp": [
       5.727,
       6.127
     ],
     "width_within_equivalent_band": true,
-    "printed_lower_unchanged": false,
+    "printed_lower_unchanged": true,
     "printed_upper_unchanged": true,
     "printed_lower_band": [
       2.75,
@@ -2361,23 +2361,23 @@
       "webb_lower": false,
       "webb_upper": false
     },
-    "code": "CONFIRM_PRINT_MOVE",
-    "manuscript_action": "CONFIRM_PRINT_MOVE: substance confirmed, printed literal moves. The new pair replaces the old at ALL 12 occurrences on 11 lines (30, 45, 76x2, 106, 301, 312, 357, 592, 605, 611, 677) in ONE commit, with gate #98's posture_binding_layer span, gate #99's ABSTRACT_POSTURE['interval'] AND its ordering assert, the count gate, the letter literal list, tests/test_headline_posture_gate.py:79 and :151, and the letter recount. Prose says MATERIALLY UNCHANGED AND RE-PRINTED, never 'widened'. RE-DERIVE the census first; the and-form x2 and bracket-form x3 are gate-invisible. [posture]"
+    "code": "CONFIRM_NO_PRINT",
+    "manuscript_action": "CONFIRM_NO_PRINT: one clause in tab:uncertainty's tablenote reporting the Webb interval, df_bm and G*; ALL 12 interval literals on 11 lines UNTOUCHED; only the tablenote-content gate gains its literal; gates #98/#99/#101 untouched. Unconditional items still land: G*/sum(h^2) in the loan-stratum convention, CR2/CR3 restated at df_bm, and the DGP + B=9999 + SMM-scale studentization stated."
   },
   "expectation_check": {
     "predicted_widening_pp": [
       0.03,
       0.15
     ],
-    "realized_widening_pp": -0.10384430521483345,
+    "realized_widening_pp": -0.07404958684865726,
     "inside_prediction": false,
-    "widening_at_lower_edge_pp": -0.05872939610145256,
+    "widening_at_lower_edge_pp": -0.028934677735276804,
     "widening_at_upper_edge_pp": -0.04511490911338001,
     "predicted_concentrated_at_upper": true,
-    "realized_concentrated_at_upper": true,
+    "realized_concentrated_at_upper": false,
     "predicted_modal_branch": "CONFIRM_PRINT_MOVE",
-    "realized_branch": "CONFIRM_PRINT_MOVE",
-    "modal_branch_realized": true,
+    "realized_branch": "CONFIRM_NO_PRINT",
+    "modal_branch_realized": false,
     "printing_slack_pp": {
       "lower_downward": 0.0463,
       "upper_upward": 0.0269
@@ -2401,22 +2401,22 @@
       "t_crit_df_bm": 2.556303223819479,
       "df_bm": 5.094518332742745,
       "cr2_pp": [
-        2.4097883016945523,
+        2.39997998821785,
         9.149768955601752
       ],
       "cr3_pp": [
-        2.280914554561832,
+        2.0092619224667865,
         9.564529582288625
       ]
     }
   },
   "tstar_csv": {
-    "webb": "/Users/eugene/somthing/Lock In effect/Lock-in-Effect/.claude/worktrees/paper-v18-review-plan-5b7b5e/hazard/data/floor_inference_v2_tstar_R2_webb.csv",
-    "rademacher": "/Users/eugene/somthing/Lock In effect/Lock-in-Effect/.claude/worktrees/paper-v18-review-plan-5b7b5e/hazard/data/floor_inference_v2_tstar_R2_rademacher.csv",
+    "webb": "/Users/eugene/somthing/Lock In effect/Lock-in-Effect/hazard/data/floor_inference_v2_tstar_R2_webb.csv",
+    "rademacher": "/Users/eugene/somthing/Lock In effect/Lock-in-Effect/hazard/data/floor_inference_v2_tstar_R2_rademacher.csv",
     "read": "R2_2018_gap<=-0.0025_age>=12",
     "n_rows": 9999,
     "format": "one header line 't_star' then 9999 rows, %.17g",
     "consumed_by": "layer_convolution (SPEC C2)"
   },
-  "runtime_s": 6.5
+  "runtime_s": 3.9
 }
