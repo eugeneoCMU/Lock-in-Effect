@@ -15,6 +15,7 @@ SUBMISSION_VARIANT = (
 )
 MANIFEST = ROOT / "paper" / "final" / "compression_manifest.json"
 SUPPLEMENT = ROOT / "paper" / "final" / "technical_replication_supplement.tex"
+ARCHIVE = ROOT / "paper" / "final" / "technical_replication_archive.tex"
 
 _VALIDATOR_SPEC = importlib.util.spec_from_file_location(
     "tex_validate", ROOT / "tools" / "tex_validate.py"
@@ -103,8 +104,9 @@ def test_submission_sources_are_physically_compressed_and_synchronized():
     variant = SUBMISSION_VARIANT.read_text()
     assert r"\iffalse" not in canonical
     assert r"\iffalse" not in variant
-    assert len(canonical.splitlines()) < 800
-    assert len(variant.splitlines()) < 800
+    archive_lines = len(ARCHIVE.read_text().splitlines())
+    assert len(canonical.splitlines()) < 0.65 * archive_lines
+    assert len(variant.splitlines()) < 0.65 * archive_lines
     assert source_section_labels(canonical) == source_section_labels(variant)
 
 
@@ -121,6 +123,65 @@ def test_submission_sources_retain_core_destinations():
         "app:benchmark",
         "app:params",
     } <= labels
+
+
+def test_submission_carries_reader_facing_evidence_tables():
+    text = SUBMISSION.read_text()
+    for label in (
+        "tab:headline-compact",
+        "tab:uncertainty-compact",
+        "tab:danish-compact",
+    ):
+        assert rf"\label{{{label}}}" in text
+    for row in (
+        "Cap-relative benchmark",
+        "Production ABM",
+        "Path B central, off-window floor",
+        r"Rate-inelastic null, $\beta_1=0$",
+        "Lock-in marginal, off-window floor",
+    ):
+        assert row in text
+
+
+def test_submission_keeps_uncertainty_dimensions_separate():
+    text = SUBMISSION.read_text()
+    assert "Floor-read sampling uncertainty" in text
+    assert "Elasticity calibration range" in text
+    assert "Functional-form range" in text
+    assert "no coverage interpretation" in text
+    assert "carries calibration, floor, and functional-form uncertainty" not in text
+
+
+def test_submission_appendix_contains_evaluable_specification():
+    text = SUBMISSION.read_text()
+    required = (
+        r"h^{\mathrm{prep}}_{i,t}",
+        r"h^{\mathrm{def}}_{i,t}",
+        "40{,}234",
+        "1{,}683{,}124",
+        "tab:floor-elasticity-grid",
+        "tab:floor-form-compact",
+        "Fannie Mae reproduction is a robustness check, not an outside test",
+        "wrong-month rotations",
+        "Path~A is excluded from every headline range",
+        "10{,}000 heterogeneous households",
+    )
+    for item in required:
+        assert item in text
+
+
+def test_submission_variants_differ_only_in_abstract():
+    def without_abstract(text):
+        return re.sub(
+            r"\\begin\{abstract\}.*?\\end\{abstract\}",
+            "ABSTRACT",
+            text,
+            flags=re.DOTALL,
+        )
+
+    assert without_abstract(SUBMISSION.read_text()) == without_abstract(
+        SUBMISSION_VARIANT.read_text()
+    )
 
 
 def test_technical_supplement_is_standalone_and_scoped():

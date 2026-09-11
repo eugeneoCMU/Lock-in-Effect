@@ -196,6 +196,29 @@ I build the empirical shortfall benchmark from the New York Fed's SOMA current f
 \label{fig:benchmark}
 \end{figure}
 
+\begin{table}[H]
+\centering
+\small
+\caption{Headline quantities on the benchmark-consistent accounting basis.}
+\label{tab:headline-compact}
+\begin{threeparttable}
+\begin{tabular}{@{}p{5.2cm}p{3.0cm}p{5.5cm}@{}}
+\toprule
+Object & Result & Interpretation \\
+\midrule
+Cap-relative benchmark & \$764.7 billion & Accounting shortfall against the phased ceiling; not a causal estimate \\
+Production ABM & 13.6\% & Fifty-seed mean on its synthetic population; 10--17\% seed band \\
+Path B central, off-window floor & 91.3\% & Loan-level hazard level with the transported rate response active \\
+Rate-inelastic null, $\beta_1=0$ & 85.7\% & Scheduled amortization, measured turnover floor, seasoning, burnout, and covariates retained \\
+Lock-in marginal, off-window floor & $+5.6$ pp; $+\$42.6$ billion & Central minus null at the mid-grid anchor; the binding result is $[+1.9,+9.1]$ pp \\
+\bottomrule
+\end{tabular}
+\begin{tablenotes}[flushleft]\footnotesize
+\item Notes: Recovery percentages divide by the unrounded \$764.748 billion benchmark. The ABM is a stress test and is not averaged with Path~B. The Path~B level is not the lock-in effect: the publication-facing result is the marginal over the rate-inelastic null. The off-window anchor uses the 4.991\% floor read and the adopted 6.5\% mobility-response calibration.
+\end{tablenotes}
+\end{threeparttable}
+\end{table}
+
 The empirical shortfall is approximately \$764.7 billion (unrounded: \$764.748 billion; every percentage-of-benchmark figure in this paper divides by this value). It is the benchmark for simulated trapped liquidity in Sections~\ref{sec:abm} and~\ref{sec:hazard}. The SOMA face spans the Federal Reserve's full agency MBS book, Ginnie Mae collateral included, 20.4\% of face. Of that face, 66.2\% lies in the 2017--2021 vintages of the Freddie Mac loan-level sample (Section~\ref{sec:hazard}). The hazard framework therefore samples directly neither Ginnie collateral nor roughly one-third of the book by vintage. Section~\ref{sec:pathb} bounds both exclusions externally; Section~\ref{sec:limitations} states what each bound leaves open. The exclusions must be netted on the book's own joint cells, not counted separately. Out-of-window vintage is 33.7\% of face (2022 cohort 23.1\%, pre-2017 10.6\%), and the 20.4\% Ginnie share cuts across vintage. The conventional-and-in-window intersection is therefore 51.0\% on the book's own agency $\times$ vintage joint cells (bounded above by 51.8\% for cell truncation; 52.7\% under an independence approximation). The Freddie 2017--2021 conventional universe estimating Path B is about \emph{half} of SOMA book face. Two-thirds is the vintage-only marginal and overstates coverage. External-speed overlays (Section~\ref{sec:pathb}) bound Ginnie at \$20--\$47 billion by published observed speeds, and out-of-window vintages at \$11.7 billion by observed cohort speeds from the replication ingest. Each bound is signed toward overstating trapped liquidity. On the simulated side an income-scaled curtailment assumption enters, averaging approximately 0.84\% annualized and consistent with GSE daily prepayment report estimates. It is added to each simulated roll-off and netted as a common dollar item in the shared accounting layer of Section~\ref{sec:robustness-hybrid}, so the empirical CPR back-out's series retains that component. Two implementations of the back-out exist: the ABM's cohort-weighted, term-aware scheduled amortization and the hazard side's single-pool approximation. Both amortize at the pass-through WAC, though scheduled principal follows the borrowers' note rate, that WAC plus a $+0.80$-point guarantee-fee and base-servicing wedge. On the note-rate basis the hazard-side CPR level rises $+0.27$ points, a deterministic schedule difference. Every trapped-dollar figure is bit-identical: the benchmark's dollars never pass through the CPR scale. Every peak lag and $U_2$ is unchanged at reporting precision, correlations differing only at the third decimal (run \texttt{coupon\_convention\_amortization}). The corrected-basis timing diagnostics are summarized in Appendix~\ref{app:theil}.
 
 \paragraph{Accounting bases.} Every recovery percentage in this paper is quoted on one of four accounting bases, differing only in two orthogonal choices, pure accounting layers with no modeling content: whether the common curtailment flow is netted out, and whether the estimation sample is reweighted to the SOMA book's coupon mix. The \emph{standalone-scorer basis} makes neither adjustment; the \emph{benchmark-consistent shared basis} nets that common curtailment flow (\$69.56 billion over the window) identically from every U.S. leg, a flat 9.1 percentage points of the benchmark for every U.S. estimator; the \emph{full-book basis} instead reweights the standalone figure to the book's weighted-average coupon (WAC) without netting; and the \emph{composed basis} applies both, the same 9.1-point netting to the full-book figure. Because the netting is bit-identical across central and null legs, it cancels exactly from the lock-in marginal and every cross-estimator gap, an invariance at every cell of the calibration box and under a $\pm 25\%$ stress on the assumed curtailment rate (derivation and stress in Section~\ref{sec:robustness-hybrid}; the accounting bases summarized in Appendix~\ref{app:params}). The cancellation is term-by-term monthly, not merely aggregate: the netted flow is a shared monthly rate times the shared actual-holdings path, so any curtailment time profile (calendar-seasonal, or income elasticities differing across sub-periods) cancels identically, moving only the common wedge. The income-to-rate mapping's functional form is immaterial to the marginal for the same reason: any alternative (concave, threshold, or piecewise in income) yields another shared profile. Main-text headline figures are quoted on the shared basis throughout.
@@ -424,6 +447,27 @@ discount reverses the preferred-anchor result to -\$51.0 billion, and product
 composition can reverse it as well. The counterfactual is therefore anchor-,
 incidence-, and product-mix-dependent.
 
+\begin{table}[H]
+\centering
+\small
+\caption{Danish counterfactual: anchor and accounting determine the sign.}
+\label{tab:danish-compact}
+\begin{threeparttable}
+\begin{tabular}{@{}p{4.0cm}p{3.4cm}p{2.5cm}p{4.0cm}@{}}
+\toprule
+Counterfactual & Accounting or level anchor & U.S.--Danish gap & What changes \\
+\midrule
+Rule-only transplant & Face accounting & $+\$61.2$ billion & U.S. zero-gap intercept; zero refinance-in-place edge \\
+Rule-only transplant & Cash accounting & $-\$51.0$ billion & Same face retirement, but bought-back face credited at its re-derived market value \\
+Rule plus Danish mobility level & Face accounting & $-\$99.9$ billion & Imports Denmark's descriptive moving level as well as the flatter response \\
+\bottomrule
+\end{tabular}
+\begin{tablenotes}[flushleft]\footnotesize
+\item Notes: Gap is U.S. trapped liquidity minus Danish trapped liquidity. The first row is benchmark-consistent because the SOMA benchmark and runoff caps are face-denominated. The cash row answers the distinct reserves-drained question. These rows are alternative readings, not additive effects. The face gap also reverses when the Danish interest-only share exceeds 34.3\%. None prices TBA liquidity, transition, tax, servicing, or general-equilibrium costs.
+\end{tablenotes}
+\end{threeparttable}
+\end{table}
+
 This exercise does not price a U.S. transition to the Danish structure.
 Market-value repurchase requires liquid trading in the specific funding bonds,
 whereas the U.S. TBA market derives liquidity from standardized, fungible pools.
@@ -450,6 +494,28 @@ $+13.1$. Seasonal and cyclical variants largely measure dispersion induced by
 the maximum rather than timing; their small order component does not credential
 the monthly path. These checks preserve a positive marginal but rule out a
 single model-free magnitude.
+
+\begin{table}[H]
+\centering
+\small
+\caption{Uncertainty and robustness for the Path~B lock-in marginal.}
+\label{tab:uncertainty-compact}
+\begin{threeparttable}
+\begin{tabular}{@{}p{4.3cm}p{3.4cm}p{6.0cm}@{}}
+\toprule
+Dimension & Reported range & Meaning \\
+\midrule
+Floor-read sampling uncertainty & $[+1.9,+9.1]$ pp & Restricted wild-cluster inversion on 31 strata, propagated through the frozen floor-to-marginal map at the central elasticity; binding coverage-bearing interval \\
+Elasticity calibration range & $+3.9$ to $+7.5$ pp & Published 5.5--7.7\% mobility-response band crossed with the clean off-window floor range; no coverage interpretation \\
+Functional-form range & $+3.5$ to $+13.1$ pp & Reported hull across maximum/additive floor combinations and the disclosed transform checks; a specification range, not a confidence interval \\
+Full calibration box & $+2.1$ to $+13.2$ pp & Floors 2--6\% crossed with the 5.5--7.7\% band under the production maximum form; no coverage interpretation \\
+\bottomrule
+\end{tabular}
+\begin{tablenotes}[flushleft]\footnotesize
+\item Notes: The $[+1.9,+9.1]$ interval prices sampling error in the off-window floor read only. It is not an interval for the transported elasticity and does not absorb functional-form uncertainty. The additive-form marginal is approximately $+11.2$ points across 3--5\% floors.
+\end{tablenotes}
+\end{threeparttable}
+\end{table}
 
 \subsection{Population and cross-design checks}\label{sec:robustness-crossdesign}\label{sec:robustness-hybrid}
 
@@ -548,60 +614,106 @@ runoff falls below the scheduled-amortization floor; consequently the paper make
 no monthly-timing claim.
 
 The hazard panel uses agency mortgage cohorts linked to note-rate gaps and loan
-characteristics. The production calculation evaluates 1,683,124 active
-loan-months. Fifteen-year securities are included in the accounting benchmark but
-excluded from the preferred 30-year causal calculation because their maturity and
-prepayment mechanics are not comparable. The complete series construction,
-crosswalks, and superseded benchmark variants are preserved in the technical
-replication supplement.
+characteristics. Path~B draws 75{,}000 loans from the Freddie Mac 2017--2021
+conventional 30-year origination universe; 40{,}234 remain active when QT opens,
+and the production calculation evaluates 1{,}683{,}124 active loan-months.
+Fifteen-year securities remain in the SOMA accounting benchmark but not this
+loan-level hazard sample. The sample also omits Ginnie collateral and vintages
+outside 2017--2021. On the book's agency-by-vintage joint cells, the sampled
+conventional-and-in-window intersection is 51.0\% of SOMA face (51.8\% upper
+bound from cell truncation), not the 66.2\% vintage-only marginal. Published
+speed overlays bound the Ginnie exclusion at \$20--\$47 billion and observed
+out-of-window vintage speeds imply an \$11.7 billion bound, both signed toward
+the unadjusted simulation overstating trapped liquidity. These are external
+bounds, not structural inclusion of the missing loans.
+
+The matched Fannie Mae reproduction is a robustness check, not an outside test.
+It applies the same transported elasticity, maximum-floor form, and calibration
+logic to a second agency sample and returns a $+8.68$-point marginal. Both agency
+samples share the policy window and omit parts of the SOMA vintage support, so
+the result checks agency dependence without supplying independent identification.
 
 \section{Hazard estimand and parameterization}\label{app:params}
 
-For loan $i$ in month $t$, the preferred specification combines a voluntary
-prepayment hazard with an involuntary-turnover floor:
-\begin{equation}
-h_{it}=\max\left\{\underline h_t,
-\operatorname{logit}^{-1}(\alpha_t+\beta_1\widetilde g_{it}+X_{it}'\gamma)\right\},
-\qquad \widetilde g_{it}=g_{it}/100,
-\end{equation}
-where $g_{it}$ is the annualized note-rate gap in 100-basis-point units. The
-central leg uses the transported estimate of $\beta_1$; the null sets
-$\beta_1=0$ while holding all other objects fixed. Their simulated runoff
-difference is the paper's lock-in marginal. The production floor is 4 percent
-annual CPR and combines with the voluntary hazard through the maximum operator.
-The alternative competing-risks form and the 3--5 percent floor sweep are treated
-as specification uncertainty rather than sampling uncertainty.
+For loan $i$ in month $t$, the production prepayment and default hazards are
+\begin{align}
+h^{\mathrm{prep}}_{i,t}
+ &= \max\!\left\{\underline h,
+ h_0(a_{i,t})\exp\!\left(\beta_1 g_{i,t}+\beta_Fz_i^{\mathrm{FICO}}
+ +\beta_Lz_i^{\mathrm{LTV}}+\beta_BB_{s(i),t}\right)\right\},
+ \label{eq:appendix-prep}\\
+h^{\mathrm{def}}_{i,t}
+ &=h^{\mathrm{def}}_0\exp\!\left(\gamma_r\sigma_{i,t}
+ +\gamma_Fz_i^{\mathrm{FICO}}+\gamma_Lz_i^{\mathrm{LTV}}\right),
+ \quad \sigma_{i,t}=\max\{0,-\widetilde g_{i,t}\}.
+ \label{eq:appendix-default}
+\end{align}
+Here $g_{i,t}$ is coupon minus the prevailing mortgage rate in 100-basis-point
+units, negative when the loan is locked in, and $\widetilde g_{i,t}=g_{i,t}/100$
+is its decimal form in the default equation. The baseline $h_0(a)$ follows the
+100-PSA seasoning ramp. The floor $\underline h$ is the SMM equivalent of the
+stated annual CPR. Burnout $B_{s(i),t}$ is the stratum's cumulative prepaid UPB
+share since the QT opening; it is initialized at zero and capped at one.
+Competing exits are applied monthly to surviving balances, followed by scheduled
+amortization at each loan's note rate and aggregation to the SOMA balance path.
 
-The headline mapping is deliberately conservative. The full central simulation
-explains \$91.3 billion of the \$764.7 billion benchmark; the zero-elasticity null
-explains \$85.7 billion. The preferred causal statement is therefore the
-central-minus-null contribution, while the reported 1.9--9.1 percentage-point
-binding interval carries calibration, floor, and functional-form uncertainty.
-Fannie Mae estimates are a population check, not a pooled estimate, and the
-separate Path A design is excluded from the headline because its timing and
-support diagnostics fail the pre-committed standard.
+\begin{table}[tbp]
+\centering
+\small
+\caption{Key Path~B parameters and accounting conventions.}
+\label{tab:pathb-parameters-compact}
+\begin{tabular}{@{}p{3.5cm}p{3.0cm}p{7.0cm}@{}}
+\toprule
+Object & Production value & Role and provenance \\
+\midrule
+Mobility response $\delta$ & 6.5\%; band 5.5--7.7\% & Imported quarterly proportional decline per 100 bp; converted by the survival transform to $\beta_1=0.0686$ \\
+Turnover floor $\underline h$ & 4\% annual CPR in-sample; 4.695--5.334\% off-window & Deep-discount realized turnover; includes discretionary and involuntary exits \\
+Seasoning baseline & 100 PSA & CPR ramps by 0.2 points per month to 6\% at month 30 \\
+Burnout coefficient $\beta_B$ & $-0.5$ & Cohort-level cumulative-prepayment state \\
+Default baseline $h^{\mathrm{def}}_0$ & $3\times10^{-4}$ monthly & Competing default prior; approximately 0.36\% annually \\
+Shared accounting & common \$69.6 billion curtailment netting & Applied identically to central and null legs, so it cancels from the marginal \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+The central leg uses the transported $\beta_1$; the rate-inelastic null sets
+$\beta_1=0$ while holding the floor, PSA baseline, burnout, covariates, default,
+loan population, randomization, amortization, and accounting layer fixed. The
+central-minus-null difference is therefore the paper's model-based lock-in
+marginal. At the off-window midpoint the central level is 91.3\% of the
+benchmark and the null is 85.7\%; these are percentages, not dollar amounts.
+The binding $[+1.9,+9.1]$-point interval propagates sampling error in the floor
+read at the central elasticity only. Calibration and form ranges are reported
+separately in Table~\ref{tab:uncertainty-compact}.
 
 \section{ABM mechanics and diagnostic role}\label{sec:method-abm}
 \label{sec:method-frictions}\label{app:abmspec}
 
-The agent-based model simulates 10,000 heterogeneous households whose coupons
-and origination dates are drawn from the live CUSIP-level SOMA composition. A
-move compares the existing payment with the payment on the outstanding balance
-at the current market rate over a fresh original term. The decision also includes
-housing-search and sentiment frictions, a 43 percent payment-to-income screen,
-2.25-times loss aversion on payment increases, and an author-calibrated
-wait-and-see freeze. The mobility scale is recalibrated to reproduce a 4--5
-percent deeply out-of-the-money turnover floor; matching that floor is therefore
-an input, not evidence for the model.
+The agent-based model simulates 10{,}000 heterogeneous households. Coupons and
+origination dates are drawn from the live CUSIP-level SOMA composition; income,
+home value, age, and mortgage balance are calibrated from aggregate series. A
+move compares the current payment with the payment on the outstanding balance
+refinanced at the market rate over a fresh original term. The decision rule also
+contains moving and closing costs, housing-search and sentiment frictions, a
+43\% payment-to-income screen, 2.25-times loss aversion on payment increases,
+and an author-calibrated wait-and-see freeze. Approved movers prepay; balances
+then receive scheduled amortization and common curtailment before the simulated
+roll-off is scored against the phased cap. The mobility scale is recalibrated to
+reproduce 4--5\% deeply out-of-the-money turnover, so matching that floor is an
+input rather than evidence for the model.
 
 The U.S. rule requires payoff at par. The Danish counterfactual permits
 market-value repurchase, but the production exercise anchors the moving hazard
 to external Danish evidence rather than allowing the pricing proxy to determine
 it. The ABM recovers only 10--17 percent of the benchmark across its production
 variants, overpredicts average CPR, and fails to match monthly shape. It is used
-as a mechanism stress test and not averaged with the hazard estimate. Full
-decision equations, parameter provenance, surface-interpolation checks,
-Monte Carlo dispersion, and failed variants remain in the technical supplement.
+as a mechanism stress test and not averaged with the hazard estimate. Its
+real-covariate variant reaches 59.3\% after recalibration and 76.3\% after book
+reweighting, crossing the pre-committed threshold that withdraws the former
+modeling-paradigm interpretation. No ABM marginal is reported because its two
+plausible nulls disagree even in sign. Full utility equations, parameter
+provenance, interpolation checks, Monte Carlo dispersion, and failed variants
+remain in the technical supplement.
 
 \section{Composition and policy mappings}\label{app:composition}
 
@@ -634,19 +746,61 @@ timing. Holding the floor's exposure-weighted mean at 4 percent changes the
 marginal by \$4.9 billion, at most 7 percent of the in-sample marginal. Permuting
 the same monthly floor values preserves 89.2 percent of that movement on average.
 
+\begin{table}[tbp]
+\centering
+\small
+\caption{Central off-window floor-by-elasticity grid: lock-in marginal (percentage points of the \$764.7 billion benchmark).}
+\label{tab:floor-elasticity-grid}
+\begin{threeparttable}
+\begin{tabular}{@{}lrrr@{}}
+\toprule
+Annual turnover floor & 5.5\% response & 6.5\% response & 7.7\% response \\
+\midrule
+4.695\% & $+6.08$ & $+6.77$ & $+7.46$ \\
+4.991\% & $+5.04$ & $+5.57$ & $+6.09$ \\
+5.334\% & $+3.89$ & $+4.27$ & $+4.62$ \\
+\bottomrule
+\end{tabular}
+\begin{tablenotes}[flushleft]\footnotesize
+\item Notes: The rows are the clean pre-episode 2018 floor reads; columns sweep the published mobility-response calibration band. The grid is monotone by construction and has no coverage interpretation. Its central cell rounds to the $+5.6$-point, \$42.6 billion anchor. Sampling uncertainty in the floor read is propagated separately.
+\end{tablenotes}
+\end{threeparttable}
+\end{table}
+
+\begin{table}[tbp]
+\centering
+\small
+\caption{Functional-form comparison at the central 6.5\% response.}
+\label{tab:floor-form-compact}
+\begin{threeparttable}
+\begin{tabular}{@{}lrrr@{}}
+\toprule
+Combination rule & 3\% floor & 4\% floor & 5\% floor \\
+\midrule
+Maximum & $+10.82$ & $+9.20$ & $+5.54$ \\
+Additive competing risks & $+11.29$ & $+11.25$ & $+11.21$ \\
+\bottomrule
+\end{tabular}
+\begin{tablenotes}[flushleft]\footnotesize
+\item Notes: Under the maximum, a higher floor censors more of the rate response. Under $1-(1-h_{\rm floor})(1-h_{\rm voluntary})$, the marginal is almost floor-invariant but both central and null levels change sharply. These are alternative specifications, not confidence intervals.
+\end{tablenotes}
+\end{threeparttable}
+\end{table}
+
 The pre-committed timing criterion is formally met by some seasonal variants, but
 it is also met by wrong-month rotations, scrambled calendars, and a
 zero-elasticity null. The result has no discriminatory power. All conclusions are
 therefore restricted to cumulative levels. Alternative turnover-floor levels,
 the competing-risks form, the 15-year fold-in, duration calculations, and the
-rate-gap unit audit are included in the headline binding interval or reported as
-secondary checks; none overturns the conclusion that lock-in is economically
-present but explains only a minority of the accounting shortfall.
+rate-gap unit audit are reported as separate specification checks; they are not
+folded into the floor-read sampling interval. None overturns the conclusion that
+lock-in is economically present but explains only a minority of the accounting
+shortfall.
 
 \section{Excluded design and replication record}\label{app:patha-detail}
 \label{app:ridge}\label{app:theil}
 
-Path A estimates aggregate timing relationships between market rates, refinancing
+Path~A is excluded from every headline range. It estimates aggregate timing relationships between market rates, refinancing
 conditions, and SOMA runoff. Its results are retained for transparency, including
 ridge stabilization and dynamic-fit decompositions, but are not used in the
 headline because the short window, common trends, weak effective support, and
