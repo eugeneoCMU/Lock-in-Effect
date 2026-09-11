@@ -796,7 +796,79 @@ The two hazard paths share no household-level decision machinery with the ABM. T
 The hazard framework's only behavioral content is loan-level covariates, a cohort-level burnout term, and literature-calibrated elasticities: no analogue to mobility desire, loss aversion, or utility maximization. Its comparative success might therefore be read as evidence for the loan-level and institutional mechanisms Section~\ref{sec:abm}'s synthetic-population ABM does not represent: FICO, LTV, and geography heterogeneity; servicer forbearance and pipeline delay; cohort-level burnout. The paper's own measurements cap that reading. The named mechanisms ablate to a point or less each: burnout 0.86 points at the in-sample floor and 0.45 at the off-window floor, FICO/LTV 1.3 points at the in-sample floor and 2.1 at the off-window floor, the delinquency pipeline \$0.39 billion, with no servicer channel beyond it modeled. Section~\ref{sec:robustness-synthesis}'s synthetic companion, meanwhile, recovers a comparable aggregate level with no real loan-level structure at all. And Section~\ref{sec:robustness-scale}'s data-source asymmetry remains unresolved. The level therefore supports the rate-inelastic decomposition, those mechanisms bounded small and candidates only for the residual. Section~\ref{sec:robustness-scale}'s scale-sensitivity replication rules out the ABM/hazard sample-size difference as the driver of this gap. Section~\ref{sec:robustness-crossdesign}'s cross-design test addresses the data-source difference only partially: real structural covariates there change the ABM's explanatory share substantially. Under one calibration choice that shift is enough to raise the question of whether ``cannot represent'' is the right description at all. The rate-gap coefficient's sign stability across both hazard specifications does not indicate that the underlying par-payoff penalty is doing real work. The reason bears restating: only Path A estimates that coefficient. Path B imports it from \citet{liebersohn2024} as a signed elasticity band that cannot come out the other way. Their agreement, having no freedom to disagree, is an orientation check on unit and sign conventions, not corroboration. It was worth running: it would catch a transposed sign between the paths, and it passes. But the evidence that the penalty has a real effect is the external literature. Path A's estimated coefficient is directionally consistent without being statistically distinguishable from zero under bias-respecting constructions (Section~\ref{sec:patha}). Household rationality is not irrelevant. But the aggregation structure of loan-level survival is the minimum a model of this shortfall must get right, and Section~\ref{sec:robustness-crossdesign} leaves open how much more. That sharpens the two-sided exchange this paper describes, with the qualification Section~\ref{sec:robustness-crossdesign} adds: the price of the TBA market's homogeneity appears to be paid at least in part through loan-level and institutional frictions that the synthetic-population household model does not represent, frictions a market-value repurchase design would substantially relieve, as Section~\ref{sec:abm-danish}'s counterfactual suggests.
 \clearpage
 \fi
-\section{Discussion}\label{sec:discussion}
+\section{Discussion and Policy}\label{sec:discussion}
++
+\subsection{Runoff composition and duration}\label{sec:discussion-fallout}\label{tab:wal}
+
+The decomposition changes how the cap-relative shortfall should be read. Slow
+MBS runoff extended the duration of the Federal Reserve's holdings and left
+more low-coupon mortgage duration with the public only gradually. It does not,
+by itself, show that the Federal Reserve missed an aggregate balance-sheet
+objective: Treasury runoff operated under separate caps, and this paper does
+not estimate reserves or the aggregate securities path. The \$764.7 billion
+benchmark measures the composition and timing of balance-sheet reduction, not a
+failure to shrink the balance sheet.
+
+The household and institutional effects are also not commensurable. Existing
+work documents foregone moves and retained below-market financing value, while
+this paper measures portfolio cash flow. The household estimate imported here
+does not price search, housing supply, distribution, or general equilibrium.
+Conversely, the cash-flow calculation does not value household mobility.
+Statements about their relative importance are therefore directional, not a
+ratio of comparable welfare quantities.
+
+\subsection{Redemption-cap design}\label{sec:discussion-capdesign}
+
+A passive-runoff cap can bind only if scheduled amortization and prepayment can
+reach it. In this episode, scheduled principal plus the observed turnover floor
+were below \$35 billion in essentially every month before adding the rate-gap
+response. Because those components and a range for the response were observable
+ex ante, the nonbindingness of the full cap was predictable as a band. The New
+York Fed in fact projected monthly payments below the cap when the full ceiling
+took effect \citep{nyfed2022}.
+
+The design implication is not that the cap should have equaled realized runoff.
+A cap also limits upside variation and communicates the maximum authorized pace.
+It is that a policy document should separate the desired pace from a passive
+cash-flow ceiling and publish the assumed amortization, turnover, and
+rate-response inputs. If the desired pace exceeds that feasible band, the gap
+must be closed by active sales, reinvestment changes, or another instrument
+rather than by a higher passive cap. Detailed monthly and state-contingent grids
+are in the technical supplement.
+
+\subsection{The Danish market-value-repurchase counterfactual}\label{sec:discussion-policy}\label{sec:abm-danish}\label{tab:danish}
+
+The U.S. mortgage contract requires payoff at face value when a borrower sells
+or refinances. Danish borrowers may instead purchase the bonds funding their
+mortgage at market value and deliver them to the mortgage bank. When rates rise,
+the bond price falls, offsetting part of the cost of giving up a low coupon.
+The counterfactual changes the payoff rule while retaining the SOMA portfolio
+and the hazard machinery.
+
+The preferred rule-only transplant anchors Danish mobility at the estimated
+U.S. zero-gap hazard and imports the flatter Danish rate response from
+\citet{berger2026}. Under face accounting, the Danish leg produces a
++\$61.2 billion U.S.-minus-Danish gap at zero refinance-in-place, rising to
++\$256.8 billion across the reported refinancing sweep. The positive sign is
+forced by the shared zero-gap anchor, so the informative result is its
+magnitude. A bracketing case that also imports the lower Danish mobility level
+reverses the gap to -\$99.9 billion. Cash accounting at the re-derived bond
+discount reverses the preferred-anchor result to -\$51.0 billion, and product
+composition can reverse it as well. The counterfactual is therefore anchor-,
+incidence-, and product-mix-dependent.
+
+This exercise does not price a U.S. transition to the Danish structure.
+Market-value repurchase requires liquid trading in the specific funding bonds,
+whereas the U.S. TBA market derives liquidity from standardized, fungible pools.
+The loss of that liquidity, investor compensation, tax treatment, servicing,
+and distributional effects are outside the calculation. The result establishes
+that the face-value payoff rule affects cash-flow incidence; it does not
+establish that adopting the Danish system would raise welfare. Full discount,
+incidence, product-mix, and fine-grid mechanics are preserved in the technical
+supplement.
+
+\iffalse
+
 
 Sections~\ref{sec:abm} and~\ref{sec:hazard} presented the paper's central contrast. Household simulation, rational or behaviorally extended, does not close the gap to the empirical benchmark. A structurally distinct hazard framework (no household utility, a substantially larger non-synthetic sample) recovers 91.3\% of it in microsimulation form on the benchmark-consistent accounting basis at the headline off-window floor, and 97.9\% at the in-sample calibration point. Across that floor's range the recovery runs 88.2--93.7\%, a miss of 6.3 to 11.8 points. But no estimator's monthly path co-movement, Path B's included, survives removing the window's shared trend (Section~\ref{sec:pathb}). The contrast is easy to over-read. The $\beta_1 = 0$ null recovers 85.7\% on the same basis at that headline floor, 88.7\% in-sample. Components common to any prepayment model (scheduled amortization, the seasoning baseline, the turnover floor) therefore deliver the large majority of the level, and the caps sat far above what any plausible prepayment environment would have produced. Named loan-level mechanisms are measured small wherever I can ablate them. Switching burnout off moves Path B by \$6.58 billion ($0.86$ points) at the in-sample floor and \$3.48 billion ($0.45$ points) at the headline off-window floor. Zeroing the FICO/LTV covariates moves it $1.3$ points at the in-sample floor and $2.1$ at the headline off-window floor, where the marginal they bracket moves $0.1$. The delinquency transition matrix is bounded at \$0.39 billion (Appendix~\ref{app:params}), and no servicer channel beyond that pipeline is modeled at all. Three mechanisms therefore remain \emph{candidates} for the residual and for the timing failure every estimator shares, not demonstrated drivers of the level. That residual is modest at the in-sample calibration (2.1 points) but 8.7 points at the headline off-window calibration, roughly 1.6$\times$ the headline marginal. Servicer behavior beyond the delinquency pipeline, updated-equity dynamics, and home-equity extraction carry no bound of any kind here, each plausibly rate-cycle-correlated. Three representational differences between the frameworks bear on that residual. First, loan-level heterogeneity in credit score, geography, and life circumstance makes mobility no smooth function of coupon and market rate alone; the hazard framework's 295 stratum fixed effects are one mechanism letting Path A track pool-level heterogeneity the ABM's coupon-cohort buckets cannot represent. Second, servicer behavior (loss mitigation, forbearance, and modification practices that vary by servicer and were unusually active in the higher-rate, higher-delinquency-risk QT window) reaches prepayment and default outcomes outside any borrower-side decision model, which Path B's competing-risks structure and Markov delinquency pipeline represent directly if partially. Third, prepayment burnout is representable at the cohort level, as in both hazard paths, but not inside a closed, per-agent household population, as Section~\ref{sec:abm-results}'s falsified survivor-selection experiment showed.
 
@@ -904,7 +976,61 @@ Berger hybrid, U.S.-intercept\tnote{d} & $+\$749.0$B & $+\$687.8$B & $+\$61.2$B 
 
 The mechanism-extrapolated specification this one corrects had implied a far larger gap. The replication package's ledger carries both the correction's derivation and the superseded figure's entry.
 
+\fi
 \section{Robustness Checks}\label{sec:robustness}
++
+The robustness exercises answer whether the main interpretation changes when
+the floor, functional form, population, accounting, or estimator changes. Full
+grids and diagnostics are in the online appendix and technical supplement.
+
+\subsection{Floor and functional form}\label{sec:robustness-floor}
+
+At the central elasticity, the defensible off-window floor range produces
+$+4.3$ to $+6.8$ points under the production maximum form. Propagating
+sampling error gives the binding $[+1.9,+9.1]$ interval. The additive
+competing-risks form moves the level sharply but leaves the marginal near
+$+11.2$ points across 3--5\% floors. The form-conditional hull is $+3.5$ to
+$+13.1$. Seasonal and cyclical variants largely measure dispersion induced by
+the maximum rather than timing; their small order component does not credential
+the monthly path. These checks preserve a positive marginal but rule out a
+single model-free magnitude.
+
+\subsection{Population and cross-design checks}\label{sec:robustness-crossdesign}\label{sec:robustness-hybrid}
+
+Reweighting the hazard simulation to the SOMA coupon composition changes the
+aggregate level but not the qualitative decomposition. Agency, vintage, and
+term mismatches remain because neither loan sample spans the whole SOMA book.
+The Fannie reproduction returns a similar marginal, while the Ginnie speed
+overlay and observed-vintage bound leave the conventional-loan result positive.
+These are transport checks rather than external identification.
+
+The paired ABM exercise is deliberately adverse to a simple paradigm story.
+Real structural covariates raise the recalibrated ABM above its pre-committed
+50\% threshold, and book reweighting raises it further. Conversely, the hazard
+structure recovers a similar level on a synthetic population. The first result
+shows that the ABM level depends materially on population and calibration; the
+second shows that the hazard level is carried substantially by its calibrated
+structure. Together they withdraw, rather than establish, the claim that the
+original ABM--hazard gap isolates modeling paradigm.
+
+\subsection{Benchmark and secondary checks}\label{sec:robustness-benchmark}\label{sec:robustness-scale}\label{sec:robustness-synthesis}
+
+Settlement-aware allocation changes the expectations-based complement but not
+the cap-relative benchmark. Alternative settlement kernels, curtailment
+profiles, and accounting bases move levels while common adjustments cancel
+from paired marginals. Increasing the ABM population reduces seed dispersion
+without closing its level or path mismatch. Path~A remains directional context,
+not a corroborating estimate. None of these checks supplies the exogenous
+variation required for a causal lock-in estimate.
+
+The robustness conclusion is therefore bounded. The positive rate-responsive
+increment survives every reported floor anchor and the second-agency
+reproduction. Its magnitude remains conditional on the floor, combination
+rule, transported elasticity, and sample-to-book mapping. That is why the paper
+reports ranges and keeps the aggregate level distinct from the marginal.
+
+\iffalse
+
 
 This section collects the methodological checks referenced throughout the paper. Two of them changed reported results. The recalibrated cross-design variant of Section~\ref{sec:robustness-crossdesign} exceeds my ex-ante threshold and qualifies the household-choice reading at the aggregate level. The off-window floor re-measurement of Section~\ref{sec:robustness-floor} is where the paper's headline marginal and level are actually derived ($+9.2 \to +5.6$ points; 97.9\% $\to$ 91.3\% shared). It demotes the in-window calibration to an in-sample point. On the shared basis the paper quotes throughout, the hazard framework undershoots the benchmark at the headline calibration (91.3\%); it overshoots only on the standalone basis (107.0--121.5\%). The remaining checks confirm the central decomposition.
 
@@ -1011,7 +1137,51 @@ The move from the in-window anchor to the off-window one changes two things at o
 A second instrument addresses the months dimension directly, not the population one. It is a floor-stability check, not an outcome holdout. No realized prepayment from the held-out months enters either simulated leg, so the construction can falsify only the floor calibration's temporal stability, never the marginal against realized data. Calibrating the floor on deeply out-of-the-money turnover confined to the window's first nineteen months (June 2022 through December 2023) returns 3.97\%. The central-minus-null marginal then sums over the remaining twenty-three months (January 2024 through November 2025) alone, which enter that calibration nowhere. That held-out marginal is $+\$45.1$ billion, against $+\$44.8$ billion at the production floor over the identical months. Very nearly the magnitude, and with it the sign, survives evaluation months the calibration never touches. The decomposition is exact, because trapped liquidity is a monthly sum against the redemption target: the target cancels from the central-minus-null difference, and the monthly marginals add back to the aggregate. Across every floor and elasticity-band combination run here (twenty-seven cells spanning floors from 3.97\% to 6.91\%) the marginal is positive without exception. That is a consistency check the window's rate configuration cannot let fail (Section~\ref{sec:identification}). The identified content of the lock-in channel is therefore a magnitude that survives both instruments as a bounded interval. Under the production max form it is $+4.3$ to $+6.8$ points at the defensible off-window floor, and $+3.9$ to $+7.5$ jointly with the elasticity band. Under the additive form at the same anchors it is $+9.6$ to $+13.1$; with the concave-transform cell above, the form-conditional hull is $+3.5$ to $+13.1$ points. Against that, the in-window production calibration returns $+9.2$ points, now reported as this paper's in-sample calibration point, not its headline.
 
 
+\fi
 \section{Conclusion}\label{sec:conclusion}
++
+The Federal Reserve's agency-MBS runoff fell \$764.7 billion below its phased
+QT caps through November 2025, but that gap was not a direct measure of mortgage
+lock-in. Under the production hazard form, scheduled amortization and a turnover
+floor measured from realized deep-discount cohorts recover 85.7\% of the
+benchmark even after the imported rate response is switched off. Adding that
+response raises recovery to 91.3\%. The paper therefore identifies a bounded
+marginal over a rate-inelastic null, not the full level: $[+1.9,+9.1]$
+percentage points when the off-window floor's sampling error is propagated,
+with additional form and calibration ranges stated separately.
+
+The result has a direct cap-design implication. Passive runoff ceilings should
+be evaluated against ex-ante ranges for scheduled amortization, baseline
+turnover, and rate-responsive prepayment. Here those inputs implied that the
+\$35 billion monthly MBS ceiling would rarely bind. A Danish-style
+market-value-repurchase rule changes the cash-flow incidence of lock-in, but
+its U.S. counterfactual changes sign across defensible level and accounting
+anchors and does not price the TBA liquidity cost of institutional redesign.
+
+\subsection{Limitations and future work}\label{sec:limitations}
+
+The decomposition is model-based rather than causal: it uses no exogenous
+variation in rate gaps. Its elasticity is imported from mobility estimates and
+mapped to total prepayment. Its turnover floor mixes discretionary,
+refinancing, and involuntary exits and is measured from realized behavior. The
+Freddie and Fannie samples do not reproduce the SOMA book's complete agency,
+vintage, coupon, and term composition. No outcome-holdout months validate the
+simulated marginal, and no estimator reproduces the monthly path after common
+trend removal. The ABM comparison remains confounded by population and
+calibration, while the Danish exercise leaves transition costs, investor
+pricing, tax, servicing, and distributional effects unmeasured.
+
+These limitations define the next empirical work: identify the mobility and
+refinancing components separately, estimate the response with plausibly
+exogenous rate-gap variation, extend coverage to the missing SOMA vintages and
+agencies, and price contract redesign jointly for households and MBS investors.
+They do not overturn the narrower conclusion supported here: most of the
+cap-relative shortfall is reproduced by rate-insensitive cash flows, while the
+increment associated with the transported lock-in response is positive and
+material but bounded.
+
+\iffalse
+
 
 The shortfall of the Federal Reserve's mortgage runoff beneath its Quantitative Tightening caps was not solely a product of high interest rates. It followed from the structural design of the U.S. mortgage contract interacting with a prepayment environment mostly rate-inelastic relative to the caps. Under the production floor form the $\beta_1 = 0$ null recovers 85.7\% of the benchmark at the headline calibration (35.6\% under the additive form). So the caps could not have bound under any rate response above the baseline turnover the null embeds. How much of the remainder sits outside household-level decision-making is a question the cross-design test of Section~\ref{sec:robustness-crossdesign} leaves open. This paper's central empirical finding is the rate-inelastic decomposition, established in Section~\ref{sec:hazard} on real Freddie Mac loan-level data. The agent-based model of Section~\ref{sec:abm} runs on the synthetic household population specified in Section~\ref{sec:method}. It stands beside that finding as a stress-test companion, since Section~\ref{sec:robustness-crossdesign} confines what its verdict can mean. The two are complementary, and neither is derived from the other. They are not independent in calibration, though: both are anchored to a baseline turnover floor read off discount-cohort turnover, and at the in-sample calibration point to the same 2023--24 read (Section~\ref{sec:pathb}).
 
@@ -1043,6 +1213,7 @@ The Danish-regime recalibration (Section~\ref{sec:abm-danish}) calibrates both f
 
 Sections~\ref{sec:abm} and~\ref{sec:hazard} establish that contrast under the synthetic household population this paper specifies. Section~\ref{sec:robustness}'s cross-design pair leaves the attribution asymmetric, and it inherits Section~\ref{sec:robustness-crossdesign}'s own hedge. The hazard framework's recovery survives a fully synthetic population (106.0\% versus 107.0\%, both standalone). That is evidence its survival structure, not its data source, carries the aggregate level. But the recalibrated real-covariate ABM's 59.3\%, and its 60.2\% fifty-seed mean, cross the pre-committed threshold: above it the contrast cannot, on that test alone, be cleanly attributed to modeling paradigm rather than to calibration and data source. The path-level timing question, meanwhile, remains open for every estimator. That result cuts both ways. Recovering 106\% on a fully synthetic population shows that the calibration constants, not real loan-level structure, deliver the level, which is consistent with the rate-inelastic decomposition above. On the paradigm question itself I make no claim: the reading was pre-committed to a threshold, the threshold was crossed, and Section~\ref{sec:robustness-crossdesign} withdraws it. The decomposition this paper does deliver never rested on it.
 
+\fi
 \clearpage
 \bibliographystyle{plainnat}
 \bibliography{references}

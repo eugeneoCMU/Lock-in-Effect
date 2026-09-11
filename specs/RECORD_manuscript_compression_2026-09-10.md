@@ -136,3 +136,20 @@ depends on the shortened manuscript for survival.
 |---|---|---|
 | Archive supplement build | `tectonic paper/final/technical_replication_supplement.tex` | Built successfully; 152 pages |
 | Compression structure | `python3 -m pytest tests/test_manuscript_compression.py -q` | 8 passed |
+
+### Batch 6 — discussion, robustness, and conclusion
+
+Replaced the rendered discussion, policy analysis, robustness catalogue, and
+conclusion with focused sections that retain the runoff-composition caveat,
+cap-design feasibility conditions, Danish and cash-window counterfactuals,
+central floor/form sensitivities, cross-design population distinction,
+benchmark checks, headline quantities, binding interval, and governing
+limitations. The complete prior sections remain preserved in the frozen
+technical archive.
+
+Both manuscript variants pass TeX structural validation and the 210-test
+targeted manuscript suite. Fresh builds produce 66 pages for the canonical
+version and 67 for the long-abstract version. The online appendix begins on
+page 19 and page 20, respectively, so the article body is now compact while the
+48-page appendix remains the next compression target. This is an intermediate
+checkpoint, not a final length or content decision.
