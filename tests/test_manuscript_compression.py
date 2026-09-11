@@ -9,6 +9,7 @@ ROOT = Path(__file__).resolve().parents[1]
 CANONICAL = ROOT / "paper" / "final" / "paper_final_v1.tex"
 VARIANT = ROOT / "paper" / "final" / "paper_final_v1_long_abstract.tex"
 MANIFEST = ROOT / "paper" / "final" / "compression_manifest.json"
+SUPPLEMENT = ROOT / "paper" / "final" / "technical_replication_supplement.tex"
 
 ALLOWED_DISPOSITIONS = {
     "main",
@@ -69,3 +70,22 @@ def test_current_manuscript_variants_have_the_same_structure():
     canonical_labels = source_section_labels(CANONICAL.read_text())
     variant_labels = source_section_labels(VARIANT.read_text())
     assert canonical_labels == variant_labels
+
+
+def test_technical_supplement_is_standalone_and_scoped():
+    text = SUPPLEMENT.read_text()
+    assert r"\title{Technical and Replication Supplement" in text
+    assert r"\begin{document}" in text
+    assert r"\end{document}" in text
+    assert "does not add evidence to the publication-facing paper" in text
+
+
+def test_supplement_declares_every_manifest_destination():
+    text = SUPPLEMENT.read_text()
+    destinations = {
+        block["destination_label"]
+        for block in load_manifest()["source_blocks"]
+        if block["disposition"] == "supplement"
+    }
+    assert destinations
+    assert destinations <= source_section_labels(text)

@@ -63,3 +63,16 @@ The machine-readable inventory is `paper/final/compression_manifest.json`. It co
 | Baseline | `python3 -m pytest tests/ -q` | 1,168 passed; 2 skipped; 26 warnings |
 | Manifest red | `python3 -m pytest tests/test_manuscript_compression.py -q` | Expected failure: manifest absent |
 
+### Batch 2 — supplement scaffold
+
+Created and built the standalone supplement shell with stable destinations for
+each relocation family. This is a scaffold, not a completed relocation: no
+main-paper or appendix text may be removed until its substantive content has
+been copied into the named supplement section and logged here.
+
+| Stage | Command | Result |
+|---|---|---|
+| Supplement red | `python3 -m pytest tests/test_manuscript_compression.py -q` | Expected failure: supplement absent |
+| Supplement structure | `python3 -m pytest tests/test_manuscript_compression.py -q` | 8 passed |
+| Supplement TeX | `python3 tools/tex_validate.py paper/final/technical_replication_supplement.tex --bib paper/final/references.bib` | CLEAN |
+| Supplement build | `tectonic paper/final/technical_replication_supplement.tex` | 3-page scaffold built successfully |
