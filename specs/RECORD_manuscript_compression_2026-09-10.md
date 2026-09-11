@@ -212,3 +212,58 @@ spans past the paper edge, zero unresolved references, an exact split
 partition, and a one-page variant-length difference. The final repository test
 run reports 1,185 passed and 1 skipped, with 26 existing dependency and
 numerical-fit warnings.
+
+### Reader-facing evidence restoration — 2026-09-11
+
+Treated the 21-page submission as a strong condensed draft rather than a final
+paper. Restored evidence selectively instead of reviving the pre-compression
+structure. The main article now includes three compact decision tables: the
+benchmark/ABM/Path-B/null/marginal comparison, an uncertainty table that keeps
+the floor-read sampling interval separate from elasticity, form, and calibration
+ranges, and a Danish table that separates face accounting, cash accounting, and
+the Danish-level anchor. Float placement was reviewed after rendering; the
+headline table follows the benchmark figure, while the Danish and uncertainty
+tables remain with their respective arguments rather than occupying isolated
+float pages.
+
+Rebuilt the online appendix as an independently useful four-page appendix. It
+now gives the exact prepayment and default hazards, key parameter and accounting
+conventions, sample counts and exclusions, the clean off-window
+floor-by-elasticity grid, a maximum-versus-additive functional-form comparison,
+the Fannie robustness-only scope, the timing rejection, Path A's exclusion, and
+concise ABM mechanics. The edit corrected two malformed quantities in the prior
+appendix: 91.3 and 85.7 are recovery percentages, not billions of dollars. It
+also corrected the description of the binding $[+1.9,+9.1]$ interval: that
+interval propagates sampling error in the floor read at the central elasticity;
+calibration and functional-form ranges have no coverage interpretation and are
+reported separately.
+
+The final canonical combined PDF is 23 pages: 19 pages of article and references
+plus a four-page online appendix. The long-abstract edition is 24 pages. The
+technical replication supplement remains 152 pages and continues to embed the
+complete frozen 147-page pre-compression manuscript.
+
+Fresh verification after the restoration:
+
+- `python3 -m pytest tests/ -q`: 1,189 passed, 1 skipped, 26 existing warnings.
+- `python3 tools/liveness_gates.py`: all 129 gates passed after the licensed-derived
+  local Freddie panel was staged into the isolated worktree.
+- Both submission variants passed `tools/tex_validate.py` with clean parsing,
+  environment nesting, citations, references, math delimiters, and table columns.
+- `tools/split_pdf.py` detected the Online Appendix banner on page 20 and produced
+  an exact 19 + 4 = 23 page partition.
+- `tools/render_gate.py` passed the combined submission, both split PDFs, the
+  long-abstract edition, and the 152-page technical supplement: zero off-page
+  text items, zero spans beyond the paper edge, and zero unresolved references.
+- Page-by-page contact-sheet review covered all 23 canonical pages and all 152
+  supplement pages. Enlarged review covered every restored main-paper and online-
+  appendix table. No clipping, overlap, malformed values, unreadable exhibits,
+  duplicated references, or weak float-only pages remain.
+
+Editorial assessment: the article is now self-contained enough for a referee to
+evaluate the main claim without opening the technical archive. It remains a
+model-based accounting decomposition rather than a causal estimate. The binding
+result is the bounded marginal over the rate-inelastic null, not the $764.7$
+billion cap-relative level; the imported elasticity, behavioral content of the
+floor, incomplete SOMA coverage, rejected monthly timing credential, and Danish
+anchor/incidence/transition-cost sensitivity remain the main limitations.
