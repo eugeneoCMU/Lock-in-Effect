@@ -1223,6 +1223,129 @@ Sections~\ref{sec:abm} and~\ref{sec:hazard} establish that contrast under the sy
 
 \noindent\textbf{Online Appendix.} The appendices that follow are for online publication. The run ledger of superseded figures and the pre-committed-rule adjudication record form a standalone document in the replication package (\texttt{replication\_appendices}). Its cross-references resolve against this manuscript.
 
+\section{Accounting benchmark and sample construction}\label{app:benchmark}
+
+The benchmark is the cumulative shortfall of realized SOMA agency-MBS runoff
+relative to the announced cap over the active QT window. Holdings are aligned to
+month end, scheduled principal is separated from unscheduled principal, and
+negative implied prepayment is clipped at zero. The resulting shortfall is
+\$764.7 billion. This is an accounting object, not an estimate of causal lock-in:
+issuance composition, servicing, reporting dates, and other market frictions can
+also affect runoff. Four exact-zero implied-prepayment months arise when reported
+runoff falls below the scheduled-amortization floor; consequently the paper makes
+no monthly-timing claim.
+
+The hazard panel uses agency mortgage cohorts linked to note-rate gaps and loan
+characteristics. The production calculation evaluates 1,683,124 active
+loan-months. Fifteen-year securities are included in the accounting benchmark but
+excluded from the preferred 30-year causal calculation because their maturity and
+prepayment mechanics are not comparable. The complete series construction,
+crosswalks, and superseded benchmark variants are preserved in the technical
+replication supplement.
+
+\section{Hazard estimand and parameterization}\label{app:params}
+
+For loan $i$ in month $t$, the preferred specification combines a voluntary
+prepayment hazard with an involuntary-turnover floor:
+\begin{equation}
+h_{it}=\max\left\{\underline h_t,
+\operatorname{logit}^{-1}(\alpha_t+\beta_1\widetilde g_{it}+X_{it}'\gamma)\right\},
+\qquad \widetilde g_{it}=g_{it}/100,
+\end{equation}
+where $g_{it}$ is the annualized note-rate gap in 100-basis-point units. The
+central leg uses the transported estimate of $\beta_1$; the null sets
+$\beta_1=0$ while holding all other objects fixed. Their simulated runoff
+difference is the paper's lock-in marginal. The production floor is 4 percent
+annual CPR and combines with the voluntary hazard through the maximum operator.
+The alternative competing-risks form and the 3--5 percent floor sweep are treated
+as specification uncertainty rather than sampling uncertainty.
+
+The headline mapping is deliberately conservative. The full central simulation
+explains \$91.3 billion of the \$764.7 billion benchmark; the zero-elasticity null
+explains \$85.7 billion. The preferred causal statement is therefore the
+central-minus-null contribution, while the reported 1.9--9.1 percentage-point
+binding interval carries calibration, floor, and functional-form uncertainty.
+Fannie Mae estimates are a population check, not a pooled estimate, and the
+separate Path A design is excluded from the headline because its timing and
+support diagnostics fail the pre-committed standard.
+
+\section{ABM mechanics and diagnostic role}\label{sec:method-abm}
+\label{sec:method-frictions}\label{app:abmspec}
+
+The agent-based model simulates 10,000 heterogeneous households whose coupons
+and origination dates are drawn from the live CUSIP-level SOMA composition. A
+move compares the existing payment with the payment on the outstanding balance
+at the current market rate over a fresh original term. The decision also includes
+housing-search and sentiment frictions, a 43 percent payment-to-income screen,
+2.25-times loss aversion on payment increases, and an author-calibrated
+wait-and-see freeze. The mobility scale is recalibrated to reproduce a 4--5
+percent deeply out-of-the-money turnover floor; matching that floor is therefore
+an input, not evidence for the model.
+
+The U.S. rule requires payoff at par. The Danish counterfactual permits
+market-value repurchase, but the production exercise anchors the moving hazard
+to external Danish evidence rather than allowing the pricing proxy to determine
+it. The ABM recovers only 10--17 percent of the benchmark across its production
+variants, overpredicts average CPR, and fails to match monthly shape. It is used
+as a mechanism stress test and not averaged with the hazard estimate. Full
+decision equations, parameter provenance, surface-interpolation checks,
+Monte Carlo dispersion, and failed variants remain in the technical supplement.
+
+\section{Composition and policy mappings}\label{app:composition}
+
+The SOMA portfolio is concentrated in low-coupon 30-year pools: the parsed
+weighted-average coupon is about 2.55 percent, with the 2.0 and 2.5 percent
+buckets accounting for roughly 69 percent of 30-year face value. That composition
+widens the gap to prevailing mortgage rates and explains why representative-loan
+examples are not sufficient. Results are aggregated on declining balances, so
+counterfactual payoff in one month reduces the exposure available thereafter.
+
+The Danish policy exercise is a mechanism comparison, not a welfare calculation.
+Using the preferred external anchor, Danish-style market-value repurchase changes
+runoff by \$61.2 billion relative to the zero-refinancing benchmark; the full
+parameter sweep spans a much wider range. A Danish-level hazard maps to
+$-\$99.9$ billion and a cash-purchase window to $-\$51.0$ billion under their
+stated counterfactual baselines. These quantities are not mutually additive and
+do not price implementation costs, TBA-market effects, redistribution, or
+general-equilibrium responses.
+
+\section{Floor, form, and timing robustness}\label{app:floormech}
+\label{sec:robustness-extensions}\label{sec:robustness-wal}
+\label{sec:robustness-pipeline}\label{sec:robustness-seasonalfloor}
+
+The main identifying uncertainty is how voluntary and involuntary prepayment
+combine. Under the preferred maximum rule, dispersion in the floor creates a
+one-sided Jensen effect: high floor realizations bind, while low realizations are
+truncated where voluntary hazard is already larger. Seasonal and cyclical-floor
+experiments therefore mostly measure floor dispersion rather than calendar
+timing. Holding the floor's exposure-weighted mean at 4 percent changes the
+marginal by \$4.9 billion, at most 7 percent of the in-sample marginal. Permuting
+the same monthly floor values preserves 89.2 percent of that movement on average.
+
+The pre-committed timing criterion is formally met by some seasonal variants, but
+it is also met by wrong-month rotations, scrambled calendars, and a
+zero-elasticity null. The result has no discriminatory power. All conclusions are
+therefore restricted to cumulative levels. Alternative turnover-floor levels,
+the competing-risks form, the 15-year fold-in, duration calculations, and the
+rate-gap unit audit are included in the headline binding interval or reported as
+secondary checks; none overturns the conclusion that lock-in is economically
+present but explains only a minority of the accounting shortfall.
+
+\section{Excluded design and replication record}\label{app:patha-detail}
+\label{app:ridge}\label{app:theil}\label{tab:theil}
+
+Path A estimates aggregate timing relationships between market rates, refinancing
+conditions, and SOMA runoff. Its results are retained for transparency, including
+ridge stabilization and dynamic-fit decompositions, but are not used in the
+headline because the short window, common trends, weak effective support, and
+sensitivity to timing conventions prevent a defensible causal interpretation.
+Every superseded number, figure, diagnostic, and parameter-level derivation is
+available in the standalone technical replication supplement, which embeds the
+complete 147-page pre-compression manuscript. This online appendix is limited to
+the material needed to interpret and reproduce the publication-facing claims.
+
+\iffalse
+
 \section{Agent-Based Model: Specification}\label{sec:method-abm}
 
 I adopt an agent-based approach because the phenomenon under study is heterogeneous. Households differ in coupon, loan age, and exposure to search and sentiment frictions. Those differences interact non-linearly with the level of interest rates. \citet{geanakoplos2012} argue for agent-based models of mortgage prepayment in environments where behavioral and search frictions vary across the population and over time, and demonstrate their feasibility. That property is directly relevant here: the frictions I model (housing search costs and consumer sentiment) are themselves time-varying. \citet{tesfatsion2006} sets out the broader methodological case for agent-based computational economics in settings with meaningful heterogeneity.
@@ -1865,4 +1988,5 @@ The grid's $+7.09$ to $+9.36$ point range is mostly not a measure of cyclicality
 
 A cyclicality signal does survive. It is real but small. The true marginal falls outside the entire twelve-draw permutation range at every one of the six non-zero $\kappa$ (0 of 72 draws bracket it). The order components are monotone in $|\kappa|$ and sign-consistent with the co-movement story the concession in Section~\ref{sec:pathb} states: $+\$5.29$, $+\$4.77$, and $+\$2.69$ billion at $\kappa = -0.5$, $-0.25$, $-0.1$, and $-\$1.42$, $-\$1.75$, and $-\$2.53$ billion at $+0.1$, $+0.25$, $+0.5$. A floor rising with rates does lower the marginal, and one falling with rates does raise it. But scrambling the time order strips most of the grid's asymmetry while leaving its level drop intact. The permuted means differ across the sign of $\kappa$ by only $\$0.22$, $\$1.80$, and $\$6.01$ billion at $|\kappa| = 0.1$, $0.25$, and $0.5$, against a true spread of $\$13.82$ billion at $|\kappa| = 0.5$ ($+\$68.08$ billion at $\kappa = -0.5$ against $+\$54.26$ billion at $+0.5$). A two-sided response that survives losing the time order is the signature of dispersion, not of co-movement. The symmetric part of the grid's movement is large and is dispersion; the asymmetric part is small and is cyclicality. What the grid bounds is therefore the marginal's sensitivity to within-run floor variation of this amplitude. Of that, at most \$5.29 billion in any cell is attributable to the direction of co-movement. That the concession's residual is bounded by the level sweep already reported holds a fortiori. One correction to the specification as earlier described: the window mean is pinned at the production 4\% only where the floor's non-negativity clip does not bind. It binds in the two $|\kappa| = 0.5$ stress cells, whose realized window means are 4.0005\% and 4.0828\% (the artifact flags the clip per cell). Of those two, $\kappa = +0.5$ sets the bracket's low end at $+7.09$ points, while $\kappa = -0.5$ sits mid-grid at $+8.90$. The invariant therefore fails in the cell that matters most for the reported range. The convexity-matched flat floor equivalent to the $\kappa = +0.5$ path is 4.0977\%, not 4\%.
 
+\fi
 \end{document}

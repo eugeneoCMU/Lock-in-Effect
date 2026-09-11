@@ -109,6 +109,13 @@
   ],
   "source_blocks": [
     {
+      "label": "app:benchmark",
+      "disposition": "appendix",
+      "destination_label": "app:benchmark",
+      "reason": "Retains the accounting benchmark, sample construction, and timing limitation",
+      "protected_claim_ids": []
+    },
+    {
       "label": "sec:intro",
       "disposition": "main",
       "destination_label": "sec:intro",

@@ -153,3 +153,19 @@ version and 67 for the long-abstract version. The online appendix begins on
 page 19 and page 20, respectively, so the article body is now compact while the
 48-page appendix remains the next compression target. This is an intermediate
 checkpoint, not a final length or content decision.
+
+### Batch 7 — online-appendix triage
+
+Replaced the rendered 48-page online appendix with a three-page synthesis that
+retains the accounting benchmark, sample boundary, hazard estimand, floor and
+functional-form uncertainty, ABM diagnostic role, composition and policy
+mappings, timing concession, and Path A exclusion. The full former appendix is
+preserved in the frozen technical supplement and remains disabled in the
+canonical files only during this staged pass.
+
+The canonical build is now 20 pages: 17 pages through references and a
+three-page online appendix. This deliberately exposes the next editorial task:
+restore the essential main-paper exhibits and enough reproducibility detail to
+reach a defensible article-plus-appendix package, rather than padding toward the
+page target. Both variants pass TeX structural validation, and the updated
+compression-manifest suite passes all 11 tests.
