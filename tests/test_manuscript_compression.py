@@ -29,6 +29,21 @@ def source_section_labels(text):
     )
 
 
+def section_span(text, start_label, end_label):
+    start = text.index(r"\label{" + start_label + "}")
+    end = text.index(r"\label{" + end_label + "}", start)
+    return text[start:end]
+
+
+def prose_word_count(text):
+    text = re.sub(r"\\iffalse.*?\\fi", " ", text, flags=re.DOTALL)
+    text = re.sub(r"%.*", " ", text)
+    text = re.sub(r"\\(?:cite\w*|ref|eqref|label)\{[^}]*\}", " ", text)
+    text = re.sub(r"\\[A-Za-z@]+\*?(?:\[[^]]*\])?", " ", text)
+    text = re.sub(r"[{}$&_^~\\]", " ", text)
+    return len(re.findall(r"[A-Za-z0-9]+(?:[-'][A-Za-z0-9]+)*", text))
+
+
 def load_manifest():
     return json.loads(MANIFEST.read_text())
 
@@ -89,3 +104,15 @@ def test_supplement_declares_every_manifest_destination():
     }
     assert destinations
     assert destinations <= source_section_labels(text)
+
+
+def test_introduction_meets_approved_word_budget():
+    text = CANONICAL.read_text()
+    introduction = section_span(text, "sec:intro", "sec:lit")
+    assert prose_word_count(introduction) <= 1500
+
+
+def test_literature_review_meets_approved_word_budget():
+    text = CANONICAL.read_text()
+    literature = section_span(text, "sec:lit", "sec:method")
+    assert prose_word_count(literature) <= 1500

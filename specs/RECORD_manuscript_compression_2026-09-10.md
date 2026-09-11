@@ -77,6 +77,24 @@ been copied into the named supplement section and logged here.
 | Supplement TeX | `python3 tools/tex_validate.py paper/final/technical_replication_supplement.tex --bib paper/final/references.bib` | CLEAN |
 | Supplement build | `tectonic paper/final/technical_replication_supplement.tex` | 3-page scaffold built successfully |
 
+### Batch 3 — publication-facing introduction and literature review
+
+Replaced the rendered introduction and literature review with focused versions
+organized around the cap-relative benchmark, primary hazard decomposition,
+binding uncertainty, governing limitations, and closest literatures. The full
+pre-compression text and former headline table remain frozen in the embedded
+technical archive. During this staged pass, the old blocks remain disabled in
+the canonical TeX so legacy claim gates continue to expose every protected
+literal; they must be physically removed after their gates are re-scoped to the
+new article or supplement.
+
+The rendered canonical document fell from 147 to 134 pages at this checkpoint.
+Both front-section word-budget tests now pass, as do all ten compression tests
+and TeX structural validation. The liveness suite passes through every gate it
+can execute in the isolated worktree and then reaches the known missing local
+Freddie panel; the missing licensed-derived parquet is an environment boundary,
+not a manuscript failure.
+
 ### Batch 2a — frozen preservation archive
 
 Copied the complete canonical pre-compression TeX source into

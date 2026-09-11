@@ -43,6 +43,78 @@
 \textbf{JEL codes:} E52, E58, G21, R31.\par}
 \newpage
 \section{Introduction}\label{sec:intro}
++
+The Federal Reserve allowed agency mortgage-backed securities (MBS) to run off
+passively when Quantitative Tightening began in June 2022, subject to a cap that
+rose from \$17.5 billion to \$35 billion per month. Principal payments never
+reached the full cap. Through November 2025, realized runoff was \$764.7 billion
+below the phased ceiling. This paper asks how much of that shortfall reflects
+mortgage-rate lock-in rather than scheduled amortization and turnover that would
+have occurred even without a rate response.
+
+The distinction matters because a cap is a ceiling, not a forecast. The New York
+Fed's May 2022 baseline already implied that 75.6--88.5\% of the eventual
+cap-relative shortfall would occur, depending on how its annual 2022 projection
+is allocated within the year. I therefore report both the policy-committed
+\$764.7 billion benchmark and an expectations-based complement. The latter is
+\$87.8 billion, but it may already embed part of the lock-in channel and the
+spring-2022 expected rate path differed from the realized one. Ratios stated
+against it are consequently upper bounds on lock-in's share of a mixed
+lock-in-and-rate-path surprise.
+
+The primary estimate is a loan-level hazard microsimulation on Freddie Mac
+loans. Its rate-inelastic null switches off the imported rate-gap elasticity
+while retaining scheduled amortization, seasoning, burnout, observed borrower
+covariates, and a turnover floor measured from realized deep-discount cohorts.
+At the off-window floor used for the headline, that null recovers 85.7\% of the
+cap-relative benchmark under the production maximum-floor form; the central
+simulation recovers 91.3\%. Their difference is the paper's identified object.
+Propagating sampling error in the off-window floor with the pre-committed
+wild-cluster procedure gives a binding interval of $+1.9$ to $+9.1$ percentage
+points. The $+5.6$-point, \$42.6 billion mid-grid value lies inside that range
+but is an anchor convention, not the estimate the design identifies. At the
+in-window calibration point the difference is $+9.2$ points, reported as an
+in-sample comparison.
+
+This is an accounting decomposition within a disclosed model, not causal
+identification. The elasticity is imported from estimates of how mortgage-rate
+gaps change mobility; it is not re-estimated here. The turnover floor contains
+discretionary and involuntary moves and therefore is not a non-behavioral
+baseline. Functional form matters: an additive competing-risks specification
+changes the aggregate level and produces a form-conditional marginal hull of
+$+3.5$ to $+13.1$ points. The result is thus a bounded marginal over a
+rate-inelastic null, not a claim that lock-in caused the entire runoff
+shortfall.
+
+Two validation exercises limit the interpretation. A household-choice
+agent-based model recovers only 13.6\% on its synthetic population, but rises
+above a pre-committed threshold when run on real structural covariates; the
+paper therefore withdraws the claim that the cross-model
+difference identifies a modeling-paradigm effect. A Fannie Mae reproduction
+returns a similar marginal, but it is a robustness check, not an outside test:
+both agencies share the same policy window and the same transported elasticity.
+
+The policy implication is narrower than the accounting shortfall. Scheduled
+amortization and baseline turnover were already too small for a \$35 billion
+monthly MBS cap to bind in almost every month, so the cap was set above
+achievable passive runoff under the modeled book. A Danish-style
+market-value-repurchase rule illustrates how contract design could change the
+cash-flow channel. The rule-only U.S.-intercept transplant produces a
++\$61.2 billion face-value gap at its zero-refinance edge, while a
+Danish-level anchor reverses the sign to -\$99.9 billion and cash accounting
+can reverse it again. The counterfactual is therefore anchor- and
+incidence-dependent and does not price the TBA liquidity cost of redesigning
+U.S. agency securitization.
+
+The paper contributes the cap-relative and expectations-based benchmarks, the
+hazard decomposition with its binding uncertainty, and the ex-ante cap-design
+arithmetic. The ABM comparison and Danish exercise are validation and policy
+counterfactuals, not additional headline estimates. The technical and
+replication supplement preserves the full specification, diagnostic grids,
+adjudications, and run history omitted from the publication-facing argument.
+
+\iffalse
+
 
 The Federal Reserve departed from its ``Treasuries-only'' framework in 2008 and 2020, purchasing trillions in agency MBS that suppressed 30-year mortgage rates \citep{hancock2011}, to lows of roughly 2.6\% on FRED series MORTGAGE30US, and triggered a refinance boom. In 2022 it reversed course. Quantitative Tightening (QT) was a passive roll-off intended to drain up to \$35 billion per month from its SOMA portfolio, under a cap phased in at \$17.5 billion and stepped up three months later. (June 2024 and April 2025 runoff slowings cut only the Treasury cap; above-cap reinvestment never triggered in this window, so the constant post-phase-in \$35 billion MBS schedule is policy-committed throughout.) Unlike standard Treasuries, U.S. mortgages carry asymmetric, state-dependent payoff profiles. Tightening pushed the 30-year rate past 7.0\%, and under the par-payoff rule that imposed a substantial penalty on relocation: the lock-in effect, compounded in practice by historic housing-inventory shortages and depressed consumer sentiment. The rate rise decomposes into the 10-year Treasury yield's climb plus primary-mortgage spread widening from roughly 170 to over 300~bp at its 2022--2023 peak (FRED series MORTGAGE30US less DGS10); spread components follow \citet{boyarchenko2019}, whose framework predates and does not document the 2022--2023 magnitudes. Mortgages did not prepay. Cumulative tightening-cycle runoff fell \$764.7 billion short of the phased caps \citep[on the balance-sheet setting, see][]{lopezsalido2023,acharya2023} (Section~\ref{sec:method-benchmark}). Sections~\ref{sec:abm} and~\ref{sec:hazard} decompose that shortfall, isolating the lock-in channel's own share.
 
@@ -95,7 +167,66 @@ Portfolio duration extension (Table~\ref{tab:wal}; Appendix~\ref{sec:robustness-
 
 \paragraph{Definitions used throughout.} Four accounting bases attach to every recovery percentage (Section~\ref{sec:method-benchmark}): \emph{standalone-scorer} (no adjustment), \emph{benchmark-consistent shared} (nets a common \$69.6 billion curtailment flow identically from every U.S. leg; the main-text convention), \emph{full-book} (reweights to the SOMA book's coupon mix), and \emph{composed} (both). The realized SOMA CPR is a back-out and moves with the coupon convention it is backed out at: unless a site says otherwise, every empirical CPR here is the \emph{ABM-basis} back-out: window mean 5.14\%, against a hazard-basis 5.52\% and 5.79\% at the note-rate WAC, the corrected amortization basis since the note rate is what amortizes the loan (run \texttt{coupon\_convention\_amortization}; duration pricing in Table~\ref{tab:wal}). Two floor calibrations attach to every marginal and level: the \emph{in-sample calibration point} (the 4\% baseline turnover floor, in-window on the locked-in 2023--24 cohorts; returns $+9.2$ points) and the \emph{off-window calibration} (the 4.70--5.33\% floor, on pre-episode 2018 discount cohorts; returns $+5.6$ points and is the headline). The floor is a measured object: realized-turnover reads put it at 3.8--3.9\% in-window (flat across seasoning cuts); 4.70--5.33\% on the off-window 2018 leg, all of it on cohort-months aged twelve to twenty-four, so that leg's mature-seasoning test is not computable rather than passed; 5.51\% under an imputation-heavy age standardization (84\% imputed weight, an indicative bound from the same 2018 leg); and 5.52\% on an out-of-agency Fannie Mae read of the pooled off-window period. The last two sit above the clean band, as does every mature-versus-young turnover contrast the data make measurable, hence the band's soft lower edge (Section~\ref{sec:robustness-floor}). The ``baseline turnover floor'' (sometimes called an involuntary-turnover floor) names that object without decomposing it: the reads measure total deep-discount-cohort turnover (discretionary life-cycle moves and cash-out refinancings mixed with strictly involuntary events), and the strictly-involuntary share, plausibly well under half (Section~\ref{sec:pathb}), is priced directly by the mixture curve of Section~\ref{sec:robustness-floor}. ``Trapped liquidity'' and ``shortfall'' denote the net shortfall of realized roll-off against the phased redemption caps (\$764.7 billion, June 2022--November 2025). The \emph{lock-in marginal}, the paper's identified object, is the central simulation minus the \emph{rate-inelastic baseline}, its $\beta_1 = 0$ null: scheduled amortization from the book's own coupon, age, and term composition plus baseline turnover held at its observed level, the marginal being the imported elasticity's increment above it. The partition separates baseline from increment, not mechanics from behavior: the floor is read off realized, partly behavioral turnover, so the baseline is not a non-behavioral object and I do not call it one. The marginal's operative uncertainty is the calibration-and-form envelope of Table~\ref{tab:uncertainty}, and the envelope is a grid, not a confidence region. The headline marginal is the exception: there the binding layer is the floor read's own propagated sampling error. The distinction is load-bearing: the elasticity band it sweeps is \citeauthor{liebersohn2024}'s \emph{specification} range with my adopted 6.5\% central value inside it, not a published point estimate with a published standard error, no sampling error of theirs is propagated anywhere in this paper, and so the envelope has no coverage property. Where a genuine sampling interval exists (the floor reads' cluster bootstrap, the loan- and stratum-level bootstraps of Section~\ref{sec:pathb}), I quote it as such and rank it against the envelope explicitly rather than merging the two. One global property is stated here as well as in the limitations, because every number below inherits it: \emph{no outcome-holdout months exist anywhere in this paper}, without exception; its unavoidability is scoped to the cash-flow margin. The identified object has nothing to hold out, since a difference between two simulations answers to no realized outcome, while a level-fit holdout, conceivable but not attempted, would split the benchmark itself, one cumulative path against one cap schedule; the household margin does admit outcome moments this design leaves unused, importing the mobility elasticity rather than estimating it (Section~\ref{sec:limitations}). The floor that sets Path~B's level is calibrated on in-window turnover, Path~A trains on nineteen of the forty-two QT months, and Path~B's level is evaluated on the window that sets it; each is disclosed again where it arises, and the nineteen-month floor variant reported later is an input-stability check rather than an outcome holdout: what it holds out is calibration months, not the benchmark. Every recovery percentage is accordingly in-sample or calibrated in the time dimension, a description of fit rather than a prediction (Section~\ref{sec:limitations}).
 
++\fi
+
 \section{Literature Review}\label{sec:lit}
+
+Mortgage prepayment research moves from frictionless refinancing toward hazards
+that combine financial incentives, seasoning, borrower heterogeneity, and pool
+selection. Early valuation models treat refinancing as optimal exercise
+\citep{dunn1981}; later work adds transaction costs and empirical prepayment
+functions \citep{schwartz1989,richard1989,stanton1995,agarwal2013}. This paper
+uses that second tradition. Its rate-inelastic null is scheduled amortization
+plus a measured turnover floor, while the central leg adds a transported
+rate-gap response. Burnout enters through loan-level survival rather than a
+representative borrower, consistent with selection in heterogeneous pools
+\citep{chernov2018,lesniewski2026}.
+
+Recent evidence establishes that the 2022 rate increase reduced refinancing and
+mobility. \citet{batzer2024} estimate large amounts of retained below-market
+financing value and foregone moves. \citet{liebersohn2024} estimate that each
+percentage point by which market rates exceed a borrower's coupon reduces
+quarterly mobility by 5.5--7.7\%, the calibration band used here.
+\citet{graybill2026} obtain a somewhat larger sale-hazard response from
+transaction data. \citet{aladangady2024} find that rate-gap lock-in explains
+44\% of the observed decline in borrower mobility, leaving substantial room
+for other housing and behavioral channels. These studies identify or calibrate
+the household response. This paper instead asks how much that response adds to
+the Federal Reserve's MBS cash-flow shortfall after rate-insensitive turnover
+and amortization are held fixed.
+
+Federal Reserve staff already document the institutional fact. \citet{na2024}
+report that most SOMA MBS were far out of the money to refinance, that principal
+payments remained below the cap, and that realized payments were composed
+roughly of scheduled principal and turnover-related prepayment. Staff and
+official accounts likewise describe persistent below-cap runoff
+\citep{nyfed2022,perli2024,hammack2025}. Their result concerns the composition
+of realized payments. The null in this paper asks a different question: how
+much of the shortfall against the cap is reproduced by those rate-insensitive
+components? Extending the measurement through November 2025 and comparing the
+central and null simulations produces the marginal reported here.
+
+The paper also relates to evidence that mortgage refinancing transmits monetary
+policy and changes the duration supplied to investors
+\citep{dimaggio2020,berger2021,eichenbaum2022,krishnamurthy2011,vayanos2021}.
+The tightening episode reverses the familiar easing channel: a stock of
+low-coupon mortgages created during the refinancing boom becomes long-lived
+when rates rise. That duration matters for banks and MBS investors
+\citep{jiang2023,malkhozov2016}, but this paper measures portfolio cash flow,
+not the general-equilibrium price of duration risk.
+
+Finally, the Danish mortgage system supplies the institutional counterfactual.
+Its balance principle and market-value-repurchase option allow a borrower to
+retire debt by purchasing and delivering the corresponding bonds
+\citep{berg2018,frankel2004,svenstrup2006}. \citet{berger2026} estimate a
+near-flat Danish mobility response to the coupon gap. Their slope estimate does
+not provide the level of U.S. mobility under Danish rules, so the
+counterfactual reports both a U.S.-intercept rule-only transplant and a
+Danish-level bracketing anchor. The difference between them is part of the
+result, not a nuisance to be averaged away.
+
+\iffalse
+
 
 Prepayment theory begins with ``ruthless exercise'': instantaneous refinancing as conditions dictate \citep{dunn1981}. It then admits frictions. Within a valuation framework, \citet{schwartz1989} fit an empirical prepayment function to aggregate GNMA experience by maximum-likelihood hazard, the econometric ancestor of my loan-level survival approach (Section~\ref{sec:hazard}). \citet{richard1989} formalize industry practice: prepayment as an empirical function of refinancing incentive, seasoning, seasonality, and a pool's own prepayment history. \citet{stanton1995} add heterogeneous transaction costs, which smooth the refinancing cliff into a predictable S-curve. \citet{agarwal2013} sharpen the rational benchmark into a closed-form optimal refinancing threshold that scores observed behavior. \citet{chernov2018} recover from MBS market prices a function driven by macroeconomic turnover alongside the rate response. My rate-inelastic null operationalizes that turnover-versus-rate-response split on the cash-flow side. \citet{quigley1987,quigley2002} established lock-in as a persistent friction on mobility in rising-rate environments. \citet{ferreira2010} gave early large-sample evidence that rising mortgage rates and negative home equity each depress owner mobility. The latter is an equity-lock-in channel, distinct from and complementary to the rate channel this paper models. The equity dimension is left unmodeled here, a boundary disclosed in Section~\ref{sec:pathb}.
 
@@ -116,6 +247,7 @@ The Danish mortgage securitization system offers a tested structural alternative
 A final strand situates lock-in within the theory of monetary policy transmission. \citet{berger2021} show the Federal Reserve's power to stimulate through rate cuts is path-dependent, since prepayment depends on the outstanding distribution of in-the-money refinancing incentives. I extend that to tightening. The path dependence that weakens easing after a low-rate period weakens tightening after one too: the resulting stock of deeply in-the-money, rate-locked mortgages cannot prepay, however aggressively the central bank then raises rates. \citet{eichenbaum2022} formalize this state dependence for the easing direction, where policy potency depends on the distribution of outstanding rate gaps. \citet{beraja2019} add regional evidence that the refinancing channel's strength varies systematically with the local distribution of in-the-money mortgages. \citet{dimaggio2020} give direct evidence for the easing-direction channel this paper mirrors: the Federal Reserve's QE1 agency-MBS purchases transmitted to the real economy specifically by inducing refinancing. The QT setting also links to how balance-sheet operations transmit through the supply of long-duration assets. There \citet{krishnamurthy2011} document several distinct quantitative-easing channels, one specific to agency MBS and running through prepayment. \citet{vayanos2021} formalize, under preferred-habitat demand, why shifts in the outstanding maturity and supply of held bonds move the term structure at all. Lock-in is thus an input to that balance-sheet-supply channel, not separate from it. \citet{du2024} assemble the cross-country QT record (seven central banks, active and passive runoff), finding announcement effects concentrated in yields. The MBS runoff shortfall decomposed here is that record's passive-runoff margin, measured at the portfolio cash-flow level. \citet{vickery2013} trace the TBA market's liquidity premium specifically to the homogeneity of deliverable pools, with TBA-eligible securities trading at significantly lower cost than otherwise similar specified pools. That homogeneity requirement is the institutional constraint that, in Section~\ref{sec:conclusion}, I argue makes the Danish market-value repurchase structure hard to reconcile with the current U.S. secondary market absent a broader redesign of agency securitization rules.
 
 My two estimators sit at the transparent end of two active methodological literatures. On the survival side, prepayment and default hazards are increasingly fit nonparametrically or by machine learning: random survival forests \citep{ishwaran2008}, competing-risks Bayesian additive regression trees \citep{sparapani2020}, and deep neural-network mortgage hazard models \citep{sadhwani2021}. The last benchmarks what flexibility buys at scale. On origination and monthly performance records for over 120 million U.S. mortgages, the deep network of \citet{sadhwani2021} learns highly nonlinear, interaction-rich prepayment and default responses without hand-specified functional form. Those responses include the burnout-type history dependence Path~A carries as an explicit stratum-level regressor and the ABM probes by pre-committed falsification (Sections~\ref{sec:patha} and~\ref{sec:abm-results}). I instead estimate a fixed-effects Poisson hazard and a literature-calibrated microsimulation, with functional forms and calibration inputs written out in full. What I need is not maximal predictive fit but an auditable decomposition. The null of Section~\ref{sec:identification} that switches the lock-in elasticity off is interpretable only if every term it holds fixed is visible, and a black-box hazard would obscure those terms. Those machine-learning survival methods remain a natural robustness avenue for the loan-level fit, and Appendix~\ref{app:patha-detail} probes them at their tabular end. Gradient-boosted Poisson and isotonic-recalibration comparators are each given Path A's information set on the identical pre-committed holdout, and each recalibrates levels without gaining cross-cell predictive power. Deep loan-level variants remain future work on data-availability grounds. A complementary strand attacks nonstationarity, not nonlinearity. Landmarking re-anchors a simple hazard among survivors at successive prediction times \citep{vanhouwelingen2007,putter2022}. Recent credit-risk work pairs landmark targets with explicit probability recalibration to hold survival predictions stable under covariate and base-rate drift, on the same Freddie Mac performance data my hazard paths use \citep{peng2026}. My design meets that concern with fixed, visible machinery: stratum fixed effects, calendar-month dummies, the dynamic friction index of Section~\ref{sec:patha}. It prices the residual time-variation it cannot remove by the temporal moving-block bootstrap reported there. On the agent-based side my calibration is fixed by the pre-committed parameterization of Appendix~\ref{sec:method-abm}, not by an automated estimator. It sits alongside a maturing literature on data-driven ABM calibration and estimation: simulated-minimum-distance and Bayesian methods \citep{grazzini2017,platt2020}, the empirical-validation taxonomy of \citet{fagiolo2007}. Within that literature the pre-committed stress-test design of Section~\ref{sec:abm} is one validation strategy among several. The paired design-crossing of Section~\ref{sec:robustness-crossdesign} is offered as a validation design in its own right: the ABM's decision rule re-run on real loan covariates, the same survival structure run on a fully synthetic population, interpretive thresholds fixed before the cross-design runs. Its nearest relative in that literature is indirect inference, which minimizes the distance between an auxiliary model's parameters fitted on real and on simulated data \citep{platt2020}. The pair here crosses designs not to estimate parameters but to attribute a result gap to modeling paradigm versus data source. It is not, to my knowledge, a named member of the validation taxonomy of \citet{fagiolo2007} or of the estimation approaches surveyed by \citet{grazzini2017} and \citet{platt2020}.
+\fi
 \section{Empirical Methodology}\label{sec:method}
 
 \subsection{Two Structurally Distinct Estimators of the Aggregate Level}\label{sec:method-estimators}
