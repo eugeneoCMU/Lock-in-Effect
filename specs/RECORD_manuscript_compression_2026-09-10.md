@@ -182,3 +182,21 @@ source pending final physical cleanup.
 The complete repository suite passes at this checkpoint: 1,179 tests passed,
 2 skipped, with 26 existing dependency and numerical-fit warnings. TeX
 structural validation remains clean.
+
+### Batch 9 — physically compact submission sources
+
+Added `paper_final_v1_submission.tex` and
+`paper_final_v1_submission_long_abstract.tex` as physically compact,
+publication-facing sources. They contain no disabled migration blocks and are
+659 lines each; the compatibility canonical sources retain the historical
+liveness corpus so the pre-existing claim gates continue to audit the frozen
+record. The submission sources compile to 21 and 22 pages, respectively,
+including a three-page online appendix. The standalone 152-page technical
+supplement preserves the complete pre-compression manuscript.
+
+A full-page contact-sheet review and enlarged inspection of the title page,
+architecture, ABM path, hazard figures, references, and every appendix page
+found no clipping, overlap, missing glyphs, or unreadable figures. That review
+did catch and correct a malformed cash-window value and a duplicate appendix
+pointer. The overfull ABM section heading was shortened; the rebuilt submission
+has no overfull-box, undefined-reference, or duplicate-label warnings.
