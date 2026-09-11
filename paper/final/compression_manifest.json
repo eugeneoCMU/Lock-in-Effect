@@ -1,0 +1,406 @@
+{
+  "source_pdf_pages": {
+    "combined": 147,
+    "main": 99,
+    "appendix": 48
+  },
+  "targets": {
+    "main_pages_max": 42,
+    "appendix_pages_max": 15
+  },
+  "protected_claims": [
+    {
+      "id": "model_based_not_causal",
+      "required_destination": [
+        "main",
+        "appendix"
+      ],
+      "patterns": [
+        "model-based decomposition"
+      ]
+    },
+    {
+      "id": "binding_interval",
+      "required_destination": [
+        "main",
+        "appendix"
+      ],
+      "patterns": [
+        "[+1.9,+9.1]"
+      ]
+    },
+    {
+      "id": "fannie_scope",
+      "required_destination": [
+        "main",
+        "appendix"
+      ],
+      "patterns": [
+        "robustness check, not an outside test"
+      ]
+    },
+    {
+      "id": "paradigm_withdrawal",
+      "required_destination": [
+        "main",
+        "appendix"
+      ],
+      "patterns": [
+        "paradigm reading"
+      ]
+    },
+    {
+      "id": "danish_anchor_sensitivity",
+      "required_destination": [
+        "main",
+        "appendix"
+      ],
+      "patterns": [
+        "Danish-level anchor"
+      ]
+    },
+    {
+      "id": "tba_unpriced",
+      "required_destination": [
+        "main",
+        "appendix"
+      ],
+      "patterns": [
+        "TBA liquidity"
+      ]
+    }
+  ],
+  "section_budgets": [
+    {
+      "label": "sec:intro",
+      "target_words": 1500,
+      "target_pages": 3
+    },
+    {
+      "label": "sec:lit",
+      "target_words": 1500,
+      "target_pages": 3
+    },
+    {
+      "label": "sec:method",
+      "target_words": 2500,
+      "target_pages": 5
+    },
+    {
+      "label": "sec:hazard",
+      "target_words": 6000,
+      "target_pages": 12
+    },
+    {
+      "label": "sec:robustness",
+      "target_words": 2500,
+      "target_pages": 5
+    },
+    {
+      "label": "sec:discussion",
+      "target_words": 2500,
+      "target_pages": 5
+    },
+    {
+      "label": "sec:conclusion",
+      "target_words": 1500,
+      "target_pages": 3
+    }
+  ],
+  "source_blocks": [
+    {
+      "label": "sec:intro",
+      "disposition": "main",
+      "destination_label": "sec:intro",
+      "reason": "Frames the question, result, contribution, and limits",
+      "protected_claim_ids": []
+    },
+    {
+      "label": "sec:lit",
+      "disposition": "main",
+      "destination_label": "sec:setting-literature",
+      "reason": "Positions the contribution against the closest work",
+      "protected_claim_ids": []
+    },
+    {
+      "label": "sec:method",
+      "disposition": "main",
+      "destination_label": "sec:design",
+      "reason": "Defines data, benchmark, and empirical design",
+      "protected_claim_ids": []
+    },
+    {
+      "label": "sec:method-estimators",
+      "disposition": "main",
+      "destination_label": "sec:design",
+      "reason": "Briefly distinguishes the primary estimator and cross-design check",
+      "protected_claim_ids": []
+    },
+    {
+      "label": "sec:method-benchmark",
+      "disposition": "main",
+      "destination_label": "sec:design",
+      "reason": "Defines the validation benchmark and accounting basis",
+      "protected_claim_ids": []
+    },
+    {
+      "label": "sec:abm",
+      "disposition": "main",
+      "destination_label": "sec:robustness-crossdesign",
+      "reason": "Retains the ABM as a compact cross-design robustness exercise",
+      "protected_claim_ids": []
+    },
+    {
+      "label": "sec:abm-results",
+      "disposition": "main",
+      "destination_label": "sec:robustness-crossdesign",
+      "reason": "Preserves adverse ABM level and path results",
+      "protected_claim_ids": []
+    },
+    {
+      "label": "sec:abm-interp",
+      "disposition": "main",
+      "destination_label": "sec:robustness-crossdesign",
+      "reason": "Preserves withdrawal and null-infeasibility interpretation",
+      "protected_claim_ids": []
+    },
+    {
+      "label": "sec:hazard",
+      "disposition": "main",
+      "destination_label": "sec:hazard",
+      "reason": "Primary empirical framework",
+      "protected_claim_ids": []
+    },
+    {
+      "label": "sec:hazard-motivation",
+      "disposition": "main",
+      "destination_label": "sec:hazard",
+      "reason": "Motivates the primary estimator",
+      "protected_claim_ids": []
+    },
+    {
+      "label": "sec:pathb",
+      "disposition": "main",
+      "destination_label": "sec:hazard",
+      "reason": "Defines the preferred loan-level microsimulation",
+      "protected_claim_ids": []
+    },
+    {
+      "label": "sec:pathb-fannie",
+      "disposition": "main",
+      "destination_label": "sec:robustness",
+      "reason": "Preserves the Fannie robustness result and scope",
+      "protected_claim_ids": []
+    },
+    {
+      "label": "sec:patha",
+      "disposition": "appendix",
+      "destination_label": "app:validation",
+      "reason": "Directional validation with headline exclusion",
+      "protected_claim_ids": []
+    },
+    {
+      "label": "sec:identification",
+      "disposition": "main",
+      "destination_label": "sec:hazard-results",
+      "reason": "Carries the estimand, null, inference, and limitations",
+      "protected_claim_ids": []
+    },
+    {
+      "label": "sec:hazard-interp",
+      "disposition": "main",
+      "destination_label": "sec:hazard-results",
+      "reason": "Interprets level and marginal once",
+      "protected_claim_ids": []
+    },
+    {
+      "label": "sec:discussion",
+      "disposition": "main",
+      "destination_label": "sec:policy",
+      "reason": "Connects results to runoff design",
+      "protected_claim_ids": []
+    },
+    {
+      "label": "sec:discussion-fallout",
+      "disposition": "main",
+      "destination_label": "sec:discussion",
+      "reason": "Retains the balance-sheet and duration implication",
+      "protected_claim_ids": []
+    },
+    {
+      "label": "sec:discussion-capdesign",
+      "disposition": "main",
+      "destination_label": "sec:policy",
+      "reason": "Retains decision-relevant cap arithmetic",
+      "protected_claim_ids": []
+    },
+    {
+      "label": "sec:discussion-policy",
+      "disposition": "main",
+      "destination_label": "sec:policy",
+      "reason": "Introduces the contract-design counterfactual",
+      "protected_claim_ids": []
+    },
+    {
+      "label": "sec:abm-danish",
+      "disposition": "main",
+      "destination_label": "sec:policy",
+      "reason": "Retains both anchors and sign sensitivity",
+      "protected_claim_ids": []
+    },
+    {
+      "label": "sec:robustness",
+      "disposition": "main",
+      "destination_label": "sec:robustness",
+      "reason": "Houses interpretation-changing checks",
+      "protected_claim_ids": []
+    },
+    {
+      "label": "sec:robustness-scale",
+      "disposition": "supplement",
+      "destination_label": "supp:abm-diagnostics",
+      "reason": "Scale mechanics support but do not govern the claim",
+      "protected_claim_ids": []
+    },
+    {
+      "label": "sec:robustness-benchmark",
+      "disposition": "appendix",
+      "destination_label": "app:benchmark",
+      "reason": "Supports benchmark sensitivity",
+      "protected_claim_ids": []
+    },
+    {
+      "label": "sec:robustness-crossdesign",
+      "disposition": "main",
+      "destination_label": "sec:robustness",
+      "reason": "Governs the ABM interpretation",
+      "protected_claim_ids": []
+    },
+    {
+      "label": "sec:robustness-synthesis",
+      "disposition": "appendix",
+      "destination_label": "app:crossdesign",
+      "reason": "Supports the symmetric companion result",
+      "protected_claim_ids": []
+    },
+    {
+      "label": "sec:robustness-hybrid",
+      "disposition": "appendix",
+      "destination_label": "app:composition",
+      "reason": "Supports sample-to-book mapping",
+      "protected_claim_ids": []
+    },
+    {
+      "label": "sec:robustness-floor",
+      "disposition": "main",
+      "destination_label": "sec:robustness",
+      "reason": "Floor and form sensitivity govern the headline",
+      "protected_claim_ids": []
+    },
+    {
+      "label": "sec:conclusion",
+      "disposition": "main",
+      "destination_label": "sec:conclusion",
+      "reason": "States the result and implication without new evidence",
+      "protected_claim_ids": []
+    },
+    {
+      "label": "sec:limitations",
+      "disposition": "main",
+      "destination_label": "sec:limitations",
+      "reason": "Preserves every unique limitation once",
+      "protected_claim_ids": []
+    },
+    {
+      "label": "sec:method-abm",
+      "disposition": "supplement",
+      "destination_label": "supp:abm-specification",
+      "reason": "Full ABM specification belongs in the audit record",
+      "protected_claim_ids": []
+    },
+    {
+      "label": "sec:method-frictions",
+      "disposition": "supplement",
+      "destination_label": "supp:abm-specification",
+      "reason": "ABM structural extensions belong in the audit record",
+      "protected_claim_ids": []
+    },
+    {
+      "label": "app:abmspec",
+      "disposition": "supplement",
+      "destination_label": "supp:abm-specification",
+      "reason": "Full decision rule and provenance belong in the audit record",
+      "protected_claim_ids": []
+    },
+    {
+      "label": "app:params",
+      "disposition": "appendix",
+      "destination_label": "app:hazard-parameters",
+      "reason": "Core hazard parameterization is referee-facing",
+      "protected_claim_ids": []
+    },
+    {
+      "label": "app:patha-detail",
+      "disposition": "supplement",
+      "destination_label": "supp:patha",
+      "reason": "Detailed timing diagnostics do not govern the headline",
+      "protected_claim_ids": []
+    },
+    {
+      "label": "app:ridge",
+      "disposition": "supplement",
+      "destination_label": "supp:patha",
+      "reason": "Estimation-panel and ridge detail belong in the audit record",
+      "protected_claim_ids": []
+    },
+    {
+      "label": "app:theil",
+      "disposition": "supplement",
+      "destination_label": "supp:timing",
+      "reason": "Dynamic-fit decomposition is supporting diagnostic material",
+      "protected_claim_ids": []
+    },
+    {
+      "label": "app:composition",
+      "disposition": "appendix",
+      "destination_label": "app:composition",
+      "reason": "Composition mapping is an important qualification",
+      "protected_claim_ids": []
+    },
+    {
+      "label": "app:floormech",
+      "disposition": "appendix",
+      "destination_label": "app:floor-inference",
+      "reason": "Core floor and inference sensitivity is referee-facing",
+      "protected_claim_ids": []
+    },
+    {
+      "label": "sec:robustness-extensions",
+      "disposition": "supplement",
+      "destination_label": "supp:abm-diagnostics",
+      "reason": "Behavioral extension mechanics belong in the audit record",
+      "protected_claim_ids": []
+    },
+    {
+      "label": "sec:robustness-wal",
+      "disposition": "supplement",
+      "destination_label": "supp:policy-mechanics",
+      "reason": "WAL mechanics support the discussion but not the estimand",
+      "protected_claim_ids": []
+    },
+    {
+      "label": "sec:robustness-pipeline",
+      "disposition": "supplement",
+      "destination_label": "supp:pipeline",
+      "reason": "Fifteen-year and unit mechanics belong in the audit record",
+      "protected_claim_ids": []
+    },
+    {
+      "label": "sec:robustness-seasonalfloor",
+      "disposition": "supplement",
+      "destination_label": "supp:floor-diagnostics",
+      "reason": "Seasonal diagnostics do not credential timing",
+      "protected_claim_ids": []
+    }
+  ]
+}
