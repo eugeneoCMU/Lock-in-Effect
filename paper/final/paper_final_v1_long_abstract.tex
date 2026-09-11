@@ -21,6 +21,7 @@
 \usepackage{xurl}
 \usepackage[hidelinks]{hyperref}
 \usepackage{microtype}
+\usepackage{setspace}
 \emergencystretch=1.5em
 \renewcommand{\thesection}{\Roman{section}}
 \renewcommand{\thesubsection}{\thesection.\Alph{subsection}}
@@ -42,6 +43,13 @@
 {\footnotesize\noindent\textbf{Keywords:} mortgage prepayment; lock-in effect; quantitative tightening; mortgage-backed securities; hazard models; monetary policy implementation.\\
 \textbf{JEL codes:} E52, E58, G21, R31.\par}
 \newpage
+\doublespacing
+\input{journal_main_v2}
+
+% The pre-redesign main text remains below as a source-level preservation
+% record. Its technical content is carried by the Online Appendix and the
+% repository's frozen pre-redesign PDF; it is not typeset in the journal main.
+\iffalse
 \section{Introduction}\label{sec:intro}
 
 The Federal Reserve departed from its ``Treasuries-only'' framework in 2008 and 2020, purchasing trillions in agency MBS that suppressed 30-year mortgage rates \citep{hancock2011}, to lows of roughly 2.6\% on FRED series MORTGAGE30US, and triggered a refinance boom. In 2022 it reversed course. Quantitative Tightening (QT) was a passive roll-off intended to drain up to \$35 billion per month from its SOMA portfolio, under a cap phased in at \$17.5 billion and stepped up three months later. (June 2024 and April 2025 runoff slowings cut only the Treasury cap; above-cap reinvestment never triggered in this window, so the constant post-phase-in \$35 billion MBS schedule is policy-committed throughout.) Unlike standard Treasuries, U.S. mortgages carry asymmetric, state-dependent payoff profiles. Tightening pushed the 30-year rate past 7.0\%, and under the par-payoff rule that imposed a substantial penalty on relocation: the lock-in effect, compounded in practice by historic housing-inventory shortages and depressed consumer sentiment. The rate rise decomposes into the 10-year Treasury yield's climb plus primary-mortgage spread widening from roughly 170 to over 300~bp at its 2022--2023 peak (FRED series MORTGAGE30US less DGS10); spread components follow \citet{boyarchenko2019}, whose framework predates and does not document the 2022--2023 magnitudes. Mortgages did not prepay. Cumulative tightening-cycle runoff fell \$764.7 billion short of the phased caps \citep[on the balance-sheet setting, see][]{lopezsalido2023,acharya2023} (Section~\ref{sec:method-benchmark}). Sections~\ref{sec:abm} and~\ref{sec:hazard} decompose that shortfall, isolating the lock-in channel's own share.
@@ -774,6 +782,8 @@ The Danish-regime recalibration (Section~\ref{sec:abm-danish}) calibrates both f
 Sections~\ref{sec:abm} and~\ref{sec:hazard} establish that contrast under the synthetic household population this paper specifies. Section~\ref{sec:robustness}'s cross-design pair leaves the attribution asymmetric, and it inherits Section~\ref{sec:robustness-crossdesign}'s own hedge. The hazard framework's recovery survives a fully synthetic population (106.0\% versus 107.0\%, both standalone). That is evidence its survival structure, not its data source, carries the aggregate level. But the recalibrated real-covariate ABM's 59.3\%, and its 60.2\% fifty-seed mean, cross the pre-committed threshold: above it the contrast cannot, on that test alone, be cleanly attributed to modeling paradigm rather than to calibration and data source. The path-level timing question, meanwhile, remains open for every estimator. That result cuts both ways. Recovering 106\% on a fully synthetic population shows that the calibration constants, not real loan-level structure, deliver the level, which is consistent with the rate-inelastic decomposition above. On the paradigm question itself I make no claim: the reading was pre-committed to a threshold, the threshold was crossed, and Section~\ref{sec:robustness-crossdesign} withdraws it. The decomposition this paper does deliver never rested on it.
 
 \clearpage
+\fi
+\singlespacing
 \bibliographystyle{plainnat}
 \bibliography{references}
 
