@@ -95,6 +95,19 @@ can execute in the isolated worktree and then reaches the known missing local
 Freddie panel; the missing licensed-derived parquet is an environment boundary,
 not a manuscript failure.
 
+### Batch 4 — compact ABM cross-design section
+
+Replaced the rendered standalone ABM results apparatus with a compact section
+that retains the production seed result, adverse monthly-path fit, failed
+burnout variant, real-covariate threshold crossing, withdrawal of the paradigm
+interpretation, composition sensitivity, and reason no ABM marginal is
+reported. Detailed mechanics remain in the frozen supplement archive pending
+their organized relocation.
+
+The combined rendering fell from 134 to 131 pages. The compression, ABM-lead,
+and paradigm-withdrawal test set passes (51 tests), TeX validation is clean,
+and both manuscript variants received identical body edits.
+
 ### Batch 2a — frozen preservation archive
 
 Copied the complete canonical pre-compression TeX source into
