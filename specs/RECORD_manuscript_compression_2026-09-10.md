@@ -169,3 +169,16 @@ restore the essential main-paper exhibits and enough reproducibility detail to
 reach a defensible article-plus-appendix package, rather than padding toward the
 page target. Both variants pass TeX structural validation, and the updated
 compression-manifest suite passes all 11 tests.
+
+### Batch 8 — essential publication exhibits and gate cleanup
+
+Restored three decision-relevant exhibits to the active paper: the ABM-versus-
+benchmark CPR path, the Path B elasticity calibration band, and the
+vintage-by-coupon marginal decomposition. Removed temporary compatibility
+labels from active prose and rewrote its remaining cross-references to semantic
+section destinations, leaving the legacy table labels only in the preserved
+source pending final physical cleanup.
+
+The complete repository suite passes at this checkpoint: 1,179 tests passed,
+2 skipped, with 26 existing dependency and numerical-fit warnings. TeX
+structural validation remains clean.
