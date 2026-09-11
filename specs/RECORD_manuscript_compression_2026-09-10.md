@@ -76,3 +76,18 @@ been copied into the named supplement section and logged here.
 | Supplement structure | `python3 -m pytest tests/test_manuscript_compression.py -q` | 8 passed |
 | Supplement TeX | `python3 tools/tex_validate.py paper/final/technical_replication_supplement.tex --bib paper/final/references.bib` | CLEAN |
 | Supplement build | `tectonic paper/final/technical_replication_supplement.tex` | 3-page scaffold built successfully |
+
+### Batch 2a — frozen preservation archive
+
+Copied the complete canonical pre-compression TeX source into
+`technical_replication_archive.tex` and embedded it in the standalone technical
+supplement with `docmute`. The resulting 152-page supplement now contains the
+three-page destination guide followed by the entire 147-page source manuscript
+(with pagination reflow from the wrapper). This is a preservation floor: later
+organized relocations may improve the supplement, but no substantive source text
+depends on the shortened manuscript for survival.
+
+| Stage | Command | Result |
+|---|---|---|
+| Archive supplement build | `tectonic paper/final/technical_replication_supplement.tex` | Built successfully; 152 pages |
+| Compression structure | `python3 -m pytest tests/test_manuscript_compression.py -q` | 8 passed |

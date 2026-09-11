@@ -2,11 +2,14 @@
 \usepackage[T1]{fontenc}
 \usepackage[margin=1in]{geometry}
 \usepackage{amsmath,amssymb}
-\usepackage{array,booktabs,longtable}
+\usepackage{graphicx,float,array,booktabs,longtable,threeparttable,caption,authblk}
 \usepackage[authoryear,round]{natbib}
 \usepackage{xurl}
 \usepackage[hidelinks]{hyperref}
 \usepackage{microtype}
+\usepackage{docmute}
+\graphicspath{{./}{../../figures/}{../../abm/data/runs/run-2026-07-04-15yr-foldin/}}
+\newcommand{\citepos}[1]{\citeauthor{#1}'s (\citeyear{#1})}
 \emergencystretch=1.5em
 
 \title{Technical and Replication Supplement\\
@@ -84,5 +87,16 @@ silently removing superseded findings.
 This section will collect the final mapping from every main-paper and
 online-appendix result to its committed artifact, script, run record, and
 required licensed input.
+
+\clearpage
+\section{Frozen Full Pre-Compression Manuscript}\label{supp:precompression-archive}
+
+The pages that follow reproduce the complete canonical manuscript at the start
+of the compression project. This frozen source prevents relocation from becoming
+deletion: until each block has been incorporated into the organized supplement
+above, its complete original text, exhibits, notes, and online appendices remain
+available here.
+
+\input{technical_replication_archive.tex}
 
 \end{document}
