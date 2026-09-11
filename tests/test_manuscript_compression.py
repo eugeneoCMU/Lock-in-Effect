@@ -1,6 +1,7 @@
 """Structural safeguards for the shortened manuscript package."""
 
 import json
+import importlib.util
 import re
 from pathlib import Path
 
@@ -10,6 +11,12 @@ CANONICAL = ROOT / "paper" / "final" / "paper_final_v1.tex"
 VARIANT = ROOT / "paper" / "final" / "paper_final_v1_long_abstract.tex"
 MANIFEST = ROOT / "paper" / "final" / "compression_manifest.json"
 SUPPLEMENT = ROOT / "paper" / "final" / "technical_replication_supplement.tex"
+
+_VALIDATOR_SPEC = importlib.util.spec_from_file_location(
+    "tex_validate", ROOT / "tools" / "tex_validate.py"
+)
+TEX_VALIDATE = importlib.util.module_from_spec(_VALIDATOR_SPEC)
+_VALIDATOR_SPEC.loader.exec_module(TEX_VALIDATE)
 
 ALLOWED_DISPOSITIONS = {
     "main",
@@ -116,3 +123,9 @@ def test_literature_review_meets_approved_word_budget():
     text = CANONICAL.read_text()
     literature = section_span(text, "sec:lit", "sec:method")
     assert prose_word_count(literature) <= 1500
+
+
+def test_validator_ignores_labels_inside_disabled_migration_blocks():
+    source = r"\section{Live}\label{sec:x}\iffalse\label{sec:x}\fi"
+    active = TEX_VALIDATE.strip_false_blocks(source)
+    assert TEX_VALIDATE.ref_check(active) == []

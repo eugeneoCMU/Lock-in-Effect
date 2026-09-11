@@ -30,6 +30,17 @@ def strip_comments(s):
     return re.sub(r"(?<!\\)%.*", "", s)
 
 
+def strip_false_blocks(s):
+    """Remove non-nested TeX conditional archives from the validation view.
+
+    TeX does not execute content between ``\\iffalse`` and the matching
+    ``\\fi``.  During the compression migration those blocks retain legacy
+    prose until its liveness gates are re-pointed at the frozen supplement;
+    treating their labels as live creates false duplicate-label failures.
+    """
+    return re.sub(r"\\iffalse\b.*?\\fi\b", "", s, flags=re.DOTALL)
+
+
 def parse_check(src):
     try:
         from pylatexenc.latexwalker import LatexWalker, LatexWalkerError
@@ -146,7 +157,7 @@ def main():
     ap.add_argument("doc")
     ap.add_argument("--bib", default=None)
     a = ap.parse_args()
-    src = open(a.doc, encoding="utf-8").read()
+    src = strip_false_blocks(open(a.doc, encoding="utf-8").read())
 
     checks = [
         ("parse (pylatexenc)", parse_check(src)),

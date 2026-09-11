@@ -108,6 +108,20 @@ The combined rendering fell from 134 to 131 pages. The compression, ABM-lead,
 and paradigm-withdrawal test set passes (51 tests), TeX validation is clean,
 and both manuscript variants received identical body edits.
 
+### Batch 5 — hazard empirical spine
+
+Replaced the rendered 35-page hazard apparatus with a compact statement of the
+loan-level design, transported elasticity, turnover floor, central/null
+estimand, binding floor uncertainty, calibration and form ranges, six governing
+limitations, Fannie robustness scope, Path A exclusion, and interpretation.
+The complete prior apparatus remains in the frozen supplement archive.
+
+The combined rendering is 98 pages, with the online appendix opening on page
+51: 50 pages of article and references plus 48 pages of appendix at this
+intermediate checkpoint. Temporary compatibility labels keep later, not-yet-
+rewritten sections buildable; they must be eliminated as those sections are
+compressed and their references are rewritten.
+
 ### Batch 2a — frozen preservation archive
 
 Copied the complete canonical pre-compression TeX source into
