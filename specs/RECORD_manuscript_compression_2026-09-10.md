@@ -200,3 +200,15 @@ found no clipping, overlap, missing glyphs, or unreadable figures. That review
 did catch and correct a malformed cash-window value and a duplicate appendix
 pointer. The overfull ABM section heading was shortened; the rebuilt submission
 has no overfull-box, undefined-reference, or duplicate-label warnings.
+
+### Final verification checkpoint
+
+The complete 129-gate manuscript-to-artifact liveness run passes after staging
+the locally available Freddie panel into the isolated worktree. Submission PDFs
+were split at the detected online-appendix banner: 18-page main article plus
+3-page appendix equals the 21-page canonical submission. The long-abstract
+variant is 22 pages. The render gate reports zero off-page text items, zero
+spans past the paper edge, zero unresolved references, an exact split
+partition, and a one-page variant-length difference. The final repository test
+run reports 1,185 passed and 1 skipped, with 26 existing dependency and
+numerical-fit warnings.

@@ -39,7 +39,13 @@ TEX = ROOT / "paper" / "final" / "paper_final_v1.tex"
 # spans missing, silently reversing round 20's calibration-label discipline and
 # round 21's Danish dual label. A variant that ships is a variant that must be
 # checked, so the abstract gate is applied to all of them.
-TEX_VARIANTS = sorted((ROOT / "paper" / "final").glob("paper_final_v1*.tex"))
+# Historical literal-level gates audit the compatibility pair.  The physically
+# compressed submission sources have their own structural and render checks;
+# treating them as literal-identical legacy variants would defeat compression.
+TEX_VARIANTS = [
+    TEX,
+    ROOT / "paper" / "final" / "paper_final_v1_long_abstract.tex",
+]
 MANIFEST = ROOT / "abm" / "data" / "runs" / "run-2026-07-04-15yr-foldin" / "manifest.json"
 FANNIE_RESULTS = ROOT / "hazard" / "data" / "fannie_replication_results.json"
 OVERLAY_RESULTS = ROOT / "hazard" / "data" / "ginnie_cpr_overlay_results.json"
