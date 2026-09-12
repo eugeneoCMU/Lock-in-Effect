@@ -138,9 +138,8 @@ def test_a_failed_parity_run_fails(tex, ffm):
 # --------------------------------------------------------------------------
 # Gate #57's scoped limb.
 # --------------------------------------------------------------------------
-REVERSAL = ("with $+9.2$ points, \\$70.3 billion, the in-sample point, inside it")
-CURRENT = ("with $+5.6$ points, \\$42.6 billion, the production form's "
-           "endpoint, inside it")
+REVERSAL = ("Their $+9.2$-point difference, or \\$70.3 billion, is an in-sample anchor")
+CURRENT = ("their $+5.6$-point difference, or \\$42.6 billion, is an interior anchor")
 
 
 def test_abstract_extractor_agrees_with_the_hedge_gate(tex):

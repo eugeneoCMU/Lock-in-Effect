@@ -71,17 +71,18 @@ def test_deleting_any_span_fails(tex, key):
 def test_point_before_range_fails(tex, abstract):
     """Put the point back in front, keeping every literal. This is the exact
     arrangement round 24b removed, and a span-presence check accepts it."""
-    mutated = (
-        " \\noindent A turnover floor read from realized, partly behavioral "
-        "turnover sets the baseline. "
-        "Lock-in itself adds, with $+5.6$ points, \\$42.6 billion, the production "
-        "form's endpoint, inside it, most of the margin. "
-        "What lock-in itself adds is a range rather than a number: "
-        "$+1.9$ to $+9.1$ points under the production floor form (the floor "  # V20-N1
-        "read's sampling error at the central elasticity, wild-cluster on 31 "
-        "clusters), a form-conditional hull of $+3.5$ to $+13.1$; measured "
-        "corrections to the floor and the accounting basis move it in both "
-        "directions. ")
+    range_sentence = (
+        "Under the production hard-maximum form, sampling uncertainty in the floor "
+        "read yields a $+1.9$ to $+9.1$ percentage-point marginal at the central "
+        "imported response. ")
+    level_sentence = (
+        "The response-off and response-on levels are 85.7\\% and 91.3\\% of the cap "
+        "gap, so their $+5.6$-point difference, or \\$42.6 billion, is an interior "
+        "anchor rather than a mean, median, directly observed effect, or uniquely "
+        "preferred estimate. ")
+    assert range_sentence + level_sentence in abstract
+    mutated = abstract.replace(range_sentence + level_sentence,
+                               level_sentence + range_sentence, 1)
     ok, info = abstract_posture_check(_swap(tex, abstract, mutated))
     assert not ok, "gate #99 accepted a point-first abstract"
     assert info["missing"] == [] and not info["ordered"], (
@@ -106,8 +107,8 @@ def test_range_softened_to_an_afterthought_fails(tex):
     """`a range around that` restores the old subordinate reading -- the point
     is the claim and the range is a caveat on it."""
     mutated = tex.replace(
-        "What lock-in itself adds is a range rather than a number",
-        "What the design pins down is a range around that", 1)
+        "sampling uncertainty in the floor read yields",
+        "the interior point is surrounded by", 1)
     assert mutated != tex
     ok, _ = abstract_posture_check(mutated)
     assert not ok
@@ -127,10 +128,10 @@ def test_commented_out_posture_fails(tex, abstract):
 # claim.
 # --------------------------------------------------------------------------
 @pytest.mark.parametrize("old,new", [
-    ("The design identifies a marginal, not a level",
-     "The design identifies a marginal --- not a level"),
-    ("The cost to households who could not move is real.",
-     "The cost to households who could not move is real and unevenly borne."),
+    ("not a new household elasticity",
+     "not a newly estimated household elasticity"),
+    ("rather than only a legal maximum",
+     "instead of only a legal maximum"),
 ])
 def test_benign_rewrites_stay_green(tex, old, new):
     mutated = tex.replace(old, new, 1)

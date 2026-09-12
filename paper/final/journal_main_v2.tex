@@ -6,23 +6,19 @@
 
 The Federal Reserve began reducing its securities holdings in June 2022. For agency mortgage-backed securities (MBS), it allowed principal payments to run off subject to a monthly ceiling of \$17.5 billion for three months and \$35 billion thereafter. Realized redemptions remained far below those ceilings. From June 2022 through November 2025, the cumulative difference between the announced MBS caps and realized agency-MBS runoff was \$764.748 billion.
 
-This paper calls that object the \emph{quantitative-tightening shortfall}. The term is MBS-specific: it is the cap-relative gap in Federal Reserve agency-MBS redemptions, not a measure of the performance of the Federal Reserve's overall balance-sheet reduction program. The distinction matters because Treasury runoff and MBS runoff obey different cash-flow mechanics. Treasury principal is due on fixed dates. Mortgage principal depends on scheduled amortization, home sales, refinancing, curtailment, default, and the distribution of borrower coupons relative to current mortgage rates.
+This observed cap-relative accounting gap is MBS-specific, not a measure of the Federal Reserve's overall balance-sheet reduction. Treasury principal is due on fixed dates; mortgage principal depends on scheduled amortization, home sales, refinancing, curtailment, default, and the distribution of borrower coupons relative to current mortgage rates.
 
-Mortgage lock-in affects those cash flows. Most U.S. fixed-rate mortgages are repaid at face value when a household sells its home, and the existing loan generally cannot move with the borrower. When market mortgage rates rise above the borrower's coupon, relocation requires surrendering below-market financing. Household-level research finds that this rate gap reduces moving and loan-termination hazards \citep{berger2021,eichenbaum2022,liebersohn2024,batzer2024}. Federal Reserve staff and officials have also connected lock-in to slow MBS runoff \citep{na2024,perli2024,hammack2025}. The unresolved quantitative question is not whether the mechanism exists. It is how much the mechanism added to the Federal Reserve's portfolio-level runoff gap.
+Mortgage lock-in changes those cash flows. When market rates rise above a borrower's fixed coupon, moving generally requires surrendering below-market financing. Existing research finds that this rate gap reduces moving and loan-termination hazards \citep{berger2021,eichenbaum2022,liebersohn2024,batzer2024}. The paper asks how much that mechanism added to the Federal Reserve's portfolio-level runoff gap.
 
-The full \$764.748 billion cap-relative gap is not an estimate of that contribution. The New York Fed's May 2022 projection already implied that the announced ceilings would exceed achievable MBS runoff. The \emph{Expectations-relative shortfall} is the projection-to-realized comparison: under the central within-year allocation used here, projected runoff exceeds realized runoff by \$87.8 billion, while the projection anticipates 88.5\% of the eventual cap-relative gap. A settlement-aware allocation puts the anticipated share at 75.6\%. The exact comparison is not independently identified: the published projection reports year-end holdings rather than monthly principal payments, may already incorporate some lock-in, and conditions on a spring-2022 rate path below the realized path. The projection nevertheless establishes a useful fact that does not depend on the loan-level model: most of the gap against the caps was anticipated before the episode was observed.
+The announced cap is not the no-lock-in counterfactual. The New York Fed's May 2022 projection already placed runoff below the ceiling. Under the central within-year allocation used here, the \emph{Expectations-relative shortfall} is \$87.8 billion. This comparison is allocation-dependent because the projection reports year-end holdings that must be placed within years; it may already incorporate some lock-in; and it conditions on a spring-2022 rate path below the realized path. Despite those qualifications, it establishes a model-free conclusion: most of the cap-relative gap was anticipated.
 
-I quantify lock-in's incremental contribution with a loan-level prepayment model built on the Freddie Mac 2017--2021 conventional origination universe. The model combines scheduled amortization with competing prepayment and default hazards. Its rate-gap elasticity is calibrated to external estimates rather than identified from new quasi-experimental variation in this paper. I simulate the portfolio twice: once with the imported rate response and once with that response switched off while the baseline-turnover construction is held fixed. The central-minus-null difference is the \emph{lock-in marginal}. It is a model-based decomposition of cumulative runoff, not a new causal estimate of the household elasticity and not an estimate of monthly timing.
+The model translates household evidence into portfolio cash flows rather than supplying a new causal design. Freddie Mac conventional loans provide loan composition, external research supplies the imported rate response, and the calibrated turnover floor and combination rule complete the translation. Paired loan-level simulations---one with the response on and one with it off---produce a cumulative model-based marginal. The production specification applies the imported moving response to all voluntary prepayment; the moving share is not estimated. The paper does not claim to identify a new causal elasticity and the marginal is not an estimate of monthly timing.
 
-The decomposition produces three results. First, the rate-insensitive path accounts for most of the cap-relative gap under the production floor form. At the headline off-window turnover floor, the null accounts for 85.7\% of the benchmark, while the model with the rate response accounts for 91.3\%. The economically relevant comparison is their difference, not the 91.3\% level: the lock-in marginal is 5.6 percentage points, or \$42.6 billion, at the headline anchor.
+Under the production hard-maximum form, sampling uncertainty in the off-window floor read yields a $+1.9$ to $+9.1$ percentage-point lock-in marginal at the central imported response. The rate-insensitive null accounts for 85.7\% of the benchmark and the response-on simulation accounts for 91.3\%; their difference is the marginal. The $+5.6$-point, \$42.6 billion result is an interior anchor, not a mean, median, uniquely preferred estimate, or directly observed effect. Joint floor-and-elasticity calibration spans $+2.1$ to $+13.2$ points, while the additive construction produces approximately $+11.2$ points. Those latter comparisons are assumption sensitivity without a coverage interpretation, not extensions of the sampling interval.
 
-Second, the evidence supports a range rather than that interior value. Propagating sampling uncertainty in the off-window floor read at the central elasticity yields a production-form interval of $+1.9$ to $+9.1$ percentage points. Sweeping the turnover floor and imported elasticity produces a calibration box of $+2.1$ to $+13.2$ points. Simulation-seed noise and ordinary loan-sampling uncertainty are small relative to uncertainty about the floor and elasticity.
+Existing work establishes household lock-in, and existing MBS work establishes prepayment mechanics. This paper supplies the portfolio translation to Federal Reserve MBS runoff while separating quantities that are observed, published, imported, calibrated, and simulated. The result is a positive and economically meaningful model-based marginal, not the claim that lock-in caused the full cap-relative gap.
 
-Third, the magnitude is conditional on how baseline turnover is combined with rate-sensitive prepayment. The production construction uses a hard maximum: the effective voluntary hazard equals the larger of a baseline floor and the rate-responsive hazard. An additive alternative treats them as distinct components. Under the production form the off-window null accounts for 85.7\% of the benchmark; under the additive form it accounts for 35.6\%. The additive lock-in marginal is approximately 11 points and is nearly invariant to the floor. Both forms produce a positive marginal, but they imply different statements about how much of the institutional shortfall is rate-insensitive. Functional form is therefore part of the result, not a secondary robustness check.
-
-The paper contributes a translation from existing household-level lock-in evidence to a central-bank portfolio outcome. It does not claim to identify a new causal elasticity, discover the lock-in mechanism, or re-estimate that elasticity from Federal Reserve runoff. The contribution is to combine the Federal Reserve's holdings and cap schedule with loan-level mortgage composition, make the rate-insensitive counterfactual explicit, and show which parts of the estimated institutional effect are observed, imported, calibrated, or extrapolated. This changes the interpretation of the QT episode. Lock-in materially slowed MBS runoff, but the announced cap was not a feasible no-lock-in counterfactual. Most of the cap-relative gap reflects scheduled amortization and baseline turnover against a ceiling set above the New York Fed's contemporaneous projection.
-
-The analysis also disciplines policy conclusions. Future MBS runoff caps can be constructed from scheduled principal, baseline turnover, and the coupon distribution of the portfolio before a tightening cycle begins. A short extension considers market-value mortgage repayment, as in Denmark, but does not model a full transition from the U.S. TBA system. The primary policy result is narrower: an MBS cap should describe plausible redemptions, not merely a maximum the portfolio is permitted to deliver.
+The policy implication follows directly: an MBS runoff cap should be based on plausible portfolio cash flows, not only the maximum amount the portfolio is legally permitted to redeem.
 
 Table~\ref{tab:mainresults} collects the empirical objects and keeps their meanings separate.
 
@@ -48,7 +44,7 @@ Additive-form comparison & approximately $+11$ points & Alternative combination 
 
 The remainder of the paper establishes those claims. Section~\ref{sec:setting} places the decomposition in the mortgage-lock-in and MBS literatures. Section~\ref{sec:data} constructs the two empirical benchmarks and maps the loan sample to the SOMA book. Section~\ref{sec:model} defines the loan-level model and rate-insensitive null. Section~\ref{sec:results} reports the marginal. Section~\ref{sec:validation} treats functional form, calibration, coverage, external replication, and adverse model checks. Section~\ref{sec:policy} develops the cap-design implication and the limited Danish extension.
 
-\section{Mortgage Lock-In and Federal Reserve MBS Runoff}\label{sec:setting}\label{sec:lit}
+\section{Institutional Background and Related Literature}\label{sec:setting}\label{sec:lit}
 
 \subsection{From household lock-in to mortgage termination}
 
@@ -66,19 +62,21 @@ The Federal Reserve became a large holder of that cash-flow risk through its age
 
 Federal Reserve commentary correctly connected slow runoff to lock-in \citep{na2024,perli2024,hammack2025}. Yet the cap itself is not the natural no-lock-in benchmark. New York Fed staff projected before the full episode that MBS runoff would remain well below the ceiling \citep{nyfed2022}. A large cap-relative gap can therefore coexist with a much smaller incremental lock-in contribution.
 
-\subsection{The missing portfolio translation}
+\subsection{Contribution Relative to the Existing Literature}
 
 Existing lock-in studies estimate household or loan-level responses. Existing MBS studies characterize prepayment and duration. Research on balance-sheet normalization studies the aggregate policy setting \citep{lopezsalido2023,acharya2023}. The missing link is an explicit translation from a borrower-level rate-gap response to the runoff of the Federal Reserve's actual coupon and vintage distribution.
 
 That translation is the paper's purpose. It requires three separate inputs: an empirical portfolio benchmark, a baseline path that remains when the rate response is removed, and an externally disciplined elasticity governing the rate-sensitive margin. Keeping those inputs separate makes clear why the full cap-relative gap is not an estimate of lock-in and why the resulting marginal remains conditional on the baseline-turnover form.
 
-\section{Data and Empirical Benchmarks}\label{sec:data}\label{sec:method}\label{sec:method-benchmark}
+\section{Data and Benchmark Construction}\label{sec:data}\label{sec:method}\label{sec:method-benchmark}
 
 \subsection{The cap-relative benchmark}
 
 I construct realized runoff from the New York Fed's SOMA current-face-value series and apply the actual MBS cap schedule: \$17.5 billion per month from June through August 2022 and \$35 billion per month thereafter. Later QT slowdowns reduced the Treasury cap, not the MBS cap. The benchmark accumulates the monthly cap less realized runoff on a net basis through November 2025. The result is \$764.748 billion.
 
 Figure~\ref{fig:benchmark} shows the monthly and cumulative constructions. Four monthly CPR back-outs equal zero because the reported rolloff in those months falls below scheduled amortization and a non-negativity clip reallocates mass across adjacent months. These observations are reporting-boundary artifacts, not evidence of zero household turnover. For that reason, every claim in this paper concerns cumulative levels. No monthly timing claim is drawn from the benchmark.
+
+The public-data boundary is explicit. SOMA disclosures report current-face holdings, not a monthly cash-flow statement: they do not separately report monthly gross principal receipts, reinvestment settlements, and other changes in face. A per-CUSIP reconstruction reproduces the holdings change rather than independently identifying gross remittances. The terminal benchmark is therefore a cumulative current-face accounting object. The reconstruction and boundary-allocation checks leave its terminal dollars unchanged under the paper's convention, but they do not license a gross-payment or monthly-timing interpretation; the full reconciliation attempts are reported in Online Appendix~\ref{sec:robustness-seasonalfloor}.
 
 \begin{figure}[H]
 \centering
@@ -87,7 +85,7 @@ Figure~\ref{fig:benchmark} shows the monthly and cumulative constructions. Four 
 \label{fig:benchmark}\label{fig:architecture}
 \end{figure}
 
-\subsection{The expectations-relative complement}
+\subsection{The expectations-relative benchmark}
 
 The New York Fed's May 2022 Open Market Operations report provides an ex-ante holdings path incorporating the FOMC's May runoff plan \citep{nyfed2022}. The report publishes year-end levels rather than monthly principal payments. The central construction spreads each published annual net uniformly within the year and clips the path to the June 2022--November 2025 window. On that basis, projected runoff is \$740.6 billion and realized runoff is \$652.8 billion, leaving an \$87.8 billion expectations-relative gap.
 
@@ -118,24 +116,23 @@ These invariances are useful because they separate accounting uncertainty from b
 \begin{table}[H]
 \centering
 \small
-\caption{Data coverage and treatment of excluded collateral. Shares are of SOMA current face and overlap across rows; the 51.0\% direct-coverage figure is computed on joint agency-by-vintage cells.}
+\caption{Data coverage, treatment, and quantitative consequence. Shares are of SOMA current face and overlap across rows; the 51.0\% direct-coverage figure is computed on joint agency-by-vintage cells.}
 \label{tab:coverage}\label{tab:bases}
-\begin{tabular}{@{}p{4.6cm}p{2.5cm}p{7.3cm}@{}}
+\begin{tabular}{@{}p{3.1cm}p{2.3cm}p{9.3cm}@{}}
 \toprule
-Component & SOMA share & Treatment \\
+Component & Share & Treatment and Quantitative consequence \\
 \midrule
-Freddie/Fannie conventional, 2017--2021 intersection & 51.0\% & Direct conventional-universe model coverage after joint-cell mapping; Freddie is primary and Fannie is the external replication. \\
-Ginnie Mae & 20.4\% & Not sampled directly; bounded with published voluntary speeds and treated as an external overlay. \\
-2022 vintage & 23.1\% & Outside the staged sampler; disciplined with an observed-speed bound. \\
-Pre-2017 vintages & 10.6\% & Outside the staged sampler; disciplined with an observed-speed bound. \\
-Fifteen-year MBS & approximately 9\% & Included in the ABM's structural fold-in but excluded from hazard cohort modeling. \\
+Freddie/Fannie conventional, 2017--2021 & 51.0\% & Direct joint-cell coverage; Freddie is primary. Fannie's in-sample marginal is $+8.68$ points versus Freddie's $+9.20$, validating sign and approximate magnitude within conventional agencies, not hazard levels. \\
+Ginnie Mae & 20.4\% & Published-speed overlay, not a direct loan-level hazard sample. The off-window composed marginal is $+4.4$ points; the Ginnie-specific level adjustment remains inside the \$20--\$47 billion observed-speed bound. \\
+2022 and pre-2017 vintages & 23.1\%; 10.6\% & Outside both conventional samples; an observed-speed proxy bounds their joint contribution at \$11.7 billion. Shares overlap other rows and proxy risk remains. \\
+Fifteen-year MBS & approximately 9\% & Included in scheduled-amortization and portfolio accounting, but outside the hazard cohort model. Behavioral coverage gap: no separately estimated fifteen-year rate response. \\
 \bottomrule
 \end{tabular}
 \end{table}
 
-\section{Loan-Level Decomposition}\label{sec:model}\label{sec:method-estimators}\label{sec:hazard}\label{sec:hazard-motivation}\label{sec:pathb}
+\section{Empirical Methodology}\label{sec:model}\label{sec:method-estimators}\label{sec:hazard}\label{sec:hazard-motivation}\label{sec:pathb}
 
-\subsection{Prepayment and competing risks}
+\subsection{Loan-level prepayment model}
 
 For loan $i$ in month $t$, the model maps the mortgage-rate gap into a voluntary-prepayment hazard and adds delinquency-state transitions and default as competing risks. Let $g_{it}$ denote the market mortgage rate less the borrower's contract rate, measured so that a positive gap represents a borrower locked into a below-market coupon. The rate-responsive voluntary hazard can be written schematically as
 
@@ -149,13 +146,15 @@ where $h_{0,it}$ contains age and baseline components, $X_{it}$ contains observe
 
 The model is a microsimulation, not a structural household-utility model. It preserves loan-level balance, coupon, vintage, credit, and leverage heterogeneity and updates the surviving book through the QT window. That structure accommodates burnout mechanically: cohorts with high termination hazards exit earlier, changing the composition of survivors.
 
-\subsection{Calibration inputs and simulation sequence}
+\subsection{Calibration and simulation}
 
 The model separates inputs according to where their empirical content originates. Loan balances, contract rates, origination dates, credit scores, original loan-to-value ratios, terms, and observed delinquency states come from the Freddie performance files. The market-rate path comes from the 30-year primary mortgage-rate series. SOMA balances and the cap schedule determine the portfolio accounting benchmark. The rate-gap elasticity comes from the external lock-in literature. The turnover floor is measured from observed cohort termination and then transported to the simulation window. This separation prevents the aggregate target from silently determining every model component.
 
 Each simulated month proceeds in five steps. First, scheduled principal is calculated from the surviving loan's balance, note rate, and remaining amortization term. Second, the current market rate is compared with the contract rate to construct the lock-in gap. Third, the model computes voluntary prepayment under the selected floor form and delinquency-state transition probabilities under the competing-risk specification. Fourth, realized events remove loans and update the distribution of survivors. Fifth, principal is aggregated by loan cell and mapped to the SOMA coupon and vintage composition. The same event draws and portfolio mapping are used in the central and null legs where possible, so simulation noise in their difference is small.
 
 The elasticity band is not estimated by minimizing the distance between simulated and realized Federal Reserve runoff. It is transported from published estimates of how rate gaps affect moving or loan termination and translated into the model's monthly hazard units. This distinction prevents a mechanical fit in which the behavioral coefficient is selected to reproduce the \$764.748 billion benchmark. The production level can nevertheless remain close to the benchmark because the baseline floor supplies most of the turnover level. That is why calibration uncertainty is reported separately from goodness of fit.
+
+The exact import is as follows. \citet{liebersohn2024} report a 5.5--7.7\% quarterly decline per 100 basis points in the relevant mobility response. I adopt 6.5\% as the central calibration and convert it with the survival-function transformation in Online Appendix~\ref{app:params}, giving $\beta=0.0686$ per 100 basis points. At a representative 380-basis-point QT-era gap the log-linear specification implies a hazard multiplier of about $0.77$. That extrapolation beyond the source estimate's local range is an assumption, not a newly estimated response; the appendix reports the conversion, reference-probability sensitivity, and concave-transform check.
 
 The turnover floor has a different provenance. It is an empirical lower-envelope construction designed to prevent the voluntary hazard from collapsing toward zero when refinancing is deeply out of the money. The original 4.0\% annualized floor was measured inside the episode. The headline floor is remeasured on pre-episode discount cohorts, and its range is propagated through the central and null legs. A seasonal-floor exercise allows the floor to vary by calendar month, but permutations show that most of its effect comes from dispersion interacting with the maximum rather than correct calendar alignment. The main specification therefore retains a level floor and treats seasonal results as form diagnostics rather than monthly validation.
 
@@ -193,7 +192,9 @@ The fourth is \emph{partial equilibrium}. The realized market-rate path and hous
 
 These assumptions explain the paper's language. The externally estimated elasticity can have causal content in its original design while the Federal Reserve portfolio translation remains model-based. The positive marginal is robust within the disclosed calibration family. Its exact size and policy incidence are conditional on transport, baseline form, and the fixed macro path.
 
-\subsection{Baseline turnover and two combination rules}
+One additional transport choice is measurable only as a bracket. The imported estimand concerns moving, whereas the production model applies it to all voluntary prepayment. Let $\mu$ denote the share of the voluntary hazard receiving the imported response. At the off-window floor, $\mu=0.25/0.50/1.00$ produces $+1.8/+3.4/+5.6$ points, respectively. No termination-reason field in the ingested data separates sale from refinancing, so $\mu$ is not estimated and the $\mu=1$ production result is the upper endpoint of this construct-mismatch bracket. This limitation is distinct from sampling error and from the floor-form comparison below.
+
+\subsection{Baseline-turnover specifications}
 
 The empirical level is dominated by turnover that remains even when the imported rate-gap response is removed. The production model represents that component with an annualized turnover floor $f_t$. Its effective voluntary hazard is
 
@@ -239,29 +240,29 @@ The model's strength is narrower. It creates a common accounting environment in 
 \label{fig:band}
 \end{figure}
 
-\subsection{Why the aggregate level is not validation}
+\subsection{Validation boundaries}
 
 At the headline off-window floor, the production model accounts for 91.3\% of the cumulative benchmark. But its rate-insensitive null already accounts for 85.7\%. The difference is informative for the conditional decomposition; the level is not a clean model-validation statistic. No outcome-holdout months exist for the aggregate level, and the floor is calibrated rather than independently estimated on a lock-in-free population.
 
 A temporal split remeasures the floor on the first nineteen QT months and sums the marginal over the remaining twenty-three, producing \$45.1 billion. That check shows input stability, not outcome prediction: realized prepayment in the held-out months is not used to score either simulated leg. The model's monthly co-movement with the empirical path also disappears after removing the shared trend. These limitations are why the results section emphasizes $\Delta L$ rather than the level-recovery percentage.
 
-\section{Results: The Lock-In Marginal}\label{sec:results}\label{sec:identification}\label{sec:hazard-interp}
+\section{Results}\label{sec:results}\label{sec:identification}\label{sec:hazard-interp}
 
-\subsection{Production-form estimate}
+\subsection{Hard-maximum baseline result}
 
-At the off-window headline floor, the production hard-maximum model produces a 5.6-point lock-in marginal, equal to \$42.6 billion. This value is an anchor inside the uncertainty set, not a posterior mean or uniquely preferred point estimate. Across the defensible off-window floor range, the marginal runs from 4.3 to 6.8 points.
+Propagating uncertainty in the off-window turnover-floor read at the central imported elasticity yields a $+1.9$ to $+9.1$ percentage-point production-form marginal. The 5.6-point lock-in marginal, equal to \$42.6 billion, is an interior anchor rather than a mean, median, uniquely preferred estimate, or directly observed effect. Across defensible floor anchors, the narrower $+4.3$ to $+6.8$ variation holds the floor read fixed at each candidate value; unlike the sampling interval, it does not propagate uncertainty in estimating those values.
 
-Propagating the floor read's sampling uncertainty at the central imported elasticity yields the binding $+1.9$ to $+9.1$ point interval. The corresponding percentile interval, $+3.0$ to $+8.0$, undercovers in the small-cluster setting and is not used as the headline. At the original in-window 4.0\% floor, the marginal is 9.2 points, or \$70.3 billion. That value is retained as an in-sample calibration point, not the main estimate.
+The paired model levels explain the anchor. With the imported response off, the rate-insensitive null accounts for 85.7\% of the cap-relative accounting gap; with the response on, the production model accounts for 91.3\%. Their difference is the $+5.6$-point marginal. The 91.3\% level is not a stand-alone validation statistic because the calibrated floor already produces most of the level under the null.
 
-The floor-elasticity calibration box spans $+2.1$ to $+13.2$ points. The marginal is positive at every grid point and at every off-window anchor tested. Positivity is useful specification evidence, but it does not supply causal identification: the sign is strongly disciplined by an episode in which almost the entire book is out of the money.
+Assumption sensitivity is wider and has no common confidence-interval interpretation. Joint floor-and-elasticity calibration spans $+2.1$ to $+13.2$ points. The additive construction produces approximately $+11.2$ points and is nearly invariant across the off-window floor band. Applying the imported response to 25/50/100\% of voluntary prepayment yields a $+1.8/+3.4/+5.6$-point moving-share bracket; that share is not estimated. These comparisons are reported without a coverage interpretation and are not total sampling uncertainty.
 
 The size of the null explains why a large aggregate fit and a modest marginal coexist. Scheduled amortization continues regardless of borrower behavior. Baseline turnover continues because households move for reasons unrelated to the current mortgage-rate gap, including job changes, household formation and dissolution, retirement, and distress. Against a cap set well above projected runoff, those ordinary cash flows mechanically generate a large shortfall. Activating the lock-in elasticity suppresses a portion of the remaining voluntary terminations. It does not convert the cap into the counterfactual path the book would have followed without lock-in.
 
 The production-form marginal is basis-invariant but not floor-invariant. Raising the floor brings more loan-months under the maximum and reduces the room for the rate-responsive hazard to differ from the null. This is why the off-window remeasurement is central rather than cosmetic. A higher pre-episode turnover floor reduces the production marginal relative to the original 4.0\% in-window calibration. The wild-cluster interval widens further because uncertainty in that floor moves the central and null paths asymmetrically under the maximum.
 
-\subsection{Functional-form result}
+\subsection{Functional-form comparison}
 
-Under the additive combination rule, the rate-insensitive null accounts for only 35.6\% of the benchmark at the headline floor, compared with 85.7\% under the maximum rule. The additive lock-in marginal is approximately 11 points and is nearly floor-invariant. A competing-risks construction lies within the broader calibration box.
+The additive rule treats baseline and rate-responsive turnover as distinct components rather than allowing the floor to mask the rate response. A continuous mixture between the maximum and additive endpoints is reported in Online Appendix~\ref{app:floormech}. These are alternative economic constructions, not statistical confidence limits, and the implementation label ``production'' does not make the maximum rule empirically preferred.
 
 This disagreement changes the institutional interpretation. The evidence supports the statement that lock-in made a positive and economically meaningful contribution under every disclosed form. It does not support an unconditional statement that the institutional cash-flow contribution was small. Under the production maximum it is modest relative to the cap gap; under the additive form it is materially larger. The main uncertainty is therefore not Monte Carlo noise but the economic meaning assigned to baseline turnover.
 
@@ -269,7 +270,7 @@ The competing-risks alternative helps interpret the disagreement. Conceptually, 
 
 The form choice also affects the policy counterfactual. A market-value repayment rule removes the rate-rise penalty represented by the imported elasticity. Under the maximum form, part of that removal is hidden wherever the floor already binds; under the additive form, the rate-sensitive component remains visible. Any claim that changing the payoff rule would have had only a small institutional cash-flow effect consequently inherits the same form dependence as the marginal itself.
 
-\subsection{Uncertainty hierarchy}
+\subsection{Uncertainty and sensitivity}
 
 Within-stratum loan-sampling intervals are extremely narrow and understate the relevant uncertainty. Clustering by the 31 origination-quarter strata produces a wider interval around the in-sample marginal, $+8.27$ to $+10.19$ points. Simulation-seed noise is negligible at reporting precision. Both remain narrower than the movement generated by changing the floor, elasticity, or combination form.
 
@@ -285,23 +286,31 @@ Table~\ref{tab:decomposition} reports the hierarchy without treating unlike inte
 \begin{table}[H]
 \centering
 \small
-\caption{Lock-in decomposition and governing uncertainty. The off-window production interval varies the measured floor at the central elasticity. The calibration box varies floor and elasticity. The additive row changes the combination form and therefore has no common coverage interpretation with the sampling intervals.}
+\caption{Lock-in decomposition and governing uncertainty. Sampling intervals and assumption sensitivity are separated because only the former have a coverage interpretation.}
 \label{tab:decomposition}\label{tab:assembly}\label{tab:oosfloor}\label{tab:lowband}\label{tab:uncertainty}\label{tab:floorband}
 \begin{tabular}{@{}p{4.6cm}p{3.1cm}p{6.9cm}@{}}
 \toprule
 Specification or uncertainty & Marginal & Interpretation \\
 \midrule
+\multicolumn{3}{@{}l}{\textit{Sampling layer with a coverage interpretation}}\\
+\addlinespace
+Floor-read wild-cluster interval & $+1.9$ to $+9.1$ points & Sampling uncertainty in the off-window floor read at the central elasticity and maximum form, 31 clusters; not total model uncertainty. \\
+Stratum-cluster loan sampling & $+8.27$ to $+10.19$ points & In-sample calibration at the maximum form; narrower than governing assumption variation. \\
+\addlinespace
+\multicolumn{3}{@{}l}{\textit{Assumption or calibration sensitivity without a coverage interpretation}}\\
+\addlinespace
 Production maximum, headline anchor & $+5.6$ points (\$42.6B) & Mid-grid off-window anchor; an interior convention, not a central tendency. \\
 Off-window floor range & $+4.3$ to $+6.8$ points & Variation across defensible off-window floor anchors. \\
-Floor-read wild-cluster interval & $+1.9$ to $+9.1$ points & Binding headline layer at the central elasticity, 31 clusters. \\
 In-window production point & $+9.2$ points (\$70.3B) & Retained as an in-sample calibration result. \\
 Joint calibration box & $+2.1$ to $+13.2$ points & Sweep over disclosed floor and elasticity ranges. \\
-Additive form & approximately $+11$ points & Alternative baseline-rate combination; nearly floor-invariant and not a sampling interval. \\
+Additive form & $+11.19$ to $+11.22$ points & Alternative baseline-rate combination across the off-window floor band; not a sampling interval. \\
+Moving-share bracket & $+1.8/+3.4/+5.6$ points & Elasticity applied to $25/50/100\%$ of voluntary prepayment at the headline floor; the share is not estimated. \\
+Housing-activity correction & $+10.7$ points & Alternative transport of the pre-episode baseline to QT housing activity; not a sampling interval. \\
 \bottomrule
 \end{tabular}
 \end{table}
 
-\subsection{Economic incidence within the conventional sample}
+\subsection{Distribution across borrowers and loan cohorts}
 
 The marginal is not evenly distributed. Per dollar of balance, its intensity is approximately 1.23--1.26 times larger among borrowers below 740 FICO and approximately 1.23 times larger among loans above 80\% loan-to-value. These are model-based within-sample decompositions, not estimates of household welfare. They suggest that the financing constraint is concentrated among borrowers with fewer refinancing or liquidity alternatives.
 
@@ -309,11 +318,13 @@ The paper cannot extend that distributional statement to FHA and VA borrowers. G
 
 The coupon-by-vintage decomposition in Figure~\ref{fig:marginalcells} is more directly supported than a welfare ranking. Deeply below-market coupons contribute more because the imported elasticity suppresses their termination hazards for more of the window. Vintage affects seasoning, remaining balance, and the distribution of coupons. Credit and leverage splits then describe how the simulated dollar marginal is allocated within those cells. None of these decompositions identifies the value households attach to moving, the availability of substitute housing, or the incidence between borrowers, sellers, buyers, and MBS investors.
 
-\section{Functional Form, Calibration, and External Validation}\label{sec:validation}\label{sec:pathb-fannie}\label{sec:patha}\label{sec:abm}\label{sec:abm-results}\label{sec:abm-interp}\label{sec:robustness}\label{sec:robustness-scale}\label{sec:robustness-benchmark}\label{sec:robustness-crossdesign}\label{sec:robustness-synthesis}\label{sec:robustness-hybrid}\label{sec:robustness-floor}
+\section{Robustness and External Validation}\label{sec:validation}\label{sec:pathb-fannie}\label{sec:patha}\label{sec:abm}\label{sec:abm-results}\label{sec:abm-interp}\label{sec:robustness}\label{sec:robustness-scale}\label{sec:robustness-benchmark}\label{sec:robustness-crossdesign}\label{sec:robustness-synthesis}\label{sec:robustness-hybrid}\label{sec:robustness-floor}
 
-\subsection{Off-window floor and housing conditions}
+\subsection{Turnover-floor measurement and transport}
 
-The off-window floor reduces direct reuse of QT-window turnover but does not remove the need to transport a baseline across housing markets. Calendar-standardizing the floor read moves the anchor to 4.7 points. Scaling the off-window floor to match the QT window's housing-activity level moves it to 10.7 points. These corrections run in both directions and belong in the main evidence because they are comparable in size to the reported marginal.
+The off-window floor reduces direct reuse of QT-window turnover but does not remove the need to transport a baseline across housing markets. The clean 2018 cohort reads span 4.70--5.33\% annual CPR, with a 4.991\% mid-grid anchor. The corresponding maximum-form marginal is 4.3--6.8 points, with the 5.6-point headline anchor inside it. Calendar-standardizing the floor read moves the marginal to 4.7 points. Scaling the off-window baseline to match the QT window's housing-activity level moves it to 10.7 points. These corrections run in both directions and belong in the main evidence because they are comparable in size to the reported marginal.
+
+The provenance ladder is reported in Online Appendix~\ref{app:floormech}: the original in-window deep-discount read is approximately 3.8--4.0\%; the clean off-window band is 4.70--5.33\%; an imputation-heavy age standardization and an out-of-agency Fannie read both lie near 5.5\%. The headline band excludes the latter values because they answer less comparable questions, not because the model estimates a unique floor. The floor is total realized deep-discount turnover---life-cycle moves, cash-out refinancing, and involuntary events combined---rather than a directly observed strictly involuntary component.
 
 The off-window construction uses 2018 discount cohorts because they provide a pre-episode group with positive rate gaps under the historical rate environment. Its advantage is temporal separation from the 2022--2025 outcome window. Its disadvantage is transport: 2018 housing turnover, inventory, borrower composition, and mortgage seasoning differ from the QT episode. The calendar-standardized and housing-activity-scaled variants do not solve transport; they reveal how much the result can move under two measurable corrections.
 
@@ -323,21 +334,17 @@ Housing inventory remains a competing explanation. A borrower who stays because 
 
 \subsection{Fannie replication and uncovered collateral}
 
-Running the same pipeline on Fannie Mae loan-level data produces an in-sample marginal of $+8.68$ points, compared with Freddie's $+9.20$. This is useful sign-and-magnitude replication across conventional agencies. It is not a hazard-level match, and the pre-committed envelope is 11.06 points wide; the observed 0.52-point difference is more informative than merely passing that envelope.
-
-The Fannie result addresses one form of researcher discretion: the same code, rate path, floor, and elasticity produce a similar marginal on a second conventional-agency loan population. It does not provide an independent identification design because both agencies operate in the same national mortgage market, share broad underwriting and securitization institutions, and are evaluated with the same imported response. Its value is reproducibility across loan files and composition, not causal independence.
+Running the same pipeline on Fannie Mae loan-level data produces an in-sample marginal of $+8.68$ points, compared with Freddie's $+9.20$. The 0.52-point difference supports reproducibility across conventional loan files and composition, not hazard-level agreement or independent causal validation: both agencies share the national mortgage market and the same imported response.
 
 The Ginnie overlay leaves the conventional-share marginal positive under every reported variant. At the headline off-window floor, the overlay produces a 4.4-point composed marginal; at the in-sample point it produces 7.3 points. Its Ginnie-specific level contribution remains inside the \$20--\$47 billion observed-speed bound. The 2022 and pre-2017 vintages remain outside both agency samples; an observed-speed proxy bounds their contribution at \$11.7 billion, signed toward overstating trapped liquidity. These exercises discipline extrapolation but do not convert uncovered collateral into directly sampled loans.
 
-Assumability makes the Ginnie case conceptually important. FHA and VA mortgages may be transferred subject to underwriting, potentially preserving the below-market coupon when the property changes hands. But an assumption does not generate MBS principal runoff: the loan remains outstanding. High take-up could therefore reduce household lock-in while also producing slow pool speeds. Published Ginnie voluntary speeds exceed conventional speeds over the window, which is inconsistent with a simple story in which assumability makes Ginnie uniformly slower. The overlay uses that observed difference to bound book-level effects without claiming to measure take-up or borrower welfare.
+Assumability makes Ginnie conceptually important: transferring a below-market mortgage may reduce household lock-in without generating MBS principal runoff because the loan remains outstanding. Published Ginnie voluntary speeds discipline the book-level overlay, but the exercise does not measure assumption take-up or borrower welfare.
 
-\subsection{The ABM as an adverse comparison}
+\subsection{Alternative model comparison}
 
-The project began with a 10,000-household agent-based model (ABM). Its production specification accounts for 11.9\% of the cap-relative benchmark on the frozen draw and 13.6\% across fifty seeds. Its raw monthly path fit is poor, with $R^2=-6.984$, and it does not admit a stable counterpart to the loan-level model's rate-insensitive null. Holding its mobility parameter fixed when the penalty is removed and re-estimating that parameter under the null produce different-signed differentials, neither of which is interpretable.
+The synthetic-household ABM recovers only 11.9\% of the cap-relative benchmark on its frozen draw and has poor raw monthly fit, with $R^2=-6.984$. Adding real covariates raises recovery to 59.3\%, while a synthetic-population version of the loan-level hazard model also loses much of its fit. The comparison therefore does not isolate a clean ABM-versus-hazard paradigm effect; seed-by-seed and implementation details are retained in the Online Appendix.
 
-The ABM therefore supplies no main lock-in estimate. A real-covariate version raises its recovery to 59.3\% on the frozen seed and 60.2\% across fifty seeds, crossing the pre-specified threshold at which the original modeling-paradigm interpretation had to be withdrawn. Conversely, the loan-level hazard structure recovers a similar aggregate level on a synthetic population. Together these results show that the comparison does not isolate a clean ABM-versus-hazard paradigm effect. The ABM is retained as adverse evidence about one structural implementation, not as a coequal estimator.
-
-This adverse result is still useful. A representative household decision rule can produce economically intuitive comparative statics while missing aggregate cash-flow levels because survivor composition, servicing transitions, and cohort heterogeneity are not disciplined by the same data. Conversely, a calibrated hazard model can reproduce an aggregate level without explaining household utility or welfare. The two approaches answer different questions. The paper uses the hazard framework as a transparent accounting instrument and does not infer that reduced-form survival modeling is generally superior.
+The loan-level framework remains the accounting instrument because it preserves observed loan composition, survivor evolution, and a stable response-off null. That choice does not establish that hazard modeling is generally superior or that its aggregate level explains household utility or welfare.
 
 \begin{figure}[H]
 \centering
@@ -346,7 +353,7 @@ This adverse result is still useful. A representative household decision rule ca
 \label{fig:recovery}\label{fig:waterfall}\label{fig:crossdesign}\label{fig:gapsweep}
 \end{figure}
 
-\subsection{No monthly validation claim}
+\subsection{Monthly validation failure}
 
 No estimator explains the empirical month-to-month path. Path A's lag-zero CPR correlation is $-0.378$; the ABM's is $-0.318$; and Path B's apparent raw relationship does not survive detrending. Seasonalizing the turnover floor can satisfy a pre-specified timing rule, but wrong-month rotations, scrambled calendars, and the zero-elasticity null can satisfy it as well. Repairing the benchmark's clipped month pairs reverses the result. The timing criterion therefore lacks discriminatory power.
 
@@ -374,13 +381,13 @@ Monthly path tests & No estimator passes a discriminating test & Restricts every
 \end{tabular}
 \end{table}
 
-\section{Policy Implications}\label{sec:policy}\label{sec:discussion}\label{sec:discussion-fallout}\label{sec:discussion-capdesign}\label{sec:discussion-policy}\label{sec:abm-danish}\label{tab:danish}
+\section{Discussion and Policy Implications}\label{sec:policy}\label{sec:discussion}\label{sec:discussion-fallout}\label{sec:discussion-capdesign}\label{sec:discussion-policy}\label{sec:abm-danish}\label{tab:danish}
 
 \subsection{Designing an achievable MBS runoff cap}
 
 The cap-relative gap is large partly because the ceiling was not designed as a forecast of achievable MBS redemptions. The post-phase-in \$35 billion monthly cap was roughly 1.7--1.9 times the New York Fed's contemporaneous projection of runoff. Unlike a Treasury maturity schedule, an MBS cap cannot cause principal to arrive. It only determines how much of an uncertain cash flow may leave the portfolio without reinvestment.
 
-An ex-ante MBS cap can be constructed from observable components. Scheduled amortization follows the book's balances, coupons, and remaining terms. A baseline-turnover band can be estimated from earlier cohorts and adjusted for housing conditions. The rate-sensitive component can be stress-tested across the book's coupon distribution and plausible mortgage-rate paths. A cap set above the upper edge of that distribution can still serve as a no-reinvestment ceiling, but it should not be communicated or evaluated as an expected runoff path.
+An ex-ante MBS cap can be constructed from observable components. Scheduled principal follows the book's balances, coupons, and remaining terms. A baseline-turnover band can be estimated from earlier cohorts and adjusted for housing conditions. The rate-sensitive component can be stress-tested across the book's coupon and vintage distribution and plausible mortgage-rate paths. The forecast is the expected cash-flow path; the cap is a no-reinvestment ceiling and should not be communicated or evaluated as that forecast.
 
 The policy implication is not that the Federal Reserve should have sold MBS. Active sales involve separate market, signaling, remittance, and implementation questions outside this design. The narrower result is that passive MBS normalization should be described with a forecast band in addition to a cap. Doing so would separate an operational limit from the amount of balance-sheet reduction the portfolio can plausibly deliver.
 
@@ -398,10 +405,12 @@ The exercise also leaves the central transition cost unpriced. The U.S. TBA mark
 
 \section{Conclusion}\label{sec:conclusion}\label{sec:limitations}
 
-Federal Reserve agency-MBS runoff fell \$764.748 billion below the announced ceilings between June 2022 and November 2025. That cap-relative gap is the MBS-specific quantitative-tightening shortfall studied in this paper. It is not a measure of the Federal Reserve's overall QT performance, and it is not the causal effect of mortgage lock-in. The New York Fed's contemporaneous projection already anticipated most of the gap because the ceilings were set above achievable MBS runoff.
+The cumulative gap between announced MBS runoff caps and realized Federal Reserve agency-MBS runoff was \$764.748 billion. That observed accounting gap is not the causal effect of mortgage lock-in: the cap was not a feasible no-lock-in counterfactual, and the New York Fed's contemporaneous projection anticipated most of it.
 
-Mortgage lock-in nevertheless mattered. Translating external rate-gap elasticities through a loan-level prepayment model produces a positive cumulative marginal over a rate-insensitive null. Under the production hard-maximum form, the binding off-window floor interval is $+1.9$ to $+9.1$ percentage points, with a \$42.6 billion anchor inside it. The joint floor-elasticity calibration box is $+2.1$ to $+13.2$ points. An additive combination of baseline and rate-sensitive turnover produces a larger, nearly floor-invariant marginal of approximately 11 points.
+Mortgage lock-in nevertheless added a positive cumulative marginal. Under the production hard-maximum form, sampling uncertainty at the central imported response yields a $+1.9$ to $+9.1$ percentage-point interval. The $+5.6$-point, \$42.6 billion result is an interior anchor.
 
-That functional-form disagreement is part of the answer. The evidence supports a positive and economically meaningful lock-in contribution. It does not support treating one interior point as the effect or calling the institutional cash-flow contribution unconditionally small. The elasticity is imported, the floor is calibrated, roughly half of SOMA face lies directly in the conventional agency-by-vintage estimation cells, and no estimator validates monthly timing. These limits define the model-based estimand rather than invalidate it.
+Calibration and functional form generate wider economically meaningful variation. Joint floor-and-elasticity calibration spans $+2.1$ to $+13.2$ points, and the additive construction produces approximately $+11.2$ points. These are assumption layers without a confidence-interval interpretation.
 
-The main operational lesson is simple. An MBS runoff cap is a ceiling on uncertain borrower cash flows, not a maturity schedule. Future balance-sheet plans should publish an achievable runoff range based on scheduled amortization, baseline turnover, the coupon distribution, and rate scenarios alongside the formal cap. Mortgage lock-in then appears where the evidence places it: as a material margin on an already slow MBS cash-flow path, not as the entire shortfall against an unattainable ceiling.
+The paper translates an imported household response into cumulative portfolio cash flows. It does not identify a new household elasticity, estimate monthly timing, measure household welfare, or turn model-based subgroup allocations into causal heterogeneous effects.
+
+Future MBS runoff caps should reflect plausible portfolio cash flows rather than only a legal maximum.

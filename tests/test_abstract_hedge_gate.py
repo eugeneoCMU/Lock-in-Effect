@@ -54,7 +54,7 @@ HANDOFF_PHRASES = [
     "large majority",
     "fifty-seed mean",
     "recalibrated on real loan covariates",
-    "institutional cash-flow",
+    "model-based",
     "turnover floor",
     "uniform-spread",
     "input-stability check",
@@ -113,17 +113,14 @@ def _mutations(abstract: str) -> dict[str, str]:
         # COMMENT: the hedge survives in the source but not in the PDF. This
         # passed while the gate read raw tex instead of comment-stripped text.
         "comment_smuggled_hedge": abstract.replace(
-            "The institutional cash-flow cost is small",
-            "The cash-flow cost is large\n% The institutional cash-flow cost is small"),
+            "model-based", "causal\n% model-based"),
         "whole_abstract_commented_out": "\n".join(
             "% " + line for line in abstract.splitlines()),
         # --- dropped hedges ----------------------------------------------
         "drops_institutional_scope": abstract.replace(
-            "The institutional cash-flow cost is small", "The cost is small"),
+            "model-based", "causal"),
         "drops_baseline_turnover": abstract.replace(
-            "scheduled amortization plus a turnover floor read from "
-            "realized, partly behavioral turnover, accounts",
-            "scheduled amortization accounts"),
+            "turnover floor", "turnover"),
         # --- scoping ------------------------------------------------------
         # the body keeps every phrase; only the abstract is gutted. A
         # whole-file count gate would pass this.
@@ -232,11 +229,11 @@ def test_body_mutation_flips_gate_to_fail(name: str, tex: str) -> None:
 
 BENIGN = {
     "reword_unrelated_sentence": (
-        "The cost to households who could not move is real.",
-        "The cost to households who could not move is real and large."),
+        "MBS runoff caps should reflect plausible portfolio cash flows",
+        "MBS runoff caps should represent plausible portfolio cash flows"),
     "reword_unrelated_lead": (
-        "lock households into old, cheap loans",
-        "lock households into old and cheap loans"),
+        "From June 2022 through November 2025",
+        "Between June 2022 and November 2025"),
 }
 
 
