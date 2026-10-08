@@ -1,0 +1,1528 @@
+{
+  "design": "frozen retrospective conditional cohort check",
+  "spec": "specs/SPEC_2026-10-07_pathb_validation.md",
+  "evaluation_start": "2024-01-01",
+  "evaluation_end": "2025-09-01",
+  "training_end": "2023-12-31",
+  "n_cells": 239,
+  "months": 21,
+  "exclusions": {
+    "missing_or_noncontiguous": 298,
+    "zero_exposure": 0,
+    "invalid_numerator": 1,
+    "evaluation": {
+      "input_rows": 6077,
+      "missing_or_noncontiguous": 0,
+      "zero_exposure": 0,
+      "invalid_numerator": 0,
+      "no_training_or_covariate_or_december_support": 1058
+    },
+    "no_training_or_covariate_or_december_support": 1058
+  },
+  "evaluation_coverage": {
+    "denominator": "Usable evaluation rows after lag/exposure/numerator exclusions, before support restrictions",
+    "usable_rows": 6077,
+    "retained_rows": 5019,
+    "usable_exposure_b_months": 37682.27849161887,
+    "retained_exposure_b_months": 37680.23011416809,
+    "usable_observed_b": 131.31186515679002,
+    "retained_observed_b": 131.30332179483003,
+    "exposure_retained_fraction": 0.9999456408281884,
+    "observed_principal_retained_fraction": 0.9999349383854247
+  },
+  "aggregate": {
+    "base": {
+      "n": 5019,
+      "exposure_b_months": 37680.23011416809,
+      "observed_b": 131.30332179483003,
+      "predicted_b": 121.43619951261094,
+      "ratio": 0.9248524550076723,
+      "weighted_rmse_monthly_pp": 0.08679077467033389,
+      "weighted_mae_monthly_pp": 0.06883815744763075
+    },
+    "off": {
+      "n": 5019,
+      "exposure_b_months": 37680.23011416809,
+      "observed_b": 131.30332179483003,
+      "predicted_b": 172.64285560950603,
+      "ratio": 1.3148399693898967,
+      "weighted_rmse_monthly_pp": 0.15699949268183158,
+      "weighted_mae_monthly_pp": 0.13355055089030665
+    },
+    "on": {
+      "n": 5019,
+      "exposure_b_months": 37680.23011416809,
+      "observed_b": 131.30332179483003,
+      "predicted_b": 161.7841953290202,
+      "ratio": 1.2321409170578224,
+      "weighted_rmse_monthly_pp": 0.133885390928567,
+      "weighted_mae_monthly_pp": 0.1101081572175448
+    }
+  },
+  "coupon_vintage": {
+    "2017|0.02": {
+      "base": {
+        "n": 21,
+        "exposure_b_months": 0.016529470560000002,
+        "observed_b": 6.172560000000001e-06,
+        "predicted_b": 0.0,
+        "ratio": 0.0,
+        "weighted_rmse_monthly_pp": 0.1624958534675188,
+        "weighted_mae_monthly_pp": 0.037342756851130504
+      },
+      "off": {
+        "n": 21,
+        "exposure_b_months": 0.016529470560000002,
+        "observed_b": 6.172560000000001e-06,
+        "predicted_b": 7.03735275905221e-05,
+        "ratio": 11.401027708199207,
+        "weighted_rmse_monthly_pp": 0.419365412440583,
+        "weighted_mae_monthly_pp": 0.4181200458750059
+      },
+      "on": {
+        "n": 21,
+        "exposure_b_months": 0.016529470560000002,
+        "observed_b": 6.172560000000001e-06,
+        "predicted_b": 7.03735275905221e-05,
+        "ratio": 11.401027708199207,
+        "weighted_rmse_monthly_pp": 0.419365412440583,
+        "weighted_mae_monthly_pp": 0.4181200458750059
+      }
+    },
+    "2017|0.025": {
+      "base": {
+        "n": 42,
+        "exposure_b_months": 0.31348191095,
+        "observed_b": 0.0014926134500000002,
+        "predicted_b": 0.000900919571228608,
+        "ratio": 0.6035853229304665,
+        "weighted_rmse_monthly_pp": 1.0824784307485626,
+        "weighted_mae_monthly_pp": 0.5597348723270625
+      },
+      "off": {
+        "n": 42,
+        "exposure_b_months": 0.31348191095,
+        "observed_b": 0.0014926134500000002,
+        "predicted_b": 0.0013585560658574258,
+        "ratio": 0.9101861341644922,
+        "weighted_rmse_monthly_pp": 1.051511303377642,
+        "weighted_mae_monthly_pp": 0.660849509674052
+      },
+      "on": {
+        "n": 42,
+        "exposure_b_months": 0.31348191095,
+        "observed_b": 0.0014926134500000002,
+        "predicted_b": 0.001334636087059852,
+        "ratio": 0.8941605658583955,
+        "weighted_rmse_monthly_pp": 1.0515509438402693,
+        "weighted_mae_monthly_pp": 0.6543275081907151
+      }
+    },
+    "2017|0.03": {
+      "base": {
+        "n": 126,
+        "exposure_b_months": 44.527236220180015,
+        "observed_b": 0.19990608144,
+        "predicted_b": 0.20341724903351846,
+        "ratio": 1.0175640859358863,
+        "weighted_rmse_monthly_pp": 0.1639508604982648,
+        "weighted_mae_monthly_pp": 0.10430362194297282
+      },
+      "off": {
+        "n": 126,
+        "exposure_b_months": 44.527236220180015,
+        "observed_b": 0.19990608144,
+        "predicted_b": 0.19012968183366097,
+        "ratio": 0.9510950365495843,
+        "weighted_rmse_monthly_pp": 0.16301421668394575,
+        "weighted_mae_monthly_pp": 0.09789988674389256
+      },
+      "on": {
+        "n": 126,
+        "exposure_b_months": 44.527236220180015,
+        "observed_b": 0.19990608144,
+        "predicted_b": 0.18957284053933623,
+        "ratio": 0.9483095220203934,
+        "weighted_rmse_monthly_pp": 0.16326314640132047,
+        "weighted_mae_monthly_pp": 0.09769338043446141
+      }
+    },
+    "2017|0.035": {
+      "base": {
+        "n": 126,
+        "exposure_b_months": 88.19073813900998,
+        "observed_b": 0.40435769117,
+        "predicted_b": 0.4124008840139673,
+        "ratio": 1.0198912819506276,
+        "weighted_rmse_monthly_pp": 0.12172818142684877,
+        "weighted_mae_monthly_pp": 0.08330226251288236
+      },
+      "off": {
+        "n": 126,
+        "exposure_b_months": 88.19073813900998,
+        "observed_b": 0.40435769117,
+        "predicted_b": 0.375886190927094,
+        "ratio": 0.9295883301724167,
+        "weighted_rmse_monthly_pp": 0.11554497310584719,
+        "weighted_mae_monthly_pp": 0.08131182555329906
+      },
+      "on": {
+        "n": 126,
+        "exposure_b_months": 88.19073813900998,
+        "observed_b": 0.40435769117,
+        "predicted_b": 0.37546836851948934,
+        "ratio": 0.9285550311484864,
+        "weighted_rmse_monthly_pp": 0.11676729201229623,
+        "weighted_mae_monthly_pp": 0.08157809125072873
+      }
+    },
+    "2017|0.04": {
+      "base": {
+        "n": 126,
+        "exposure_b_months": 667.9405484621002,
+        "observed_b": 2.9505765466500002,
+        "predicted_b": 3.128068230374482,
+        "ratio": 1.0601549157997616,
+        "weighted_rmse_monthly_pp": 0.08772767326616834,
+        "weighted_mae_monthly_pp": 0.06598917612762756
+      },
+      "off": {
+        "n": 126,
+        "exposure_b_months": 667.9405484621002,
+        "observed_b": 2.9505765466500002,
+        "predicted_b": 2.846173605563168,
+        "ratio": 0.9646160879285209,
+        "weighted_rmse_monthly_pp": 0.08272739297509342,
+        "weighted_mae_monthly_pp": 0.06727790871243461
+      },
+      "on": {
+        "n": 126,
+        "exposure_b_months": 667.9405484621002,
+        "observed_b": 2.9505765466500002,
+        "predicted_b": 2.843728868713751,
+        "ratio": 0.9637875255066469,
+        "weighted_rmse_monthly_pp": 0.08264024072683555,
+        "weighted_mae_monthly_pp": 0.06718982081447691
+      }
+    },
+    "2017|0.045": {
+      "base": {
+        "n": 126,
+        "exposure_b_months": 285.35282939960996,
+        "observed_b": 1.36108364595,
+        "predicted_b": 1.468579656941648,
+        "ratio": 1.0789782547983071,
+        "weighted_rmse_monthly_pp": 0.10519310045838014,
+        "weighted_mae_monthly_pp": 0.08114367927251212
+      },
+      "off": {
+        "n": 126,
+        "exposure_b_months": 285.35282939960996,
+        "observed_b": 1.36108364595,
+        "predicted_b": 1.2206060910387957,
+        "ratio": 0.8967899178502327,
+        "weighted_rmse_monthly_pp": 0.10524364725489548,
+        "weighted_mae_monthly_pp": 0.08173902974764455
+      },
+      "on": {
+        "n": 126,
+        "exposure_b_months": 285.35282939960996,
+        "observed_b": 1.36108364595,
+        "predicted_b": 1.2148777022164348,
+        "ratio": 0.8925812207290776,
+        "weighted_rmse_monthly_pp": 0.10554540334891374,
+        "weighted_mae_monthly_pp": 0.08189647152541804
+      }
+    },
+    "2017|0.05": {
+      "base": {
+        "n": 126,
+        "exposure_b_months": 129.21517994657,
+        "observed_b": 0.69693005355,
+        "predicted_b": 0.7524137102982751,
+        "ratio": 1.0796115140474345,
+        "weighted_rmse_monthly_pp": 0.1162423134628999,
+        "weighted_mae_monthly_pp": 0.08761563512221685
+      },
+      "off": {
+        "n": 126,
+        "exposure_b_months": 129.21517994657,
+        "observed_b": 0.69693005355,
+        "predicted_b": 0.5565402821576018,
+        "ratio": 0.7985597397080447,
+        "weighted_rmse_monthly_pp": 0.15238916394059834,
+        "weighted_mae_monthly_pp": 0.12563889650056315
+      },
+      "on": {
+        "n": 126,
+        "exposure_b_months": 129.21517994657,
+        "observed_b": 0.69693005355,
+        "predicted_b": 0.5506569692370124,
+        "ratio": 0.7901179844836559,
+        "weighted_rmse_monthly_pp": 0.1549584753069588,
+        "weighted_mae_monthly_pp": 0.1288089954183006
+      }
+    },
+    "2017|0.055": {
+      "base": {
+        "n": 126,
+        "exposure_b_months": 4.92739028446,
+        "observed_b": 0.03044526311,
+        "predicted_b": 0.031231898670576415,
+        "ratio": 1.0258376995375034,
+        "weighted_rmse_monthly_pp": 0.547017779145334,
+        "weighted_mae_monthly_pp": 0.41131088848891595
+      },
+      "off": {
+        "n": 126,
+        "exposure_b_months": 4.92739028446,
+        "observed_b": 0.03044526311,
+        "predicted_b": 0.02145202268147405,
+        "ratio": 0.7046095349535,
+        "weighted_rmse_monthly_pp": 0.5769190588742384,
+        "weighted_mae_monthly_pp": 0.40108815175237356
+      },
+      "on": {
+        "n": 126,
+        "exposure_b_months": 4.92739028446,
+        "observed_b": 0.03044526311,
+        "predicted_b": 0.021055991912405706,
+        "ratio": 0.6916015748108182,
+        "weighted_rmse_monthly_pp": 0.5797251535415904,
+        "weighted_mae_monthly_pp": 0.401654308930408
+      }
+    },
+    "2017|0.06": {
+      "base": {
+        "n": 84,
+        "exposure_b_months": 0.5553233730999999,
+        "observed_b": 0.004174625570000001,
+        "predicted_b": 0.003731971293212636,
+        "ratio": 0.8939655139449155,
+        "weighted_rmse_monthly_pp": 2.920447962892716,
+        "weighted_mae_monthly_pp": 0.9128674418334598
+      },
+      "off": {
+        "n": 84,
+        "exposure_b_months": 0.5553233730999999,
+        "observed_b": 0.004174625570000001,
+        "predicted_b": 0.002568990501161786,
+        "ratio": 0.6153822559856035,
+        "weighted_rmse_monthly_pp": 2.969875771184674,
+        "weighted_mae_monthly_pp": 0.8396349892940204
+      },
+      "on": {
+        "n": 84,
+        "exposure_b_months": 0.5553233730999999,
+        "observed_b": 0.004174625570000001,
+        "predicted_b": 0.002470697726860447,
+        "ratio": 0.591836964880289,
+        "weighted_rmse_monthly_pp": 2.970779569811362,
+        "weighted_mae_monthly_pp": 0.8357372632441832
+      }
+    },
+    "2018|0.025": {
+      "base": {
+        "n": 21,
+        "exposure_b_months": 0.01180693874,
+        "observed_b": 0.0,
+        "predicted_b": 1.2725037069147237e-05,
+        "ratio": null,
+        "weighted_rmse_monthly_pp": 0.10777592184870806,
+        "weighted_mae_monthly_pp": 0.10777592184870806
+      },
+      "off": {
+        "n": 21,
+        "exposure_b_months": 0.01180693874,
+        "observed_b": 0.0,
+        "predicted_b": 6.0736159660044025e-05,
+        "ratio": null,
+        "weighted_rmse_monthly_pp": 0.5144420380918237,
+        "weighted_mae_monthly_pp": 0.5144107291272693
+      },
+      "on": {
+        "n": 21,
+        "exposure_b_months": 0.01180693874,
+        "observed_b": 0.0,
+        "predicted_b": 5.0267546450622346e-05,
+        "ratio": null,
+        "weighted_rmse_monthly_pp": 0.42574580556028474,
+        "weighted_mae_monthly_pp": 0.42574580556028485
+      }
+    },
+    "2018|0.03": {
+      "base": {
+        "n": 84,
+        "exposure_b_months": 3.2095019546,
+        "observed_b": 0.01502868305,
+        "predicted_b": 0.015848908235398213,
+        "ratio": 1.0545773161007752,
+        "weighted_rmse_monthly_pp": 0.7215145534185914,
+        "weighted_mae_monthly_pp": 0.2998152520217927
+      },
+      "off": {
+        "n": 84,
+        "exposure_b_months": 3.2095019546,
+        "observed_b": 0.01502868305,
+        "predicted_b": 0.013677898871147192,
+        "ratio": 0.9101195910274513,
+        "weighted_rmse_monthly_pp": 0.7120093237146657,
+        "weighted_mae_monthly_pp": 0.2910673827762126
+      },
+      "on": {
+        "n": 84,
+        "exposure_b_months": 3.2095019546,
+        "observed_b": 0.01502868305,
+        "predicted_b": 0.013664319951084854,
+        "ratio": 0.9092160574299192,
+        "weighted_rmse_monthly_pp": 0.7137066982061029,
+        "weighted_mae_monthly_pp": 0.2907812535637339
+      }
+    },
+    "2018|0.035": {
+      "base": {
+        "n": 126,
+        "exposure_b_months": 12.282512986330003,
+        "observed_b": 0.057814171170000005,
+        "predicted_b": 0.05620535344566032,
+        "ratio": 0.9721726059237445,
+        "weighted_rmse_monthly_pp": 0.2903527244163054,
+        "weighted_mae_monthly_pp": 0.19244220600317558
+      },
+      "off": {
+        "n": 126,
+        "exposure_b_months": 12.282512986330003,
+        "observed_b": 0.057814171170000005,
+        "predicted_b": 0.052301532175340025,
+        "ratio": 0.904649000701743,
+        "weighted_rmse_monthly_pp": 0.27854384747932665,
+        "weighted_mae_monthly_pp": 0.18171028297991373
+      },
+      "on": {
+        "n": 126,
+        "exposure_b_months": 12.282512986330003,
+        "observed_b": 0.057814171170000005,
+        "predicted_b": 0.05229228385669725,
+        "ratio": 0.9044890344087804,
+        "weighted_rmse_monthly_pp": 0.27868443542216287,
+        "weighted_mae_monthly_pp": 0.18168715093278534
+      }
+    },
+    "2018|0.04": {
+      "base": {
+        "n": 126,
+        "exposure_b_months": 146.81239751004,
+        "observed_b": 0.7160163188499999,
+        "predicted_b": 0.7363355970885421,
+        "ratio": 1.02837823343353,
+        "weighted_rmse_monthly_pp": 0.1094046366839365,
+        "weighted_mae_monthly_pp": 0.08807460839649682
+      },
+      "off": {
+        "n": 126,
+        "exposure_b_months": 146.81239751004,
+        "observed_b": 0.7160163188499999,
+        "predicted_b": 0.6255695216355679,
+        "ratio": 0.8736805365557877,
+        "weighted_rmse_monthly_pp": 0.12275720185349542,
+        "weighted_mae_monthly_pp": 0.09061211527723935
+      },
+      "on": {
+        "n": 126,
+        "exposure_b_months": 146.81239751004,
+        "observed_b": 0.7160163188499999,
+        "predicted_b": 0.6250476244414873,
+        "ratio": 0.8729516464727812,
+        "weighted_rmse_monthly_pp": 0.12284526979014108,
+        "weighted_mae_monthly_pp": 0.09060984638398899
+      }
+    },
+    "2018|0.045": {
+      "base": {
+        "n": 126,
+        "exposure_b_months": 245.86866616409,
+        "observed_b": 1.22649841555,
+        "predicted_b": 1.3324741720808269,
+        "ratio": 1.0864051312151952,
+        "weighted_rmse_monthly_pp": 0.11416017199577864,
+        "weighted_mae_monthly_pp": 0.08984205832851709
+      },
+      "off": {
+        "n": 126,
+        "exposure_b_months": 245.86866616409,
+        "observed_b": 1.22649841555,
+        "predicted_b": 1.047957825472735,
+        "ratio": 0.8544306394417952,
+        "weighted_rmse_monthly_pp": 0.12652507606126012,
+        "weighted_mae_monthly_pp": 0.1024408665918247
+      },
+      "on": {
+        "n": 126,
+        "exposure_b_months": 245.86866616409,
+        "observed_b": 1.22649841555,
+        "predicted_b": 1.0467755333806321,
+        "ratio": 0.8534666821491371,
+        "weighted_rmse_monthly_pp": 0.12704023700394554,
+        "weighted_mae_monthly_pp": 0.10262393890768699
+      }
+    },
+    "2018|0.05": {
+      "base": {
+        "n": 126,
+        "exposure_b_months": 389.2043115078,
+        "observed_b": 2.01975292984,
+        "predicted_b": 2.2780914619398245,
+        "ratio": 1.1279060068601012,
+        "weighted_rmse_monthly_pp": 0.11045710040506794,
+        "weighted_mae_monthly_pp": 0.08863566976013029
+      },
+      "off": {
+        "n": 126,
+        "exposure_b_months": 389.2043115078,
+        "observed_b": 2.01975292984,
+        "predicted_b": 1.6634200394289855,
+        "ratio": 0.8235760002391767,
+        "weighted_rmse_monthly_pp": 0.12638954201645924,
+        "weighted_mae_monthly_pp": 0.10308121702958421
+      },
+      "on": {
+        "n": 126,
+        "exposure_b_months": 389.2043115078,
+        "observed_b": 2.01975292984,
+        "predicted_b": 1.6570828631890435,
+        "ratio": 0.8204384005128359,
+        "weighted_rmse_monthly_pp": 0.12786451692389117,
+        "weighted_mae_monthly_pp": 0.10405088123124513
+      }
+    },
+    "2018|0.055": {
+      "base": {
+        "n": 126,
+        "exposure_b_months": 70.46652006401999,
+        "observed_b": 0.42609441329000003,
+        "predicted_b": 0.46259449941503084,
+        "ratio": 1.08566196830229,
+        "weighted_rmse_monthly_pp": 0.17736566768871662,
+        "weighted_mae_monthly_pp": 0.1469739726914162
+      },
+      "off": {
+        "n": 126,
+        "exposure_b_months": 70.46652006401999,
+        "observed_b": 0.42609441329000003,
+        "predicted_b": 0.3032417456498411,
+        "ratio": 0.7116773564535206,
+        "weighted_rmse_monthly_pp": 0.24221385481940638,
+        "weighted_mae_monthly_pp": 0.1949053809643249
+      },
+      "on": {
+        "n": 126,
+        "exposure_b_months": 70.46652006401999,
+        "observed_b": 0.42609441329000003,
+        "predicted_b": 0.30049204240402233,
+        "ratio": 0.7052240842207601,
+        "weighted_rmse_monthly_pp": 0.24445248903614786,
+        "weighted_mae_monthly_pp": 0.19575580660242736
+      }
+    },
+    "2018|0.06": {
+      "base": {
+        "n": 126,
+        "exposure_b_months": 26.709840733259995,
+        "observed_b": 0.17844442099,
+        "predicted_b": 0.19681520968290175,
+        "ratio": 1.1029496388342186,
+        "weighted_rmse_monthly_pp": 0.2579988748462802,
+        "weighted_mae_monthly_pp": 0.21044164330622567
+      },
+      "off": {
+        "n": 126,
+        "exposure_b_months": 26.709840733259995,
+        "observed_b": 0.17844442099,
+        "predicted_b": 0.11584261515966046,
+        "ratio": 0.6491803695345133,
+        "weighted_rmse_monthly_pp": 0.3423194049867766,
+        "weighted_mae_monthly_pp": 0.26885131447869104
+      },
+      "on": {
+        "n": 126,
+        "exposure_b_months": 26.709840733259995,
+        "observed_b": 0.17844442099,
+        "predicted_b": 0.11478596583524837,
+        "ratio": 0.6432589217327281,
+        "weighted_rmse_monthly_pp": 0.3439062582872549,
+        "weighted_mae_monthly_pp": 0.2701988656932542
+      }
+    },
+    "2018|0.065": {
+      "base": {
+        "n": 84,
+        "exposure_b_months": 0.77055095899,
+        "observed_b": 0.005291809400000001,
+        "predicted_b": 0.0048512263157193015,
+        "ratio": 0.9167424502702802,
+        "weighted_rmse_monthly_pp": 0.9272699186449409,
+        "weighted_mae_monthly_pp": 0.6333819148315305
+      },
+      "off": {
+        "n": 84,
+        "exposure_b_months": 0.77055095899,
+        "observed_b": 0.005291809400000001,
+        "predicted_b": 0.0032864936786090254,
+        "ratio": 0.6210529197459428,
+        "weighted_rmse_monthly_pp": 0.9336159111907103,
+        "weighted_mae_monthly_pp": 0.6726073643437458
+      },
+      "on": {
+        "n": 84,
+        "exposure_b_months": 0.77055095899,
+        "observed_b": 0.005291809400000001,
+        "predicted_b": 0.003284245990564164,
+        "ratio": 0.620628171257295,
+        "weighted_rmse_monthly_pp": 0.9337848613835409,
+        "weighted_mae_monthly_pp": 0.6726782567513481
+      }
+    },
+    "2019|0.02": {
+      "base": {
+        "n": 21,
+        "exposure_b_months": 0.05980346543,
+        "observed_b": 1.307482e-05,
+        "predicted_b": 0.0,
+        "ratio": 0.0,
+        "weighted_rmse_monthly_pp": 0.10212210256991543,
+        "weighted_mae_monthly_pp": 0.021862980524605363
+      },
+      "off": {
+        "n": 21,
+        "exposure_b_months": 0.05980346543,
+        "observed_b": 1.307482e-05,
+        "predicted_b": 0.0002546107456479199,
+        "ratio": 19.4733652660549,
+        "weighted_rmse_monthly_pp": 0.416019555158988,
+        "weighted_mae_monthly_pp": 0.4085822852312612
+      },
+      "on": {
+        "n": 21,
+        "exposure_b_months": 0.05980346543,
+        "observed_b": 1.307482e-05,
+        "predicted_b": 0.0002546107456479199,
+        "ratio": 19.4733652660549,
+        "weighted_rmse_monthly_pp": 0.416019555158988,
+        "weighted_mae_monthly_pp": 0.4085822852312612
+      }
+    },
+    "2019|0.025": {
+      "base": {
+        "n": 63,
+        "exposure_b_months": 2.08211990475,
+        "observed_b": 0.0067636782199999995,
+        "predicted_b": 0.005734329820291484,
+        "ratio": 0.8478123343205828,
+        "weighted_rmse_monthly_pp": 0.5388083083956857,
+        "weighted_mae_monthly_pp": 0.3553494447188338
+      },
+      "off": {
+        "n": 63,
+        "exposure_b_months": 2.08211990475,
+        "observed_b": 0.0067636782199999995,
+        "predicted_b": 0.009199194194109729,
+        "ratio": 1.3600874989747411,
+        "weighted_rmse_monthly_pp": 0.5515292473028978,
+        "weighted_mae_monthly_pp": 0.43671480502088367
+      },
+      "on": {
+        "n": 63,
+        "exposure_b_months": 2.08211990475,
+        "observed_b": 0.0067636782199999995,
+        "predicted_b": 0.00886453816120892,
+        "ratio": 1.3106090906271588,
+        "weighted_rmse_monthly_pp": 0.5461132208868709,
+        "weighted_mae_monthly_pp": 0.4252983837162235
+      }
+    },
+    "2019|0.03": {
+      "base": {
+        "n": 126,
+        "exposure_b_months": 125.63292041477,
+        "observed_b": 0.4988860883600001,
+        "predicted_b": 0.4754906249956872,
+        "ratio": 0.9531045986044203,
+        "weighted_rmse_monthly_pp": 0.11783108727819858,
+        "weighted_mae_monthly_pp": 0.08751280936250394
+      },
+      "off": {
+        "n": 126,
+        "exposure_b_months": 125.63292041477,
+        "observed_b": 0.4988860883600001,
+        "predicted_b": 0.535419476504765,
+        "ratio": 1.0732299196092276,
+        "weighted_rmse_monthly_pp": 0.11913464525234063,
+        "weighted_mae_monthly_pp": 0.08801740721362064
+      },
+      "on": {
+        "n": 126,
+        "exposure_b_months": 125.63292041477,
+        "observed_b": 0.4988860883600001,
+        "predicted_b": 0.534876889068774,
+        "ratio": 1.0721423217614412,
+        "weighted_rmse_monthly_pp": 0.1192654265937306,
+        "weighted_mae_monthly_pp": 0.08796212560570651
+      }
+    },
+    "2019|0.035": {
+      "base": {
+        "n": 126,
+        "exposure_b_months": 434.85340271965,
+        "observed_b": 1.7139018628000002,
+        "predicted_b": 1.6692897085341758,
+        "ratio": 0.9739704149729195,
+        "weighted_rmse_monthly_pp": 0.09613080188016919,
+        "weighted_mae_monthly_pp": 0.07663491973755247
+      },
+      "off": {
+        "n": 126,
+        "exposure_b_months": 434.85340271965,
+        "observed_b": 1.7139018628000002,
+        "predicted_b": 1.852338010362945,
+        "ratio": 1.0807725054553485,
+        "weighted_rmse_monthly_pp": 0.10290195683723004,
+        "weighted_mae_monthly_pp": 0.08045181391480338
+      },
+      "on": {
+        "n": 126,
+        "exposure_b_months": 434.85340271965,
+        "observed_b": 1.7139018628000002,
+        "predicted_b": 1.8513701224150834,
+        "ratio": 1.0802077777023367,
+        "weighted_rmse_monthly_pp": 0.10258162462468547,
+        "weighted_mae_monthly_pp": 0.08036460480212862
+      }
+    },
+    "2019|0.04": {
+      "base": {
+        "n": 126,
+        "exposure_b_months": 1122.9847376452,
+        "observed_b": 5.020645616090001,
+        "predicted_b": 5.2068855477786675,
+        "ratio": 1.0370948172664907,
+        "weighted_rmse_monthly_pp": 0.08240167779474444,
+        "weighted_mae_monthly_pp": 0.06628080852190046
+      },
+      "off": {
+        "n": 126,
+        "exposure_b_months": 1122.9847376452,
+        "observed_b": 5.020645616090001,
+        "predicted_b": 4.785509050062498,
+        "ratio": 0.953166069862819,
+        "weighted_rmse_monthly_pp": 0.08514254392266865,
+        "weighted_mae_monthly_pp": 0.07311019263636911
+      },
+      "on": {
+        "n": 126,
+        "exposure_b_months": 1122.9847376452,
+        "observed_b": 5.020645616090001,
+        "predicted_b": 4.781060417606607,
+        "ratio": 0.9522800020547997,
+        "weighted_rmse_monthly_pp": 0.08506180560538602,
+        "weighted_mae_monthly_pp": 0.07301927008369631
+      }
+    },
+    "2019|0.045": {
+      "base": {
+        "n": 126,
+        "exposure_b_months": 327.1120161570001,
+        "observed_b": 1.6795469990499998,
+        "predicted_b": 1.8077697142117697,
+        "ratio": 1.0763436302969172,
+        "weighted_rmse_monthly_pp": 0.10265965747495943,
+        "weighted_mae_monthly_pp": 0.07995346605096763
+      },
+      "off": {
+        "n": 126,
+        "exposure_b_months": 327.1120161570001,
+        "observed_b": 1.6795469990499998,
+        "predicted_b": 1.3969432038176617,
+        "ratio": 0.8317380845000546,
+        "weighted_rmse_monthly_pp": 0.12781166789876006,
+        "weighted_mae_monthly_pp": 0.10280744177041466
+      },
+      "on": {
+        "n": 126,
+        "exposure_b_months": 327.1120161570001,
+        "observed_b": 1.6795469990499998,
+        "predicted_b": 1.3926656882721085,
+        "ratio": 0.8291912575592351,
+        "weighted_rmse_monthly_pp": 0.1281234878213916,
+        "weighted_mae_monthly_pp": 0.10288096707361832
+      }
+    },
+    "2019|0.05": {
+      "base": {
+        "n": 126,
+        "exposure_b_months": 207.31888335068996,
+        "observed_b": 1.1495452546699998,
+        "predicted_b": 1.2605661766873737,
+        "ratio": 1.096578122145565,
+        "weighted_rmse_monthly_pp": 0.10733926111419444,
+        "weighted_mae_monthly_pp": 0.08447201987581388
+      },
+      "off": {
+        "n": 126,
+        "exposure_b_months": 207.31888335068996,
+        "observed_b": 1.1495452546699998,
+        "predicted_b": 0.8881122162025152,
+        "ratio": 0.7725769930279655,
+        "weighted_rmse_monthly_pp": 0.1576136033450293,
+        "weighted_mae_monthly_pp": 0.13373789297036748
+      },
+      "on": {
+        "n": 126,
+        "exposure_b_months": 207.31888335068996,
+        "observed_b": 1.1495452546699998,
+        "predicted_b": 0.8826933372063316,
+        "ratio": 0.7678630603018117,
+        "weighted_rmse_monthly_pp": 0.15874330971644712,
+        "weighted_mae_monthly_pp": 0.13445577171778927
+      }
+    },
+    "2019|0.055": {
+      "base": {
+        "n": 126,
+        "exposure_b_months": 42.38664131441,
+        "observed_b": 0.28304371552,
+        "predicted_b": 0.29020522856180236,
+        "ratio": 1.0253017913810432,
+        "weighted_rmse_monthly_pp": 0.21850095444609008,
+        "weighted_mae_monthly_pp": 0.17503068037841282
+      },
+      "off": {
+        "n": 126,
+        "exposure_b_months": 42.38664131441,
+        "observed_b": 0.28304371552,
+        "predicted_b": 0.1826499885643392,
+        "ratio": 0.6453066383359889,
+        "weighted_rmse_monthly_pp": 0.3212613486574246,
+        "weighted_mae_monthly_pp": 0.26498639320417405
+      },
+      "on": {
+        "n": 126,
+        "exposure_b_months": 42.38664131441,
+        "observed_b": 0.28304371552,
+        "predicted_b": 0.18105873933281125,
+        "ratio": 0.639684717960175,
+        "weighted_rmse_monthly_pp": 0.32322239231060257,
+        "weighted_mae_monthly_pp": 0.26662403935339507
+      }
+    },
+    "2019|0.06": {
+      "base": {
+        "n": 126,
+        "exposure_b_months": 17.44438105361,
+        "observed_b": 0.12195515661999998,
+        "predicted_b": 0.13659448742390382,
+        "ratio": 1.1200386372305562,
+        "weighted_rmse_monthly_pp": 0.3169369631840042,
+        "weighted_mae_monthly_pp": 0.2549460848618986
+      },
+      "off": {
+        "n": 126,
+        "exposure_b_months": 17.44438105361,
+        "observed_b": 0.12195515661999998,
+        "predicted_b": 0.07508051407417424,
+        "ratio": 0.6156403399006537,
+        "weighted_rmse_monthly_pp": 0.40985867655453057,
+        "weighted_mae_monthly_pp": 0.3227406507901504
+      },
+      "on": {
+        "n": 126,
+        "exposure_b_months": 17.44438105361,
+        "observed_b": 0.12195515661999998,
+        "predicted_b": 0.07462330710368253,
+        "ratio": 0.6118913637756316,
+        "weighted_rmse_monthly_pp": 0.4109083969652483,
+        "weighted_mae_monthly_pp": 0.32372037517648083
+      }
+    },
+    "2019|0.065": {
+      "base": {
+        "n": 105,
+        "exposure_b_months": 0.8895672305800001,
+        "observed_b": 0.00657203212,
+        "predicted_b": 0.005407600841569927,
+        "ratio": 0.8228202088534415,
+        "weighted_rmse_monthly_pp": 1.1513606968086587,
+        "weighted_mae_monthly_pp": 0.8476151313435638
+      },
+      "off": {
+        "n": 105,
+        "exposure_b_months": 0.8895672305800001,
+        "observed_b": 0.00657203212,
+        "predicted_b": 0.0038264467441791144,
+        "ratio": 0.5822318994051287,
+        "weighted_rmse_monthly_pp": 1.1069417082450892,
+        "weighted_mae_monthly_pp": 0.7409441118036586
+      },
+      "on": {
+        "n": 105,
+        "exposure_b_months": 0.8895672305800001,
+        "observed_b": 0.00657203212,
+        "predicted_b": 0.0038022827468405193,
+        "ratio": 0.5785551070679368,
+        "weighted_rmse_monthly_pp": 1.107966591489777,
+        "weighted_mae_monthly_pp": 0.7406401374208159
+      }
+    },
+    "2019|0.07": {
+      "base": {
+        "n": 63,
+        "exposure_b_months": 0.01037415458,
+        "observed_b": 0.0,
+        "predicted_b": 6.32701629746526e-05,
+        "ratio": null,
+        "weighted_rmse_monthly_pp": 2.1722572321758067,
+        "weighted_mae_monthly_pp": 0.6098825931958747
+      },
+      "off": {
+        "n": 63,
+        "exposure_b_months": 0.01037415458,
+        "observed_b": 0.0,
+        "predicted_b": 4.5808776531299155e-05,
+        "ratio": null,
+        "weighted_rmse_monthly_pp": 0.4418595891995543,
+        "weighted_mae_monthly_pp": 0.4415663577985663
+      },
+      "on": {
+        "n": 63,
+        "exposure_b_months": 0.01037415458,
+        "observed_b": 0.0,
+        "predicted_b": 4.624475544469149e-05,
+        "ratio": null,
+        "weighted_rmse_monthly_pp": 0.4462526519378169,
+        "weighted_mae_monthly_pp": 0.4457689066427183
+      }
+    },
+    "2020|0.02": {
+      "base": {
+        "n": 126,
+        "exposure_b_months": 347.35396171388004,
+        "observed_b": 0.8876506708399999,
+        "predicted_b": 0.7949511253068681,
+        "ratio": 0.8955675373450588,
+        "weighted_rmse_monthly_pp": 0.07938839321421769,
+        "weighted_mae_monthly_pp": 0.06187230789587551
+      },
+      "off": {
+        "n": 126,
+        "exposure_b_months": 347.35396171388004,
+        "observed_b": 0.8876506708399999,
+        "predicted_b": 1.529598155591169,
+        "ratio": 1.7231983322264406,
+        "weighted_rmse_monthly_pp": 0.20105404099915375,
+        "weighted_mae_monthly_pp": 0.18917538819173374
+      },
+      "on": {
+        "n": 126,
+        "exposure_b_months": 347.35396171388004,
+        "observed_b": 0.8876506708399999,
+        "predicted_b": 1.479797907995325,
+        "ratio": 1.6670949018660295,
+        "weighted_rmse_monthly_pp": 0.18928015062138495,
+        "weighted_mae_monthly_pp": 0.17724998629850688
+      }
+    },
+    "2020|0.025": {
+      "base": {
+        "n": 126,
+        "exposure_b_months": 2444.1590428951,
+        "observed_b": 6.477614711010001,
+        "predicted_b": 5.841268499043437,
+        "ratio": 0.9017622627531449,
+        "weighted_rmse_monthly_pp": 0.06818013551289488,
+        "weighted_mae_monthly_pp": 0.05823439452381329
+      },
+      "off": {
+        "n": 126,
+        "exposure_b_months": 2444.1590428951,
+        "observed_b": 6.477614711010001,
+        "predicted_b": 10.849718116255039,
+        "ratio": 1.674955766945165,
+        "weighted_rmse_monthly_pp": 0.19058853403052542,
+        "weighted_mae_monthly_pp": 0.17908889086427543
+      },
+      "on": {
+        "n": 126,
+        "exposure_b_months": 2444.1590428951,
+        "observed_b": 6.477614711010001,
+        "predicted_b": 10.40990606288655,
+        "ratio": 1.6070585435087448,
+        "weighted_rmse_monthly_pp": 0.17533303619440296,
+        "weighted_mae_monthly_pp": 0.16263291416029194
+      }
+    },
+    "2020|0.03": {
+      "base": {
+        "n": 126,
+        "exposure_b_months": 8403.175159791039,
+        "observed_b": 26.96254820453,
+        "predicted_b": 25.309039514099812,
+        "ratio": 0.9386738717020678,
+        "weighted_rmse_monthly_pp": 0.07513968753656217,
+        "weighted_mae_monthly_pp": 0.062574325967698
+      },
+      "off": {
+        "n": 126,
+        "exposure_b_months": 8403.175159791039,
+        "observed_b": 26.96254820453,
+        "predicted_b": 37.48252502788495,
+        "ratio": 1.390169977390619,
+        "weighted_rmse_monthly_pp": 0.14752698527315056,
+        "weighted_mae_monthly_pp": 0.12840061370628242
+      },
+      "on": {
+        "n": 126,
+        "exposure_b_months": 8403.175159791039,
+        "observed_b": 26.96254820453,
+        "predicted_b": 35.80188410700845,
+        "ratio": 1.3278375558358146,
+        "weighted_rmse_monthly_pp": 0.13321892178401187,
+        "weighted_mae_monthly_pp": 0.1139358964370774
+      }
+    },
+    "2020|0.035": {
+      "base": {
+        "n": 126,
+        "exposure_b_months": 2111.30196254623,
+        "observed_b": 8.426423707180001,
+        "predicted_b": 8.109487997954437,
+        "ratio": 0.9623878741160964,
+        "weighted_rmse_monthly_pp": 0.08181988287701382,
+        "weighted_mae_monthly_pp": 0.06899965207466947
+      },
+      "off": {
+        "n": 126,
+        "exposure_b_months": 2111.30196254623,
+        "observed_b": 8.426423707180001,
+        "predicted_b": 9.174895862739424,
+        "ratio": 1.088824414908268,
+        "weighted_rmse_monthly_pp": 0.09706541723598017,
+        "weighted_mae_monthly_pp": 0.07430394499463368
+      },
+      "on": {
+        "n": 126,
+        "exposure_b_months": 2111.30196254623,
+        "observed_b": 8.426423707180001,
+        "predicted_b": 9.002839446592557,
+        "ratio": 1.068405738833356,
+        "weighted_rmse_monthly_pp": 0.09508326983024908,
+        "weighted_mae_monthly_pp": 0.07261824123339426
+      }
+    },
+    "2020|0.04": {
+      "base": {
+        "n": 126,
+        "exposure_b_months": 623.89779101649,
+        "observed_b": 2.83752384328,
+        "predicted_b": 2.8749070990019656,
+        "ratio": 1.0131746049678132,
+        "weighted_rmse_monthly_pp": 0.0897862940810504,
+        "weighted_mae_monthly_pp": 0.07023268937767603
+      },
+      "off": {
+        "n": 126,
+        "exposure_b_months": 623.89779101649,
+        "observed_b": 2.83752384328,
+        "predicted_b": 2.6693327260201554,
+        "ratio": 0.940726095515227,
+        "weighted_rmse_monthly_pp": 0.09396683009750326,
+        "weighted_mae_monthly_pp": 0.07334345559415316
+      },
+      "on": {
+        "n": 126,
+        "exposure_b_months": 623.89779101649,
+        "observed_b": 2.83752384328,
+        "predicted_b": 2.656284609920982,
+        "ratio": 0.9361276791424183,
+        "weighted_rmse_monthly_pp": 0.09593187813111755,
+        "weighted_mae_monthly_pp": 0.07399800782431318
+      }
+    },
+    "2020|0.045": {
+      "base": {
+        "n": 126,
+        "exposure_b_months": 65.83964005328,
+        "observed_b": 0.34619445546000005,
+        "predicted_b": 0.3473329024348092,
+        "ratio": 1.0032884610277668,
+        "weighted_rmse_monthly_pp": 0.15915456047527946,
+        "weighted_mae_monthly_pp": 0.11836576295807698
+      },
+      "off": {
+        "n": 126,
+        "exposure_b_months": 65.83964005328,
+        "observed_b": 0.34619445546000005,
+        "predicted_b": 0.2819293232920724,
+        "ratio": 0.814366951421748,
+        "weighted_rmse_monthly_pp": 0.1874089070010652,
+        "weighted_mae_monthly_pp": 0.1419001445379515
+      },
+      "on": {
+        "n": 126,
+        "exposure_b_months": 65.83964005328,
+        "observed_b": 0.34619445546000005,
+        "predicted_b": 0.28030950592282877,
+        "ratio": 0.8096880279332385,
+        "weighted_rmse_monthly_pp": 0.18848300199899212,
+        "weighted_mae_monthly_pp": 0.14211612842506
+      }
+    },
+    "2020|0.05": {
+      "base": {
+        "n": 126,
+        "exposure_b_months": 42.325786649150004,
+        "observed_b": 0.26371032603,
+        "predicted_b": 0.2709826273592329,
+        "ratio": 1.027576854644689,
+        "weighted_rmse_monthly_pp": 0.2040633737358093,
+        "weighted_mae_monthly_pp": 0.15955602931086418
+      },
+      "off": {
+        "n": 126,
+        "exposure_b_months": 42.325786649150004,
+        "observed_b": 0.26371032603,
+        "predicted_b": 0.18210413878995105,
+        "ratio": 0.6905461061438856,
+        "weighted_rmse_monthly_pp": 0.27918734077382446,
+        "weighted_mae_monthly_pp": 0.21559765034697176
+      },
+      "on": {
+        "n": 126,
+        "exposure_b_months": 42.325786649150004,
+        "observed_b": 0.26371032603,
+        "predicted_b": 0.1802468598247488,
+        "ratio": 0.6835032307542015,
+        "weighted_rmse_monthly_pp": 0.281188512818381,
+        "weighted_mae_monthly_pp": 0.21674350022372288
+      }
+    },
+    "2020|0.055": {
+      "base": {
+        "n": 126,
+        "exposure_b_months": 5.374033171159999,
+        "observed_b": 0.04097780174,
+        "predicted_b": 0.04626297716405995,
+        "ratio": 1.1289765482685932,
+        "weighted_rmse_monthly_pp": 0.6204471365229172,
+        "weighted_mae_monthly_pp": 0.4456214326972077
+      },
+      "off": {
+        "n": 126,
+        "exposure_b_months": 5.374033171159999,
+        "observed_b": 0.04097780174,
+        "predicted_b": 0.02292347979826644,
+        "ratio": 0.5594121408394134,
+        "weighted_rmse_monthly_pp": 0.6659608669130339,
+        "weighted_mae_monthly_pp": 0.4628331506201304
+      },
+      "on": {
+        "n": 126,
+        "exposure_b_months": 5.374033171159999,
+        "observed_b": 0.04097780174,
+        "predicted_b": 0.022879720815632058,
+        "ratio": 0.5583442704125898,
+        "weighted_rmse_monthly_pp": 0.6663952894150411,
+        "weighted_mae_monthly_pp": 0.46311006820083395
+      }
+    },
+    "2020|0.06": {
+      "base": {
+        "n": 105,
+        "exposure_b_months": 1.66334480068,
+        "observed_b": 0.01443885669,
+        "predicted_b": 0.012082351763048562,
+        "ratio": 0.8367942159448472,
+        "weighted_rmse_monthly_pp": 1.0688532900167058,
+        "weighted_mae_monthly_pp": 0.6082843808663001
+      },
+      "off": {
+        "n": 105,
+        "exposure_b_months": 1.66334480068,
+        "observed_b": 0.01443885669,
+        "predicted_b": 0.007138750579233773,
+        "ratio": 0.49441245470480344,
+        "weighted_rmse_monthly_pp": 1.1551294986731366,
+        "weighted_mae_monthly_pp": 0.6763948089422194
+      },
+      "on": {
+        "n": 105,
+        "exposure_b_months": 1.66334480068,
+        "observed_b": 0.01443885669,
+        "predicted_b": 0.007118195377232222,
+        "ratio": 0.4929888515454351,
+        "weighted_rmse_monthly_pp": 1.1550654300895016,
+        "weighted_mae_monthly_pp": 0.6760110680612197
+      }
+    },
+    "2021|0.02": {
+      "base": {
+        "n": 126,
+        "exposure_b_months": 1027.58083406263,
+        "observed_b": 2.7954715343399994,
+        "predicted_b": 2.2703192446774016,
+        "ratio": 0.8121417860237363,
+        "weighted_rmse_monthly_pp": 0.08382184082102638,
+        "weighted_mae_monthly_pp": 0.06881297797786233
+      },
+      "off": {
+        "n": 126,
+        "exposure_b_months": 1027.58083406263,
+        "observed_b": 2.7954715343399994,
+        "predicted_b": 4.588210661584179,
+        "ratio": 1.6413011562528534,
+        "weighted_rmse_monthly_pp": 0.1883564537986275,
+        "weighted_mae_monthly_pp": 0.1756441173848305
+      },
+      "on": {
+        "n": 126,
+        "exposure_b_months": 1027.58083406263,
+        "observed_b": 2.7954715343399994,
+        "predicted_b": 4.378730850380326,
+        "ratio": 1.5663657442371808,
+        "weighted_rmse_monthly_pp": 0.16970410213047335,
+        "weighted_mae_monthly_pp": 0.15743440845072093
+      }
+    },
+    "2021|0.025": {
+      "base": {
+        "n": 126,
+        "exposure_b_months": 2832.26037682326,
+        "observed_b": 7.792325443570002,
+        "predicted_b": 6.70454491256328,
+        "ratio": 0.8604036062297262,
+        "weighted_rmse_monthly_pp": 0.07373361432069118,
+        "weighted_mae_monthly_pp": 0.06181117165182137
+      },
+      "off": {
+        "n": 126,
+        "exposure_b_months": 2832.26037682326,
+        "observed_b": 7.792325443570002,
+        "predicted_b": 12.843881270551927,
+        "ratio": 1.6482732097836497,
+        "weighted_rmse_monthly_pp": 0.19031847550349626,
+        "weighted_mae_monthly_pp": 0.17839050815932975
+      },
+      "on": {
+        "n": 126,
+        "exposure_b_months": 2832.26037682326,
+        "observed_b": 7.792325443570002,
+        "predicted_b": 12.087711650341715,
+        "ratio": 1.551232907028561,
+        "weighted_rmse_monthly_pp": 0.16604667372267004,
+        "weighted_mae_monthly_pp": 0.1531950002617514
+      }
+    },
+    "2021|0.03": {
+      "base": {
+        "n": 126,
+        "exposure_b_months": 12502.275865265778,
+        "observed_b": 41.12570158434,
+        "predicted_b": 35.520185481638805,
+        "ratio": 0.8636979823625505,
+        "weighted_rmse_monthly_pp": 0.08239076648506356,
+        "weighted_mae_monthly_pp": 0.06994517081373018
+      },
+      "off": {
+        "n": 126,
+        "exposure_b_months": 12502.275865265778,
+        "observed_b": 41.12570158434,
+        "predicted_b": 59.35484622359736,
+        "ratio": 1.4432543138959781,
+        "weighted_rmse_monthly_pp": 0.1639680643872681,
+        "weighted_mae_monthly_pp": 0.14580661021808164
+      },
+      "on": {
+        "n": 126,
+        "exposure_b_months": 12502.275865265778,
+        "observed_b": 41.12570158434,
+        "predicted_b": 53.80958370313379,
+        "ratio": 1.308417403962869,
+        "weighted_rmse_monthly_pp": 0.12321153537417578,
+        "weighted_mae_monthly_pp": 0.10420306042536519
+      }
+    },
+    "2021|0.035": {
+      "base": {
+        "n": 126,
+        "exposure_b_months": 2363.6580300549194,
+        "observed_b": 9.853113351360001,
+        "predicted_b": 8.944351929720975,
+        "ratio": 0.9077691091908944,
+        "weighted_rmse_monthly_pp": 0.0836972310270254,
+        "weighted_mae_monthly_pp": 0.07030324511789438
+      },
+      "off": {
+        "n": 126,
+        "exposure_b_months": 2363.6580300549194,
+        "observed_b": 9.853113351360001,
+        "predicted_b": 12.13664016095055,
+        "ratio": 1.2317568801007814,
+        "weighted_rmse_monthly_pp": 0.132525268785893,
+        "weighted_mae_monthly_pp": 0.10674800563685737
+      },
+      "on": {
+        "n": 126,
+        "exposure_b_months": 2363.6580300549194,
+        "observed_b": 9.853113351360001,
+        "predicted_b": 10.537972181038448,
+        "ratio": 1.0695068457305343,
+        "weighted_rmse_monthly_pp": 0.0797917173343063,
+        "weighted_mae_monthly_pp": 0.06153673481859324
+      }
+    },
+    "2021|0.04": {
+      "base": {
+        "n": 126,
+        "exposure_b_months": 434.02263264155005,
+        "observed_b": 2.2075363814499998,
+        "predicted_b": 1.9825588767767728,
+        "ratio": 0.8980866152133571,
+        "weighted_rmse_monthly_pp": 0.10392533396614256,
+        "weighted_mae_monthly_pp": 0.08655920912714817
+      },
+      "off": {
+        "n": 126,
+        "exposure_b_months": 434.02263264155005,
+        "observed_b": 2.2075363814499998,
+        "predicted_b": 2.3402698211651134,
+        "ratio": 1.0601274075618763,
+        "weighted_rmse_monthly_pp": 0.11949366375674816,
+        "weighted_mae_monthly_pp": 0.08785197632284422
+      },
+      "on": {
+        "n": 126,
+        "exposure_b_months": 434.02263264155005,
+        "observed_b": 2.2075363814499998,
+        "predicted_b": 2.0363553035124244,
+        "ratio": 0.9224560558204088,
+        "weighted_rmse_monthly_pp": 0.10850687166415421,
+        "weighted_mae_monthly_pp": 0.0885153231590617
+      }
+    },
+    "2021|0.045": {
+      "base": {
+        "n": 126,
+        "exposure_b_months": 59.10789771602,
+        "observed_b": 0.3678678089,
+        "predicted_b": 0.3469631794506147,
+        "ratio": 0.9431735287958619,
+        "weighted_rmse_monthly_pp": 0.22618734854484673,
+        "weighted_mae_monthly_pp": 0.16596269550992337
+      },
+      "off": {
+        "n": 126,
+        "exposure_b_months": 59.10789771602,
+        "observed_b": 0.3678678089,
+        "predicted_b": 0.31165311537698054,
+        "ratio": 0.8471877882136171,
+        "weighted_rmse_monthly_pp": 0.25198827311730976,
+        "weighted_mae_monthly_pp": 0.19156682865783511
+      },
+      "on": {
+        "n": 126,
+        "exposure_b_months": 59.10789771602,
+        "observed_b": 0.3678678089,
+        "predicted_b": 0.2788297709853014,
+        "ratio": 0.7579618662993629,
+        "weighted_rmse_monthly_pp": 0.270237701451834,
+        "weighted_mae_monthly_pp": 0.2100210348095895
+      }
+    },
+    "2021|0.05": {
+      "base": {
+        "n": 105,
+        "exposure_b_months": 18.785602546190002,
+        "observed_b": 0.12684343067,
+        "predicted_b": 0.11685245928278022,
+        "ratio": 0.9212338287095638,
+        "weighted_rmse_monthly_pp": 0.3027717320761885,
+        "weighted_mae_monthly_pp": 0.22403881898786837
+      },
+      "off": {
+        "n": 105,
+        "exposure_b_months": 18.785602546190002,
+        "observed_b": 0.12684343067,
+        "predicted_b": 0.09621922551387341,
+        "ratio": 0.7585668804890691,
+        "weighted_rmse_monthly_pp": 0.33338068118542274,
+        "weighted_mae_monthly_pp": 0.23810279261732306
+      },
+      "on": {
+        "n": 105,
+        "exposure_b_months": 18.785602546190002,
+        "observed_b": 0.12684343067,
+        "predicted_b": 0.08837068610266147,
+        "ratio": 0.6966910752561519,
+        "weighted_rmse_monthly_pp": 0.3528175998452324,
+        "weighted_mae_monthly_pp": 0.25804987059815643
+      }
+    },
+    "2021|0.055": {
+      "base": {
+        "n": 63,
+        "exposure_b_months": 0.29793898564000004,
+        "observed_b": 0.00259234958,
+        "predicted_b": 0.0021279719165432647,
+        "ratio": 0.8208661104044713,
+        "weighted_rmse_monthly_pp": 2.4319190769071115,
+        "weighted_mae_monthly_pp": 1.2735169695247355
+      },
+      "off": {
+        "n": 63,
+        "exposure_b_months": 0.29793898564000004,
+        "observed_b": 0.00259234958,
+        "predicted_b": 0.0014468272384597963,
+        "ratio": 0.5581142487965671,
+        "weighted_rmse_monthly_pp": 2.4534131376353003,
+        "weighted_mae_monthly_pp": 1.1469986584464733
+      },
+      "on": {
+        "n": 63,
+        "exposure_b_months": 0.29793898564000004,
+        "observed_b": 0.00259234958,
+        "predicted_b": 0.00134699469150303,
+        "ratio": 0.5196037995396554,
+        "weighted_rmse_monthly_pp": 2.456109886998384,
+        "weighted_mae_monthly_pp": 1.1276157362676191
+      }
+    }
+  },
+  "subperiods": {
+    "2024H1": {
+      "base": {
+        "n": 1434,
+        "exposure_b_months": 11322.860385872491,
+        "observed_b": 36.35329285911,
+        "predicted_b": 36.524537749671126,
+        "ratio": 1.0047105743962397,
+        "weighted_rmse_monthly_pp": 0.08618697346236728,
+        "weighted_mae_monthly_pp": 0.07040998830164312
+      },
+      "off": {
+        "n": 1434,
+        "exposure_b_months": 11322.860385872491,
+        "observed_b": 36.35329285911,
+        "predicted_b": 52.19487864608886,
+        "ratio": 1.4357675616449423,
+        "weighted_rmse_monthly_pp": 0.18252374540912933,
+        "weighted_mae_monthly_pp": 0.1594988463142907
+      },
+      "on": {
+        "n": 1434,
+        "exposure_b_months": 11322.860385872491,
+        "observed_b": 36.35329285911,
+        "predicted_b": 48.62627573496588,
+        "ratio": 1.3376030590521957,
+        "weighted_rmse_monthly_pp": 0.15510852599788302,
+        "weighted_mae_monthly_pp": 0.1315513391339852
+      }
+    },
+    "2024H2": {
+      "base": {
+        "n": 1434,
+        "exposure_b_months": 10862.76076491022,
+        "observed_b": 38.86358392863,
+        "predicted_b": 35.01194269877135,
+        "ratio": 0.9008933083234965,
+        "weighted_rmse_monthly_pp": 0.07278725939289986,
+        "weighted_mae_monthly_pp": 0.05016903049479658
+      },
+      "off": {
+        "n": 1434,
+        "exposure_b_months": 10862.76076491022,
+        "observed_b": 38.86358392863,
+        "predicted_b": 49.837309514032754,
+        "ratio": 1.2823652498327267,
+        "weighted_rmse_monthly_pp": 0.14354104009271237,
+        "weighted_mae_monthly_pp": 0.12546888275782725
+      },
+      "on": {
+        "n": 1434,
+        "exposure_b_months": 10862.76076491022,
+        "observed_b": 38.86358392863,
+        "predicted_b": 46.70458074233317,
+        "ratio": 1.2017569153710208,
+        "weighted_rmse_monthly_pp": 0.12145279890764811,
+        "weighted_mae_monthly_pp": 0.10148342616477458
+      }
+    },
+    "2025H1": {
+      "base": {
+        "n": 1434,
+        "exposure_b_months": 10442.50556968282,
+        "observed_b": 35.40368392589999,
+        "predicted_b": 33.63403567326546,
+        "ratio": 0.950015138076071,
+        "weighted_rmse_monthly_pp": 0.09085249087394928,
+        "weighted_mae_monthly_pp": 0.07475417464473202
+      },
+      "off": {
+        "n": 1434,
+        "exposure_b_months": 10442.50556968282,
+        "observed_b": 35.40368392589999,
+        "predicted_b": 47.6483345729779,
+        "ratio": 1.3458580941098106,
+        "weighted_rmse_monthly_pp": 0.1620157921307321,
+        "weighted_mae_monthly_pp": 0.13780580185423674
+      },
+      "on": {
+        "n": 1434,
+        "exposure_b_months": 10442.50556968282,
+        "observed_b": 35.40368392589999,
+        "predicted_b": 44.777360931838594,
+        "ratio": 1.2647655827443758,
+        "weighted_rmse_monthly_pp": 0.13905911922868636,
+        "weighted_mae_monthly_pp": 0.11556023518530191
+      }
+    },
+    "2025H2": {
+      "base": {
+        "n": 717,
+        "exposure_b_months": 5052.10339370255,
+        "observed_b": 20.682761081189998,
+        "predicted_b": 16.265683390903014,
+        "ratio": 0.7864367492837255,
+        "weighted_rmse_monthly_pp": 0.10526235603718387,
+        "weighted_mae_monthly_pp": 0.09322851257985426
+      },
+      "off": {
+        "n": 717,
+        "exposure_b_months": 5052.10339370255,
+        "observed_b": 20.682761081189998,
+        "predicted_b": 22.962332876406514,
+        "ratio": 1.1102160290044485,
+        "weighted_rmse_monthly_pp": 0.10303157236041276,
+        "weighted_mae_monthly_pp": 0.08397611402584089
+      },
+      "on": {
+        "n": 717,
+        "exposure_b_months": 5052.10339370255,
+        "observed_b": 20.682761081189998,
+        "predicted_b": 21.675977919882534,
+        "ratio": 1.0480214819865525,
+        "weighted_rmse_monthly_pp": 0.08992188201000147,
+        "weighted_mae_monthly_pp": 0.06932452642680012
+      }
+    }
+  },
+  "input_sha256": {
+    "hazard/data/cohort_month_panel.parquet": "c0feca1da96e97300d840c867494cc80ca8bbe97249c5fdeeb98761a015528e2",
+    "hazard/data/loan_sample.parquet": "df4cb174b7251634126180cbbf78c2e64f83cff6578ec5d23118227cca1e3767",
+    "output/review-revision/2026-10-07-checks/macro_frozen.parquet": "fee06af1927a23eb8ef9d5548899f5d3c9a15bf0a9aadbe9ea4e8a672e963535"
+  },
+  "limitations": [
+    "Previously examined outcomes, no untouched holdout",
+    "Cohort-level aggregation and frozen covariate proxies",
+    "Conditional on realized opening exposure and rates, not a forward full-book forecast",
+    "No realized separate scheduled/default/curtailment fields or loan-ID histories",
+    "No claim to validate imported elasticity or causal marginal"
+  ]
+}

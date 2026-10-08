@@ -1,0 +1,105 @@
+{
+  "mode": "fresh_freddie_umbs30_cell_targeted_sample",
+  "n": 75000,
+  "seed": 42,
+  "source_quarters": [
+    "2017Q1",
+    "2017Q2",
+    "2017Q3",
+    "2017Q4",
+    "2018Q1",
+    "2018Q2",
+    "2018Q3",
+    "2018Q4",
+    "2019Q1",
+    "2019Q2",
+    "2019Q3",
+    "2019Q4",
+    "2020Q1",
+    "2020Q2",
+    "2020Q3",
+    "2020Q4",
+    "2021Q1",
+    "2021Q2",
+    "2021Q3",
+    "2021Q4"
+  ],
+  "source_universe_30yr_survivors": 6261485,
+  "source_universe_balance_b": 1724.7893296997297,
+  "listed_cells_total_soma_face_share": 0.47587619671971765,
+  "cell_report": {
+    "0.0150|2020": {
+      "freddie_universe_loans": 119440,
+      "freddie_universe_balance_b": 40.762422077839986,
+      "target_share_within_supported_cells": 0.011347057106641158,
+      "sample_loans": 851
+    },
+    "0.0150|2021": {
+      "freddie_universe_loans": 105214,
+      "freddie_universe_balance_b": 37.947343935679996,
+      "target_share_within_supported_cells": 0.04182312078213465,
+      "sample_loans": 3137
+    },
+    "0.0200|2020": {
+      "freddie_universe_loans": 1103308,
+      "freddie_universe_balance_b": 338.67990831086996,
+      "target_share_within_supported_cells": 0.12213283872845682,
+      "sample_loans": 9160
+    },
+    "0.0200|2021": {
+      "freddie_universe_loans": 1497401,
+      "freddie_universe_balance_b": 473.04181781049004,
+      "target_share_within_supported_cells": 0.4046226356804449,
+      "sample_loans": 30347
+    },
+    "0.0250|2017-19": {
+      "freddie_universe_loans": 50834,
+      "freddie_universe_balance_b": 13.37850090999,
+      "target_share_within_supported_cells": 0.006289953300417714,
+      "sample_loans": 472
+    },
+    "0.0250|2020": {
+      "freddie_universe_loans": 689853,
+      "freddie_universe_balance_b": 186.7637949645999,
+      "target_share_within_supported_cells": 0.14073529710687518,
+      "sample_loans": 10555
+    },
+    "0.0250|2021": {
+      "freddie_universe_loans": 1070951,
+      "freddie_universe_balance_b": 304.16925365949004,
+      "target_share_within_supported_cells": 0.17432803419693133,
+      "sample_loans": 13074
+    },
+    "0.0300|2017-19": {
+      "freddie_universe_loans": 355840,
+      "freddie_universe_balance_b": 77.80936964375998,
+      "target_share_within_supported_cells": 0.03387931996947443,
+      "sample_loans": 2541
+    },
+    "0.0300|2020": {
+      "freddie_universe_loans": 228427,
+      "freddie_universe_balance_b": 53.41392402277,
+      "target_share_within_supported_cells": 0.026542772730696915,
+      "sample_loans": 1991
+    },
+    "0.0350|2017-19": {
+      "freddie_universe_loans": 360351,
+      "freddie_universe_balance_b": 68.76904349135,
+      "target_share_within_supported_cells": 0.01943488487002536,
+      "sample_loans": 1458
+    },
+    "0.0400|2017-19": {
+      "freddie_universe_loans": 268430,
+      "freddie_universe_balance_b": 46.64863786445001,
+      "target_share_within_supported_cells": 0.016139285917410092,
+      "sample_loans": 1210
+    },
+    "0.0450|2017-19": {
+      "freddie_universe_loans": 96468,
+      "freddie_universe_balance_b": 15.003462432859997,
+      "target_share_within_supported_cells": 0.0027247996104914495,
+      "sample_loans": 204
+    }
+  },
+  "scope": "Freddie 30-year survivors at May 2022, drawn from all 2017-2021 quarterly files. Cell shares follow listed June 2022 UMBS 30-year SOMA coupon-by-vintage cells after an assumed 80 bp note-to-pass-through conversion. No Fannie, Ginnie, 15-year, pre-2017, or 2022 direct loan draw."
+}

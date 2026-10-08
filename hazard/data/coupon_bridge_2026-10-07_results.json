@@ -1,0 +1,252 @@
+{
+  "spec": "specs/SPEC_2026-10-07_coupon_bridge.md",
+  "fixed_sample_sha256": "718158f2bf41dfa6efb64365edcc37a36b1fb69ba88daf03f5e4dd9f964e1ce7",
+  "unique_ids": 75000,
+  "target_total_soma_face_share": 0.47587619671971765,
+  "bridges": {
+    "60": {
+      "status": "supported",
+      "missing_cells": [],
+      "missing_target_share": 0,
+      "cell_counts": {
+        "0.0200|2021": 12204,
+        "0.0250|2021": 29589,
+        "0.0250|2020": 12023,
+        "0.0200|2020": 3517,
+        "0.0150|2021": 202,
+        "0.0300|2017-19": 1151,
+        "0.0300|2020": 6228,
+        "0.0350|2017-19": 2507,
+        "0.0400|2017-19": 1430,
+        "0.0150|2020": 42,
+        "0.0250|2017-19": 56,
+        "0.0450|2017-19": 664
+      },
+      "candidate_loans": 75000,
+      "positive_weight_loans": 69613,
+      "max_share_error": 5.551115123125783e-17,
+      "missing_total_soma_face_share": 0.0,
+      "weights_sha256": "14764f4b406c69f7ba67d80d09165f6d240620b0cde0c57adeb5485827ceac16",
+      "paired_results": {
+        "initial_active_b": 2709.3280000000004,
+        "initial_total_b": 2709.3280000000004,
+        "paths": {
+          "production": {
+            "off_principal_b": 681.643824898217,
+            "on_principal_b": 644.6926533223075,
+            "marginal_b": 36.951171575909484,
+            "marginal_pp": 4.831808561862649,
+            "marginal_pct_initial_active": 1.3638500608235504,
+            "off_allowed_runoff_b": 681.643824898217,
+            "on_allowed_runoff_b": 644.6926533223075,
+            "capped_marginal_b": 36.951171575909484,
+            "off_reinvestment_b": 0.0,
+            "on_reinvestment_b": 0.0,
+            "off_cap_binding_months": 0,
+            "on_cap_binding_months": 0
+          },
+          "closed": {
+            "off_principal_b": 670.7047724284012,
+            "on_principal_b": 638.2480138270093,
+            "marginal_b": 32.45675860139181,
+            "marginal_pp": 4.244110197652216,
+            "marginal_pct_initial_active": 1.1979634286211123,
+            "off_allowed_runoff_b": 670.7047724284012,
+            "on_allowed_runoff_b": 638.2480138270093,
+            "capped_marginal_b": 32.45675860139181,
+            "off_reinvestment_b": 0.0,
+            "on_reinvestment_b": 0.0,
+            "off_cap_binding_months": 0,
+            "on_cap_binding_months": 0
+          }
+        },
+        "off_components_b": {
+          "voluntary_b": 467.6240258771238,
+          "scheduled_b": 203.0807465512773,
+          "default_transfer_b": 0.2235393064945621,
+          "other_terminal_transfer_b": 0.0,
+          "default_cash_b": 0.0,
+          "curtailment_b": 0.0,
+          "additions_b": 0.0
+        },
+        "off_max_active_identity_error_b": 9.925439953804017e-13,
+        "on_components_b": {
+          "voluntary_b": 433.8870993902542,
+          "scheduled_b": 204.3609144367552,
+          "default_transfer_b": 0.22409151218425535,
+          "other_terminal_transfer_b": 0.0,
+          "default_cash_b": 0.0,
+          "curtailment_b": 0.0,
+          "additions_b": 0.0
+        },
+        "on_max_active_identity_error_b": 8.176956325769424e-13,
+        "change_b": -4.494412974517672,
+        "change_pp": -0.5876983642104334,
+        "change_percent_production": -12.163113597859043
+      }
+    },
+    "80": {
+      "status": "supported",
+      "missing_cells": [],
+      "missing_target_share": 0,
+      "cell_counts": {
+        "0.0200|2021": 30347,
+        "0.0250|2021": 13074,
+        "0.0250|2020": 10555,
+        "0.0200|2020": 9160,
+        "0.0150|2021": 3137,
+        "0.0300|2017-19": 2541,
+        "0.0300|2020": 1991,
+        "0.0350|2017-19": 1458,
+        "0.0400|2017-19": 1210,
+        "0.0150|2020": 851,
+        "0.0250|2017-19": 472,
+        "0.0450|2017-19": 204
+      },
+      "candidate_loans": 75000,
+      "positive_weight_loans": 75000,
+      "max_share_error": 5.551115123125783e-17,
+      "missing_total_soma_face_share": 0.0,
+      "weights_sha256": "b60b5af4b89c0a40c1735f969053c6f294829b8a962b3133ef66e285a5e538fa",
+      "paired_results": {
+        "initial_active_b": 2709.3279999999995,
+        "initial_total_b": 2709.3279999999995,
+        "paths": {
+          "production": {
+            "off_principal_b": 684.4932632283088,
+            "on_principal_b": 642.3171740444914,
+            "marginal_b": 42.17608918381745,
+            "marginal_pp": 5.5150291623530485,
+            "marginal_pct_initial_active": 1.5566992694800135,
+            "off_allowed_runoff_b": 684.4932632283088,
+            "on_allowed_runoff_b": 642.3171740444914,
+            "capped_marginal_b": 42.17608918381745,
+            "off_reinvestment_b": 0.0,
+            "on_reinvestment_b": 0.0,
+            "off_cap_binding_months": 0,
+            "on_cap_binding_months": 0
+          },
+          "closed": {
+            "off_principal_b": 673.3428975457861,
+            "on_principal_b": 636.2844626443358,
+            "marginal_b": 37.058434901450255,
+            "marginal_pp": 4.845834527281826,
+            "marginal_pct_initial_active": 1.3678090988411244,
+            "off_allowed_runoff_b": 673.3428975457861,
+            "on_allowed_runoff_b": 636.2844626443358,
+            "capped_marginal_b": 37.058434901450255,
+            "off_reinvestment_b": 0.0,
+            "on_reinvestment_b": 0.0,
+            "off_cap_binding_months": 0,
+            "on_cap_binding_months": 0
+          }
+        },
+        "off_components_b": {
+          "voluntary_b": 477.42734014093804,
+          "scheduled_b": 195.91555740484807,
+          "default_transfer_b": 0.35547265306977677,
+          "other_terminal_transfer_b": 0.0,
+          "default_cash_b": 0.0,
+          "curtailment_b": 0.0,
+          "additions_b": 0.0
+        },
+        "off_max_active_identity_error_b": 9.145736694335938e-13,
+        "on_components_b": {
+          "voluntary_b": 438.9590283677734,
+          "scheduled_b": 197.32543427656253,
+          "default_transfer_b": 0.3558043601006948,
+          "other_terminal_transfer_b": 0.0,
+          "default_cash_b": 0.0,
+          "curtailment_b": 0.0,
+          "additions_b": 0.0
+        },
+        "on_max_active_identity_error_b": 8.440017700195312e-13,
+        "change_b": -5.117654282367198,
+        "change_pp": -0.6691946350712226,
+        "change_percent_production": -12.13401806901241
+      }
+    },
+    "100": {
+      "status": "supported",
+      "missing_cells": [],
+      "missing_target_share": 0,
+      "cell_counts": {
+        "0.0200|2021": 36031,
+        "0.0250|2021": 4668,
+        "0.0250|2020": 6260,
+        "0.0200|2020": 13645,
+        "0.0150|2021": 5657,
+        "0.0300|2017-19": 2521,
+        "0.0300|2020": 754,
+        "0.0350|2017-19": 1094,
+        "0.0400|2017-19": 1003,
+        "0.0150|2020": 1857,
+        "0.0250|2017-19": 1133,
+        "0.0450|2017-19": 78
+      },
+      "candidate_loans": 75000,
+      "positive_weight_loans": 74701,
+      "max_share_error": 5.551115123125783e-17,
+      "missing_total_soma_face_share": 0.0,
+      "weights_sha256": "0da70f4e8a502622c38879038d6d49210dd65112f7f6f31a65b25554dc849652",
+      "paired_results": {
+        "initial_active_b": 2709.328,
+        "initial_total_b": 2709.328,
+        "paths": {
+          "production": {
+            "off_principal_b": 687.9787229836977,
+            "on_principal_b": 642.676969795268,
+            "marginal_b": 45.30175318842976,
+            "marginal_pp": 5.923747193605888,
+            "marginal_pct_initial_active": 1.6720660321832483,
+            "off_allowed_runoff_b": 687.9787229836977,
+            "on_allowed_runoff_b": 642.676969795268,
+            "capped_marginal_b": 45.30175318842976,
+            "off_reinvestment_b": 0.0,
+            "on_reinvestment_b": 0.0,
+            "off_cap_binding_months": 0,
+            "on_cap_binding_months": 0
+          },
+          "closed": {
+            "off_principal_b": 676.4904983244818,
+            "on_principal_b": 636.7375932542474,
+            "marginal_b": 39.75290507023442,
+            "marginal_pp": 5.198168796425886,
+            "marginal_pct_initial_active": 1.467260703400785,
+            "off_allowed_runoff_b": 676.4904983244818,
+            "on_allowed_runoff_b": 636.7375932542474,
+            "capped_marginal_b": 39.75290507023442,
+            "off_reinvestment_b": 0.0,
+            "on_reinvestment_b": 0.0,
+            "off_cap_binding_months": 0,
+            "on_cap_binding_months": 0
+          }
+        },
+        "off_components_b": {
+          "voluntary_b": 484.27410449175716,
+          "scheduled_b": 192.2163938327247,
+          "default_transfer_b": 0.1849624037879959,
+          "other_terminal_transfer_b": 0.0,
+          "default_cash_b": 0.0,
+          "curtailment_b": 0.0,
+          "additions_b": 0.0
+        },
+        "off_max_active_identity_error_b": 9.317398071289062e-13,
+        "on_components_b": {
+          "voluntary_b": 443.0290275977275,
+          "scheduled_b": 193.70856565651982,
+          "default_transfer_b": 0.18629580090015319,
+          "other_terminal_transfer_b": 0.0,
+          "default_cash_b": 0.0,
+          "curtailment_b": 0.0,
+          "additions_b": 0.0
+        },
+        "on_max_active_identity_error_b": 9.469985961914063e-13,
+        "change_b": -5.5488481181953375,
+        "change_pp": -0.7255783971800028,
+        "change_percent_production": -12.248638800170177
+      }
+    }
+  },
+  "bridge80_parity_difference_b": -1.1368683772161603e-13
+}

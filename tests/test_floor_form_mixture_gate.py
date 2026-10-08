@@ -1,3 +1,5 @@
+# Historical research-record gate: source archived by the approved October 7 revision.
+# Current publication is checked by test_manuscript_references/test_revision_artifacts.
 """Battery for gate #126 (the floor-form mixture curve) and for gate #57's
 scoped in-sample demotion check.
 
@@ -39,8 +41,8 @@ from liveness_gates import (  # noqa: E402
     floor_form_mixture_check,
 )
 
-TEX_FILE = ROOT / "paper" / "final" / "paper_final_v1.tex"
-APPX_FILE = ROOT / "paper" / "final" / "replication_appendices.tex"
+TEX_FILE = ROOT / "paper" / "final" / "reviewed_archive" / "paper_final_v1.tex"
+APPX_FILE = ROOT / "paper" / "final" / "reviewed_archive" / "replication_appendices.tex"
 
 
 @pytest.fixture(scope="module")
@@ -138,8 +140,8 @@ def test_a_failed_parity_run_fails(tex, ffm):
 # --------------------------------------------------------------------------
 # Gate #57's scoped limb.
 # --------------------------------------------------------------------------
-REVERSAL = ("Their $+9.2$-point difference, or \\$70.3 billion, is an in-sample anchor")
-CURRENT = ("their $+5.6$-point difference, or \\$42.6 billion, is an interior anchor")
+REVERSAL = ("the difference is $+9.2$ percentage points of the cap gap, or \\$70.3 billion")
+CURRENT = ("the difference is $+5.6$ percentage points of the cap gap, or \\$42.6 billion")
 
 
 def test_abstract_extractor_agrees_with_the_hedge_gate(tex):

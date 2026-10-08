@@ -1,0 +1,158 @@
+{
+  "as_of": "2022-06-29",
+  "sample_loans": 75000,
+  "sample_vintages": [
+    2017,
+    2021
+  ],
+  "coupon_conversion_note_minus_pp": 0.8,
+  "book_grid_min_share_of_total_face": 0.001,
+  "grid_listed_share_of_total_face": 0.9909333749271184,
+  "grid_omitted_share_of_total_face": 0.009066625072881584,
+  "listed_umbs_30yr_share_of_total_face": 0.6202322848906406,
+  "listed_umbs_30yr_in_sample_vintages_share_of_total_face": 0.47587619671971765,
+  "listed_joint_cells_with_sample_support_share_of_total_face": 0.47587619671971765,
+  "matched_share_of_listed_umbs_30yr": 0.7672547984238263,
+  "matched_share_of_total_soma_mbs_face": 0.47587619671971765,
+  "cells": [
+    {
+      "cell": "UMBS|30yr|2.0|2021",
+      "book_share_of_total_face": 0.19255028097431803,
+      "n_loans": 7217,
+      "sample_balance": 2024227495.6799998
+    },
+    {
+      "cell": "UMBS|30yr|2.5|2021",
+      "book_share_of_total_face": 0.08295856189526056,
+      "n_loans": 4576,
+      "sample_balance": 1228948413.3200004
+    },
+    {
+      "cell": "UMBS|30yr|2.5|2020",
+      "book_share_of_total_face": 0.06697257793143925,
+      "n_loans": 4799,
+      "sample_balance": 850252363.9
+    },
+    {
+      "cell": "UMBS|30yr|2.0|2020",
+      "book_share_of_total_face": 0.058120110788680665,
+      "n_loans": 5742,
+      "sample_balance": 1371619348.6399996
+    },
+    {
+      "cell": "UMBS|30yr|2.5|2022",
+      "book_share_of_total_face": 0.03560166808145769,
+      "n_loans": 0,
+      "sample_balance": 0.0
+    },
+    {
+      "cell": "UMBS|30yr|2.0|2022",
+      "book_share_of_total_face": 0.025385288464434747,
+      "n_loans": 0,
+      "sample_balance": 0.0
+    },
+    {
+      "cell": "UMBS|30yr|3.0|pre2017",
+      "book_share_of_total_face": 0.02121682119443563,
+      "n_loans": 0,
+      "sample_balance": 0.0
+    },
+    {
+      "cell": "UMBS|30yr|1.5|2021",
+      "book_share_of_total_face": 0.01990262765275162,
+      "n_loans": 1977,
+      "sample_balance": 490343113.4799999
+    },
+    {
+      "cell": "UMBS|30yr|3.5|pre2017",
+      "book_share_of_total_face": 0.019257616906972027,
+      "n_loans": 0,
+      "sample_balance": 0.0
+    },
+    {
+      "cell": "UMBS|30yr|3.0|2017-19",
+      "book_share_of_total_face": 0.016122361934523873,
+      "n_loans": 10541,
+      "sample_balance": 776655897.0900002
+    },
+    {
+      "cell": "UMBS|30yr|3.0|2020",
+      "book_share_of_total_face": 0.012631073737479882,
+      "n_loans": 2392,
+      "sample_balance": 313494138.85
+    },
+    {
+      "cell": "UMBS|30yr|3.0|2022",
+      "book_share_of_total_face": 0.011756251639530995,
+      "n_loans": 0,
+      "sample_balance": 0.0
+    },
+    {
+      "cell": "UMBS|30yr|4.0|pre2017",
+      "book_share_of_total_face": 0.01114211603328944,
+      "n_loans": 0,
+      "sample_balance": 0.0
+    },
+    {
+      "cell": "UMBS|30yr|3.5|2017-19",
+      "book_share_of_total_face": 0.009248599095633253,
+      "n_loans": 14806,
+      "sample_balance": 785674957.5999999
+    },
+    {
+      "cell": "UMBS|30yr|3.5|2022",
+      "book_share_of_total_face": 0.008069785374705487,
+      "n_loans": 0,
+      "sample_balance": 0.0
+    },
+    {
+      "cell": "UMBS|30yr|4.0|2017-19",
+      "book_share_of_total_face": 0.007680302000149214,
+      "n_loans": 11781,
+      "sample_balance": 528163213.1999998
+    },
+    {
+      "cell": "UMBS|30yr|1.5|2020",
+      "book_share_of_total_face": 0.005399794379869838,
+      "n_loans": 1261,
+      "sample_balance": 296076723.97
+    },
+    {
+      "cell": "UMBS|30yr|4.0|2022",
+      "book_share_of_total_face": 0.005113222851439525,
+      "n_loans": 0,
+      "sample_balance": 0.0
+    },
+    {
+      "cell": "UMBS|30yr|4.5|pre2017",
+      "book_share_of_total_face": 0.0037042001575207442,
+      "n_loans": 0,
+      "sample_balance": 0.0
+    },
+    {
+      "cell": "UMBS|30yr|2.5|2017-19",
+      "book_share_of_total_face": 0.0029932390541474174,
+      "n_loans": 2728,
+      "sample_balance": 237379945.05
+    },
+    {
+      "cell": "UMBS|30yr|4.5|2022",
+      "book_share_of_total_face": 0.001770127396345853,
+      "n_loans": 0,
+      "sample_balance": 0.0
+    },
+    {
+      "cell": "UMBS|30yr|5.0|pre2017",
+      "book_share_of_total_face": 0.0013389900707909226,
+      "n_loans": 0,
+      "sample_balance": 0.0
+    },
+    {
+      "cell": "UMBS|30yr|4.5|2017-19",
+      "book_share_of_total_face": 0.001296667275464039,
+      "n_loans": 3745,
+      "sample_balance": 164531132.89
+    }
+  ],
+  "interpretation": "Support only. The sample lacks term and Fannie/Freddie identity within UMBS; the grid omits cells below 0.1% of total MBS face. No paired microsimulation or cell-level floor-binding estimate is made here."
+}

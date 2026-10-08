@@ -1,3 +1,5 @@
+# Historical research-record gate: source archived by the approved October 7 revision.
+# Current publication is checked by test_manuscript_references/test_revision_artifacts.
 """Gate #109: the manuscript must print beta_1 under ONE sign convention.
 
 Round 32 (C-R4). The panel found $0.069$ in tab:params and $-0.0686$ in
@@ -24,7 +26,7 @@ ROOT = Path(__file__).resolve().parent.parent
 _s = importlib.util.spec_from_file_location("lg", ROOT / "tools" / "liveness_gates.py")
 lg = importlib.util.module_from_spec(_s)
 _s.loader.exec_module(lg)
-TEX = (ROOT / "paper" / "final" / "paper_final_v1.tex").read_text()
+TEX = (ROOT / "paper" / "final" / "reviewed_archive" / "paper_final_v1.tex").read_text()
 
 
 def test_beta1_signs_agree_across_tables():

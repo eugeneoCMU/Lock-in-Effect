@@ -1,0 +1,15 @@
+\begin{table}[H]
+\centering\small\singlespacing
+\caption{Observed age support and imputation in the saved floor-transport exercise. Exposure sums balance-dollar-months, in billions; rows count cohort-months. The 2018 group has note-minus-market gap at most $-25$ bp; target weights use 2023--2024 cohorts at most $-200$ bp. These unequal depth selections and missing older ages prevent a fully matched baseline.}
+\label{tab:floorsupport}
+\begin{tabular}{@{}lrrrrl@{}}
+\toprule
+Age (months) & 2018 exposure & Rows & Observed CPR & Target weight & Treatment\\\midrule
+$[0,12)$ & 1,714.298 & 439 & 3.6372\% & 0.0000\% & No target weight\\
+$[12,24)$ & 1,058.073 & 137 & 4.9906\% & 16.0126\% & Observed\\
+$[24,36)$ & 0.000 & 0 & -- & 37.9171\% & Imputed\\
+$[36,\infty)$ & 0.000 & 0 & -- & 46.0703\% & Imputed\\\bottomrule
+\end{tabular}
+\par\smallskip\raggedright\footnotesize
+Source: saved floor-uncertainty age-standardization artifact. Total imputed target weight is 83.9874\%. Missing CPRs are not zero. Housing-listing rescaling is an aggregate diagnostic, not loan-cell matching; no complete age--discount-depth--activity baseline is estimated.
+\end{table}

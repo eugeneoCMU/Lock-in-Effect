@@ -1,3 +1,5 @@
+# Historical research-record gate: source archived by the approved October 7 revision.
+# Current publication is checked by test_manuscript_references/test_revision_artifacts.
 """
 Reconciliation battery: every value below is RE-DERIVED from its committed
 artifact and then required to appear in the manuscript at the precision the
@@ -41,8 +43,8 @@ from pathlib import Path
 import pytest
 
 _ROOT = Path(__file__).resolve().parents[1]
-_TEX = _ROOT / "paper" / "final" / "paper_final_v1.tex"
-_VARIANT = _ROOT / "paper" / "final" / "paper_final_v1_long_abstract.tex"
+_TEX = _ROOT / "paper" / "final" / "reviewed_archive" / "paper_final_v1.tex"
+_VARIANT = _ROOT / "paper" / "final" / "reviewed_archive" / "paper_final_v1_long_abstract.tex"
 
 CANONICAL = _TEX.read_text()
 VARIANT = _VARIANT.read_text()

@@ -1,0 +1,67 @@
+{
+  "initial_active_b": 2709.2667641668336,
+  "initial_total_b": 2709.3280000000004,
+  "paths": {
+    "production": {
+      "off_principal_b": 692.5819414345885,
+      "on_principal_b": 649.9735475534998,
+      "marginal_b": 42.60839388108877,
+      "marginal_pp": 5.571558182909755,
+      "marginal_pct_initial_active": 1.5726909747180953,
+      "off_allowed_runoff_b": 692.5661601483941,
+      "on_allowed_runoff_b": 649.9735475534998,
+      "capped_marginal_b": 42.592612594894376,
+      "off_reinvestment_b": 0.015781286194478383,
+      "on_reinvestment_b": 0.0,
+      "off_cap_binding_months": 2,
+      "on_cap_binding_months": 0
+    },
+    "closed": {
+      "off_principal_b": 679.7760860400712,
+      "on_principal_b": 642.7736910699624,
+      "marginal_b": 37.00239497010875,
+      "marginal_pp": 4.838506634592258,
+      "marginal_pct_initial_active": 1.3657715607598317,
+      "off_allowed_runoff_b": 679.7760860400712,
+      "on_allowed_runoff_b": 642.7736910699624,
+      "capped_marginal_b": 37.00239497010875,
+      "off_reinvestment_b": 0.0,
+      "on_reinvestment_b": 0.0,
+      "off_cap_binding_months": 0,
+      "on_cap_binding_months": 0
+    }
+  },
+  "off_components_b": {
+    "voluntary_b": 484.79764065232814,
+    "scheduled_b": 194.97844538774294,
+    "default_transfer_b": 0.27645333553681073,
+    "other_terminal_transfer_b": 0.0,
+    "default_cash_b": 0.0,
+    "curtailment_b": 0.0,
+    "additions_b": 0.0
+  },
+  "off_max_active_identity_error_b": 9.165257215499879e-13,
+  "on_components_b": {
+    "voluntary_b": 446.2942909535541,
+    "scheduled_b": 196.47940011640839,
+    "default_transfer_b": 0.2764768064838702,
+    "other_terminal_transfer_b": 0.0,
+    "default_cash_b": 0.0,
+    "curtailment_b": 0.0,
+    "additions_b": 0.0
+  },
+  "on_max_active_identity_error_b": 7.839202880859375e-13,
+  "change_b": -5.60599891098002,
+  "change_pp": -0.7330515483174974,
+  "change_percent_production": -13.157029402763232,
+  "spec": "specs/SPEC_2026-10-07_stock_flow_accounting.md",
+  "benchmark_b": 764.7482532227002,
+  "scope": "Closed opening book; inactive claims retained, no recovery cash/additions/reinvestment-pool simulation. Production is a reporting convention, not a self-financing full-SOMA book.",
+  "production_parity_difference_b": 1.1368683772161603e-13,
+  "production_parity_pass": true,
+  "input_sha256": {
+    "hazard/data/loan_sample.parquet": "df4cb174b7251634126180cbbf78c2e64f83cff6578ec5d23118227cca1e3767",
+    "output/review-revision/2026-10-07-checks/macro_frozen.parquet": "fee06af1927a23eb8ef9d5548899f5d3c9a15bf0a9aadbe9ea4e8a672e963535",
+    "hazard/data/markov_transition_matrix.parquet": "70b57edb30df0e61bcfd494ad15b095318d7262588b86f0d8c8f7bd3b4ceed3d"
+  }
+}

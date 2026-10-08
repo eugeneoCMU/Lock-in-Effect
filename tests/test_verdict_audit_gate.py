@@ -1,3 +1,5 @@
+# Historical research-record gate: source archived by the approved October 7 revision.
+# Current publication is checked by test_manuscript_references/test_revision_artifacts.
 """Battery for gate #104 (round-26 verdict-adjudication audit, app:verdicts).
 
 Mutations remove ALL occurrences (presence-gate power); every mutation is
@@ -18,8 +20,8 @@ from liveness_gates import (  # noqa: E402
 
 # V20 closing-session rescope: app:ledger/app:verdicts live in the standalone
 # replication_appendices.tex; the gated corpus is manuscript + that file.
-TEX = ((ROOT / "paper" / "final" / "paper_final_v1.tex").read_text()
-       + "\n" + (ROOT / "paper" / "final" / "replication_appendices.tex").read_text())
+TEX = ((ROOT / "paper" / "final" / "reviewed_archive" / "paper_final_v1.tex").read_text()
+       + "\n" + (ROOT / "paper" / "final" / "reviewed_archive" / "replication_appendices.tex").read_text())
 
 
 def test_gate_passes_on_the_manuscript():
@@ -47,8 +49,8 @@ def test_one_sided_table_fails():
 
 
 def test_variant_carries_the_spans_too():
-    var = (ROOT / "paper" / "final"
+    var = (ROOT / "paper" / "final" / "reviewed_archive"
            / "paper_final_v1_long_abstract.tex").read_text() \
-    + "\n" + (ROOT / "paper" / "final" / "replication_appendices.tex").read_text()  # V20 rescope
+    + "\n" + (ROOT / "paper" / "final" / "reviewed_archive" / "replication_appendices.tex").read_text()  # V20 rescope
     ok, info = verdict_audit_check(var)
     assert ok, f"long-abstract variant missing spans: {info}"

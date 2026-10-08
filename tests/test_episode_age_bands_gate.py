@@ -1,3 +1,5 @@
+# Historical research-record gate: source archived by the approved October 7 revision.
+# Current publication is checked by test_manuscript_references/test_revision_artifacts.
 """Battery for gate #119 (R32 C-78: the episode gradient with loan age held fixed).
 
 This exhibit's failure mode is asymmetric. The run returned a result the paper
@@ -70,11 +72,11 @@ from liveness_gates import (  # noqa: E402
 
 # V20 closing-session rescope: app:ledger/app:verdicts live in the standalone
 # replication_appendices.tex; the gated corpus is manuscript + that file.
-TEX = ((ROOT / "paper" / "final" / "paper_final_v1.tex").read_text()
-       + "\n" + (ROOT / "paper" / "final" / "replication_appendices.tex").read_text())
-VARIANT = (ROOT / "paper" / "final"
+TEX = ((ROOT / "paper" / "final" / "reviewed_archive" / "paper_final_v1.tex").read_text()
+       + "\n" + (ROOT / "paper" / "final" / "reviewed_archive" / "replication_appendices.tex").read_text())
+VARIANT = (ROOT / "paper" / "final" / "reviewed_archive"
            / "paper_final_v1_long_abstract.tex").read_text() \
-    + "\n" + (ROOT / "paper" / "final" / "replication_appendices.tex").read_text()  # V20 rescope
+    + "\n" + (ROOT / "paper" / "final" / "reviewed_archive" / "replication_appendices.tex").read_text()  # V20 rescope
 A = json.loads((ROOT / "hazard" / "data"
                 / "episode_gradient_age_bands_results.json").read_text())
 W = json.loads((ROOT / "hazard" / "data"

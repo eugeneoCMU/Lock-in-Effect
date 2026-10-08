@@ -1,3 +1,5 @@
+# Historical research-record gate: source archived by the approved October 7 revision.
+# Current publication is checked by test_manuscript_references/test_revision_artifacts.
 """Battery for gate #106 (round-28 G2 coupon-convention companion)."""
 import sys
 from pathlib import Path
@@ -12,8 +14,8 @@ from liveness_gates import (  # noqa: E402
     coupon_convention_check,
 )
 
-TEX = (ROOT / "paper" / "final" / "paper_final_v1.tex").read_text()
-VARIANT = (ROOT / "paper" / "final"
+TEX = (ROOT / "paper" / "final" / "reviewed_archive" / "paper_final_v1.tex").read_text()
+VARIANT = (ROOT / "paper" / "final" / "reviewed_archive"
            / "paper_final_v1_long_abstract.tex").read_text()
 
 

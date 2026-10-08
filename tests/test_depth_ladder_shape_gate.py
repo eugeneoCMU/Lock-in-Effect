@@ -1,3 +1,5 @@
+# Historical research-record gate: source archived by the approved October 7 revision.
+# Current publication is checked by test_manuscript_references/test_revision_artifacts.
 """Battery for gate #114 (R32 C-80: the 2018 depth ladder's shape).
 
 This exhibit's failure mode is cherry-picking. The plateau supports the paper's
@@ -16,8 +18,8 @@ sys.path.insert(0, str(ROOT / "tools"))
 
 from liveness_gates import depth_ladder_shape_check  # noqa: E402
 
-TEX = (ROOT / "paper" / "final" / "paper_final_v1.tex").read_text()
-VARIANT = (ROOT / "paper" / "final"
+TEX = (ROOT / "paper" / "final" / "reviewed_archive" / "paper_final_v1.tex").read_text()
+VARIANT = (ROOT / "paper" / "final" / "reviewed_archive"
            / "paper_final_v1_long_abstract.tex").read_text()
 D = json.loads((ROOT / "hazard" / "data"
                 / "depth_ladder_shape_results.json").read_text())

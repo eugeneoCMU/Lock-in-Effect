@@ -1,0 +1,75 @@
+{
+  "initial_active_b": 2709.3135931709853,
+  "initial_total_b": 2709.3280000000004,
+  "paths": {
+    "production": {
+      "off_principal_b": 675.9188611254519,
+      "on_principal_b": 639.3955041398597,
+      "marginal_b": 36.52335698559227,
+      "marginal_pp": 4.775866676606374,
+      "marginal_pct_initial_active": 1.34806679734867,
+      "off_allowed_runoff_b": 675.9188611254519,
+      "on_allowed_runoff_b": 639.3955041398597,
+      "capped_marginal_b": 36.52335698559227,
+      "off_reinvestment_b": 0.0,
+      "on_reinvestment_b": 0.0,
+      "off_cap_binding_months": 0,
+      "on_cap_binding_months": 0
+    },
+    "closed": {
+      "off_principal_b": 665.9522634015649,
+      "on_principal_b": 633.7557913535434,
+      "marginal_b": 32.19647204802152,
+      "marginal_pp": 4.210074611134243,
+      "marginal_pct_initial_active": 1.1883626955984343,
+      "off_allowed_runoff_b": 665.9522634015649,
+      "on_allowed_runoff_b": 633.7557913535434,
+      "capped_marginal_b": 32.19647204802152,
+      "off_reinvestment_b": 0.0,
+      "on_reinvestment_b": 0.0,
+      "off_cap_binding_months": 0,
+      "on_cap_binding_months": 0
+    }
+  },
+  "off_components_b": {
+    "voluntary_b": 469.24092475374687,
+    "scheduled_b": 196.71133864781785,
+    "default_transfer_b": 0.04676942934710191,
+    "other_terminal_transfer_b": 0.0,
+    "default_cash_b": 0.0,
+    "curtailment_b": 0.0,
+    "additions_b": 0.0
+  },
+  "off_max_active_identity_error_b": 6.160736083984375e-13,
+  "on_components_b": {
+    "voluntary_b": 435.8245807273707,
+    "scheduled_b": 197.93121062617263,
+    "default_transfer_b": 0.04677457708675897,
+    "other_terminal_transfer_b": 0.0,
+    "default_cash_b": 0.0,
+    "curtailment_b": 0.0,
+    "additions_b": 0.0
+  },
+  "on_max_active_identity_error_b": 7.359683513641357e-13,
+  "change_b": -4.326884937570753,
+  "change_pp": -0.5657920654721303,
+  "change_percent_production": -11.846898244533278,
+  "weighting": {
+    "cell_counts": {
+      "0.0200|2021": 7217,
+      "0.0250|2021": 4576,
+      "0.0250|2020": 4799,
+      "0.0200|2020": 5742,
+      "0.0150|2021": 1977,
+      "0.0300|2017-19": 10541,
+      "0.0300|2020": 2392,
+      "0.0350|2017-19": 14806,
+      "0.0400|2017-19": 11781,
+      "0.0150|2020": 1261,
+      "0.0250|2017-19": 2728,
+      "0.0450|2017-19": 3745
+    },
+    "supported_sample_balance_share": 0.9533611991533217,
+    "max_target_share_error": 2.7755575615628914e-17
+  }
+}

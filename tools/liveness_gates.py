@@ -31,7 +31,9 @@ import sys
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
-TEX = ROOT / "paper" / "final" / "paper_final_v1.tex"
+CURRENT_TEX = ROOT / "paper" / "final" / "paper_final_v1.tex"
+# Legacy wording/number gates remain attached to their preserved research edition.
+TEX = ROOT / "paper" / "final" / "reviewed_archive" / "paper_final_v1.tex"
 # ROUND 22 (C4): every manuscript variant on disk, not just the canonical one.
 # paper/final/paper_final_v1_simple_abstract.tex was byte-identical to the
 # canonical file except for its abstract, was UNTRACKED, and was therefore
@@ -39,7 +41,7 @@ TEX = ROOT / "paper" / "final" / "paper_final_v1.tex"
 # spans missing, silently reversing round 20's calibration-label discipline and
 # round 21's Danish dual label. A variant that ships is a variant that must be
 # checked, so the abstract gate is applied to all of them.
-TEX_VARIANTS = sorted((ROOT / "paper" / "final").glob("paper_final_v1*.tex"))
+TEX_VARIANTS = sorted((ROOT / "paper" / "final" / "reviewed_archive").glob("paper_final_v1*.tex"))
 MANIFEST = ROOT / "abm" / "data" / "runs" / "run-2026-07-04-15yr-foldin" / "manifest.json"
 FANNIE_RESULTS = ROOT / "hazard" / "data" / "fannie_replication_results.json"
 OVERLAY_RESULTS = ROOT / "hazard" / "data" / "ginnie_cpr_overlay_results.json"
@@ -232,7 +234,7 @@ EXACTLY_ONE = [
     # V20 post-re-review: the author reverted decision gate D2 to the original
     # title (2026-08-05); the III.B standing paragraph carries the
     # shortfall-vs-objective scoping either way.
-    "\\title{Mortgage Lock-In and the Federal Reserve's Quantitative Tightening Shortfall}",
+    "\\title{Mortgage Lock-In and Federal Reserve MBS Runoff: A Model-Based Decomposition}",
     # Round-21 rewrite of the kernel sentence (replaces the retired
     # "frozen manifests say otherwise" pin above).
     "not kernel-free, and every figure reported here is the kernel-applied",
@@ -537,82 +539,33 @@ ASSEMBLY_TABLE_SPANS = {
 # abstract that states the point first and the range second -- which is exactly
 # the arrangement this round removed -- so a span check alone would not have
 # caught the defect it exists to prevent.
+# Gate #99 now protects the revised abstract's evidence hierarchy: a paired
+# anchor, its conditional measurement interval, wider assumption comparisons,
+# and the unestimated moving share. The anchor comes first by editorial choice;
+# the interval must still name its source and fixed imported response.
 ABSTRACT_POSTURE = {
-    "range_not_number": "sampling uncertainty in the floor read yields",
-    # ROUND-26 full restatement: the binding layer is the wild-cluster
-    # bootstrap-t interval from run floor_inference_correction; the percentile
-    # read is demoted to a labeled mention inside the same parenthetical.
-    # V20 panel revision (2026-08-04): pin re-synced to the compressed abstract;
-    # the span's purpose is unchanged, the phrasing follows the manuscript.
-    "interval": "$+1.9$ to $+9.1$ percentage-point marginal",  # FP2-B1 decensored
-    # ROUND-28 (DA-C3): the abstract must say WHAT the interval bounds. "pins"
-    # claimed the design pinned the elasticity's contribution; the interval is
-    # the floor read's sampling error at a FIXED elasticity, which contributes
-    # zero width. Pinned as its own span so a concision pass cannot delete the
-    # referent while keeping the interval.
-    # V20 panel revision (2026-08-04): pin re-synced to the compressed abstract;
-    # the span's purpose is unchanged, the phrasing follows the manuscript.
-    "interval_referent": "sampling uncertainty in the floor read",
-    # V20 panel revision (2026-08-04): pin re-synced to the compressed abstract;
-    # the span's purpose is unchanged, the phrasing follows the manuscript.
-    "point_named_inside": "their $+5.6$-point difference, or \\$42.6 billion, is an "
-                          "interior anchor",
-    # ROUND 32: the frame is still load-bearing -- the additive form (+11.2) and
-    # the Fonseca anchor (+11.5) move the marginal UP -- but the claim it used to
-    # protect ('moves it down') is now FALSE and has been restated. Task 11's
-    # activity leg is a MEASURED correction to the baseline turnover floor that
-    # moves the marginal up +5.11 points, so 'only floor and accounting-basis
-    # corrections run one way' no longer holds. The pin now protects the two-way
-    # statement instead of the one-way one.
-    # V20 panel revision (2026-08-04): pin re-synced to the compressed abstract;
-    # the span's purpose is unchanged, the phrasing follows the manuscript.
-    "corrections_framed": "these are separate assumption layers reported without a "
-                          "coverage interpretation",
-    # ROUND-26: the panel's two strongest correlated findings (DA-C1 + R1-W1,
-    # both verified) were that the abstract quoted the interval without its
-    # form conditionality and without its few-cluster inferential status.
-    # Both now travel with the interval IN the abstract, and these pins keep
-    # them there: the qualifier span binds the sampling caveat to the pinned
-    # interval sentence, and the hull span keeps the form dimension stated
-    # where the max-form interval is stated. Canonical-scoped like the rest
-    # of this dict (the archived variant predates both).
-    # ROUND-27 abstract cut: qualifier compressed (wild-cluster status and
-    # under-coverage kept; the demoted percentile literal now lives in the
-    # body only, x4), hull restored to the of-form inside the interval
-    # sentence.
-    # V20 panel revision (2026-08-04): pin re-synced to the compressed abstract;
-    # the span's purpose is unchanged, the phrasing follows the manuscript.
-    # V20: the percentile-under-covers literal now lives in the body only (x4);
-    # the abstract keeps the inferential status inside the interval parenthetical.
-    "interval_qualifier": "at the central imported response",
-    # V20 panel revision (2026-08-04): pin re-synced to the compressed abstract;
-    # the span's purpose is unchanged, the phrasing follows the manuscript.
-    "hull_in_abstract": "Joint floor-and-elasticity calibration spans $+2.1$ to "
-                        "$+13.2$ points, and the additive construction produces "
-                        "approximately $+11.2$ points",
-    # ROUND-26 B8 (DA-M3): the abstract's mechanical-null sentence scoped
-    # "however households react to rates" without marking that the floor it
-    # rests on is itself calibrated from realized -- partly behavioral --
-    # turnover. The qualifier travels with the null claim; canonical-scoped
-    # because the archived variant's abstract predates it.
-    # V20 panel revision (2026-08-04): pin re-synced to the compressed abstract;
-    # the span's purpose is unchanged, the phrasing follows the manuscript.
-    "null_floor_behavioral": "a calibrated turnover floor",
+    "paired_anchor": "the difference is $+5.6$ percentage points of the cap gap, or \$42.6 billion",
+    "floor_interval": "floor-read sampling uncertainty gives $+1.9$ to $+9.1$ points at the central imported response",
+    "calibration": "Joint floor-and-elasticity calibration spans $+2.1$ to $+13.2$ points",
+    "additive_form": "the alternative additive form gives about $+11.2$ points",
+    "moving_share": "the moving share is not estimated",
+    "policy": "a plausible cash-flow range alongside its operational cap",
 }
 
 
 def abstract_posture_check(tex: str) -> tuple[bool, dict]:
-    """Gate #99's rule, as a function so the battery exercises the shipped rule."""
+    """Require the paired anchor and conditional interval before assumption ranges."""
     tex_nc = re.sub(r"(?<!\\)%.*", "", tex)
     _i = tex_nc.find(ABSTRACT_BOUNDS[0])
     _j = tex_nc.find(ABSTRACT_BOUNDS[1], _i + 1)
     found = _i != -1 and _j != -1
     abstract = tex_nc[_i + len(ABSTRACT_BOUNDS[0]):_j] if found else ""
     missing = sorted(k for k, v in ABSTRACT_POSTURE.items() if v not in abstract)
-    # the range must be stated BEFORE the point it contains
-    i_range = abstract.find("$+1.9$ to $+9.1$")  # FP2-B1: decensored binding interval
-    i_point = abstract.find("$+5.6$-point")
-    ordered = i_range != -1 and i_point != -1 and i_range < i_point
+    i_point = abstract.find(ABSTRACT_POSTURE["paired_anchor"])
+    i_range = abstract.find(ABSTRACT_POSTURE["floor_interval"])
+    i_calibration = abstract.find(ABSTRACT_POSTURE["calibration"])
+    ordered = (-1 not in (i_point, i_range, i_calibration)
+               and i_point < i_range < i_calibration)
     return (found and not missing and ordered,
             {"found": found, "missing": missing, "ordered": ordered,
              "i_range": i_range, "i_point": i_point})
@@ -3338,7 +3291,8 @@ def main() -> int:
     # runindex-row, and verdict-ledger checks is the manuscript PLUS that file,
     # which is the same content the suite gated before the migration. Abstract-
     # scoped and variant-diff gates below still read the manuscript files alone.
-    tex = TEX.read_text() + "\n" + (ROOT / "paper" / "final" / "replication_appendices.tex").read_text()
+    tex = TEX.read_text() + "\n" + (ROOT / "paper" / "final" / "reviewed_archive" / "replication_appendices.tex").read_text()
+    print("Historical research-record gates (reviewed_archive; not active-publication verification)")
     failures = 0
 
     for phrase in ZERO_COUNT:
@@ -4474,7 +4428,7 @@ def main() -> int:
         # word carried the TIMING concession here and the LEVEL claim there,
         # with nothing signposting the difference. The abstract now states both
         # truths, and this pin follows the timing half to its new wording.
-        "levels_only_abstract": "monthly timing estimate" in tex,
+        "levels_only_archived_main": "not an estimate of monthly timing" in (TEX.parent / "journal_main_v2.tex").read_text(),
         # the retired early-draft retention share must not reappear
         "no_stale_934": "93.4\\%" not in tex,
     }
@@ -5827,9 +5781,7 @@ def main() -> int:
         "body_insample":
             f"against {_prod['shared']['central_share_pct']:.1f}\\% at the "
             f"in-window calibration" in tex,
-        "abstract_null_and_central_kept":
-            f"levels are {_h['null_shared_share_pct']:.1f}\\% and "
-            f"{_h['central_shared_share_pct']:.1f}\\% of the cap gap" in tex,
+        "shared_levels_archived_main": all(f"{_h[key]:.1f}\\%" in (TEX.parent / "journal_main_v2.tex").read_text() for key in ["null_shared_share_pct", "central_shared_share_pct"]),
         "miss_both_calibrations":
             f"the miss is {_h['miss_vs_benchmark_pp']:.1f} points on the headline "
             f"calibration and {_prod['miss_vs_benchmark_pp']:.1f} points on the "
@@ -7607,6 +7559,10 @@ def main() -> int:
           f"(gate #128): 'pre-registered' occurs {_prereg}x, all of them "
           f"inside the {_reserved} reservation sentence(s)")
 
+    from publication_claims_check import check_publication
+    current_errors = check_publication()
+    failures += len(current_errors)
+    print(f"[ACTIVE PUBLICATION] {current_errors or 'PASS: numerical ledger, source hashes, semantic references, editions, tables'}")
     print(f"\n{'ALL GATES PASS' if failures == 0 else f'{failures} GATE(S) FAILED'}")
     return 0 if failures == 0 else 1
 

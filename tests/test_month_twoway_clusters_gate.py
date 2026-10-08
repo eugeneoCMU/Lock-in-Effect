@@ -1,3 +1,5 @@
+# Historical research-record gate: source archived by the approved October 7 revision.
+# Current publication is checked by test_manuscript_references/test_revision_artifacts.
 """Battery for gate #115 (R32 C-72: the month and two-way cluster rungs).
 
 This exhibit's failure mode is a half-truth that reads as a clean answer.
@@ -31,8 +33,8 @@ from liveness_gates import (  # noqa: E402
     month_twoway_clusters_check,
 )
 
-TEX = (ROOT / "paper" / "final" / "paper_final_v1.tex").read_text()
-VARIANT = (ROOT / "paper" / "final"
+TEX = (ROOT / "paper" / "final" / "reviewed_archive" / "paper_final_v1.tex").read_text()
+VARIANT = (ROOT / "paper" / "final" / "reviewed_archive"
            / "paper_final_v1_long_abstract.tex").read_text()
 V2 = json.loads((ROOT / "hazard" / "data"
                  / "floor_inference_correction_v2_results.json").read_text())
