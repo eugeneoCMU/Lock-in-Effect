@@ -1,4 +1,4 @@
-# Independent fresh-reader review — October 8, 20 26
+# Independent fresh-reader review — October 8, 2026
 
 A separate reader, without project history or archived sources, read the rebuilt 21-page main paper and 11-page appendix, and visually inspected the early evidence table and central result table. An initial execution failed because of account usage limits; a single retry after the user's continuation request completed the review. This is an internal independent-reader check, not external peer review or independent causal validation.
 
@@ -12,7 +12,7 @@ The reader correctly identified the June 2022–November 2025 cumulative reporte
 2. Limited population support, unknown inclusion probabilities, outcome-conditioned flow reporting and missing later purchase/reinvestment/default histories prevent a full-book counterfactual holdings interpretation.
 3. The retrospective prediction is adverse against a simple cohort-speed baseline and does not provide untouched empirical validation.
 
-The reader found all three disclosed, rather than misrepresented as solved. It found no material numerical contradiction among the abstract, results, methods and conclusion. The July 20 26/June 2022 coverage dates were clear and consistent.
+The reader found all three disclosed, rather than misrepresented as solved. It found no material numerical contradiction among the abstract, results, methods and conclusion. The July 2026/June 2022 coverage dates were clear and consistent.
 
 ## One substantive revision and one bounded caption clarification
 
