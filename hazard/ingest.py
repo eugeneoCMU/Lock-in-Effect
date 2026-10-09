@@ -213,7 +213,7 @@ def build_panel_from_files(
         joined = joined.with_columns([
             pl.col("current_upb")
             .shift(1)
-            .over("loan_sequence_number")
+            .over("loan_sequence_number", order_by="reporting_period")
             .alias("prev_upb"),
         ])
         agg = (
@@ -251,7 +251,10 @@ def build_panel_from_files(
         pl.col("exposure_upb").sum(),
         pl.col("orig_upb_sum").sum(),
         pl.col("prepaid_upb").sum(),
-        pl.col("mean_loan_age").mean(),
+        ((pl.col("mean_loan_age") * pl.col("loan_count"))
+         .filter(pl.col("mean_loan_age").is_finite()).sum()
+         / pl.col("loan_count").filter(pl.col("mean_loan_age").is_finite()).sum())
+        .alias("mean_loan_age"),
         pl.col("mode_state").first(),
         pl.col("loan_count").sum(),
     ])

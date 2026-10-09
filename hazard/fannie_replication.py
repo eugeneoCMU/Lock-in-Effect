@@ -191,7 +191,10 @@ def combine_quarter_cells(
         pl.col("exposure_upb").sum(),
         pl.col("orig_upb_sum").sum(),
         pl.col("prepaid_upb").sum(),
-        pl.col("mean_loan_age").mean(),
+        ((pl.col("mean_loan_age") * pl.col("loan_count"))
+         .filter(pl.col("mean_loan_age").is_finite()).sum()
+         / pl.col("loan_count").filter(pl.col("mean_loan_age").is_finite()).sum())
+        .alias("mean_loan_age"),
         pl.col("mode_state").first(),
         pl.col("loan_count").sum(),
     ])

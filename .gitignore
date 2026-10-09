@@ -118,3 +118,7 @@ output/pdf/lock-in-effect-economics-review-*.pdf
 # October 8 local baseline archives, replay logs, renders, and delivery packages.
 output/paper-improvement/
 output/pdf/lock-in-paper-improved-2026-10-08*.pdf
+
+# October 9 research diagnostics: frozen downloads, licensed derived cells,
+# model score files and render intermediates remain local.
+output/research-limits/
