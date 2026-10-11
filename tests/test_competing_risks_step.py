@@ -359,15 +359,15 @@ def test_empty_pool_returns_a_zeroed_month_not_a_crash():
     assert out["exposure"] == 0.0
 
 
-def test_exposure_is_floored_at_one_on_a_live_but_zero_balance_pool():
-    """max(exposure, 1.0): a fully paid-down but still-active pool must not
-    hand a zero denominator downstream."""
+def test_zero_balances_refresh_stale_active_mask():
+    """Paid-down balances leave the live pool even if its cached mask is stale."""
     from competing_risks import monthly_step
 
     pool = _pool(n=3)
     pool.balance[:] = 0.0
     out = monthly_step(pool, 0.07, trans=_trans())
-    assert out["exposure"] == 1.0
+    assert out["exposure"] == 0.0
+    assert not pool.active_mask.any()
 
 
 def test_default_upb_is_reported_as_zero_by_construction():

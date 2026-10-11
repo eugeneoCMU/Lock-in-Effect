@@ -15,6 +15,7 @@ import pandas as pd
 import polars as pl
 
 from hazard.pathb_cohort_validation import KEYS, START, END, fit_baseline, prepare_exposures, score
+from hazard.cohort_history import prediction_initial_state
 from hazard.stock_flow_accounting_comparison import ROOT, CHECKS, lh, sha
 
 OUTPUT = ROOT / 'output/research-limits/2026-10-09/prediction'
@@ -53,12 +54,14 @@ def ordered_previous_upb(performance):
     )
 
 
-def predict_path(rows, pre, cov, rates, annual_floor, psa, beta):
-    """Reproduce the existing cohort approximation with explicit parameters.
+def predict_path(rows, pre, cov, rates, annual_floor, psa, beta, *, allow_legacy_history=False):
+    """Predict the cohort approximation from an explicit pre-period state.
 
     Reads only cell/date/coupon from rows; the observed outcomes, exposures and
     contemporaneous burnout never update the model's state. Observed opening
-    exposure is used later solely for conditional scoring.
+    exposure is used later solely for conditional scoring. Corrected histories
+    require the fixed original cohort balance. Legacy clipping and survivor
+    original-balance denominators are available only for historical replay.
     """
     if rows.duplicated(['cell', 'period']).any():
         raise ValueError('Duplicate cell-month rows')
@@ -75,9 +78,7 @@ def predict_path(rows, pre, cov, rates, annual_floor, psa, beta):
     d['lz'] = d.cell.map(cov.ltv_z)
     if not np.isfinite(d[['age', 'rate', 'fz', 'lz']].to_numpy()).all():
         raise ValueError('Missing or nonfinite conditioning covariates')
-    burn = pre.burnout.clip(0, 1).to_dict()
-    balance = pre.exposure_upb.to_dict()
-    original = pre.orig_upb_sum.to_dict()
+    burn, balance, original = prediction_initial_state(pre, allow_legacy=allow_legacy_history)
     c = lh.LITERATURE_COEFS
     floor = annual_floor_monthly(annual_floor)
     for _, sub in d.groupby('period', sort=True):
@@ -98,19 +99,21 @@ def predict_path(rows, pre, cov, rates, annual_floor, psa, beta):
         for cell, hz in zip(sub.cell, h):
             amount = balance[cell] * hz
             balance[cell] -= amount
-            burn[cell] = min(1., burn[cell] + amount/max(original[cell], 1.))
+            denominator = max(original[cell], 1.) if allow_legacy_history else original[cell]
+            burn[cell] = min(1., burn[cell] + amount/denominator)
     d['floor_bound'] = d.floor_bound.astype(bool)
     d['normalized'] = d.normalized.astype(bool)
     return d.drop(columns=['cell', 'period', 'coupon'])
 
 
-def select_parameters(rows, pre, cov, rates):
+def select_parameters(rows, pre, cov, rates, *, allow_legacy_history=False):
     if rows.empty or not rows.period.between('2023-01-01', '2023-12-01').all():
         raise ValueError('Parameter selection permits only January-December 2023 rows')
     grid = []
     for floor in FLOORS:
         for psa in PSAS:
-            pred = predict_path(rows, pre, cov, rates, floor, psa, RESPONSE_BETA)
+            pred = predict_path(rows, pre, cov, rates, floor, psa, RESPONSE_BETA,
+                                allow_legacy_history=allow_legacy_history)
             metrics = strict_score(rows.opening_exposure, rows.prepaid_upb, pred.hazard)
             grid.append(dict(annual_floor=floor, psa=psa, **metrics))
     def choose(candidates):
@@ -173,7 +176,9 @@ def main(output=OUTPUT):
     pre_train = panel[panel.period == pd.Timestamp('2022-12-01')].set_index('cell')
     train = usable[usable.period.between('2023-01-01', '2023-12-01')].copy()
     train = train[train.cell.isin(set(pre_train.index) & set(cov.index))].copy()
-    selected, grid = select_parameters(train, pre_train, cov, rates)
+    # Frozen retrospective replay intentionally retains its recorded legacy
+    # history convention. Corrected development needs a separately audited run.
+    selected, grid = select_parameters(train, pre_train, cov, rates, allow_legacy_history=True)
     freeze = dict(design='retrospective development; previously examined evaluation outcomes',
                   selection_start='2023-01-01', selection_end='2023-12-01',
                   selection_metric='exposure-weighted monthly-rate RMSE, response-on',
@@ -204,7 +209,8 @@ def main(output=OUTPUT):
     for family, p in parameters.items():
         for leg, beta in [('off', 0.), ('on', RESPONSE_BETA)]:
             name = family+'_'+leg
-            path = predict_path(ev, pre_eval, cov, rates, p['annual_floor'], p['psa'], beta)
+            path = predict_path(ev, pre_eval, cov, rates, p['annual_floor'], p['psa'], beta,
+                                allow_legacy_history=True)
             paths[name] = path
             ev[name] = path.hazard
             ev[name+'_floor_bound'] = path.floor_bound

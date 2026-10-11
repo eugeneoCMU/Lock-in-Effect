@@ -56,7 +56,7 @@ def test_recombine_weights_unequal_existing_quarter_cells(tmp_path):
             'period':['2018-01-01'], 'burnout':[0.],
         })
         p=tmp_path/f'{i}.parquet'; frame.write_parquet(p); paths.append(p)
-    combined=combine_quarter_cells(paths,tmp_path/'pooled.parquet',vintage_years=None)
+    combined=combine_quarter_cells(paths,tmp_path/'pooled.parquet',vintage_years=None,allow_legacy_cells=True)
     assert combined['mean_loan_age'].item() == pytest.approx(30.)
 
 
@@ -74,6 +74,6 @@ def test_missing_quarter_age_does_not_turn_known_age_into_zero_or_nan(tmp_path, 
             'burnout':[0.],
         }).write_parquet(p)
         paths.append(p)
-    result=combine_quarter_cells(paths,tmp_path/'known_age.parquet',vintage_years=None)
+    result=combine_quarter_cells(paths,tmp_path/'known_age.parquet',vintage_years=None,allow_legacy_cells=True)
     assert result['mean_loan_age'].item() == pytest.approx(30.)
     assert result['loan_count'].item() == 2

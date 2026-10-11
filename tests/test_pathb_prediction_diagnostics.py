@@ -18,7 +18,8 @@ def fixture():
     })
     pre = pd.DataFrame({'cell': ['a'], 'period': pd.to_datetime(['2022-12-01']),
                         'mean_loan_age': [40.], 'burnout': [.2],
-                        'exposure_upb': [100.], 'orig_upb_sum': [120.]}).set_index('cell')
+                        'exposure_upb': [100.], 'orig_upb_sum': [120.],
+                        'cohort_original_upb': [200.]}).set_index('cell')
     cov = pd.DataFrame({'fico_z': [0.], 'ltv_z': [0.]}, index=['a'])
     rates = pd.Series([.07, .07], index=pd.period_range('2023-01', periods=2, freq='M'))
     return rows, pre, cov, rates
@@ -61,6 +62,49 @@ def test_predictions_do_not_read_future_outcomes_or_realized_burnout():
     poisoned['mean_loan_age'] = [-1000., 10000.]
     actual = predict_path(poisoned, pre, cov, rates, .02, 75, -.07)
     pd.testing.assert_frame_equal(expected, actual)
+
+
+def test_prediction_burnout_uses_fixed_original_cohort_balance():
+    rows, pre, cov, rates = fixture()
+    actual = predict_path(rows, pre, cov, rates, .02, 75, -.07)
+    assert actual.predicted_burnout.iloc[0] == pytest.approx(.2)
+    first_payoff = 100. * actual.hazard.iloc[0]
+    assert actual.predicted_burnout.iloc[1] == pytest.approx(.2 + first_payoff / 200.)
+    assert actual.latent_balance.iloc[1] == pytest.approx(100. - first_payoff)
+    # Contemporaneous survivor original UPB is not a denominator for this state.
+    altered = pre.assign(orig_upb_sum=1.)
+    pd.testing.assert_frame_equal(actual, predict_path(rows, altered, cov, rates, .02, 75, -.07))
+
+
+def test_legacy_prediction_requires_explicit_opt_in():
+    rows, pre, cov, rates = fixture()
+    legacy = pre.drop(columns='cohort_original_upb').assign(burnout=2.)
+    with pytest.raises(ValueError, match='cohort_original_upb'):
+        predict_path(rows, legacy, cov, rates, .02, 75, -.07)
+    historical = predict_path(rows, legacy, cov, rates, .02, 75, -.07,
+                              allow_legacy_history=True)
+    assert historical.predicted_burnout.iloc[0] == 1.
+
+
+@pytest.mark.parametrize('invalid_burnout', [-.1, 1.1, np.nan])
+def test_corrected_prediction_rejects_invalid_history_without_clipping(invalid_burnout):
+    rows, pre, cov, rates = fixture()
+    pre['burnout'] = invalid_burnout
+    with pytest.raises(ValueError, match='Historical'):
+        predict_path(rows, pre, cov, rates, .02, 75, -.07)
+
+
+def test_selector_propagates_explicit_legacy_history_choice():
+    rows, pre, cov, rates = fixture()
+    legacy = pre.drop(columns='cohort_original_upb')
+    with pytest.raises(ValueError, match='cohort_original_upb'):
+        select_parameters(rows, legacy, cov, rates)
+    historical, historical_grid = select_parameters(rows, legacy, cov, rates,
+                                                    allow_legacy_history=True)
+    equivalent = pre.assign(cohort_original_upb=pre.orig_upb_sum)
+    corrected, corrected_grid = select_parameters(rows, equivalent, cov, rates)
+    assert historical == corrected
+    assert historical_grid == corrected_grid
 
 
 def test_response_off_removes_only_rate_gap_coefficient():

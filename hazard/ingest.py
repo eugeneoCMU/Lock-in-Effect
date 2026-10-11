@@ -98,6 +98,7 @@ def _scan_orig(path: Path) -> pl.LazyFrame:
             pl.col("loan_sequence_number").cast(pl.Utf8),
             pl.col("amortization_type").cast(pl.Utf8),
             pl.col("property_state").cast(pl.Utf8),
+            pl.col("original_loan_term").cast(pl.Float64, strict=False),
         ])
         .filter(pl.col("amortization_type") == "FRM")
         .filter(pl.col("original_upb") > 0)
@@ -112,7 +113,7 @@ def _scan_orig(path: Path) -> pl.LazyFrame:
     )
 
 
-def _scan_perf(path: Path) -> pl.LazyFrame:
+def _scan_perf(path: Path, reporting_end: str | None = None) -> pl.LazyFrame:
     lf = pl.scan_csv(
         path,
         separator="|",
@@ -121,6 +122,8 @@ def _scan_perf(path: Path) -> pl.LazyFrame:
         infer_schema_length=0,
         truncate_ragged_lines=True,
     )
+    if reporting_end is not None:
+        lf = lf.filter(pl.col("reporting_period") <= reporting_end)
     return (
         lf.select([
             pl.col("loan_sequence_number").cast(pl.Utf8),
@@ -202,14 +205,37 @@ def filter_pairs(
 def build_panel_from_files(
     pairs: Iterable[tuple[Path, Path]],
     output: Path = PANEL_PATH,
+    *, term_months: int | None = None, reporting_end: str | None = None,
 ) -> pl.DataFrame:
     """Lazy-scan Freddie files and aggregate to cohort-month panel."""
     agg_dfs: list[pl.DataFrame] = []
+    cohort_keys = ["vintage", "coupon", "fico_bucket", "ltv_bucket"]
+    denominators = []
+    seen_ids = set()
     for orig_path, perf_path in pairs:
         print(f"  Scanning {orig_path.name} + {perf_path.name} …")
         orig = _scan_orig(orig_path)
-        perf = _scan_perf(perf_path)
+        if term_months is not None:
+            orig = orig.filter(pl.col("original_loan_term") == term_months)
+        ids = orig.select("loan_sequence_number").collect()["loan_sequence_number"].to_list()
+        if len(ids) != len(set(ids)) or seen_ids.intersection(ids):
+            raise ValueError("Duplicate origination IDs or overlapping source files")
+        seen_ids.update(ids)
+        fixed_cohorts = orig.group_by(cohort_keys).agg(
+            pl.col("original_upb").sum().alias("cohort_original_upb")).collect()
+        if fixed_cohorts.filter(~pl.col('cohort_original_upb').is_finite()
+                               | (pl.col('cohort_original_upb') <= 0)).height:
+            raise ValueError('Original cohort balances must be finite and positive')
+        denominators.append(fixed_cohorts)
+        perf = (_scan_perf(perf_path) if reporting_end is None else
+                _scan_perf(perf_path, reporting_end=reporting_end))
+        duplicates = perf.group_by(["loan_sequence_number", "reporting_period"]).len().filter(pl.col("len") > 1).limit(1).collect()
+        if len(duplicates):
+            raise ValueError("Duplicate loan-month in performance source")
         joined = perf.join(orig, on="loan_sequence_number", how="inner")
+        observed_ids = joined.select('loan_sequence_number').unique().collect()['loan_sequence_number'].to_list()
+        if set(ids).difference(observed_ids):
+            raise ValueError('Eligible source loans have no performance history; audit missing coverage before building fixed burnout')
         joined = joined.with_columns([
             pl.col("current_upb")
             .shift(1)
@@ -232,12 +258,16 @@ def build_panel_from_files(
                   .otherwise(0.0)
                   .sum()
                   .alias("prepaid_upb"),
-                pl.col("loan_age").mean().alias("mean_loan_age"),
+                pl.col("loan_age").filter(pl.col("loan_age").is_finite()).mean().alias("mean_loan_age"),
+                pl.col("loan_age").filter(pl.col("loan_age").is_finite()).sum().alias("finite_age_sum"),
+                pl.col("loan_age").is_finite().fill_null(False).sum().alias("finite_age_count"),
                 pl.col("servicer_state").mode().first().alias("mode_state"),
                 pl.len().alias("loan_count"),
             ])
         )
         agg_dfs.append(agg.collect())
+        if fixed_cohorts.join(agg_dfs[-1].select(cohort_keys).unique(), on=cohort_keys, how='anti').height:
+            raise ValueError('Source cohort has no performance history; cannot preserve its denominator in quarter cells')
         print(f"    → {len(agg_dfs[-1]):,} cohort-month cells")
 
     if not agg_dfs:
@@ -251,13 +281,14 @@ def build_panel_from_files(
         pl.col("exposure_upb").sum(),
         pl.col("orig_upb_sum").sum(),
         pl.col("prepaid_upb").sum(),
-        ((pl.col("mean_loan_age") * pl.col("loan_count"))
-         .filter(pl.col("mean_loan_age").is_finite()).sum()
-         / pl.col("loan_count").filter(pl.col("mean_loan_age").is_finite()).sum())
-        .alias("mean_loan_age"),
+        pl.col("finite_age_sum").sum(),
+        pl.col("finite_age_count").sum(),
         pl.col("mode_state").first(),
         pl.col("loan_count").sum(),
     ])
+    fixed = pl.concat(denominators).group_by(cohort_keys).agg(pl.col("cohort_original_upb").sum())
+    panel = panel.join(fixed, on=cohort_keys, how="left").with_columns(
+        (pl.col("finite_age_sum") / pl.col("finite_age_count")).alias("mean_loan_age"))
     panel = (
         panel
         .sort(["vintage", "coupon", "fico_bucket", "ltv_bucket", "reporting_period"])
@@ -274,9 +305,11 @@ def build_panel_from_files(
     panel = panel.with_columns([
         (pl.col("prepaid_upb").cum_sum().over(
             ["vintage", "coupon", "fico_bucket", "ltv_bucket"]
-        ) / pl.col("orig_upb_sum").clip(lower_bound=1))
+        ) / pl.col("cohort_original_upb"))
         .alias("burnout"),
     ])
+    if panel.filter(~pl.col("burnout").is_finite() | (pl.col("burnout") < 0) | (pl.col("burnout") > 1 + 1e-10)).height:
+        raise ValueError("Payoff history exceeds fixed original cohort balance; audit events instead of clipping")
     output.parent.mkdir(parents=True, exist_ok=True)
     panel.write_parquet(output)
     print(f"Cohort-month panel saved: {output} ({len(panel):,} rows)")

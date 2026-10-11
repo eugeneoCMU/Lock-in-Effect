@@ -165,7 +165,7 @@ def run(source=SOURCE, output=OUTPUT, fetch_rates=False):
     grid_parity = {book: verify_grid_parity(g, saved[book]) for book, g in old_grids.items()}
     # New values are calculated only after all old-grid replay gates pass.
     rebuilt_path = output/'cohort_month_panel_fannie_age_recombined.parquet'
-    combined = combine_quarter_cells(paths, rebuilt_path)
+    combined = combine_quarter_cells(paths, rebuilt_path, allow_legacy_cells=True)
     comparison = compare_panels(pd.read_parquet(fannie_path), combined.to_pandas())
     rebuilt = prep(rebuilt_path, monthly)
     new_grid = grids(rebuilt)

@@ -36,16 +36,30 @@ def _markov_step_delinquent(
     pool: MicrosimPool,
     trans: pd.DataFrame,
     rng: np.random.Generator,
-) -> None:
+    opening_delinquent: Optional[np.ndarray] = None,
+) -> tuple[np.ndarray, np.ndarray]:
     """Apply Markov transitions to agents already in delinquency pipeline."""
-    T = trans.to_numpy()
-    state_names = list(trans.index)
+    state_names = list(trans.columns)
+    if (not trans.index.is_unique or not trans.columns.is_unique
+            or set(trans.index) != set(MARKOV_STATES)
+            or set(trans.columns) != set(MARKOV_STATES)):
+        raise ValueError("Transition matrix must have unique, complete state labels")
+    values = trans.to_numpy(dtype=float)
+    if not np.all(np.isfinite(values) & (values >= 0)):
+        raise ValueError("Transition probabilities must be finite and nonnegative")
+    totals = values.sum(axis=1)
+    if not np.all(np.isclose(totals, 1) | np.isclose(totals, 0)):
+        raise ValueError("Transition rows must sum to one (or zero for legacy unsupported rows)")
     name_to_code = {s: STATE_TO_CODE[s] for s in MARKOV_STATES if s in STATE_TO_CODE}
 
     mask = np.isin(pool.state_code, list(DELINQUENT_CODES)) & pool.active_mask
+    if opening_delinquent is not None:
+        mask &= opening_delinquent
     idxs = np.where(mask)[0]
     if len(idxs) == 0:
-        return
+        return np.array([], dtype=int), np.array([], dtype=float)
+
+    paid_idxs, paid_amounts = [], []
 
     for i in idxs:
         state_name = CODE_TO_STATE[int(pool.state_code[i])]
@@ -60,6 +74,11 @@ def _markov_step_delinquent(
         j = min(int(np.searchsorted(cum, u)), len(state_names) - 1)
         new_state = state_names[j]
         pool.state_code[i] = name_to_code.get(new_state, pool.state_code[i])
+        if new_state == "Prepaid":
+            paid_idxs.append(i)
+            paid_amounts.append(pool.balance[i])
+            pool.balance[i] = 0.0
+    return np.asarray(paid_idxs, dtype=int), np.asarray(paid_amounts, dtype=float)
 
 
 def update_cohort_burnout_amounts(
@@ -93,8 +112,14 @@ def monthly_step(
     if trans is None:
         trans = load_transition_matrix()
 
+    # Contractual maturity cash is scheduled principal, not voluntary payoff.
+    mature = pool.active_mask & (pool.loan_age >= pool.loan_terms)
+    maturity_cash = float(pool.balance[mature].sum())
+    pool.balance[mature] = 0.0
+    pool._update_active_mask()
     pool.broadcast_burnout()
-    active = pool.active_mask
+    active = pool.active_mask.copy()
+    opening_delinquent = active & np.isin(pool.state_code, list(DELINQUENT_CODES))
     # Round-15 Q3 amendment: beta1 may be a per-loan vector (full pool
     # length, aligned to loan-sample row order) for group-ablation runs.
     # A constant vector is elementwise bit-identical to the scalar path;
@@ -107,7 +132,7 @@ def monthly_step(
         return {
             "prepay_upb": 0.0,
             "default_upb": 0.0,
-            "sched_amt": 0.0,
+            "sched_amt": maturity_cash,
             "settled_b": 0.0,
             "exposure": 0.0,
             "prepay_count": 0,
@@ -155,7 +180,7 @@ def monthly_step(
             )
             refi_ann = danish_refi_in_place_cpr_annual(
                 pool.coupon[active], market_rate, pool.loan_age[active],
-                regime="US", term_months=pool.term_months,
+                regime="US", term_months=pool.loan_terms[active],
             )
             h_refi = _annual_to_monthly_cpr(refi_ann)
             # competing risks on the survival scale
@@ -163,7 +188,7 @@ def monthly_step(
         else:
             cpr_ann = danish_cpr_annual(
                 pool.coupon[active], market_rate, pool.loan_age[active],
-                regime="US", term_months=pool.term_months,
+                regime="US", term_months=pool.loan_terms[active],
             )
             h_prep = _annual_to_monthly_cpr(cpr_ann)
     else:
@@ -186,7 +211,7 @@ def monthly_step(
         prepay_amts = bal_active * h_prep_n
         prepay_upb = float(prepay_amts.sum())
         pool.balance[active_idx] = np.maximum(bal_active - prepay_amts, 0.0)
-        prepay_count = int(np.sum(prepay_amts > 0))
+        prepaid_indices = active_idx[prepay_amts > 0]
 
         u = pool.rng.uniform(size=n_active)
         default_hits = u < h_def_n
@@ -206,9 +231,10 @@ def monthly_step(
 
         prepay_idx = active_idx[prepay_hits]
         default_idx = active_idx[default_hits]
+        prepaid_balances = pool.balance[prepay_idx].copy()
 
         prepay_upb = float(pool.balance[prepay_idx].sum()) if len(prepay_idx) else 0.0
-        prepay_count = int(len(prepay_idx))
+        prepaid_indices = prepay_idx
         default_count = int(len(default_idx))
 
         for i in prepay_idx:
@@ -222,27 +248,20 @@ def monthly_step(
                 pool.state_code[i] = STATE_TO_CODE["Defaulted"]
 
         if len(prepay_idx):
-            prepaid_mask = np.zeros(pool.n, dtype=bool)
-            prepaid_mask[prepay_idx] = True
-            prepaid_bal = np.where(prepaid_mask, pool.balance, 0.0)
-            for s in range(pool.n_strata):
-                in_stratum = pool.stratum_id_code == s
-                prepaid_s = prepaid_bal[in_stratum].sum()
-                denom = pool.stratum_orig_upb[s]
-                if denom > 0 and prepaid_s > 0:
-                    pool.cohort_burnout[s] = min(
-                        1.0,
-                        pool.cohort_burnout[s] + prepaid_s / denom,
-                    )
+            update_cohort_burnout_amounts(pool, prepay_idx, prepaid_balances)
 
-    _markov_step_delinquent(pool, trans, pool.rng)
+    paid_idxs, paid_amounts = _markov_step_delinquent(pool, trans, pool.rng, opening_delinquent)
+    prepay_upb += float(paid_amounts.sum())
+    # A fractional payment and a subsequent Markov payoff are one borrower.
+    prepay_count = int(len(np.union1d(prepaid_indices, paid_idxs)))
+    update_cohort_burnout_amounts(pool, paid_idxs, paid_amounts)
 
-    sched_amt = 0.0
+    sched_amt = maturity_cash
     pool._update_active_mask()
     still_active = pool.active_mask
     for i in np.where(still_active)[0]:
         smm = scheduled_amortization_smm(
-            float(pool.coupon[i]), TERM_MONTHS, int(pool.loan_age[i])
+            float(pool.coupon[i]), int(pool.loan_terms[i]), int(pool.loan_age[i])
         )
         principal = pool.balance[i] * smm
         pool.balance[i] = max(pool.balance[i] - principal, 0.0)

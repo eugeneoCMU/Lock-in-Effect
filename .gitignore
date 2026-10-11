@@ -123,3 +123,4 @@ output/pdf/lock-in-paper-audited-2026-10-10*.pdf
 # October 9 research diagnostics: frozen downloads, licensed derived cells,
 # model score files and render intermediates remain local.
 output/research-limits/
+output/research-repairs/

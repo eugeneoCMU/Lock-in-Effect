@@ -4,6 +4,7 @@ import json
 import numpy as np
 import pandas as pd
 from hazard.stock_flow_accounting_comparison import ROOT,CHECKS,sha,lh
+from hazard.cohort_history import prediction_initial_state
 KEYS=['vintage','coupon','fico_bucket','ltv_bucket']
 START=pd.Timestamp('2024-01-01');END=pd.Timestamp('2025-09-01')
 
@@ -47,7 +48,10 @@ def main():
     # Hold all state/covariate initialization to pre-evaluation rows.
     ev['base']=ev.cell.map(base)
     ev['fz']=ev.cell.map(cov.fico_z);ev['lz']=ev.cell.map(cov.ltv_z)
-    age0=pre.mean_loan_age.to_dict();burn0=pre.burnout.clip(0,1).to_dict();orig0=pre.orig_upb_sum.to_dict()
+    age0=pre.mean_loan_age.to_dict()
+    # This frozen replay retains the recorded legacy convention; corrected
+    # prediction entry points require audited fixed-cohort history instead.
+    burn0,balance0,orig0=prediction_initial_state(pre,allow_legacy=True)
     macro=pd.read_parquet(CHECKS/'macro_frozen.parquet');rate=macro.MORTGAGE30US.groupby(macro.index.to_period('M')).last()/100
     ev['rate']=ev.period.dt.to_period('M').map(rate)
     if ev.rate.isna().any():raise ValueError('Missing conditioning mortgage rates')
@@ -55,7 +59,7 @@ def main():
     old=lh.INVOLUNTARY_CPR_ANNUAL;lh.INVOLUNTARY_CPR_ANNUAL=.04991
     try:
         for name,beta in [('off',0.),('on',lh.rothstein_beta1(.065))]:
-            burn=dict(burn0);balance=pre.exposure_upb.to_dict()
+            burn=dict(burn0);balance=dict(balance0)
             for dt,sub in ev.groupby('period',sort=True):
                 b=np.array([burn[c] for c in sub.cell]);h=lh.prepay_hazard(sub.age.to_numpy(),(sub.coupon-sub.rate).to_numpy(),b,sub.fz.to_numpy(),sub.lz.to_numpy(),beta1=beta)
                 default=lh.default_hazard(np.maximum(sub.rate-sub.coupon,0).to_numpy(),sub.fz.to_numpy(),sub.lz.to_numpy())
