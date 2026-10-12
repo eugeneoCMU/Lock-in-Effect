@@ -64,7 +64,7 @@ def check_resources(path):
     return {"free_disk_bytes": free, "peak_rss_bytes": rss}
 
 
-def schema_audit(orig_path, perf_path, *, quarter='2017Q1'):
+def schema_audit(orig_path, perf_path, *, quarter='2017Q1', exclude_zero_note_rate=False):
     """Only identity/layout/date fields are inspected in performance here."""
     if not re.fullmatch(r'20\d{2}Q[1-4]', quarter):
         raise ValueError('Expected declared source quarter YYYYQn')
@@ -76,6 +76,8 @@ def schema_audit(orig_path, perf_path, *, quarter='2017Q1'):
     p = {"rows": 0, "invalid_id_positions": 0, "unknown_origination_ids": 0,
          "invalid_reporting_periods": 0, "pre_cutoff_rows": 0, "post_cutoff_date_rows": 0}
     oh, ph = hashlib.sha256(), hashlib.sha256()
+    zero_rates=dict(enabled=exclude_zero_note_rate,otherwise_eligible_frm_count=0,
+        otherwise_eligible_frm_upb=0.,known360_count=0,known360_upb=0.)
     with orig_path.open("rb") as source:
         for raw in source:
             oh.update(raw)
@@ -95,6 +97,13 @@ def schema_audit(orig_path, perf_path, *, quarter='2017Q1'):
                         and ltv is not None and 1 <= ltv <= 200
                         and fico is not None and 300 <= fico <= 850)
             if eligible:
+                if rate == 0 and exclude_zero_note_rate:
+                    zero_rates['otherwise_eligible_frm_count']+=1
+                    zero_rates['otherwise_eligible_frm_upb']+=upb
+                    if finite(cols[21]) == 360:
+                        zero_rates['known360_count']+=1
+                        zero_rates['known360_upb']+=upb
+                    continue
                 # A missing rate cannot be assigned to a valid cohort; retain
                 # this as a blocking positional/data ambiguity, not silently drop.
                 if rate is None or not 0 < rate < 30:
@@ -130,6 +139,7 @@ def schema_audit(orig_path, perf_path, *, quarter='2017Q1'):
                 check_resources(perf_path.parent)
                 print(f"Schema rows checked: {p['rows']:,}", flush=True)
     o["sha256"], p["sha256"] = oh.hexdigest(), ph.hexdigest()
+    o['zero_note_rate_exclusions']=zero_rates
     o["width_counts"], p["width_counts"] = dict(ow), dict(pw)
     passed = (set(ow) == {32} and set(pw) == {32}
               and o["duplicate_ids"] == o["invalid_id_positions"] == 0

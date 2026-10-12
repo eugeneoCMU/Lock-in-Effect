@@ -72,7 +72,7 @@ def _sha256(path):
     return digest.hexdigest()
 
 
-def build_quarter(orig, perf, output, quarter, cutoff="202509", transition_end="202205"):
+def build_quarter(orig, perf, output, quarter, cutoff="202509", transition_end="202205", *, exclude_zero_note_rate=False):
     """Write corrected compact artifacts only after every source check succeeds.
 
     Coupon buckets and outcome mapping match ingest.py. First-observed voluntary
@@ -107,6 +107,8 @@ def build_quarter(orig, perf, output, quarter, cutoff="202509", transition_end="
     ]})
     counts.update(first_observed_payoff_fallback_upb=0.0,
                   payoff_with_nonadjacent_prior_upb=0.0, total_prepaid_upb=0.0)
+    zero_rates=dict(enabled=exclude_zero_note_rate,otherwise_eligible_frm_count=0,
+        otherwise_eligible_frm_upb=0.,known360_count=0,known360_upb=0.)
     all_ids, loans = set(), {}
     fixed, source_history = defaultdict(float), defaultdict(lambda: [0., 0., 0., 0, 0])
     orig_hash, perf_hash = hashlib.sha256(), hashlib.sha256()
@@ -126,9 +128,18 @@ def build_quarter(orig, perf, output, quarter, cutoff="202509", transition_end="
                 raise ValueError("Duplicate origination identity")
             all_ids.add(loan_id)
             fico, upb, ltv, rate, term = (finite(row[i]) for i in (0, 10, 11, 12, 21))
-            eligible = (row[15] == b"FRM" and term == 360 and upb is not None and upb > 0
+            base_eligible = (row[15] == b"FRM" and upb is not None and upb > 0
                         and ltv is not None and 1 <= ltv <= 200
                         and fico is not None and 300 <= fico <= 850)
+            if base_eligible and rate == 0 and exclude_zero_note_rate:
+                zero_rates['otherwise_eligible_frm_count']+=1
+                zero_rates['otherwise_eligible_frm_upb']+=upb
+                if term == 360:
+                    zero_rates['known360_count']+=1
+                    zero_rates['known360_upb']+=upb
+                counts['excluded_original_ids']+=1
+                continue
+            eligible = base_eligible and term == 360
             if not eligible:
                 counts["excluded_original_ids"] += 1
                 continue
@@ -332,7 +343,8 @@ def build_quarter(orig, perf, output, quarter, cutoff="202509", transition_end="
                 ["opening_upb","adjacent_opening_upb","first_observed_opening_upb","gap_opening_upb","exposure_upb"]}
     if not all(math.isfinite(v) for v in [*risk_sets.values(), *counts.values(), *weighted_transitions.values()]):
         raise ValueError("Quarter totals exceed finite numeric support")
-    report = dict(quarter=quarter, population="known 360-month fixed-rate originations; valid FICO/LTV/positive original UPB",
+    report = dict(quarter=quarter, population="known 360-month fixed-rate originations; valid FICO/LTV/positive original UPB and note rate",
+        zero_note_rate_exclusions=zero_rates,
         cutoff=str(cutoff), snapshot_month=SNAPSHOT_MONTH, transition_end=str(transition_end),
         source_sha256={"origination":orig_hash.hexdigest(),"performance":perf_hash.hexdigest()},
         schema={"origination_width_counts":{"32":counts["origination_rows"]},

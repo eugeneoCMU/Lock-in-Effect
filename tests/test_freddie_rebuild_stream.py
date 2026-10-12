@@ -163,3 +163,35 @@ def test_offline_cli_does_not_require_a_macro_api_key():
     result=subprocess.run([sys.executable,str(Path(__file__).resolve().parents[1]/'hazard/freddie_rebuild_stream.py'),'--help'],env=env,capture_output=True,text=True)
     assert result.returncode == 0, result.stderr
 
+
+def test_zero_rate_exclusion_is_explicit_audited_and_outcome_blind(tmp_path):
+    from freddie_raw_quarter_audit import schema_audit
+    o,p=sources(tmp_path,[orig(1),orig(2,upb=237000,rate='0'),orig(3,upb=10000,term=180,rate='0')],
+        [perf(1,'202204',100),perf(1,'202205',90),
+         perf(2,'202205','DO NOT DECODE',age='DO NOT DECODE'),perf(3,'202205','DO NOT DECODE')])
+    strict,_=schema_audit(o,p,quarter='2020Q1')
+    assert not strict['passed']
+    with pytest.raises(ValueError,match='valid note rate'):build_quarter(o,p,tmp_path/'strict','2020Q1')
+    schema,_=schema_audit(o,p,quarter='2020Q1',exclude_zero_note_rate=True)
+    report=build_quarter(o,p,tmp_path/'explicit','2020Q1',exclude_zero_note_rate=True)
+    expected={'enabled':True,'otherwise_eligible_frm_count':2,'otherwise_eligible_frm_upb':247000.,'known360_count':1,'known360_upb':237000.}
+    assert schema['passed']
+    assert schema['origination']['zero_note_rate_exclusions']==expected
+    assert report['zero_note_rate_exclusions']==expected
+    assert report['counts']['eligible_original_ids']==1
+    assert report['counts']['excluded_original_ids']==2
+    assert report['counts']['valid_balance_rows']==2
+    assert pl.read_parquet(tmp_path/'explicit/panel.parquet')['cohort_original_upb'].unique().to_list()==[100.]
+    assert pl.read_parquet(tmp_path/'explicit/snapshot.parquet').height==1
+    assert pl.read_parquet(tmp_path/'explicit/eligible_source_ids.parquet').height==1
+
+
+@pytest.mark.parametrize('rate',['','nan','-1','30','9999'])
+def test_zero_rate_clarification_keeps_other_rate_errors_blocking(tmp_path,rate):
+    from freddie_raw_quarter_audit import schema_audit
+    o,p=sources(tmp_path,[orig(1),orig(2,rate=rate)],[perf(1,'202205',100),perf(2,'202205',100)])
+    schema,_=schema_audit(o,p,quarter='2020Q1',exclude_zero_note_rate=True)
+    assert not schema['passed']
+    with pytest.raises(ValueError,match='valid note rate'):
+        build_quarter(o,p,tmp_path/'out','2020Q1',exclude_zero_note_rate=True)
+    assert not (tmp_path/'out').exists()

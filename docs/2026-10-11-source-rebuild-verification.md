@@ -95,11 +95,35 @@ execution records and completion receipts remain under ignored
 
 ## Work continuing and limits
 
-The serial job has accepted the strengthened 2017Q1 completion and started
-2017Q2. Its command will invoke `hazard/combine_freddie_rebuild.py` only after
-the full quarterly sequence succeeds. Current completion counts must be read
-from verified per-quarter receipts; this first-quarter note does not certify
-any later quarter.
+The serial job subsequently completed and verified all four 2017 quarters:
+75,291,361 source performance rows, 1,089,540 eligible original loans, and
+336,936 May-2022 survivors. Across those quarters, 663 first-observed payoffs
+used $163.169 million of original-UPB fallback; no payoff used a nonadjacent
+prior balance. These are quarter-source totals, not model effects.
+
+The 2018Q1 strict schema audit then stopped on one otherwise eligible 360-month
+loan with a zero original note rate. All field widths, IDs and dates passed.
+An origination-only diagnostic confirmed the record and its $237,000 original
+balance without inspecting performance outcomes. The failed attempt, source
+hashes and verified cleanup remain preserved as `2018Q1.attempt1`.
+
+The separately frozen
+`specs/SPEC_2026-10-11_source_rebuild_zero_rate_clarification.md` implements the
+already specified positive-note-rate restriction with explicit zero-rate
+exclusion accounting. Both the schema gate and streamer must report identical
+excluded counts and original balances, and completion requires the clarification
+hash. No value is imputed; missing, nonfinite, negative and implausibly high
+rates remain blocking errors. The strict standalone audit default is unchanged.
+Regression tests verify that excluded-loan outcome fields are not decoded and
+that the excluded principal cannot enter cohort denominators or snapshots.
+All four earlier quarters had no invalid-rate records and remain valid.
+
+After this clarification, the complete canonical test suite passed again:
+**1,364 passed, 29 warnings**. The serial job revalidated the four existing
+completions and resumed 2018Q1. Its command invokes
+`hazard/combine_freddie_rebuild.py` only after all 20 quarters succeed. Later
+completion counts must be read from verified receipts; a running log is not a
+completed quarter.
 
 Fannie native originals remain unavailable in the inspected local and mounted
 source locations. The existing API configuration could not resolve credentials,

@@ -21,6 +21,7 @@ import time
 ROOT = Path(__file__).resolve().parents[1]
 SOURCE = Path('/Users/eugene/Library/CloudStorage/GoogleDrive-eugeneo@andrew.cmu.edu/My Drive/Fannie and Freddie MAC')
 SPEC = ROOT/'specs/SPEC_2026-10-11_source_rebuild.md'
+ELIGIBILITY_CLARIFICATION = ROOT/'specs/SPEC_2026-10-11_source_rebuild_zero_rate_clarification.md'
 OUTPUT = ROOT/'output/research-rebuild/2026-10-11'
 QUARTERS = [f'{y}Q{q}' for y in range(2017,2022) for q in range(1,5)]
 GIB = 1024**3
@@ -115,16 +116,20 @@ def worker(quarter, source, destination):
     from freddie_raw_quarter_audit import schema_audit, check_resources
     from freddie_rebuild_stream import build_quarter
     orig,perf=[source/f'{kind}_{quarter}.txt' for kind in ['orig','perf']]
+    freeze=json.loads((destination/'execution_freeze.json').read_text())
+    clarified=freeze.get('eligibility_clarification_sha256')
+    if clarified and digest(destination/'eligibility_clarification.md')!=clarified:
+        raise ValueError('Eligibility clarification must be frozen before source access')
     schema_path=destination/'schema.json'
     if schema_path.exists():
         schema=json.loads(schema_path.read_text())
     else:
-        schema,_=schema_audit(orig,perf,quarter=quarter)
+        schema,_=schema_audit(orig,perf,quarter=quarter,exclude_zero_note_rate=bool(clarified))
         write_json(schema_path,schema)
     if not schema['passed']:
         raise ValueError('Schema/identity gate failed before outcome processing')
     check_resources(destination)
-    report=build_quarter(orig,perf,destination/'rebuilt',quarter=quarter)
+    report=build_quarter(orig,perf,destination/'rebuilt',quarter=quarter,exclude_zero_note_rate=bool(clarified))
     if quarter == '2017Q1':
         # Independent vectorized implementation over the same declared 360-month
         # population. This first-quarter check is bounded by the parent watchdog.
@@ -178,6 +183,8 @@ def required_evidence(destination):
     if not set(CORE_CODE_FILES).issubset(code) or any(Path(n).name!=n for n in code):
         raise ValueError('Incomplete or invalid executed-code manifest')
     names=AUDIT_FILES+['rebuilt/'+n for n in REBUILT_ARTIFACTS]+['executed_code/'+n for n in code]
+    if freeze.get('eligibility_clarification_sha256'):
+        names+=['eligibility_clarification.md']
     if destination.name=='2017Q1':
         names+=['production_comparison.json','production_cells_360.parquet']
     return names
@@ -201,6 +208,10 @@ def validate_evidence(destination):
     spec_sha=digest(destination/'spec_frozen.md')
     if freeze.get('spec_sha256')!=spec_sha or digest(destination.parent.parent/'spec_frozen.md')!=spec_sha:
         raise ValueError('Frozen specification mismatch')
+    clarification=freeze.get('eligibility_clarification_sha256')
+    if clarification and (digest(destination/'eligibility_clarification.md')!=clarification
+            or digest(destination.parent.parent/'eligibility_clarification_frozen.md')!=clarification):
+        raise ValueError('Frozen eligibility clarification mismatch')
     if schema.get('passed') is not True:
         raise ValueError('Schema audit did not pass')
     before_hashes={k:schema[k]['sha256'] for k in ['origination','performance']}
@@ -213,6 +224,13 @@ def validate_evidence(destination):
             raise ValueError('Schema/stream row counts disagree')
     if report['counts']['eligible_original_ids']!=schema['origination']['eligible_360_month_ids']:
         raise ValueError('Schema/stream eligible population disagrees')
+    zero_rates=report.get('zero_note_rate_exclusions')
+    if zero_rates!=schema['origination'].get('zero_note_rate_exclusions'):
+        raise ValueError('Schema/stream zero-rate exclusion accounting disagrees')
+    if zero_rates and zero_rates.get('enabled')!=bool(clarification):
+        raise ValueError('Zero-rate exclusions require the frozen eligibility clarification')
+    if clarification and not zero_rates:
+        raise ValueError('Missing zero-rate exclusion accounting')
     proof=report.get('cutoff_proof',{})
     if (proof.get('post_cutoff_outcomes_decoded')!=0 or proof.get('outcome_filter_precedes_decode') is not True
             or not re.fullmatch(r'20\d{2}(0[1-9]|1[0-2])',proof.get('latest_decoded_month',''))
@@ -295,6 +313,9 @@ def run_quarter(quarter, source=SOURCE, output=OUTPUT):
     frozen=output/'spec_frozen.md'
     if not frozen.exists() or frozen.read_bytes()!=SPEC.read_bytes():
         raise ValueError('Current specification must match pre-access frozen copy')
+    clarification=output/'eligibility_clarification_frozen.md'
+    if not clarification.exists() or clarification.read_bytes()!=ELIGIBILITY_CLARIFICATION.read_bytes():
+        raise ValueError('Eligibility clarification must match its pre-access frozen copy')
     paths=[source/f'{kind}_{quarter}.txt' for kind in ['orig','perf']]
     if shutil.disk_usage(output).free < 12*GIB + sum(p.stat().st_size for p in paths):
         raise RuntimeError('Insufficient headroom for the declared pair plus 12 GiB reserve')
@@ -309,9 +330,11 @@ def run_quarter(quarter, source=SOURCE, output=OUTPUT):
     for name in code_files:
         shutil.copy2(ROOT/'hazard'/name,code_archive/name)
     shutil.copy2(frozen,destination/'spec_frozen.md')
+    shutil.copy2(clarification,destination/'eligibility_clarification.md')
     write_json(destination/'execution_freeze.json',dict(
         started_utc=datetime.now(timezone.utc).isoformat(),quarter=quarter,cutoff='202509',
         transition_end='202205',spec_sha256=digest(SPEC),python=sys.version,
+        eligibility_clarification_sha256=digest(clarification),
         code_sha256={n:digest(code_archive/n) for n in code_files}))
     error=None;peak_rss=0;proc=None
     try:

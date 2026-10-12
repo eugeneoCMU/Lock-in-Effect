@@ -58,6 +58,7 @@ def test_worker_is_reaped_before_cleanup_on_every_failure(tmp_path, monkeypatch,
     output = tmp_path/'output'; output.mkdir()
     spec = tmp_path/'spec.md'; spec.write_text('frozen synthetic scope')
     (output/'spec_frozen.md').write_bytes(spec.read_bytes())
+    (output/'eligibility_clarification_frozen.md').write_bytes(driver.ELIGIBILITY_CLARIFICATION.read_bytes())
     monkeypatch.setattr(driver, 'SPEC', spec)
     monkeypatch.setattr(driver.shutil, 'disk_usage', lambda _: SimpleNamespace(free=30*driver.GIB))
     worker = StubbornWorker()
@@ -141,3 +142,29 @@ def test_sealing_rejects_inconsistent_required_evidence(tmp_path,mutation):
         data=json.loads((p/'cleanup.json').read_text()); data['files'][0]['path']='wrong_source.txt';driver.write_json(p/'cleanup.json',data)
     with pytest.raises((ValueError,FileNotFoundError)):driver.seal_completion(p)
     assert not (p/'completed.json').exists()
+
+
+def add_zero_rate_evidence(p, *, authorized):
+    z={'enabled':True,'otherwise_eligible_frm_count':1,'otherwise_eligible_frm_upb':237000.,'known360_count':1,'known360_upb':237000.}
+    schema=json.loads((p/'schema.json').read_text());schema['origination']['zero_note_rate_exclusions']=z;driver.write_json(p/'schema.json',schema)
+    report=json.loads((p/'rebuilt/report.json').read_text());report['zero_note_rate_exclusions']=z;driver.write_json(p/'rebuilt/report.json',report)
+    worker=json.loads((p/'worker_passed.json').read_text());worker['report']=report;driver.write_json(p/'worker_passed.json',worker)
+    if authorized:
+        (p/'eligibility_clarification.md').write_text('synthetic explicit positive-rate scope')
+        (p.parent.parent/'eligibility_clarification_frozen.md').write_bytes((p/'eligibility_clarification.md').read_bytes())
+        freeze=json.loads((p/'execution_freeze.json').read_text());freeze['eligibility_clarification_sha256']=digest(p/'eligibility_clarification.md');driver.write_json(p/'execution_freeze.json',freeze)
+
+
+def test_zero_rate_exclusion_needs_hashed_scope_and_matching_accounting(tmp_path):
+    p=audit_fixture(tmp_path)
+    add_zero_rate_evidence(p,authorized=False)
+    with pytest.raises(ValueError,match='clarification'):driver.seal_completion(p)
+    add_zero_rate_evidence(p,authorized=True)
+    driver.seal_completion(p)
+    assert 'eligibility_clarification.md' in validate_completed(p)['output_sha256']
+
+
+def test_zero_rate_schema_stream_disagreement_blocks_completion(tmp_path):
+    p=audit_fixture(tmp_path);add_zero_rate_evidence(p,authorized=True)
+    schema=json.loads((p/'schema.json').read_text());schema['origination']['zero_note_rate_exclusions']['known360_upb']=238000.;driver.write_json(p/'schema.json',schema)
+    with pytest.raises(ValueError,match='exclusion'):driver.seal_completion(p)
