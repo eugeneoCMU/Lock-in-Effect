@@ -31,6 +31,16 @@ def test_width_mismatch_blocks_instead_of_truncating(tmp_path):
     assert report["performance"]["width_counts"] == {33:1}
 
 
+def test_schema_gate_supports_only_the_declared_quarter(tmp_path):
+    o,p=tmp_path/'orig.txt',tmp_path/'perf.txt'
+    o.write_text(orig_line('F20Q40000001'))
+    p.write_text(perf_line(loan='F20Q40000001'))
+    report,_=schema_audit(o,p,quarter='2020Q4')
+    assert report['passed']
+    wrong,_=schema_audit(o,p,quarter='2020Q3')
+    assert not wrong['passed']
+
+
 def test_duplicate_orig_ids_block_join_multiplication(tmp_path):
     o,p=tmp_path/"orig.txt",tmp_path/"perf.txt"
     o.write_text(orig_line()+orig_line())

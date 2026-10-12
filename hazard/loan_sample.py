@@ -211,7 +211,9 @@ def _build_loan_sample_pool(
 
 def _stratified_sample(df: pl.DataFrame, n_loans: int, seed: int) -> pl.DataFrame:
     """Sample n_loans proportionally within stratum_id; with-replacement if needed."""
-    strata = df.group_by("stratum_id").agg(pl.len().alias("count"))
+    # Assign seeded draws to stable strata and loan positions across executions.
+    df = df.sort(["stratum_id", "loan_id"])
+    strata = df.group_by("stratum_id").agg(pl.len().alias("count")).sort("stratum_id")
     total = strata["count"].sum()
     if total == 0:
         raise ValueError("Empty loan universe.")

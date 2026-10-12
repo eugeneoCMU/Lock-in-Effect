@@ -64,8 +64,11 @@ def check_resources(path):
     return {"free_disk_bytes": free, "peak_rss_bytes": rss}
 
 
-def schema_audit(orig_path, perf_path):
+def schema_audit(orig_path, perf_path, *, quarter='2017Q1'):
     """Only identity/layout/date fields are inspected in performance here."""
+    if not re.fullmatch(r'20\d{2}Q[1-4]', quarter):
+        raise ValueError('Expected declared source quarter YYYYQn')
+    id_pattern = ('F' + quarter[2:] + r'\d+').encode()
     loans, all_ids = {}, set()
     ow, pw = Counter(), Counter()
     o = {"rows": 0, "duplicate_ids": 0, "invalid_id_positions": 0,
@@ -82,7 +85,7 @@ def schema_audit(orig_path, perf_path):
             if len(cols) != 32:
                 continue
             loan_id = cols[19]
-            if not re.fullmatch(rb"F17Q1\d+", loan_id):
+            if not re.fullmatch(id_pattern, loan_id):
                 o["invalid_id_positions"] += 1
             if loan_id in all_ids:
                 o["duplicate_ids"] += 1
@@ -112,7 +115,7 @@ def schema_audit(orig_path, perf_path):
             pw[len(cols)] += 1
             if len(cols) != 32:
                 continue
-            if not re.fullmatch(rb"F17Q1\d+", cols[0]):
+            if not re.fullmatch(id_pattern, cols[0]):
                 p["invalid_id_positions"] += 1
             if cols[0] not in all_ids:
                 p["unknown_origination_ids"] += 1
