@@ -119,8 +119,17 @@ that the excluded principal cannot enter cohort denominators or snapshots.
 All four earlier quarters had no invalid-rate records and remain valid.
 
 After this clarification, the complete canonical test suite passed again:
-**1,364 passed, 29 warnings**. The serial job revalidated the four existing
-completions and resumed 2018Q1. Its command invokes
+**1,364 passed, 29 warnings**. Independent review of this clarification and
+63 targeted synthetic tests found no concrete blocker. The 2018Q1 retry then
+completed successfully: 239,706 eligible original loans, 13,873,084 source
+performance rows and 68,872 exact May survivors. The schema and stream both
+recorded the one $237,000 zero-rate exclusion. Before/streamed/after hashes
+agree and both source files passed verified cloud-only cleanup.
+
+The latest verified checkpoint is **five of 20 quarters complete** (2017Q1
+through 2018Q1), totaling 89,164,445 source performance rows, 1,329,246 eligible
+original loans and 405,808 May survivors. The serial job advanced to 2018Q2.
+Its command invokes
 `hazard/combine_freddie_rebuild.py` only after all 20 quarters succeed. Later
 completion counts must be read from verified receipts; a running log is not a
 completed quarter.
