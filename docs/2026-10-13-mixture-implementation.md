@@ -76,3 +76,24 @@ creating the comparison directory: verified completion receipts are missing for
 Independent review found protected-output and coefficient-labeling issues;
 both were fixed, tested, and re-reviewed with no remaining substantive findings
 in that scope. The review was static, not an independent empirical rerun.
+
+## Completed coverage diagnostic
+
+The exact frozen 2020Q4 files contain 946,085 eligible original loans and
+64,493,775 performance rows. All eligible loans have valid performance by the
+September 2025 cutoff. Four loans expected to have pre-May history do not:
+original first-payment months are November 2021 (one), December 2021 (two),
+and March 2022 (one). Their first valid observed performance months are July
+2022 (two) and August 2022 (two). Combined original principal is $1,487,000.
+None has an invalid-balance row explaining the gap.
+
+Both raw source hashes match the frozen source pair. Cloud-only cleanup was
+verified for both files after the scan. All 15 existing completion receipts
+were revalidated. No loan, cohort denominator or eligibility rule was changed.
+
+The research decision is whether to develop an explicit coverage exception
+that represents pre-May history as unknown, excludes these loans from the
+May starting portfolio, and audits their cohort-history/burnout impact before
+resuming; or retain the strict gate until complete records are available.
+No exception is applied without the user's choice. This is a source-coverage
+policy decision, not a requirement of the mixture equation.
