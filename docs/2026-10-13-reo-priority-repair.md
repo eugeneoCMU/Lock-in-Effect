@@ -79,3 +79,22 @@ still running; combination, calibration, scoring and paired simulation have
 not run. The timestamped receipt and latest checkpoint are saved under
 `output/research-rebuild/2026-10-13-reo/verification_checkpoints/` and
 `output/research-rebuild/2026-10-13-reo/verified_progress.json` respectively.
+
+## Cloud-read timeout and audited retry — October 13, 4:03 p.m. Eastern
+
+The 2020Q4 performance-file read timed out during the schema-only scan, after
+the progress log reached 22 million records. No completed schema or rebuilt
+outcome artifacts were produced. The driver reaped the failed worker and
+verified cloud-only cleanup for both files.
+
+All fifteen completed receipts were revalidated, along with the 264 frozen
+pipeline hashes, 292 protected baseline hashes and exact 2020Q4 identity
+exception. The failed attempt was preserved as `quarters/2020Q4.timeout-attempt-1`
+with hashes of all 27 files checked before and after the directory move. No
+processing code, population rule, cutoff or model choice was changed.
+
+A single serial retry launched at 20:03:51 UTC (4:03:51 p.m. Eastern), reusing
+the fifteen validated completions and starting fresh processing at 2020Q4.
+The active five-stage pipeline is now `pipeline-after-timeout/state.json` under
+the version-2 output root. The original pipeline state remains preserved as
+stopped. `timeout_recovery.json` records the archive and retry evidence.
