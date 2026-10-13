@@ -101,7 +101,10 @@ def combine(root=OUTPUT, output=None, *, quarters=QUARTERS, n_loans=N_LOANS, see
             pieces.append(snap.sample(n=min(per_file,snap.height),seed=seed+i))
     if not pieces:
         raise ValueError('No surviving loans to sample')
-    pool=_attach_history(pl.concat(pieces),[pl.read_parquet(p/'rebuilt/cohort_history.parquet') for p in paths])
+    histories=[pl.read_parquet(p/'rebuilt/cohort_history.parquet') for p in paths]
+    from coverage_exception import combined_audit
+    coverage=combined_audit(reports,histories)
+    pool=_attach_history(pl.concat(pieces),histories)
     sample=_stratified_sample(pool,n_loans,seed).with_columns(pl.lit(1.).alias('weight'))
     output.mkdir(parents=True,mode=0o700)
     panel.write_parquet(output/'cohort_month_panel.parquet')
@@ -111,6 +114,7 @@ def combine(root=OUTPUT, output=None, *, quarters=QUARTERS, n_loans=N_LOANS, see
     write_json(output/'transition_diagnostics.json',transition_diag)
     result=dict(quarters=list(quarters),complete_freddie_manifest=list(quarters)==QUARTERS,
         source_semantics_version=SOURCE_SEMANTICS_VERSION,
+        pre_snapshot_coverage=coverage,
         population='known360FRM; original vintage2017–2021',cutoff='202509',transition_end='202205',
         sample_month='202205',sample_n=sample.height,sample_unique_ids=sample['loan_id'].n_unique(),
         sample_seed=seed,pool_per_source_quarter=per_file,panel_rows=panel.height,

@@ -16,6 +16,7 @@ import sys
 
 import numpy as np
 import pandas as pd
+import polars as pl
 
 HERE = Path(__file__).resolve().parent
 ROOT = HERE.parent
@@ -34,7 +35,7 @@ RATE_URL = ('https://fred.stlouisfed.org/graph/fredgraph.csv?id=MORTGAGE30US'
 COMBINED_OUTPUTS = {'cohort_month_panel.parquet', 'loan_sample.parquet',
                     'markov_transition_matrix.parquet', 'transition_diagnostics.json'}
 KEYS = ['vintage', 'coupon', 'fico_bucket', 'ltv_bucket', 'reporting_period']
-CODE_FILES = ['calibrate_freddie_rebuild.py', 'fannie_floor_read.py',
+CODE_FILES = ['coverage_exception.py', 'calibrate_freddie_rebuild.py', 'fannie_floor_read.py',
               'fannie_age_rebuild_audit.py', 'run_freddie_rebuild.py',
               'combine_freddie_rebuild.py', 'freddie_raw_quarter_audit.py']
 POPULATION = 'known360FRM; original vintage2017–2021'
@@ -79,6 +80,14 @@ def validated_combined(root):
             or report.get('population') != POPULATION or report.get('cutoff') != '202509'
             or report.get('transition_end') != '202205' or report.get('sample_month') != '202205'):
         raise ValueError('Combined report lacks the complete frozen population/cutoff manifest')
+    from coverage_exception import combined_audit
+    histories=([pl.read_parquet(root/'quarters'/q/'rebuilt/cohort_history.parquet') for q in QUARTERS]
+        if any((r.get('pre_snapshot_coverage') or {}).get('enabled') for r in reports.values()) else [])
+    expected_coverage=combined_audit(list(reports.values()),histories)
+    if report.get('pre_snapshot_coverage') is not None and report['pre_snapshot_coverage']!=expected_coverage:
+        raise ValueError('Combined pre-snapshot coverage audit differs from source evidence')
+    if expected_coverage['missing_loans'] and report.get('pre_snapshot_coverage') is None:
+        raise ValueError('Combined inputs omit the approved unknown-history audit')
     cash_audits={q:reports[q].get('quarter_cash_ratio_audit') for q in QUARTERS}
     if (report.get('quarter_cash_ratio_audits_by_quarter')!=cash_audits
             or report.get('partial_cohort_overrun_count')!=sum((v or {}).get('overrun_cohort_count',0) for v in cash_audits.values())

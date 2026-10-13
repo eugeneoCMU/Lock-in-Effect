@@ -82,7 +82,7 @@ def _sha256(path):
 
 
 def build_quarter(orig, perf, output, quarter, cutoff="202509", transition_end="202205", *, exclude_zero_note_rate=False,
-                  allow_partial_cohort_overrun=False, identity_exceptions=None):
+                  allow_partial_cohort_overrun=False, identity_exceptions=None, coverage_exception=None):
     """Write corrected compact artifacts only after every source check succeeds.
 
     Coupon buckets and outcome mapping match ingest.py. First-observed voluntary
@@ -183,6 +183,7 @@ def build_quarter(orig, perf, output, quarter, cutoff="202509", transition_end="
         "gap_opening_upb": 0., "first_observed_payoff_upb": 0., "gap_payoff_upb": 0.,
         "first_observed_payoff_count": 0, "gap_payoff_count": 0, "states": Counter()})
     snapshot, covered, history_covered = [], set(), set()
+    missing_history_details = {}
     weighted_transitions, count_transitions = Counter(), Counter()
     cohort_cash = defaultdict(lambda: dict(loans=0,loans_with_payoff_above_original=0,
         above_original_payoff_upb=0.,multiple_positive_payoff_loans=0,terminal_revival_loans=0))
@@ -206,6 +207,8 @@ def build_quarter(orig, perf, output, quarter, cutoff="202509", transition_end="
         counts["valid_balance_missing_calendar_months"] += max(vm) - min(vm) + 1 - len(vm)
         key, upb, rate, fico, ltv, property_state, first_month = loans[loan_id]
         is_history_source = first_month <= snapshot_ord
+        if is_history_source and valid[0][0] > snapshot_ord:
+            missing_history_details[loan_id] = valid[0][0]
         previous = None
         loan_paid=0.;positive_payoffs=0;revivals=0
         for month, balance, age, state, contract in valid:
@@ -341,8 +344,18 @@ def build_quarter(orig, perf, output, quarter, cutoff="202509", transition_end="
     identity_report = identity.finish({'origination': orig_hash.hexdigest(), 'performance': perf_hash.hexdigest()})
     if len(covered) != len(loans):
         raise ValueError("Eligible original sources lack valid pre-cutoff performance coverage")
+    coverage_audit = dict(enabled=False,missing_loans=0,unknown_original_upb=0.)
     if len(history_covered) != counts["history_eligible_original_ids"]:
-        raise ValueError("Eligible original sources lack valid pre-snapshot performance coverage")
+        if coverage_exception is None:
+            raise ValueError("Eligible original sources lack valid pre-snapshot performance coverage")
+        if len(missing_history_details) != counts["history_eligible_original_ids"]-len(history_covered):
+            raise ValueError('Unresolved missing pre-snapshot history identity')
+        from coverage_exception import apply_exception
+        coverage_audit=apply_exception(coverage_exception,quarter,
+            {'origination':orig_hash.hexdigest(),'performance':perf_hash.hexdigest()},
+            missing_history_details,loans,source_history)
+    elif coverage_exception is not None:
+        raise ValueError('Coverage exception must match the recorded nonempty missing pattern')
     counts["loans_with_pre_snapshot_history"] = len(history_covered)
     if td["terminal_absorption_violations"]:
         raise ValueError(f"Terminal absorption violations in the frozen transition history: {td['terminal_absorption_violations']}")
@@ -398,6 +411,7 @@ def build_quarter(orig, perf, output, quarter, cutoff="202509", transition_end="
         source_semantics_version=SOURCE_SEMANTICS_VERSION,
         current_contract_fields='Contemporaneous May evidence only; rates decimal, maturity months, balances USD, flags as reported; original model conventions unchanged; missing or nonfinite numeric fields retained as null',
         identity_exceptions=identity_report,
+        pre_snapshot_coverage=coverage_audit,
         zero_note_rate_exclusions=zero_rates,
         quarter_cash_ratio_audit=dict(partial_cohort_overrun_enabled=allow_partial_cohort_overrun,
             overrun_cohort_count=len(overruns),overruns=list(overruns.values()),

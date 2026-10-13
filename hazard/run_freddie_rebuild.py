@@ -195,12 +195,29 @@ def expected_identity_audit(record):
                 source_sha256=record['source_sha256'], **record['expected'])
 
 
+def freeze_coverage_record(root, destination, quarter):
+    path=Path(root)/'coverage_exceptions_frozen.json'
+    if not path.exists(): return {}
+    record=json.loads(path.read_text()).get(quarter)
+    if record is None: return {}
+    if record.get('quarter')!=quarter:
+        raise ValueError('Coverage record quarter mismatch')
+    for name,expected in record.get('evidence_sha256',{}).items():
+        if Path(name).name!=name or digest(Path(root)/name)!=expected:
+            raise ValueError('Coverage evidence must be frozen before source access')
+        shutil.copy2(Path(root)/name,Path(destination)/name)
+    write_json(Path(destination)/'coverage_exception.json',record)
+    return {'coverage_exception_sha256':digest(Path(destination)/'coverage_exception.json')}
+
+
 def worker(quarter, source, destination):
     from freddie_raw_quarter_audit import schema_audit, check_resources
     from freddie_rebuild_stream import build_quarter
     orig,perf=[source/f'{kind}_{quarter}.txt' for kind in ['orig','perf']]
     freeze=json.loads((destination/'execution_freeze.json').read_text())
     identity = validate_identity_freeze(destination, freeze)
+    from coverage_exception import frozen_record
+    coverage=frozen_record(destination,freeze,digest)
     clarified=freeze.get('eligibility_clarification_sha256')
     if clarified and digest(destination/'eligibility_clarification.md')!=clarified:
         raise ValueError('Eligibility clarification must be frozen before source access')
@@ -222,7 +239,7 @@ def worker(quarter, source, destination):
         raise ValueError('Schema identity exception does not match the frozen record')
     check_resources(destination)
     report=build_quarter(orig,perf,destination/'rebuilt',quarter=quarter,exclude_zero_note_rate=bool(clarified),
-        allow_partial_cohort_overrun=bool(cash_clarified),identity_exceptions=identity)
+        allow_partial_cohort_overrun=bool(cash_clarified),identity_exceptions=identity,coverage_exception=coverage)
     if quarter == '2017Q1':
         # Independent vectorized implementation over the same declared 360-month
         # population. This first-quarter check is bounded by the parent watchdog.
@@ -283,6 +300,10 @@ def required_evidence(destination):
     if freeze.get('identity_exception_sha256'):
         names+=['identity_manifest.json','identity_exception.json','identity_clarification.md']
         names+=list(freeze.get('identity_evidence_sha256',{}))
+    if freeze.get('coverage_exception_sha256'):
+        from coverage_exception import frozen_record
+        coverage=frozen_record(destination,freeze,digest)
+        names+=['coverage_exception.json']+list(coverage['evidence_sha256'])
     if destination.name=='2017Q1':
         names+=['production_comparison.json','production_cells_360.parquet']
     return names
@@ -324,6 +345,9 @@ def validate_evidence(destination):
             or report['counts'].get('semantic_rows_validated') is None):
         raise ValueError('Native source semantics evidence is missing or inconsistent')
     before_hashes={k:schema[k]['sha256'] for k in ['origination','performance']}
+    from coverage_exception import frozen_record, validate_audit
+    coverage=frozen_record(destination,freeze,digest)
+    validate_audit(coverage,report,destination)
     expected_identity = expected_identity_audit(identity)
     if (schema.get('identity_exceptions') != expected_identity
             or report.get('identity_exceptions') != expected_identity
@@ -461,7 +485,7 @@ def run_quarter(quarter, source=SOURCE, output=OUTPUT):
         raise RuntimeError('Another source pair is materialized; verify its cleanup first')
     before=[file_info(p) for p in paths]
     write_json(destination/'source_metadata_at_worker_start.json',before)
-    code_files=CORE_CODE_FILES+['config.py','schema.py']
+    code_files=CORE_CODE_FILES+['config.py','schema.py','coverage_exception.py']
     code_archive=destination/'executed_code';code_archive.mkdir()
     for name in code_files:
         shutil.copy2(ROOT/'hazard'/name,code_archive/name)
@@ -474,6 +498,7 @@ def run_quarter(quarter, source=SOURCE, output=OUTPUT):
         eligibility_clarification_sha256=digest(clarification),
         cash_ratio_clarification_sha256=digest(cash_clarification),
         **freeze_identity_record(output,destination,quarter,identity),
+        **freeze_coverage_record(output,destination,quarter),
         code_sha256={n:digest(code_archive/n) for n in code_files}))
     error=None;peak_rss=0;proc=None
     try:

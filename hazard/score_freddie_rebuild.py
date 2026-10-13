@@ -37,7 +37,7 @@ MACRO_REFERENCE = 'output/review-revision/2026-10-07-checks/macro_frozen.parquet
 PRE = pd.Timestamp('2023-12-01')
 TRAIN_START = pd.Timestamp('2023-01-01')
 LOAD_START = pd.Timestamp('2022-12-01')
-CODE_FILES = ['score_freddie_rebuild.py', 'calibrate_freddie_rebuild.py',
+CODE_FILES = ['coverage_exception.py', 'score_freddie_rebuild.py', 'calibrate_freddie_rebuild.py',
     'pathb_prediction_diagnostics.py', 'pathb_cohort_validation.py',
     'cohort_history.py', 'literature_hazard.py', 'stock_flow_accounting_comparison.py',
     'config.py', 'run_freddie_rebuild.py', 'combine_freddie_rebuild.py',
@@ -240,6 +240,7 @@ def run(*, root, macro, parameter_freeze, recorded_result, output):
             baseline_training=manifest['baseline_training'], initialization=manifest['initialization'],
             evaluation_start=manifest['evaluation_start'], evaluation_end=manifest['evaluation_end'],
             source_inputs_unchanged=True, population=combined['population'],
+            pre_snapshot_coverage=combined.get('pre_snapshot_coverage'),
             source_semantics_version=combined['source_semantics_version'],
             sampling=dict(rows=combined['sample_n'], unique_source_ids=combined['sample_unique_ids'],
                 replacement_rows=combined['sample_n'] - combined['sample_unique_ids'],
