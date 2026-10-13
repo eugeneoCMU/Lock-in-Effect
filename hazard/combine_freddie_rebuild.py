@@ -12,6 +12,7 @@ import pandas as pd
 import polars as pl
 
 from config import MARKOV_STATES, N_LOANS, RNG_SEED
+from schema import SOURCE_SEMANTICS_VERSION
 from loan_sample import _attach_history, _stratified_sample
 from run_freddie_rebuild import OUTPUT, QUARTERS, digest, validate_completed, write_json
 
@@ -80,6 +81,8 @@ def combine(root=OUTPUT, output=None, *, quarters=QUARTERS, n_loans=N_LOANS, see
     receipts=[validate_completed(p) for p in paths]
     reports=[json.loads((p/'rebuilt/report.json').read_text()) for p in paths]
     for q,report in zip(quarters,reports):
+        if report.get('source_semantics_version') != SOURCE_SEMANTICS_VERSION:
+            raise ValueError('Source semantics require a fresh corrected quarterly extraction')
         if report['quarter']!=q or report['cutoff']!='202509' or report['snapshot_month']!='202205' or report['transition_end']!='202205':
             raise ValueError('Quarter or cutoff mismatch in rebuilt report')
     ids=pl.concat([pl.scan_parquet(p/'rebuilt/eligible_source_ids.parquet') for p in paths])
@@ -107,6 +110,7 @@ def combine(root=OUTPUT, output=None, *, quarters=QUARTERS, n_loans=N_LOANS, see
     matrix.to_parquet(output/'markov_transition_matrix.parquet')
     write_json(output/'transition_diagnostics.json',transition_diag)
     result=dict(quarters=list(quarters),complete_freddie_manifest=list(quarters)==QUARTERS,
+        source_semantics_version=SOURCE_SEMANTICS_VERSION,
         population='known360FRM; original vintage2017–2021',cutoff='202509',transition_end='202205',
         sample_month='202205',sample_n=sample.height,sample_unique_ids=sample['loan_id'].n_unique(),
         sample_seed=seed,pool_per_source_quarter=per_file,panel_rows=panel.height,

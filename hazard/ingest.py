@@ -69,11 +69,12 @@ def _map_servicer_state(delinq: pl.Expr, assistance: pl.Expr, zb: pl.Expr) -> pl
     return (
         pl.when(zb == ZB_VOLUNTARY_PREPAY).then(pl.lit("Prepaid"))
         .when(zb.is_in(["02", "03", "09", "15"])).then(pl.lit("Defaulted"))
+        .when(zb.is_in(["16", "96"])).then(pl.lit("Liquidated"))
         .when(assistance == "F").then(pl.lit("Forbearance"))
         .when(delinq == "0").then(pl.lit("Current"))
         .when(delinq == "1").then(pl.lit("D30"))
         .when(delinq == "2").then(pl.lit("D60"))
-        .when(delinq.is_in(["3", "4", "5", "6", "7", "8", "9"])).then(pl.lit("D90+"))
+        .when(delinq.str.contains(r"^\d+$") & (delinq.cast(pl.Int64, strict=False) >= 3)).then(pl.lit("D90+"))
         .when(delinq.is_in(["RA", "RP"])).then(pl.lit("Defaulted"))
         .otherwise(pl.lit("Current"))
     )

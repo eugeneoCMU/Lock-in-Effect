@@ -71,3 +71,37 @@ or full-SOMA transport.
 - Initial state: dfd3370, clean working tree; 34 GiB free; all 40 Freddie source
   files present as dataless Drive placeholders; Google Drive process active.
 - No source content opened before this specification was written and hashed.
+
+## October 13 source-semantics correction and separate rerun
+
+The original October 11 freeze remains preserved in its output root. A bounded
+October 13 diagnostic on the exact 2020Q4 performance hash confirmed the
+January-2026 native layout: zero-based field 12 is last-paid-installment date,
+28 is disaster, 29 is borrower assistance, and 31 is interest-bearing UPB.
+The first 1,000,000 physical records contained 343,251 rows through 202205;
+the assistance column had 285 F, 18 R and 9 T values. Column 28 instead had
+285 Y values. There were also 56 delinquency values of ten or more and 52
+zero-balance-96 events. These are diagnostic-subset counts, not population
+prevalences. Both full-file hashes matched and source cleanup was verified.
+
+For the separate rerun, use source semantics version
+`freddie-native32-ddlpi-states-v1`. Record it in quarter and combined reports;
+downstream gates must reject earlier semantics. All numeric delinquency values
+of at least three map to D90+. Codes 16 and 96 map to the existing Liquidated
+terminal state and generate no voluntary or recovery cash. Keep existing
+01 payoff and 02/03/09/15 credit classifications. Validate last-paid-date,
+disaster, assistance, zero-balance and delinquency tokens only after the
+202509/eligibility boundary; unresolved nonterminal unknown states block.
+
+Retain additional contemporaneous fields in the exact-May snapshot: current
+note rate, remaining months, modification and payment-deferral flags,
+non-interest-bearing UPB and interest-bearing UPB. Preserve missing values.
+These fields are audit evidence only: the queued model continues to use its
+recorded original-rate/original-term convention until a separately specified
+current-contract comparison is completed. Do not silently replace coupons,
+terms, balances, eligibility, parameters or the fixed cohort denominator.
+
+Run all quarters into a new output root. No previous state-dependent source
+artifact may be relabeled or copied as a new completion. Prior financial
+aggregates remain preserved for reconciliation. Keep every earlier resource,
+cutoff, identity, zero-rate and intermediate-cash-ratio requirement.

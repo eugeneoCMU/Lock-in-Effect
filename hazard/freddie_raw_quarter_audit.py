@@ -23,6 +23,7 @@ import shutil
 import subprocess
 import sys
 import time
+from schema import SOURCE_SEMANTICS_VERSION
 
 ROOT = Path(__file__).resolve().parents[1]
 SPEC = ROOT / "specs/SPEC_2026-10-09_raw_2017Q1_audit.md"
@@ -205,6 +206,7 @@ def schema_audit(orig_path, perf_path, *, quarter='2017Q1', exclude_zero_note_ra
               and not o.get("eligible_invalid_rate_rows", 0)
               and p["invalid_id_positions"] == p["unknown_origination_ids"] == p["invalid_reporting_periods"] == 0)
     return {"passed": passed, "origination": o, "performance": p,
+            'source_semantics_version': SOURCE_SEMANTICS_VERSION,
             'identity_exceptions': identity_report}, loans
 
 

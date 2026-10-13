@@ -166,6 +166,16 @@ def test_two_quarter_combination_preserves_source_history_and_balances(rebuilt_t
     assert json.loads((output / 'report.json').read_text()) == result
 
 
+def test_pre_semantic_repair_receipts_cannot_feed_combination(rebuilt_two_quarters):
+    root, quarters, _ = rebuilt_two_quarters
+    p=root/'quarters'/quarters[0]/'rebuilt/report.json'
+    report=json.loads(p.read_text()); report.pop('source_semantics_version',None)
+    p.write_text(json.dumps(report))
+    with pytest.raises(ValueError,match='semantic'):
+        combine(root,quarters=quarters,n_loans=3)
+    assert not (root/'combined').exists()
+
+
 def test_cross_quarter_overlap_rejects_a_paid_off_source_id_before_output(rebuilt_two_quarters):
     root, quarters, validated = rebuilt_two_quarters
     source_ids = root / 'quarters' / quarters[1] / 'rebuilt/eligible_source_ids.parquet'

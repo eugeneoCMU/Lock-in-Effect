@@ -18,6 +18,7 @@ import shutil
 import subprocess
 import sys
 import time
+from schema import SOURCE_SEMANTICS_VERSION
 
 ROOT = Path(__file__).resolve().parents[1]
 SOURCE = Path('/Users/eugene/Library/CloudStorage/GoogleDrive-eugeneo@andrew.cmu.edu/My Drive/Fannie and Freddie MAC')
@@ -215,6 +216,8 @@ def worker(quarter, source, destination):
         write_json(schema_path,schema)
     if not schema['passed']:
         raise ValueError('Schema/identity gate failed before outcome processing')
+    if schema.get('source_semantics_version') != SOURCE_SEMANTICS_VERSION:
+        raise ValueError('Fresh native source semantics gate required before outcome processing')
     if schema.get('identity_exceptions') != expected_identity_audit(identity):
         raise ValueError('Schema identity exception does not match the frozen record')
     check_resources(destination)
@@ -314,6 +317,12 @@ def validate_evidence(destination):
         raise ValueError('Frozen cash-ratio clarification mismatch')
     if schema.get('passed') is not True:
         raise ValueError('Schema audit did not pass')
+    semantics = report.get('source_semantics_version')
+    if semantics is not None and (semantics != SOURCE_SEMANTICS_VERSION
+            or schema.get('source_semantics_version') != semantics
+            or report['counts'].get('semantic_rows_validated') != report['counts'].get('eligible_pre_cutoff_rows')
+            or report['counts'].get('semantic_rows_validated') is None):
+        raise ValueError('Native source semantics evidence is missing or inconsistent')
     before_hashes={k:schema[k]['sha256'] for k in ['origination','performance']}
     expected_identity = expected_identity_audit(identity)
     if (schema.get('identity_exceptions') != expected_identity
@@ -426,7 +435,10 @@ def run_quarter(quarter, source=SOURCE, output=OUTPUT):
     destination=output/'quarters'/quarter
     destination.mkdir(parents=True,exist_ok=True)
     if (destination/'completed.json').exists():
-        return validate_completed(destination)
+        result = validate_completed(destination)
+        if json.loads((destination/'rebuilt/report.json').read_text()).get('source_semantics_version') != SOURCE_SEMANTICS_VERSION:
+            raise ValueError('Earlier source semantics are archive-only; rebuild in a separate root')
+        return result
     # A prior failed extraction must be inspected, not overwritten on resume.
     if (destination/'rebuilt').exists() or (destination/'failed.json').exists():
         raise FileExistsError('Prior attempt requires audit; use a separate output root')

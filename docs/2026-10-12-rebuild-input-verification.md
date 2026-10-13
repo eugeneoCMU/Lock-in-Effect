@@ -1,5 +1,11 @@
 # Rebuild input verification — October 12, 2026
 
+**October 13 update:** the source layout/state review found a material mapping
+error after this checkpoint. The automatic pipeline stopped before downstream
+execution. These 15 earlier receipts remain archived evidence, not inputs for
+the corrected model chain. See `2026-10-13-source-semantics-repair.md` for the
+source diagnostic, correction and separate rerun.
+
 This continues the authorized source rebuild in f586. The source job remains
 serial, with one Freddie pair at a time and verified cloud-only cleanup before
 the next pair. Existing results and the manuscript remain preserved. This note

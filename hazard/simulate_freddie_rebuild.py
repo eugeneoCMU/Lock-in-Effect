@@ -295,6 +295,7 @@ def run(*, root, macro_path, parameter_freeze, empirical_csv, input_inventory,
         verify_hashes(dict(hashes, **code_hashes))
         marginal = legs['off']['production_principal_b'] - legs['on']['production_principal_b']
         result = dict(created_utc=datetime.now(timezone.utc).isoformat(),
+            source_semantics_version=combined['source_semantics_version'],
             scope='Conditional corrected-input Freddie main pair; unchanged imported response and floor',
             initialization=initialization, parameters=PARAMETERS, empirical_benchmark=benchmark,
             legs=legs, reported_marginal_b=marginal, reported_marginal_pp=marginal / benchmark['denominator_b'] * 100.,

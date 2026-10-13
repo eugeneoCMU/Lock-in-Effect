@@ -240,6 +240,7 @@ def run(*, root, macro, parameter_freeze, recorded_result, output):
             baseline_training=manifest['baseline_training'], initialization=manifest['initialization'],
             evaluation_start=manifest['evaluation_start'], evaluation_end=manifest['evaluation_end'],
             source_inputs_unchanged=True, population=combined['population'],
+            source_semantics_version=combined['source_semantics_version'],
             sampling=dict(rows=combined['sample_n'], unique_source_ids=combined['sample_unique_ids'],
                 replacement_rows=combined['sample_n'] - combined['sample_unique_ids'],
                 convention='Preserve the verified combined draw, including declared sampling with replacement'),

@@ -27,6 +27,7 @@ os.environ.setdefault('FRED_API_KEY', 'offline-calibration-no-network')
 from hazard.fannie_floor_read import prep
 from hazard.fannie_age_rebuild_audit import grids, verify_grid_parity
 from run_freddie_rebuild import QUARTERS, SPEC, digest, validate_completed, write_json
+from schema import SOURCE_SEMANTICS_VERSION
 
 RATE_URL = ('https://fred.stlouisfed.org/graph/fredgraph.csv?id=MORTGAGE30US'
             '&cosd=2016-12-01&coed=2025-10-31')
@@ -63,6 +64,8 @@ def validated_combined(root):
         hashes[str(path / 'completed.json')] = digest(path / 'completed.json')
         hashes.update({str(path / name): value for name, value in receipt['output_sha256'].items()})
         reports[quarter] = read_json(path / 'rebuilt/report.json')
+        if reports[quarter].get('source_semantics_version') != SOURCE_SEMANTICS_VERSION:
+            raise ValueError('Quarter source semantics predate the native layout/state correction')
     frozen_spec = root / 'spec_frozen.md'
     if digest(frozen_spec) != digest(SPEC):
         raise ValueError('Source specification differs from the frozen rebuild protocol')
@@ -70,6 +73,8 @@ def validated_combined(root):
     combined = root / 'combined'
     report_path = combined / 'report.json'
     report = read_json(report_path)
+    if report.get('source_semantics_version') != SOURCE_SEMANTICS_VERSION:
+        raise ValueError('Combined source semantics predate the native layout/state correction')
     if (report.get('quarters') != QUARTERS or report.get('complete_freddie_manifest') is not True
             or report.get('population') != POPULATION or report.get('cutoff') != '202509'
             or report.get('transition_end') != '202205' or report.get('sample_month') != '202205'):
@@ -222,6 +227,7 @@ def run(*, root, legacy_panel, saved_grid, rate_csv, rate_source, output):
         new_grid = grids(corrected)
         verify_hashes(dict(hashes, **code_hashes))
         result = dict(created_utc=datetime.now(timezone.utc).isoformat(),
+            source_semantics_version=combined['source_semantics_version'],
             scope=manifest['scope'], input_manifest_sha256=digest(output / 'input_manifest.json'),
             legacy_replay_sha256=digest(output / 'legacy_replay.json'), legacy_replay=replay,
             corrected_grid=new_grid, corrected_rows_after_filter=len(corrected),

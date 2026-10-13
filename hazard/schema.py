@@ -1,5 +1,24 @@
 """Freddie Mac SF Loan-Level Dataset column layouts (pipe-delimited, no header)."""
 
+import re
+
+SOURCE_SEMANTICS_VERSION = 'freddie-native32-ddlpi-states-v1'
+_PERF_DATE = re.compile(rb'(19|20)\d{2}(0[1-9]|1[0-2])')
+_TERMINAL_CODES = {b'01', b'02', b'03', b'09', b'15', b'16', b'96'}
+
+
+def validate_performance_semantics(row):
+    """Validate native tokens only after the caller's outcome/date boundary."""
+    if (row[12] and not _PERF_DATE.fullmatch(row[12])):
+        raise ValueError('Native performance semantic mismatch: last-paid date')
+    if row[28] not in {b'', b'Y'} or row[29] not in {b'', b'F', b'R', b'T'}:
+        raise ValueError('Native performance semantic mismatch: disaster/assistance position')
+    if row[8] not in _TERMINAL_CODES | {b''}:
+        raise ValueError('Native performance semantic mismatch: unknown termination code')
+    if row[8] not in _TERMINAL_CODES and not (
+            row[3] in {b'RA', b'RP'} or (row[3].isdigit() and len(row[3]) <= 3)):
+        raise ValueError('Native performance semantic mismatch: unresolved nonterminal delinquency')
+
 # Origination file — 32 columns (0-indexed positions)
 ORIG_COLS = [
     "credit_score",           # 0
@@ -22,7 +41,7 @@ ORIG_COLS = [
     "property_type",          # 17
     "postal_code",            # 18
     "loan_sequence_number",   # 19
-    "loan_purpose",           # 18 -> actually 20 in 1-indexed = index 19
+    "loan_purpose",           # 20
     "original_loan_term",     # 21
     "num_borrowers",          # 22
     "seller_name",            # 23
@@ -36,7 +55,8 @@ ORIG_COLS = [
     "mi_cancel",              # 31
 ]
 
-# Performance file — 32 columns
+# January-2026 native performance layout: 32 columns, including DDLPI at 12.
+# A missing DDLPI name shifts every later field without changing row width.
 PERF_COLS = [
     "loan_sequence_number",       # 0
     "reporting_period",           # 1  YYYYMM
@@ -50,26 +70,26 @@ PERF_COLS = [
     "zero_balance_date",          # 9
     "current_interest_rate",      # 10
     "current_non_ib_upb",         # 11
-    "mi_recoveries",              # 12
-    "net_sales_proceeds",         # 13
-    "non_mi_recoveries",          # 14
-    "expenses",                   # 15
-    "legal_costs",                # 16
-    "maintenance_costs",          # 17
-    "taxes_insurance",            # 18
-    "misc_expenses",              # 19
-    "actual_loss",                # 20
-    "modification_cost",          # 21
-    "step_mod_indicator",         # 22
-    "deferred_payment_flag",      # 23
-    "eltv",                       # 24
-    "zero_balance_removal_upb",   # 25
-    "delinquent_accrued_interest",# 26
-    "delinq_disaster",            # 27
-    "borrower_assistance",        # 28  F=Forbearance
-    "current_month_mod_cost",     # 29
-    "interest_bearing_upb",       # 30
-    "deferred_upb",               # 31
+    "due_date_last_paid_installment", # 12 YYYYMM
+    "mi_recoveries",              # 13
+    "net_sales_proceeds",         # 14
+    "non_mi_recoveries",          # 15
+    "expenses",                   # 16
+    "legal_costs",                # 17
+    "maintenance_costs",          # 18
+    "taxes_insurance",            # 19
+    "misc_expenses",              # 20
+    "actual_loss",                # 21
+    "modification_cost",          # 22
+    "step_mod_indicator",         # 23
+    "deferred_payment_flag",      # 24
+    "eltv",                       # 25
+    "zero_balance_removal_upb",    # 26
+    "delinquent_accrued_interest", # 27
+    "delinq_disaster",            # 28
+    "borrower_assistance",        # 29 F=Forbearance
+    "current_month_mod_cost",     # 30
+    "interest_bearing_upb",       # 31
 ]
 
 ORIG_DTYPES = {

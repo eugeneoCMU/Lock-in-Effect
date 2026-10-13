@@ -24,6 +24,7 @@ import polars as pl
 os.environ.setdefault('FRED_API_KEY', 'offline-source-rebuild-no-network')
 from config import COUPON_STEP, MARKOV_STATES
 from freddie_raw_quarter_audit import IdentityExceptions, check_resources, finite
+from schema import SOURCE_SEMANTICS_VERSION, validate_performance_semantics
 
 SNAPSHOT_MONTH = "202205"
 COHORT_KEYS = ["vintage", "coupon", "fico_bucket", "ltv_bucket"]
@@ -37,6 +38,9 @@ SNAPSHOT_SCHEMA = {
     "state": pl.String, "vintage": pl.Int64, "fico_bucket": pl.String,
     "ltv_bucket": pl.String, "cohort_coupon": pl.Float64,
     "original_loan_term": pl.Float64, "reporting_period": pl.String,
+    "current_note_rate": pl.Float64, "remaining_months": pl.Float64,
+    "modification_flag": pl.String, "current_non_ib_upb": pl.Float64,
+    "interest_bearing_upb": pl.Float64, "payment_deferral_flag": pl.String,
 }
 HISTORY_SCHEMA = dict(zip(HISTORY_KEYS, [pl.Int64, pl.Float64, pl.String, pl.String]),
     cohort_original_upb=pl.Float64, historical_prepaid_upb=pl.Float64,
@@ -55,13 +59,15 @@ def _state(delinquency, assistance, zero_balance):
         return "Prepaid"
     if zero_balance in {b"02", b"03", b"09", b"15"}:
         return "Defaulted"
+    if zero_balance in {b"16", b"96"}:
+        return "Liquidated"
     if assistance == b"F":
         return "Forbearance"
     if delinquency in {b"RA", b"RP"}:
         return "Defaulted"
-    return {b"1": "D30", b"2": "D60", b"3": "D90+", b"4": "D90+",
-            b"5": "D90+", b"6": "D90+", b"7": "D90+", b"8": "D90+",
-            b"9": "D90+"}.get(delinquency, "Current")
+    if delinquency.isdigit() and int(delinquency) >= 3:
+        return "D90+"
+    return {b"1": "D30", b"2": "D60"}.get(delinquency, "Current")
 
 
 def _sha256(path):
@@ -199,7 +205,7 @@ def build_quarter(orig, perf, output, quarter, cutoff="202509", transition_end="
         is_history_source = first_month <= snapshot_ord
         previous = None
         loan_paid=0.;positive_payoffs=0;revivals=0
-        for month, balance, age, state in valid:
+        for month, balance, age, state, contract in valid:
             yr, zero_month = divmod(month, 12)
             ym = f"{yr:04d}{zero_month+1:02d}"
             first = previous is None
@@ -246,7 +252,7 @@ def build_quarter(orig, perf, output, quarter, cutoff="202509", transition_end="
                     snapshot.append(dict(zip(SNAPSHOT_SCHEMA, [
                         loan_id.decode(), f"{key[0]}_{round(key[1]*10000)}_{key[2]}_{key[3]}",
                         fico, property_state, ltv, rate, upb, balance, age, state, vintage,
-                        key[2], key[3], key[1], 360., ym])))
+                        key[2], key[3], key[1], 360., ym, *contract])))
             if month <= transition_ord:
                 td["eligible_rows"] += 1
                 if previous is not None:
@@ -303,6 +309,11 @@ def build_quarter(orig, perf, output, quarter, cutoff="202509", transition_end="
                 counts["excluded_pre_cutoff_rows"] += 1
             else:
                 counts["eligible_pre_cutoff_rows"] += 1
+                validate_performance_semantics(row)
+                counts["semantic_rows_validated"] += 1
+                counts["forbearance_assistance_rows"] += int(row[29] == b'F')
+                counts["extended_delinquency_rows"] += int(row[3].isdigit() and int(row[3]) >= 10)
+                counts["other_terminal_rows"] += int(row[8] in {b'16', b'96'})
                 balance, age = finite(row[2]), finite(row[4])
                 max_decoded_month = max(month, max_decoded_month or month)
                 if balance is None or balance < 0:
@@ -311,7 +322,14 @@ def build_quarter(orig, perf, output, quarter, cutoff="202509", transition_end="
                 else:
                     counts["valid_balance_rows"] += 1
                 counts["missing_or_nonfinite_age_rows"] += int(age is None)
-                group.append((month, balance, age, _state(row[3], row[28], row[8])))
+                # Additional May-only evidence is retained without replacing
+                # the recorded original-rate/original-term model inputs.
+                contract = None
+                if month == snapshot_ord:
+                    current_rate = finite(row[10])
+                    contract = (None if current_rate is None else current_rate/100., finite(row[5]), row[7].decode() or None,
+                                finite(row[11]), finite(row[31]), row[24].decode() or None)
+                group.append((month, balance, age, _state(row[3], row[29], row[8]), contract))
             if counts["performance_rows"] % 2000000 == 0:
                 check_resources(perf.parent)
                 print(f"Quarterly rebuild rows scanned: {counts['performance_rows']:,}", flush=True)
@@ -373,6 +391,8 @@ def build_quarter(orig, perf, output, quarter, cutoff="202509", transition_end="
     if not all(math.isfinite(v) for v in [*risk_sets.values(), *counts.values(), *weighted_transitions.values()]):
         raise ValueError("Quarter totals exceed finite numeric support")
     report = dict(quarter=quarter, population="known 360-month fixed-rate originations; valid FICO/LTV/positive original UPB and note rate",
+        source_semantics_version=SOURCE_SEMANTICS_VERSION,
+        current_contract_fields='Contemporaneous May evidence only; rates decimal, maturity months, balances USD, flags as reported; original model conventions unchanged; missing or nonfinite numeric fields retained as null',
         identity_exceptions=identity_report,
         zero_note_rate_exclusions=zero_rates,
         quarter_cash_ratio_audit=dict(partial_cohort_overrun_enabled=allow_partial_cohort_overrun,
