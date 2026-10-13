@@ -55,3 +55,27 @@ retrospective scoring and paired simulation. Each stage stops on a failed gate.
 The 202509 outcome boundary, 202205 transition/snapshot boundaries, one-pair
 resource and cleanup controls, fixed model choices and empirical limitations
 remain unchanged. No replacement paper estimate is available from this repair.
+
+## Verified execution checkpoint — October 13, 2:06 p.m. Eastern
+
+The version-2 run has completed 15 of 20 quarters, 2017Q1 through 2020Q3, and
+is processing 2020Q4. All fifteen full completion validators passed, including
+the source/output hashes and two-file cloud-only cleanup evidence. Their totals
+are 5,527,605 eligible original source records, 315,936,421 physical performance
+rows and 2,527,494 exact-May-2022 snapshot rows. Global cross-file identity and
+combination checks still await the complete twenty-quarter source set.
+
+The 2018Q2 extraction now succeeds. There is one joint RA/F source row among
+these fifteen completed quarters, in 2018Q2, and zero reported terminal-
+absorption violations. The first-quarter streaming/production comparison passes
+all eleven financial, age and count checks across 4,153 cohort-month cells.
+Cohort-mode tie breaking is excluded from that comparison, as declared in its
+receipt; transition estimation does not use cohort modes.
+
+All 292 protected baseline files and all 264 frozen pipeline inputs still match
+their hashes. The largest completed worker RSS is approximately 2.86 GiB, below
+the 8-GiB limit. Only the active 2020Q4 pair is materialized. Source extraction is
+still running; combination, calibration, scoring and paired simulation have
+not run. The timestamped receipt and latest checkpoint are saved under
+`output/research-rebuild/2026-10-13-reo/verification_checkpoints/` and
+`output/research-rebuild/2026-10-13-reo/verified_progress.json` respectively.
