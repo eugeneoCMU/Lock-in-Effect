@@ -10,6 +10,7 @@ import argparse
 from datetime import datetime, timezone
 import hashlib
 import json
+import math
 import os
 from pathlib import Path
 import re
@@ -22,6 +23,8 @@ ROOT = Path(__file__).resolve().parents[1]
 SOURCE = Path('/Users/eugene/Library/CloudStorage/GoogleDrive-eugeneo@andrew.cmu.edu/My Drive/Fannie and Freddie MAC')
 SPEC = ROOT/'specs/SPEC_2026-10-11_source_rebuild.md'
 ELIGIBILITY_CLARIFICATION = ROOT/'specs/SPEC_2026-10-11_source_rebuild_zero_rate_clarification.md'
+CASH_RATIO_CLARIFICATION = ROOT/'specs/SPEC_2026-10-12_quarter_cash_ratio.md'
+IDENTITY_CLARIFICATION = ROOT/'specs/SPEC_2026-10-12_source_identity_clarification.md'
 OUTPUT = ROOT/'output/research-rebuild/2026-10-11'
 QUARTERS = [f'{y}Q{q}' for y in range(2017,2022) for q in range(1,5)]
 GIB = 1024**3
@@ -112,24 +115,111 @@ for path in CommandLine.arguments.dropFirst() {
             time.sleep(3)
 
 
+def load_identity_record(root, quarter):
+    """Validate only local frozen identity evidence; never reopen a source."""
+    root = Path(root)
+    manifest = root/'identity_exceptions_frozen.json'
+    if not manifest.exists():
+        return None
+    record = json.loads(manifest.read_text()).get(quarter)
+    if record is None:
+        return None
+    from freddie_raw_quarter_audit import IdentityExceptions
+    IdentityExceptions(quarter, record)
+    clarification = root/'identity_clarification_frozen.md'
+    if (clarification.read_bytes() != IDENTITY_CLARIFICATION.read_bytes()
+            or digest(clarification) != record.get('clarification_sha256')):
+        raise ValueError('Frozen identity clarification differs')
+    evidence = record.get('evidence_sha256', {})
+    if not isinstance(evidence, dict) or not evidence:
+        raise ValueError('Frozen identity exception requires diagnostic evidence')
+    for name, expected in evidence.items():
+        path = (root/name).resolve()
+        if root.resolve() not in path.parents or digest(path) != expected:
+            raise ValueError('Frozen identity diagnostic evidence differs')
+    return record
+
+
+def freeze_identity_record(root, destination, quarter, record):
+    if record is None:
+        return {}
+    if record != load_identity_record(root, quarter):
+        raise ValueError('Identity record changed before freeze')
+    shutil.copy2(root/'identity_exceptions_frozen.json', destination/'identity_manifest.json')
+    shutil.copy2(root/'identity_clarification_frozen.md', destination/'identity_clarification.md')
+    write_json(destination/'identity_exception.json', record)
+    archive = destination/'identity_evidence'
+    archive.mkdir()
+    hashes = {}
+    for index, (name, expected) in enumerate(sorted(record['evidence_sha256'].items())):
+        target = archive/f'{index:02d}.json'
+        shutil.copy2(root/name, target)
+        hashes[str(target.relative_to(destination))] = expected
+    return dict(identity_manifest_sha256=digest(destination/'identity_manifest.json'),
+        identity_exception_sha256=digest(destination/'identity_exception.json'),
+        identity_clarification_sha256=digest(destination/'identity_clarification.md'),
+        identity_evidence_sha256=hashes)
+
+
+def validate_identity_freeze(destination, freeze):
+    if not freeze.get('identity_exception_sha256'):
+        return None
+    root = destination.parent.parent
+    record = load_identity_record(root, destination.name)
+    if record is None:
+        raise ValueError('Frozen identity exception disappeared')
+    names = {'identity_manifest.json': 'identity_manifest_sha256',
+             'identity_exception.json': 'identity_exception_sha256',
+             'identity_clarification.md': 'identity_clarification_sha256'}
+    for name, key in names.items():
+        if digest(destination/name) != freeze.get(key):
+            raise ValueError('Frozen identity copy changed: '+name)
+    expected_evidence = {f'identity_evidence/{i:02d}.json': value
+                        for i, (_, value) in enumerate(sorted(record['evidence_sha256'].items()))}
+    if (digest(root/'identity_exceptions_frozen.json') != freeze['identity_manifest_sha256']
+            or json.loads((destination/'identity_exception.json').read_text()) != record
+            or freeze.get('identity_evidence_sha256') != expected_evidence
+            or digest(root/'identity_clarification_frozen.md') != freeze['identity_clarification_sha256']):
+        raise ValueError('Frozen identity manifest or evidence binding changed')
+    for name, expected in expected_evidence.items():
+        if digest(destination/name) != expected:
+            raise ValueError('Frozen identity evidence copy changed')
+    return record
+
+
+def expected_identity_audit(record):
+    if record is None:
+        return None
+    return dict(enabled=True, quarter=record['quarter'], allowed_id_sha256=record['allowed_id_sha256'],
+                source_sha256=record['source_sha256'], **record['expected'])
+
+
 def worker(quarter, source, destination):
     from freddie_raw_quarter_audit import schema_audit, check_resources
     from freddie_rebuild_stream import build_quarter
     orig,perf=[source/f'{kind}_{quarter}.txt' for kind in ['orig','perf']]
     freeze=json.loads((destination/'execution_freeze.json').read_text())
+    identity = validate_identity_freeze(destination, freeze)
     clarified=freeze.get('eligibility_clarification_sha256')
     if clarified and digest(destination/'eligibility_clarification.md')!=clarified:
         raise ValueError('Eligibility clarification must be frozen before source access')
+    cash_clarified=freeze.get('cash_ratio_clarification_sha256')
+    if cash_clarified and digest(destination/'cash_ratio_clarification.md')!=cash_clarified:
+        raise ValueError('Cash-ratio clarification must be frozen before source access')
     schema_path=destination/'schema.json'
     if schema_path.exists():
         schema=json.loads(schema_path.read_text())
     else:
-        schema,_=schema_audit(orig,perf,quarter=quarter,exclude_zero_note_rate=bool(clarified))
+        schema,_=schema_audit(orig,perf,quarter=quarter,exclude_zero_note_rate=bool(clarified),
+                              identity_exceptions=identity)
         write_json(schema_path,schema)
     if not schema['passed']:
         raise ValueError('Schema/identity gate failed before outcome processing')
+    if schema.get('identity_exceptions') != expected_identity_audit(identity):
+        raise ValueError('Schema identity exception does not match the frozen record')
     check_resources(destination)
-    report=build_quarter(orig,perf,destination/'rebuilt',quarter=quarter,exclude_zero_note_rate=bool(clarified))
+    report=build_quarter(orig,perf,destination/'rebuilt',quarter=quarter,exclude_zero_note_rate=bool(clarified),
+        allow_partial_cohort_overrun=bool(cash_clarified),identity_exceptions=identity)
     if quarter == '2017Q1':
         # Independent vectorized implementation over the same declared 360-month
         # population. This first-quarter check is bounded by the parent watchdog.
@@ -185,6 +275,11 @@ def required_evidence(destination):
     names=AUDIT_FILES+['rebuilt/'+n for n in REBUILT_ARTIFACTS]+['executed_code/'+n for n in code]
     if freeze.get('eligibility_clarification_sha256'):
         names+=['eligibility_clarification.md']
+    if freeze.get('cash_ratio_clarification_sha256'):
+        names+=['cash_ratio_clarification.md']
+    if freeze.get('identity_exception_sha256'):
+        names+=['identity_manifest.json','identity_exception.json','identity_clarification.md']
+        names+=list(freeze.get('identity_evidence_sha256',{}))
     if destination.name=='2017Q1':
         names+=['production_comparison.json','production_cells_360.parquet']
     return names
@@ -197,6 +292,7 @@ def validate_evidence(destination):
     if quarter not in QUARTERS:
         raise ValueError('Unexpected completed source quarter')
     freeze=read('execution_freeze.json'); schema=read('schema.json')
+    identity = validate_identity_freeze(destination, freeze)
     report=read('rebuilt/report.json'); worker_record=read('worker_passed.json')
     after=read('source_hashes_after.json'); receipt=read('cleanup.json')
     resources=read('resources.json')
@@ -212,9 +308,18 @@ def validate_evidence(destination):
     if clarification and (digest(destination/'eligibility_clarification.md')!=clarification
             or digest(destination.parent.parent/'eligibility_clarification_frozen.md')!=clarification):
         raise ValueError('Frozen eligibility clarification mismatch')
+    cash_clarification=freeze.get('cash_ratio_clarification_sha256')
+    if cash_clarification and (digest(destination/'cash_ratio_clarification.md')!=cash_clarification
+            or digest(destination.parent.parent/'cash_ratio_clarification_frozen.md')!=cash_clarification):
+        raise ValueError('Frozen cash-ratio clarification mismatch')
     if schema.get('passed') is not True:
         raise ValueError('Schema audit did not pass')
     before_hashes={k:schema[k]['sha256'] for k in ['origination','performance']}
+    expected_identity = expected_identity_audit(identity)
+    if (schema.get('identity_exceptions') != expected_identity
+            or report.get('identity_exceptions') != expected_identity
+            or (identity and before_hashes != identity['source_sha256'])):
+        raise ValueError('Schema/stream identity exception accounting disagrees with its freeze')
     if (after!=before_hashes or report.get('source_sha256')!=after
             or worker_record.get('source_hashes')!=after or worker_record.get('report')!=report
             or any(not re.fullmatch('[0-9a-f]{64}',h) for h in after.values())):
@@ -231,6 +336,21 @@ def validate_evidence(destination):
         raise ValueError('Zero-rate exclusions require the frozen eligibility clarification')
     if clarification and not zero_rates:
         raise ValueError('Missing zero-rate exclusion accounting')
+    cash_audit=report.get('quarter_cash_ratio_audit')
+    if cash_audit and cash_audit.get('partial_cohort_overrun_enabled')!=bool(cash_clarification):
+        raise ValueError('Partial-cohort exceptions require their frozen clarification')
+    if cash_clarification and not cash_audit:
+        raise ValueError('Missing partial-cohort cash-ratio audit')
+    if cash_audit:
+        overruns=cash_audit.get('overruns',[])
+        if cash_audit.get('overrun_cohort_count')!=len(overruns) or (overruns and not cash_clarification):
+            raise ValueError('Inconsistent partial-cohort cash-ratio accounting')
+        for item in overruns:
+            original=item.get('original_upb',0);paid=item.get('cumulative_prepaid_upb',0);ratio=item.get('peak_ratio',0)
+            if (not all(math.isfinite(v) for v in [original,paid,ratio]) or original<=0 or ratio<=1
+                    or not math.isclose(paid/original,ratio,rel_tol=1e-10,abs_tol=1e-10)
+                    or item.get('multiple_positive_payoff_loans')!=0 or item.get('terminal_revival_loans')!=0):
+                raise ValueError('Unresolved partial-cohort cash-ratio evidence')
     proof=report.get('cutoff_proof',{})
     if (proof.get('post_cutoff_outcomes_decoded')!=0 or proof.get('outcome_filter_precedes_decode') is not True
             or not re.fullmatch(r'20\d{2}(0[1-9]|1[0-2])',proof.get('latest_decoded_month',''))
@@ -316,6 +436,10 @@ def run_quarter(quarter, source=SOURCE, output=OUTPUT):
     clarification=output/'eligibility_clarification_frozen.md'
     if not clarification.exists() or clarification.read_bytes()!=ELIGIBILITY_CLARIFICATION.read_bytes():
         raise ValueError('Eligibility clarification must match its pre-access frozen copy')
+    cash_clarification=output/'cash_ratio_clarification_frozen.md'
+    if not cash_clarification.exists() or cash_clarification.read_bytes()!=CASH_RATIO_CLARIFICATION.read_bytes():
+        raise ValueError('Cash-ratio clarification must match its pre-access frozen copy')
+    identity = load_identity_record(output, quarter)
     paths=[source/f'{kind}_{quarter}.txt' for kind in ['orig','perf']]
     if shutil.disk_usage(output).free < 12*GIB + sum(p.stat().st_size for p in paths):
         raise RuntimeError('Insufficient headroom for the declared pair plus 12 GiB reserve')
@@ -331,10 +455,13 @@ def run_quarter(quarter, source=SOURCE, output=OUTPUT):
         shutil.copy2(ROOT/'hazard'/name,code_archive/name)
     shutil.copy2(frozen,destination/'spec_frozen.md')
     shutil.copy2(clarification,destination/'eligibility_clarification.md')
+    shutil.copy2(cash_clarification,destination/'cash_ratio_clarification.md')
     write_json(destination/'execution_freeze.json',dict(
         started_utc=datetime.now(timezone.utc).isoformat(),quarter=quarter,cutoff='202509',
         transition_end='202205',spec_sha256=digest(SPEC),python=sys.version,
         eligibility_clarification_sha256=digest(clarification),
+        cash_ratio_clarification_sha256=digest(cash_clarification),
+        **freeze_identity_record(output,destination,quarter,identity),
         code_sha256={n:digest(code_archive/n) for n in code_files}))
     error=None;peak_rss=0;proc=None
     try:

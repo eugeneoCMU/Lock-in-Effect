@@ -59,6 +59,7 @@ def test_worker_is_reaped_before_cleanup_on_every_failure(tmp_path, monkeypatch,
     spec = tmp_path/'spec.md'; spec.write_text('frozen synthetic scope')
     (output/'spec_frozen.md').write_bytes(spec.read_bytes())
     (output/'eligibility_clarification_frozen.md').write_bytes(driver.ELIGIBILITY_CLARIFICATION.read_bytes())
+    (output/'cash_ratio_clarification_frozen.md').write_bytes(driver.CASH_RATIO_CLARIFICATION.read_bytes())
     monkeypatch.setattr(driver, 'SPEC', spec)
     monkeypatch.setattr(driver.shutil, 'disk_usage', lambda _: SimpleNamespace(free=30*driver.GIB))
     worker = StubbornWorker()
@@ -168,3 +169,24 @@ def test_zero_rate_schema_stream_disagreement_blocks_completion(tmp_path):
     p=audit_fixture(tmp_path);add_zero_rate_evidence(p,authorized=True)
     schema=json.loads((p/'schema.json').read_text());schema['origination']['zero_note_rate_exclusions']['known360_upb']=238000.;driver.write_json(p/'schema.json',schema)
     with pytest.raises(ValueError,match='exclusion'):driver.seal_completion(p)
+
+
+@pytest.mark.parametrize('problem',['none','unfrozen','multiple_events','changed_ratio','changed_spec'])
+def test_partial_cohort_exception_requires_frozen_accounting_evidence(tmp_path,problem):
+    p=audit_fixture(tmp_path)
+    audit=dict(partial_cohort_overrun_enabled=True,overrun_cohort_count=1,overruns=[dict(original_upb=100.,cumulative_prepaid_upb=120.,peak_ratio=1.2,multiple_positive_payoff_loans=0,terminal_revival_loans=0)])
+    if problem=='multiple_events':audit['overruns'][0]['multiple_positive_payoff_loans']=1
+    if problem=='changed_ratio':audit['overruns'][0]['peak_ratio']=2.
+    report=json.loads((p/'rebuilt/report.json').read_text());report['quarter_cash_ratio_audit']=audit;driver.write_json(p/'rebuilt/report.json',report)
+    worker=json.loads((p/'worker_passed.json').read_text());worker['report']=report;driver.write_json(p/'worker_passed.json',worker)
+    if problem!='unfrozen':
+        (p/'cash_ratio_clarification.md').write_text('synthetic partial-cohort rule; final bound unchanged')
+        (p.parent.parent/'cash_ratio_clarification_frozen.md').write_bytes((p/'cash_ratio_clarification.md').read_bytes())
+        freeze=json.loads((p/'execution_freeze.json').read_text());freeze['cash_ratio_clarification_sha256']=digest(p/'cash_ratio_clarification.md');driver.write_json(p/'execution_freeze.json',freeze)
+    if problem=='changed_spec':(p/'cash_ratio_clarification.md').write_text('changed')
+    if problem=='none':
+        driver.seal_completion(p)
+        assert 'cash_ratio_clarification.md' in validate_completed(p)['output_sha256']
+    else:
+        with pytest.raises(ValueError):driver.seal_completion(p)
+        assert not (p/'completed.json').exists()

@@ -24,7 +24,7 @@ missing performance coverage for eligible original loans, and invalid fixed
 history. Old quarter cells cannot reconstruct the missing denominator; their
 age-only replay requires explicit `allow_legacy_cells=True`.
 
-Fresh snapshots retain actual contractual terms, the exact pre-QT reporting
+Fresh snapshots retain reported original loan terms, the exact pre-QT reporting
 month (May 2022), active positive balances, and full-source historical cohort
 totals. They exclude stale earlier observations and terminated loans. Source
 histories combine across quarters before being attached to sampled survivors.
@@ -61,8 +61,8 @@ the new estimator supplies explicit self-loops for unsupported rows.
 ### Contractual terms and maturity
 
 The sample carries `original_loan_term`, and amortization uses each loan's
-actual term. Both Danish calibration branches also receive the per-loan term.
-Remaining principal at or beyond contractual maturity closes as scheduled
+reported original term. Both Danish calibration branches also receive that term.
+Remaining principal at or beyond the modeled maturity closes as scheduled
 principal before voluntary/default hazards are applied. Maturity cash does not
 increase voluntary payoff history. The last scheduled installment closes the
 remaining balance.

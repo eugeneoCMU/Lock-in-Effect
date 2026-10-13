@@ -23,7 +23,7 @@ import polars as pl
 # requires a key even to read constants; do not require live credentials here.
 os.environ.setdefault('FRED_API_KEY', 'offline-source-rebuild-no-network')
 from config import COUPON_STEP, MARKOV_STATES
-from freddie_raw_quarter_audit import check_resources, finite
+from freddie_raw_quarter_audit import IdentityExceptions, check_resources, finite
 
 SNAPSHOT_MONTH = "202205"
 COHORT_KEYS = ["vintage", "coupon", "fico_bucket", "ltv_bucket"]
@@ -72,7 +72,8 @@ def _sha256(path):
     return digest.hexdigest()
 
 
-def build_quarter(orig, perf, output, quarter, cutoff="202509", transition_end="202205", *, exclude_zero_note_rate=False):
+def build_quarter(orig, perf, output, quarter, cutoff="202509", transition_end="202205", *, exclude_zero_note_rate=False,
+                  allow_partial_cohort_overrun=False, identity_exceptions=None):
     """Write corrected compact artifacts only after every source check succeeds.
 
     Coupon buckets and outcome mapping match ingest.py. First-observed voluntary
@@ -92,6 +93,7 @@ def build_quarter(orig, perf, output, quarter, cutoff="202509", transition_end="
     if output.exists() and (not output.is_dir() or any(output.iterdir())):
         raise FileExistsError("Choose a new or empty quarterly output directory")
     id_re = re.compile(("F" + quarter[2:] + r"\d+").encode())
+    identity = IdentityExceptions(quarter, identity_exceptions)
     vintage = int(quarter[:4])
     counts = Counter({k: 0 for k in [
         "origination_rows", "eligible_original_ids", "excluded_original_ids",
@@ -122,7 +124,8 @@ def build_quarter(orig, perf, output, quarter, cutoff="202509", transition_end="
             if len(row) != 32:
                 raise ValueError("Origination source requires exactly 32 fields")
             loan_id = row[19]
-            if not id_re.fullmatch(loan_id):
+            exceptional = not id_re.fullmatch(loan_id) and identity.accept(loan_id, 'origination')
+            if not id_re.fullmatch(loan_id) and not exceptional:
                 raise ValueError("Origination identity does not match the declared quarter")
             if loan_id in all_ids:
                 raise ValueError("Duplicate origination identity")
@@ -145,6 +148,8 @@ def build_quarter(orig, perf, output, quarter, cutoff="202509", transition_end="
                 continue
             if rate is None or not 0 < rate < 30:
                 raise ValueError("Eligible origination lacks a valid note rate")
+            if exceptional:
+                identity.eligible(upb)
             first_month = _month(row[1])
             bucket = round((rate / 100.) / COUPON_STEP) * COUPON_STEP
             key = (vintage, bucket, "<680" if fico < 680 else "680-740" if fico < 740 else "740+",
@@ -170,6 +175,8 @@ def build_quarter(orig, perf, output, quarter, cutoff="202509", transition_end="
         "first_observed_payoff_count": 0, "gap_payoff_count": 0, "states": Counter()})
     snapshot, covered, history_covered = [], set(), set()
     weighted_transitions, count_transitions = Counter(), Counter()
+    cohort_cash = defaultdict(lambda: dict(loans=0,loans_with_payoff_above_original=0,
+        above_original_payoff_upb=0.,multiple_positive_payoff_loans=0,terminal_revival_loans=0))
     td = Counter({k: 0 for k in ["eligible_rows", "contiguous_pairs", "used_pairs",
         "gap_pairs_excluded", "zero_opening_balance_pairs", "terminal_absorption_violations"]})
 
@@ -191,6 +198,7 @@ def build_quarter(orig, perf, output, quarter, cutoff="202509", transition_end="
         key, upb, rate, fico, ltv, property_state, first_month = loans[loan_id]
         is_history_source = first_month <= snapshot_ord
         previous = None
+        loan_paid=0.;positive_payoffs=0;revivals=0
         for month, balance, age, state in valid:
             yr, zero_month = divmod(month, 12)
             ym = f"{yr:04d}{zero_month+1:02d}"
@@ -198,6 +206,9 @@ def build_quarter(orig, perf, output, quarter, cutoff="202509", transition_end="
             adjacent = not first and month == previous[0] + 1
             opening = upb if first else previous[1]
             paid = opening if state == "Prepaid" else 0.
+            loan_paid+=paid
+            positive_payoffs+=int(paid>0)
+            revivals+=int(previous is not None and previous[3] in TERMINAL and state not in TERMINAL)
             c = cells[key + (ym,)]
             c["exposure_upb"] += balance
             c["orig_upb_sum"] += upb
@@ -250,6 +261,12 @@ def build_quarter(orig, perf, output, quarter, cutoff="202509", transition_end="
                         count_transitions[pair] += 1
                         td["used_pairs"] += 1
             previous = (month, balance, age, state)
+        cash=cohort_cash[key]
+        cash['loans']+=1
+        cash['loans_with_payoff_above_original']+=int(loan_paid>upb)
+        cash['above_original_payoff_upb']+=max(loan_paid-upb,0.)
+        cash['multiple_positive_payoff_loans']+=int(positive_payoffs>1)
+        cash['terminal_revival_loans']+=int(revivals>0)
 
     seen_groups, current, group, group_dates = set(), None, [], set()
     max_decoded_month = None
@@ -261,7 +278,8 @@ def build_quarter(orig, perf, output, quarter, cutoff="202509", transition_end="
             if len(row) != 32:
                 raise ValueError("Performance source requires exactly 32 fields")
             loan_id = row[0]
-            if not id_re.fullmatch(loan_id) or loan_id not in all_ids:
+            if ((not id_re.fullmatch(loan_id) and not identity.accept(loan_id, 'performance'))
+                    or loan_id not in all_ids):
                 raise ValueError("Performance identity has no matching quarterly origination")
             month = _month(row[1])
             if current != loan_id:
@@ -298,6 +316,7 @@ def build_quarter(orig, perf, output, quarter, cutoff="202509", transition_end="
                 check_resources(perf.parent)
                 print(f"Quarterly rebuild rows scanned: {counts['performance_rows']:,}", flush=True)
     finish(current, group)
+    identity_report = identity.finish({'origination': orig_hash.hexdigest(), 'performance': perf_hash.hexdigest()})
     if len(covered) != len(loans):
         raise ValueError("Eligible original sources lack valid pre-cutoff performance coverage")
     if len(history_covered) != counts["history_eligible_original_ids"]:
@@ -306,7 +325,7 @@ def build_quarter(orig, perf, output, quarter, cutoff="202509", transition_end="
     if td["terminal_absorption_violations"]:
         raise ValueError(f"Terminal absorption violations in the frozen transition history: {td['terminal_absorption_violations']}")
 
-    panel_rows, cumulative = [], defaultdict(float)
+    panel_rows, cumulative, overruns = [], defaultdict(float), {}
     for key, c in sorted(cells.items()):
         states = c.pop("states")
         if any(not math.isfinite(v) for v in c.values()):
@@ -315,8 +334,18 @@ def build_quarter(orig, perf, output, quarter, cutoff="202509", transition_end="
         denominator = fixed[key[:4]]
         cumulative[key[:4]] += c["prepaid_upb"]
         burnout = cumulative[key[:4]] / denominator
-        if not 0 <= burnout <= 1 + 1e-10:
-            raise ValueError("Cumulative prepayments exceed the fixed source original balance")
+        if burnout<0 or not math.isfinite(burnout):
+            raise ValueError('Invalid finite nonnegative source cash ratio')
+        if burnout > 1 + 1e-10:
+            cash=cohort_cash[key[:4]]
+            if not allow_partial_cohort_overrun:
+                raise ValueError("Cumulative prepayments exceed the fixed source original balance")
+            if cash['multiple_positive_payoff_loans'] or cash['terminal_revival_loans']:
+                raise ValueError('Unresolved payoff identity cannot use a partial-cohort exception')
+            if key[:4] not in overruns:
+                overruns[key[:4]]=dict(cohort=list(key[:4]),first_crossing_month=key[4],
+                    original_upb=denominator,**cash)
+            overruns[key[:4]].update(peak_ratio=burnout,cumulative_prepaid_upb=cumulative[key[:4]])
         panel_rows.append(dict(zip(COHORT_KEYS + ["reporting_period"], key), **c,
             cohort_original_upb=denominator,
             mean_loan_age=c["finite_age_sum"]/c["finite_age_count"] if c["finite_age_count"] else float("nan"),
@@ -344,7 +373,11 @@ def build_quarter(orig, perf, output, quarter, cutoff="202509", transition_end="
     if not all(math.isfinite(v) for v in [*risk_sets.values(), *counts.values(), *weighted_transitions.values()]):
         raise ValueError("Quarter totals exceed finite numeric support")
     report = dict(quarter=quarter, population="known 360-month fixed-rate originations; valid FICO/LTV/positive original UPB and note rate",
+        identity_exceptions=identity_report,
         zero_note_rate_exclusions=zero_rates,
+        quarter_cash_ratio_audit=dict(partial_cohort_overrun_enabled=allow_partial_cohort_overrun,
+            overrun_cohort_count=len(overruns),overruns=list(overruns.values()),
+            complete_cohort_gate='Final model panel remains bounded after all source partitions combine'),
         cutoff=str(cutoff), snapshot_month=SNAPSHOT_MONTH, transition_end=str(transition_end),
         source_sha256={"origination":orig_hash.hexdigest(),"performance":perf_hash.hexdigest()},
         schema={"origination_width_counts":{"32":counts["origination_rows"]},

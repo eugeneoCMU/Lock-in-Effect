@@ -114,6 +114,12 @@ def combine(root=OUTPUT, output=None, *, quarters=QUARTERS, n_loans=N_LOANS, see
         zero_note_rate_excluded_loans=sum(r.get('zero_note_rate_exclusions',{}).get('known360_count',0) for r in reports),
         zero_note_rate_excluded_original_upb=sum(r.get('zero_note_rate_exclusions',{}).get('known360_upb',0.) for r in reports),
         zero_note_rate_exclusions_by_quarter={q:r.get('zero_note_rate_exclusions',dict(enabled=False,known360_count=0,known360_upb=0.)) for q,r in zip(quarters,reports)},
+        quarter_cash_ratio_audits_by_quarter={q:r.get('quarter_cash_ratio_audit') for q,r in zip(quarters,reports)},
+        identity_exceptions_by_quarter={q:r.get('identity_exceptions') for q,r in zip(quarters,reports)},
+        identity_exception_totals={k:sum((r.get('identity_exceptions') or {}).get(k,0) for r in reports)
+            for k in ['original_records','performance_rows','eligible_original_loans','eligible_original_upb']},
+        partial_cohort_overrun_count=sum(r.get('quarter_cash_ratio_audit',{}).get('overrun_cohort_count',0) for r in reports),
+        complete_cohort_burnout_bounds_verified=True,
         observed_source_survivors=sum(r['artifacts']['snapshot.parquet']['rows'] for r in reports),
         original_payoff_assumptions=[dict(quarter=q,**r['payoff_assumptions']) for q,r in zip(quarters,reports)],
         source_report_sha256={q:digest(p/'rebuilt/report.json') for q,p in zip(quarters,paths)},

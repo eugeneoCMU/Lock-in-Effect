@@ -64,11 +64,66 @@ def check_resources(path):
     return {"free_disk_bytes": free, "peak_rss_bytes": rss}
 
 
-def schema_audit(orig_path, perf_path, *, quarter='2017Q1', exclude_zero_note_rate=False):
+class IdentityExceptions:
+    """Account for exact, frozen same-year ID placement exceptions only."""
+    FIELDS = ('original_records', 'performance_rows', 'eligible_original_loans', 'eligible_original_upb')
+
+    def __init__(self, quarter, record=None):
+        self.quarter, self.record, self.seen = quarter, record, set()
+        self.allowed = set()
+        self.counts = dict.fromkeys(self.FIELDS, 0)
+        if record is None:
+            return
+        ids = record.get('allowed_id_sha256', [])
+        expected = record.get('expected', {})
+        hashes = record.get('source_sha256', {})
+        if (record.get('quarter') != quarter or not isinstance(ids, list) or not ids
+                or any(not isinstance(x, str) or not re.fullmatch('[0-9a-f]{64}', x) for x in ids)
+                or len(set(ids)) != len(ids) or set(expected) != set(self.FIELDS)
+                or set(hashes) != {'origination', 'performance'}
+                or any(not isinstance(x, str) or not re.fullmatch('[0-9a-f]{64}', x) for x in hashes.values())
+                or any(type(expected[k]) is not int or expected[k] < 0 for k in self.FIELDS[:3])
+                or expected['original_records'] != len(ids)
+                or type(expected['eligible_original_upb']) not in (int, float)
+                or not math.isfinite(expected['eligible_original_upb']) or expected['eligible_original_upb'] < 0):
+            raise ValueError('Invalid frozen identity exception record')
+        self.allowed = set(ids)
+
+    def accept(self, loan_id, kind):
+        if self.record is None:
+            return False
+        if (not re.fullmatch(('F' + self.quarter[2:4] + r'Q[1-4]\d+').encode(), loan_id)
+                or loan_id.startswith(('F' + self.quarter[2:]).encode())):
+            return False
+        identifier = hashlib.sha256(loan_id).hexdigest()
+        if identifier not in self.allowed:
+            return False
+        self.counts['original_records' if kind == 'origination' else 'performance_rows'] += 1
+        if kind == 'origination':
+            self.seen.add(identifier)
+        return True
+
+    def eligible(self, upb):
+        self.counts['eligible_original_loans'] += 1
+        self.counts['eligible_original_upb'] += upb
+
+    def finish(self, source_hashes):
+        if self.record is None:
+            return None
+        if (self.seen != self.allowed or self.counts != self.record['expected']
+                or source_hashes != self.record['source_sha256']):
+            raise ValueError('Frozen identity exception counts, allowlist or source hashes disagree')
+        return dict(enabled=True, quarter=self.quarter,
+            allowed_id_sha256=self.record['allowed_id_sha256'], source_sha256=source_hashes, **self.counts)
+
+
+def schema_audit(orig_path, perf_path, *, quarter='2017Q1', exclude_zero_note_rate=False,
+                 identity_exceptions=None):
     """Only identity/layout/date fields are inspected in performance here."""
     if not re.fullmatch(r'20\d{2}Q[1-4]', quarter):
         raise ValueError('Expected declared source quarter YYYYQn')
     id_pattern = ('F' + quarter[2:] + r'\d+').encode()
+    identity = IdentityExceptions(quarter, identity_exceptions)
     loans, all_ids = {}, set()
     ow, pw = Counter(), Counter()
     o = {"rows": 0, "duplicate_ids": 0, "invalid_id_positions": 0,
@@ -87,7 +142,8 @@ def schema_audit(orig_path, perf_path, *, quarter='2017Q1', exclude_zero_note_ra
             if len(cols) != 32:
                 continue
             loan_id = cols[19]
-            if not re.fullmatch(id_pattern, loan_id):
+            exceptional = not re.fullmatch(id_pattern, loan_id) and identity.accept(loan_id, 'origination')
+            if not re.fullmatch(id_pattern, loan_id) and not exceptional:
                 o["invalid_id_positions"] += 1
             if loan_id in all_ids:
                 o["duplicate_ids"] += 1
@@ -112,6 +168,8 @@ def schema_audit(orig_path, perf_path, *, quarter='2017Q1', exclude_zero_note_ra
                     continue
                 o["eligible_ids"] += 1
                 o["eligible_360_month_ids"] += int(cols[21] == b"360")
+                if exceptional and cols[21] == b'360':
+                    identity.eligible(upb)
                 loans[loan_id] = (upb, round((rate / 100) / .005) * .005,
                                   "<680" if fico < 680 else "680-740" if fico < 740 else "740+",
                                   "≤80" if ltv <= 80 else ">80")
@@ -124,7 +182,7 @@ def schema_audit(orig_path, perf_path, *, quarter='2017Q1', exclude_zero_note_ra
             pw[len(cols)] += 1
             if len(cols) != 32:
                 continue
-            if not re.fullmatch(id_pattern, cols[0]):
+            if not re.fullmatch(id_pattern, cols[0]) and not identity.accept(cols[0], 'performance'):
                 p["invalid_id_positions"] += 1
             if cols[0] not in all_ids:
                 p["unknown_origination_ids"] += 1
@@ -139,13 +197,15 @@ def schema_audit(orig_path, perf_path, *, quarter='2017Q1', exclude_zero_note_ra
                 check_resources(perf_path.parent)
                 print(f"Schema rows checked: {p['rows']:,}", flush=True)
     o["sha256"], p["sha256"] = oh.hexdigest(), ph.hexdigest()
+    identity_report = identity.finish({'origination': o['sha256'], 'performance': p['sha256']})
     o['zero_note_rate_exclusions']=zero_rates
     o["width_counts"], p["width_counts"] = dict(ow), dict(pw)
     passed = (set(ow) == {32} and set(pw) == {32}
               and o["duplicate_ids"] == o["invalid_id_positions"] == 0
               and not o.get("eligible_invalid_rate_rows", 0)
               and p["invalid_id_positions"] == p["unknown_origination_ids"] == p["invalid_reporting_periods"] == 0)
-    return {"passed": passed, "origination": o, "performance": p}, loans
+    return {"passed": passed, "origination": o, "performance": p,
+            'identity_exceptions': identity_report}, loans
 
 
 def audit_rows(perf_path, loans):

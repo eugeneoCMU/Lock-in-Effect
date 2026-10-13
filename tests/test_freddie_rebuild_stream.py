@@ -195,3 +195,35 @@ def test_zero_rate_clarification_keeps_other_rate_errors_blocking(tmp_path,rate)
     with pytest.raises(ValueError,match='valid note rate'):
         build_quarter(o,p,tmp_path/'out','2020Q1',exclude_zero_note_rate=True)
     assert not (tmp_path/'out').exists()
+
+
+def test_partial_cohort_principal_overrun_is_preserved_until_global_combination(tmp_path):
+    from combine_freddie_rebuild import combine_panel
+    o,p=sources(tmp_path,[orig(1,upb=100)],[perf(1,'202205',120),perf(1,'202406',120),perf(1,'202407',0,zb='01')])
+    with pytest.raises(ValueError,match='fixed source original balance'):
+        build_quarter(o,p,tmp_path/'strict','2020Q1')
+    r=build_quarter(o,p,tmp_path/'partial','2020Q1',allow_partial_cohort_overrun=True)
+    a=pl.read_parquet(tmp_path/'partial/panel.parquet')
+    assert a['prepaid_upb'].sum()==120.
+    assert a['cohort_original_upb'].unique().to_list()==[100.]
+    assert a['burnout'].max()==1.2
+    audit=r['quarter_cash_ratio_audit'];assert audit['overrun_cohort_count']==1
+    v=audit['overruns'][0]
+    assert v['first_crossing_month']=='202407' and v['peak_ratio']==1.2
+    assert v['loans']==1 and v['above_original_payoff_upb']==20.
+    assert v['multiple_positive_payoff_loans']==v['terminal_revival_loans']==0
+    # Only after pooling a second source partition is this a valid model panel.
+    b=a.with_columns(pl.lit(200.).alias('cohort_original_upb'),pl.lit(0.).alias('prepaid_upb'))
+    combined=combine_panel([a,b]);assert combined['burnout'].max()==.4
+    with pytest.raises(ValueError,match='exceeds fixed original balance'):combine_panel([a])
+
+
+@pytest.mark.parametrize('case',['repeated_positive_payoff','terminal_revival','pre_snapshot_excess'])
+def test_partial_ratio_exception_keeps_unresolved_event_and_history_gates(tmp_path,case):
+    rows=[perf(1,'202205',120),perf(1,'202406',120),perf(1,'202407',0,zb='01')]
+    if case=='repeated_positive_payoff':rows=[perf(1,'202205',100),perf(1,'202406',100,zb='01'),perf(1,'202407',0,zb='01')]
+    elif case=='terminal_revival':rows=[perf(1,'202205',100),perf(1,'202406',0,zb='01'),perf(1,'202407',120),perf(1,'202408',0,zb='01')]
+    else:rows=[perf(1,'202204',120),perf(1,'202205',0,zb='01')]
+    o,p=sources(tmp_path,[orig(1,upb=100)],rows)
+    with pytest.raises(ValueError):build_quarter(o,p,tmp_path/'out','2020Q1',allow_partial_cohort_overrun=True)
+    assert not (tmp_path/'out').exists()

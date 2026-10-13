@@ -5,6 +5,34 @@ this note. The source rebuild and its all-20-quarter gate must finish first.
 Existing `hazard/data/`, archived research results and paper artifacts are
 preserved. Native Fannie source reconstruction remains separately blocked.
 
+October 12 continuation: explicit offline wrappers are now implemented as
+`calibrate_freddie_rebuild.py`, `score_freddie_rebuild.py`, and
+`simulate_freddie_rebuild.py`. Each rejects incomplete source receipts, changed
+inputs and existing output directories. Synthetic tests and actual saved-input
+preflights are distinct from corrected empirical runs, which remain gated on
+source completion. The scorer and paired wrapper have separate frozen October
+12 specifications. The earlier entry-point cautions below still apply.
+
+The calibration wrapper requires explicit `root`, `legacy-panel`, `saved-grid`,
+`rate-csv`, `rate-source` and new `output` arguments. It validates saved numeric
+values and replays all 14 legacy cells before calculating corrected values.
+
+The scorer requires explicit `root`, `macro`, `parameter-freeze`,
+`recorded-result` and new `output`. It retains the recorded 2023 baseline and
+3.5%/100 PSA candidate, plus the original 4.991%/100 PSA comparator. Its complete
+monthly prediction calendar advances independently of observed-row exclusions.
+
+The paired runner requires explicit `root`, `macro-path`, `parameter-freeze`,
+`empirical-csv`, `input-inventory`, `benchmark-reference` and new `output`.
+It supplies the rebuilt matrix, full macro frame, 4.991% floor and matched
+0/6.5% response legs to the existing engine. Each leg saves separate monthly
+accounting, preserving the May-31 initialization and distinguishing closed-pool
+cash from the engine's observed-holdings reporting scale. The reference file's
+December 2025 observation is excluded from the 42-month QT benchmark.
+
+Both modeling wrappers retain exact replacement draws in the verified sample
+and bind both row and unique-ID counts to its manifest.
+
 ## Required input gate
 
 Validate every quarter with `run_freddie_rebuild.validate_completed`. Only then
