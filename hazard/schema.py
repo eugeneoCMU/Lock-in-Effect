@@ -2,7 +2,11 @@
 
 import re
 
-SOURCE_SEMANTICS_VERSION = 'freddie-native32-ddlpi-states-v1'
+SOURCE_SEMANTICS_VERSION = 'freddie-native32-reo-priority-v2'
+# Recognized archived receipts remain verifiable, but consumption gates require
+# SOURCE_SEMANTICS_VERSION. This does not relabel earlier source outputs.
+ARCHIVE_SOURCE_SEMANTICS_VERSIONS = frozenset({
+    'freddie-native32-ddlpi-states-v1', SOURCE_SEMANTICS_VERSION})
 _PERF_DATE = re.compile(rb'(19|20)\d{2}(0[1-9]|1[0-2])')
 _TERMINAL_CODES = {b'01', b'02', b'03', b'09', b'15', b'16', b'96'}
 
@@ -16,7 +20,7 @@ def validate_performance_semantics(row):
     if row[8] not in _TERMINAL_CODES | {b''}:
         raise ValueError('Native performance semantic mismatch: unknown termination code')
     if row[8] not in _TERMINAL_CODES and not (
-            row[3] in {b'RA', b'RP'} or (row[3].isdigit() and len(row[3]) <= 3)):
+            row[3] == b'RA' or (row[3].isdigit() and len(row[3]) <= 3)):
         raise ValueError('Native performance semantic mismatch: unresolved nonterminal delinquency')
 
 # Origination file — 32 columns (0-indexed positions)

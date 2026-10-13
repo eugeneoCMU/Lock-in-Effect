@@ -75,7 +75,7 @@ def test_native_layout_positions_include_last_paid_date():
     assert PERF_COLS[31]=='interest_bearing_upb'
 
 
-@pytest.mark.parametrize('position,bad',[(12,'123.45'),(28,'F'),(29,'Y'),(3,'XX'),(8,'77')])
+@pytest.mark.parametrize('position,bad',[(12,'123.45'),(28,'F'),(29,'Y'),(3,'XX'),(3,'RP'),(8,'77')])
 def test_ambiguous_native_semantics_fail_before_artifact_publication(tmp_path,position,bad):
     o,p=native_sources(tmp_path)
     rows=p.read_text().splitlines()
@@ -93,7 +93,8 @@ def test_semantic_validation_does_not_decode_post_cutoff_fields(tmp_path):
     row[0]='F20Q10000001'; row[1]='202510'
     with p.open('a') as f: f.write('|'.join(row)+'\n')
     report=build_quarter(o,p,tmp_path/'out','2020Q1')
-    assert report.get('source_semantics_version')=='freddie-native32-ddlpi-states-v1'
+    from schema import SOURCE_SEMANTICS_VERSION
+    assert report.get('source_semantics_version')==SOURCE_SEMANTICS_VERSION
     assert report['cutoff_proof']['post_cutoff_outcomes_decoded']==0
 
 
@@ -112,3 +113,44 @@ def test_snapshot_retains_contemporaneous_contract_fields_without_changing_origi
     assert snap.get('payment_deferral_flag')=='P'
     assert snap['coupon']==.035 and snap['original_loan_term']==360
     assert snap['balance']==89000 and snap['orig_upb']==100000
+
+
+def test_reo_acquisition_cannot_return_to_forbearance_from_a_concurrent_flag(tmp_path):
+    o,p=native_sources(tmp_path,delinquency='RA',assistance='F')
+    rows=p.read_text().splitlines()
+    previous=rows[0].split('|');previous[3]='RA';rows[0]='|'.join(previous)
+    p.write_text('\n'.join(rows)+'\n')
+    out=tmp_path/'out'
+    report=build_quarter(o,p,out,'2020Q1')
+    assert report['transition_diagnostics']['terminal_absorption_violations']==0
+    assert report['counts']['reo_with_forbearance_flag_rows']==1
+    assert pl.read_parquet(out/'snapshot.parquet').is_empty()
+    panel=pl.read_parquet(out/'panel.parquet')
+    assert panel['mode_state'].to_list()==['Defaulted','Defaulted']
+    assert panel['prepaid_upb'].sum()==0
+    assert panel['exposure_upb'].sum()==179000
+
+
+@pytest.mark.parametrize('zero_balance,want',[
+    ('','Defaulted'),('01','Prepaid'),('09','Defaulted'),('16','Liquidated'),('96','Liquidated')])
+def test_explicit_termination_then_reo_precede_assistance_in_both_paths(zero_balance,want):
+    from freddie_rebuild_stream import _state
+    assert _state(b'RA',b'F',zero_balance.encode())==want
+    got=pl.DataFrame({'d':['RA'],'a':['F'],'z':[zero_balance]}).select(
+        _map_servicer_state(pl.col('d'),pl.col('a'),pl.col('z')).alias('state'))
+    assert got['state'].to_list()==[want]
+
+
+def test_assistance_does_not_authorize_unsupported_native_delinquency(tmp_path):
+    o,p=native_sources(tmp_path,delinquency='RP',assistance='F')
+    with pytest.raises(ValueError,match='semantic'):
+        build_quarter(o,p,tmp_path/'out','2020Q1')
+
+
+@pytest.mark.parametrize('delinquency',['0','2','24'])
+def test_numeric_delinquency_with_assistance_still_maps_to_forbearance(delinquency):
+    from freddie_rebuild_stream import _state
+    assert _state(delinquency.encode(),b'F',b'')=='Forbearance'
+    got=pl.DataFrame({'d':[delinquency],'a':['F'],'z':['']}).select(
+        _map_servicer_state(pl.col('d'),pl.col('a'),pl.col('z')).alias('state'))
+    assert got['state'].to_list()==['Forbearance']

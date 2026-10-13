@@ -166,10 +166,12 @@ def test_two_quarter_combination_preserves_source_history_and_balances(rebuilt_t
     assert json.loads((output / 'report.json').read_text()) == result
 
 
-def test_pre_semantic_repair_receipts_cannot_feed_combination(rebuilt_two_quarters):
+@pytest.mark.parametrize('old_version',[None,'freddie-native32-ddlpi-states-v1'])
+def test_pre_semantic_repair_receipts_cannot_feed_combination(rebuilt_two_quarters,old_version):
     root, quarters, _ = rebuilt_two_quarters
     p=root/'quarters'/quarters[0]/'rebuilt/report.json'
     report=json.loads(p.read_text()); report.pop('source_semantics_version',None)
+    if old_version is not None: report['source_semantics_version']=old_version
     p.write_text(json.dumps(report))
     with pytest.raises(ValueError,match='semantic'):
         combine(root,quarters=quarters,n_loans=3)

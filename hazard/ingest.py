@@ -70,6 +70,7 @@ def _map_servicer_state(delinq: pl.Expr, assistance: pl.Expr, zb: pl.Expr) -> pl
         pl.when(zb == ZB_VOLUNTARY_PREPAY).then(pl.lit("Prepaid"))
         .when(zb.is_in(["02", "03", "09", "15"])).then(pl.lit("Defaulted"))
         .when(zb.is_in(["16", "96"])).then(pl.lit("Liquidated"))
+        .when(delinq == "RA").then(pl.lit("Defaulted"))
         .when(assistance == "F").then(pl.lit("Forbearance"))
         .when(delinq == "0").then(pl.lit("Current"))
         .when(delinq == "1").then(pl.lit("D30"))

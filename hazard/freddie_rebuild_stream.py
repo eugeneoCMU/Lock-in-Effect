@@ -61,6 +61,9 @@ def _state(delinquency, assistance, zero_balance):
         return "Defaulted"
     if zero_balance in {b"16", b"96"}:
         return "Liquidated"
+    # REO acquisition is not reversed by a concurrent assistance-plan flag.
+    if delinquency == b"RA":
+        return "Defaulted"
     if assistance == b"F":
         return "Forbearance"
     if delinquency in {b"RA", b"RP"}:
@@ -312,6 +315,7 @@ def build_quarter(orig, perf, output, quarter, cutoff="202509", transition_end="
                 validate_performance_semantics(row)
                 counts["semantic_rows_validated"] += 1
                 counts["forbearance_assistance_rows"] += int(row[29] == b'F')
+                counts["reo_with_forbearance_flag_rows"] += int(row[3] == b'RA' and row[29] == b'F')
                 counts["extended_delinquency_rows"] += int(row[3].isdigit() and int(row[3]) >= 10)
                 counts["other_terminal_rows"] += int(row[8] in {b'16', b'96'})
                 balance, age = finite(row[2]), finite(row[4])

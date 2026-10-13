@@ -129,6 +129,23 @@ def test_one_output_cannot_masquerade_as_completed_quarter(tmp_path):
     with pytest.raises(ValueError):validate_completed(tmp_path)
 
 
+def test_recognized_prior_semantics_remain_verifiable_but_cannot_resume(tmp_path,monkeypatch):
+    p=audit_fixture(tmp_path)
+    old='freddie-native32-ddlpi-states-v1'
+    schema=json.loads((p/'schema.json').read_text());schema['source_semantics_version']=old
+    driver.write_json(p/'schema.json',schema)
+    report=json.loads((p/'rebuilt/report.json').read_text());report['source_semantics_version']=old
+    report['counts'].update(semantic_rows_validated=2,eligible_pre_cutoff_rows=2)
+    driver.write_json(p/'rebuilt/report.json',report)
+    driver.write_json(p/'worker_passed.json',{'source_hashes':report['source_sha256'],'report':report})
+    # A version advance must not erase the ability to verify preserved evidence.
+    monkeypatch.setattr(driver,'SOURCE_SEMANTICS_VERSION','synthetic-new-current-version')
+    driver.seal_completion(p)
+    assert validate_completed(p)['status']=='completed'
+    with pytest.raises(ValueError,match='archive-only'):
+        driver.run_quarter('2017Q2',source=tmp_path/'unavailable-originals',output=tmp_path)
+
+
 @pytest.mark.parametrize('mutation',['missing_schema','mismatched_source','wrong_quarter','wrong_spec','missing_code','wrong_cutoff','wrong_cleanup_source'])
 def test_sealing_rejects_inconsistent_required_evidence(tmp_path,mutation):
     p=audit_fixture(tmp_path)

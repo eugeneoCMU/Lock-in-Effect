@@ -1,5 +1,10 @@
 # Source field and state verification — October 13, 2026 UTC
 
+**Later October 13 update:** the first rerun completed five quarters and exposed
+an REO/assistance precedence defect in 2018Q2. Its five receipts remain preserved
+version-1 evidence. The current repair and separate version-2 rerun are recorded
+in `2026-10-13-reo-priority-repair.md`.
+
 The five-stage pipeline was deliberately stopped at 02:31 UTC before any
 combination, calibration, scoring or paired simulation. The 2020Q4 driver reaped
 its worker and verified cloud-only cleanup of both original files. The previous

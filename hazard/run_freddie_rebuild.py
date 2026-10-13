@@ -18,7 +18,7 @@ import shutil
 import subprocess
 import sys
 import time
-from schema import SOURCE_SEMANTICS_VERSION
+from schema import SOURCE_SEMANTICS_VERSION, ARCHIVE_SOURCE_SEMANTICS_VERSIONS
 
 ROOT = Path(__file__).resolve().parents[1]
 SOURCE = Path('/Users/eugene/Library/CloudStorage/GoogleDrive-eugeneo@andrew.cmu.edu/My Drive/Fannie and Freddie MAC')
@@ -318,7 +318,7 @@ def validate_evidence(destination):
     if schema.get('passed') is not True:
         raise ValueError('Schema audit did not pass')
     semantics = report.get('source_semantics_version')
-    if semantics is not None and (semantics != SOURCE_SEMANTICS_VERSION
+    if semantics is not None and (semantics not in ARCHIVE_SOURCE_SEMANTICS_VERSIONS
             or schema.get('source_semantics_version') != semantics
             or report['counts'].get('semantic_rows_validated') != report['counts'].get('eligible_pre_cutoff_rows')
             or report['counts'].get('semantic_rows_validated') is None):

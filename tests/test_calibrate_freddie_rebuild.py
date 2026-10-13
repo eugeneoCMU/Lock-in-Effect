@@ -10,6 +10,7 @@ import pytest
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / 'hazard'))
 import run_freddie_rebuild as source
+from schema import SOURCE_SEMANTICS_VERSION
 
 
 def module():
@@ -37,7 +38,7 @@ def synthetic_quarter(root, quarter):
         'code_sha256': {n: source.digest(path / 'executed_code' / n) for n in source.CORE_CODE_FILES}})
     hashes = {'origination': 'a' * 64, 'performance': 'b' * 64}
     zero = {'enabled': False, 'known360_count': 0, 'known360_upb': 0.}
-    dump(path / 'schema.json', {'passed': True, 'source_semantics_version':'freddie-native32-ddlpi-states-v1',
+    dump(path / 'schema.json', {'passed': True, 'source_semantics_version':SOURCE_SEMANTICS_VERSION,
         'origination': {'sha256': hashes['origination'], 'rows': 1,
                         'eligible_360_month_ids': 1, 'zero_note_rate_exclusions': zero},
         'performance': {'sha256': hashes['performance'], 'rows': 2}})
@@ -53,7 +54,7 @@ def synthetic_quarter(root, quarter):
     for name in source.REBUILT_ARTIFACTS:
         (path / 'rebuilt' / name).write_bytes(b'synthetic compact source evidence')
     report = dict(quarter=quarter, cutoff='202509', snapshot_month='202205', transition_end='202205',
-        source_semantics_version='freddie-native32-ddlpi-states-v1',
+        source_semantics_version=SOURCE_SEMANTICS_VERSION,
         source_sha256=hashes, counts={'origination_rows': 1, 'performance_rows': 2, 'eligible_original_ids': 1,
                                     'semantic_rows_validated':2,'eligible_pre_cutoff_rows':2},
         cutoff_proof={'post_cutoff_outcomes_decoded': 0, 'outcome_filter_precedes_decode': True,
@@ -92,7 +93,7 @@ def inputs(tmp_path):
         (combined / name).write_bytes(b'synthetic unused input')
     dump(combined / 'transition_diagnostics.json', {'estimation_end': '202205'})
     report = dict(quarters=source.QUARTERS, complete_freddie_manifest=True,
-        source_semantics_version='freddie-native32-ddlpi-states-v1',
+        source_semantics_version=SOURCE_SEMANTICS_VERSION,
         population='known360FRM; original vintage2017–2021', cutoff='202509', transition_end='202205',
         sample_month='202205', panel_rows=3, original_loans=20, sample_n=20, sample_unique_ids=20,
         observed_source_survivors=20, zero_note_rate_excluded_loans=0,
@@ -164,7 +165,7 @@ def test_an_incomplete_quarter_stops_before_a_manifest_or_new_values(inputs):
 
 
 @pytest.mark.parametrize('mutation', ['partial_combined', 'wrong_cutoff', 'changed_output',
-                                     'missing_output_hash', 'wrong_source_hash', 'wrong_exclusions', 'old_semantics'])
+                                     'missing_output_hash', 'wrong_source_hash', 'wrong_exclusions', 'old_semantics', 'reo_old_semantics'])
 def test_combined_evidence_must_bind_all_quarters_and_every_output(inputs, mutation):
     path = inputs['root'] / 'combined/report.json'
     report = json.loads(path.read_text())
@@ -174,6 +175,7 @@ def test_combined_evidence_must_bind_all_quarters_and_every_output(inputs, mutat
     elif mutation == 'missing_output_hash': del report['output_sha256']['loan_sample.parquet']
     elif mutation == 'wrong_source_hash': report['source_report_sha256']['2017Q1'] = 'c' * 64
     elif mutation == 'old_semantics': report.pop('source_semantics_version')
+    elif mutation == 'reo_old_semantics': report['source_semantics_version']='freddie-native32-ddlpi-states-v1'
     else: report['zero_note_rate_excluded_loans'] = 1
     dump(path, report)
     with pytest.raises(ValueError): module().run(**inputs)

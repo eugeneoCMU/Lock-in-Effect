@@ -105,3 +105,29 @@ Run all quarters into a new output root. No previous state-dependent source
 artifact may be relabeled or copied as a new completion. Prior financial
 aggregates remain preserved for reconciliation. Keep every earlier resource,
 cutoff, identity, zero-rate and intermediate-cash-ratio requirement.
+
+## October 13 REO and assistance precedence correction
+
+The v1 rerun completed five quarters, then stopped in 2018Q2 on one apparent
+terminal revival. A separately frozen diagnostic verified the exact source
+hashes and decoded only eligible records through 202205. The loan remained RA
+(REO acquisition) from July 2020 through its May 2021 code-09 disposition. A
+September 2020 F assistance flag overrode RA in the old state mapping, despite
+unchanged reported principal. This is a parser precedence defect; no source
+exception or weakening of the terminal-absorption gate is warranted.
+
+For a fresh full rerun use `freddie-native32-reo-priority-v2`: explicit zero-
+balance codes remain first; RA maps to Defaulted before assistance F maps to
+Forbearance. Numeric delinquency plus F keeps its prior treatment. Count the
+joint RA/F source rows. Nonterminal RP is unsupported by the native guide and
+must fail semantic validation, with or without assistance; do not assume a
+meaning from a legacy mapping. Keep the existing rule allowing explicit known
+termination codes to determine a terminal state when delinquency is unresolved.
+
+Preserve v1 receipts and their exact bytes as verifiable historical evidence.
+They cannot feed a current model. The earlier five quarters have no joint RA/F
+audit establishing that their outputs are unaffected, so re-extract all twenty
+quarters into `output/research-rebuild/2026-10-13-reo/`. Copy no completed source
+artifacts. Retain all source/resource/cutoff/cleanup requirements and the same
+fixed downstream choices. The original and v1 frozen specifications remain
+unchanged in their respective output roots.
