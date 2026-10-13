@@ -47,13 +47,21 @@ This is a bounded diagnostic, not a whole-quarter prevalence estimate.
    and paired simulation under the existing parameter choices. No manuscript
    result changes precede the audited chain.
 
-The independent reviewer reported no actionable defect in its completed checks
-of the native positions, snapshot tuple handling, downstream version gates and
-non-voluntary terminal treatment. Its final provenance pass was interrupted by
-the account usage limit, so this is a partial independent review. The primary
-agent completed the diff review and verified rejection of archived semantics,
-all 292 protected baseline hashes, all 259 prepared pipeline hashes and the
-copied identity-exception evidence. See the new root's `pipeline/review.json`.
+The independent reviewer completed its bounded correctness, cutoff, provenance
+and regression review with no actionable findings. Its initial pass was
+interrupted by the account usage limit, then resumed and completed after the
+repair commit. It reviewed native positions, snapshot tuple handling, downstream
+version gates and non-voluntary terminal treatment without raw access or model
+execution. The primary agent verified rejection of archived semantics, all 292
+protected baseline hashes, all 259 prepared pipeline hashes and the copied
+identity-exception evidence. The reviewer did not independently rerun the suite.
+See the new root's `pipeline/review.json` and `pipeline/review_completed.json`.
+
+Commit `f0c9ef28` binds the repaired implementation. The fresh pipeline launched
+at 13:07:58 UTC on October 13 (9:07:58 a.m. Eastern), starting with 2017Q1.
+Its live status is `pipeline/state.json`; each quarterly receipt remains required
+before combination. Launch is not evidence that the corrected rebuild or any
+dependent result is complete.
 
 ## Other work completed during the source run
 
