@@ -1,20 +1,4 @@
-"""Perturbation battery for liveness gate #99 (the abstract leads with the range).
-
-Section V.E argues that the identified content is the range and that $+5.6$ is
-an upper-middle member of it. Before this round the abstract, the introduction,
-Table 1 and the conclusion all led with the point, so the front of the paper
-argued against its own Section V.E. Gate #99 keeps that fixed.
-
-The case this file exists for is the ORDERING one. Every span in ABSTRACT_POSTURE
-survives an abstract that states the point first and the range second -- the
-exact arrangement this round removed -- so a span-presence check alone would not
-catch a reversion. `test_point_before_range_fails` is therefore the load-bearing
-test here, not a nice-to-have.
-
-Follows the two rules `test_abstract_hedge_gate.py` records: it imports the
-shipped rule rather than redefining it, and it treats the structural attack as a
-first-class case.
-"""
+"""Regression checks for the revised abstract's evidence ordering."""
 from __future__ import annotations
 
 import pathlib
@@ -33,120 +17,64 @@ from liveness_gates import (  # noqa: E402
 )
 
 
+def _abstract(tex: str) -> str:
+    i = tex.index(ABSTRACT_BOUNDS[0]) + len(ABSTRACT_BOUNDS[0])
+    j = tex.index(ABSTRACT_BOUNDS[1], i)
+    return tex[i:j]
+
+
+def _replace_abstract(tex: str, new: str) -> str:
+    old = _abstract(tex)
+    assert new != old
+    return tex.replace(old, new, 1)
+
+
 @pytest.fixture(scope="module")
 def tex() -> str:
     return TEX.read_text()
 
 
-@pytest.fixture(scope="module")
-def abstract(tex: str) -> str:
-    i = tex.find(ABSTRACT_BOUNDS[0])
-    j = tex.find(ABSTRACT_BOUNDS[1], i + 1)
-    assert i != -1 and j != -1, "abstract environment not found"
-    return tex[i + len(ABSTRACT_BOUNDS[0]):j]
-
-
-def _swap(tex: str, abstract: str, mutated: str) -> str:
-    assert mutated != abstract, "mutation was a no-op -- the test would be vacuous"
-    return tex.replace(abstract, mutated, 1)
-
-
 def test_shipped_manuscript_passes(tex):
     ok, info = abstract_posture_check(tex)
-    assert ok, f"gate #99 fails the shipped manuscript: {info}"
-    assert info["ordered"]
+    assert ok, info
+    assert info["i_point"] < info["i_range"]
 
 
 @pytest.mark.parametrize("key", sorted(ABSTRACT_POSTURE))
-def test_deleting_any_span_fails(tex, key):
-    mutated = tex.replace(ABSTRACT_POSTURE[key], "", 1)
-    assert mutated != tex, f"span {key} is not in the manuscript verbatim"
-    ok, info = abstract_posture_check(mutated)
-    assert not ok, f"deleting span {key} left gate #99 green"
-
-
-# --------------------------------------------------------------------------
-# THE reversion. Both halves survive; only the order changes.
-# --------------------------------------------------------------------------
-def test_point_before_range_fails(tex, abstract):
-    """Put the point back in front, keeping every literal. This is the exact
-    arrangement round 24b removed, and a span-presence check accepts it."""
-    range_sentence = (
-        "Under the production hard-maximum form, sampling uncertainty in the floor "
-        "read yields a $+1.9$ to $+9.1$ percentage-point marginal at the central "
-        "imported response. ")
-    level_sentence = (
-        "The response-off and response-on levels are 85.7\\% and 91.3\\% of the cap "
-        "gap, so their $+5.6$-point difference, or \\$42.6 billion, is an interior "
-        "anchor rather than a mean, median, directly observed effect, or uniquely "
-        "preferred estimate. ")
-    assert range_sentence + level_sentence in abstract
-    mutated = abstract.replace(range_sentence + level_sentence,
-                               level_sentence + range_sentence, 1)
-    ok, info = abstract_posture_check(_swap(tex, abstract, mutated))
-    assert not ok, "gate #99 accepted a point-first abstract"
-    assert info["missing"] == [] and not info["ordered"], (
-        "the ordering assert must be what fires here, not a missing span -- "
-        f"info={info}")
-
-
-def test_frame_dropped_from_the_corrections_claim_fails(tex):
-    """Without `to the baseline turnover floor or to the accounting basis`
-    the claim is FALSE: the additive form (+11.2) and the Fonseca anchor (+11.5)
-    move the marginal up. An unframed 'every correction moves it down' is the
-    overclaim HANDOFF_round25 §4.2 records."""
-    mutated = tex.replace(
-        ABSTRACT_POSTURE["corrections_framed"],
-        "the corrections I can measure no longer all run one way", 1)
-    assert mutated != tex
-    ok, _ = abstract_posture_check(mutated)
+def test_removing_evidence_span_fails(tex, key):
+    old = _abstract(tex)
+    span = ABSTRACT_POSTURE[key]
+    assert span in old
+    ok, _ = abstract_posture_check(_replace_abstract(tex, old.replace(span, "", 1)))
     assert not ok
 
 
-def test_range_softened_to_an_afterthought_fails(tex):
-    """`a range around that` restores the old subordinate reading -- the point
-    is the claim and the range is a caveat on it."""
-    mutated = tex.replace(
-        "sampling uncertainty in the floor read yields",
-        "the interior point is surrounded by", 1)
-    assert mutated != tex
-    ok, _ = abstract_posture_check(mutated)
+def test_promoting_conditional_interval_ahead_of_anchor_fails(tex):
+    old = _abstract(tex)
+    point = ABSTRACT_POSTURE["paired_anchor"]
+    interval = ABSTRACT_POSTURE["floor_interval"]
+    changed = old.replace(point, "__POINT__", 1).replace(interval, point, 1).replace("__POINT__", interval, 1)
+    ok, info = abstract_posture_check(_replace_abstract(tex, changed))
+    assert not ok and not info["ordered"] and not info["missing"]
+
+
+def test_dropping_interval_condition_fails(tex):
+    old = _abstract(tex)
+    changed = old.replace("at the central imported response", "", 1)
+    ok, _ = abstract_posture_check(_replace_abstract(tex, changed))
     assert not ok
 
 
-def test_commented_out_posture_fails(tex, abstract):
-    """A commented posture is absent from the PDF. The rule strips comments."""
-    mutated = abstract.replace(
-        ABSTRACT_POSTURE["range_not_number"],
-        "% " + ABSTRACT_POSTURE["range_not_number"])
-    ok, _ = abstract_posture_check(_swap(tex, abstract, mutated))
+def test_commented_out_assumption_qualification_fails(tex):
+    old = _abstract(tex)
+    span = ABSTRACT_POSTURE["moving_share"]
+    changed = old.replace(span, "% " + span, 1)
+    ok, _ = abstract_posture_check(_replace_abstract(tex, changed))
     assert not ok
 
 
-# --------------------------------------------------------------------------
-# Benign rewrites stay green, or the gate freezes prose instead of pinning a
-# claim.
-# --------------------------------------------------------------------------
-@pytest.mark.parametrize("old,new", [
-    ("not a new household elasticity",
-     "not a newly estimated household elasticity"),
-    ("rather than only a legal maximum",
-     "instead of only a legal maximum"),
-])
-def test_benign_rewrites_stay_green(tex, old, new):
-    mutated = tex.replace(old, new, 1)
-    assert mutated != tex, f"benign fixture {old!r} is stale"
-    ok, info = abstract_posture_check(mutated)
-    assert ok, f"gate #99 false-alarmed: {info}"
-
-
-# --------------------------------------------------------------------------
-# The posture must agree with Section V.E. Two places stating it means two
-# places it can drift, so check they still say the same thing.
-# --------------------------------------------------------------------------
-def test_abstract_posture_agrees_with_section_ve(tex):
-    ve = [ln for ln in tex.split("\n") if ln.startswith("A seventh qualification")]
-    assert len(ve) == 1, "Section V.E's assembly paragraph is missing or duplicated"
-    assert "$+1.9$ to $+9.1$ points" in ve[0], "V.E no longer quotes the binding interval"  # V20-N1
-    assert "no interior member is privileged, and the range rather than any point is what the design delivers" in ve[0], (
-        "V.E no longer states the range-carries reading of Section V.E")
+def test_unrelated_prose_edit_passes(tex):
+    old = _abstract(tex)
+    changed = old.replace("I combine SOMA holdings", "This study combines SOMA holdings", 1)
+    ok, info = abstract_posture_check(_replace_abstract(tex, changed))
+    assert ok, info

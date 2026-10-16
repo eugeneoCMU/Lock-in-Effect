@@ -537,82 +537,33 @@ ASSEMBLY_TABLE_SPANS = {
 # abstract that states the point first and the range second -- which is exactly
 # the arrangement this round removed -- so a span check alone would not have
 # caught the defect it exists to prevent.
+# Gate #99 now protects the revised abstract's evidence hierarchy: a paired
+# anchor, its conditional measurement interval, wider assumption comparisons,
+# and the unestimated moving share. The anchor comes first by editorial choice;
+# the interval must still name its source and fixed imported response.
 ABSTRACT_POSTURE = {
-    "range_not_number": "sampling uncertainty in the floor read yields",
-    # ROUND-26 full restatement: the binding layer is the wild-cluster
-    # bootstrap-t interval from run floor_inference_correction; the percentile
-    # read is demoted to a labeled mention inside the same parenthetical.
-    # V20 panel revision (2026-08-04): pin re-synced to the compressed abstract;
-    # the span's purpose is unchanged, the phrasing follows the manuscript.
-    "interval": "$+1.9$ to $+9.1$ percentage-point marginal",  # FP2-B1 decensored
-    # ROUND-28 (DA-C3): the abstract must say WHAT the interval bounds. "pins"
-    # claimed the design pinned the elasticity's contribution; the interval is
-    # the floor read's sampling error at a FIXED elasticity, which contributes
-    # zero width. Pinned as its own span so a concision pass cannot delete the
-    # referent while keeping the interval.
-    # V20 panel revision (2026-08-04): pin re-synced to the compressed abstract;
-    # the span's purpose is unchanged, the phrasing follows the manuscript.
-    "interval_referent": "sampling uncertainty in the floor read",
-    # V20 panel revision (2026-08-04): pin re-synced to the compressed abstract;
-    # the span's purpose is unchanged, the phrasing follows the manuscript.
-    "point_named_inside": "their $+5.6$-point difference, or \\$42.6 billion, is an "
-                          "interior anchor",
-    # ROUND 32: the frame is still load-bearing -- the additive form (+11.2) and
-    # the Fonseca anchor (+11.5) move the marginal UP -- but the claim it used to
-    # protect ('moves it down') is now FALSE and has been restated. Task 11's
-    # activity leg is a MEASURED correction to the baseline turnover floor that
-    # moves the marginal up +5.11 points, so 'only floor and accounting-basis
-    # corrections run one way' no longer holds. The pin now protects the two-way
-    # statement instead of the one-way one.
-    # V20 panel revision (2026-08-04): pin re-synced to the compressed abstract;
-    # the span's purpose is unchanged, the phrasing follows the manuscript.
-    "corrections_framed": "these are separate assumption layers reported without a "
-                          "coverage interpretation",
-    # ROUND-26: the panel's two strongest correlated findings (DA-C1 + R1-W1,
-    # both verified) were that the abstract quoted the interval without its
-    # form conditionality and without its few-cluster inferential status.
-    # Both now travel with the interval IN the abstract, and these pins keep
-    # them there: the qualifier span binds the sampling caveat to the pinned
-    # interval sentence, and the hull span keeps the form dimension stated
-    # where the max-form interval is stated. Canonical-scoped like the rest
-    # of this dict (the archived variant predates both).
-    # ROUND-27 abstract cut: qualifier compressed (wild-cluster status and
-    # under-coverage kept; the demoted percentile literal now lives in the
-    # body only, x4), hull restored to the of-form inside the interval
-    # sentence.
-    # V20 panel revision (2026-08-04): pin re-synced to the compressed abstract;
-    # the span's purpose is unchanged, the phrasing follows the manuscript.
-    # V20: the percentile-under-covers literal now lives in the body only (x4);
-    # the abstract keeps the inferential status inside the interval parenthetical.
-    "interval_qualifier": "at the central imported response",
-    # V20 panel revision (2026-08-04): pin re-synced to the compressed abstract;
-    # the span's purpose is unchanged, the phrasing follows the manuscript.
-    "hull_in_abstract": "Joint floor-and-elasticity calibration spans $+2.1$ to "
-                        "$+13.2$ points, and the additive construction produces "
-                        "approximately $+11.2$ points",
-    # ROUND-26 B8 (DA-M3): the abstract's mechanical-null sentence scoped
-    # "however households react to rates" without marking that the floor it
-    # rests on is itself calibrated from realized -- partly behavioral --
-    # turnover. The qualifier travels with the null claim; canonical-scoped
-    # because the archived variant's abstract predates it.
-    # V20 panel revision (2026-08-04): pin re-synced to the compressed abstract;
-    # the span's purpose is unchanged, the phrasing follows the manuscript.
-    "null_floor_behavioral": "a calibrated turnover floor",
+    "paired_anchor": "the difference is $+5.6$ percentage points of the cap gap, or \$42.6 billion",
+    "floor_interval": "floor-read sampling uncertainty gives $+1.9$ to $+9.1$ points at the central imported response",
+    "calibration": "Joint floor-and-elasticity calibration spans $+2.1$ to $+13.2$ points",
+    "additive_form": "the alternative additive form gives about $+11.2$ points",
+    "moving_share": "the moving share is not estimated",
+    "policy": "a plausible cash-flow range alongside its operational cap",
 }
 
 
 def abstract_posture_check(tex: str) -> tuple[bool, dict]:
-    """Gate #99's rule, as a function so the battery exercises the shipped rule."""
+    """Require the paired anchor and conditional interval before assumption ranges."""
     tex_nc = re.sub(r"(?<!\\)%.*", "", tex)
     _i = tex_nc.find(ABSTRACT_BOUNDS[0])
     _j = tex_nc.find(ABSTRACT_BOUNDS[1], _i + 1)
     found = _i != -1 and _j != -1
     abstract = tex_nc[_i + len(ABSTRACT_BOUNDS[0]):_j] if found else ""
     missing = sorted(k for k, v in ABSTRACT_POSTURE.items() if v not in abstract)
-    # the range must be stated BEFORE the point it contains
-    i_range = abstract.find("$+1.9$ to $+9.1$")  # FP2-B1: decensored binding interval
-    i_point = abstract.find("$+5.6$-point")
-    ordered = i_range != -1 and i_point != -1 and i_range < i_point
+    i_point = abstract.find(ABSTRACT_POSTURE["paired_anchor"])
+    i_range = abstract.find(ABSTRACT_POSTURE["floor_interval"])
+    i_calibration = abstract.find(ABSTRACT_POSTURE["calibration"])
+    ordered = (-1 not in (i_point, i_range, i_calibration)
+               and i_point < i_range < i_calibration)
     return (found and not missing and ordered,
             {"found": found, "missing": missing, "ordered": ordered,
              "i_range": i_range, "i_point": i_point})

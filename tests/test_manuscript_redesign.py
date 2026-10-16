@@ -38,8 +38,8 @@ def test_manifest_has_reasoned_dispositions():
             assert block["destination"], block
 
 
-def test_title_is_unchanged_in_both_editions():
-    title = "Mortgage Lock-In and the Federal Reserve's Quantitative Tightening Shortfall"
+def test_title_names_mbs_runoff_and_is_shared_by_both_editions():
+    title = "Mortgage Lock-In and Federal Reserve MBS Runoff: A Model-Based Decomposition"
     assert f"\\title{{{title}}}" in CANON.read_text()
     assert f"\\title{{{title}}}" in LONG.read_text()
 
@@ -55,7 +55,7 @@ def test_main_distinguishes_the_three_empirical_objects():
     for phrase in (
         "Cap-relative MBS runoff shortfall",
         "Expectations-relative shortfall",
-        "Lock-in marginal",
+        "Hard-maximum anchor",
         "\\$764.748 billion",
         "\\$87.8 billion",
     ):
@@ -65,8 +65,8 @@ def test_main_distinguishes_the_three_empirical_objects():
 def test_main_states_scope_and_identification_boundary():
     canon = CANON.read_text()
     main = MAIN.read_text()
-    assert "not the performance of the Federal Reserve's overall balance-sheet reduction program" in canon
-    assert "model-based portfolio decomposition" in canon
+    assert "agency-MBS runoff" in canon
+    assert "conditional, model-based comparisons" in canon
     assert "does not claim to identify a new causal elasticity" in main
     assert "No estimator explains the empirical month-to-month path" in main
 
@@ -75,7 +75,7 @@ def test_both_floor_forms_are_first_order_main_assumptions():
     text = MAIN.read_text()
     assert "h^{\\max}_{it}=\\max" in text
     assert "h^{\\mathrm{add}}_{it}=f_t+h^{R}_{it}" in text
-    assert "The paper therefore reports the production result and the cross-form implication together" in text
+    assert "The paper therefore reports the maximum-form result and the cross-form implication together" in text
 
 
 def test_main_exposes_referee_critical_model_inputs_and_construct_bracket():
@@ -92,8 +92,9 @@ def test_main_exposes_referee_critical_model_inputs_and_construct_bracket():
 
 def test_main_separates_sampling_inference_from_assumption_sensitivity():
     text = MAIN.read_text()
-    assert "Sampling layer with a coverage interpretation" in text
-    assert "Assumption or calibration sensitivity without a coverage interpretation" in text
+    assert "Measurement uncertainty, conditional on the stated model" in text
+    assert "Calibration sensitivity, without a coverage interpretation" in text
+    assert "Structural and population sensitivity, without a coverage interpretation" in text
 
 
 def test_main_quantifies_floor_provenance_and_portfolio_transport():
@@ -114,15 +115,17 @@ def test_main_states_public_soma_data_boundary_directly():
     assert "reproduces the holdings change rather than independently identifying gross remittances" in text
 
 
-def test_adverse_and_policy_limits_survive_in_main():
+def test_adverse_and_policy_limits_remain_accessible_after_demotions():
     text = MAIN.read_text()
+    appendix = CANON.read_text().split(r"\appendix", 1)[1]
     for phrase in (
-        "$R^2=-6.984$",
-        "does not isolate a clean ABM-versus-hazard paradigm effect",
-        "$-\\$51.0$ billion",
-        "does not estimate the cost of migrating the U.S. issuance architecture",
+        "alternative household-choice model performs poorly",
+        "sign changes with assumed baseline mobility",
+        "not the month in which it would otherwise have arrived",
     ):
         assert phrase in text
+    assert "$-\\$51.0$ billion" in appendix
+    assert "does not estimate the cost of changing U.S. issuance" in appendix
 
 
 def test_main_has_approved_section_order():
@@ -168,13 +171,13 @@ def test_introduction_orders_claims_by_evidence_status():
         r"\section{Institutional Background and Related Literature}",
     )
     markers = (
-        r"\$764.748 billion",
+        r"\$764.7 billion",
         r"\$87.8 billion",
         "imported rate response",
         "$+1.9$ to $+9.1$",
         "$+2.1$ to $+13.2$",
         "additive",
-        "plausible portfolio cash flows",
+        "plausible portfolio cash-flow range",
     )
     positions = [intro.index(marker) for marker in markers]
     assert positions == sorted(positions)
@@ -183,15 +186,15 @@ def test_introduction_orders_claims_by_evidence_status():
     assert "spring-2022 rate path below the realized path" in intro
 
 
-def test_results_lead_with_interval_then_anchor_then_assumption_sensitivity():
+def test_results_lead_with_anchor_then_conditional_interval_then_assumption_sensitivity():
     results = _section(
         MAIN.read_text(),
         r"\section{Results}",
         r"\section{Robustness and External Validation}",
     )
     markers = (
+        "$+5.6$ percentage points",
         "$+1.9$ to $+9.1$",
-        "5.6-point lock-in marginal",
         "$+2.1$ to $+13.2$",
         "additive",
     )
@@ -232,7 +235,7 @@ def test_main_rejects_unqualified_overclaims():
         assert "85.7\\%" in local
 
 
-def test_both_abstracts_lead_with_sampling_then_anchor_then_assumptions():
+def test_both_abstracts_separate_anchor_sampling_and_assumptions():
     for path in (CANON, LONG):
         abstract = _abstract(path)
         markers = (
@@ -242,11 +245,10 @@ def test_both_abstracts_lead_with_sampling_then_anchor_then_assumptions():
             "$+11.2$",
         )
         positions = [abstract.index(marker) for marker in markers]
-        assert positions == sorted(positions), path
+        assert positions[0] < positions[2] < positions[3], path
+        assert positions[1] < positions[2], path
         assert "sampling uncertainty" in abstract
-        assert "interior anchor" in abstract
-        assert "without a coverage interpretation" in abstract
-        assert "allocation-dependent" in abstract
+        assert "moving share is not estimated" in abstract
 
 
 def test_coverage_table_reserves_space_for_approximate_share():

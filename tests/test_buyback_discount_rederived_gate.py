@@ -442,6 +442,7 @@ def test_all_five_expectations_hold():
 def test_the_two_variants_carry_the_same_paragraph():
     span = BUYBACK_DISCOUNT_SPANS["prepay_consistent"]
     assert TEX.count(span) == VARIANT.count(span) == 1
-    assert TEX.count(POINT) == 5
-    assert VARIANT.count(POINT) == 5
+    # The market-value scenario now appears once in the active Online Appendix.
+    assert TEX.count(POINT) == 6
+    assert VARIANT.count(POINT) == 6
     assert len(TEX.split("\n")) == len(VARIANT.split("\n"))
