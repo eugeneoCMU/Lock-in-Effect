@@ -27,7 +27,9 @@ os.environ.setdefault('FRED_API_KEY', 'offline-calibration-no-network')
 
 from hazard.fannie_floor_read import prep
 from hazard.fannie_age_rebuild_audit import grids, verify_grid_parity
-from run_freddie_rebuild import QUARTERS, SPEC, digest, validate_completed, write_json
+from run_freddie_rebuild import QUARTERS, SPEC, digest, write_json
+from source_rebuild_receipts import (validate_source_completed as validate_completed,
+                                    source_provenance, validate_combined_provenance)
 from schema import SOURCE_SEMANTICS_VERSION
 
 RATE_URL = ('https://fred.stlouisfed.org/graph/fredgraph.csv?id=MORTGAGE30US'
@@ -37,7 +39,8 @@ COMBINED_OUTPUTS = {'cohort_month_panel.parquet', 'loan_sample.parquet',
 KEYS = ['vintage', 'coupon', 'fico_bucket', 'ltv_bucket', 'reporting_period']
 CODE_FILES = ['coverage_exception.py', 'calibrate_freddie_rebuild.py', 'fannie_floor_read.py',
               'fannie_age_rebuild_audit.py', 'run_freddie_rebuild.py',
-              'combine_freddie_rebuild.py', 'freddie_raw_quarter_audit.py']
+              'combine_freddie_rebuild.py', 'freddie_raw_quarter_audit.py',
+              'source_rebuild_receipts.py', 'release47_local_rebuild.py', 'freddie_archive_rebuild.py']
 POPULATION = 'known360FRM; original vintage2017–2021'
 WINDOWS = {'out_of_window_2017_2019', 'in_window_2023_2024',
            'in_window_deep_OTM_validation'}
@@ -58,15 +61,15 @@ def validated_combined(root):
     missing = [q for q in QUARTERS if not (root / 'quarters' / q / 'completed.json').is_file()]
     if missing:
         raise FileNotFoundError('Missing verified quarter completions: ' + ', '.join(missing))
-    hashes, reports = {}, {}
+    hashes, reports, receipts = {}, {}, []
     for quarter in QUARTERS:
         path = root / 'quarters' / quarter
         receipt = validate_completed(path)
+        receipts.append(receipt)
         hashes[str(path / 'completed.json')] = digest(path / 'completed.json')
         hashes.update({str(path / name): value for name, value in receipt['output_sha256'].items()})
         reports[quarter] = read_json(path / 'rebuilt/report.json')
-        if reports[quarter].get('source_semantics_version') != SOURCE_SEMANTICS_VERSION:
-            raise ValueError('Quarter source semantics predate the native layout/state correction')
+    provenance = source_provenance(QUARTERS, list(reports.values()), receipts)
     frozen_spec = root / 'spec_frozen.md'
     if digest(frozen_spec) != digest(SPEC):
         raise ValueError('Source specification differs from the frozen rebuild protocol')
@@ -74,8 +77,7 @@ def validated_combined(root):
     combined = root / 'combined'
     report_path = combined / 'report.json'
     report = read_json(report_path)
-    if report.get('source_semantics_version') != SOURCE_SEMANTICS_VERSION:
-        raise ValueError('Combined source semantics predate the native layout/state correction')
+    validate_combined_provenance(report, provenance)
     if (report.get('quarters') != QUARTERS or report.get('complete_freddie_manifest') is not True
             or report.get('population') != POPULATION or report.get('cutoff') != '202509'
             or report.get('transition_end') != '202205' or report.get('sample_month') != '202205'):
@@ -249,6 +251,7 @@ def run(*, root, legacy_panel, saved_grid, rate_csv, rate_source, output):
                 'zero_note_rate_excluded_original_upb': combined['zero_note_rate_excluded_original_upb'],
                 'zero_note_rate_exclusions_by_quarter': combined['zero_note_rate_exclusions_by_quarter']},
             payoff_assumptions=combined['original_payoff_assumptions'], rate_source=rate_meta,
+            pre_snapshot_coverage=combined.get('pre_snapshot_coverage'),
             quarter_cash_ratio_audits=combined['quarter_cash_ratio_audits_by_quarter'],
             identity_exceptions_by_quarter=combined['identity_exceptions_by_quarter'],
             identity_exception_totals=combined['identity_exception_totals'],
@@ -258,6 +261,7 @@ def run(*, root, legacy_panel, saved_grid, rate_csv, rate_source, output):
                 'Unchanged CPR annualizes payoff/current-end-UPB; exposure totals are dollar-months.',
                 'Original-UPB first-observed fallback and nonadjacent prior-balance assumptions remain explicit.',
                 'Evaluation windows were previously examined; these are not new holdouts.',
+                'Pre-May missing history remains unknown; coverage-audit burnout bounds depend on the stated payoff cap.',
                 'No new floor choice, imported response, headline, paper result, Fannie validation or full-SOMA transport claim.'])
         write_json(output / 'results.json', result)
         return result

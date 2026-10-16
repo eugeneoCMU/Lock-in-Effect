@@ -7,12 +7,15 @@ ROOT=Path(__file__).resolve().parent.parent
 for path in (ROOT,ROOT/'hazard'):
     if str(path) not in sys.path: sys.path.insert(0,str(path))
 from hazard import simulate_freddie_rebuild as pair, score_freddie_rebuild as scoring
+from hazard.benchmark_forms import run_additive_pair, score_additive
+from hazard.comparison_acceptance import validate_analysis
 from hazard.run_mixture_rebuild import run_pair
 from hazard.score_mixture_rebuild import run as score_mixture
 
 SHARES=(0.,.25,.5,.75,1.)
 CALIBRATIONS=('legacy_conversion','illustrative')
 GAP_MODES=('positive_only','preserve_refinancing')
+REFERENCE_MODES=('inherited_psa','matched_max_off')
 
 
 def planned_inputs(pipeline):
@@ -33,6 +36,12 @@ def planned_inputs(pipeline):
 
 
 def run(*,pipeline,output):
+    from source_rebuild_receipts import receipt_validation_session
+    with receipt_validation_session() as source_session:
+        return _run(pipeline=pipeline,output=output,source_session=source_session)
+
+
+def _run(*,pipeline,output,source_session):
     pipeline,output=Path(pipeline).resolve(),Path(output).resolve()
     inputs=planned_inputs(pipeline)
     roots={x['root'].resolve() for x in inputs.values()}
@@ -46,31 +55,49 @@ def run(*,pipeline,output):
     pair.verify_hashes(frozen)
     pair.validated_combined(root)
     output.mkdir(parents=True,exist_ok=False)
-    files=[Path(__file__),ROOT/'hazard/mixture_hazard.py',ROOT/'hazard/run_mixture_rebuild.py',ROOT/'hazard/score_mixture_rebuild.py',ROOT/'specs/SPEC_2026-10-13_mixture_alternative.md']
+    files=[Path(__file__),ROOT/'hazard/mixture_hazard.py',ROOT/'hazard/run_mixture_rebuild.py',ROOT/'hazard/score_mixture_rebuild.py',ROOT/'specs/SPEC_2026-10-13_mixture_alternative.md',
+        ROOT/'hazard/benchmark_forms.py',ROOT/'hazard/comparison_acceptance.py',
+        ROOT/'hazard/source_rebuild_receipts.py',
+        ROOT/'hazard/simulate_freddie_rebuild.py',ROOT/'hazard/pathb_prediction_diagnostics.py',
+        ROOT/'specs/SPEC_2026-10-13_comparison_matrix_v2.md']
+    code_hashes={str(p):pair.digest(p) for p in files}
     pair.write_json(output/'analysis_manifest.json',dict(pipeline=str(pipeline),pipeline_sha256=pair.digest(pipeline),
-        code_sha256={str(p):pair.digest(p) for p in files},shares=SHARES,
-        calibrations=CALIBRATIONS,gap_modes=GAP_MODES,parameter_selection_performed=False))
+        code_sha256=code_hashes,shares=SHARES,
+        calibrations=CALIBRATIONS,gap_modes=GAP_MODES,reference_modes=REFERENCE_MODES,
+        benchmarks=('max','additive'),parameter_selection_performed=False))
     done=[]
     try:
         print('Running existing-model benchmarks',flush=True)
         old_pair=pair.run(**inputs['paired-simulation'],output=output/'benchmark-pair')
         old_scores=scoring.run(**inputs['scoring'],output=output/'benchmark-scoring')
-        for calibration in CALIBRATIONS:
-            for gap_mode in GAP_MODES:
-                for share in SHARES:
-                    label=f'{calibration}-{gap_mode}-share-{share}'
-                    print('Running',label,flush=True)
-                    candidate=run_pair(**inputs['paired-simulation'],output=output/(label+'-pair'),
-                        sensitive_share=share,calibration=calibration,gap_mode=gap_mode)
-                    score=score_mixture(**inputs['scoring'],output=output/(label+'-scoring'),
-                        sensitive_share=share,calibration=calibration,gap_mode=gap_mode)
-                    done.append(dict(scenario=label,sensitive_share=share,calibration=calibration,gap_mode=gap_mode,
-                        reported_marginal_b=candidate['reported_marginal_b'],
-                        closed_pool_cash_marginal_b=candidate['closed_pool_cash_marginal_b'],
-                        retrospective_scores=score['aggregate'],support=score['support']))
-                    pair.write_json(output/'progress.json',dict(completed=done,status='running'))
+        additive_pair=run_additive_pair(**inputs['paired-simulation'],output=output/'additive-benchmark-pair')
+        additive_scores=score_additive(**inputs['scoring'],output=output/'additive-benchmark-scoring')
+        for reference_mode in REFERENCE_MODES:
+            for calibration in CALIBRATIONS:
+                for gap_mode in GAP_MODES:
+                    for share in SHARES:
+                        label=f'{reference_mode}-{calibration}-{gap_mode}-share-{share}'
+                        print('Running',label,flush=True)
+                        candidate=run_pair(**inputs['paired-simulation'],output=output/(label+'-pair'),
+                            sensitive_share=share,calibration=calibration,gap_mode=gap_mode,reference_mode=reference_mode)
+                        score=score_mixture(**inputs['scoring'],output=output/(label+'-scoring'),
+                            sensitive_share=share,calibration=calibration,gap_mode=gap_mode,reference_mode=reference_mode)
+                        done.append(dict(scenario=label,sensitive_share=share,calibration=calibration,gap_mode=gap_mode,
+                            reference_mode=reference_mode,
+                            reported_marginal_b=candidate['reported_marginal_b'],
+                            closed_pool_cash_marginal_b=candidate['closed_pool_cash_marginal_b'],
+                            retrospective_scores=score['aggregate'],support=score['support']))
+                        pair.write_json(output/'progress.json',dict(completed=done,status='running'))
         pair.verify_hashes(frozen)
-        result=dict(status='complete',benchmark_pair=old_pair,benchmark_scores=old_scores['aggregate'],
+        pair.verify_hashes(code_hashes)
+        # Fresh compact validation plus distinct retained-source SHA checks
+        # precede acceptance; provisional scenario outputs cannot bypass them.
+        pair.validated_combined(root)
+        source_session.verify_unchanged()
+        acceptance=validate_analysis(output,done)
+        pair.write_json(output/'acceptance.json',acceptance)
+        result=dict(status='complete',acceptance=acceptance,benchmark_pair=old_pair,benchmark_scores=old_scores['aggregate'],
+            additive_benchmark_pair=additive_pair,additive_benchmark_scores=additive_scores['aggregate'],
             scenarios=done,reference_newly_calibrated=False,sensitive_share_estimated=False,
             interpretation='Prespecified structural sensitivities; previously examined retrospective period')
         pair.write_json(output/'results.json',result)

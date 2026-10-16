@@ -23,7 +23,8 @@ import shutil
 import subprocess
 import sys
 import time
-from schema import SOURCE_SEMANTICS_VERSION
+from freddie_archive_source import as_source
+from schema import SOURCE_SEMANTICS_VERSION, source_semantics_version, source_layout_metadata, normalize_origination
 
 ROOT = Path(__file__).resolve().parents[1]
 SPEC = ROOT / "specs/SPEC_2026-10-09_raw_2017Q1_audit.md"
@@ -66,7 +67,7 @@ def check_resources(path):
 
 
 class IdentityExceptions:
-    """Account for exact, frozen same-year ID placement exceptions only."""
+    """Account for exact source-bound ID placement and explicit vintage overrides."""
     FIELDS = ('original_records', 'performance_rows', 'eligible_original_loans', 'eligible_original_upb')
 
     def __init__(self, quarter, record=None):
@@ -89,20 +90,42 @@ class IdentityExceptions:
                 or not math.isfinite(expected['eligible_original_upb']) or expected['eligible_original_upb'] < 0):
             raise ValueError('Invalid frozen identity exception record')
         self.allowed = set(ids)
+        prefixes = record.get('allowed_id_prefixes')
+        vintages = record.get('cohort_vintage_by_id_sha256')
+        if prefixes is not None or vintages is not None:
+            if (not isinstance(prefixes, dict) or not isinstance(vintages, dict)
+                    or set(prefixes) != self.allowed or set(vintages) != self.allowed
+                    or any(not isinstance(prefixes[h], str) or not re.fullmatch(r'F\d{2}Q[1-4]', prefixes[h])
+                           or type(vintages[h]) is not int or vintages[h] != 2000 + int(prefixes[h][1:3])
+                           for h in self.allowed)):
+                raise ValueError('Invalid exact cross-year identity prefix/vintage override')
 
     def accept(self, loan_id, kind):
         if self.record is None:
             return False
-        if (not re.fullmatch(('F' + self.quarter[2:4] + r'Q[1-4]\d+').encode(), loan_id)
-                or loan_id.startswith(('F' + self.quarter[2:]).encode())):
-            return False
         identifier = hashlib.sha256(loan_id).hexdigest()
         if identifier not in self.allowed:
+            return False
+        prefixes = self.record.get('allowed_id_prefixes')
+        if prefixes is not None:
+            if (not re.fullmatch((prefixes[identifier] + r'\d+').encode(), loan_id)
+                    or loan_id.startswith(('F' + self.quarter[2:]).encode())):
+                return False
+        elif (not re.fullmatch(('F' + self.quarter[2:4] + r'Q[1-4]\d+').encode(), loan_id)
+                or loan_id.startswith(('F' + self.quarter[2:]).encode())):
             return False
         self.counts['original_records' if kind == 'origination' else 'performance_rows'] += 1
         if kind == 'origination':
             self.seen.add(identifier)
         return True
+
+    def cohort_vintage(self, loan_id):
+        if self.record is None or 'cohort_vintage_by_id_sha256' not in self.record:
+            return int(self.quarter[:4])
+        identifier = hashlib.sha256(loan_id).hexdigest()
+        if self.record is not None and identifier in self.allowed:
+            return self.record.get('cohort_vintage_by_id_sha256', {}).get(identifier, int(self.quarter[:4]))
+        return int(self.quarter[:4])
 
     def eligible(self, upb):
         self.counts['eligible_original_loans'] += 1
@@ -114,15 +137,21 @@ class IdentityExceptions:
         if (self.seen != self.allowed or self.counts != self.record['expected']
                 or source_hashes != self.record['source_sha256']):
             raise ValueError('Frozen identity exception counts, allowlist or source hashes disagree')
-        return dict(enabled=True, quarter=self.quarter,
+        result = dict(enabled=True, quarter=self.quarter,
             allowed_id_sha256=self.record['allowed_id_sha256'], source_sha256=source_hashes, **self.counts)
+        if 'allowed_id_prefixes' in self.record:
+            result.update(allowed_id_prefixes=self.record['allowed_id_prefixes'],
+                cohort_vintage_by_id_sha256=self.record['cohort_vintage_by_id_sha256'])
+        return result
 
 
 def schema_audit(orig_path, perf_path, *, quarter='2017Q1', exclude_zero_note_rate=False,
-                 identity_exceptions=None):
+                 identity_exceptions=None, source_layout="native32"):
     """Only identity/layout/date fields are inspected in performance here."""
+    orig_path, perf_path = as_source(orig_path), as_source(perf_path)
     if not re.fullmatch(r'20\d{2}Q[1-4]', quarter):
         raise ValueError('Expected declared source quarter YYYYQn')
+    layout = source_layout_metadata(source_layout)
     id_pattern = ('F' + quarter[2:] + r'\d+').encode()
     identity = IdentityExceptions(quarter, identity_exceptions)
     loans, all_ids = {}, set()
@@ -140,8 +169,9 @@ def schema_audit(orig_path, perf_path, *, quarter='2017Q1', exclude_zero_note_ra
             o["rows"] += 1
             cols = raw.rstrip(b"\r\n").split(b"|")
             ow[len(cols)] += 1
-            if len(cols) != 32:
+            if len(cols) != layout["origination_width"]:
                 continue
+            cols = normalize_origination(cols, source_layout)
             loan_id = cols[19]
             exceptional = not re.fullmatch(id_pattern, loan_id) and identity.accept(loan_id, 'origination')
             if not re.fullmatch(id_pattern, loan_id) and not exceptional:
@@ -181,7 +211,7 @@ def schema_audit(orig_path, perf_path, *, quarter='2017Q1', exclude_zero_note_ra
             p["rows"] += 1
             cols = raw.rstrip(b"\r\n").split(b"|")
             pw[len(cols)] += 1
-            if len(cols) != 32:
+            if len(cols) != layout["performance_width"]:
                 continue
             if not re.fullmatch(id_pattern, cols[0]) and not identity.accept(cols[0], 'performance'):
                 p["invalid_id_positions"] += 1
@@ -201,12 +231,13 @@ def schema_audit(orig_path, perf_path, *, quarter='2017Q1', exclude_zero_note_ra
     identity_report = identity.finish({'origination': o['sha256'], 'performance': p['sha256']})
     o['zero_note_rate_exclusions']=zero_rates
     o["width_counts"], p["width_counts"] = dict(ow), dict(pw)
-    passed = (set(ow) == {32} and set(pw) == {32}
+    passed = (set(ow) == {layout["origination_width"]} and set(pw) == {layout["performance_width"]}
               and o["duplicate_ids"] == o["invalid_id_positions"] == 0
               and not o.get("eligible_invalid_rate_rows", 0)
               and p["invalid_id_positions"] == p["unknown_origination_ids"] == p["invalid_reporting_periods"] == 0)
     return {"passed": passed, "origination": o, "performance": p,
-            'source_semantics_version': SOURCE_SEMANTICS_VERSION,
+            'source_semantics_version': source_semantics_version(source_layout),
+            'source_layout': layout,
             'identity_exceptions': identity_report}, loans
 
 

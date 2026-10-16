@@ -14,7 +14,8 @@ import polars as pl
 from config import MARKOV_STATES, N_LOANS, RNG_SEED
 from schema import SOURCE_SEMANTICS_VERSION
 from loan_sample import _attach_history, _stratified_sample
-from run_freddie_rebuild import OUTPUT, QUARTERS, digest, validate_completed, write_json
+from run_freddie_rebuild import OUTPUT, QUARTERS, digest, write_json
+from source_rebuild_receipts import validate_source_completed as validate_completed, source_provenance
 
 KEYS=['vintage','coupon','fico_bucket','ltv_bucket']
 SUMS=['exposure_upb','orig_upb_sum','prepaid_upb','finite_age_sum','finite_age_count','loan_count',
@@ -80,11 +81,7 @@ def combine(root=OUTPUT, output=None, *, quarters=QUARTERS, n_loans=N_LOANS, see
     paths=[root/'quarters'/q for q in quarters]
     receipts=[validate_completed(p) for p in paths]
     reports=[json.loads((p/'rebuilt/report.json').read_text()) for p in paths]
-    for q,report in zip(quarters,reports):
-        if report.get('source_semantics_version') != SOURCE_SEMANTICS_VERSION:
-            raise ValueError('Source semantics require a fresh corrected quarterly extraction')
-        if report['quarter']!=q or report['cutoff']!='202509' or report['snapshot_month']!='202205' or report['transition_end']!='202205':
-            raise ValueError('Quarter or cutoff mismatch in rebuilt report')
+    provenance=source_provenance(quarters,reports,receipts)
     ids=pl.concat([pl.scan_parquet(p/'rebuilt/eligible_source_ids.parquet') for p in paths])
     if ids.group_by('loan_sequence_number').len().filter(pl.col('len')>1).limit(1).collect().height:
         raise ValueError('Cross-quarter original loan ID overlap')
@@ -113,7 +110,7 @@ def combine(root=OUTPUT, output=None, *, quarters=QUARTERS, n_loans=N_LOANS, see
     matrix.to_parquet(output/'markov_transition_matrix.parquet')
     write_json(output/'transition_diagnostics.json',transition_diag)
     result=dict(quarters=list(quarters),complete_freddie_manifest=list(quarters)==QUARTERS,
-        source_semantics_version=SOURCE_SEMANTICS_VERSION,
+        **provenance,
         pre_snapshot_coverage=coverage,
         population='known360FRM; original vintage2017–2021',cutoff='202509',transition_end='202205',
         sample_month='202205',sample_n=sample.height,sample_unique_ids=sample['loan_id'].n_unique(),

@@ -39,3 +39,16 @@ def test_illustrative_receipt_records_actual_intensity_coefficient(inputs):
     manifest=json.loads((inputs['output']/'input_manifest.json').read_text())
     assert manifest['parameters']['mixture']['gamma_per_pp']['on'] == pytest.approx(-np.log(.935))
     assert manifest['response_coefficients']['on'] == pytest.approx(np.log(.935))
+
+
+def test_matched_reference_scoring_off_matches_original(inputs):
+    import pandas as pd
+    from hazard import score_freddie_rebuild as scoring
+    baseline=inputs['output'].with_name('max-scores')
+    scoring.run(**dict(inputs,output=baseline))
+    result=run(**inputs,sensitive_share=.75,reference_mode='matched_max_off')
+    a=pd.read_parquet(baseline/'predictions.parquet')
+    b=pd.read_parquet(inputs['output']/'predictions.parquet')
+    for suffix in ('','_predicted_burnout'):
+        assert np.allclose(a['original_off'+suffix],b['mixture_off'+suffix],rtol=1e-12,atol=1e-12)
+    assert result['parameters']['mixture']['reference_mode']=='matched_max_off'

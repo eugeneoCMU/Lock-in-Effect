@@ -90,3 +90,22 @@ def test_cli_rejects_protected_parent_before_writing(pair_inputs, monkeypatch):
     monkeypatch.setattr('sys.argv',args)
     with pytest.raises(SystemExit): main()
     assert not target.exists()
+
+
+def test_matched_reference_has_floor_and_inherited_reference_does_not():
+    args=(np.array([0.]),np.array([0.]),np.array([0.]),np.array([0.]))
+    assert reference_probability(*args,reference_mode='inherited_psa') == pytest.approx(1e-8)
+    assert reference_probability(*args,reference_mode='matched_max_off') == pytest.approx(1-(1-.04991)**(1/12))
+    with pytest.raises(ValueError): reference_probability(*args,reference_mode='unknown')
+
+
+def test_matched_reference_real_engine_off_matches_hard_max(pair_inputs):
+    import pandas as pd
+    from hazard import simulate_freddie_rebuild as pair
+    from hazard.run_mixture_rebuild import run_pair
+    benchmark=pair_inputs['output'].with_name('max-reference')
+    pair.run(**dict(pair_inputs,output=benchmark))
+    result=run_pair(**pair_inputs,sensitive_share=.75,reference_mode='matched_max_off')
+    pd.testing.assert_frame_equal(pd.read_parquet(benchmark/'off_accounting.parquet'),
+                                 pd.read_parquet(pair_inputs['output']/'off_accounting.parquet'),rtol=1e-12,atol=1e-8)
+    assert result['parameters']['reference_mode']=='matched_max_off'

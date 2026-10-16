@@ -37,7 +37,7 @@ MACRO_REFERENCE = 'output/review-revision/2026-10-07-checks/macro_frozen.parquet
 PRE = pd.Timestamp('2023-12-01')
 TRAIN_START = pd.Timestamp('2023-01-01')
 LOAD_START = pd.Timestamp('2022-12-01')
-CODE_FILES = ['coverage_exception.py', 'score_freddie_rebuild.py', 'calibrate_freddie_rebuild.py',
+CODE_FILES = ['source_rebuild_receipts.py','release47_local_rebuild.py','freddie_archive_rebuild.py','freddie_archive_source.py','schema.py','freddie_rebuild_stream.py','coverage_exception.py', 'score_freddie_rebuild.py', 'calibrate_freddie_rebuild.py',
     'pathb_prediction_diagnostics.py', 'pathb_cohort_validation.py',
     'cohort_history.py', 'literature_hazard.py', 'stock_flow_accounting_comparison.py',
     'config.py', 'run_freddie_rebuild.py', 'combine_freddie_rebuild.py',

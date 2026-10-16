@@ -54,7 +54,7 @@ def ordered_previous_upb(performance):
     )
 
 
-def predict_path(rows, pre, cov, rates, annual_floor, psa, beta, *, allow_legacy_history=False):
+def predict_path(rows, pre, cov, rates, annual_floor, psa, beta, *, allow_legacy_history=False, floor_form="max"):
     """Predict the cohort approximation from an explicit pre-period state.
 
     Reads only cell/date/coupon from rows; the observed outcomes, exposures and
@@ -63,6 +63,8 @@ def predict_path(rows, pre, cov, rates, annual_floor, psa, beta, *, allow_legacy
     require the fixed original cohort balance. Legacy clipping and survivor
     original-balance denominators are available only for historical replay.
     """
+    if floor_form not in ('max', 'additive'):
+        raise ValueError('Unknown floor form')
     if rows.duplicated(['cell', 'period']).any():
         raise ValueError('Duplicate cell-month rows')
     d = rows[['cell', 'period', 'coupon']].copy()
@@ -88,11 +90,14 @@ def predict_path(rows, pre, cov, rates, annual_floor, psa, beta, *, allow_legacy
             + c['beta_fico']*sub.fz.to_numpy() + c['beta_ltv']*sub.lz.to_numpy()
             + c['beta_burnout']*b)
         default = lh.default_hazard(np.maximum(sub.rate-sub.coupon, 0).to_numpy(), sub.fz.to_numpy(), sub.lz.to_numpy())
-        before_normalization = np.clip(np.maximum(floor, vol), 0, 1)
+        if floor_form == "additive":
+            before_normalization = 1. - (1. - floor) * (1. - np.clip(vol, 0., 1.))
+        else:
+            before_normalization = np.clip(np.maximum(floor, vol), 0, 1)
         h, _ = lh.normalize_competing_hazards(before_normalization, default)
         d.loc[sub.index, 'hazard'] = h
         d.loc[sub.index, 'voluntary_before_floor'] = vol
-        d.loc[sub.index, 'floor_bound'] = vol <= floor
+        d.loc[sub.index, 'floor_bound'] = (vol <= floor) if floor_form == 'max' else False
         d.loc[sub.index, 'normalized'] = before_normalization + default > 1
         d.loc[sub.index, 'predicted_burnout'] = b
         d.loc[sub.index, 'latent_balance'] = [balance[x] for x in sub.cell]

@@ -3,10 +3,11 @@ from pathlib import Path
 import json,hashlib,re
 from manuscript_reference_audit import expand_source,semantic_errors
 ROOT=Path(__file__).resolve().parents[1]
-def check_publication():
-    errors=[];ledger=json.loads((ROOT/'output/review-revision/2026-10-07-checks/publication-ledger.json').read_text())
+def check_publication(legacy_ledger=None, legacy_artifacts=None):
+    errors=[];ledger=json.loads((Path(legacy_ledger) if legacy_ledger else ROOT/'output/review-revision/2026-10-07-checks/publication-ledger.json').read_text())
+    artifact_root=Path(legacy_artifacts) if legacy_artifacts else ROOT/'hazard/data'
     for name,digest in ledger['artifact_sha256'].items():
-        if hashlib.sha256((ROOT/'hazard/data'/name).read_bytes()).hexdigest()!=digest:errors.append('Stale ledger artifact '+name)
+        if hashlib.sha256((artifact_root/name).read_bytes()).hexdigest()!=digest:errors.append('Stale ledger artifact '+name)
     source=expand_source(ROOT/'paper/final/paper_final_v1.tex');long=expand_source(ROOT/'paper/final/paper_final_v1_long_abstract.tex')
     errors+=semantic_errors(source)+semantic_errors(long)
     if source.split(r'\end{abstract}',1)[1]!=long.split(r'\end{abstract}',1)[1]:errors.append('Edition body drift')
@@ -30,4 +31,6 @@ def check_publication():
     if not 180<=words<=220:errors.append(f'Abstract word target: {words}')
     return errors
 if __name__=='__main__':
-    e=check_publication();print(json.dumps({'errors':e},indent=2));raise SystemExit(bool(e))
+    import argparse
+    parser=argparse.ArgumentParser();parser.add_argument('--legacy-ledger');parser.add_argument('--legacy-artifacts');args=parser.parse_args()
+    e=check_publication(args.legacy_ledger,args.legacy_artifacts);print(json.dumps({'errors':e},indent=2));raise SystemExit(bool(e))

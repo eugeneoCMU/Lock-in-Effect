@@ -268,3 +268,17 @@ def test_repeated_ids_require_matching_records_and_declared_unique_count(pair_in
     with pytest.raises(ValueError, match='sample|repeated|multiplicity'):
         module().run(**pair_inputs)
     assert not (pair_inputs['output'] / 'off_simulation.parquet').exists()
+
+@pytest.mark.parametrize('changed_hash', [False, True])
+def test_relative_recorded_macro_survives_worktree_relocation(pair_inputs, changed_hash):
+    stage = module()
+    freeze = json.loads(pair_inputs['parameter_freeze'].read_text())
+    value = freeze['input_sha256'].pop(str(pair_inputs['macro_path']))
+    freeze['input_sha256']['output/review-revision/2026-10-07-checks/macro_frozen.parquet'] = ('b' * 64 if changed_hash else value)
+    dump(pair_inputs['parameter_freeze'], freeze)
+    refresh_inventory(pair_inputs)
+    args = {k: pair_inputs[k] for k in ('macro_path', 'parameter_freeze', 'empirical_csv', 'input_inventory', 'benchmark_reference')}
+    if changed_hash:
+        with pytest.raises(ValueError, match='macro'): stage.validate_recorded_inputs(**args)
+    else:
+        assert stage.validate_recorded_inputs(**args) == freeze

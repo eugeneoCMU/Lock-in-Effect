@@ -24,7 +24,9 @@ import polars as pl
 os.environ.setdefault('FRED_API_KEY', 'offline-source-rebuild-no-network')
 from config import COUPON_STEP, MARKOV_STATES
 from freddie_raw_quarter_audit import IdentityExceptions, check_resources, finite
-from schema import SOURCE_SEMANTICS_VERSION, validate_performance_semantics
+from freddie_archive_source import as_source
+from schema import (SOURCE_SEMANTICS_VERSION, validate_performance_semantics, source_semantics_version,
+                    source_layout_metadata, normalize_origination, normalize_performance)
 
 SNAPSHOT_MONTH = "202205"
 COHORT_KEYS = ["vintage", "coupon", "fico_bucket", "ltv_bucket"]
@@ -82,7 +84,7 @@ def _sha256(path):
 
 
 def build_quarter(orig, perf, output, quarter, cutoff="202509", transition_end="202205", *, exclude_zero_note_rate=False,
-                  allow_partial_cohort_overrun=False, identity_exceptions=None, coverage_exception=None):
+                  allow_partial_cohort_overrun=False, identity_exceptions=None, coverage_exception=None, source_layout="native32"):
     """Write corrected compact artifacts only after every source check succeeds.
 
     Coupon buckets and outcome mapping match ingest.py. First-observed voluntary
@@ -91,7 +93,7 @@ def build_quarter(orig, perf, output, quarter, cutoff="202509", transition_end="
     previous-month balances. Opening-UPB transition weights require adjacent
     calendar months and an active positive opening state through transition_end.
     """
-    orig, perf, output = Path(orig), Path(perf), Path(output)
+    orig, perf, output = as_source(orig), as_source(perf), Path(output)
     if not re.fullmatch(r"20\d{2}Q[1-4]", quarter):
         raise ValueError("quarter must be YYYYQn")
     cutoff_b, transition_b = str(cutoff).encode(), str(transition_end).encode()
@@ -103,7 +105,7 @@ def build_quarter(orig, perf, output, quarter, cutoff="202509", transition_end="
         raise FileExistsError("Choose a new or empty quarterly output directory")
     id_re = re.compile(("F" + quarter[2:] + r"\d+").encode())
     identity = IdentityExceptions(quarter, identity_exceptions)
-    vintage = int(quarter[:4])
+    layout = source_layout_metadata(source_layout)
     counts = Counter({k: 0 for k in [
         "origination_rows", "eligible_original_ids", "excluded_original_ids",
         "performance_rows", "eligible_pre_cutoff_rows", "post_cutoff_date_rows",
@@ -130,8 +132,7 @@ def build_quarter(orig, perf, output, quarter, cutoff="202509", transition_end="
             if counts["origination_rows"] % 200000 == 0:
                 check_resources(orig.parent)
             row = raw.rstrip(b"\r\n").split(b"|")
-            if len(row) != 32:
-                raise ValueError("Origination source requires exactly 32 fields")
+            row = normalize_origination(row, source_layout)
             loan_id = row[19]
             exceptional = not id_re.fullmatch(loan_id) and identity.accept(loan_id, 'origination')
             if not id_re.fullmatch(loan_id) and not exceptional:
@@ -161,7 +162,7 @@ def build_quarter(orig, perf, output, quarter, cutoff="202509", transition_end="
                 identity.eligible(upb)
             first_month = _month(row[1])
             bucket = round((rate / 100.) / COUPON_STEP) * COUPON_STEP
-            key = (vintage, bucket, "<680" if fico < 680 else "680-740" if fico < 740 else "740+",
+            key = (identity.cohort_vintage(loan_id), bucket, "<680" if fico < 680 else "680-740" if fico < 740 else "740+",
                    "≤80" if ltv <= 80 else ">80")
             # Tuple retains original term by the explicit eligibility constant.
             loans[loan_id] = (key, upb, rate / 100., int(fico), ltv,
@@ -257,7 +258,7 @@ def build_quarter(orig, perf, output, quarter, cutoff="202509", transition_end="
                     h[2] += upb
                     snapshot.append(dict(zip(SNAPSHOT_SCHEMA, [
                         loan_id.decode(), f"{key[0]}_{round(key[1]*10000)}_{key[2]}_{key[3]}",
-                        fico, property_state, ltv, rate, upb, balance, age, state, vintage,
+                        fico, property_state, ltv, rate, upb, balance, age, state, key[0],
                         key[2], key[3], key[1], 360., ym, *contract])))
             if month <= transition_ord:
                 td["eligible_rows"] += 1
@@ -287,8 +288,8 @@ def build_quarter(orig, perf, output, quarter, cutoff="202509", transition_end="
             perf_hash.update(raw)
             counts["performance_rows"] += 1
             row = raw.rstrip(b"\r\n").split(b"|")
-            if len(row) != 32:
-                raise ValueError("Performance source requires exactly 32 fields")
+            if len(row) != layout["performance_width"]:
+                raise ValueError(f"Performance source requires exactly {layout['performance_width']} fields")
             loan_id = row[0]
             if ((not id_re.fullmatch(loan_id) and not identity.accept(loan_id, 'performance'))
                     or loan_id not in all_ids):
@@ -315,7 +316,8 @@ def build_quarter(orig, perf, output, quarter, cutoff="202509", transition_end="
                 counts["excluded_pre_cutoff_rows"] += 1
             else:
                 counts["eligible_pre_cutoff_rows"] += 1
-                validate_performance_semantics(row)
+                validate_performance_semantics(row, source_layout)
+                row = normalize_performance(row, source_layout)
                 counts["semantic_rows_validated"] += 1
                 counts["forbearance_assistance_rows"] += int(row[29] == b'F')
                 counts["reo_with_forbearance_flag_rows"] += int(row[3] == b'RA' and row[29] == b'F')
@@ -408,7 +410,8 @@ def build_quarter(orig, perf, output, quarter, cutoff="202509", transition_end="
     if not all(math.isfinite(v) for v in [*risk_sets.values(), *counts.values(), *weighted_transitions.values()]):
         raise ValueError("Quarter totals exceed finite numeric support")
     report = dict(quarter=quarter, population="known 360-month fixed-rate originations; valid FICO/LTV/positive original UPB and note rate",
-        source_semantics_version=SOURCE_SEMANTICS_VERSION,
+        source_semantics_version=source_semantics_version(source_layout),
+        source_layout=layout,
         current_contract_fields='Contemporaneous May evidence only; rates decimal, maturity months, balances USD, flags as reported; original model conventions unchanged; missing or nonfinite numeric fields retained as null',
         identity_exceptions=identity_report,
         pre_snapshot_coverage=coverage_audit,
@@ -418,8 +421,8 @@ def build_quarter(orig, perf, output, quarter, cutoff="202509", transition_end="
             complete_cohort_gate='Final model panel remains bounded after all source partitions combine'),
         cutoff=str(cutoff), snapshot_month=SNAPSHOT_MONTH, transition_end=str(transition_end),
         source_sha256={"origination":orig_hash.hexdigest(),"performance":perf_hash.hexdigest()},
-        schema={"origination_width_counts":{"32":counts["origination_rows"]},
-                "performance_width_counts":{"32":counts["performance_rows"]},
+        schema={"origination_width_counts":{str(layout["origination_width"]):counts["origination_rows"]},
+                "performance_width_counts":{str(layout["performance_width"]):counts["performance_rows"]},
                 "declared_quarter_ids_validated":True,"duplicate_origination_ids":0,
                 "unknown_performance_ids":0,"duplicate_loan_months":0,"group_reentries":0},
         counts=dict(counts), transition_diagnostics=td,

@@ -16,7 +16,7 @@ from hazard.mixture_hazard import mixture_probability, reference_probability, re
 
 
 def predict_path(rows, pre, cov, rates, annual_floor, psa, beta, *,
-                 sensitive_share, calibration, gap_mode):
+                 sensitive_share, calibration, gap_mode, reference_mode='inherited_psa'):
     if rows.duplicated(['cell','period']).any():
         raise ValueError('Duplicate cell-month rows')
     d = rows[['cell','period','coupon']].copy()
@@ -34,7 +34,8 @@ def predict_path(rows, pre, cov, rates, annual_floor, psa, beta, *,
     burn, balance, original = prediction_initial_state(pre)
     for _, sub in d.groupby('period', sort=True):
         b = np.array([burn[x] for x in sub.cell])
-        p0 = reference_probability(sub.age.to_numpy(), b, sub.fz.to_numpy(), sub.lz.to_numpy(), psa=psa)
+        p0 = reference_probability(sub.age.to_numpy(), b, sub.fz.to_numpy(), sub.lz.to_numpy(), psa=psa,
+            reference_mode=reference_mode)
         probability = mixture_probability(p0, (sub.coupon-sub.rate).to_numpy(),
             sensitive_share, response_gamma(beta, calibration), gap_mode=gap_mode)
         default = pair.lh.default_hazard(np.maximum(sub.rate-sub.coupon,0).to_numpy(), sub.fz.to_numpy(), sub.lz.to_numpy())
@@ -55,18 +56,20 @@ def predict_path(rows, pre, cov, rates, annual_floor, psa, beta, *,
 
 
 @contextmanager
-def scoring_context(sensitive_share, calibration, gap_mode):
+def scoring_context(sensitive_share, calibration, gap_mode, reference_mode='inherited_psa'):
     mixture_probability(.02,0.,sensitive_share,response_gamma(0.,calibration),gap_mode=gap_mode)
+    reference_probability(0.,0.,0.,0.,reference_mode=reference_mode)
     previous = (scoring.predict_path, scoring.recorded_choices, scoring.SPEC, scoring.CODE_FILES, scoring.RESPONSE_BETA)
     def choices(*args, **kwargs):
         previous[1](*args, **kwargs)  # Validate the historical freeze; do not reuse selected floors.
         return {'mixture': dict(annual_floor=0., psa=100., sensitive_share=sensitive_share,
-            calibration=calibration, gap_mode=gap_mode, reference_newly_calibrated=False,
+            calibration=calibration, gap_mode=gap_mode, reference_mode=reference_mode,
+            reference_annual_floor=.04991 if reference_mode=='matched_max_off' else None, reference_newly_calibrated=False,
             gamma_per_pp={'off': 0., 'on': float(response_gamma(previous[4],calibration))},
             coefficient_convention='response_coefficients stores negative gamma; gamma_per_pp is the positive intensity coefficient')}
     def predictor(*args, **kwargs):
         return predict_path(*args, **kwargs, sensitive_share=sensitive_share,
-            calibration=calibration, gap_mode=gap_mode)
+            calibration=calibration, gap_mode=gap_mode, reference_mode=reference_mode)
     scoring.predict_path, scoring.recorded_choices = predictor, choices
     scoring.RESPONSE_BETA = -float(response_gamma(previous[4], calibration))
     scoring.SPEC = ROOT/'specs/SPEC_2026-10-13_mixture_alternative.md'
@@ -77,8 +80,9 @@ def scoring_context(sensitive_share, calibration, gap_mode):
         scoring.predict_path, scoring.recorded_choices, scoring.SPEC, scoring.CODE_FILES, scoring.RESPONSE_BETA = previous
 
 
-def run(*, sensitive_share, calibration='legacy_conversion', gap_mode='positive_only', **inputs):
-    with scoring_context(sensitive_share,calibration,gap_mode):
+def run(*, sensitive_share, calibration='legacy_conversion', gap_mode='positive_only',
+        reference_mode='inherited_psa', **inputs):
+    with scoring_context(sensitive_share,calibration,gap_mode,reference_mode):
         return scoring.run(**inputs)
 
 
@@ -89,6 +93,7 @@ def main():
     p.add_argument('--sensitive-share',required=True,type=float)
     p.add_argument('--calibration',choices=['illustrative','legacy_conversion'],default='legacy_conversion')
     p.add_argument('--gap-mode',choices=['positive_only','preserve_refinancing'],default='positive_only')
+    p.add_argument('--reference-mode',choices=['inherited_psa','matched_max_off'],default='inherited_psa')
     run(**vars(p.parse_args()))
 
 

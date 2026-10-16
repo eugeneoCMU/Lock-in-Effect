@@ -26,3 +26,8 @@ No source reconstruction, network access or parameter selection in the runner.
 Run only on complete verified combined inputs; synthetic tests are not estimates.
 All temporary in-process adapters restore their prior bindings even on failure.
 The adapter is serial and must not be used concurrently in a shared process.
+
+
+## Version 2 references and acceptance
+
+The separate comparison_matrix_v2 specification adds `matched_max_off` alongside the default `inherited_psa`. Matched probability is max(monthly annual-.04991 floor, zero-gap inherited probability) before conversion to intensity. No floor is reimposed after the mixture response. Thus response-OFF matches the fixed hard-max benchmark, while the insensitive component remains a share of the selected reference. Forty scenarios and a separate additive benchmark are validated by the final automatic gate. Both references are inherited assumptions, not newly estimated no-lock-in behavior.

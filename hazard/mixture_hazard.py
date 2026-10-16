@@ -1,7 +1,8 @@
 """Assumed sensitive/insensitive decomposition on the intensity scale.
 
 The reference schedule is the existing zero-gap PSA/covariate probability;
-its level is not newly estimated. No fixed turnover floor is applied.
+or its hard-max response-OFF counterpart; neither is newly estimated.
+No fixed turnover floor is applied after the mixture response.
 """
 from contextlib import contextmanager
 import numpy as np
@@ -30,7 +31,12 @@ def mixture_probability(p_reference, rate_gap, sensitive_share, gamma_per_pp,
     return -np.expm1(-intensity)
 
 
-def reference_probability(loan_age, burnout, fico_z, ltv_z, *, psa=100., coefs=None):
+def reference_probability(loan_age, burnout, fico_z, ltv_z, *, psa=100., coefs=None,
+                          reference_mode='inherited_psa', annual_floor=.04991):
+    if reference_mode not in ('inherited_psa', 'matched_max_off'):
+        raise ValueError('Unknown reference mode')
+    if not np.isfinite(annual_floor) or not 0 <= annual_floor < 1:
+        raise ValueError('Reference annual floor must lie in [0,1)')
     from hazard import simulate_freddie_rebuild as pair
     lh = pair.lh
     c = lh.LITERATURE_COEFS if coefs is None else coefs
@@ -41,6 +47,8 @@ def reference_probability(loan_age, burnout, fico_z, ltv_z, *, psa=100., coefs=N
         p = baseline * np.exp(log_adjustment)
     if not np.isfinite(p).all() or np.any((p < 0) | (p >= 1)):
         raise ValueError('Reference schedule outside probability support; recalibration required')
+    if reference_mode == 'matched_max_off':
+        p = np.maximum(p, -np.expm1(np.log1p(-annual_floor)/12.))
     return p
 
 
@@ -53,17 +61,19 @@ def response_gamma(beta, calibration):
 
 
 @contextmanager
-def mixture_context(sensitive_share, calibration='legacy_conversion', gap_mode='positive_only'):
+def mixture_context(sensitive_share, calibration='legacy_conversion', gap_mode='positive_only',
+                    reference_mode='inherited_psa'):
     """Adapt the existing engine in one process, restoring all hooks on exit.
 
     Not thread-safe. Frozen source files and global config files are untouched.
     """
     from hazard import simulate_freddie_rebuild as pair
     mixture_probability(.02, 0., sensitive_share, response_gamma(0., calibration), gap_mode=gap_mode)
+    reference_probability(0.,0.,0.,0.,reference_mode=reference_mode)
     original_lh, original_cr = pair.lh.prepay_hazard, pair.cr.prepay_hazard
     def prepay(loan_age, rate_gap, burnout, fico_z, ltv_z,
                beta1=pair.lh.BETA1_PREPAY_MID, coefs=None):
-        p0 = reference_probability(loan_age, burnout, fico_z, ltv_z, coefs=coefs)
+        p0 = reference_probability(loan_age, burnout, fico_z, ltv_z, coefs=coefs, reference_mode=reference_mode)
         return mixture_probability(p0, rate_gap, sensitive_share,
             response_gamma(beta1, calibration), gap_mode=gap_mode)
     pair.lh.prepay_hazard = pair.cr.prepay_hazard = prepay

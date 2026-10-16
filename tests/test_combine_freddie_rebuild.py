@@ -198,3 +198,34 @@ def test_stratified_sampling_is_reproducible_for_a_fixed_pool_and_seed():
     samples = {tuple(sorted(_stratified_sample(ordered_pool, 2, 42)['loan_id'].to_list()))
                for ordered_pool in (pool, pool.reverse()) for _ in range(12)}
     assert len(samples) == 1, f'The same fixed pool and seed produced different loans: {samples}'
+
+
+def test_mixed_layout_combination_binds_exact_source_provenance(rebuilt_two_quarters, monkeypatch):
+    from schema import RELEASE47_SOURCE_SEMANTICS_VERSION, source_layout_metadata, SOURCE_SEMANTICS_VERSION
+    import combine_freddie_rebuild as stage
+    root, quarters, _ = rebuilt_two_quarters
+    path = root / 'quarters' / quarters[1] / 'rebuilt/report.json'
+    report = json.loads(path.read_text())
+    report.update(source_semantics_version=RELEASE47_SOURCE_SEMANTICS_VERSION,
+                  source_layout=source_layout_metadata('release47'))
+    path.write_text(json.dumps(report))
+    monkeypatch.setattr(stage, 'validate_completed', lambda p: {
+        'storage_policy': 'local_archive_retained'} if p.name == quarters[1] else {})
+    result = combine(root, quarters=quarters, n_loans=3)
+    assert result['source_semantics_version'] == 'freddie-mixed-layout-reo-priority-v4'
+    assert result['source_semantics_by_quarter'] == dict(zip(quarters, [SOURCE_SEMANTICS_VERSION, RELEASE47_SOURCE_SEMANTICS_VERSION]))
+    assert result['source_layouts_by_quarter'] == dict(zip(quarters, [source_layout_metadata('native32'), source_layout_metadata('release47')]))
+    assert result['source_receipt_types_by_quarter'] == dict(zip(quarters, ['native_cloud', 'local_archive_retained']))
+
+
+def test_release47_report_requires_canonical_layout(rebuilt_two_quarters):
+    from schema import RELEASE47_SOURCE_SEMANTICS_VERSION
+    root, quarters, _ = rebuilt_two_quarters
+    path = root / 'quarters' / quarters[1] / 'rebuilt/report.json'
+    report = json.loads(path.read_text())
+    report['source_semantics_version'] = RELEASE47_SOURCE_SEMANTICS_VERSION
+    report.pop('source_layout', None)
+    path.write_text(json.dumps(report))
+    with pytest.raises(ValueError, match='layout'):
+        combine(root, quarters=quarters, n_loans=3)
+    assert not (root / 'combined').exists()

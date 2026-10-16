@@ -266,3 +266,73 @@ def test_input_mutation_during_calculation_cannot_produce_a_success_result(input
     with pytest.raises(ValueError, match='changed'): stage.run(**inputs)
     assert (inputs['output'] / 'failed.json').exists()
     assert not (inputs['output'] / 'results.json').exists()
+
+
+def test_calibration_receipt_carries_coverage_disclosure(inputs):
+    result=module().run(**inputs)
+    assert 'pre_snapshot_coverage' in result
+    assert any('missing history remains unknown' in line for line in result['limitations'])
+
+
+def test_calibration_serializes_nonempty_coverage_audit(inputs,monkeypatch):
+    stage=module();original=stage.validated_combined
+    audit={'policy':'known_pre_snapshot_history_v1','missing_loans':4,'unknown_original_upb':1487000.,
+           'burnout_bound_assumption':'Unknown payoff capped at original principal',
+           'affected_cohorts':[{'known_history_burnout':.2,'full_cohort_burnout_lower':.19,'full_cohort_burnout_upper':.21}]}
+    def validated(root):
+        combined,hashes=original(root)
+        return dict(combined,pre_snapshot_coverage=audit),hashes
+    monkeypatch.setattr(stage,'validated_combined',validated)
+    result=stage.run(**inputs)
+    assert result['pre_snapshot_coverage']==audit
+    assert json.loads((inputs['output']/'results.json').read_text())['pre_snapshot_coverage']==audit
+
+
+@pytest.fixture
+def mixed_inputs(inputs, monkeypatch):
+    """Keep native receipts real; isolate one local receipt's provenance gate."""
+    from schema import RELEASE47_SOURCE_SEMANTICS_VERSION, source_layout_metadata
+    stage = module()
+    root = inputs['root']
+    quarter = '2021Q1'
+    path = root / 'quarters' / quarter
+    source_report = json.loads((path / 'rebuilt/report.json').read_text())
+    source_report.update(source_semantics_version=RELEASE47_SOURCE_SEMANTICS_VERSION,
+                         source_layout=source_layout_metadata('release47'))
+    dump(path / 'rebuilt/report.json', source_report)
+    receipt = json.loads((path / 'completed.json').read_text())
+    receipt['storage_policy'] = 'local_archive_retained'
+    receipt['output_sha256']['rebuilt/report.json'] = source.digest(path / 'rebuilt/report.json')
+    dump(path / 'completed.json', receipt)
+    original = stage.validate_completed
+    monkeypatch.setattr(stage, 'validate_completed', lambda p: receipt if p.name == quarter else original(p))
+    combined_path = root / 'combined/report.json'
+    report = json.loads(combined_path.read_text())
+    report.update(source_semantics_version='freddie-mixed-layout-reo-priority-v4',
+        source_semantics_by_quarter={q: RELEASE47_SOURCE_SEMANTICS_VERSION if q == quarter else SOURCE_SEMANTICS_VERSION for q in source.QUARTERS},
+        source_layouts_by_quarter={q: source_layout_metadata('release47' if q == quarter else 'native32') for q in source.QUARTERS},
+        source_receipt_types_by_quarter={q: 'local_archive_retained' if q == quarter else 'native_cloud' for q in source.QUARTERS})
+    report['source_report_sha256'][quarter] = source.digest(path / 'rebuilt/report.json')
+    dump(combined_path, report)
+    return inputs
+
+
+def test_calibration_validates_mixed_source_provenance(mixed_inputs):
+    report, hashes = module().validated_combined(mixed_inputs['root'])
+    assert report['source_semantics_version'] == 'freddie-mixed-layout-reo-priority-v4'
+    assert report['source_receipt_types_by_quarter']['2021Q1'] == 'local_archive_retained'
+    assert str(mixed_inputs['root'] / 'quarters/2021Q1/completed.json') in hashes
+
+
+@pytest.mark.parametrize('field', ['source_semantics_by_quarter', 'source_layouts_by_quarter', 'source_receipt_types_by_quarter'])
+@pytest.mark.parametrize('mutation', ['missing', 'changed'])
+def test_calibration_rejects_mixed_provenance_tampering(mixed_inputs, field, mutation):
+    path = mixed_inputs['root'] / 'combined/report.json'
+    report = json.loads(path.read_text())
+    if mutation == 'missing':
+        report.pop(field)
+    else:
+        report[field]['2021Q1'] = 'forged'
+    dump(path, report)
+    with pytest.raises(ValueError, match='provenance'):
+        module().validated_combined(mixed_inputs['root'])

@@ -41,7 +41,7 @@ PARAMETERS = dict(annual_floor=.04991, psa=100., floor_form='max',
                   prepay_mode='fractional', moving_share='full', regime='US',
                   seed=42, response_off_pct=0., response_on_pct=6.5,
                   allow_legacy_inputs=False, soma_reweighting=False)
-CODE_FILES = [HERE / 'coverage_exception.py', Path(__file__), HERE / 'calibrate_freddie_rebuild.py',
+CODE_FILES = [*[HERE / name for name in ('source_rebuild_receipts.py','release47_local_rebuild.py','freddie_archive_rebuild.py','freddie_archive_source.py','schema.py','freddie_rebuild_stream.py')], HERE / 'coverage_exception.py', Path(__file__), HERE / 'calibrate_freddie_rebuild.py',
               HERE / 'run_freddie_rebuild.py', HERE / 'microsim_engine.py',
               HERE / 'competing_risks.py', HERE / 'agents.py',
               HERE / 'literature_hazard.py', HERE / 'macro.py', HERE / 'config.py',
@@ -59,7 +59,11 @@ def validate_conventions():
     coefficients = {'beta_burnout': -.5, 'beta_fico': -.15, 'beta_ltv': .10,
                     'h0_default_monthly': .0003, 'gamma_rate_stress': 2.,
                     'gamma_fico': -.20, 'gamma_ltv': .25}
-    if (lh.FLOOR_MODE != 'max' or cr.PREPAY_MODE != 'fractional'
+    declared_form = PARAMETERS.get('floor_form', 'max')
+    if declared_form not in ('max', 'additive', 'mixture'):
+        raise ValueError('Unknown declared floor convention')
+    expected_floor_mode = 'additive' if declared_form == 'additive' else 'max'
+    if (lh.FLOOR_MODE != expected_floor_mode or cr.PREPAY_MODE != 'fractional'
             or lh.h0_psa.__defaults__ != (100.,)
             or lh.baseline_hazard.__defaults__ != ('psa',)
             or lh.rothstein_beta1.__defaults__ != (.06,)
@@ -83,8 +87,12 @@ def validate_recorded_inputs(macro_path, parameter_freeze, empirical_csv,
         if Path(record['path']).resolve() != path or digest(path) != record['sha256']:
             raise ValueError('Recorded downstream inventory path/hash mismatch: ' + str(path))
     freeze = read_json(parameter_freeze)
-    recorded_macro = {str((ROOT / key).resolve()): value for key, value in freeze['input_sha256'].items()}
-    if recorded_macro.get(str(macro_path)) != digest(macro_path):
+    # The inventory above binds the exact supplied path. The historical freeze
+    # uses this canonical repository-relative artifact key across worktrees.
+    macro_key = 'output/review-revision/2026-10-07-checks/macro_frozen.parquet'
+    recorded = freeze['input_sha256']
+    bindings = [recorded[key] for key in (macro_key, str(macro_path)) if key in recorded]
+    if not bindings or any(value != digest(macro_path) for value in bindings):
         raise ValueError('Frozen macro is not bound to the recorded parameter freeze')
     if (freeze.get('annual_floor_grid') != [0., .02, .035, .04991]
             or freeze.get('psa_grid') != [50., 75., 100.]
