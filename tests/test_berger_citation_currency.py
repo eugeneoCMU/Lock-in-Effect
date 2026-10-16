@@ -1,3 +1,5 @@
+# Historical research-record gate: source archived by the approved October 7 revision.
+# Current publication is checked by test_manuscript_references/test_revision_artifacts.
 """Regression battery for the berger2026 citation (R32 fact-check, 2026-07-30).
 
 This is a TEST and not a liveness gate on purpose: the claim is about an external
@@ -16,10 +18,10 @@ from pathlib import Path
 import pytest
 
 ROOT = Path(__file__).resolve().parents[1]
-TEX = (ROOT / "paper" / "final" / "paper_final_v1.tex").read_text()
-VARIANT = (ROOT / "paper" / "final"
+TEX = (ROOT / "paper" / "final" / "reviewed_archive" / "paper_final_v1.tex").read_text()
+VARIANT = (ROOT / "paper" / "final" / "reviewed_archive"
            / "paper_final_v1_long_abstract.tex").read_text()
-BIB = (ROOT / "paper" / "final" / "references.bib").read_text()
+BIB = (ROOT / "paper" / "final" / "reviewed_archive" / "references.bib").read_text()
 
 BOTH = pytest.mark.parametrize("tex", [TEX, VARIANT], ids=["canonical", "variant"])
 

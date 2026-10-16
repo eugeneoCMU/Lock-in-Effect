@@ -1,0 +1,237 @@
+{
+  "started_utc": "2026-10-10T13:26:26.440605+00:00",
+  "cutoff": "202509",
+  "spec_sha256": "016af5325ab1be6dc3c1df597656ef5520d94ddd9368057d934a8dfd2c500e9d",
+  "source_metadata_before": {
+    "origination": {
+      "path": "/Users/eugene/Library/CloudStorage/GoogleDrive-eugeneo@andrew.cmu.edu/My Drive/Fannie and Freddie MAC/orig_2017Q1.txt",
+      "size": 44424387,
+      "allocated_bytes": 0,
+      "flags": 1073741920,
+      "mtime_ns": 1783070415000000000
+    },
+    "performance": {
+      "path": "/Users/eugene/Library/CloudStorage/GoogleDrive-eugeneo@andrew.cmu.edu/My Drive/Fannie and Freddie MAC/perf_2017Q1.txt",
+      "size": 1420624291,
+      "allocated_bytes": 0,
+      "flags": 1073741920,
+      "mtime_ns": 1783070422000000000
+    }
+  },
+  "cleanup": "verified; see cleanup_verified.json",
+  "schema": {
+    "passed": true,
+    "origination": {
+      "rows": 290601,
+      "duplicate_ids": 0,
+      "invalid_id_positions": 0,
+      "eligible_ids": 290558,
+      "eligible_360_month_ids": 217530,
+      "sha256": "1fe24e7e2a1f1367c35f3e9837ace37a18aa10debed8244b6f2b2482a0ba9eab",
+      "width_counts": {
+        "32": 290601
+      }
+    },
+    "performance": {
+      "rows": 16516599,
+      "invalid_id_positions": 0,
+      "unknown_origination_ids": 0,
+      "invalid_reporting_periods": 0,
+      "pre_cutoff_rows": 16516599,
+      "post_cutoff_date_rows": 0,
+      "sha256": "7e2b28f48a834f11a5512437b82f8435377a3045d6888ca7f952bee87fa974b7",
+      "width_counts": {
+        "32": 16516599
+      }
+    }
+  },
+  "raw_audit": {
+    "eligible_pre_cutoff_rows": 16513080,
+    "invalid_balance_rows": 0,
+    "negative_balance_rows": 0,
+    "missing_or_nonfinite_age_rows": 0,
+    "within_loan_backward_rows": 0,
+    "duplicate_loan_month_rows": 0,
+    "loan_group_reentries": 0,
+    "missing_calendar_months": 63,
+    "valid_balance_missing_calendar_months": 63,
+    "first_observed_payoff_rows": 139,
+    "payoff_with_nonadjacent_prior_rows": 0,
+    "valid_balance_rows": 16513080,
+    "voluntary_payoff_rows": 216031,
+    "loans_with_pre_cutoff_history": 290558,
+    "first_observed_payoff_fallback_upb": 33659000.0,
+    "payoff_with_nonadjacent_prior_upb": 0.0,
+    "reference_complete": true
+  },
+  "outcomes_calculated": true,
+  "reference_cells": 4847,
+  "reference_additive_totals": {
+    "exposure_upb": 3099294467879.1235,
+    "orig_upb_sum": 3490950913000.0,
+    "prepaid_upb": 45069256264.32,
+    "finite_age_sum": 604650013.0,
+    "finite_age_count": 16513080,
+    "loan_count": 16513080
+  },
+  "ingest_sha256": "4cc4f873cad47b2773214737c9fd5ee02e4b5b9e669b554380ba2da120a44992",
+  "replays": {
+    "fixed": {
+      "status": "completed",
+      "returncode": 0,
+      "stopped_reason": null,
+      "peak_observed_rss_bytes": 3040165888,
+      "elapsed_seconds": 19.32137608300002,
+      "output": "/Users/eugene/.codex/worktrees/f586/Lock-in-Effect/output/research-limits/2026-10-09/rebuild/freddie-2017Q1/fixed_production_cells.parquet",
+      "log": "/Users/eugene/.codex/worktrees/f586/Lock-in-Effect/output/research-limits/2026-10-09/rebuild/freddie-2017Q1/fixed_production_replay.log",
+      "reference_comparison": {
+        "keys_equal": true,
+        "columns": {
+          "exposure_upb": {
+            "allclose": true,
+            "max_abs_difference": 0.0002040863037109375,
+            "different_cells_beyond_tolerance": 0,
+            "reference_sum": 3099294467879.1094,
+            "production_sum": 3099294467879.1104
+          },
+          "orig_upb_sum": {
+            "allclose": true,
+            "max_abs_difference": 0.0,
+            "different_cells_beyond_tolerance": 0,
+            "reference_sum": 3490950913000.0,
+            "production_sum": 3490950913000.0
+          },
+          "prepaid_upb": {
+            "allclose": true,
+            "max_abs_difference": 1.3113021850585938e-06,
+            "different_cells_beyond_tolerance": 0,
+            "reference_sum": 45069256264.32001,
+            "production_sum": 45069256264.32001
+          },
+          "loan_count": {
+            "allclose": true,
+            "max_abs_difference": 0.0,
+            "different_cells_beyond_tolerance": 0,
+            "reference_sum": 16513080.0,
+            "production_sum": 16513080.0
+          },
+          "mean_loan_age": {
+            "allclose": true,
+            "max_abs_difference": 0.0,
+            "different_cells_beyond_tolerance": 0,
+            "reference_sum": 237225.99085332657,
+            "production_sum": 237225.99085332657
+          }
+        }
+      }
+    },
+    "legacy": {
+      "status": "completed",
+      "returncode": 0,
+      "stopped_reason": null,
+      "peak_observed_rss_bytes": 3258499072,
+      "elapsed_seconds": 16.280295292000005,
+      "output": "/Users/eugene/.codex/worktrees/f586/Lock-in-Effect/output/research-limits/2026-10-09/rebuild/freddie-2017Q1/legacy_production_cells.parquet",
+      "log": "/Users/eugene/.codex/worktrees/f586/Lock-in-Effect/output/research-limits/2026-10-09/rebuild/freddie-2017Q1/legacy_production_replay.log",
+      "reference_comparison": {
+        "keys_equal": true,
+        "columns": {
+          "exposure_upb": {
+            "allclose": true,
+            "max_abs_difference": 0.0002040863037109375,
+            "different_cells_beyond_tolerance": 0,
+            "reference_sum": 3099294467879.1094,
+            "production_sum": 3099294467879.1104
+          },
+          "orig_upb_sum": {
+            "allclose": true,
+            "max_abs_difference": 0.0,
+            "different_cells_beyond_tolerance": 0,
+            "reference_sum": 3490950913000.0,
+            "production_sum": 3490950913000.0
+          },
+          "prepaid_upb": {
+            "allclose": true,
+            "max_abs_difference": 1.3113021850585938e-06,
+            "different_cells_beyond_tolerance": 0,
+            "reference_sum": 45069256264.32001,
+            "production_sum": 45069256264.32001
+          },
+          "loan_count": {
+            "allclose": true,
+            "max_abs_difference": 0.0,
+            "different_cells_beyond_tolerance": 0,
+            "reference_sum": 16513080.0,
+            "production_sum": 16513080.0
+          },
+          "mean_loan_age": {
+            "allclose": true,
+            "max_abs_difference": 0.0,
+            "different_cells_beyond_tolerance": 0,
+            "reference_sum": 237225.99085332657,
+            "production_sum": 237225.99085332657
+          }
+        }
+      }
+    }
+  },
+  "status": "streaming_audit_completed",
+  "finished_utc": "2026-10-10T13:34:21.369041+00:00",
+  "resources": {
+    "free_disk_bytes": 19217141760,
+    "peak_rss_bytes": 106233856
+  },
+  "source_metadata_after_reads": {
+    "origination": {
+      "path": "/Users/eugene/Library/CloudStorage/GoogleDrive-eugeneo@andrew.cmu.edu/My Drive/Fannie and Freddie MAC/orig_2017Q1.txt",
+      "size": 44424387,
+      "allocated_bytes": 44425216,
+      "flags": 64,
+      "mtime_ns": 1783070415000000000
+    },
+    "performance": {
+      "path": "/Users/eugene/Library/CloudStorage/GoogleDrive-eugeneo@andrew.cmu.edu/My Drive/Fannie and Freddie MAC/perf_2017Q1.txt",
+      "size": 1420624291,
+      "allocated_bytes": 1420627968,
+      "flags": 64,
+      "mtime_ns": 1783070422000000000
+    }
+  },
+  "source_sizes_mtimes_unchanged": true,
+  "cleanup_verification": {
+    "verified_utc": "2026-10-10T20:03:04.722335+00:00",
+    "method": "FileManager.default.evictUbiquitousItem(at:); no deletion",
+    "checks": {
+      "origination": {
+        "exists": true,
+        "size": 44424387,
+        "allocated_bytes": 0,
+        "isDownloaded": 0,
+        "isTrashed": 0,
+        "isUploaded": 1
+      },
+      "performance": {
+        "exists": true,
+        "size": 1420624291,
+        "allocated_bytes": 0,
+        "isDownloaded": 0,
+        "isTrashed": 0,
+        "isUploaded": 1
+      }
+    }
+  },
+  "source_rehash_after": {
+    "verified_utc": "2026-10-10T20:01:56.417763+00:00",
+    "checks": {
+      "origination": {
+        "sha256": "1fe24e7e2a1f1367c35f3e9837ace37a18aa10debed8244b6f2b2482a0ba9eab",
+        "unchanged": true
+      },
+      "performance": {
+        "sha256": "7e2b28f48a834f11a5512437b82f8435377a3045d6888ca7f952bee87fa974b7",
+        "unchanged": true
+      }
+    }
+  },
+  "audit_script_sha256": "3a4a583c32797c2e9b17dd871265fd98d6ae6b28311c4daea3e7bc6d4696cbac"
+}

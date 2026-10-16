@@ -1,0 +1,100 @@
+# REO precedence correction — October 13, 2026
+
+The first corrected-layout run completed 2017Q1–2018Q1, then stopped safely in
+2018Q2 on one apparent terminal revival. Those five version-1 receipts cover
+1,329,246 eligible original loans, 89,164,445 source performance rows and 405,808
+exact May-2022 snapshot rows. Their hashes and cleanup receipts still validate;
+they are preserved historical outputs, not inputs to the version-2 model chain.
+
+## Source evidence and cause
+
+A protocol frozen before renewed raw access authorized only the exact 2018Q2
+pair, the same eligibility and outcomes through May 2022. Both source hashes
+matched before and after the diagnostic. It examined 14,749,218 physical records,
+decoded 9,641,642 eligible pre-QT records, skipped later dates before outcome
+decoding and reproduced exactly one offending edge. Peak RSS was about 204 MiB.
+Both files passed cloud-only cleanup with no deletion.
+
+The matching loan retained reported REO-acquisition status from July 2020 through
+its May 2021 code-09 disposition. A September 2020 forbearance flag overrode that
+status in the parser despite unchanged principal of $207,280.17. The source did
+not report a cure of the REO status. The [Freddie guide](https://www.freddiemac.com/research/pdf/user_guide.pdf)
+defines RA as REO acquisition and F as borrower assistance; the parser's order
+created the artificial Defaulted-to-Forbearance transition.
+
+The private diagnostic, with hashed identifiers, is under
+`output/research-rebuild/2026-10-13/quarters/2018Q2/terminal-diagnostic/`.
+
+## Repair and verification
+
+Version `freddie-native32-reo-priority-v2` retains explicit zero-balance-code
+precedence, then evaluates RA before F in both scalar and vector paths. Numeric
+delinquency plus F retains its existing forbearance treatment. The stream counts
+joint RA/F rows after the eligible-loan and date filters. No source exception,
+balance adjustment, invented payoff or weakening of terminal absorption was
+introduced. Unsupported nonterminal RP now stops native extraction, including
+when F is present; the current guide does not establish a native RP meaning.
+
+Five focused regression failures reproduced the missing behavior before repair.
+The completed canonical suite passes **1,488 tests with 29 warnings**. An
+independent read-only review found no actionable correctness or provenance
+issue. Version-1 receipts remain verifiable, while current resume and downstream
+consumption require version 2. Actual saved version-1 receipts validate and a
+resume attempt with an unavailable raw-source path is rejected before access.
+
+## Required fresh extraction
+
+The first five quarters have no saved joint RA/F accounting proving they were
+unaffected. A history beginning with both flags could be misclassified without
+triggering a revival. Re-extract all twenty quarters into
+`output/research-rebuild/2026-10-13-reo/`, copying no earlier source completions.
+Preserve both earlier roots and the failed 2018Q2 attempt.
+
+The five-stage sequence remains source extraction, combination, calibration,
+retrospective scoring and paired simulation. Each stage stops on a failed gate.
+The 202509 outcome boundary, 202205 transition/snapshot boundaries, one-pair
+resource and cleanup controls, fixed model choices and empirical limitations
+remain unchanged. No replacement paper estimate is available from this repair.
+
+## Verified execution checkpoint — October 13, 2:06 p.m. Eastern
+
+The version-2 run has completed 15 of 20 quarters, 2017Q1 through 2020Q3, and
+is processing 2020Q4. All fifteen full completion validators passed, including
+the source/output hashes and two-file cloud-only cleanup evidence. Their totals
+are 5,527,605 eligible original source records, 315,936,421 physical performance
+rows and 2,527,494 exact-May-2022 snapshot rows. Global cross-file identity and
+combination checks still await the complete twenty-quarter source set.
+
+The 2018Q2 extraction now succeeds. There is one joint RA/F source row among
+these fifteen completed quarters, in 2018Q2, and zero reported terminal-
+absorption violations. The first-quarter streaming/production comparison passes
+all eleven financial, age and count checks across 4,153 cohort-month cells.
+Cohort-mode tie breaking is excluded from that comparison, as declared in its
+receipt; transition estimation does not use cohort modes.
+
+All 292 protected baseline files and all 264 frozen pipeline inputs still match
+their hashes. The largest completed worker RSS is approximately 2.86 GiB, below
+the 8-GiB limit. Only the active 2020Q4 pair is materialized. Source extraction is
+still running; combination, calibration, scoring and paired simulation have
+not run. The timestamped receipt and latest checkpoint are saved under
+`output/research-rebuild/2026-10-13-reo/verification_checkpoints/` and
+`output/research-rebuild/2026-10-13-reo/verified_progress.json` respectively.
+
+## Cloud-read timeout and audited retry — October 13, 4:03 p.m. Eastern
+
+The 2020Q4 performance-file read timed out during the schema-only scan, after
+the progress log reached 22 million records. No completed schema or rebuilt
+outcome artifacts were produced. The driver reaped the failed worker and
+verified cloud-only cleanup for both files.
+
+All fifteen completed receipts were revalidated, along with the 264 frozen
+pipeline hashes, 292 protected baseline hashes and exact 2020Q4 identity
+exception. The failed attempt was preserved as `quarters/2020Q4.timeout-attempt-1`
+with hashes of all 27 files checked before and after the directory move. No
+processing code, population rule, cutoff or model choice was changed.
+
+A single serial retry launched at 20:03:51 UTC (4:03:51 p.m. Eastern), reusing
+the fifteen validated completions and starting fresh processing at 2020Q4.
+The active five-stage pipeline is now `pipeline-after-timeout/state.json` under
+the version-2 output root. The original pipeline state remains preserved as
+stopped. `timeout_recovery.json` records the archive and retry evidence.

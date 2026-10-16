@@ -1,0 +1,431 @@
+{
+  "created_utc": "2026-10-10T02:38:55.221964+00:00",
+  "scope": "Age-only recombination of preserved Fannie quarter cells; not a raw-source payoff rebuild",
+  "spec_sha256": "80a8f72fd712ee3cd243262a4c6c4ff2ed7c97eda240b832f6d309c22c946db7",
+  "input_sha256": {
+    "/Users/eugene/somthing/Lock In effect/Lock-in-Effect/hazard/data/fannie_quarters/cells_FNMA2017Q1.parquet": "edaaf5ee09286bd84dec138f43435af34b765078821cd392a02625f46a3d55b8",
+    "/Users/eugene/somthing/Lock In effect/Lock-in-Effect/hazard/data/fannie_quarters/cells_FNMA2017Q2.parquet": "79ea3b25aec4ce2dd47d3b246cbc6639aa6e7488909eaf897fc9f2fd9da66065",
+    "/Users/eugene/somthing/Lock In effect/Lock-in-Effect/hazard/data/fannie_quarters/cells_FNMA2017Q3.parquet": "e910a036ccee16e809f26de3eeef79d2f20395d9b51ec5fc77f765a8e992c764",
+    "/Users/eugene/somthing/Lock In effect/Lock-in-Effect/hazard/data/fannie_quarters/cells_FNMA2017Q4.parquet": "5a29b157e9e217ed04b2e7fbc4f8af5ba6730e6a1fbf28d491cfe8cdb73cf5aa",
+    "/Users/eugene/somthing/Lock In effect/Lock-in-Effect/hazard/data/fannie_quarters/cells_FNMA2018Q1.parquet": "41b9a34bbc10c199c19a5067319673e1abd6ca121517250668a9f7ec16c75f2a",
+    "/Users/eugene/somthing/Lock In effect/Lock-in-Effect/hazard/data/fannie_quarters/cells_FNMA2018Q2.parquet": "635ca0bcf8dc66baa3196ef97683a1f58cc6bd60df03549f4fdfe2008516fc08",
+    "/Users/eugene/somthing/Lock In effect/Lock-in-Effect/hazard/data/fannie_quarters/cells_FNMA2018Q3.parquet": "ef56021e7aad72ed64b069da1c48e27eebf9fdde62f5aff6d06755eb9a4f8c71",
+    "/Users/eugene/somthing/Lock In effect/Lock-in-Effect/hazard/data/fannie_quarters/cells_FNMA2018Q4.parquet": "3bf9a87bb0ee68de4f520884116c1f4de5b62afd0e9e982e7f11b364b479c1ce",
+    "/Users/eugene/somthing/Lock In effect/Lock-in-Effect/hazard/data/fannie_quarters/cells_FNMA2019Q1.parquet": "5ccefc1aabe5702b5e5c8cba5d04933a87f0d7a4f9f3e3321a67fa6c243f3c77",
+    "/Users/eugene/somthing/Lock In effect/Lock-in-Effect/hazard/data/fannie_quarters/cells_FNMA2019Q2.parquet": "aa655d27ba90ef345cb7621379b6919fa6d49fa33e23973f2d15f9107756679d",
+    "/Users/eugene/somthing/Lock In effect/Lock-in-Effect/hazard/data/fannie_quarters/cells_FNMA2019Q3.parquet": "1f4a5c553b8cef8b8326fb8bd3c3c550db3968ede5749cc5c92f0999c64ca297",
+    "/Users/eugene/somthing/Lock In effect/Lock-in-Effect/hazard/data/fannie_quarters/cells_FNMA2019Q4.parquet": "3713b9d9f55992bcb420ac880d74973a2ee72386a366a944ec02005e74b99e9a",
+    "/Users/eugene/somthing/Lock In effect/Lock-in-Effect/hazard/data/fannie_quarters/cells_FNMA2020Q1.parquet": "e202e797922dad8fd1c8158a6d57b7e5270c30e81446cacd345ec8ad71f99d64",
+    "/Users/eugene/somthing/Lock In effect/Lock-in-Effect/hazard/data/fannie_quarters/cells_FNMA2020Q2.parquet": "fe2075db4edcd91a3558a897461a7a99c7c06f522f98757527456485eec24b51",
+    "/Users/eugene/somthing/Lock In effect/Lock-in-Effect/hazard/data/fannie_quarters/cells_FNMA2020Q3.parquet": "a738840a0f979b39bf273b5cc337106d58dffbf5a84bd9741d7f71183f0c2167",
+    "/Users/eugene/somthing/Lock In effect/Lock-in-Effect/hazard/data/fannie_quarters/cells_FNMA2020Q4.parquet": "e9fa76956b67831a8df6dfe51c161f570d83fca350568e4f203e8e6c09b9178b",
+    "/Users/eugene/somthing/Lock In effect/Lock-in-Effect/hazard/data/fannie_quarters/cells_FNMA2021Q1.parquet": "5272dc3e7641d9c20e2e4028d51aecd3b22c70317655cd3ac9e990f254e78333",
+    "/Users/eugene/somthing/Lock In effect/Lock-in-Effect/hazard/data/fannie_quarters/cells_FNMA2021Q2.parquet": "6e91e9179111d8c49259da3629405d06696abdadeb748bf52a2664e2c4879305",
+    "/Users/eugene/somthing/Lock In effect/Lock-in-Effect/hazard/data/fannie_quarters/cells_FNMA2021Q3.parquet": "08f6ab94ba2c75d29382c39f72743b83575ab5032788bd9f04433b7d648fc3bb",
+    "/Users/eugene/somthing/Lock In effect/Lock-in-Effect/hazard/data/fannie_quarters/cells_FNMA2021Q4.parquet": "54edf4beb3586ccd2ad28c20eeff60bc74b40b4c0a1ee7ca470270d170ce2a61",
+    "/Users/eugene/somthing/Lock In effect/Lock-in-Effect/hazard/data/fannie_quarters/cells_FNMA2022Q1.parquet": "de3f15a7a0627297879fd071886a402a0370a947aeea28430a13ffd7d2384cdb",
+    "/Users/eugene/somthing/Lock In effect/Lock-in-Effect/hazard/data/fannie_quarters/cells_FNMA2022Q2.parquet": "f74129bf5b1b9f90bf79ef24a3a94bb3a7c88ea69309adb344c9e03e87ae2750",
+    "/Users/eugene/somthing/Lock In effect/Lock-in-Effect/hazard/data/fannie_quarters/cells_FNMA2022Q3.parquet": "086bece0688d7bbe563c0b1f40718b97ed38f70a1f83b72e98beae292c39a41b",
+    "/Users/eugene/somthing/Lock In effect/Lock-in-Effect/hazard/data/fannie_quarters/cells_FNMA2022Q4.parquet": "5d219311d0eda07d984778b5be83a3c324bc01e308999ef8a9d7fae1150e845e",
+    "/Users/eugene/somthing/Lock In effect/Lock-in-Effect/hazard/data/fannie_quarters/manifest.json": "b50ecee0dd33b07afc09ddfe6cbb75203480af66687c4e6f0709e752e98c5343",
+    "/Users/eugene/somthing/Lock In effect/Lock-in-Effect/hazard/data/cohort_month_panel_fannie.parquet": "012b6b3ef82e4e0f3ed9f7193bd786e4f8568a3101a1667a563b31f00c81e47d",
+    "/Users/eugene/.codex/worktrees/f586/Lock-in-Effect/hazard/data/cohort_month_panel.parquet": "c0feca1da96e97300d840c867494cc80ca8bbe97249c5fdeeb98761a015528e2",
+    "/Users/eugene/.codex/worktrees/f586/Lock-in-Effect/hazard/data/fannie_floor_read_results.json": "431318fb9acce76da63a1e562b58c28d906a12e55d2158f7d6194e05ed247087",
+    "/Users/eugene/.codex/worktrees/f586/Lock-in-Effect/specs/SPEC_2026-10-09_audited_rebuild_continuation.md": "80a8f72fd712ee3cd243262a4c6c4ff2ed7c97eda240b832f6d309c22c946db7",
+    "/Users/eugene/.codex/worktrees/f586/Lock-in-Effect/hazard/fannie_age_rebuild_audit.py": "ff369e465e88a46e1ce2b3549f0a6765d044349c2f6192ffa10ff54a08af650e",
+    "/Users/eugene/.codex/worktrees/f586/Lock-in-Effect/hazard/fannie_replication.py": "bb91a04e093da763bd0863b938907bd6f442983b18656daabe1ff447e6ee69bf",
+    "/Users/eugene/.codex/worktrees/f586/Lock-in-Effect/hazard/fannie_floor_read.py": "98755393efeceaa931e9399efe6c8eeb98f9043024b82c581a31e32866eada9b"
+  },
+  "rate_source": {
+    "url": "https://fred.stlouisfed.org/graph/fredgraph.csv?id=MORTGAGE30US&cosd=2016-12-01&coed=2025-10-31",
+    "sha256": "c2f7298dbd9c382fd9796631d92fd8234f1506605e25f1f2e1c86efea9c96205",
+    "retrieved_utc": "2026-10-10T02:38:54.890197+00:00"
+  },
+  "source_inputs_unchanged": true,
+  "legacy_panel_parity": {
+    "rows": 23443,
+    "reference_rows": 23443,
+    "keys_exact": true,
+    "absolute_tolerance": 1e-07,
+    "relative_tolerance": 1e-12,
+    "numeric": {
+      "exposure_upb": {
+        "passed": true,
+        "exact_equal_rows": 23443,
+        "max_abs_difference": 0.0
+      },
+      "orig_upb_sum": {
+        "passed": true,
+        "exact_equal_rows": 23443,
+        "max_abs_difference": 0.0
+      },
+      "prepaid_upb": {
+        "passed": true,
+        "exact_equal_rows": 23443,
+        "max_abs_difference": 0.0
+      },
+      "loan_count": {
+        "passed": true,
+        "exact_equal_rows": 23443,
+        "max_abs_difference": 0.0
+      },
+      "mean_loan_age": {
+        "passed": true,
+        "exact_equal_rows": 23435,
+        "max_abs_difference": 0.0
+      },
+      "monthly_prepay_rate": {
+        "passed": true,
+        "exact_equal_rows": 23443,
+        "max_abs_difference": 0.0
+      },
+      "burnout": {
+        "passed": true,
+        "exact_equal_rows": 23443,
+        "max_abs_difference": 0.0
+      }
+    },
+    "period_exact": true,
+    "mode_state_differences": 0,
+    "passed": true
+  },
+  "saved_grid_parity": {
+    "freddie": {
+      "passed": true,
+      "cells": 14,
+      "cpr_tolerance_pp": 0.001
+    },
+    "fannie": {
+      "passed": true,
+      "cells": 14,
+      "cpr_tolerance_pp": 0.001
+    }
+  },
+  "panel_comparison": {
+    "rows": 23443,
+    "keys_equal": true,
+    "unaffected_columns": {
+      "exposure_upb": {
+        "passed": true,
+        "max_abs_difference": 0.0
+      },
+      "orig_upb_sum": {
+        "passed": true,
+        "max_abs_difference": 0.0
+      },
+      "prepaid_upb": {
+        "passed": true,
+        "max_abs_difference": 0.0
+      },
+      "loan_count": {
+        "passed": true,
+        "max_abs_difference": 0.0
+      },
+      "monthly_prepay_rate": {
+        "passed": true,
+        "max_abs_difference": 0.0
+      },
+      "burnout": {
+        "passed": true,
+        "max_abs_difference": 0.0
+      }
+    },
+    "changed_age_rows": 20906,
+    "nonfinite_age_rows": 8,
+    "max_abs_age_change_months": 11.579500815388457,
+    "weighted_abs_age_change_months": 3.0709295856979577,
+    "mode_state_differences": 0
+  },
+  "before": {
+    "out_of_window_2017_2019": {
+      "gap<=+0.0000_age>=12": {
+        "cpr_pct": 6.403,
+        "exposure_upb": 3066137934377.6694,
+        "n_cohort_months": 501
+      },
+      "gap<=+0.0000_age>=24": {
+        "cpr_pct": 11.895,
+        "exposure_upb": 98499219043.6,
+        "n_cohort_months": 89
+      },
+      "gap<=-0.0025_age>=12": {
+        "cpr_pct": 5.522,
+        "exposure_upb": 2317864654424.1094,
+        "n_cohort_months": 421
+      },
+      "gap<=-0.0025_age>=24": {
+        "cpr_pct": 10.136,
+        "exposure_upb": 27522487459.69,
+        "n_cohort_months": 71
+      },
+      "gap<=-0.0050_age>=12": {
+        "cpr_pct": 5.373,
+        "exposure_upb": 1429742652360.28,
+        "n_cohort_months": 378
+      },
+      "gap<=-0.0050_age>=24": {
+        "cpr_pct": 10.136,
+        "exposure_upb": 27522487459.69,
+        "n_cohort_months": 71
+      }
+    },
+    "in_window_2023_2024": {
+      "gap<=+0.0000_age>=12": {
+        "cpr_pct": 3.963,
+        "exposure_upb": 53543199674054.55,
+        "n_cohort_months": 6463
+      },
+      "gap<=+0.0000_age>=24": {
+        "cpr_pct": 4.151,
+        "exposure_upb": 39953875238900.016,
+        "n_cohort_months": 5815
+      },
+      "gap<=-0.0025_age>=12": {
+        "cpr_pct": 3.962,
+        "exposure_upb": 53537572461388.375,
+        "n_cohort_months": 6322
+      },
+      "gap<=-0.0025_age>=24": {
+        "cpr_pct": 4.151,
+        "exposure_upb": 39948260650495.766,
+        "n_cohort_months": 5685
+      },
+      "gap<=-0.0050_age>=12": {
+        "cpr_pct": 3.961,
+        "exposure_upb": 53510957085399.586,
+        "n_cohort_months": 6040
+      },
+      "gap<=-0.0050_age>=24": {
+        "cpr_pct": 4.149,
+        "exposure_upb": 39921685524345.266,
+        "n_cohort_months": 5434
+      }
+    },
+    "in_window_deep_OTM_validation": {
+      "gap<=-0.02_age>=12": {
+        "cpr_pct": 3.864,
+        "exposure_upb": 51715104425808.73,
+        "n_cohort_months": 3984
+      },
+      "gap<=-0.02_age>=24": {
+        "cpr_pct": 4.029,
+        "exposure_upb": 38156033157215.25,
+        "n_cohort_months": 3586
+      }
+    }
+  },
+  "after": {
+    "out_of_window_2017_2019": {
+      "gap<=+0.0000_age>=12": {
+        "cpr_pct": 6.565,
+        "exposure_upb": 3350207554854.46,
+        "n_cohort_months": 587
+      },
+      "gap<=+0.0000_age>=24": {
+        "cpr_pct": 11.328,
+        "exposure_upb": 206388794008.39,
+        "n_cohort_months": 122
+      },
+      "gap<=-0.0025_age>=12": {
+        "cpr_pct": 5.544,
+        "exposure_upb": 2389104453975.2803,
+        "n_cohort_months": 489
+      },
+      "gap<=-0.0025_age>=24": {
+        "cpr_pct": 9.523,
+        "exposure_upb": 84304323739.45001,
+        "n_cohort_months": 92
+      },
+      "gap<=-0.0050_age>=12": {
+        "cpr_pct": 5.392,
+        "exposure_upb": 1493670548650.76,
+        "n_cohort_months": 435
+      },
+      "gap<=-0.0050_age>=24": {
+        "cpr_pct": 9.523,
+        "exposure_upb": 84304323739.45001,
+        "n_cohort_months": 92
+      }
+    },
+    "in_window_2023_2024": {
+      "gap<=+0.0000_age>=12": {
+        "cpr_pct": 3.963,
+        "exposure_upb": 53543079983813.266,
+        "n_cohort_months": 6448
+      },
+      "gap<=+0.0000_age>=24": {
+        "cpr_pct": 4.045,
+        "exposure_upb": 45789048181650.15,
+        "n_cohort_months": 5946
+      },
+      "gap<=-0.0025_age>=12": {
+        "cpr_pct": 3.962,
+        "exposure_upb": 53537452771147.09,
+        "n_cohort_months": 6307
+      },
+      "gap<=-0.0025_age>=24": {
+        "cpr_pct": 4.044,
+        "exposure_upb": 45783433593245.91,
+        "n_cohort_months": 5816
+      },
+      "gap<=-0.0050_age>=12": {
+        "cpr_pct": 3.961,
+        "exposure_upb": 53510845609534.72,
+        "n_cohort_months": 6028
+      },
+      "gap<=-0.0050_age>=24": {
+        "cpr_pct": 4.042,
+        "exposure_upb": 45756858467095.414,
+        "n_cohort_months": 5565
+      }
+    },
+    "in_window_deep_OTM_validation": {
+      "gap<=-0.02_age>=12": {
+        "cpr_pct": 3.864,
+        "exposure_upb": 51715104425808.73,
+        "n_cohort_months": 3984
+      },
+      "gap<=-0.02_age>=24": {
+        "cpr_pct": 3.934,
+        "exposure_upb": 43986105896998.66,
+        "n_cohort_months": 3725
+      }
+    }
+  },
+  "membership_changes": [
+    {
+      "window": "out_of_window_2017_2019",
+      "max_gap": 0.0,
+      "min_mean_age": 12,
+      "added_cells": 87,
+      "removed_cells": 1,
+      "added_exposure_dollar_months": 284204649821.54,
+      "removed_exposure_dollar_months": 135029344.75
+    },
+    {
+      "window": "out_of_window_2017_2019",
+      "max_gap": 0.0,
+      "min_mean_age": 24,
+      "added_cells": 34,
+      "removed_cells": 1,
+      "added_exposure_dollar_months": 108007857624.33998,
+      "removed_exposure_dollar_months": 118282659.55
+    },
+    {
+      "window": "out_of_window_2017_2019",
+      "max_gap": -0.0025,
+      "min_mean_age": 12,
+      "added_cells": 69,
+      "removed_cells": 1,
+      "added_exposure_dollar_months": 71374828895.92001,
+      "removed_exposure_dollar_months": 135029344.75
+    },
+    {
+      "window": "out_of_window_2017_2019",
+      "max_gap": -0.0025,
+      "min_mean_age": 24,
+      "added_cells": 22,
+      "removed_cells": 1,
+      "added_exposure_dollar_months": 56900118939.310005,
+      "removed_exposure_dollar_months": 118282659.55
+    },
+    {
+      "window": "out_of_window_2017_2019",
+      "max_gap": -0.005,
+      "min_mean_age": 12,
+      "added_cells": 58,
+      "removed_cells": 1,
+      "added_exposure_dollar_months": 64062925635.23001,
+      "removed_exposure_dollar_months": 135029344.75
+    },
+    {
+      "window": "out_of_window_2017_2019",
+      "max_gap": -0.005,
+      "min_mean_age": 24,
+      "added_cells": 22,
+      "removed_cells": 1,
+      "added_exposure_dollar_months": 56900118939.310005,
+      "removed_exposure_dollar_months": 118282659.55
+    },
+    {
+      "window": "in_window_2023_2024",
+      "max_gap": 0.0,
+      "min_mean_age": 12,
+      "added_cells": 0,
+      "removed_cells": 15,
+      "added_exposure_dollar_months": 0.0,
+      "removed_exposure_dollar_months": 119690241.28
+    },
+    {
+      "window": "in_window_2023_2024",
+      "max_gap": 0.0,
+      "min_mean_age": 24,
+      "added_cells": 148,
+      "removed_cells": 17,
+      "added_exposure_dollar_months": 5835311958160.35,
+      "removed_exposure_dollar_months": 139015410.20999998
+    },
+    {
+      "window": "in_window_2023_2024",
+      "max_gap": -0.0025,
+      "min_mean_age": 12,
+      "added_cells": 0,
+      "removed_cells": 15,
+      "added_exposure_dollar_months": 0.0,
+      "removed_exposure_dollar_months": 119690241.28
+    },
+    {
+      "window": "in_window_2023_2024",
+      "max_gap": -0.0025,
+      "min_mean_age": 24,
+      "added_cells": 148,
+      "removed_cells": 17,
+      "added_exposure_dollar_months": 5835311958160.35,
+      "removed_exposure_dollar_months": 139015410.20999998
+    },
+    {
+      "window": "in_window_2023_2024",
+      "max_gap": -0.005,
+      "min_mean_age": 12,
+      "added_cells": 0,
+      "removed_cells": 12,
+      "added_exposure_dollar_months": 0.0,
+      "removed_exposure_dollar_months": 111475864.86
+    },
+    {
+      "window": "in_window_2023_2024",
+      "max_gap": -0.005,
+      "min_mean_age": 24,
+      "added_cells": 148,
+      "removed_cells": 17,
+      "added_exposure_dollar_months": 5835311958160.35,
+      "removed_exposure_dollar_months": 139015410.20999998
+    },
+    {
+      "window": "in_window_deep_OTM_validation",
+      "max_gap": -0.02,
+      "min_mean_age": 12,
+      "added_cells": 0,
+      "removed_cells": 0,
+      "added_exposure_dollar_months": 0.0,
+      "removed_exposure_dollar_months": 0.0
+    },
+    {
+      "window": "in_window_deep_OTM_validation",
+      "max_gap": -0.02,
+      "min_mean_age": 24,
+      "added_cells": 139,
+      "removed_cells": 0,
+      "added_exposure_dollar_months": 5830072739783.399,
+      "removed_exposure_dollar_months": 0.0
+    }
+  ],
+  "rebuilt_panel_sha256": "d3d0ee8fca7e8bf4eea646ad14a4f6a5a028436e0a3f25f8a17d87f7fd8a4727",
+  "limitations": [
+    "Original quarter payoff numerators are unchanged and unaudited against raw loan histories.",
+    "Reported loan count is the age weight; within-quarter finite-age counts are unavailable.",
+    "Age thresholds apply to cohort means, not each individual loan.",
+    "CPR annualizes payoff/current-end-UPB; summed exposure is dollar-months.",
+    "No Freddie raw-source rebuild, new parameter selection or headline simulation update."
+  ]
+}

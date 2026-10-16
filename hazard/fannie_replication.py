@@ -45,11 +45,12 @@ CONSTRUCTION (production conventions held fixed)
   guard: abort below MIN_FREE_GIB before each quarter; the loop is
   resume-safe (a quarter with cells+pool pieces on disk is skipped; a
   surviving native file forces a fresh overwrite staging).
-  Panel: per-quarter cells recombined by combine_quarter_cells(), which
-  replicates ingest.py's combine stage (ingest.py:246-276) verbatim — sums
-  for exposure_upb/orig_upb_sum/prepaid_upb/loan_count, mean of
-  mean_loan_age, first of mode_state, then monthly_prepay_rate/period/burnout
-  derived on the combined frame — in spec quarter order. Equality with the
+  Panel: corrected per-quarter cells are recombined by combine_quarter_cells()
+  using summed financial balances/counts and finite-age sums/counts. Fixed
+  original cohort balances are summed once per source quarter and cohort;
+  monthly_prepay_rate/period/burnout are derived on the combined frame.
+  Old cells require explicit historical replay and cannot be mixed with
+  corrected cells. Equality with the
   one-shot build is gated by tests/test_fannie_replication.py (synthetic
   two-pair identity), and end-to-end staging+ingest determinism by the
   2019Q1 gate: production cells for FNMA2019Q1 must equal the probe panel.
@@ -114,6 +115,7 @@ import json
 import shutil
 import subprocess
 import time
+import warnings
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Sequence
@@ -174,27 +176,81 @@ def combine_quarter_cells(
     cell_paths: Sequence[Path],
     output: Path,
     vintage_years: Sequence[int] | None = VINTAGE_YEARS,
+    *,
+    allow_legacy_cells: bool = False,
 ) -> pl.DataFrame:
+    """Recombine disjoint source-quarter aggregates without losing history.
+
+    Corrected cells must carry fixed original cohort balances and finite-age
+    sums/counts. The denominator is counted once per source file and cohort,
+    including months when that source cohort has no remaining observations.
+    Historical age-only replay is available explicitly for old cells; it
+    preserves their legacy, shrinking burnout denominator.
     """
-    Concatenate per-quarter cohort-month cells (each a single-pair
-    build_panel_from_files output) and re-run the combine stage of
-    ingest.build_panel_from_files (ingest.py:246-276) verbatim. Per-quarter
-    derived columns are dropped and re-derived on the combined frame; the
-    optional vintage filter (applied before deriving, equivalent for kept
-    cohorts since all derives are within-cohort) enforces the origination
-    universe. Identity with the one-shot build over the same pairs is gated
-    by tests/test_fannie_replication.py.
-    """
+    if not cell_paths:
+        raise ValueError("No quarter cells supplied")
+    if len({Path(p).resolve() for p in cell_paths}) != len(cell_paths):
+        raise ValueError("Duplicate quarter-cell input path")
     frames = [pl.read_parquet(p).drop(_DERIVED_COLS) for p in cell_paths]
+    cohort_keys = _PANEL_KEYS[:-1]
+    required = {"cohort_original_upb", "finite_age_sum", "finite_age_count"}
+    metadata = [required.intersection(frame.columns) for frame in frames]
+    corrected = all(cols == required for cols in metadata)
+    if not corrected:
+        if any(metadata):
+            raise ValueError("Mixed or incomplete corrected quarter-cell metadata; rebuild all source quarters")
+        if not allow_legacy_cells:
+            raise ValueError("Quarter cells lack fixed cohort balances and finite-age counts; rebuild them or explicitly allow_legacy_cells for historical replay")
+        warnings.warn("Historical quarter-cell replay uses legacy burnout denominators and count-weighted available mean ages", UserWarning, stacklevel=2)
+    denominators = []
+    for frame in frames:
+        if frame.select(pl.struct(_PANEL_KEYS).is_duplicated().any()).item():
+            raise ValueError("Duplicate cohort-month in quarter cells")
+        if corrected:
+            invalid_denominator = frame.filter(
+                pl.col("cohort_original_upb").is_null()
+                | ~pl.col("cohort_original_upb").is_finite()
+                | (pl.col("cohort_original_upb") <= 0)
+            )
+            fixed = frame.group_by(cohort_keys).agg(
+                pl.col("cohort_original_upb").n_unique().alias("denominator_values"),
+                pl.col("cohort_original_upb").first(),
+            )
+            if invalid_denominator.height or fixed.filter(pl.col("denominator_values") != 1).height:
+                raise ValueError("Each source cohort must have one finite positive fixed original balance")
+            invalid_age = frame.filter(
+                pl.col("finite_age_sum").is_null()
+                | ~pl.col("finite_age_sum").is_finite()
+                | pl.col("finite_age_count").is_null()
+                | ~pl.col("finite_age_count").is_finite()
+                | (pl.col("finite_age_count") < 0)
+                | (pl.col("finite_age_count") > pl.col("loan_count"))
+                | (pl.col("finite_age_count") != pl.col("finite_age_count").floor())
+                | ((pl.col("finite_age_count") == 0) & (pl.col("finite_age_sum") != 0))
+            )
+            if invalid_age.height:
+                raise ValueError("Invalid finite-age sufficient statistics in quarter cells")
+            denominators.append(fixed.drop("denominator_values"))
     panel = pl.concat(frames)
+    age_aggregates = [pl.col("finite_age_sum").sum(), pl.col("finite_age_count").sum()] if corrected else [
+        ((pl.col("mean_loan_age") * pl.col("loan_count"))
+         .filter(pl.col("mean_loan_age").is_finite()).sum()
+         / pl.col("loan_count").filter(pl.col("mean_loan_age").is_finite()).sum())
+        .alias("mean_loan_age")
+    ]
     panel = panel.group_by(_PANEL_KEYS).agg([
         pl.col("exposure_upb").sum(),
         pl.col("orig_upb_sum").sum(),
         pl.col("prepaid_upb").sum(),
-        pl.col("mean_loan_age").mean(),
+        *age_aggregates,
         pl.col("mode_state").first(),
         pl.col("loan_count").sum(),
     ])
+    if corrected:
+        fixed = pl.concat(denominators).group_by(cohort_keys).agg(pl.col("cohort_original_upb").sum())
+        panel = panel.join(fixed, on=cohort_keys, how="left").with_columns(
+            (pl.col("finite_age_sum") / pl.col("finite_age_count")).alias("mean_loan_age")
+        )
     if vintage_years is not None:
         panel = panel.filter(pl.col("vintage").is_in(list(vintage_years)))
     panel = (
@@ -212,9 +268,11 @@ def combine_quarter_cells(
     panel = panel.with_columns([
         (pl.col("prepaid_upb").cum_sum().over(
             ["vintage", "coupon", "fico_bucket", "ltv_bucket"]
-        ) / pl.col("orig_upb_sum").clip(lower_bound=1))
+        ) / (pl.col("cohort_original_upb") if corrected else pl.col("orig_upb_sum").clip(lower_bound=1)))
         .alias("burnout"),
     ])
+    if corrected and panel.filter(~pl.col("burnout").is_finite() | (pl.col("burnout") < 0) | (pl.col("burnout") > 1 + 1e-10)).height:
+        raise ValueError("Payoff history exceeds fixed original cohort balance; audit events instead of clipping")
     output.parent.mkdir(parents=True, exist_ok=True)
     panel.write_parquet(output)
     print(f"Combined Fannie panel saved: {output} ({len(panel):,} rows)")

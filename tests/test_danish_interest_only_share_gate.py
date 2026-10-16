@@ -1,3 +1,5 @@
+# Historical research-record gate: source archived by the approved October 7 revision.
+# Current publication is checked by test_manuscript_references/test_revision_artifacts.
 """Battery for gate #120 (R32 C-79: the Danish leg with an interest-only share).
 
 Four failure modes drive what these tests bind hardest on.
@@ -49,12 +51,12 @@ from liveness_gates import (  # noqa: E402
 
 # V20 closing-session rescope: app:ledger/app:verdicts live in the standalone
 # replication_appendices.tex; the gated corpus is manuscript + that file.
-TEX = ((ROOT / "paper" / "final" / "paper_final_v1.tex").read_text()
-       + "\n" + (ROOT / "paper" / "final" / "replication_appendices.tex").read_text())
-VARIANT = (ROOT / "paper" / "final"
+TEX = ((ROOT / "paper" / "final" / "reviewed_archive" / "paper_final_v1.tex").read_text()
+       + "\n" + (ROOT / "paper" / "final" / "reviewed_archive" / "replication_appendices.tex").read_text())
+VARIANT = (ROOT / "paper" / "final" / "reviewed_archive"
            / "paper_final_v1_long_abstract.tex").read_text() \
-    + "\n" + (ROOT / "paper" / "final" / "replication_appendices.tex").read_text()  # V20 rescope
-BIB = (ROOT / "paper" / "final" / "references.bib").read_text()
+    + "\n" + (ROOT / "paper" / "final" / "reviewed_archive" / "replication_appendices.tex").read_text()  # V20 rescope
+BIB = (ROOT / "paper" / "final" / "reviewed_archive" / "references.bib").read_text()
 GATES_SRC = (ROOT / "tools" / "liveness_gates.py").read_text()
 IO = json.loads((ROOT / "hazard" / "data"
                  / "danish_interest_only_share_results.json").read_text())
@@ -271,8 +273,8 @@ def test_each_derived_span_removal_fails(key):
 
 
 def test_the_bib_entry_exists_in_the_bib_the_manuscript_resolves():
-    """\\bibliography{references} sits in paper/final/, so it resolves to
-    paper/final/references.bib -- not the stale paper/references.bib."""
+    """\\bibliography{references} sits in paper/final/reviewed_archive/, so it resolves to
+    paper/final/reviewed_archive/references.bib -- not the stale paper/references.bib."""
     assert "\\citep{nationalbanken2020}" in TEX
     assert "@misc{nationalbanken2020," in BIB
     assert "{{Danmarks Nationalbank}}" in BIB

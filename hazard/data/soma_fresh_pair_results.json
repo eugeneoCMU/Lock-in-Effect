@@ -1,0 +1,37 @@
+{
+  "mode": "fresh_freddie_umbs30_cell_targeted_paired_sensitivity",
+  "sample_report": "hazard/data/soma_fresh_umbs30_sample_report.json",
+  "n": 75000,
+  "listed_cells_total_soma_face_share": 0.47587619671971765,
+  "pair": {
+    "null_trapped_b": 733.0067367716908,
+    "central_trapped_b": 775.1828259555084,
+    "null_share_pct": 95.84941628604597,
+    "central_share_pct": 101.36444544839902,
+    "marginal_b": 42.17608918381757,
+    "marginal_pp": 5.515029162353059,
+    "null_bind": 0.4258518204787428,
+    "central_bind": 0.7925389549241094,
+    "null_bind_n": 3149666,
+    "central_bind_n": 3149666
+  },
+  "weighting": {
+    "cell_counts": {
+      "0.0200|2021": 30347,
+      "0.0250|2021": 13074,
+      "0.0250|2020": 10555,
+      "0.0200|2020": 9160,
+      "0.0150|2021": 3137,
+      "0.0300|2017-19": 2541,
+      "0.0300|2020": 1991,
+      "0.0350|2017-19": 1458,
+      "0.0400|2017-19": 1210,
+      "0.0150|2020": 851,
+      "0.0250|2017-19": 472,
+      "0.0450|2017-19": 204
+    },
+    "supported_sample_balance_share": 1.0,
+    "max_target_share_error": 5.551115123125783e-17
+  },
+  "scope": "Paired model marginal using a new Freddie 30-year May-2022 survivor draw, with listed June-2022 UMBS 30-year coupon-by-vintage cell shares. Conditional whole-pool scaling; not a causal estimate or a direct full-SOMA estimate."
+}

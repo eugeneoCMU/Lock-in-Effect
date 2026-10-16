@@ -92,6 +92,8 @@ def run_qt_microsim(
     p_q_shock_pct: float = ROTHSTEIN_Q_DECLINE_MID * 100,
     soma_cohorts: Optional[list] = None,
     coupon_convert=None,
+    *, allow_legacy_inputs: bool = False,
+    transition_matrix: Optional[pd.DataFrame] = None,
 ) -> dict[str, pd.DataFrame]:
     """
     Forward-walk loan sample through QT window under US and Danish rate-gap regimes.
@@ -100,14 +102,41 @@ def run_qt_microsim(
     in percent (sensitivity band 5.5–7.7, midpoint 6.5).  β₁ is derived via
     the survival-function conversion — same loan sample and RNG seeds across
     band points, so only the elasticity varies.
+
+    Corrected runs require the exact pre-QT snapshot with known terms and
+    fixed-cohort history, plus a supplied identified-loan transition matrix
+    whose stored estimation cutoff precedes QT. These are structural checks,
+    not a certification of source provenance or empirical identification.
+    Historical cached inputs require explicit allow_legacy_inputs=True.
     """
     beta1 = rothstein_beta1(p_q_shock_pct / 100.0)
     if loan_sample is None:
         loan_sample = load_or_build_loan_sample(n_loans=n_loans)
+    if not allow_legacy_inputs:
+        required = {'original_loan_term', 'initial_burnout', 'burnout_denominator_multiplier', 'reporting_period'}
+        if not required.issubset(loan_sample.columns):
+            raise ValueError('Rebuild snapshots with known terms and fixed-cohort historical burnout; legacy replay requires allow_legacy_inputs=True')
+        MicrosimPool(loan_sample, require_audited_inputs=True)
+        snapshot_ym = (pd.Timestamp(QT_START).to_period('M') - 1).strftime('%Y%m')
+        if (loan_sample['reporting_period'].null_count()
+                or not (loan_sample['reporting_period'].cast(pl.String) == snapshot_ym).all()):
+            raise ValueError('Corrected QT runs require an exact pre-QT month snapshot')
+        if transition_matrix is None:
+            raise ValueError('Provide an audited loan-history transition_matrix; the cached cohort proxy is legacy only')
+        matrix_end = str(transition_matrix.attrs.get('estimation_end', ''))
+        if (transition_matrix.attrs.get('estimator') != 'identified_monthly_loan_transitions'
+                or len(matrix_end) != 6 or not matrix_end.isdigit()
+                or matrix_end[4:] not in {f'{month:02d}' for month in range(1, 13)}
+                or matrix_end > snapshot_ym):
+            raise ValueError('Transition matrix requires identified-loan metadata and a frozen cutoff before the QT window')
+        if output.exists():
+            raise FileExistsError('Preserve previous results; choose a new output path for the corrected run')
+        if soma_cohorts is not None and (loan_sample['original_loan_term'] != 360).any():
+            raise ValueError('SOMA coupon weighting requires the explicitly restricted 360-month sample')
     if macro is None:
         macro = calculate_dynamic_friction(fetch_data())
 
-    trans = load_transition_matrix()
+    trans = load_transition_matrix() if transition_matrix is None else transition_matrix
     qt_start_idx = macro.index.get_indexer([QT_START], method="nearest")[0]
     holdings_b = float(macro.iloc[qt_start_idx]["WSHOMCB"]) / 1_000
 

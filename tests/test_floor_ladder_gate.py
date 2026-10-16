@@ -1,3 +1,5 @@
+# Historical research-record gate: source archived by the approved October 7 revision.
+# Current publication is checked by test_manuscript_references/test_revision_artifacts.
 """Battery for gate #107 (round-30 E7/CR1: the CR1 rungs and the designer units).
 
 Same convention as the #105/#106 batteries: mutations remove ALL occurrences of
@@ -21,8 +23,8 @@ from liveness_gates import (  # noqa: E402
     floor_ladder_check,
 )
 
-TEX = (ROOT / "paper" / "final" / "paper_final_v1.tex").read_text()
-VARIANT = (ROOT / "paper" / "final"
+TEX = (ROOT / "paper" / "final" / "reviewed_archive" / "paper_final_v1.tex").read_text()
+VARIANT = (ROOT / "paper" / "final" / "reviewed_archive"
            / "paper_final_v1_long_abstract.tex").read_text()
 ART = json.loads((ROOT / "hazard" / "data"
                   / "floor_inference_correction_v2_results.json").read_text())

@@ -1,8 +1,10 @@
+# Historical research-record gate: source archived by the approved October 7 revision.
+# Current publication is checked by test_manuscript_references/test_revision_artifacts.
 """The manuscript states how many standalone pre-committed specifications ship in specs/.
 
 That sentence was written when the count was eleven and silently went stale as the round added
 nine more; no gate pinned it, so the suite stayed green over a false claim in a paper that
-publishes the very directory refuting it. This test ties the printed number to the directory.
+publishes the very directory refuting it. This test ties the printed number to the reviewed inventory.
 
 It counts FILES, deliberately. The earlier sentence said "Eleven runs" while counting files, which
 was true only while each spec covered exactly one run -- the round-28 specs cover several apiece
@@ -12,15 +14,17 @@ and three R32 specs cover none. Counting files is the claim that can actually be
 from __future__ import annotations
 
 import re
+import json
+import hashlib
 from pathlib import Path
 
 import pytest
 
 ROOT = Path(__file__).resolve().parents[1]
-SPECS = ROOT / "specs"
-_REPLAPPX = (ROOT / "paper" / "final" / "replication_appendices.tex").read_text()
-TEX = [ROOT / "paper" / "final" / "paper_final_v1.tex",
-       ROOT / "paper" / "final" / "paper_final_v1_long_abstract.tex"]
+SPEC_INVENTORY = ROOT / "paper/final/reviewed_archive/spec_inventory.json"
+_REPLAPPX = (ROOT / "paper" / "final" / "reviewed_archive" / "replication_appendices.tex").read_text()
+TEX = [ROOT / "paper" / "final" / "reviewed_archive" / "paper_final_v1.tex",
+       ROOT / "paper" / "final" / "reviewed_archive" / "paper_final_v1_long_abstract.tex"]
 
 NUMBER_WORDS = {
     10: "Ten", 11: "Eleven", 12: "Twelve", 13: "Thirteen", 14: "Fourteen", 15: "Fifteen",
@@ -35,14 +39,17 @@ CLAIM = re.compile(
 
 
 def spec_file_count() -> int:
-    return len(list(SPECS.glob("SPEC_*.md")))
+    files = json.loads(SPEC_INVENTORY.read_text())["files"]
+    for entry in files:
+        assert hashlib.sha256((ROOT / entry["path"]).read_bytes()).hexdigest() == entry["sha256"]
+    return len(files)
 
 
 @pytest.mark.parametrize("tex_path", TEX, ids=lambda p: p.name)
 def test_printed_spec_count_matches_the_directory(tex_path: Path) -> None:
     n = spec_file_count()
     assert n in NUMBER_WORDS, (
-        f"specs/ holds {n} SPEC files, outside this test's number-word table; extend "
+        f"the preserved specification inventory holds {n} SPEC files, outside this test's number-word table; extend "
         f"NUMBER_WORDS and update the manuscript sentence together")
     # V20 closing-session rescope: the claim sentence lives in app:verdicts,
     # migrated to replication_appendices.tex; each variant ships with it.
@@ -51,7 +58,7 @@ def test_printed_spec_count_matches_the_directory(tex_path: Path) -> None:
         f"{tex_path.name}: expected exactly one spec-count claim, found {len(hits)}: {hits}")
     assert hits[0] == NUMBER_WORDS[n], (
         f"{tex_path.name} prints '{hits[0]} standalone pre-committed specifications' but "
-        f"specs/ holds {n} SPEC files ('{NUMBER_WORDS[n]}'). Update the sentence in BOTH .tex "
+        f"the preserved specification inventory holds {n} SPEC files ('{NUMBER_WORDS[n]}'). Update the sentence in BOTH .tex "
         f"variants whenever a spec is added or removed.")
 
 

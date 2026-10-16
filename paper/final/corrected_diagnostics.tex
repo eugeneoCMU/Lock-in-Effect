@@ -1,0 +1,45 @@
+\section{Corrected-Input Diagnostics}\label{app:correcteddiagnostics}
+\subsection{Sequential input comparison}
+The historical anchor is \$42.6083939 billion. Replaying archived inputs through the current engine gives \$42.6068674 billion, leaving a \$-0.0015265 billion replication residual. That residual is retained, not assigned to source parsing. Archived loan records lack original-term and pre-May history fields. Their compatibility replay therefore retains the original assumed 360-month amortization and zero-history initialization; it does not certify their original terms. The archived transition proxy has zero rows for unsupported states, whose states remain unchanged under the documented legacy rule. The final corrected stage instead requires audited terms, history and identified pre-QT transitions.
+
+\begin{table}[H]\centering\small
+\caption{Sequential controlled substitutions (\$ billions). Changes depend on the stated order and are not causal contributions.}\label{tab:correctedbridge}
+\begin{tabular}{@{}p{5.7 cm}rrr@{}}\toprule
+Input stage & Reported & Pool cash & Change\\\midrule
+Archived inputs/current engine & 42.6069 & 36.9760 & -- \\
+Corrected sample; legacy history & 41.8328 & 35.9173 & -0.7741 \\
+Corrected history; archived transitions & 16.2845 & 14.4379 & -25.5483 \\
+All corrected inputs & 16.2155 & 14.3407 & -0.0690 \\
+\bottomrule\end{tabular}\end{table}
+
+The sample substitution jointly changes eligibility, draw, covariates, observed balances and states; it is not isolated random sampling variation. The history substitution retains the corrected sample and archived transition proxy while installing observed pre-May burnout and fixed-cohort denominator multipliers. The final transition substitution reproduces the accepted corrected benchmark within $10^{-8}$ billion dollars. This sequential comparison cannot disentangle every source correction or recover unavailable archived fields.
+
+\subsection{Disaggregated retrospective fit}
+All four models use identical observed outcomes and exposure in 44 coupon--vintage groups and four half-year groups. The complete group-level support, predicted totals, ratios, signed errors, RMSE and MAE are retained in\path{fit_review.json}; low-exposure groups are retained rather than silently discarded. Against the simple baseline's group RMSE, the max, additive, inherited 75\% and matched 75\% models improve in 8/6/8/7 groups, respectively, out of 44. Counts are unweighted diagnostics; aggregate errors remain exposure weighted. Half-year scores retain the shortened July--September 2025 period explicitly.
+
+\begin{table}[H]\centering\scriptsize
+\caption{Same-support half-year payoff errors. Observed principal is \$ billions; all errors are exposure-weighted monthly-rate RMSE in percentage points.}\label{tab:correctedhalves}
+\begin{tabular}{@{}lrrrrrr@{}}\toprule
+Period & Observed & Baseline & Max & Additive & Inherited 75 & Matched 75\\\midrule
+2024 H 1 & 29.88 & 0.0916 & 0.1536 & 0.4576 & 0.1310 & 0.1290\\
+2024 H 2 & 31.86 & 0.0764 & 0.1220 & 0.4211 & 0.1071 & 0.1005\\
+2025 H 1 & 29.13 & 0.0952 & 0.1389 & 0.4320 & 0.1185 & 0.1151\\
+2025 H 2 & 16.99 & 0.1076 & 0.0962 & 0.3628 & 0.1098 & 0.0931\\
+\bottomrule\end{tabular}\end{table}
+
+\subsection{Fresh floor measurement uncertainty}
+The selected 2018 note-minus-market gap is at most $-25$ basis points and mean loan age is at least twelve months. Corrected support contains 96 cohort-months in 24 strata and 7 calendar months. The point annualized end-exposure payoff-speed ratio is 4.6881\%. Selected mean ages range from 12.000 to 18.959 months; no qualifying cohort has mean age at least 24 months. Support isJune--December 2018. A cohort mean-age threshold does not establish each loan's age, and this ratio is not an observed beginning-balance hazard or a purely involuntary exit rate.
+
+Restricted Webb test inversion uses 9,999 six-point-weight draws, seed 42, and 401 candidate monthly ratios over the observed point plus/minus five CR 1 standard errors. The same weights are reused across candidates. The observed statistic uses the inherited unrestricted CR 1 studentizer; each null-imposed resample recomputes its restricted studentizer. Nonphysical candidates are excluded explicitly; finite-studentizer counts, retained indices, contiguity and open-edge flags are archived. Stratum clustering permits repeated-month dependence within the original four-way cohort; month clustering instead addresses a common month shock. Neither alone is two-way clustering or an identified total-uncertainty model.
+
+\begin{table}[H]\centering\small
+\caption{Corrected floor-ratio inference. Nominal clusters, exposure-effective count, maximum leverage, and annualized retained 95\% candidate interval.}\label{tab:correctedfloor}
+\begin{tabular}{@{}lrrrr@{}}\toprule
+Cluster & Nominal & Effective & Max leverage & Floor(\%)\\\midrule
+Stratum & 24 & 5.10 & 0.352 & [3.652, 6.509] \\
+Month & 7 & 3.90 & 0.297 & [2.944, 5.598] \\
+\bottomrule\end{tabular}\end{table}
+
+The corrected-engine PCHIP image of the primary retained floor set gives an approximate reported measurement band of \$1.15--\$52.05 billion. 10 exact paired grid runs and 9 midpoint checks have maximum holdout discrepancy \$0.0137 billion, below the prespecified \$0.05 billion numerical tolerance. The checked grid is monotone; this numerical audit is not a proof of global exact coverage. The exact point-read effect is \$23.27 billion and is a reanchored scenario, distinct from the inherited 4.991\% benchmark. This band conditions on the fixed sample, response, hazard form, initialization, transition inputs and reporting rule; it excludes mixture-share, reference, elasticity, seasoning and portfolio-transport uncertainty.
+
+The historical $+1.9$--$+9.1$ point band belongs to the archived floor read, sample and mapping and is not transferred to the corrected benchmark. The new floor inference does not estimate a sensitive share or provide statistical coverage for the 40 structural scenarios. All results condition on previously inspected source and evaluation data; no prospective validation or full-SOMA causal interpretation follows.

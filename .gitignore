@@ -62,6 +62,7 @@ hazard/data/oos_identification_run.log
 # Editor/agent workspaces (stale worktree copies pollute repo greps)
 .claude/
 .cursor/
+.worktrees/
 
 # Phase backups made by the freeze protocol
 *.bak-*
@@ -101,3 +102,26 @@ abm/data/cross_design_seeds/
 abm/data/production_scale_test/
 # FP2-B1 per-run parquets (regenerable via hazard/floor_grid_extension.py)
 hazard/data/floor_grid_extension/
+
+# Local-only survivor and validation inputs (October 7 revision)
+hazard/data/soma_fresh_umbs30_sample.parquet
+hazard/data/soma_stream_quarters/
+output/review-revision/**/validation_cell_month_scores.csv
+
+# Revision deliveries and verification intermediates stay local.
+output/review-revision/
+output/packages/
+output/pdf/lock-in-effect-economics-review-*.pdf
+# Historical JSON inventories are source evidence for archived manuscript gates.
+!paper/final/reviewed_archive/*.json
+
+# October 8 local baseline archives, replay logs, renders, and delivery packages.
+output/paper-improvement/
+output/pdf/lock-in-paper-improved-2026-10-08*.pdf
+output/pdf/lock-in-paper-audited-2026-10-10*.pdf
+
+# October 9 research diagnostics: frozen downloads, licensed derived cells,
+# model score files and render intermediates remain local.
+output/research-limits/
+output/research-repairs/
+output/research-rebuild/

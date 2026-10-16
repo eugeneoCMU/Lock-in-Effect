@@ -1,0 +1,167 @@
+\noindent\textbf{Online Appendix.} Audited continuation, October 10, 2026. The dated replication archive preserves the reviewed manuscript, superseded specification history, original results, and prior adjudication notes. This appendix contains the current derivations, material sensitivities, and adverse checks. Its tables use precise saved artifacts; rounding is for display only.
+
+\section{Model Equations and Monthly Accounting}\label{app:model}
+
+Equation~\eqref{eq:beta1} converts a proportional change in a quarterly probability into a monthly log-hazard coefficient. It does not divide the quarterly percentage response by three. At $P=0.06$, baseline monthly probability is $1-0.94^{1/3}=0.020414$; the shocked quarterly probability is $0.0561$. Their monthly probability ratio gives $b=-0.0685705$. The exponent's sign in equation~\eqref{eq:pathB} is negative for a positive market-minus-note gap. At 380 bp it is $-0.260568$, yielding a 0.771 hazard multiplier before the floor and competing-risk normalization. The reference probability and extrapolation to large gaps remain assumptions.
+
+The production default trigger is
+\begin{equation}
+h^D_{it}=0.0003\exp\{2\max(0,r_t-c_i)-0.20z_i^{\mathrm{FICO}}+0.25z_i^{\mathrm{LTV}}\},
+\label{eq:default}
+\end{equation}
+clipped to $[0,1]$. Here rate stress is in decimals, unlike the percentage-point gap in the prepayment exponent. If $h^P+h^D>1$, both are divided by their sum. The fractional voluntary payment is then $B_{it}^{open}h^P_{it}$. A uniform default trigger first moves a current loan to 30-day delinquency or an already delinquent loan to default. The Markov transition matrix advances delinquent states. Default/liquidated states are inactive; the current engine supplies no recovery cash from those balances. It does not model a foreclosure-recovery lag with measured receipts.
+
+\begin{table}[!htbp]
+\centering\small
+\caption{Code-to-equation and timing map for the current calculation.}
+\label{tab:modelmap}
+\begin{tabular}{@{}>{\raggedright\arraybackslash}p{3.5cm}>{\raggedright\arraybackslash}p{5.2cm}>{\raggedright\arraybackslash}p{5.7cm}@{}}\toprule
+Object & Equation or definition & Implementation location\\\midrule
+Imported response & Equation~\eqref{eq:beta1}, negative code coefficient & \path{literature_hazard.rothstein_beta1}\\
+PSA baseline & Equation~\eqref{eq:psa}; monthly probability & \path{literature_hazard.h0_psa}\\
+Voluntary hazard & Equation~\eqref{eq:pathB}, sample covariates and stratum burnout & \path{literature_hazard.prepay_hazard}\\
+Floor combination & Equations~\eqref{eq:maxfloor}--\eqref{eq:addfloor}; annual floor converted first & Same prepayment function\\
+Default & Equation~\eqref{eq:default}; monthly trigger then state transitions & \path{competing_risks.monthly_step}\\
+Burnout & Cumulative prepaid/original stratum principal; cap at one & Updated after default triggers, before Markov transitions\\
+Amortization & Note-rate annuity principal on post-prepayment active balance & \path{macro.scheduled_amortization_smm}\\
+Dollar reporting & Equation~\eqref{eq:reporting}; closing active denominator & \path{microsim_engine._simulate_regime}\\\bottomrule
+\end{tabular}
+\end{table}
+
+Scheduled principal is computed after fractional prepayment and delinquency transitions, using the loan's note rate, 360-month amortization term, and elapsed age. The engine's diagnostic exposure field adds prepayment back to remaining balances but does not add scheduled principal back; it is not an exact beginning-of-month denominator. The new stock-flow comparison instead records opening and closing balances explicitly. The retrospective check constructs its own contiguous lagged exposure, independently of that diagnostic field.
+
+Write $A_t$ for active principal, $I_t$ inactive principal claims, $V_t$ voluntary cash principal, $S_t$ scheduled principal, and $D_t$ transfers to inactive claims. In the closed opening book,
+\begin{align}
+A_{t+1}&=A_t-V_t-S_t-D_t,\label{eq:activebalance}\\
+I_{t+1}&=I_t+D_t,\qquad
+(A+I)_{t+1}=(A+I)_t-V_t-S_t.\label{eq:totalbalance}
+\end{align}
+There are no additions, curtailment receipts, or default recovery receipts in this scoped comparison. An absorbing-state transfer is not counted a second time as cash. The maximum absolute monthly active-identity error is below $10^{-12}$ billion in both original-sample legs. Initial total principal is \$2{,}709.328 billion; initial active principal is \$2{,}709.266764 billion, with the difference already inactive. These are explicit scale assumptions, not the supported slice's observed principal.
+
+The production reporting denominator is closing active exposure. Its use is reproduced, not silently repaired. The once-scaled comparison removes this reporting operation and therefore measures a different dollar object. It omits unsettled purchases and future reinvestment pools because the present loan data do not identify them. A comparable full-book counterfactual would need settlement-level purchases, reinvestment allocation, collateral composition, and default remittances. Common historical shared-layer adjustments cancel only because the same external dollars are imposed on both legs; equation~\eqref{eq:totalbalance} does not imply cancellation of scheduled principal generated by changing balances.
+
+\section{Retrospective Cohort Prediction}\label{app:validation}
+
+The preserved legacy cohort panel contains 22,709 rows from January 2017 through September 2025. Earlier analyses already used the post-2023 period for model diagnostics. The original exercise is frozen before scoring in the dated validation specification, with pre-evaluation comparator training during calendar 2023 and evaluation in 2024--September 2025. No claim of statistical independence follows from that retrospective freeze. The following original scores are retained as legacy-input calculations; Appendix~\ref{app:sourceaudit} describes the historical pilot and development candidate; Appendix~\ref{app:correcteddiagnostics} reports the completed rebuild and new diagnostics.
+
+The risk set is a cohort, not an individual loan: vintage, 50-bp note-coupon, FICO bucket, and LTV bucket. The panel lacks loan IDs and separate default, scheduled, and curtailment amounts. Voluntary payoff includes the data's ``prepaid or matured'' category, not just property sales. Recorded events use the legacy panel's prior-balance numerator for voluntary-payoff loans; its original chronological alignment is not certified by retaining those legacy scores; corrected-input scores are reported in Appendix~\ref{app:correcteddiagnostics}. Opening exposure is the prior contiguous cohort end balance; observations with missing/noncontiguous exposure or events above exposure are excluded rather than clipped into a valid probability. Across the full input, 298 rows lack a usable contiguous lag and one has an invalid numerator. An additional 1,058 otherwise usable evaluation rows lack the frozen training, December-2023, or saved-sample covariate support. The retained balanced evaluation contains 239 cohorts and 5,019 monthly rows. All 6,077 evaluation rows have usable lagged exposure and numerators before the support restriction. The retained rows cover 99.9946\% of that exposure and 99.9935\% of its observed principal; the saved artifact records both denominators.
+
+The comparator fixes each retained cohort's 2023 total prepaid principal divided by its total opening exposure. The original model candidates retain 100 PSA, 4.991\% floor, maximum form, and the original coefficients. Cell credit/leverage inputs are averages of standardized saved-sample characteristics; age starts at December 2023 and advances mechanically. Burnout starts at its December-2023 value and subsequently increases from predicted prepayment, never evaluation outcomes. This aggregation and burnout projection approximate the loan-level model. Realized opening exposures and mortgage rates are conditioning information, so this is not a free-running balance or ex-ante rate forecast.
+
+For cohort-months $j$, observed principal $Y_j$, opening exposure $E_j$, and predicted monthly probability $\widehat h_j$, the reported error is
+\begin{equation}
+\mathrm{RMSE}_w=100\sqrt{\frac{\sum_j E_j(\widehat h_j-Y_j/E_j)^2}{\sum_j E_j}},\qquad
+\mathrm{P/O}=\frac{\sum_j E_j\widehat h_j}{\sum_jY_j}.
+\label{eq:validation}
+\end{equation}
+RMSE is in monthly probability percentage points, not annual CPR points. Cumulative principal is on the observed Freddie exposure base. All three candidates use the same retained observations. Table~\ref{tab:validperiods} shows fixed subperiods; Table~\ref{tab:validcells} shows coupon-vintage totals so aggregate error cannot hide offsetting cells. Zero-observed cells would have an undefined ratio rather than a manufactured zero.
+
+\input{review_validation_detail}
+
+The original response-on candidate performs worse than the simple comparator in aggregate, and those scores remain unchanged. A separate development exercise selected a lower floor using 2023 observations; it too fails to outperform the comparator on the already-seen evaluation period (Appendix~\ref{app:sourceaudit}). A future prospective check would freeze eligible loan IDs, opening balances, subsequent observation dates, censoring/default treatment, all coefficients, and comparator rules before access to genuinely unseen performance. It would separately score voluntary, scheduled, default, and total principal using observed event histories and beginning balances. That evaluation has not occurred here, and passing code or document checks cannot substitute for it.
+
+\section{Population, Weighting, and Bridge Support}\label{app:population}
+
+The 51.0\% broad coverage diagnostic sums listed non-Ginnie 2017--2021 cells in the July 15, 2026 snapshot: 50.9714\%, with a conservative 51.7926\% upper bound assigning every unlisted cell to that intersection. The same definition at June 29, 2022 gives 57.6423\%, bounded above at 58.5490\%. Restricting the latter to listed UMBS 30-year supported coupon cells gives 47.5876\%. These differences reflect both snapshot date and scope; none is a loan inclusion probability.
+
+The fresh draw uses the twenty 2017Q1--2021Q4 compact survivor snapshots and seed 42. All 75,000 IDs are unique. It is sampled from Freddie May-2022 30-year survivors with positive principal, then matched to twelve listed June-29-2022 UMBS coupon-vintage cells. Their 47.5876\% share is of total SOMA MBS face, while within-target weights sum to one. The UMBS grid cannot determine the Freddie/Fannie collateral mix, and omitted cells below the listing threshold remain unrepresented. All recorded sample/output/code and snapshot hashes match the saved audit.
+
+For bridge $b$ basis points, the bucket is the nearest 50-bp increment to $c_i-b/10{,}000$. Original note coupons remain unchanged in hazards and amortization. Within cell $k$, balance weights multiply original balance by the target share divided by its original cell balance share. Both response legs use precisely the same resulting weights and ID order. A missing positive-target cell stops that bridge comparison and reports its missing target share; there is no silent renormalization. No such failure occurs for the fixed-ID 60/80/100-bp diagnostics. The fixed 75,000 candidate IDs have 69,613, 75,000, and 74,701 positive-weight loans at the three bridges; candidates outside the twelve targets receive zero weight. The smallest target cells have 42, 204, and 78 loans respectively; that thin support is a reason not to read the three points as an empirically calibrated interval.
+
+\input{review_support_table}
+
+The saved-sample joint run is \$36.5234 billion under production reporting, versus \$42.6084 billion for the saved unweighted specification. The fresh 80-bp joint run is \$42.1761 billion. Changing the frame as well as the draw prevents a sampling-only attribution of those differences. Whole-pool scaling is a separate assumption from within-support composition. Multiplying these dollars by 47.6\% without a defined slice exposure path would not produce an observed supported-slice contribution.
+
+\section{Conditional Inference and Calibration}\label{app:inference}
+
+The 130 loan-draw strata are vintage year $\times$ 50-bp coupon $\times$ FICO bucket. A cluster replication samples strata with replacement and takes all their loans, so total loan count varies. Two hundred paired replications hold the engine seed at 42. Effective cluster count is $1/\sum_k w_k^2=25.78$, using initial balance shares; the largest share is 9.77\%. The 4.991\%-floor marginal has median $+5.641$ points and percentile endpoints $+4.631,+6.924$ (\$35.415--\$52.954 billion). These intervals refer to the saved sample, full moving share, 100 PSA, maximum form, and production reporting.
+
+\input{improvement_floor_support_table}
+
+The legacy Freddie 2018 selection has no qualifying exposure in cohort-months with mean age at least 24 months. The historical age-standardization assigns 83.9874\% of target weight to those unsupported buckets, imputing their CPRs from in-window age ratios. Its 5.50775\% floor is therefore an assumption-dependent transport calculation. A later matched on/off rerun at that floor gives $+3.6713$ points (\$28.0763 billion); the older $+3.8$-point grid reading is an interpolation, not that paired result. Neither replaces the 4.991\% anchor or supplies a clean mature-loan baseline. These displayed support and floor-inference results retain the legacy panel. Corrected support and fresh primary floor inference are reported separately in Appendix~\ref{app:correcteddiagnostics}; the historical age-standardization exercise has not been rerun. The floor-read interval below excludes this seasoning-transport uncertainty.
+
+The legacy floor read instead selects 2018 cohort-months with mean age at least twelve and note-minus-market gap at most $-0.25$ percentage points. Its clusters are vintage $\times$ coupon $\times$ FICO $\times$ LTV, preserving repeated-month dependence within 31 strata. Exposure concentration reduces its effective count to 5.87; maximum leverage is 0.332. The restricted Webb wild-cluster test inversion uses 9,999 draws and 401 candidate floor values, with the floor mapped through the fixed marginal-response grid. Its reported $+1.9$ to $+9.1$ point interval conditions on the central imported response and maximum form. It does not cover uncertainty about moving share, PSA, coefficient transport, portfolio mapping, reporting convention, or the later corrected-source rerun.
+
+The coverage exercise imposed the observed cluster-weight pattern with Gaussian or $t_5$ cluster shocks in 5,000 outer simulations and 999 inner draws. Restricted Webb coverage was 94.34\% and 95.08\%, respectively. This tests a stated synthetic error design; it does not establish coverage under arbitrary time shocks, selection into discount cohorts, or uncertain hazard structure. Month and two-way-cluster sensitivity remains in the replication record. No bootstrap was rerun to correct the cluster descriptions.
+
+\begin{table}[H]
+\centering\small
+\caption{Separate uncertainty objects; each interval retains its own specification.}
+\label{tab:inference}
+\begin{tabular}{@{}>{\raggedright\arraybackslash}p{4.5cm}>{\raggedright\arraybackslash}p{3.1cm}>{\raggedright\arraybackslash}p{6.8cm}@{}}\toprule
+Object & Points of cap gap & Conditioning and interpretation\\\midrule
+Loan-stratum percentile, 4.991\% floor & $+4.631$ to $+6.924$ & 130 nominal / 25.78 effective clusters; sample variation only.\\
+Loan-stratum percentile, 4\% floor & $+8.27$ to $+10.19$ & Historical in-sample floor; different center.\\
+Floor-read restricted wild interval & $+1.9$ to $+9.1$ & 31 nominal / 5.87 effective clusters; fixed response/form.\\
+Floor--elasticity grid & $+2.1$ to $+13.2$ & Assumption sweep, not a sampling interval.\\
+PSA 75--150 at 4.991\% floor & $+0.856$ to $+15.626$ & Fixed full share and maximum form; not a confidence band.\\\bottomrule
+\end{tabular}
+\end{table}
+
+Baseline transport remains uncertain. Calendar standardization moves the named marginal to about $+4.7$ points; housing-activity rescaling moves it to about $+10.7$. Alternative covariate and burnout choices remain saved with their exact specifications. None transforms observed 2018 discount turnover into an identified, purely non-rate component. The in-sample 4\% floor's group-ablation figure remains explicitly labeled: \$70.345 billion paired total, \$69.620 billion cell sum, \$0.725 billion residual from interactions. Its shares are not rescaled to the off-window specification.
+
+\subsection{Source audit and calibration qualifications}\label{app:sourceaudit}
+
+\input{rebuild_audit_detail}
+
+\section{Benchmarks, Settlement Diagnostics, and Loan Life}\label{app:benchmark}
+
+The original report/workbook source trail is independent of the later September-2022 policy explainer. The five workbook year-end MBS levels telescope to a \$765.8 billion 2021--2025 decline. Uniform calendar allocation leaves \$740.583 billion in June-2022--November-2025. The settlement-aware adjustment first adds the \$92.322 billion early-year holdings-rise proxy to 2022's net decline, assigns the resulting \$108.222 billion to June--December, and gives \$839.530 billion in the full window. It is a disclosed allocation using realized early-year information, not an untouched forecast.
+
+\begin{table}[H]
+\centering\small
+\caption{Within-year allocation stress cases from the saved projection comparison. All keep realized net face decline at \$652.752 billion.}
+\label{tab:allocationstress}
+\begin{tabular}{@{}p{7cm}rrr@{}}\toprule
+Allocation change from uniform & Projected decline & Gap & Anticipated share\\\midrule
+2022 linear back-loaded annual net & 744.151 & 91.399 & 88.05\%\\
+All 2025 decline in January--November & 759.175 & 106.423 & 86.08\%\\
+All 2025 decline in December & 536.075 & $-116.677$ & 115.26\%\\\bottomrule
+\end{tabular}
+\end{table}
+
+The all-December case is an implausible boundary stress, not a likely scenario. Its negative expectations-relative gap is a surplus under that allocation. It shows why there is no unique ratio of the model marginal to a projection-relative denominator.
+
+A separate timing diagnostic convolves the cap with the $(0.1,0.6,0.3)$ monthly lag kernel while keeping realized holdings changes unchanged. The benchmark becomes \$722.748 billion because exactly \$42 billion of cap mass is pushed beyond November 2025. Faster/slower kernels give \$736.748 and \$712.248 billion. These are window-edge effects of convolving a schedule, not a reconstruction of actual mortgage remittances. The named calendar-convention gap remains \$764.748253 billion. Phase-in purchases and settlement timing make any gross-principal interpretation particularly inappropriate at the opening boundary.
+
+Weighted-average-life calculations are scenario illustrations with explicit coupon and CPR bases. Table~\ref{tab:wal} restores an actual loan-life reference; it no longer points to an unrelated validation table. The empirical note-rate row uses a 5.79\% CPR back-out and the 80-bp coupon conversion in its amortization basis. The turnover-floor row is a separate constant-CPR illustration, not a fitted lifetime forecast. They cannot be differenced against a no-shock row on another convention to infer an identified duration effect.
+
+\begin{table}[H]
+\centering\small
+\caption{Approximate weighted-average life (years), with scenario and basis stated.}
+\label{tab:wal}
+\begin{tabular}{@{}lrrr@{}}\toprule
+Scenario & Annual CPR & June 2022 & November 2025\\\midrule
+Empirical back-out, note-rate basis & 5.79\% & 8.9 & 8.1\\
+Empirical back-out, hazard basis & 5.52\% & 9.1 & 8.3\\
+Off-window turnover-floor illustration & 4.99\% & 9.5 & 8.6\\\bottomrule
+\end{tabular}
+\end{table}
+
+\section{Adverse Checks and Institutional Extensions}\label{app:alternatives}
+
+The fitted cohort hazard approach (Path A) estimates associations in the Freddie panel. Its prior-specification coefficient bootstrap is skewed and its full forward simulations have unstable tails; its newer calendar-seasonal specification does not carry a reliable recomputed inferential object. It is not independent corroboration of the imported response. The aggregate level can also be reproduced using synthetic populations, indicating that calibration and survival mechanics can generate a close level match without identifying a causal effect.
+
+The household-choice model's original aggregate recovery is about 13.6\% across simulation seeds, but recalibrating on real loan covariates raises its mean to 60.2\% and book-composition adjustment changes it further. The original contrast therefore does not isolate the modeling paradigm. These adverse results remain available in the archived derivations and frozen artifacts; their removal from the main narrative does not turn them into successful validation.
+
+Fannie replication yields an in-sample marginal near $+8.68$ points versus Freddie's $+9.20$ at the 4\% floor. The common imported elasticity means this checks conventional-agency transfer of the calculation. A Ginnie speed overlay composed with the off-window floor gives approximately $+4.4$ points. It inserts identical observed Ginnie speeds into both legs, forcing that share's marginal to zero by construction; the result primarily rescales the conventional-share marginal. It is not evidence of zero Ginnie lock-in and uses no directly estimated Ginnie elasticity or assumption take-up. The excluded-vintage observed-speed proxy gives an approximately \$11.7 billion level bound, conditional on Fannie segment speeds representing the book; it is not a direct estimate of the excluded loans' marginal. Fifteen-year collateral enters the portfolio CPR back-out and household-model scheduled amortization; that model borrows the same-coupon 30-year voluntary-CPR surface. The headline loan-level hazard simulation retains a 360-month term and has no native 15-year behavioral extension. Each extension addresses a different dimension of coverage.
+
+The Danish market-value repayment extension imports a separate working-paper calibration \citep{berger2026}. At the in-sample 4\% floor, a rule-only transplant retaining the U.S. zero-gap moving intercept gives $+\$61.2$ billion in retired face. Importing the Danish baseline mobility instead gives $-\$99.9$ billion, and the re-derived cash-incidence convention gives $-\$51.0$ billion. These signed comparisons use different anchors and cash/face objects. They are neither predictions for the U.S. book nor comparable estimates at the off-window \$42.6 billion specification. The exercise does not estimate the cost of changing U.S. issuance, guarantee-fee allocation, servicing contracts, or TBA liquidity. The July-2026 source is an unrefereed working paper, and its changing refinancing estimates are retained as a limitation.
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.77\textwidth]{fig11_marginal_decomposition}
+\caption{Historical in-sample sensitivity: 4\% annual floor, 100 PSA, full moving share, saved sample, \$70.345 billion paired total. Group-ablation cells sum to \$69.620 billion; the \$0.725 billion residual is 1.03\% of the paired total. This figure does not allocate the \$42.608 billion off-window result. Values describe modeled coupon-vintage contributions, not differential causal effects.}
+\label{fig:marginalcells}
+\end{figure}
+
+\section{Replication Record}\label{app:replication}
+
+Editable sources, numerical artifacts, code, specifications, input hashes, the October 8 claim ledger, and a plan-disposition report accompany this local edition. Dated, hash-indexed snapshots preserve the saved project's October 5 manuscript and PDF, the newer 6930 draft, and the c470 editing base. The support table is extracted from the existing floor-uncertainty artifact; no imputed cell is relabeled as observed. The reviewed 83-page combined PDF is preserved byte-for-byte under the dated baseline directory. The original main text, long abstract, and extensive online appendix are preserved under \texttt{reviewed\_archive}; superseded results and internal adjudications remain research history, not current conclusions. Current references attach to actual equations and exhibits, with a semantic audit of object types and selected destinations.
+
+Freddie/Fannie raw data and loan-grain or potentially identifying compact panels are not redistributed in the source package. Reproduction of loan-based calculations requires the user's existing licensed local files. The new runs read compact saved inputs and a frozen public-macro extract, avoiding bulk raw downloads. Software and rendering checks establish reproducibility and document integrity within that environment; they do not establish causal identification, independent predictive success, or full-SOMA representativeness.
+
+% Proposed extension, distinct from the reported production model.
+\input{contracting_extension}
+
+\input{corrected_diagnostics}

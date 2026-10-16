@@ -1,0 +1,241 @@
+% Current economics-review revision. Prior source is preserved in reviewed_archive/.
+\section{Introduction}\label{sec:intro}
+
+From June 2022 through November 2025, the announced Federal Reserve agency mortgage-backed securities (MBS) runoff caps exceeded the net decline in SOMA current face by \$764.7 billion. That difference is an accounting gap, not the effect of mortgage lock-in. A cap specifies how much principal may run off; it does not guarantee that mortgages will generate that principal. Unlike Treasury maturities, mortgage cash flows depend on amortization, refinancing, home sales, and the surviving distribution of borrower coupons.
+
+Mortgage lock-in can slow those cash flows. A homeowner with a fixed mortgage rate below the current market rate generally gives up valuable financing when selling and purchasing another home. Empirical studies document lower mobility and loan termination at larger mortgage-rate gaps \citep{berger2021,eichenbaum2022,liebersohn2024,batzer2024,fonseca2024}. Mortgage-pricing research models the resulting prepayment and duration risk through borrower heterogeneity, seasoning, burnout, and competing default \citep{dunn1981,richard1989,schwartz1989,stanton1995,deng2000}. This paper connects that household evidence to the accounting of Federal Reserve MBS runoff. The imported moving response does not separately identify financing lock-in, inventory constraints, and affordability in the modeled population.
+
+% BEGIN SPATT RELATED
+\citet{dunnspatt1985} study prepayment penalties and due-on-sale clauses as mortgage-contracting choices under asymmetric information. Their analysis links enforced repayment of favorable financing to the decision to sell, and permits a lender to demand less than the full effective penalty when doing so induces additional prepayments. This motivates a distinction between the mortgage-rate gap and the contractual cost of surrendering financing. The present paper translates an imported household response into portfolio cash flows; it does not estimate optimal mortgage contracts or a lender-concession effect.
+% END SPATT RELATED
+
+\citet{dunnspatt2005} provide a complementary refinancing perspective: loan valuation and the borrower's refinancing strategy are determined jointly across coupons, with future refinancing costs entering the dynamic decision. This motivates distinguishing sale exits from refinancing rather than treating an aggregate voluntary-payoff schedule as a rate-independent moving baseline. The present simulation does not solve that dynamic refinancing problem.
+
+The first contribution is to separate three objects. The cap-relative gap compares an operational ceiling with realized net holdings decline. An expectations-relative gap compares the New York Fed's published May 2022 holdings projection with that decline. A model marginal compares two simulated cash-flow paths, with an imported moving response switched on and off. They answer different questions and cannot be added. Under uniform within-year allocation, the projection-relative gap is \$87.8 billion; a settlement-aware allocation gives \$186.8 billion. Thus the published projection anticipated 75.6--88.5\% of the cap-relative gap under these two constructions, although it may already incorporate lock-in and conditions on a different interest-rate path.
+
+The second contribution is a reproducible, assumption-sensitive portfolio translation. The following introductory sensitivities describe the preserved historical version; Section~\ref{sec:corrected} reports the completed corrected-input benchmark and alternatives. The conventional 2017--2021 categories account for 51.0\% of SOMA face in the July 2026 coverage snapshot; extending their behavior to total holdings requires additional assumptions. The paper does not claim to identify a new causal elasticity. Freddie Mac loans supply the borrower distribution; an external estimate supplies the response to the rate gap; a baseline prepayment schedule, turnover floor, and reporting convention turn hazards into dollars. Applying the imported response to assumed shares of $0/25/50/100\%$ of voluntary prepayment yields $0/+1.8/+3.4/+5.6$ percentage points of the cap gap. The final case is \$42.6 billion, a named specification rather than an empirically preferred estimate. The sale-related share is unestimated because the available payoff flag does not distinguish sales from refinancing.
+
+Other assumptions are equally consequential. At the 4.991\% annual turnover floor and full moving share, changing the baseline from 75 to 150 PSA moves the marginal from $+0.9$ to $+15.6$ points. Combining baseline and responsive turnover on the survival scale gives $+11.2$ points at 100 PSA. Scaling the opening portfolio once, rather than rescaling reported flows to observed holdings each month, reduces the saved-sample marginal from \$42.6 to \$37.0 billion. These are separate scenario comparisons, not a joint confidence interval or bounds over all mortgage models.
+
+The evidence does not support calling the calculation independently validated. In a frozen retrospective check on legacy-panel January 2024--September 2025 cohort outcomes, response-on predictions overstate voluntary prepaid principal by 23.2\% and have greater exposure-weighted error than a simple 2023 cohort-speed baseline. A later development candidate selected using 2023 observations lowers the original model's monthly-rate error by 17.7\% but still loses to that comparator. Source audits also require qualifications to the floor's age support; the full Freddie source rebuild and dependent rerun are now complete (Section~\ref{sec:corrected}). The paper therefore retains the original simulated dollars as conditional calculations at the legacy floor, not ingestion-corrected estimates. Its policy implication is correspondingly specific: regularly publish cap and projected cash-flow paths together, separating interest-rate and prepayment-assumption scenarios.
+
+Table~\ref{tab:evidenceoverview} separates the evidence used throughout the paper. A positive model marginal is cumulative reported cash principal with the response off minus that with it on. Only the conserved, once-scaled closed-book comparison also interprets this difference as additional total principal retained with the response on. The imported response and baseline-turnover rule are the two central structural choices; moving share, PSA speed, and floor transport determine how strongly they affect the result.
+
+\input{improvement_evidence_table}
+
+\section{Institution, Data, and Benchmarks}\label{sec:data}
+
+\subsection{Runoff policy and net holdings}
+
+The monthly agency-MBS cap was \$17.5 billion during June--August 2022 and \$35 billion from September 2022. The 2024 and 2025 runoff slowdowns reduced Treasury caps, not the MBS cap. Reinvestment did occur during the phase-in: the New York Fed reports \$32.8 billion of MBS purchases in the June, July, and August purchase periods. It reports no purchases from the September purchase period through the end of 2022 because principal payments were below the cap \citep[p.~15]{nyfedomo2022}. Purchase periods and settlement dates differ, so those transactions cannot be assigned mechanically to calendar-month holdings changes. The September Teller Window explanation describes the operating mechanics; it is not the source of the May projection \citep{nyfed2022}.
+
+Let $C_t$ denote the announced cap and $H_t$ SOMA current face. The named cap-relative accounting object is
+\begin{equation}
+G_C=\sum_{t=\mathrm{Jun22}}^{\mathrm{Nov25}}\{C_t-(H_{t-1}-H_t)\}
+=1{,}417.5-652.7517468=764.7482532
+\quad\text{(\$ billions)}.
+\label{eq:benchmark}
+\end{equation}
+The displayed benchmark is \$764.748 billion. It measures caps less net face decline, not caps less gross borrower principal receipts. Principal payments reduce face; settlements of earlier purchases and reinvestments add face. Other reporting adjustments can also affect measured changes. The public SOMA series do not separately report monthly gross principal receipts, reinvestment settlements, and other changes in face. A per-CUSIP reconstruction reproduces the holdings change rather than independently identifying gross remittances.
+
+Figure~\ref{fig:benchmark} shows the original construction. Four inferred monthly prepayment rates are clipped at zero when measured rolloff falls below scheduled amortization. That is a limitation of the holdings-based back-out, not evidence of zero borrower prepayment. Convolving the cap schedule with settlement lags measures sensitivity at the window edges; it does not recover the missing gross-principal series. Appendix~\ref{app:benchmark} records these distinctions and alternative allocations.
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.94\textwidth]{fig9_benchmark_construction}
+\caption{Caps, realized net face decline, and the published projection. The terminal cap-relative gap is \$764.748 billion. The displayed projection uses uniform within-year allocation and gives an \$87.8 billion gap. Net holdings changes include settlement effects; neither the monthly back-out nor the cap path is a measure of gross principal receipts.}
+\label{fig:benchmark}
+\end{figure}
+
+\subsection{The expectations-relative benchmark}
+
+The source is \emph{Open Market Operations During 2021}, published in May 2022, Chart 34 on printed page 49 (PDF page 51), with its chart-data workbook, sheet ``Chart 34,'' column D, ``Agency MBS'' \citep{nyfedomo2021,nyfedomo2021data}. The year-end levels for 2021--2025 are \$2{,}615.5, \$2{,}599.6, \$2{,}319.9, \$2{,}072.8, and \$1{,}849.7 billion. The revision retrieves that workbook and matches all five levels exactly. The report cover dates the publication May 2022; the workbook cover's ``May 2021'' text is inconsistent with it. Annual changes must be allocated within years to obtain the study window.
+
+\begin{table}[H]
+\centering\small
+\caption{Expectations-relative shortfall under two explicit allocations (\$ billions). Anticipated share is $(\sum C_t-\text{projected decline})/G_C$. Neither construction identifies a no-lock-in path.}
+\label{tab:benchmarks}
+\begin{tabular}{@{}lrrrr@{}}\toprule
+Allocation & Projected & Realized & Gap & Anticipated share\\\midrule
+Uniform annual net decline & 740.583 & 652.752 & 87.832 & 88.5\%\\
+Settlement-aware proxy & 839.530 & 652.752 & 186.778 & 75.6\%\\\bottomrule
+\end{tabular}
+\end{table}
+
+Uniform allocation spreads each annual net decline across its twelve months and clips the result to June 2022--November 2025. The settlement-aware case assigns a \$92.322 billion proxy for early-2022 inflows outside the QT window, then distributes the adjusted 2022 decline across June--December. It uses realized early-year holdings changes as a proxy, so it is partly retrospective rather than a wholly ex-ante forecast. The two allocations imply the same realized decline but different expectations-relative gaps. Extreme allocations are stress cases in Appendix~\ref{app:benchmark}, not a probability distribution. The projection also uses the spring-2022 expected rate path, which differs from realized rates. Consequently, dividing the model marginal by \$87.8 billion does not estimate the causal share of an unexpected shortfall.
+
+\subsection{Loan data and SOMA coverage}
+
+The saved production sample contains 75,000 Freddie Mac loans originated in 2017--2021, drawn across vintage, coupon, and credit strata. It includes loans whose latest pre-QT observation was already terminated. Simulations use positive active balances. The input histories provide note rates, principal, age, credit, leverage, and delinquency states. A fresh sensitivity sample separately draws 75,000 unique positive-balance, 30-year May-2022 survivors from 6,261,485 eligible loans across all twenty origination quarters. Its seed is 42; its sample, code, and twenty snapshot hashes are verified without repeating raw downloads.
+
+Both simulation samples contain individual loan ages, separate from the pooled cohort mean ages used in calibration and prediction checks. Their paired results nevertheless retain the panel-derived 4.991\% floor. Chronological payoff lags and count-weighted quarter mean ages have been repaired in ingestion code, but the legacy Freddie panel, floor calibration, and prediction scores have not undergone a full audited source rebuild. Appendix~\ref{app:sourceaudit} separates these dependencies and the completed age-only Fannie recombination.
+
+The population restrictions matter for dollars. Conventional 2017--2021 collateral represents 51.0\% of the July 15, 2026 book in the agency-by-vintage coverage calculation (at most 51.8\% after allowing for unlisted cells). This is a later composition diagnostic, not opening-window coverage. Applying the same broad categories to June 29, 2022 gives 57.6\% (at most 58.5\%); restricting that opening grid to the twelve supported UMBS 30-year coupon-vintage cells gives 47.6\%. The June 29, 2022 grid contains twelve listed UMBS 30-year coupon-by-vintage cells representing 47.5876\% of total SOMA face. The latter grid omits cells below 0.1\% of face and does not identify the Freddie/Fannie mix. Neither share is a probability-sampling coverage rate. The production sample, saved joint-cell reweight, and fresh survivor reweight are distinct specifications.
+
+\begin{table}[H]
+\centering\small
+\caption{Population coverage and the role of separate checks. The broad 51.0\% figure uses July 15, 2026; joint-cell support uses June 29, 2022. Vintage-overlay weights are separately frozen inputs. Overlapping exclusions cannot be added.}
+\label{tab:coverage}
+\begin{tabular}{@{}>{\raggedright\arraybackslash}p{3.9cm}>{\raggedright\arraybackslash}p{2cm}>{\raggedright\arraybackslash}p{7.7cm}@{}}\toprule
+Population or check & Book share & Interpretation\\\midrule
+Conventional 2017--2021 & 51.0\% & July 2026 agency-by-vintage scope; June 2022 counterpart is 57.6\%. No known loan inclusion probabilities.\\
+Listed UMBS 30-year cells & 47.6\% & Twelve June-2022 cells under the 80 bp bridge; both joint-cell runs expand this pool to total holdings.\\
+Ginnie Mae & 20.4\% & July 2026 agency share; external speed overlay, no directly estimated Ginnie hazard or assumption take-up.\\
+Pre-2017 and 2022 vintages & 10.6\%, 23.1\% & Frozen weights in the vintage-speed bound; these are proxy-based extensions.\\
+Fifteen-year MBS & About 9\% & Portfolio CPR back-out and household-model amortization extension; no native 15-year hazard estimate.\\
+Fannie replication & Separate sample & Conventional-agency transfer check using the same imported response.\\\bottomrule
+\end{tabular}
+\end{table}
+
+Joint-cell weights match initial balance shares, not later exposures. The assumed note-to-pass-through bridge assigns loans to cells while their actual note rates remain in the hazard. Section~\ref{sec:results} reports 60/80/100 bp perturbations with the same IDs and targets. The fresh versus saved comparison changes both sampling frame and draw and cannot isolate sampling noise. Ginnie, vintage, and term checks address different omissions; none supplies the missing full-SOMA probability sample.
+
+\section{Model and Assumptions}\label{sec:model}
+
+\subsection{Loan-level prepayment model}
+
+Define the positive lock-in gap $g_{it}=100(r_t-c_i)$ in percentage points, with market and note rates $r_t,c_i$ in decimals. Let $P=0.06$ be the reference quarterly moving probability and $d=0.065$ the assumed proportional quarterly reduction per 100 basis points, with a 5.5--7.7\% calibration band drawn from selected specifications \citep[Table~2, column~5, main and stacked samples]{liebersohn2024}. The source estimates complementary-log-log mobility hazards; this band is not its confidence interval. The central 6.5\% proportional probability reduction and reference $P$ are explicit calibration conventions. The monthly conversion is
+\begin{equation}
+q(P)=1-(1-P)^{1/3},\qquad
+b=\log\!\left\{\frac{q(P(1-d))}{q(P)}\right\}=-0.0685705,
+\qquad \beta=-b.
+\label{eq:beta1}
+\end{equation}
+Thus $\beta=0.0686$ and $\exp(-\beta\times3.8)=0.771$ at a 380-basis-point gap. The code stores the negative refinance-incentive gap $c_i-r_t$ and negative coefficient $b$; its exponent $(-b)100(c_i-r_t)$ equals $-\beta g_{it}$. Switching off the response sets $b=0$, retaining the realized rates and every other model input.
+
+The baseline is the PSA seasoning schedule, not the minimum turnover floor. At speed $s$ and age $a$ months,
+\begin{equation}
+\mathrm{CPR}_0(a;s)=0.06(s/100)\frac{\min(a,30)}{30},\qquad
+h_0(a;s)=1-[1-\mathrm{CPR}_0(a;s)]^{1/12}.
+\label{eq:psa}
+\end{equation}
+The named production specification uses 100 PSA, a 6\% annual plateau before borrower covariates. Its rate-responsive monthly voluntary hazard is
+\begin{equation}
+h^R_{it}=h_0(a_{it};s)\exp\{-\beta g_{it}-0.15z^{\mathrm{FICO}}_i
++0.10z^{\mathrm{LTV}}_i-0.50B_{k(i),t}\}.
+\label{eq:pathB}
+\end{equation}
+Credit and leverage are standardized over the sample. $B_{k(i),t}$ is accumulated prepaid principal divided by original balance in the loan's vintage-coupon-credit stratum, capped at one. These covariate coefficients are calibrated priors, not estimates of the causal runoff response. Appendix~\ref{app:model} gives the default hazard and state ordering.
+
+\subsection{Baseline-turnover specifications}
+
+For annual turnover floor $f_A$, define $f_m=1-(1-f_A)^{1/12}$. All combinations below are monthly probabilities. Let $h^0$ denote equation~\eqref{eq:pathB} with $b=0$. The assumed moving-share mixture is $h^\mu=(1-\mu)h^0+\mu h^R$, before applying the floor. The alternatives are
+\begin{align}
+h^{\max}_{it}&=\max\{f_m,h^\mu_{it}\},\label{eq:maxfloor}\\
+h^{\mathrm{add}}_{it}&=1-(1-f_m)(1-h^\mu_{it}).\label{eq:addfloor}
+\end{align}
+The latter is a survival combination. The sum $f_m+h^\mu$ is only its small-probability approximation and is not the implemented formula. The maximum censors the response wherever the floor binds. The survival form allows both components but requires a stronger interpretation of them as distinct causes. Neither is selected by causal evidence in this study.
+
+The 4.991\% annual floor is transported from the legacy panel's 2018 discount cohorts, with alternative floor readings of 4.70--5.33\%. It annualizes recorded payoff principal relative to end-of-month exposure, rather than the opening-risk-set denominator used in the predictive check. It is not a measured strictly involuntary hazard or a lock-in-free control group. Aggregate voluntary payoffs can contain refinancing generated by historical rate incentives and refinancing costs; selecting discount cohorts does not establish a rate-independent sale hazard. Housing inventory and financing incentives remain unseparated. The legacy Freddie selection has no qualifying cohort-months with mean age at least 24 months; the saved age-standardization exercise imputes 84.0\% of its target exposure weight (Appendix~\ref{app:inference}). These displayed support and calibration readings retain their historical inputs; completed corrected-source diagnostics and fresh inference are reported in Appendix~\ref{app:correcteddiagnostics}. At the saved-sample anchor the floor binds in 35.8\% of evaluated response-off loan-months and 68.8\% on the response-on leg. Moving-share $\mu$ is likewise unestimated: the available code-01 voluntary-payoff flag includes prepaid or matured loans without a sale/refinance split \citep{freddieguide2026}. Measuring a moving share would require sale-related voluntary terminations divided by all comparable voluntary terminations, within the same risk set and period; dollar translation would also require balance weighting and assumptions about within-cell heterogeneity. Zero share gives zero marginal by definition; 25\% is not an empirical lower bound.
+
+% BEGIN MIXTURE STATUS
+A separately implemented robustness specification decomposes a candidate reference intensity into assumed sensitive and insensitive components:
+\begin{equation}
+\lambda^0_{it}=-\log(1-p^0_{it}),\qquad
+\lambda^{\mathrm{on}}_{it}=\lambda^0_{it}\{(1-\omega)+\omega e^{-\gamma g^+_{it}}\},\qquad
+p^{\mathrm{on}}_{it}=1-e^{-\lambda^{\mathrm{on}}_{it}},
+\label{eq:mixtureproposal}
+\end{equation}
+where $g^+_{it}=\max\{100(r_t-c_i),0\}$ and $\omega\in[0,1]$ is an assumed share of reference intensity, distinct from PSA speed $s$ and from an estimated share of borrowers moving. Response-off sets $\gamma=0$. Two candidate references are compared: \texttt{inherited\_psa} uses zero-gap PSA100 with borrower adjustments, while \texttt{matched\_max\_off} uses the maximum of that probability and $f_m$, matching the legacy maximum-form response-off hazard at the same state. The latter retains the floor in its reference; neither applies an additional hard floor after splitting the intensity. Neither reference is a newly estimated neutral-rate schedule or an identified sale/refinance decomposition. The completed forty-scenario corrected-source comparison crosses five assumed shares, two response conversions, two gap treatments, and these two references; the additive-survival specification is a separate benchmark. Section~\ref{sec:corrected} reports the accepted results and their retained identification limits. The \texttt{preserve\_refinancing} gap treatment additionally boosts intensity at favorable rate gaps under an explicit structural assumption; only the \texttt{positive\_only} treatment guarantees a zero marginal at zero responsive share. Appendix~\ref{app:contractingextension} distinguishes this mixture from a future sale/refinancing model.
+% END MIXTURE STATUS
+
+\subsection{Calibration and simulation}
+
+Each month broadcasts stratum burnout and calculates the rate gap. The model computes prepayment and default probabilities and proportionally normalizes them if their sum exceeds one. In fractional mode, voluntary principal drains each active balance by its prepayment probability. A separate random default trigger changes loan states, and the fractional prepaid amounts update stratum burnout. The Markov matrix then advances delinquent loans. Scheduled amortization is applied to the remaining active balances, and their age advances. Fractional prepayment reduces balances without removing whole borrowers; a partially prepaid loan can also enter delinquency.
+
+Paired legs use the same starting loans, seed 42, rate path, coefficients, and transition rules. Because balances and states evolve, the same rules do not imply identical scheduled-principal dollars. The coefficient's 380-basis-point application extrapolates beyond a local estimate; halving the response slope beyond 200 basis points lowers the off-window marginal to about $+5.1$ points. An extreme transition-matrix comparison moves trapped principal by approximately \$0.39 billion. These are disclosed sensitivities, not independent validation of the imported response.
+
+% BEGIN CONTRACT LIMITATION
+Mortgage contracts and their enforcement are held fixed in these paired simulations. The effective penalty for losing below-market financing need not be an explicit prepayment fee, and a bilateral concession mechanism need not carry over to agency MBS. Current Fannie Mae guidance treats conventional fixed-rate loans as nonassumable at origination and generally requires due-on-sale enforcement, with specified exceptions; Freddie Mac likewise requires acceleration for nonexempt transfers and prohibits a prepayment penalty merely because acceleration occurs \citep{fannie_fixedrate,fannie_dueonsale,freddie_dueontransfer}. These guides illustrate institutional restrictions rather than establish loan-by-loan historical enforcement during 2022--2025. The Federal Reserve holds securities; it is not modeled as negotiating directly with homeowners. The reported marginal is therefore conditional on the existing contractual regime.
+% END CONTRACT LIMITATION
+
+Refinancing also depends on costs and anticipated future opportunities, beyond the current note-rate gap \citep{dunnspatt2005}. The imported mobility response supplies neither those costs nor an optimal refinancing rule. A future model would separate sale-related exits, refinancing, and other terminations and apply the mobility response only to the sale component. These omissions do not establish a direction of bias in the \$42.6 billion conditional comparison: refinancing behavior, the reference hazard, and the evolving portfolio would have to be specified and recomputed together.
+
+\subsection{Accounting convention and comparison}
+
+The engine evolves its loan balances and scales them once at initialization. It then separately scales each month's reported voluntary-plus-scheduled principal $P^j_t$ by observed holdings $H_t^{obs}$ divided by END-of-step active pool exposure $E^j_t$:
+\begin{equation}
+\widetilde P^j_t=P^j_t\frac{H_t^{obs}}{E^j_t},\qquad
+\Delta^{obs}=\sum_t(\widetilde P^{off}_t-\widetilde P^{on}_t).
+\label{eq:reporting}
+\end{equation}
+Numerator flows have already occurred when the denominator is measured. This is a monthly flow-reporting convention; it does not reset every loan's balance or define a self-financing observed portfolio. The historical shared accounting layer adds the same externally imposed dollar adjustments to both paths, shifting their levels but leaving their difference unchanged. Cancellation applies only to equal dollar adjustments. Balance-dependent scheduled flows must be recomputed separately on each leg.
+
+The new comparison retains the same underlying loan walks and reports their unrescaled cash principal after the opening scale. It is a closed opening book: no unsettled purchases or later reinvestment mortgages are added. Default transfers remain separate inactive principal claims because the engine supplies no default-recovery cash; curtailment and additions are zero in this comparison. Each month's active and total-principal identities reconcile. This scope cannot be compared in levels with full-book observed net holdings as though both included the same purchases and recoveries.
+
+Mortgage principal also differs from cap-allowed runoff. For each path, allowable runoff is $\min(P_t,C_t)$ and excess $\max(P_t-C_t,0)$ requires reinvestment. The comparison reports both, without inventing reinvestment-pool cash flows. Its marginal measures the difference in reported cash principal under the stated convention; the monthly rescaled quantity does not identify an additional stock of retained principal or the Federal Reserve's complete future holdings path.
+
+\section{Results and Retrospective Validation}\label{sec:results}
+
+The original numerical tables and uncertainty bands below retain their historical input versions. The completed corrected-source comparison follows in Section~\ref{sec:corrected}; historical values are not transferred to that rerun.
+
+\subsection{Assumption comparisons}
+
+Table~\ref{tab:mainresults} places the unestimated moving share, PSA baseline, and turnover form together. The preserved hard-maximum anchor is $+5.5716$ points (\$42.6084 billion), at 100 PSA, the legacy 4.991\% floor, full moving share, and the saved sample. It has not been recalibrated after the ingestion repairs. The benchmark denominator is equation~\eqref{eq:benchmark}; it is never replaced by the smaller expectations-relative gap. The historical shared-basis levels are 85.7\% response off and 91.3\% response on: simulated cap-relative shortfalls divided by the observed $G_C$, not fractions of mortgage principal repaid. Both subtract the same assumed \$69.5622 billion curtailment layer; it changes the levels and cancels exactly from their difference. Those calibrated level fits do not validate the marginal.
+
+\input{review_results_table}
+
+The 75/100/125/150-PSA comparison gives $+0.8560/+5.5716/+11.4191/+15.6265$ points. It was already present in the saved research artifacts and is promoted here because it materially exceeds the narrow loan-sampling interval. A larger baseline places more loans above the hard floor, where the response can affect principal. PSA and the floor are different assumptions even when their annual numbers are close. The response-off path changes with PSA as well; each row uses its matching pair.
+
+At 100 PSA the survival-combination alternative produces $+11.2070$ points (\$85.7055 billion). Varying the floor and elasticity within the historical joint calibration grid gives $+2.1$ to $+13.2$ points under its specified form. These comparisons are not combined into a synthetic statistical band. An assumed positive response generally produces a positive model marginal; that sign is not new portfolio evidence identifying the response.
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.95\textwidth]{fig13_specification_sensitivity}
+\caption{Separate assumption comparisons from precise saved paired results. Each row names the changed input; all use the saved sample, 4.991\% annual floor, full moving share, maximum form, and 100 PSA except the named change. Values are points of the \$764.748253 billion gap. Rows are neither additive nor confidence intervals. The zero-share point is definitional. Sources and hashes are saved with the figure.}
+\label{fig:band}
+\end{figure}
+
+\subsection{Stock-flow comparison}
+
+The instrumented production calculation reproduces \$42.6083938811 billion within $1.2\times10^{-13}$ billion. Its response-off and response-on reported principal totals are \$692.582 and \$649.974 billion. Under the once-scaled closed-book convention they are \$679.776 and \$642.774 billion, giving \$37.0024 billion, or $+4.8385$ benchmark points. The change is $-\$5.6060$ billion, $-0.7331$ points, or $-13.16\%$ of the production marginal. The result therefore depends materially on the flow-reporting convention without implying that balances were previously reset each month.
+
+Scheduled principal illustrates why common rules do not guarantee cancellation: it totals \$194.978 billion off and \$196.479 billion on in the closed book. Default-state transfers are approximately \$0.276 billion in each leg and are retained as claims, not treated as received principal. The production response-off report exceeds the phase-in cap in two months by \$0.0158 billion in total; cap enforcement reduces its paired runoff difference to \$42.5926 billion. Neither closed-book leg reaches a cap, so its principal and cap-allowed differences coincide. These are modeled implications, not estimates of the actual \$32.8 billion of phase-in purchases.
+
+\subsection{Supported cells and the coupon bridge}
+
+\input{review_population_table}
+
+The supported pool's initial active balance is approximately \$2{,}709.328 billion after the explicitly assumed whole-pool scale. Table~\ref{tab:populationresults} also expresses closed-book principal differences per \$100 of that initial active balance. This normalization states the conditional pool calculation without claiming that the 47.6\% book slice generated the displayed whole-pool dollars. A slice contribution would require a specified slice exposure and purchase path, which the current mapping does not provide.
+
+All twelve cells remain supported with the same 75,000 fresh IDs at bridges of 60, 80, and 100 basis points, and initialized balance shares match within $10^{-8}$. The production-reported marginals are \$36.9512, \$42.1761, and \$45.3018 billion ($+4.8318/+5.5150/+5.9237$ points). The 80-bp result reproduces the saved fresh calculation. The bridge does not alter hazard note rates; it changes cell assignment and weights. The alternatives are diagnostic assumptions, not an empirically established plausible range. Appendix~\ref{app:population} gives support counts and weighting details.
+
+\subsection{Frozen retrospective predictive check}\label{sec:validation}
+
+Before scoring, the original check fixes the available legacy panel, dates, exposure definition, state initialization, candidates, and subperiods. It uses January 2024--September 2025: 5,019 cohort-months in 239 supported vintage-coupon-credit-leverage cells over 21 months. These outcomes were previously examined in Path A and machine-learning diagnostics, so this is a frozen retrospective check, not an untouched holdout. The panel has no later October--November outcomes for this exercise and no loan IDs for an individual split. Both the original scores and the later development comparison below use preserved inputs that predate the source rebuild.
+
+Recorded voluntary prepaid principal is the legacy panel's prior-balance numerator for voluntary payoff events; its original chronological alignment is not certified by preserving those legacy scores. The completed corrected-input audit and new scores are reported separately in Section~\ref{sec:corrected}. Opening exposure is reconstructed from the prior contiguous month's end exposure. Scheduled principal, default receipts, and curtailment are excluded on both sides because their separate observed components are unavailable. Predictions condition on realized opening exposure and rates. They use pre-evaluation age/covariate initialization and predicted-only burnout updates. The simple comparator is each cell's 2023 prepaid-principal-to-exposure rate; no evaluation outcome enters it. Appendix~\ref{app:validation} reports exclusions, cell ratios, and fixed half-year errors.
+
+\input{review_validation_table}
+
+The original response-on model improves on the response-off model, reducing exposure-weighted monthly-rate RMSE from 0.1570 to 0.1339 percentage points. It still performs worse than the 2023 comparator's 0.0868 points and predicts \$161.784 billion against \$131.303 billion recorded in the legacy panel. Its aggregate prediction/observation ratio is 1.232, versus 1.315 off and 0.925 for the comparator. Those are Freddie cohort dollars on observed exposure, not scaled SOMA dollars. These original results remain unchanged.
+
+A separate bounded development exercise selects a 3.5\% annual floor and 100 PSA using 2023 observations only. On the same already-examined 2024--September 2025 evaluation rows, its response-on prediction is \$128.8461 billion against \$131.3033 billion recorded, and monthly-rate RMSE is 0.11014 points versus 0.13389 for the original model and 0.08679 for the simple comparator. The 17.74\% error reduction does not establish predictive superiority. The candidate remains for future testing and is not promoted into the paired simulation results. Appendix~\ref{app:sourceaudit} records its selection, floor diagnostic, and input limitations. Neither comparison independently validates the imported elasticity, forward balance dynamics, or response-off counterfactual.
+
+\subsection{Sampling uncertainty and other checks}
+
+Sampling intervals condition on the model choices above. The loan-resampling procedure draws 130 vintage-by-coupon-by-FICO strata, with effective balance-weighted cluster count 25.8. At the 4.991\% floor its 200-replication percentile interval is $+4.631$ to $+6.924$ points; at the separate in-sample 4\% floor the interval is $+8.27$ to $+10.19$. These are distinct from the floor-read inference, which uses 31 cohort strata and only 5.87 effective clusters. The latter's restricted wild-cluster construction maps to $+1.9$ to $+9.1$ points under the stated maximum-form, central-response specification. Coverage simulations support the construction under their imposed cluster-shock design, not under arbitrary dependence or uncertain model form (Appendix~\ref{app:inference}).
+
+A Fannie replication checks conventional-agency transport but uses the same imported elasticity and cannot independently validate it. Ginnie speed overlays, vintage checks, and the 15-year scheduled-principal extension have separate scope and proxy assumptions. An alternative household-choice model performs poorly on the aggregate benchmark; recalibration on real covariates substantially changes that comparison, so it does not establish a general superiority of one modeling approach. A fitted cohort hazard model also has unstable propagated uncertainty. The appendix retains these adverse checks.
+
+No estimator explains the empirical month-to-month path reliably. The loan-level model's apparent aggregate relationship disappears after detrending, and incorrect seasonal rotations can perform similarly to the intended calendar. The calculation concerns cumulative principal differences, not the month in which that principal would otherwise have arrived.
+
+The historical 4\%-floor group-ablation figure is retained in Appendix~\ref{app:alternatives}, Figure~\ref{fig:marginalcells}; it decomposes a different specification from the \$42.6 billion anchor.
+
+
+\input{corrected_results}
+
+\section{Policy Implications}\label{sec:policy}
+
+The cap is an operational limit and should be presented as such. The New York Fed already publishes balance-sheet projections; the proposal here is an incremental disclosure, not a claim that projections do not exist. A regularly updated side-by-side table would show the MBS cap, projected gross principal, expected reinvestment settlements, and projected net face decline, with the horizon and initial portfolio stated. Separate scenarios would change the interest-rate path and the prepayment assumptions. A reconciliation to subsequently realized cash flows and holdings would distinguish forecast error from settlement timing.
+
+This is more informative than treating a conditional model-sensitivity band as a probabilistic forecast. The moving-share, PSA, and turnover-form comparisons have no assigned scenario probabilities. Publishing them would reveal why a cap can stay far above projected payments while reducing the risk that the gap is read as unanticipated policy failure. Household lock-in may remain important for mobility and welfare even when its conditional contribution to Federal Reserve runoff is much smaller than the full cap gap. This paper does not measure those welfare costs, feedback from mobility to prices and mortgage spreads, or the change in bank reserves, which also depends on the Federal Reserve balance sheet and liability composition.
+
+Contract reform raises a separate question. Denmark's market-value repayment mechanism can reduce the penalty from extinguishing below-market debt \citep{campbell2013,berg2018,andersen2020}. A U.S. transplant's sign changes with assumed baseline mobility and with whether retired face or cash paid is counted. Appendix~\ref{app:alternatives} retains those signed comparisons and the source's working-paper status. The exercise does not price a transition in U.S. issuance, guarantees, servicing, or TBA liquidity and therefore does not justify a contract-policy recommendation from runoff dollars alone.
+
+\section{Conclusion}\label{sec:conclusion}
+
+The \$764.7 billion difference between announced MBS caps and realized net face decline is not a causal estimate of mortgage lock-in. The contemporaneous holdings projection anticipated most of that accounting gap under the two disclosed annual-allocation rules. A paired simulation can translate an imported household response into portfolio principal, but the translation depends on assumptions the aggregate data do not identify.
+
+At the saved-sample maximum-form specification, assumed moving shares of 0, 25, 50, and 100\% give $0$, $+1.8$, $+3.4$, and $+5.6$ points, respectively. The \$42.6 billion full-share result is not an empirically preferred estimate. At that floor, the 75--150 PSA sweep spans $+0.9$ to $+15.6$ points; the survival-combination form gives $+11.2$ at 100 PSA; and once-scaled closed-book accounting gives \$37.0 billion for the original sample. The July 2026 agency-by-vintage diagnostic covers 51.0\% of SOMA face. The fresh joint-cell and bridge comparisons use 47.6\% of the June 2022 book as listed-cell support and conditional whole-pool scaling; they do not measure either slice's actual contribution.
+
+The original retrospective check improves on response off but loses to a simple cohort-speed baseline; the separate 3.5\% development candidate also loses to that baseline. The \$42.6 billion calculation retains its legacy floor and is not a corrected estimate after the ingestion repairs. The completed source rebuild resolves the declared reconstruction checks; sale-reason data, broader collateral coverage, and untouched loan-level evaluation remain needed to strengthen the empirical interpretation. The current contribution is a transparent accounting decomposition with material assumptions and adverse evidence visible beside its results. The operational recommendation is to publish updated cap and cash-flow scenarios together, with separate rate and prepayment assumptions and an explicit bridge from gross principal to net holdings.

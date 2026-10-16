@@ -39,7 +39,7 @@ import sys
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
-BUILD = ROOT / "paper" / "final" / "build_split"
+BUILD = ROOT / "paper" / "final" / "build_review_revision"
 DEFAULTS = [
     BUILD / "paper_final_v1.pdf",
     BUILD / "paper_final_v1_main.pdf",

@@ -1,0 +1,82 @@
+{
+  "mode": "saved_sample_joint_cell_attribution",
+  "book_as_of": "2022-06-29",
+  "covered_total_soma_face_share": 0.47587619671971765,
+  "aggregate_marginal_b": 36.52335698559261,
+  "max_monthly_principal_reconciliation_b": 6.103515625e-14,
+  "cells": [
+    {
+      "cell": "0.0150|2020",
+      "marginal_trapped_b": 0.2871427896767811,
+      "response_on_floor_bind_share": 0.9547831632653061,
+      "response_on_evaluated_loan_months": 47040
+    },
+    {
+      "cell": "0.0150|2021",
+      "marginal_trapped_b": 0.8760701329908684,
+      "response_on_floor_bind_share": 0.9640111809923131,
+      "response_on_evaluated_loan_months": 80136
+    },
+    {
+      "cell": "0.0200|2020",
+      "marginal_trapped_b": 4.319521496555538,
+      "response_on_floor_bind_share": 0.8908476826363672,
+      "response_on_evaluated_loan_months": 204888
+    },
+    {
+      "cell": "0.0200|2021",
+      "marginal_trapped_b": 12.288052850182794,
+      "response_on_floor_bind_share": 0.9100091256014601,
+      "response_on_evaluated_loan_months": 289296
+    },
+    {
+      "cell": "0.0250|2017-19",
+      "marginal_trapped_b": 0.27914715964886394,
+      "response_on_floor_bind_share": 0.7822615451014242,
+      "response_on_evaluated_loan_months": 55608
+    },
+    {
+      "cell": "0.0250|2020",
+      "marginal_trapped_b": 6.552011468907622,
+      "response_on_floor_bind_share": 0.7659959159363566,
+      "response_on_evaluated_loan_months": 141036
+    },
+    {
+      "cell": "0.0250|2021",
+      "marginal_trapped_b": 6.847118915127197,
+      "response_on_floor_bind_share": 0.7979509445460086,
+      "response_on_evaluated_loan_months": 183792
+    },
+    {
+      "cell": "0.0300|2017-19",
+      "marginal_trapped_b": 1.7018646981595076,
+      "response_on_floor_bind_share": 0.6206517030220006,
+      "response_on_evaluated_loan_months": 170814
+    },
+    {
+      "cell": "0.0300|2020",
+      "marginal_trapped_b": 1.496374659183811,
+      "response_on_floor_bind_share": 0.5778340900292119,
+      "response_on_evaluated_loan_months": 56826
+    },
+    {
+      "cell": "0.0350|2017-19",
+      "marginal_trapped_b": 1.0038534145900702,
+      "response_on_floor_bind_share": 0.45533579773886296,
+      "response_on_evaluated_loan_months": 185305
+    },
+    {
+      "cell": "0.0400|2017-19",
+      "marginal_trapped_b": 0.7658252876783127,
+      "response_on_floor_bind_share": 0.3330806729683134,
+      "response_on_evaluated_loan_months": 134568
+    },
+    {
+      "cell": "0.0450|2017-19",
+      "marginal_trapped_b": 0.10637411289070342,
+      "response_on_floor_bind_share": 0.2477136549984232,
+      "response_on_evaluated_loan_months": 44394
+    }
+  ],
+  "scope": "Model allocation within the saved Freddie sample reweighted to supported UMBS 30-year cells and rescaled to total holdings; not a contribution of the 47.6% book slice."
+}

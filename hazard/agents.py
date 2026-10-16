@@ -97,6 +97,7 @@ class MicrosimPool:
         loan_df: pl.DataFrame,
         regime: str = "US",
         rng: Optional[np.random.Generator] = None,
+        require_audited_inputs: bool = False,
     ):
         self.regime = regime
         self.rng = rng or np.random.default_rng()
@@ -129,6 +130,29 @@ class MicrosimPool:
         self.orig_upb = pdf["orig_upb"].values.astype(np.float64)
         self.balance = pdf["balance"].values.astype(np.float64)
         self.loan_age = pdf["loan_age"].fillna(36).values.astype(np.int32)
+        self.terms_assumed = "original_loan_term" not in pdf
+        terms = (np.full(self.n, TERM_MONTHS, dtype=float) if self.terms_assumed
+                 else pdf["original_loan_term"].to_numpy(dtype=float))
+        if not np.all(np.isfinite(terms) & (terms > 0) & (terms == np.floor(terms))):
+            raise ValueError("Known original loan terms must be positive integer months")
+        self.loan_terms = terms.astype(np.int32)
+        history_fields = {"initial_burnout", "burnout_denominator_multiplier"}
+        present = history_fields.intersection(pdf.columns)
+        if present and present != history_fields:
+            raise ValueError("Historical burnout requires both initial share and denominator multiplier")
+        self.history_assumed = not present
+        if require_audited_inputs and (self.terms_assumed or self.history_assumed):
+            raise ValueError("Rebuild loan snapshots with known terms and fixed-cohort historical burnout")
+        self.initial_burnout = (np.zeros(self.n) if self.history_assumed else
+                               pdf["initial_burnout"].to_numpy(dtype=float))
+        self.burnout_denominator_multiplier = (np.ones(self.n) if self.history_assumed else
+            pdf["burnout_denominator_multiplier"].to_numpy(dtype=float))
+        if not np.all(np.isfinite(self.initial_burnout) & (self.initial_burnout >= 0)
+                      & (self.initial_burnout <= 1)):
+            raise ValueError("Initial historical burnout must be finite and between zero and one")
+        if not np.all(np.isfinite(self.burnout_denominator_multiplier)
+                      & (self.burnout_denominator_multiplier >= 1)):
+            raise ValueError("Historical burnout denominator multiplier must be finite and at least one")
 
         states = pdf["state"].fillna("Current").astype(str).values
         self.state_code = np.array(
@@ -144,9 +168,15 @@ class MicrosimPool:
 
         self.stratum_orig_upb = np.zeros(self.n_strata, dtype=np.float64)
         for i in range(self.n):
-            self.stratum_orig_upb[self.stratum_id_code[i]] += self.orig_upb[i]
+            self.stratum_orig_upb[self.stratum_id_code[i]] += (
+                self.orig_upb[i] * self.burnout_denominator_multiplier[i])
 
         self.cohort_burnout = np.zeros(self.n_strata, dtype=np.float64)
+        for s in range(self.n_strata):
+            members = self.stratum_id_code == s
+            weights = self.orig_upb[members] * self.burnout_denominator_multiplier[members]
+            if weights.sum() > 0:
+                self.cohort_burnout[s] = np.average(self.initial_burnout[members], weights=weights)
         self.burnout = np.zeros(self.n, dtype=np.float64)
         self.rate_gap = np.zeros(self.n, dtype=np.float64)
         self.active_mask = np.ones(self.n, dtype=bool)
@@ -240,7 +270,13 @@ class MicrosimPool:
         # Recompute stratum original UPB under the new weights.
         self.stratum_orig_upb = np.zeros(self.n_strata, dtype=np.float64)
         for i in range(self.n):
-            self.stratum_orig_upb[self.stratum_id_code[i]] += self.orig_upb[i]
+            self.stratum_orig_upb[self.stratum_id_code[i]] += (
+                self.orig_upb[i] * self.burnout_denominator_multiplier[i])
+        for s in range(self.n_strata):
+            members = self.stratum_id_code == s
+            weights = self.orig_upb[members] * self.burnout_denominator_multiplier[members]
+            if weights.sum() > 0:
+                self.cohort_burnout[s] = np.average(self.initial_burnout[members], weights=weights)
         self._update_active_mask()
 
     def scale_to_holdings(self, target_billions: float):

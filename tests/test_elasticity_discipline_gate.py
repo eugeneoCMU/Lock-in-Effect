@@ -1,3 +1,5 @@
+# Historical research-record gate: source archived by the approved October 7 revision.
+# Current publication is checked by test_manuscript_references/test_revision_artifacts.
 """Battery for gate #102 (round-26 elasticity-discipline exhibits).
 
 Same convention as the other gate batteries: every mutation is verified
@@ -17,7 +19,7 @@ from liveness_gates import (  # noqa: E402
     elasticity_discipline_check,
 )
 
-TEX = (ROOT / "paper" / "final" / "paper_final_v1.tex").read_text()
+TEX = (ROOT / "paper" / "final" / "reviewed_archive" / "paper_final_v1.tex").read_text()
 
 
 def test_gate_passes_on_the_manuscript():
@@ -43,7 +45,7 @@ def test_each_span_removal_fails(key):
 
 
 def test_variant_carries_the_spans_too():
-    var = (ROOT / "paper" / "final"
+    var = (ROOT / "paper" / "final" / "reviewed_archive"
            / "paper_final_v1_long_abstract.tex").read_text()
     ok, info = elasticity_discipline_check(var)
     assert ok, f"long-abstract variant missing spans: {info}"

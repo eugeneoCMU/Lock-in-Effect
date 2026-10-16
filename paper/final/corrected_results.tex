@@ -1,0 +1,31 @@
+\subsection{Completed corrected-source rerun}\label{sec:corrected}
+The October 14 rerun verifies all twenty Freddie source partitions for 2017Q1--2021Q4 and reconstructs the same outcome cutoff of September 2025. Eligibility now explicitly requires an original 360-month fixed-rate contract, valid original borrower attributes, positive note rate and principal. The source frame contains 9,516,603 eligible originals and 6,261,246 observed May 2022 survivors; the fixed simulation draw contains 75,000 unique loan IDs. Native and Release 47 layouts retain separate per-quarter provenance. Fifty-seven loans, totaling \$21.870 million in original principal, have unknown pre-May histories. Their later observations remain in the panel; no missing early payoff is imputed, and none enters the May starting portfolio. Fixed original-cohort denominators, known-history initialization and assumption-dependent burnout bounds are audited separately.
+
+With the inherited 4.991\% annual hard-maximum floor,100 PSA, full responsive share and imported response unchanged, the corrected pair produces \$16.2155 billion in reported principal difference, or \$14.3407 billion in closed-pool cash accounting. This is an inherited-parameter audit benchmark, not a newly estimated optimal specification. The historical \$42.6084 billion calculation remains a version-specific result. The controlled substitutions in Appendix~\ref{app:correcteddiagnostics} separate sample/composition, historical initialization and transition inputs as far as archived fields permit; they do not identify an isolated parser effect.
+
+The full prespecified matrix contains forty mixture scenarios: five assumed shares, two response conversions, two gap treatments and two reference schedules. Both maximum and additive-survival benchmarks are retained. All 84 paired/scoring outputs pass common-input, support, hash and principal-accounting checks. Matched-reference OFF paths reproduce the hard-maximum OFF benchmark, and positive-gap-only zero-share paths satisfy the ON/OFF identity. These checks establish computational comparability rather than scientific identification. Table~\ref{tab:correctedresults} reports the illustrative 75\% cases and both benchmarks.
+
+\begin{table}[H]
+\centering\small
+\caption{Completed corrected-input comparisons. Principal differences are response OFF minus ON, June 2022--November 2025 (\$ billions); RMSE is the exposure-weighted monthly payoff-rate error on January 2024--September 2025 (percentage points).}\label{tab:correctedresults}
+\begin{tabular}{@{}p{5.4 cm}rrr@{}}\toprule
+Specification & Reported & Pool cash & ON RMSE\\\midrule
+Hard maximum & 16.22 & 14.34 & 0.13399 \\
+Additive survival & 66.39 & 49.84 & 0.42818 \\
+Mixture: inherited reference & 49.57 & 44.42 & 0.11819 \\
+Mixture: matched OFF & 57.59 & 50.14 & 0.11288 \\
+\bottomrule\end{tabular}
+\begin{minipage}{0.94\textwidth}\footnotesize
+Both mixture rows assume a 75\% sensitive share, positive-gap-only suppression, and $\gamma=-\log(0.935)$ per percentage point. References are inherited, not newly calibrated. Reported principal uses each leg's monthly observed-holdings scale; pool cash sums unscaled simulated principal. Simple-baseline RMSE is 0.09096; none of these ON models outperforms it. These amounts are conditional model sensitivities, not interval endpoints or identified SOMA effects.
+\end{minipage}
+\end{table}
+
+
+On identical 4,998 cohort-month observations in 238 cells, corrected observed voluntary payoff is \$107.8634 billion. The inherited-reference 75\% mixture predicts \$113.3676 billion; the matched-reference case predicts \$118.9830 billion. The former is closer to the observed total, while the latter has lower cohort-month RMSE and MAE. Both improve on the hard-maximum and additive ON errors, but both remain worse than the simple cohort-speed baseline. The separately recorded 3.5\% floor/100 PSA candidate predicts \$106.6200 billion with RMSE 0.11060 and MAE 0.08264 percentage points on these corrected rows. Its parameters were selected on the preserved 2023 development inputs, not retuned here; it also remains worse than the baseline, and its scores do not promote it into the paired benchmark. Coupon--vintage and half-year errors are disclosed in Appendix~\ref{app:correcteddiagnostics}; these previously examined outcomes do not select a preferred reference or share.
+
+Fresh floor inference uses corrected 2018 discount-cohort data rather than transferring historical bands. It retains the inherited end-exposure payoff-speed ratio and imported response interpretation. Its measurement uncertainty, numerical effect mapping, cluster sensitivity and limited age support are reported in Appendix~\ref{app:correcteddiagnostics}. Assumed mixture shares and reference choices remain structural sensitivities, not statistical confidence intervals. Source verification does not identify a sale/refinance decomposition, a causal imported response, a representative SOMA sample or an untouched forward evaluation.
+
+\begin{figure}[H]\centering
+\includegraphics[width=0.96\textwidth]{fig14_corrected_comparison.png}
+\caption{Corrected-input conditional differences and retrospective errors. Both mixture cases assume 75\% sensitivity and the illustrative positive-gap response. Reported and pool-cash dollars are distinct accounting measures; the baseline is a prediction comparator, not a lock-in counterfactual.}\label{fig:correctedcomparison}
+\end{figure}

@@ -1,3 +1,5 @@
+# Historical research-record gate: source archived by the approved October 7 revision.
+# Current publication is checked by test_manuscript_references/test_revision_artifacts.
 """Battery for gate #111 (R32 C-54: the cap result in $bn/month).
 
 Same convention as the #105-#110 batteries: every mutation is verified
@@ -19,8 +21,8 @@ sys.path.insert(0, str(ROOT / "tools"))
 
 from liveness_gates import cap_monthly_units_check  # noqa: E402
 
-TEX = (ROOT / "paper" / "final" / "paper_final_v1.tex").read_text()
-VARIANT = (ROOT / "paper" / "final"
+TEX = (ROOT / "paper" / "final" / "reviewed_archive" / "paper_final_v1.tex").read_text()
+VARIANT = (ROOT / "paper" / "final" / "reviewed_archive"
            / "paper_final_v1_long_abstract.tex").read_text()
 EB = json.loads((ROOT / "hazard" / "data"
                  / "expectation_benchmark_results.json").read_text())

@@ -1,3 +1,5 @@
+# Historical research-record gate: source archived by the approved October 7 revision.
+# Current publication is checked by test_manuscript_references/test_revision_artifacts.
 """Battery for gate #117 (R32 C-75: the buyback discount, re-derived).
 
 Three failure modes drive what these tests bind hardest on.
@@ -41,10 +43,10 @@ from liveness_gates import (  # noqa: E402
     buyback_discount_rederived_check,
 )
 
-TEX = (ROOT / "paper" / "final" / "paper_final_v1.tex").read_text()
-VARIANT = (ROOT / "paper" / "final"
+TEX = (ROOT / "paper" / "final" / "reviewed_archive" / "paper_final_v1.tex").read_text()
+VARIANT = (ROOT / "paper" / "final" / "reviewed_archive"
            / "paper_final_v1_long_abstract.tex").read_text()
-LETTER = (ROOT / "paper" / "final"
+LETTER = (ROOT / "paper" / "final" / "reviewed_archive"
           / "response_to_referees_round22.tex").read_text()
 GATES_SRC = (ROOT / "tools" / "liveness_gates.py").read_text()
 D = json.loads((ROOT / "hazard" / "data"
@@ -442,6 +444,7 @@ def test_all_five_expectations_hold():
 def test_the_two_variants_carry_the_same_paragraph():
     span = BUYBACK_DISCOUNT_SPANS["prepay_consistent"]
     assert TEX.count(span) == VARIANT.count(span) == 1
-    assert TEX.count(POINT) == 5
-    assert VARIANT.count(POINT) == 5
+    # The market-value scenario now appears once in the active Online Appendix.
+    assert TEX.count(POINT) == 6
+    assert VARIANT.count(POINT) == 6
     assert len(TEX.split("\n")) == len(VARIANT.split("\n"))

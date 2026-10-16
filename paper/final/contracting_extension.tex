@@ -1,0 +1,42 @@
+\section{Proposed Contracting Extension}\label{app:contractingextension}
+
+This section specifies a research extension, not a fitted replacement for the reported model. \citet{dunnspatt1985} motivate separating the economic cost of surrendering favorable financing from an explicit prepayment fee. Their bilateral contracting result does not establish a concession mechanism for the agency loans studied here. The publisher's abstract verifies the qualitative result; the equations below are a proposed implementation sketch rather than a replication of the full 1985 equilibrium.
+
+\citet{dunnspatt2005} motivate including refinancing costs and future refinancing opportunities alongside the sale decision. Their abstract reports a joint valuation and dynamic refinancing problem; the prototype below does not reproduce its optimum. The accessible publisher abstract, rather than the unavailable full text, supports this motivation. The equations that follow remain proposed modeling choices, not imported theorems from either paper.
+
+Let $U_{it}$ be outstanding principal in dollars and $V_{it}$ the value of the existing loan under an explicitly chosen valuation model. Define the contractual financing loss
+\begin{equation}
+\Pi^{C}_{it}=\max\{U_{it}-V_{it},0\},\qquad
+\Pi^{E}_{it}=\begin{cases}
+\Pi^{C}_{it},&A_{it}=0,\\
+\min\{\Pi^{C}_{it},\bar\Pi_{it}\},&A_{it}=1.
+\end{cases}
+\label{eq:contractcost}
+\end{equation}
+$A_{it}$ indicates that a concession is institutionally permitted. The cap $\bar\Pi_{it}$ is an explicit scenario input, not an estimated or solved lender optimum. The prototype defaults to $A_{it}=0$ and refuses a concession cap without explicit permission. Its scheduled-payment valuation uses a supplied discount rate and remaining term; it omits prepayment options, credit risk, servicing and modifications, and is not an observed loan market value.
+
+Suppose moving opportunities arrive at monthly Poisson intensity $\nu_{it}$ and the net gain from selling, in dollars, has a supplied continuous distribution $F_G$. Holding these objects constant within the month, a proposed home-sale intensity is
+\begin{equation}
+\lambda^{\mathrm{home\ sale}}_{it}=\nu_{it}[1-F_G(\Pi^E_{it})],\qquad
+\lambda^{\mathrm{sale\ exit}}_{it}=\rho_{it}\lambda^{\mathrm{home\ sale}}_{it},
+\label{eq:saleextension}
+\end{equation}
+where $\rho_{it}$ is the probability that a sale terminates the mortgage. A sale is not automatically an MBS principal repayment: an assumption may leave the loan outstanding, a repurchase may remove it from a pool, and a discounted payoff may change cash and principal-loss accounting. The future model must therefore specify both termination incidence and the associated cash, transfer and loss rules. Neither $\rho_{it}$ nor those rules is identified here.
+
+A proposed voluntary-termination decomposition is
+\begin{equation}
+\lambda^{\mathrm{vol}}_{it}=\lambda^{\mathrm{sale\ exit}}_{it}
++\lambda^{\mathrm{refi}}_{it}+\lambda^{\mathrm{other}}_{it}.
+\label{eq:voluntarydecomposition}
+\end{equation}
+An imported mobility response would modify only $\lambda^{\mathrm{sale\ exit}}_{it}$. If used as a reduced-form alternative to equation~\eqref{eq:saleextension}, it would replace that equation's sale-response mechanism rather than automatically compound it. Refinancing intensity would require its own rule for costs, rate incentives, and future opportunities; holding that rule fixed across paired legs does not make refinancing empirically rate-independent. Other voluntary termination and default also require separate rules. No cause-specific intensity, moving share, or refinancing-cost parameter is estimated or identified here from aggregate payoff flags.
+
+With these separate intensities and a default intensity, a constant-intensity first-exit model would use
+\begin{equation}
+\Lambda_{it}=\sum_k\lambda^k_{it},\qquad
+p^k_{it}=\frac{\lambda^k_{it}}{\Lambda_{it}}(1-e^{-\Lambda_{it}}),
+\label{eq:structuralcompeting}
+\end{equation}
+with $p^k_{it}=0$ when all intensities are zero. This alternative is not mixed into the production engine's fractional-prepayment and Markov-default rules. The prototype in \path{hazard/structural_sale_extension.py} exposes these components for future calibration and unit checks only. Opportunity intensity, gain distribution, valuation, concession permission and cap, refinancing behavior, and sale-to-payoff mapping all require additional evidence or explicitly labeled assumptions. The existing payoff flag does not separately identify them.
+
+The mixture specification in equation~\eqref{eq:mixtureproposal} instead splits a reference intensity by an assumed responsive share. It does not identify sale and refinancing causes, lender bargaining, or contractual concessions. Both approaches leave the existing \$42.6 billion result labeled as a conditional legacy-specification comparison; neither supplies a new estimated concession effect or a direction of bias for that comparison.

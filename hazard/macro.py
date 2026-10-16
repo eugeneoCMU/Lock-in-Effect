@@ -53,6 +53,10 @@ def scheduled_amortization_smm(annual_rate: float, term_months: int,
     annual_rate = float(coupon_to_decimal(annual_rate))
     r = annual_rate / 12
     n, k = term_months, months_elapsed
+    if not np.isfinite(n) or n <= 0 or n != int(n) or k < 0:
+        raise ValueError("Amortization requires a positive integer term and nonnegative age")
+    if k >= n:
+        return 1.0
     if r == 0:
         return 1.0 / (n - k) if k < n else 0.0
     growth_k, growth_n = (1 + r) ** k, (1 + r) ** n
@@ -61,7 +65,7 @@ def scheduled_amortization_smm(annual_rate: float, term_months: int,
         return 0.0
     payment_ratio = r * growth_n / (growth_n - 1)
     sched_principal = payment_ratio - r * balance_ratio
-    return sched_principal / balance_ratio
+    return float(np.clip(sched_principal / balance_ratio, 0.0, 1.0))
 
 
 def scheduled_amortization_series(
