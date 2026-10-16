@@ -62,6 +62,7 @@ hazard/data/oos_identification_run.log
 # Editor/agent workspaces (stale worktree copies pollute repo greps)
 .claude/
 .cursor/
+.worktrees/
 
 # Phase backups made by the freeze protocol
 *.bak-*

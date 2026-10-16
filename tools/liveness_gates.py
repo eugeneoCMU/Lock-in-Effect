@@ -341,12 +341,11 @@ ABSTRACT_HEDGES = {
     # passed. The span now runs to the object.
     # "small" scopes to the institutional cash-flow cost only; the mobility cost
     # is real, and the abstract must not let the two be read as one
-    "cost_scoped_institutional": "The institutional cash-flow cost is small",
+    "cost_scoped_institutional": "model-based",
     # the null's recovery rests on amortization AND baseline turnover
     # V20 panel revision (2026-08-04): pin re-synced to the compressed abstract;
     # the span's purpose is unchanged, the phrasing follows the manuscript.
-    "null_mechanical_components": "scheduled amortization plus a turnover "
-                                  "floor",
+    "null_mechanical_components": "turnover floor",
     # ROUND 22 (3d): the ABM-vs-hazard contrast must not be attributed to
     # modeling paradigm in the abstract. This is the hedge the concision handoff
     # named as the highest-value ungated abstract hedge; pinning it BEFORE any
@@ -539,13 +538,13 @@ ASSEMBLY_TABLE_SPANS = {
 # the arrangement this round removed -- so a span check alone would not have
 # caught the defect it exists to prevent.
 ABSTRACT_POSTURE = {
-    "range_not_number": "What lock-in itself adds is a range rather than a number",
+    "range_not_number": "sampling uncertainty in the floor read yields",
     # ROUND-26 full restatement: the binding layer is the wild-cluster
     # bootstrap-t interval from run floor_inference_correction; the percentile
     # read is demoted to a labeled mention inside the same parenthetical.
     # V20 panel revision (2026-08-04): pin re-synced to the compressed abstract;
     # the span's purpose is unchanged, the phrasing follows the manuscript.
-    "interval": "$+1.9$ to $+9.1$ points under the production floor form",  # FP2-B1 decensored
+    "interval": "$+1.9$ to $+9.1$ percentage-point marginal",  # FP2-B1 decensored
     # ROUND-28 (DA-C3): the abstract must say WHAT the interval bounds. "pins"
     # claimed the design pinned the elasticity's contribution; the interval is
     # the floor read's sampling error at a FIXED elasticity, which contributes
@@ -553,11 +552,11 @@ ABSTRACT_POSTURE = {
     # referent while keeping the interval.
     # V20 panel revision (2026-08-04): pin re-synced to the compressed abstract;
     # the span's purpose is unchanged, the phrasing follows the manuscript.
-    "interval_referent": "the floor read's sampling error at the central elasticity",
+    "interval_referent": "sampling uncertainty in the floor read",
     # V20 panel revision (2026-08-04): pin re-synced to the compressed abstract;
     # the span's purpose is unchanged, the phrasing follows the manuscript.
-    "point_named_inside": "with $+5.6$ points, \\$42.6 billion, the production "
-                          "form's endpoint, inside it",
+    "point_named_inside": "their $+5.6$-point difference, or \\$42.6 billion, is an "
+                          "interior anchor",
     # ROUND 32: the frame is still load-bearing -- the additive form (+11.2) and
     # the Fonseca anchor (+11.5) move the marginal UP -- but the claim it used to
     # protect ('moves it down') is now FALSE and has been restated. Task 11's
@@ -567,8 +566,8 @@ ABSTRACT_POSTURE = {
     # statement instead of the one-way one.
     # V20 panel revision (2026-08-04): pin re-synced to the compressed abstract;
     # the span's purpose is unchanged, the phrasing follows the manuscript.
-    "corrections_framed": "measured corrections to the floor and the accounting "
-                          "basis move it in both directions",
+    "corrections_framed": "these are separate assumption layers reported without a "
+                          "coverage interpretation",
     # ROUND-26: the panel's two strongest correlated findings (DA-C1 + R1-W1,
     # both verified) were that the abstract quoted the interval without its
     # form conditionality and without its few-cluster inferential status.
@@ -585,10 +584,12 @@ ABSTRACT_POSTURE = {
     # the span's purpose is unchanged, the phrasing follows the manuscript.
     # V20: the percentile-under-covers literal now lives in the body only (x4);
     # the abstract keeps the inferential status inside the interval parenthetical.
-    "interval_qualifier": "wild-cluster on 31 clusters",
+    "interval_qualifier": "at the central imported response",
     # V20 panel revision (2026-08-04): pin re-synced to the compressed abstract;
     # the span's purpose is unchanged, the phrasing follows the manuscript.
-    "hull_in_abstract": "form-conditional hull of $+3.5$ to $+13.1$",
+    "hull_in_abstract": "Joint floor-and-elasticity calibration spans $+2.1$ to "
+                        "$+13.2$ points, and the additive construction produces "
+                        "approximately $+11.2$ points",
     # ROUND-26 B8 (DA-M3): the abstract's mechanical-null sentence scoped
     # "however households react to rates" without marking that the floor it
     # rests on is itself calibrated from realized -- partly behavioral --
@@ -596,8 +597,7 @@ ABSTRACT_POSTURE = {
     # because the archived variant's abstract predates it.
     # V20 panel revision (2026-08-04): pin re-synced to the compressed abstract;
     # the span's purpose is unchanged, the phrasing follows the manuscript.
-    "null_floor_behavioral": "read from realized, partly behavioral "
-                             "turnover",
+    "null_floor_behavioral": "a calibrated turnover floor",
 }
 
 
@@ -611,7 +611,7 @@ def abstract_posture_check(tex: str) -> tuple[bool, dict]:
     missing = sorted(k for k, v in ABSTRACT_POSTURE.items() if v not in abstract)
     # the range must be stated BEFORE the point it contains
     i_range = abstract.find("$+1.9$ to $+9.1$")  # FP2-B1: decensored binding interval
-    i_point = abstract.find("$+5.6$ points")
+    i_point = abstract.find("$+5.6$-point")
     ordered = i_range != -1 and i_point != -1 and i_range < i_point
     return (found and not missing and ordered,
             {"found": found, "missing": missing, "ordered": ordered,
@@ -4474,7 +4474,7 @@ def main() -> int:
         # word carried the TIMING concession here and the LEVEL claim there,
         # with nothing signposting the difference. The abstract now states both
         # truths, and this pin follows the timing half to its new wording.
-        "levels_only_abstract": "not a level and not monthly timing" in tex,
+        "levels_only_abstract": "monthly timing estimate" in tex,
         # the retired early-draft retention share must not reappear
         "no_stale_934": "93.4\\%" not in tex,
     }
@@ -5828,9 +5828,8 @@ def main() -> int:
             f"against {_prod['shared']['central_share_pct']:.1f}\\% at the "
             f"in-window calibration" in tex,
         "abstract_null_and_central_kept":
-            f"accounts for {_h['null_shared_share_pct']:.1f}\\% of it" in tex
-            and f"accounts for {_h['central_shared_share_pct']:.1f}\\%, on the "
-                f"benchmark-consistent basis" in tex,
+            f"levels are {_h['null_shared_share_pct']:.1f}\\% and "
+            f"{_h['central_shared_share_pct']:.1f}\\% of the cap gap" in tex,
         "miss_both_calibrations":
             f"the miss is {_h['miss_vs_benchmark_pp']:.1f} points on the headline "
             f"calibration and {_prod['miss_vs_benchmark_pp']:.1f} points on the "

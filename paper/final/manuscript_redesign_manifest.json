@@ -1,0 +1,45 @@
+{
+  "version": 1,
+  "date": "2026-09-11",
+  "title": "Mortgage Lock-In and the Federal Reserve's Quantitative Tightening Shortfall",
+  "main_source": "paper/final/journal_main_v2.tex",
+  "canonical_editions": [
+    "paper/final/paper_final_v1.tex",
+    "paper/final/paper_final_v1_long_abstract.tex"
+  ],
+  "source_blocks": [
+    {"label": "sec:intro", "disposition": "main", "destination": "journal_main_v2.tex", "reason": "Rewritten around the MBS-specific shortfall and lock-in marginal."},
+    {"label": "sec:lit", "disposition": "delete-obsolete", "destination": "sec:setting", "reason": "Replaced by the focused mortgage-lock-in and MBS-runoff literature section."},
+    {"label": "sec:method", "disposition": "delete-obsolete", "destination": "sec:data and sec:model", "reason": "Replaced by separate benchmark and loan-level decomposition sections."},
+    {"label": "sec:abm", "disposition": "appendix", "destination": "sec:method-abm", "reason": "ABM mechanics move to the online appendix; adverse conclusions remain in sec:validation."},
+    {"label": "sec:hazard", "disposition": "delete-obsolete", "destination": "sec:model and sec:results", "reason": "Replaced by the publication-facing Loan-Level Prepayment Model."},
+    {"label": "sec:discussion", "disposition": "delete-obsolete", "destination": "sec:policy", "reason": "Replaced by a cap-design-led policy section."},
+    {"label": "sec:robustness", "disposition": "appendix", "destination": "sec:validation and Online Appendix", "reason": "Interpretation-changing checks remain in the main text; full grids remain online."},
+    {"label": "sec:conclusion", "disposition": "main", "destination": "journal_main_v2.tex", "reason": "Rewritten to state the three approved conclusions without a robustness replay."},
+    {"label": "sec:method-abm", "disposition": "appendix", "destination": "Online Appendix", "reason": "Full ABM specification retained."},
+    {"label": "app:abmspec", "disposition": "appendix", "destination": "Online Appendix", "reason": "ABM decision rule and parameter provenance retained."},
+    {"label": "app:params", "disposition": "appendix", "destination": "Online Appendix", "reason": "Loan-level parameterization and Danish derivations retained."},
+    {"label": "app:patha-detail", "disposition": "appendix", "destination": "Online Appendix", "reason": "Path A specification and timing diagnostics retained."},
+    {"label": "app:ridge", "disposition": "appendix", "destination": "Online Appendix", "reason": "Path A inference and ridge diagnostics retained."},
+    {"label": "app:theil", "disposition": "appendix", "destination": "Online Appendix", "reason": "Dynamic-fit decomposition retained."},
+    {"label": "app:composition", "disposition": "appendix", "destination": "Online Appendix", "reason": "Sample-to-book composition details retained."},
+    {"label": "app:floormech", "disposition": "appendix", "destination": "Online Appendix", "reason": "Floor mechanics and contamination analysis retained."},
+    {"label": "sec:robustness-extensions", "disposition": "appendix", "destination": "Online Appendix", "reason": "Behavioral extension mechanics retained."},
+    {"label": "sec:robustness-wal", "disposition": "appendix", "destination": "Online Appendix", "reason": "Weighted-average-life details retained."},
+    {"label": "sec:robustness-pipeline", "disposition": "appendix", "destination": "Online Appendix", "reason": "Term and rate-gap implementation details retained."},
+    {"label": "sec:robustness-seasonalfloor", "disposition": "appendix", "destination": "Online Appendix", "reason": "Seasonal-floor and timing diagnostics retained."}
+  ],
+  "protected_claims": [
+    {"id": "title", "destination": "canonical editions", "text": "Mortgage Lock-In and the Federal Reserve's Quantitative Tightening Shortfall"},
+    {"id": "cap_gap", "destination": "abstract and main", "text": "$764.748 billion"},
+    {"id": "expectations_gap", "destination": "main", "text": "$87.8 billion"},
+    {"id": "production_interval", "destination": "abstract and main", "text": "$+1.9$ to $+9.1$"},
+    {"id": "calibration_box", "destination": "abstract and main", "text": "$+2.1$ to $+13.2$"},
+    {"id": "model_based", "destination": "abstract and main", "text": "model-based portfolio decomposition"},
+    {"id": "functional_forms", "destination": "main", "text": "h^{\\mathrm{max}}_{it}"},
+    {"id": "no_monthly_claim", "destination": "main", "text": "No estimator explains the empirical month-to-month path"},
+    {"id": "abm_adverse", "destination": "main and appendix", "text": "$R^2=-6.984$"},
+    {"id": "paradigm_withdrawal", "destination": "main and appendix", "text": "does not isolate a clean ABM-versus-hazard paradigm effect"},
+    {"id": "danish_incidence", "destination": "main and appendix", "text": "$-\\$51.0$ billion"}
+  ]
+}
