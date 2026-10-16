@@ -217,6 +217,7 @@ def pair(loans, empirical, cohorts=None) -> dict:
             "marginal_b": c["trapped_b"] - n["trapped_b"],
             "marginal_pp": c["share_pct"] - n["share_pct"],
             "null_bind": n["floor_bind_share"], "central_bind": c["floor_bind_share"],
+            "null_bind_n": n["floor_bind_loan_months"],
             "central_bind_n": c["floor_bind_loan_months"]}
 
 

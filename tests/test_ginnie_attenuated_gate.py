@@ -1,3 +1,5 @@
+# Historical research-record gate: source archived by the approved October 7 revision.
+# Current publication is checked by test_manuscript_references/test_revision_artifacts.
 """Battery for gate #116 (R32 C-74: the Ginnie share's gap response, bracketed).
 
 This exhibit's failure mode is an overclaim, in two directions, so the tests bind
@@ -36,12 +38,12 @@ from liveness_gates import (  # noqa: E402
 
 # V20 closing-session rescope: app:ledger/app:verdicts live in the standalone
 # replication_appendices.tex; the gated corpus is manuscript + that file.
-TEX = ((ROOT / "paper" / "final" / "paper_final_v1.tex").read_text()
-       + "\n" + (ROOT / "paper" / "final" / "replication_appendices.tex").read_text())
+TEX = ((ROOT / "paper" / "final" / "reviewed_archive" / "paper_final_v1.tex").read_text()
+       + "\n" + (ROOT / "paper" / "final" / "reviewed_archive" / "replication_appendices.tex").read_text())
 OPENER = "Pure conventional-share scaling is what a gap-inert Ginnie share gives."
-VARIANT = (ROOT / "paper" / "final"
+VARIANT = (ROOT / "paper" / "final" / "reviewed_archive"
            / "paper_final_v1_long_abstract.tex").read_text() \
-    + "\n" + (ROOT / "paper" / "final" / "replication_appendices.tex").read_text()  # V20 rescope
+    + "\n" + (ROOT / "paper" / "final" / "reviewed_archive" / "replication_appendices.tex").read_text()  # V20 rescope
 HAZ = ROOT / "hazard" / "data"
 G = json.loads((HAZ / "ginnie_overlay_attenuated_results.json").read_text())
 OV = json.loads((HAZ / "ginnie_cpr_overlay_results.json").read_text())

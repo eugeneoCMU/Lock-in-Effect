@@ -1,0 +1,140 @@
+{
+  "scope": "Specification files present in the reviewed edition; three October 7 revision specifications are later additions.",
+  "files": [
+    {
+      "path": "specs/SPEC_R30_wal_normal_turnover.md",
+      "sha256": "e4d3cdabc394ef731d50a93f24673d2bbcd66f327aeab9d73f08e512749dc2a2",
+      "bytes": 37906
+    },
+    {
+      "path": "specs/SPEC_R32_c07_post_stratification.md",
+      "sha256": "349a39a869b7645461b2e92ebdcbd3b6904d2b4cf198f8d571c7cdc74fefee07",
+      "bytes": 11464
+    },
+    {
+      "path": "specs/SPEC_R32_c127_benchmark_monthly_rebuild.md",
+      "sha256": "35a61e63299750c04d1d5d8498614e62fc99d5e5ac1a642262e97cc814ed2c71",
+      "bytes": 9637
+    },
+    {
+      "path": "specs/SPEC_R32_c128_realized_boundary_allocation.md",
+      "sha256": "5f8957dbba94763b196b9ffb40f9ae2a6cbaf22a11c12dbd9bc285d8e38f42de",
+      "bytes": 7752
+    },
+    {
+      "path": "specs/SPEC_R32_c72_month_and_twoway_clusters.md",
+      "sha256": "26972e8777e241487c3b9681fee14f09e438a4b61a06c78bc2c85f41ebe1ff32",
+      "bytes": 13488
+    },
+    {
+      "path": "specs/SPEC_R32_c73_gradient_recompute.md",
+      "sha256": "9e4269c6bbf2528ece936d1212a89040658cb3771e22e1611f4a3fa798b59220",
+      "bytes": 6532
+    },
+    {
+      "path": "specs/SPEC_R32_c74_ginnie_attenuated_elasticity.md",
+      "sha256": "701a66cf95dca3f4476627562dd4bcb3e792304695168b83924c491166b20a0d",
+      "bytes": 13697
+    },
+    {
+      "path": "specs/SPEC_R32_c75_buyback_discount.md",
+      "sha256": "677f45c4bd9464c0f6cb2abbfbf2a7df31143d672e6493e3ce4c2ca4935508f8",
+      "bytes": 14634
+    },
+    {
+      "path": "specs/SPEC_R32_c76_transaction_counts.md",
+      "sha256": "a2c4bb6683e4b821f870f2397dcc09732892daeadbd2c108c6ccfcbacc06c8e3",
+      "bytes": 5514
+    },
+    {
+      "path": "specs/SPEC_R32_c77_aladangady_additive.md",
+      "sha256": "d8742e2095afd5605e24d3ebcb63efb466095514f921eb40bdfc0b35973c35c2",
+      "bytes": 12951
+    },
+    {
+      "path": "specs/SPEC_R32_c78_episode_gradient_age_bands.md",
+      "sha256": "d53e464fc79c631edc3c47704642c9f6d0fb8981f3bc6834e15e47ddd5a8a57d",
+      "bytes": 15658
+    },
+    {
+      "path": "specs/SPEC_R32_c79_danish_interest_only_share.md",
+      "sha256": "a78f0c7ddd50c929bfa996d892bd9439f0284672df8751c94420c326958eca33",
+      "bytes": 14500
+    },
+    {
+      "path": "specs/SPEC_R32_c80_depth_ladder_shape.md",
+      "sha256": "f23e5707c06ad086d0aeb9fec35b9d0f42d6f9a2bf8b0739e5a9d46c500cdae4",
+      "bytes": 4724
+    },
+    {
+      "path": "specs/SPEC_R32_c81_state_contingent_cap.md",
+      "sha256": "eacc9c390ac7ce148d6241ce30aaf89a3fb640308b6a5f752f211f3a5fbbcd99",
+      "bytes": 6681
+    },
+    {
+      "path": "specs/SPEC_R32_c94_wal_note_rate_basis.md",
+      "sha256": "edaf8f6cc10bd5e001bf61489b387aa1cd7929a390a814c62e9494f8e122fd28",
+      "bytes": 6225
+    },
+    {
+      "path": "specs/SPEC_R32_floor_transport_two_sided.md",
+      "sha256": "803760d95c155d7be47645a5120f6f133cc19ce886a82a19abdcdde0761daee2",
+      "bytes": 10466
+    },
+    {
+      "path": "specs/SPEC_R32_h0_reanchor.md",
+      "sha256": "3b4ecb425d507e18f3f930f141ab720f8a61288f8afb7c02558c0150afdb9244",
+      "bytes": 14881
+    },
+    {
+      "path": "specs/SPEC_V20_A_compounding_null_2026-08-04.md",
+      "sha256": "c3b4bd10ce315a1aca3936d4fb8a4ffffe6c3d018e3f7bb078eb2ad8a86f2a10",
+      "bytes": 3247
+    },
+    {
+      "path": "specs/SPEC_V20_B_null_floor_interval_2026-08-04.md",
+      "sha256": "9acd681194f86fe60437d7995df27b8a3b2e327398cbf319c6804ca8ad66a219",
+      "bytes": 3927
+    },
+    {
+      "path": "specs/SPEC_V20_C_fewcluster_coverage_2026-08-04.md",
+      "sha256": "be62dd275761538d33e38e7772351d4a72b0f7302c41744f015c7a9fcd3eefc2",
+      "bytes": 4377
+    },
+    {
+      "path": "specs/SPEC_fresh_panel2_B1_grid_extension_2026-08-29.md",
+      "sha256": "6c37d12fda35b41f22371291271e468ef2371c9e4640799defdee86a80c7217a",
+      "bytes": 11575
+    },
+    {
+      "path": "specs/SPEC_fresh_panel2_B2_convolution_rederivation_2026-08-29.md",
+      "sha256": "f9111813791e1017542108a0228739e6570e1989d8d76fb18604be65851e36a3",
+      "bytes": 7815
+    },
+    {
+      "path": "specs/SPEC_round28_B2_C4_C5.md",
+      "sha256": "b1ae1070b0b365bd4632b8f4b94c526a9a81fb2ee4a893d9360bc6c1ec3eb575",
+      "bytes": 52790
+    },
+    {
+      "path": "specs/SPEC_round28_C1_C2_C3_C6.md",
+      "sha256": "689a0169121958a240c6201922c2c52f81394c0a54e9a329967269a7ee469be6",
+      "bytes": 80307
+    },
+    {
+      "path": "specs/SPEC_round28_D_F1_I1_I3_J2_S8.md",
+      "sha256": "11630bd80750fd6f0e577fb29dba6d8d90be865ea7700201711880c43a511d42",
+      "bytes": 74156
+    },
+    {
+      "path": "specs/SPEC_round28_G2_coupon_convention.md",
+      "sha256": "6c175220e96a94ead7fe0ba70cfd4404872645cd59fc9722f432a44ff7a24427",
+      "bytes": 78868
+    },
+    {
+      "path": "specs/SPEC_round28_H1_zero_months.md",
+      "sha256": "bf79a86c5628dc61dc7217b7f9b2c2cd2330984ae3fcf36445667e232a663a3a",
+      "bytes": 5442
+    }
+  ]
+}

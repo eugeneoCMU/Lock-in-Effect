@@ -1,0 +1,3 @@
+# Coupon bridge diagnostic frozen 2026-10-07
+
+Use identical 75,000 fresh survivor IDs and June 29, 2022 twelve-cell target book. Shift note coupons by 60/80/100 bp before 50bp bucket assignment; hazard note rates unchanged. Recompute support and weights; missing positive-target cells invalidate a comparison, with missing mass reported and no target renormalization. Check already-saved snapshots read-only if necessary; no new draw. Paired supported legs use identical weights, inputs, seed 42, 4.991% floor. Report scaled dollars and initial-balance-normalized comparison separately. Bridges are diagnostic assumptions, not a plausible interval inferred from evidence.

@@ -229,8 +229,8 @@ def test_body_mutation_flips_gate_to_fail(name: str, tex: str) -> None:
 
 BENIGN = {
     "reword_unrelated_sentence": (
-        "MBS runoff caps should reflect plausible portfolio cash flows",
-        "MBS runoff caps should represent plausible portfolio cash flows"),
+        "Passive MBS runoff should be communicated with a plausible cash-flow range",
+        "Passive MBS runoff can be communicated with a plausible cash-flow range"),
     "reword_unrelated_lead": (
         "From June 2022 through November 2025",
         "Between June 2022 and November 2025"),

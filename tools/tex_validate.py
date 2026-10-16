@@ -146,7 +146,8 @@ def main():
     ap.add_argument("doc")
     ap.add_argument("--bib", default=None)
     a = ap.parse_args()
-    src = open(a.doc, encoding="utf-8").read()
+    from manuscript_reference_audit import expand_source
+    src = expand_source(a.doc)
 
     checks = [
         ("parse (pylatexenc)", parse_check(src)),

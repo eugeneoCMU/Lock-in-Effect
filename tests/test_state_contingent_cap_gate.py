@@ -1,3 +1,5 @@
+# Historical research-record gate: source archived by the approved October 7 revision.
+# Current publication is checked by test_manuscript_references/test_revision_artifacts.
 """Battery for gate #112 (R32 C-81: the state-contingent cap's two-input grid).
 
 The exhibit's point is a COMPARISON -- the designer's observable moves the implied
@@ -21,8 +23,8 @@ sys.path.insert(0, str(ROOT / "tools"))
 
 from liveness_gates import state_contingent_cap_check  # noqa: E402
 
-TEX = (ROOT / "paper" / "final" / "paper_final_v1.tex").read_text()
-VARIANT = (ROOT / "paper" / "final"
+TEX = (ROOT / "paper" / "final" / "reviewed_archive" / "paper_final_v1.tex").read_text()
+VARIANT = (ROOT / "paper" / "final" / "reviewed_archive"
            / "paper_final_v1_long_abstract.tex").read_text()
 G = json.loads((ROOT / "hazard" / "data"
                 / "state_contingent_cap_grid_results.json").read_text())

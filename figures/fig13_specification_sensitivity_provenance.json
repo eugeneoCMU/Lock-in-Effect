@@ -1,0 +1,73 @@
+{
+  "rows": [
+    {
+      "label": "Moving share 0% (definitional)",
+      "value": 0.0,
+      "source": "moving_share_bracket_offwindow_results.json",
+      "key": "null identity",
+      "group": "Moving share"
+    },
+    {
+      "label": "Moving share 25%",
+      "value": 1.8211743834884828,
+      "source": "moving_share_bracket_offwindow_results.json",
+      "key": "cells.0.25",
+      "group": "Moving share"
+    },
+    {
+      "label": "Moving share 50%",
+      "value": 3.3615155254281035,
+      "source": "moving_share_bracket_offwindow_results.json",
+      "key": "cells.0.5",
+      "group": "Moving share"
+    },
+    {
+      "label": "Moving share 100%",
+      "value": 5.571558182909726,
+      "source": "moving_share_bracket_offwindow_results.json",
+      "key": "cells.1",
+      "group": "Moving share"
+    },
+    {
+      "label": "75 PSA baseline",
+      "value": 0.8560355409769471,
+      "source": "psa_level_sweep_results.json",
+      "key": "cells.4.991|75|6.5",
+      "group": "PSA speed"
+    },
+    {
+      "label": "100 PSA baseline",
+      "value": 5.571558182909726,
+      "source": "psa_level_sweep_results.json",
+      "key": "cells.4.991|100|6.5",
+      "group": "PSA speed"
+    },
+    {
+      "label": "125 PSA baseline",
+      "value": 11.4190637487321,
+      "source": "psa_level_sweep_results.json",
+      "key": "cells.4.991|125|6.5",
+      "group": "PSA speed"
+    },
+    {
+      "label": "150 PSA baseline",
+      "value": 15.626488479897219,
+      "source": "psa_level_sweep_results.json",
+      "key": "cells.4.991|150|6.5",
+      "group": "PSA speed"
+    },
+    {
+      "label": "Survival-combination form",
+      "value": 11.207021073656186,
+      "source": "floor_form_offwindow_results.json",
+      "key": "additive;4.991;6.5",
+      "group": "Turnover form"
+    }
+  ],
+  "artifact_sha256": {
+    "moving_share_bracket_offwindow_results.json": "0221884e5fbadb0d989065d592ac0857a7e178d2f80b8462b1fbfd342c209227",
+    "psa_level_sweep_results.json": "790eb724ffa0bc4d22c720d777c3b2e33d3b6d7b9b68a45454af51466398058b",
+    "floor_form_offwindow_results.json": "20d7f48783daf3b342713d11a886fd39a44e6b36b906b29495d732e4b44c47e9"
+  },
+  "fixed": "saved sample; 4.991% floor; 100 PSA; full moving share; maximum form, except named variation"
+}

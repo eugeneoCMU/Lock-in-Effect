@@ -663,7 +663,7 @@ def fig11_marginal_decomposition():
     ax.set_yticks(range(len(vintages)), [str(v) for v in vintages])
     ax.set_xlabel("coupon bucket")
     ax.set_ylabel("origination vintage")
-    ax.set_title("Lock-in marginal by vintage × coupon cell")
+    ax.set_title("In-sample 4% floor: $70.3B paired total\nVintage × coupon group-ablation sensitivity", fontsize=11)
     cbar = fig.colorbar(mesh, ax=ax, fraction=0.046, pad=0.03)
     cbar.set_label("marginal contribution ($B)", fontsize=9.5)
     g3 = d["gates"]["G3_additivity"]

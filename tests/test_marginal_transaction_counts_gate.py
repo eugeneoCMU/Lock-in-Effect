@@ -1,3 +1,5 @@
+# Historical research-record gate: source archived by the approved October 7 revision.
+# Current publication is checked by test_manuscript_references/test_revision_artifacts.
 """Battery for gate #113 (R32 C-76 + C-82: the marginal in transaction counts).
 
 Three of these tests exist because of how this exhibit could go wrong quietly
@@ -16,8 +18,8 @@ sys.path.insert(0, str(ROOT / "tools"))
 
 from liveness_gates import marginal_transaction_counts_check  # noqa: E402
 
-TEX = (ROOT / "paper" / "final" / "paper_final_v1.tex").read_text()
-VARIANT = (ROOT / "paper" / "final"
+TEX = (ROOT / "paper" / "final" / "reviewed_archive" / "paper_final_v1.tex").read_text()
+VARIANT = (ROOT / "paper" / "final" / "reviewed_archive"
            / "paper_final_v1_long_abstract.tex").read_text()
 M = json.loads((ROOT / "hazard" / "data"
                 / "marginal_transaction_counts_results.json").read_text())
