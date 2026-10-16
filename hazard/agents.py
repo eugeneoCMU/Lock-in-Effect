@@ -129,6 +129,28 @@ class MicrosimPool:
         self.orig_upb = pdf["orig_upb"].values.astype(np.float64)
         self.balance = pdf["balance"].values.astype(np.float64)
         self.loan_age = pdf["loan_age"].fillna(36).values.astype(np.int32)
+        self.terms_assumed = "original_loan_term" not in pdf.columns
+        terms = (np.full(self.n, TERM_MONTHS, dtype=float) if self.terms_assumed
+                 else pdf["original_loan_term"].to_numpy(dtype=float))
+        if not np.all(np.isfinite(terms) & (terms > 0) & (terms <= np.iinfo(np.int32).max)
+                      & (terms == np.floor(terms))):
+            raise ValueError("Original loan terms must be finite positive integer months")
+        self.loan_terms = terms.astype(np.int32)
+        fields = {"initial_burnout", "burnout_denominator_multiplier"}
+        present = fields.intersection(pdf.columns)
+        if present and present != fields:
+            raise ValueError("Historical burnout requires share and denominator multiplier together")
+        self.history_assumed = not present
+        self.initial_burnout = (np.zeros(self.n) if self.history_assumed else
+                               pdf["initial_burnout"].to_numpy(dtype=float))
+        self.burnout_denominator_multiplier = (np.ones(self.n) if self.history_assumed else
+            pdf["burnout_denominator_multiplier"].to_numpy(dtype=float))
+        if not np.all(np.isfinite(self.initial_burnout) & (self.initial_burnout >= 0)
+                      & (self.initial_burnout <= 1)):
+            raise ValueError("Historical burnout shares must be finite and between zero and one")
+        if not np.all(np.isfinite(self.burnout_denominator_multiplier)
+                      & (self.burnout_denominator_multiplier >= 1)):
+            raise ValueError("Historical denominator multipliers must be finite and at least one")
 
         states = pdf["state"].fillna("Current").astype(str).values
         self.state_code = np.array(
@@ -144,15 +166,28 @@ class MicrosimPool:
 
         self.stratum_orig_upb = np.zeros(self.n_strata, dtype=np.float64)
         for i in range(self.n):
-            self.stratum_orig_upb[self.stratum_id_code[i]] += self.orig_upb[i]
+            self.stratum_orig_upb[self.stratum_id_code[i]] += (
+                self.orig_upb[i] * self.burnout_denominator_multiplier[i])
 
         self.cohort_burnout = np.zeros(self.n_strata, dtype=np.float64)
+        if not self.history_assumed:
+            self._restore_initial_burnout()
         self.burnout = np.zeros(self.n, dtype=np.float64)
         self.rate_gap = np.zeros(self.n, dtype=np.float64)
         self.active_mask = np.ones(self.n, dtype=bool)
         self._update_active_mask()
 
         self.term_months = TERM_MONTHS
+
+    def _restore_initial_burnout(self):
+        """Initialize history under current loan weights and cohort denominators."""
+        self.cohort_burnout[:] = 0.0
+        weights = self.orig_upb * self.burnout_denominator_multiplier
+        for s in range(self.n_strata):
+            members = self.stratum_id_code == s
+            if weights[members].sum() > 0:
+                self.cohort_burnout[s] = np.average(
+                    self.initial_burnout[members], weights=weights[members])
 
     def _update_active_mask(self):
         absorbing = np.isin(
@@ -240,7 +275,10 @@ class MicrosimPool:
         # Recompute stratum original UPB under the new weights.
         self.stratum_orig_upb = np.zeros(self.n_strata, dtype=np.float64)
         for i in range(self.n):
-            self.stratum_orig_upb[self.stratum_id_code[i]] += self.orig_upb[i]
+            self.stratum_orig_upb[self.stratum_id_code[i]] += (
+                self.orig_upb[i] * self.burnout_denominator_multiplier[i])
+        if not self.history_assumed:
+            self._restore_initial_burnout()
         self._update_active_mask()
 
     def scale_to_holdings(self, target_billions: float):

@@ -36,8 +36,13 @@ def _markov_step_delinquent(
     pool: MicrosimPool,
     trans: pd.DataFrame,
     rng: np.random.Generator,
-) -> None:
-    """Apply Markov transitions to agents already in delinquency pipeline."""
+) -> tuple[np.ndarray, np.ndarray]:
+    """Apply delinquency transitions and return full-payoff indices and cash.
+
+    Prepaid closes the remaining debt; default/liquidation transitions retain
+    balances under the existing unresolved-credit convention. Returned cash is
+    loan principal, with no new claim about security receipt timing.
+    """
     T = trans.to_numpy()
     state_names = list(trans.index)
     name_to_code = {s: STATE_TO_CODE[s] for s in MARKOV_STATES if s in STATE_TO_CODE}
@@ -45,8 +50,10 @@ def _markov_step_delinquent(
     mask = np.isin(pool.state_code, list(DELINQUENT_CODES)) & pool.active_mask
     idxs = np.where(mask)[0]
     if len(idxs) == 0:
-        return
+        return np.array([], dtype=int), np.array([], dtype=float)
 
+    payoff_idxs = []
+    payoff_amounts = []
     for i in idxs:
         state_name = CODE_TO_STATE[int(pool.state_code[i])]
         if state_name not in trans.index:
@@ -60,6 +67,11 @@ def _markov_step_delinquent(
         j = min(int(np.searchsorted(cum, u)), len(state_names) - 1)
         new_state = state_names[j]
         pool.state_code[i] = name_to_code.get(new_state, pool.state_code[i])
+        if new_state == "Prepaid":
+            payoff_idxs.append(i)
+            payoff_amounts.append(float(pool.balance[i]))
+            pool.balance[i] = 0.0
+    return np.asarray(payoff_idxs, dtype=int), np.asarray(payoff_amounts, dtype=float)
 
 
 def update_cohort_burnout_amounts(
@@ -84,14 +96,25 @@ def monthly_step(
     market_rate: float,
     trans: Optional[pd.DataFrame] = None,
     beta1: float = BETA1_PREPAY_MID,
+    *, payment_state=None,prepayment_model=None,
 ) -> dict:
     """
     One monthly competing-risks step for all active agents.
 
     Returns month aggregates: prepay_upb, default_count, sched_amt, settled_b.
+    Optional payment_state tracks separate principal components under an
+    explicit scenario. It must be bound to this pool after initial weighting.
     """
+    if prepayment_model is not None:
+        from hazard.positive_gap_mixture import PositiveGapMixture
+        from hazard.floor_clamped_mixture import FloorClampedMixture
+        if not isinstance(prepayment_model,(PositiveGapMixture,FloorClampedMixture)) or pool.regime.upper()!='US':
+            raise ValueError('Positive-gap mixture requires its explicit configuration and US regime')
     if trans is None:
         trans = load_transition_matrix()
+
+    if payment_state is not None:
+        payment_state.before_month(pool)
 
     pool.broadcast_burnout()
     active = pool.active_mask
@@ -104,6 +127,9 @@ def monthly_step(
         beta1 = beta1[active]
     n_active = int(active.sum())
     if n_active == 0:
+        if payment_state is not None:
+            payment_state.after_exits(pool)
+            payment_state.finish_month(pool)
         return {
             "prepay_upb": 0.0,
             "default_upb": 0.0,
@@ -126,7 +152,11 @@ def monthly_step(
     )
     stress = rate_stress(pool.coupon[active], market_rate)
 
-    if pool.regime.upper() in ("DANISH", "DK"):
+    if prepayment_model is not None:
+        reference=prepay_hazard(pool.loan_age[active],np.zeros(n_active),
+            pool.burnout[active],pool.fico_z[active],pool.ltv_z[active],beta1=0.)
+        h_prep=prepayment_model.probability(reference,(market_rate-pool.coupon[active])*100.)
+    elif pool.regime.upper() in ("DANISH", "DK"):
         # Berger et al. Danish counterfactual (§20): import the estimated
         # U.S.-transplant elasticities directly instead of the NPV-reset
         # heuristic. Same population, only the prepay hazard swaps. Two
@@ -181,12 +211,14 @@ def monthly_step(
     prepay_upb = 0.0
     prepay_count = 0
     default_count = 0
+    prepaid_this_month = np.zeros(pool.n, dtype=bool)
 
     if PREPAY_MODE == "fractional":
         prepay_amts = bal_active * h_prep_n
         prepay_upb = float(prepay_amts.sum())
         pool.balance[active_idx] = np.maximum(bal_active - prepay_amts, 0.0)
         prepay_count = int(np.sum(prepay_amts > 0))
+        prepaid_this_month[active_idx[prepay_amts > 0]] = True
 
         u = pool.rng.uniform(size=n_active)
         default_hits = u < h_def_n
@@ -209,6 +241,7 @@ def monthly_step(
 
         prepay_upb = float(pool.balance[prepay_idx].sum()) if len(prepay_idx) else 0.0
         prepay_count = int(len(prepay_idx))
+        prepaid_this_month[prepay_idx] = True
         default_count = int(len(default_idx))
 
         for i in prepay_idx:
@@ -235,23 +268,37 @@ def monthly_step(
                         pool.cohort_burnout[s] + prepaid_s / denom,
                     )
 
-    _markov_step_delinquent(pool, trans, pool.rng)
+    payoff_idxs, payoff_amounts = _markov_step_delinquent(pool, trans, pool.rng)
+    if len(payoff_idxs):
+        prepay_upb += float(payoff_amounts.sum())
+        prepaid_this_month[payoff_idxs[payoff_amounts > 0]] = True
+        prepay_count = int(prepaid_this_month.sum())
+        update_cohort_burnout_amounts(pool, payoff_idxs, payoff_amounts)
+
+    if payment_state is not None:
+        payment_state.after_exits(pool)
 
     sched_amt = 0.0
     pool._update_active_mask()
     still_active = pool.active_mask
     for i in np.where(still_active)[0]:
-        smm = scheduled_amortization_smm(
-            float(pool.coupon[i]), TERM_MONTHS, int(pool.loan_age[i])
-        )
-        principal = pool.balance[i] * smm
+        if payment_state is None:
+            smm = scheduled_amortization_smm(
+                float(pool.coupon[i]), int(pool.loan_terms[i]), int(pool.loan_age[i])
+            )
+            principal = pool.balance[i] * smm
+        else:
+            principal = payment_state.scheduled_principal(pool,i)
         pool.balance[i] = max(pool.balance[i] - principal, 0.0)
         sched_amt += principal
         pool.loan_age[i] += 1
 
+    if payment_state is not None:
+        payment_state.finish_month(pool)
+
     pool._update_active_mask()
 
-    # Voluntary prepayments reach SOMA immediately.
+    # Legacy loan-principal cash field; security receipt timing needs a separate mapping.
     settled_b = prepay_upb
 
     default_upb = 0.0

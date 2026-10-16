@@ -37,19 +37,31 @@ def _simulate_regime(
     beta1: float,
     soma_cohorts: Optional[list] = None,
     coupon_convert=None,
+    *, payment_rule=None,prepayment_model=None,
 ) -> pd.DataFrame:
-    """Walk one regime pool through QT window."""
+    """Walk one regime pool through QT window.
+
+    payment_rule=None preserves the existing schedule. An explicit component
+    rule opts into current-rate scheduling with separately retained deferred
+    principal; hazard coupons and security normalization remain as before.
+    """
     qt_index = macro.index[(macro.index >= QT_START) & (macro.index < QT_END)]
     pool = MicrosimPool(loan_df, regime=regime, rng=np.random.default_rng(seed))
     if soma_cohorts is not None:
         pool.reweight_to_soma_coupons(  # full-book weighting (3.1)
             soma_cohorts, coupon_convert=coupon_convert)
     pool.scale_to_holdings(holdings_scale_b)
+    payment_state=None
+    if payment_rule is not None:
+        from hazard.observed_payment_path import ObservedPaymentState
+        payment_state=ObservedPaymentState(loan_df,pool,payment_rule=payment_rule)
 
     records = []
     for ts in qt_index:
         mkt = float(macro.loc[ts, "MORTGAGE30US"]) / 100.0
-        result = monthly_step(pool, mkt, trans=trans, beta1=beta1)
+        options={} if payment_state is None else {'payment_state':payment_state}
+        if prepayment_model is not None:options['prepayment_model']=prepayment_model
+        result = monthly_step(pool, mkt, trans=trans, beta1=beta1, **options)
 
         exposure = result["exposure"]
         monthly_cpr = (result["prepay_upb"] / exposure) if exposure > 0 else 0.0
@@ -92,9 +104,14 @@ def run_qt_microsim(
     p_q_shock_pct: float = ROTHSTEIN_Q_DECLINE_MID * 100,
     soma_cohorts: Optional[list] = None,
     coupon_convert=None,
+    payment_rule=None,
+    prepayment_model=None,
 ) -> dict[str, pd.DataFrame]:
     """
     Forward-walk loan sample through QT window under US and Danish rate-gap regimes.
+
+    payment_rule is an opt-in scheduling scenario, not a verified contract
+    schedule or a change to the coupon basis used by behavioral hazards.
 
     p_q_shock_pct: Rothstein quarterly mobility decline per 100bp rate gap,
     in percent (sensitivity band 5.5–7.7, midpoint 6.5).  β₁ is derived via
@@ -124,6 +141,8 @@ def run_qt_microsim(
             beta1=beta1,
             soma_cohorts=soma_cohorts,
             coupon_convert=coupon_convert,
+            **({} if payment_rule is None else {'payment_rule':payment_rule}),
+            **({} if prepayment_model is None else {'prepayment_model':prepayment_model}),
         )
 
     # Combined output for extension-risk scoring (US primary)
